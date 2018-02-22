@@ -1,0 +1,27 @@
+{
+  "name": "Pareto-Ranking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "countup.js": "^1.9.3",
+    "debug": "^3.1.0",
+    "express": "^4.15.2",
+    "jquery": "^3.2.1",
+    "request-promise": "4.2.2",
+    "uglify-js": "^3.3.9",
+    "web3": "1.0.0-beta.29"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babelify": "^8.0.0",
+    "debug": "^3.1.0"
+  }
+}
