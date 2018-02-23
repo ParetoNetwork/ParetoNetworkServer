@@ -1,10 +1,9 @@
 {
   "name": "Pareto-Ranking",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "PARETO",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node backend.js"
   },
   "author": "",
   "license": "Apache-2.0",
