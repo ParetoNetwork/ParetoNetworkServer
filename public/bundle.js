@@ -14,7 +14,7 @@ function getUrlParameter(name) {
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 };
 
-window.addEventListener('load', function() {
+/*window.addEventListener('xload', function() {
 
   //if connected to metamask, use metamask provider
 
@@ -134,7 +134,7 @@ window.addEventListener('load', function() {
   }
 
 
-});
+});*/
 },{"countup.js":47,"jquery":108,"uri-js":161,"web3":217}],2:[function(require,module,exports){
 var asn1 = exports;
 
