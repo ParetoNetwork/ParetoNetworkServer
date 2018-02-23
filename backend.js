@@ -6,6 +6,7 @@ var requestp = require('request-promise');
 var app = express();
 var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
+var uniqueRandomArray = require('unique-random-array');
 const debug = require('debug')('pareto-ranking')
 const appName = 'Pareto Ranking Backend'
 debug('booting %s', appName)
@@ -50,7 +51,7 @@ app.get('/summation', function(req, res){
       }
       address = "0x" + zeroes + address.substring(2,n);
     }
-
+    var etherscanApiKeys =  uniqueRandomArray([ 'NW6AVI32DZ5YSK88ZDDUXRG54MPJXJA6V1', 'TS62T2DDKXJQ7BSBTHEJVRB39HQJK7WPHD', 'QWGXC7ATH525RZ53WKGVUHDKF61APV5VI4']);
     var txs = [];
     var incoming = {};
     var outgoing = {};
@@ -73,11 +74,11 @@ app.get('/summation', function(req, res){
           address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
           topic0: '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
           topic2: address,
-          apikey: 'NW6AVI32DZ5YSK88ZDDUXRG54MPJXJA6V1'
+          apikey: etherscanApiKeys()
         },
         json: true
       }
-
+    console.log(reqOptions);
     return requestp(reqOptions)
       }).then(function (txObjects){
 
@@ -103,6 +104,8 @@ app.get('/summation', function(req, res){
             }
         }
 
+
+
         var reqOptions = {
           uri : 'https://api.etherscan.io/api',
           qs: {
@@ -113,10 +116,11 @@ app.get('/summation', function(req, res){
             address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
             topic0: '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
             topic1: address,
-            apikey: 'NW6AVI32DZ5YSK88ZDDUXRG54MPJXJA6V1'
+            apikey: etherscanApiKeys()
           },
           json: true
         }
+        console.log(reqOptions);
         return requestp(reqOptions)
       })
       .then(function (txObjects){
