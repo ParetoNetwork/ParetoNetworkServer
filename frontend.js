@@ -47,8 +47,13 @@ window.addEventListener('load', function() {
 
         var lookupInputField = document.getElementById('lookup-input');
 
-
-        var addr = ((typeof accounts[0] !== 'undefined') ? accounts[0] : lookupInputField.value);//getUrlParameter('address'));//accounts[0]; //kucoin 0x2b5634c42055806a59e9107ed44d43c426e58258
+        var addr = '';
+        if(lookupInputField.value !== 'undefined' && lookupInputField.value !== ''){
+          addr = lookupInputField.value;
+        }
+        else {
+           addr = ((typeof accounts[0] !== 'undefined') ? accounts[0] : lookupInputField.value);//getUrlParameter('address'));//accounts[0]; //kucoin 0x2b5634c42055806a59e9107ed44d43c426e58258
+        }
         var contractData = '';
 
         if(web3.utils.isAddress(addr)){
