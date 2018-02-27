@@ -13,7 +13,14 @@ function getUrlParameter(name) {
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 };
 
-/*window.addEventListener('xload', function() {
+function searchLookup(){
+  var lookupField = document.getElementById('lookup');
+  var lookupButton = document.getElementById('lookup-button');
+  lookupField.style.opacity = "100";
+  lookupButton.style.opacity = "100";
+}
+
+window.addEventListener('load', function() {
 
   //if connected to metamask, use metamask provider
 
@@ -24,6 +31,7 @@ function getUrlParameter(name) {
     window.web3 = new Web3(web3.currentProvider);
   } else {
     console.log('No web3? You should consider trying MetaMask!')
+    searchLookup();
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
     window.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
   }
@@ -36,10 +44,14 @@ function getUrlParameter(name) {
 
     web3.eth.getAccounts(function(error, accounts) {
       if(!error) {
-        var addr = ((typeof accounts[0] !== 'undefined') ? accounts[0] : getUrlParameter('address'));//accounts[0]; //kucoin 0x2b5634c42055806a59e9107ed44d43c426e58258
+
+        var lookupInputField = document.getElementById('lookup-input');
+
+
+        var addr = ((typeof accounts[0] !== 'undefined') ? accounts[0] : lookupInputField.value);//getUrlParameter('address'));//accounts[0]; //kucoin 0x2b5634c42055806a59e9107ed44d43c426e58258
         var contractData = '';
 
-        if(addr !== 'undefined'){
+        if(web3.utils.isAddress(addr)){
 
               //add it all together
               var tknAddress = (addr).substring(2);
@@ -94,6 +106,11 @@ function getUrlParameter(name) {
                         console.error(rankCount.error);
                       }
 
+                      searchLookup();
+                      var lookupInputField = document.getElementById('lookup-input');
+                      lookupInputField.value = addr;
+
+
                       //update every 5 blocks
 
                       //still needs a websocket to listen for blocks
@@ -112,6 +129,10 @@ function getUrlParameter(name) {
                 });
               });
             }//end if address !== 'undefined'
+            else if(accounts === undefined || accounts.length == 0){
+                console.log("unlock metamask, or alternatively check any valid address");
+                searchLookup();
+            }
 
         
     }//end if
@@ -133,4 +154,4 @@ function getUrlParameter(name) {
   }
 
 
-});*/
+});

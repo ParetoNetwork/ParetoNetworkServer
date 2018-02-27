@@ -53,9 +53,36 @@
     line-height: 32px;
 }
 
+
+#rank-logo-holder {
+  padding-top: 30px;
+}
+
+#rank-logo {
+  width: 100px;
+}
+
+#rank-counter{
+  font-size: 100px; 
+  overflow-wrap: break-word;
+}
+
 @media (max-width: 767px) {
     .header .whitepaper {
         line-height: 24px;
+    }
+
+    #rank-logo-holder {
+      padding-top: 5px;
+    }
+
+    #rank-logo {
+      width: 40px;
+    }
+
+    #rank-counter{
+      font-size: 30px; 
+      overflow-wrap: break-word;
     }
 }
 
@@ -137,13 +164,12 @@ video {
 .button {
     border-radius: 5px;
     border: 2px solid #fff;
-    background: transparent;
+    background: #fff;
     display: inline-block;
-    height: 54px;
-    line-height: 50px;
+    line-height: 20px;
     text-transform: uppercase;
-    color: #FFF;
-    font-size: 14px;
+    color: blue;
+    font-size: 10px;
     font-weight: 700;
     cursor: pointer;
     -webkit-transition: all .2s;
@@ -151,14 +177,7 @@ video {
     transition: all .2s;
 }
 
-@media (max-width: 600px) {
-  .button {
-      height: 40px;
-      line-height: 36px;
-      font-size: 12px;
-      width: 240px;
-  }
-}
+
 
 .video-box {
     width: 460px;
@@ -169,19 +188,18 @@ video {
 }
 
 .center-page {
-    position: absolute;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
     width: 100%;
-    height: 100%;
-    min-height: 100vh;
+    min-height: 97vh;
     color: #ffffff;
 }
 
-.flexrow {
+.flex-row {
+    display: flex;
     flex-direction: row;
 }
 
@@ -190,4 +208,123 @@ video {
     top: 50%;
     transform: translateY(-50%); 
 }
+
+html, body {
+  margin: 0; 
+  height: 100%; 
+  overflow: hidden;
+}
+
+body {
+  width:100%;
+  flex-direction: row;
+  flex-wrap:nowrap;
+}
+
+a:link, a:visited, a:hover, a:active {
+  text-decoration: none; color: #ffffff;
+}
+
+/* form starting stylings ------------------------------- */
+.group        { 
+  position:relative; 
+  margin-bottom:5px; 
+}
+input         {
+  font-size:18px;
+  padding:10px 10px 10px 5px;
+  display:block;
+  width:300px;
+  border:none;
+  background-color: #040f1e;
+  border-bottom:1px solid #757575;
+}
+input:focus     { outline:none; }
+
+/* LABEL ======================================= */
+label          {
+  color:#ffffff; 
+  font-size:18px;
+  font-weight:normal;
+  position:absolute;
+  pointer-events:none;
+  left:5px;
+  top:10px;
+  transition:0.2s ease all; 
+  -moz-transition:0.2s ease all; 
+  -webkit-transition:0.2s ease all;
+}
+
+/* active state */
+input:focus ~ label, input:valid ~ label    {
+  top:-20px;
+  font-size:14px;
+  color:#ffffff;
+}
+
+/* BOTTOM BARS ================================= */
+.bar  { position:relative; display:block; width:300px; }
+.bar:before, .bar:after   {
+  content:'';
+  height:2px; 
+  width:0;
+  bottom:1px; 
+  position:absolute;
+  background:#5264AE; 
+  transition:0.2s ease all; 
+  -moz-transition:0.2s ease all; 
+  -webkit-transition:0.2s ease all;
+}
+.bar:before {
+  left:50%;
+}
+.bar:after {
+  right:50%; 
+}
+
+/* active state */
+input:focus ~ .bar:before, input:focus ~ .bar:after {
+  width:50%;
+}
+
+/* HIGHLIGHTER ================================== */
+.highlight {
+  position:absolute;
+  height:60%; 
+  width:100px; 
+  top:25%; 
+  left:0;
+  pointer-events:none;
+  opacity:0.5;
+}
+
+/* active state */
+input:focus ~ .highlight {
+  -webkit-animation:inputHighlighter 0.3s ease;
+  -moz-animation:inputHighlighter 0.3s ease;
+  animation:inputHighlighter 0.3s ease;
+}
+
+input, select, textarea{
+    color: #ffffff;
+    font-size: 12px;
+}
+
+textarea:focus, input:focus {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+/* ANIMATIONS ================ */
+@-webkit-keyframes inputHighlighter {
+  from { background:#5264AE; }
+  to  { width:0; background:transparent; }
+}
+@-moz-keyframes inputHighlighter {
+  from { background:#5264AE; }
+  to  { width:0; background:transparent; }
+}
+@keyframes inputHighlighter {
+  from { background:#5264AE; }
+  to  { width:0; background:transparent; }
 }

@@ -18,11 +18,11 @@
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/custom.css">
         
-
-           </head>
+        
+    </head>
     <body style="background-color: #040f1e;">
 
-    	<div id="gradient" style="vertical-align: top;
+    	<div id="gradient" class="flex-row" style="vertical-align: top;
     		height: 5px; 
     		background: #295087; /* Old browsers */
 			background: -moz-linear-gradient(left, #295087 0%, #3f7989 50%, #6aba82 77%, #85c568 100%); /* FF3.6-15 */
@@ -31,22 +31,48 @@
 			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
             ">&nbsp;</div>
         
-		<div class="center-page font-body flexrow">
+		<div class="font-body center-page" style="color: #ffffff;">
             
-			<div style="padding-top: 30px;"><img src="pareto-logo-mark-color.svg" width="100" alt="Pareto Logo for Ranking"></div>
-			<div>&nbsp;</div>
-			<div id="rank-counter" style="font-size: 100px;"></div>
+            <div class="flex-row">
+                <!-- hidden by default unless metamask connect -->
+                <form id="lookup" style="opacity: 0; margin: 5px;"">
+                    <div class="group">      
+                      <input id="lookup-input" type="text" name="address">
+                      <span class="highlight"></span>
+                      <span class="bar"></span>
+                      <label>Type in Ethereum Address</label>
+                    </div>
+                </form>
+                <button id="lookup-button" class="button" style="margin:5px; width:50px; height: 25px; opacity: 0;" type="button" form="lookup" value="View" onclick="dispatchView()">View</button>
+            </div>
+
+            <div class="flex-row" style="word-wrap:break-word; overflow-wrap: break-word;">
+    			<div id="rank-logo-holder"><img id="rank-logo" src="pareto-logo-mark-color.svg" alt="Pareto Logo for Ranking"></div>
+    			<div>&nbsp;</div>
+    			<div id="rank-counter">0</div>
+            </div>
 
 		</div>
+
+        <div id="bottom-row" class="font-body flex-row" style="color: #ffffff; vertical-align: bottom; height: 10px;">
+         
+          <a href="https://www.pareto.network" target="_blank">About</a>
+
+        </div>
 
     </body>
 
     <script>
-
+        function dispatchView(){
+            let event = new Event("load");
+            window.dispatchEvent(event);
+        }
     	/*
 		 * reasons to calculate ranking server side: possible to do less API calls to the Ethereum node. possible to keep a single web socket open to the Ethereum node microservice, as opposed to thousands or an infinite number of websockets client side from users checking their ranking
     	 */
 
     </script>
+
     <script src="bundle.js"></script>
+    
 </html>
