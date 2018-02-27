@@ -26,12 +26,12 @@ app.use(express.static('public'));
   }
   res.end();
 });*/
-app.get('/summation', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
+app.get('/summation', function(req, fres){
+    fres.setHeader('Content-Type', 'application/json');
     var address = req.query.address;
     var tokenTotal = req.query.total;
     var blockHeight = 0;
-    var fres = res;
+    //var fres = res;
 
     if(web3.utils.isAddress(address) == false){
 
@@ -141,14 +141,17 @@ app.get('/summation', function(req, res){
             var transactions = Object.entries(incoming).concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])));
             try {
               transactions = transactions.sort().reverse();
-
+              console.log("sorted");
+              console.log(transactions);
+              console.log("looping");
               try {
                 var i = 0;
                 var removableIndex = 0;
                 
                 //sorts down to remaining transactions, since we already know the total and the system block height
                 while(i < transactions.length){
-                  if(transactions[i][1] <= 0){
+                  console.log(transactions);
+                  if(transactions[i][1] < 0 /*&& transactions[i+1] !== 'undefined'*/){
                     transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
                     //console.log("current transaction[i][1] value: " + transactions[i][1]);
                     if(transactions[0][1] <= 0){
@@ -171,20 +174,20 @@ app.get('/summation', function(req, res){
                     removableIndex = i;
 
                   }
-                }
+                } // end while
+                //console.log(transactions);
+
+                //now find weighted average block number
+                var weightAverageBlockHeight = transactions[transactions.length-1][4];
+                var blockHeightDifference = blockHeight - weightAverageBlockHeight;
+                console.log("weighted avg block height difference: " + blockHeightDifference);
+
+                fres.json({ 'weightAverageBlockHeight' : weightAverageBlockHeight, 'weightedAverageDifference' : blockHeightDifference});
               } catch (e) {
                 console.log(e);
                 fres.status(500).send('Something broke!')
               }
 
-              //console.log(transactions);
-
-              //now find weighted average block number
-              var weightAverageBlockHeight = transactions[transactions.length-1][4];
-              var blockHeightDifference = blockHeight - weightAverageBlockHeight;
-              console.log("weighted avg block height difference: " + blockHeightDifference);
-
-              fres.json({ 'weightAverageBlockHeight' : weightAverageBlockHeight, 'weightedAverageDifference' : blockHeightDifference});
 
             } catch (e) {
               console.log(e);
