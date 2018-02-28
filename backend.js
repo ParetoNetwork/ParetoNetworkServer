@@ -31,6 +31,10 @@ app.get('/summation', function(req, fres){
     var address = req.query.address;
     var tokenTotal = req.query.total;
     var blockHeight = 0;
+
+    //ways of writing contract creation block height
+    var contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
+    var contractCreationBlockHeightInt = 4953750;
     //var fres = res;
 
     if(web3.utils.isAddress(address) == false){
@@ -66,7 +70,7 @@ app.get('/summation', function(req, fres){
           console.log("blockheight: " + blockHeight);
 
         return web3.eth.getPastLogs({
-          fromBlock: '0x4B9696',
+          fromBlock: contractCreationBlockHeightHexString,
           toBlock: 'latest',
           address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
           topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, address]
@@ -95,7 +99,7 @@ app.get('/summation', function(req, fres){
             }
 
             return web3.eth.getPastLogs({
-              fromBlock: '0x4B9696',
+              fromBlock: contractCreationBlockHeightHexString,
               toBlock: 'latest',
               address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
               topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', address, null]
@@ -141,16 +145,14 @@ app.get('/summation', function(req, fres){
             var transactions = Object.entries(incoming).concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])));
             try {
               transactions = transactions.sort().reverse();
-              console.log("sorted");
-              console.log(transactions);
-              console.log("looping");
+             
               try {
                 var i = 0;
                 var removableIndex = 0;
                 
                 //sorts down to remaining transactions, since we already know the total and the system block height
                 while(i < transactions.length){
-                  console.log(transactions);
+                  
                   if(transactions[i][1] < 0 /*&& transactions[i+1] !== 'undefined'*/){
                     transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
                     //console.log("current transaction[i][1] value: " + transactions[i][1]);
@@ -182,7 +184,7 @@ app.get('/summation', function(req, fres){
                 var blockHeightDifference = blockHeight - weightAverageBlockHeight;
                 console.log("weighted avg block height difference: " + blockHeightDifference);
 
-                fres.json({ 'weightAverageBlockHeight' : weightAverageBlockHeight, 'weightedAverageDifference' : blockHeightDifference});
+                fres.json({ 'weightAverageBlockHeight' : weightAverageBlockHeight, 'weightedAverageDifference' : blockHeightDifference, 'blockHeightDivisor' : (blockHeight - contractCreationBlockHeightInt)/100});
               } catch (e) {
                 console.log(e);
                 fres.status(500).send('Something broke!')

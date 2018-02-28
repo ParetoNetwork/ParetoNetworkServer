@@ -79,7 +79,7 @@ window.addEventListener('load', function() {
                     decimal: '.',
                   };
                   console.log("Counting till: " + tokenTotal);
-                  var rankCountInit = new CountUp('rank-counter', 0, tokenTotal, 0, 3, counterOptions);
+                  var rankCountInit = new CountUp('rank-counter', 0, tokenTotal, 2, 3, counterOptions);
                   if (!rankCountInit.error) {
                     rankCountInit.start();
                   } else {
@@ -98,11 +98,11 @@ window.addEventListener('load', function() {
                   url: '/summation?address='+addr+'&total='+tokenTotal,
                   dataType: 'json',
                   success: function (data, textStatus, jqXHR) {
-                      var weightedAverageDifference = parseInt(data.weightedAverageDifference);
-                      rankCalculation = parseInt(rankCalculation) + weightedAverageDifference;
+                      var weightedAverageDifference = parseFloat(data.weightedAverageDifference) / parseFloat(data.blockHeightDivisor);
+                      rankCalculation = parseFloat(rankCalculation) * weightedAverageDifference;
                       console.log("HODLING Bonus: " + weightedAverageDifference);
                       console.log("Counting till: " + rankCalculation);
-                      var rankCount = new CountUp('rank-counter', tokenTotal, rankCalculation, 0, 2.5, counterOptions);
+                      var rankCount = new CountUp('rank-counter', tokenTotal, rankCalculation, 2, 2.5, counterOptions);
                        if (!rankCount.error) {
 
                         //would like to briefly change color and font of text
