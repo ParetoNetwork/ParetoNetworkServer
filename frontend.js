@@ -126,7 +126,7 @@ window.addEventListener('load', function() {
 
                 $.ajax({
                   method: 'GET',
-                  url: '/summation?address='+addr+'&total='+tokenTotal,
+                  url: '/v1/summation?address='+addr+'&total='+tokenTotal,
                   dataType: 'json',
                   success: function (data, textStatus, jqXHR) {
                       var weightedAverageDifference = parseFloat(data.weightedAverageDifference) / parseFloat(data.blockHeightDivisor);
