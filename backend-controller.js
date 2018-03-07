@@ -21,9 +21,9 @@ function postContent (body, res){
 	    //assert.equal(1, r.insertedCount);
 	    if(err){
 	    	console.error('unable because: ', err);
-	    	res.status(500).send('unable because: ' + err);
+	    	res.boom.badData();
 	    } else {
-	    	res.status(200).json(r);
+	    	res.status(200); //why is this gibberish
 	    }
 
 	  });
