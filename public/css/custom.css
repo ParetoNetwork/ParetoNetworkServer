@@ -203,6 +203,11 @@ video {
     flex-direction: row;
 }
 
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
 .vertical-align {
     position: relative;
     top: 50%;
