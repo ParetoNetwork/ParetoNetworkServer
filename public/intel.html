@@ -37,6 +37,14 @@
                 <!-- hidden by default unless metamask connect -->
                 <form id="intel" style="margin: 5px;"">
                     <div class="group">      
+                      <input id="lookup-input" type="text" name="address">
+                      <span class="highlight"></span>
+                      <span class="bar"></span>
+                      <label>Input your Ethereum Address</label>
+                    </div>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <div class="group">      
                       <input id="intel-title-input" type="text" name="intel-title">
                       <span class="highlight"></span>
                       <span class="bar"></span>
@@ -71,13 +79,9 @@
 
      <script>
         function dispatchView(){
-            let event = new Event("load");
+            let event = new Event("intel");
             window.dispatchEvent(event);
         }
-        /*
-         * reasons to calculate ranking server side: possible to do less API calls to the Ethereum node. possible to keep a single web socket open to the Ethereum node microservice, as opposed to thousands or an infinite number of websockets client side from users checking their ranking
-         */
-
     </script>
 
     <script src="bundle.js"></script>
