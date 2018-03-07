@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express');
+var path    = require("path");
 var boom = require('express-boom-2');
 var requestp = require('request-promise');
 var controller = require('./backend-controller.js');
@@ -32,6 +33,16 @@ app.use(boom()); //handles error codes in a consistent way and format
   }
   res.end();
 });*/
+
+app.get('/',function(req,res){
+  //__dirname : It will resolve to your project folder.
+  res.sendFile(path.join(__dirname+'/public/index.html'));
+});
+
+app.get('/intel',function(req,res){
+  res.sendFile(path.join(__dirname+'/public/intel.html'));
+});
+
 app.get('/summation', function(req, fres){
     fres.setHeader('Content-Type', 'application/json');
     var address = req.query.address;

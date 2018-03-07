@@ -5,6 +5,7 @@ var Web3 = require('web3');
 var CountUp = require('countup.js');
 var $ = require('jquery');
 var uri = require('uri-js');
+var blockNumber = 1;
 
 //util for params
 function getUrlParameter(name) {
@@ -20,6 +21,35 @@ function searchLookup(){
   lookupField.style.opacity = "100";
   lookupButton.style.opacity = "100";
 }
+
+window.addEventListener('intel', function() {
+  
+  var data = {};
+  data.address = ''; //authed address, or maybe just keep the session and extrapolate the associated address server side
+  data.title = '';
+  data.body = '';
+  data.block = blockNumber;
+
+  var jsonData = JSON.stringify(data.serializeArray());
+  console.log(jsonData);
+
+  $.ajax({
+    method: 'POST',
+    url: '/content',
+    data: jsonData,
+    dataType: 'json',
+    success: function (data, textStatus, jqXHR) {
+        
+        //show success
+        console.log('success');
+    
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.log('error');
+    }
+  });
+
+});
 
 window.addEventListener('load', function() {
 
@@ -40,7 +70,6 @@ window.addEventListener('load', function() {
   if (typeof web3 !== 'undefined') {
     var contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
     var rankCalculation = 0;
-    var blockNumber = 1;
     var tokenTotal = 0;
 
     web3.eth.getAccounts(function(error, accounts) {

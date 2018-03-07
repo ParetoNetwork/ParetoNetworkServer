@@ -14,21 +14,29 @@ function postContent (body, res){
 
 	  const db = client.db(dbName);
 
-	  // Insert a single document
-	  db.collection('content').insertOne(
-	  	body, function(err, r) {
-	    //assert.equal(null, err);
-	    //assert.equal(1, r.insertedCount);
-	    if(err){
-	    	console.error('unable because: ', err);
-	    	res.boom.badData();
-	    } else {
-	    	res.status(200); //why is this gibberish
-	    }
+	  
+	  web3.eth.getBlock('latest')
+        .then(function(res) {
 
-	  });
-	}); //end mongodb
+          body.dateCreated = Date.now();
+          body.block = res.number;
 
+          // Insert a single document
+		  db.collection('content').insertOne(
+			  	body, function(err, r) {
+			    //assert.equal(null, err);
+			    //assert.equal(1, r.insertedCount);
+			    if(err){
+			    	console.error('unable because: ', err);
+			    	res.boom.badData();
+			    } else {
+			    	res.status(200); //why is this gibberish
+			    }
+
+			  });
+		  }); //end mongodb
+
+      });
 };
 
 module.exports.postContent = postContent;
