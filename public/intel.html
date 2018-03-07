@@ -1,0 +1,85 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>P A R E T O .</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Place favicon.ico in the root directory -->
+        <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+        <link rel="manifest" href="manifest.json">
+        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/custom.css">
+        
+        
+    </head>
+    <body style="background-color: #040f1e;">
+
+        <div id="gradient" class="flex-row" style="vertical-align: top;
+            height: 5px; 
+            background: #295087; /* Old browsers */
+            background: -moz-linear-gradient(left, #295087 0%, #3f7989 50%, #6aba82 77%, #85c568 100%); /* FF3.6-15 */
+            background: -webkit-linear-gradient(left, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* Chrome10-25,Safari5.1-6 */
+            background: linear-gradient(to right, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
+            ">&nbsp;</div>
+
+        <div class="font-body center-page" style="color: #ffffff;">
+                    
+            <div class="flex-row">
+                <!-- hidden by default unless metamask connect -->
+                <form id="intel" style="margin: 5px;"">
+                    <div class="group">      
+                      <input id="intel-title-input" type="text" name="intel-title">
+                      <span class="highlight"></span>
+                      <span class="bar"></span>
+                      <label>Title</label>
+                    </div>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <div class="group">  
+                      <input id="intel-body-input" type="text" name="intel-body" cols="40" rows="5">
+                      <span class="highlight"></span>
+                      <span class="bar"></span>
+                      <label>Body</label>
+                    </div>
+                </form>
+
+
+            </div>
+
+            <button id="intel-body-button" class="button" style="margin:5px; width:50px; height: 25px;" type="button" form="intel" value="View" onclick="dispatchView()">View</button>
+
+        </div>
+
+
+        <div id="bottom-row" class="font-body flex-row" style="color: #ffffff; vertical-align: bottom; height: 10px;">
+         
+          <a href="https://www.pareto.network" target="_blank">About</a>
+
+        </div>
+
+          
+    </body>
+
+     <script>
+        function dispatchView(){
+            let event = new Event("load");
+            window.dispatchEvent(event);
+        }
+        /*
+         * reasons to calculate ranking server side: possible to do less API calls to the Ethereum node. possible to keep a single web socket open to the Ethereum node microservice, as opposed to thousands or an infinite number of websockets client side from users checking their ranking
+         */
+
+    </script>
+
+    <script src="bundle.js"></script>
+    
+</html>
