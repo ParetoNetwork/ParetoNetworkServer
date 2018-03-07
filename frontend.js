@@ -22,11 +22,14 @@ function searchLookup(){
 }
 
 window.addEventListener('intel', function() {
-  
+
+  var titleField = document.getElementById('intel-title-input');
+  var bodyField = document.getElementById('intel-body-input');
+
   var data = {};
   data.address = ''; //authed address, or maybe just keep the session and extrapolate the associated address server side
-  data.title = '';
-  data.body = '';
+  data.title = titleField.value;
+  data.body = bodyField.value;
   data.block = blockNumber;
 
   var jsonData = JSON.stringify(data.serializeArray());
