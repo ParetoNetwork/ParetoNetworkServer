@@ -214,7 +214,7 @@ function postContent (web3, body, fres){
 			    	console.error('unable because: ', err);
 			    	fres.boom.badData();
 			    } else {
-			    	fres.status(200);
+			    	fres.status(200).json({status: "success"});
 			    }
 
 			  });

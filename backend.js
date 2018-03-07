@@ -54,13 +54,15 @@ function start() {
     res.sendFile(path.join(__dirname+'/public/intel.html'));
   });
 
-  app.get('/summation', function(req, fres){
+  /********* v1 APIs *********/
+
+  app.get('/v1/summation', function(req, fres){
       
       controller.calculateScore(req, fres, web3);
 
   });//end entire function
 
-  app.post('/content', function(req, res){
+  app.post('/v1/content', function(req, res){
 
     if(req.body.constructor === Object && Object.keys(req.body).length === 0){
       res.boom.badRequest('POST body missing');
@@ -73,17 +75,17 @@ function start() {
 
   }); //end content post
 
-  app.get('/content', function(req, res){
+  app.get('/v1/content', function(req, res){
 
   });
 
-  app.get('/ranking', function(req, res){
+  app.get('/v1/ranking', function(req, res){
 
       controller.calculateAllRanks(null, res);
 
   });
 
-  app.post('/rank', function(req, res){
+  app.post('/v1/rank', function(req, res){
 
   });
 
@@ -91,7 +93,7 @@ function start() {
     This should be a cron job or background process using the 2nd concurrent worker
   */
 
-  app.post('/updatescores', function(req,res){
+  app.post('/v1/updatescores', function(req,res){
     if(req.body.constructor === Object && Object.keys(req.body).length === 0){
       res.boom.badRequest('POST body missing');
     }
