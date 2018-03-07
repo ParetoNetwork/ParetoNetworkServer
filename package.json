@@ -18,6 +18,7 @@
     "mongodb": "3.0.4",
     "redis": "2.8.0",
     "request-promise": "4.2.2",
+    "throng": "4.0.0",
     "uglify-js": "^3.3.9",
     "web3": "1.0.0-beta.29",
     "uri-js": "3.0.2",
