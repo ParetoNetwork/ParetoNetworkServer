@@ -77,6 +77,32 @@ function start() {
 
   });
 
+  app.get('/ranking', function(req, res){
+
+      controller.calculateAllRanks(null, res);
+
+  });
+
+  app.post('/rank', function(req, res){
+
+  });
+
+  /*
+    This should be a cron job or background process using the 2nd concurrent worker
+  */
+
+  app.post('/updatescores', function(req,res){
+    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
+      res.boom.badRequest('POST body missing');
+    }
+    else if(req.body.admin === undefined){
+      res.boom.badRequest('POST body missing, needs keys'); 
+    } else {
+      controller.calculateAllScores(web3, res);
+    }
+
+  });
+
   app.listen(process.env.PORT || 3000, function () {
     console.log('Pareto Network ranking app listening on port 3000!')
   });

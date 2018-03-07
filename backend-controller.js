@@ -315,7 +315,7 @@ function retrieveRankAroundAddress(index){
 	3. optional - check that addresses' block height (for when it was last calculated), if it wasn't long ago then don't update it and let that user do it on their own volition, to save some processing
 	4. run entire score promises chain
 */
-function calculateAllScores(web3){
+function calculateAllScores(web3, fres){
 
 	web3.eth.getPastLogs({
       fromBlock: contractCreationBlockHeightHexString,
@@ -323,6 +323,8 @@ function calculateAllScores(web3){
       address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
       topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
     }).then(function (txObjects){
+
+    	console.log(txObjects);
 
     	mongodb.connect(connectionUrl, function(err, client) {
 		    assert.equal(null, err);
@@ -334,14 +336,21 @@ function calculateAllScores(web3){
 
 				var score = 0;
 
-				db.address.findOneAndUpdate({ address : txObjects[i].address }, { score : score });
+				db.collection('address').findOne({ address : txObjects[i].address }, function(err, addressObject){
+					if(err){
+						//no address entry found, add entry and calculate everything
+					} else {
+						//address found, update current entry
+					}
+
+				});
 
 			}
 
-			//calculateAllRanks(db);
-		}); //end mongo
+			calculateAllRanks(db);
+		}); //end mongodb
 
-		
+		fres.status(200).json({status:"success"});
 
     });
 
@@ -350,12 +359,36 @@ function calculateAllScores(web3){
 /* Given the complete set of scores, rank them from highest to lowest (just the sort() command and looping through all, adding the current i to each object's rank)
    1. get db.address.find().sort()
 */
-function calculateAllRanks(db){ //only runs inside of a mongodb connection
+function calculateAllRanks(db, res){ //only runs inside of a mongodb connection
 
-	db.address.find().sort({ score : 1 });
+	var i = 1;
 
+	if(db === null){
+		mongodb.connect(connectionUrl, function(err, client) {
+	        assert.equal(null, err);
+
+	        const db = client.db(dbName);
+
+	        db.collection('address').find().sort({ score : 1 }).forEach( function(addressObject) {
+				db.collection('address').update({ _id : addressObject._id }, {$set:{ rank : i } }) ;
+				i++;
+			});
+
+			res.status(200).json({status:"success"});
+	        
+	      });
+        
+	} else {
+		db.collection('address').find().sort({ score : 1 }).forEach( function(addressObject) {
+			db.collection('address').update({ _id : addressObject._id }, {$set:{ rank : i } }) ;
+			i++;
+		});
+
+		res.status(200).json({status:"success"});
+	}
 };
 
+module.exports.calculateAllRanks = calculateAllRanks;
 module.exports.calculateScore = calculateScore;
 module.exports.calculateAllScores = calculateAllScores;
 module.exports.postContent = postContent;
