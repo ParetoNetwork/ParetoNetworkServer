@@ -1,6 +1,6 @@
 var mongodb = require('mongodb').MongoClient;
 const assert = require('assert');
-var connectionUrl = require('./backend-credentials.json').mongodb_connection;
+var connectionUrl = process.env.CRED_MONGODB || require('./backend-credentials.json').mongodb_connection;
 
 //ways of writing contract creation block height
 const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
@@ -188,7 +188,7 @@ function calculateScore(req, fres, web3){
 
 }
 
-function postContent (body, res){
+function postContent (web3, body, fres){
 
 	//exposed endpoint to write content to database
 
@@ -206,15 +206,15 @@ function postContent (body, res){
           body.block = res.number;
 
           // Insert a single document
-		  db.content.insertOne(
+		  db.collection('content').insertOne(
 			  	body, function(err, r) {
 			    //assert.equal(null, err);
 			    //assert.equal(1, r.insertedCount);
 			    if(err){
 			    	console.error('unable because: ', err);
-			    	res.boom.badData();
+			    	fres.boom.badData();
 			    } else {
-			    	res.status(200);
+			    	fres.status(200);
 			    }
 
 			  });

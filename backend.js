@@ -68,7 +68,7 @@ function start() {
     else if(req.body.address === undefined || req.body.title === undefined || req.body.body === undefined ){
       res.boom.badRequest('POST body missing, needs address, title and body'); 
     } else {
-      controller.postContent(req.body, res);
+      controller.postContent(web3, req.body, res);
     }
 
   }); //end content post
