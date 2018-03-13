@@ -1,19 +1,30 @@
+var controller = module.exports = {};
+
+/*constants*/
+var connectionUrl = process.env.CRED_MONGODB || require('./backend-private-constants.json').mongodb_connection;
+var paretoContractAddress = process.env.CRED_PARETOCONTRACT || require('./backend-public-constants.json').pareto_contract_address;
+
+/*dependencies*/
 var mongodb = require('mongodb').MongoClient;
 const assert = require('assert');
-var connectionUrl = process.env.CRED_MONGODB || require('./backend-credentials.json').mongodb_connection;
 
-//ways of writing contract creation block height
+var utils = require('./backend-utils.js');
+
+/*ways of writing contract creation block height*/
 const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
 const contractCreationBlockHeightInt = 4953750;
 
 const dbName = 'pareto';
 
-function calculateScore(req, fres, web3){
+controller.calculateScore = function(req, fres, web3){
 
 	fres.setHeader('Content-Type', 'application/json');
-    var address = req.query.address;
-    var tokenTotal = req.query.total;
+    var address = req.query.address; //should validate type
+    var tokenTotal = req.query.total; //should validate type
     var blockHeight = 0;
+
+    
+    var rankCalculation = 0;
 
     if(web3.utils.isAddress(address) == false){
 
@@ -32,7 +43,7 @@ function calculateScore(req, fres, web3){
           { 
               zeroes += "0"; 
           }
-          address = "0x" + zeroes + address.substring(2,n);
+          var addressPadded = "0x" + zeroes + address.substring(2,n);
         }
 
         var txs = [];
@@ -41,19 +52,30 @@ function calculateScore(req, fres, web3){
 
         console.log(address);
 
-        //should re-do 
+		var tknAddress = (address).substring(2); //this call doesn't use the padded address
+        var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
 
         //get current blocknumber too
         web3.eth.getBlock('latest')
-        .then(function(res) {
+         .then(function(res) {
           blockHeight = res.number;
           console.log("blockheight: " + blockHeight);
+
+        //then re-tally total
+        return web3.eth.call({
+          to: paretoContractAddress, 
+          data: contractData  
+        }).then(function(result) {
+	        if (result) { 
+	              var tokens = web3.utils.toBN(result).toString();
+	              tokenTotal = web3.utils.fromWei(tokens, 'ether');
+	        }
 
         return web3.eth.getPastLogs({
           fromBlock: contractCreationBlockHeightHexString,
           toBlock: 'latest',
           address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
-          topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, address]
+          topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
         }).then(function (txObjects){
           //console.log(txObjects);
             for(i = 0; i < txObjects.length; i++){
@@ -82,7 +104,7 @@ function calculateScore(req, fres, web3){
               fromBlock: contractCreationBlockHeightHexString,
               toBlock: 'latest',
               address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
-              topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', address, null]
+              topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
             }).then(function (txObjects){
             //console.log(txObjects);
             for(i = 0; i < txObjects.length; i++){
@@ -164,7 +186,52 @@ function calculateScore(req, fres, web3){
                 var blockHeightDifference = blockHeight - weightAverageBlockHeight;
                 console.log("weighted avg block height difference: " + blockHeightDifference);
 
-                fres.json({ 'weightAverageBlockHeight' : weightAverageBlockHeight, 'weightedAverageDifference' : blockHeightDifference, 'blockHeightDivisor' : (blockHeight - contractCreationBlockHeightInt)/100});
+                //do final calculations for this stage
+                var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
+                var score = tokenTotal * (blockHeightDifference / divisor);
+                var bonus = blockHeightDifference / divisor;
+
+                var resultJson = {
+                	'address' : req.query.address,
+                	'score' : score,
+                	'block' : blockHeight,
+                	'bonus' : bonus
+                };
+
+                //write to db as well
+                mongodb.connect(connectionUrl, function(err, client) {
+				  assert.equal(null, err);
+				  //console.log("Connected correctly to server");
+
+				  const db = client.db(dbName);
+
+				  var dbQuery = { 
+				  	address : address 
+				  };
+				  var dbValues = { 
+				  		$set: { 
+				  				score : score, 
+				  				block: blockHeight 
+				  		} 
+				  };
+				  var dbOptions = {
+						upsert : true
+				  };
+
+				  //should queue for writing later
+				  db.collection('address').updateOne(dbQuery, dbValues, dbOptions,
+				  	function(err, r){
+				  		if(err){
+						    	console.error('unable to write to db because: ', err);
+						    	fres.boom.badData();
+					    } else {
+					    	console.log(r);
+					    	fres.status(200).json(resultJson);
+					    } //end conditional
+					} //end function
+				  );
+				});//end mongo
+
               } catch (e) {
                 console.log(e);
                 fres.status(500).send('Something broke!')
@@ -184,11 +251,12 @@ function calculateScore(req, fres, web3){
           });
         });//end first then promise
       });//end 
+	 }); //end promise related to balance
     } //end address validation
 
 }
 
-function postContent (web3, body, fres){
+controller.postContent = function(web3, body, fres){
 
 	//exposed endpoint to write content to database
 
@@ -224,35 +292,17 @@ function postContent (web3, body, fres){
 };
 
 
-function getAllAvailableContent(){
+controller.getAllAvailableContent = function(){
 
 	//check if user, then return what the user is privy to see
 
-};
+	//check block number or block age, then retrieve all content after that block. add more limitations/filters later
 
-function getContentById(){
+	var acceptableBlockHeight = 0; //system block height. global var determined by worker? stored on S3? stored on db? dynamic based on rank %?
 
-	//check if user, then check if the user is privy to see it
-
-};
-
-function retrieveScores(){
-
-	//makes the rank by sorting server side, stores all ranks in db, also sends result client side if requested
-
-};
-
-function retrieveRank(){
-
-	//quick way to retrieve the current snapshot of rankings. can limit to a range
-
-};
+	//get standard deviation
 
 
-/*
-*	Send an address, get the address and its current score and current ranking
-*/
-function retrieveRankScoreOfAddress(address, res){
 
 	mongodb.connect(connectionUrl, function(err, client) {
 	  assert.equal(null, err);
@@ -260,7 +310,76 @@ function retrieveRankScoreOfAddress(address, res){
 
 	  const db = client.db(dbName);
 
-	  db.address.findOne({ address : address }, 
+	  db.collection('content').findOne({ block : block }, 
+	  	function(err, r){
+	  		if(err){
+			    	console.error('unable because: ', err);
+			    	res.boom.badData();
+		    } else {
+		    	res.status(200).json(r);
+		    } //end conditional
+		} //end function
+	  );
+	});//end mongo
+
+};
+
+controller.getContentById = function(){
+
+	//check if user, then check if the user is privy to see it
+
+};
+
+controller.retrieveScores = function(){
+
+	//makes the rank by sorting server side, stores all ranks in db, also sends result client side if requested
+
+};
+
+controller.retrieveRank = function(){
+
+	//quick way to retrieve the current snapshot of rankings. can limit to a range
+
+	//get your rank number, so retrieve by address
+	mongodb.connect(connectionUrl, function(err, client) {
+	  assert.equal(null, err);
+	  //console.log("Connected correctly to server");
+
+	  const db = client.db(dbName);
+
+	  db.collection('address').findOne({ address : address }, 
+	  	function(err, r){
+	  		if(err){
+			    	console.error('unable because: ', err);
+			    	res.boom.badData();
+		    } else {
+
+		    	var rankIndex = r.rank;
+
+		    	//want ranks -5 to +5
+		    	//db.address.findOne({ rank : rank }).limit
+
+		    	res.status(200).json(r);
+		    } //end conditional
+		} //end function
+	  );
+	});//end mongo
+
+};
+
+
+/*
+*	Send an address, get the address and its current score and current ranking
+*/
+controller.retrieveRankScoreOfAddress = function(address, res){
+
+	mongodb.connect(connectionUrl, function(err, client) {
+	  assert.equal(null, err);
+	  //console.log("Connected correctly to server");
+
+	  const db = client.db(dbName);
+
+	  db.collection('address').findOne({ address : address }, 
 	  	function(err, r){
 	  		if(err){
 			    	console.error('unable because: ', err);
@@ -277,7 +396,7 @@ function retrieveRankScoreOfAddress(address, res){
 /*
 *	Send a number greater than zero, get the address and its current score
 */
-function retrieveAddressAtRank(rank, res){
+controller.retrieveAddressAtRank = function(rank, res){
 
 	mongodb.connect(connectionUrl, function(err, client) {
 	  assert.equal(null, err);
@@ -298,7 +417,7 @@ function retrieveAddressAtRank(rank, res){
 
 };
 
-function retrieveRankAroundAddress(index){
+controller.retrieveRankAroundAddress = function(index){
 
 	//a range of rankings
 	var range = 50;
@@ -315,51 +434,86 @@ function retrieveRankAroundAddress(index){
 	3. optional - check that addresses' block height (for when it was last calculated), if it wasn't long ago then don't update it and let that user do it on their own volition, to save some processing
 	4. run entire score promises chain
 */
-function calculateAllScores(web3, fres){
+controller.calculateAllScores = function(web3, fres){
 
-	web3.eth.getPastLogs({
+	var blockHeight = 0;
+
+	//get current blocknumber too
+    web3.eth.getBlock('latest')
+     .then(function(res) {
+      blockHeight = res.number;
+      console.log("blockheight: " + blockHeight);
+
+	return web3.eth.getPastLogs({
       fromBlock: contractCreationBlockHeightHexString,
       toBlock: 'latest',
       address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
       topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
     }).then(function (txObjects){
 
-    	console.log(txObjects);
+    	console.log("tx count here: " + txObjects.length);
+
 
     	mongodb.connect(connectionUrl, function(err, client) {
 		    assert.equal(null, err);
 		    //console.log("Connected correctly to server");
 
 		    const db = client.db(dbName);
+		    var bulk = db.collection('address').initializeUnorderedBulkOp();
 
 			for(i = 0; i < txObjects.length; i++){
 
-				var score = 0;
+				var dataA = "0x" + txObjects[i].topics[1].substring(26);
+				var dataB = "0x" + txObjects[i].topics[2].substring(26); //destination, most likely current holder
+				var score = 0.0;
 
-				db.collection('address').findOne({ address : txObjects[i].address }, function(err, addressObject){
-					if(err){
-						//no address entry found, add entry and calculate everything
-					} else {
-						//address found, update current entry
-					}
+				//get all addresses first and add to the collection where necessary
+				/*if(i == 0){
+					var dbQuery = { 
+					  	address : dataB
+					  };
+					  var dbValues = { 
+					  		$set: { 
+					  				score : score, 
+					  				block: Long.fromInt(blockHeight)
+					  		} 
+					  };
+					  var dbOptions = {
+							upsert : true
+					  };
 
+					db.collection('address').updateOne(dbQuery, dbValues, dbOptions, function(err, addressObject){
+						if(err){
+							//no address entry found, add entry and calculate everything
+						} else {
+							//address found, update current entry
+						}
+
+					});
+				}*/
+				
+				bulk.find({address : dataB}).upsert().updateOne({
+					address : dataB,
+					score : 0.0,
+					block : blockHeight
 				});
 
 			}
-
-			calculateAllRanks(db);
+			bulk.execute();
+			//controller.calculateAllRanks(db, fres);
 		}); //end mongodb
 
-		fres.status(200).json({status:"success"});
+		//fres.status(200).json({status:"success"});
 
-    });
+      }); // end events
+	}); // end block height
 
 };
 
 /* Given the complete set of scores, rank them from highest to lowest (just the sort() command and looping through all, adding the current i to each object's rank)
    1. get db.address.find().sort()
 */
-function calculateAllRanks(db, res){ //only runs inside of a mongodb connection
+controller.calculateAllRanks = function(db, res){ //only runs inside of a mongodb connection
 
 	var i = 1;
 
@@ -387,10 +541,3 @@ function calculateAllRanks(db, res){ //only runs inside of a mongodb connection
 		res.status(200).json({status:"success"});
 	}
 };
-
-module.exports.calculateAllRanks = calculateAllRanks;
-module.exports.calculateScore = calculateScore;
-module.exports.calculateAllScores = calculateAllScores;
-module.exports.postContent = postContent;
-module.exports.retrieveRankScoreOfAddress = retrieveRankScoreOfAddress;
-module.exports.retrieveAddressAtRank = retrieveAddressAtRank;

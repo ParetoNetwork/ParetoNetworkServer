@@ -130,11 +130,9 @@ window.addEventListener('load', function() {
                   url: '/v1/summation?address='+addr+'&total='+tokenTotal,
                   dataType: 'json',
                   success: function (data, textStatus, jqXHR) {
-                      var weightedAverageDifference = parseFloat(data.weightedAverageDifference) / parseFloat(data.blockHeightDivisor);
-                      rankCalculation = parseFloat(rankCalculation) * weightedAverageDifference;
-                      console.log("HODLING Bonus: " + weightedAverageDifference);
-                      console.log("Counting till: " + rankCalculation);
-                      var rankCount = new CountUp('rank-counter', tokenTotal, rankCalculation, 2, 2.5, counterOptions);
+                      console.log("HODLING Bonus: " + data.bonus);
+                      console.log("Counting till: " + data.score);
+                      var rankCount = new CountUp('rank-counter', tokenTotal, data.score, 2, 2.5, counterOptions);
                        if (!rankCount.error) {
 
                         //would like to briefly change color and font of text

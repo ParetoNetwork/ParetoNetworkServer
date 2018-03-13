@@ -81,7 +81,12 @@ function start() {
 
   app.get('/v1/ranking', function(req, res){
 
-      controller.calculateAllRanks(null, res);
+      if(req.query.admin === undefined){ //endpoint protection from DDOS
+          res.boom.unauthorized();
+      }
+      else {
+        controller.calculateAllRanks(null, res);  
+      }
 
   });
 
