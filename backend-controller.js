@@ -4,11 +4,35 @@ var controller = module.exports = {};
 var connectionUrl = process.env.CRED_MONGODB || require('./backend-private-constants.json').mongodb_connection;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || require('./backend-public-constants.json').pareto_contract_address;
 
-/*dependencies*/
-var mongodb = require('mongodb').MongoClient;
-const assert = require('assert');
+/*third-party dependencies*/
+var mongoose = require('mongoose');
+mongoose.connect(connectionUrl);
+var Schema = mongoose.Schema;
 
+/*project files*/
 var utils = require('./backend-utils.js');
+
+/*models, should be their own file, MVC*/
+var paretoAddressSchema = new Schema({
+	address : String,
+	rank 	: Number,
+	score 	: Number,
+	block 	: Number
+}, { collection : 'address' });
+
+var ParetoAddress = mongoose.model('address', paretoAddressSchema);
+
+var paretoContentSchema = new Schema({
+	address : String,
+	title 	: String,
+	body	: String,
+	reward	: Number,
+	dateCreated : { type: Date, default: Date.now },
+	block 	: Number
+
+}, { collection : 'content' });
+
+var ParetoContent = mongoose.model('content', paretoContentSchema);
 
 /*ways of writing contract creation block height*/
 const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
@@ -192,18 +216,13 @@ controller.calculateScore = function(req, fres, web3){
                 var bonus = blockHeightDifference / divisor;
 
                 var resultJson = {
-                	'address' : req.query.address,
+                	'address' : address,
                 	'score' : score,
                 	'block' : blockHeight,
                 	'bonus' : bonus
                 };
 
                 //write to db as well
-                mongodb.connect(connectionUrl, function(err, client) {
-				  assert.equal(null, err);
-				  //console.log("Connected correctly to server");
-
-				  const db = client.db(dbName);
 
 				  var dbQuery = { 
 				  	address : address 
@@ -215,22 +234,22 @@ controller.calculateScore = function(req, fres, web3){
 				  		} 
 				  };
 				  var dbOptions = {
-						upsert : true
+						upsert : true,
+						returnNewDocument: true
 				  };
 
 				  //should queue for writing later
-				  db.collection('address').updateOne(dbQuery, dbValues, dbOptions,
+				  ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions, 
 				  	function(err, r){
 				  		if(err){
-						    	console.error('unable to write to db because: ', err);
-						    	fres.boom.badData();
+					    	console.error('unable to write to db because: ', err);
+					    	fres.boom.badData();
 					    } else {
-					    	console.log(r);
+					    	console.log("here is db writing response : " + r);
 					    	fres.status(200).json(resultJson);
 					    } //end conditional
 					} //end function
 				  );
-				});//end mongo
 
               } catch (e) {
                 console.log(e);
@@ -453,13 +472,7 @@ controller.calculateAllScores = function(web3, fres){
 
     	console.log("tx count here: " + txObjects.length);
 
-
-    	mongodb.connect(connectionUrl, function(err, client) {
-		    assert.equal(null, err);
-		    //console.log("Connected correctly to server");
-
-		    const db = client.db(dbName);
-		    var bulk = db.collection('address').initializeUnorderedBulkOp();
+		    var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
 
 			for(i = 0; i < txObjects.length; i++){
 
@@ -494,14 +507,13 @@ controller.calculateAllScores = function(web3, fres){
 				
 				bulk.find({address : dataB}).upsert().updateOne({
 					address : dataB,
-					score : 0.0,
+					score : score,
 					block : blockHeight
 				});
 
 			}
 			bulk.execute();
 			//controller.calculateAllRanks(db, fres);
-		}); //end mongodb
 
 		//fres.status(200).json({status:"success"});
 
