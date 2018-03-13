@@ -15,14 +15,14 @@
     "express": "^4.15.2",
     "express-boom-2": "0.4.0",
     "jquery": "^3.2.1",
-    "mongodb": "3.0.4",
+    "mongoose": "^5.0.10",
     "redis": "2.8.0",
     "request-promise": "4.2.2",
     "throng": "4.0.0",
     "uglify-js": "^3.3.9",
-    "web3": "1.0.0-beta.29",
+    "unique-random-array": "1.0.0",
     "uri-js": "3.0.2",
-    "unique-random-array": "1.0.0"
+    "web3": "1.0.0-beta.29"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
