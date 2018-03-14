@@ -57,7 +57,7 @@ function start() {
   app.get('/v1/summation', function(req, fres){
       fres.setHeader('Content-Type', 'application/json');
 
-      controller.calculateScore(req.query.address, req.query.total, function(err, result){
+      controller.calculateScore(req.query.address, req.query.total, 0, function(err, result){
         if(err){
           console.log(err.message);
           fres.boom.badImplementation(err.message);
@@ -124,7 +124,33 @@ function start() {
           }
         });
     }
+  });
 
+  app.post('/v1/updateranks', function(req, res){
+    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
+      res.boom.badRequest('POST body missing');
+    }
+    else if(req.body.admin === undefined){
+      res.boom.badRequest('POST body missing, needs keys'); 
+    } else {
+        if(req.body.admin == 'update'){
+          controller.calculateAllRanks(function(err, result){
+            if(err){
+              res.boom.badRequest(err.message);
+            } else {
+              res.status(200).json(result);
+            }
+          });
+        } else if (req.body.admin == 'reset') {
+          controller.resetRanks(function(err, result){
+            if(err){
+              res.boom.badRequest(err.message);
+            } else {
+              res.status(200).json(result);
+            }
+          });
+        }
+    } //end else
   });
 
   app.listen(process.env.PORT || 3000, function () {
