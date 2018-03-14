@@ -62,7 +62,7 @@
   width: 100px;
 }
 
-#rank-counter{
+#score-counter{
   font-size: 100px; 
   overflow-wrap: break-word;
 }
@@ -80,7 +80,7 @@
       width: 40px;
     }
 
-    #rank-counter{
+    #score-counter{
       font-size: 30px; 
       overflow-wrap: break-word;
     }

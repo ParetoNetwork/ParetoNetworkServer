@@ -212,14 +212,6 @@ controller.calculateScore = async function(address, amount, blockHeightFixed, ca
 		                var score = amount * multiple;
 		                var bonus = blockHeightDifference / divisor;
 
-		                var resultJson = {
-		                	'address' : address,
-		                	'score' : score,
-		                	'block' : blockHeight,
-		                	'rank'	: -1,
-		                	'bonus' : bonus
-		                };
-
 		                //write to db as well
 
 						  var dbQuery = { 
@@ -236,15 +228,30 @@ controller.calculateScore = async function(address, amount, blockHeightFixed, ca
 								returnNewDocument: true
 						  };
 
-						  if(callback && typeof callback === "function") { callback(null,resultJson); }
-
 						  //should queue for writing later
 						  ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions, 
 						  	function(err, r){
 						  		if(err){
 							    	console.error('unable to write to db because: ', err);
 							    } else {
-							    	console.log("here is db writing response : " + r);
+							    	
+							    	ParetoAddress.count({}, function(err, count){
+							    		if(err){}
+							    		else {
+							    			var resultJson = {
+							                	'address' : r.address,
+							                	'score' : r.score,
+							                	'block' : blockHeight,
+							                	'bonus' : bonus,
+							                	'rank'  : r.rank,
+							                	'totalRanks' : count
+							                };
+							    			console.log("here is db writing response : " + JSON.stringify(resultJson));
+						  					if(callback && typeof callback === "function") { callback(null,resultJson); }
+							    		}
+							    	}); //end count
+							    	
+							    	//if(callback && typeof callback === "function") { callback(null,r); }
 							    } //end conditional
 							} //end function
 						  );
@@ -447,38 +454,27 @@ controller.retrieveRankScoreOfAddress = function(address, res){
 
 };
 
-/*
-*	Send a number greater than zero, get the address and its current score
-*/
-controller.retrieveAddressAtRank = function(rank, res){
 
-	mongodb.connect(connectionUrl, function(err, client) {
-	  assert.equal(null, err);
-	  //console.log("Connected correctly to server");
+controller.retrieveRanksAtAddress = function(rank, limit, page, callback){
 
-	  const db = client.db(dbName);
+	var queryRank = rank - 11;
+	if(queryRank <= 0){
+		queryRank = 1;
+	}
 
-	  db.address.find({ rank : rank }, 
-	  	function(err, r){
-	  		if(err){
-		    	console.error('unable because: ', err);
-		    	res.boom.badData();
-		    } else {
-		    	res.status(200).json(r);
-		    }
-	  });
+	var query = ParetoAddress.find({ rank : {$gte : queryRank}}).limit(limit).skip(page);
+
+	query.exec(function(err, results){
+
+		if(err){ 
+			if(callback && typeof callback === "function") { 
+				callback(err); 
+			} 
+		}
+		else {
+			if(callback && typeof callback === "function") { callback(null, results ); }
+		}
 	});
-
-};
-
-controller.retrieveRankAroundAddress = function(index){
-
-	//a range of rankings
-	var range = 50;
-	var lowerBound = ((index > range) ? index-range : 0);
-	var upperBound = index + range;
-
-	//db.address.find with limits
 
 };
 
