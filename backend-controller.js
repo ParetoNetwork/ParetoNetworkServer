@@ -597,15 +597,19 @@ controller.calculateAllScores = function(callback){
 */
 controller.calculateAllRanks = function(callback){
 	console.log("updating ranks begun");
-	//-1 desc, 1 asc, limit just for testing
-	ParetoAddress.find({}, 'address score', { score : -1 , limit : 5 }, function(err, results){
+	//-1 desc where greatest number to smallest number, 1 asc for smallest number to greatest number, limit just for testing
+	var query = ParetoAddress.find().sort({score : -1});
+
+	query.exec(function(err, results){
 		if(err){
 			callback(err);
 		}
 		else {
-			console.log("updating ranks finished querying");
+			console.log("updating ranks finished querying with results.length : " + results.length);
 			if(callback && typeof callback === "function") { callback(null, {} ); }
 			
+			console.log(results);
+
 			var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
 			var i = 1;
 			results.forEach(function(result){
@@ -620,8 +624,6 @@ controller.calculateAllRanks = function(callback){
 				//optional logic here
 				console.log("updating ranks finished");
 			});
-
-			
 		}
 	});
 };
