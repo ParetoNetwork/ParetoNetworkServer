@@ -4,35 +4,29 @@ var controller = module.exports = {};
 var connectionUrl = process.env.CRED_MONGODB || require('./backend-private-constants.json').mongodb_connection;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || require('./backend-public-constants.json').pareto_contract_address;
 
-/*third-party dependencies*/
+const fs = require('fs');
+const path = require('path');
+
+const modelsPath = path.resolve(__dirname, 'models')
+fs.readdirSync(modelsPath).forEach(file => {
+  require(modelsPath + '/' + file);
+})
+
+/*db initialization*/
 var mongoose = require('mongoose');
+//var models = require('./models/address');
 mongoose.connect(connectionUrl);
-var Schema = mongoose.Schema;
+
+/*db model initializations*/
+const ParetoAddress = mongoose.model('address');
+const ParetoContent = mongoose.model('content');
+
+var Web3 = require('web3');
+var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
 
 /*project files*/
 var utils = require('./backend-utils.js');
 
-/*models, should be their own file, MVC*/
-var paretoAddressSchema = new Schema({
-	address : String,
-	rank 	: Number,
-	score 	: Number,
-	block 	: Number
-}, { collection : 'address' });
-
-var ParetoAddress = mongoose.model('address', paretoAddressSchema);
-
-var paretoContentSchema = new Schema({
-	address : String,
-	title 	: String,
-	body	: String,
-	reward	: Number,
-	dateCreated : { type: Date, default: Date.now },
-	block 	: Number
-
-}, { collection : 'content' });
-
-var ParetoContent = mongoose.model('content', paretoContentSchema);
 
 /*ways of writing contract creation block height*/
 const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
@@ -40,20 +34,14 @@ const contractCreationBlockHeightInt = 4953750;
 
 const dbName = 'pareto';
 
-controller.calculateScore = function(req, fres, web3){
+controller.calculateScore = function(address, amount, callback){
 
-	fres.setHeader('Content-Type', 'application/json');
-    var address = req.query.address; //should validate type
-    var tokenTotal = req.query.total; //should validate type
     var blockHeight = 0;
 
-    
     var rankCalculation = 0;
 
     if(web3.utils.isAddress(address) == false){
-
-       res.json({"status": 500, "error":"invalid address"});
-
+       if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
     } else {
 
          //pad address +32 bits for web3 API
@@ -92,7 +80,7 @@ controller.calculateScore = function(req, fres, web3){
         }).then(function(result) {
 	        if (result) { 
 	              var tokens = web3.utils.toBN(result).toString();
-	              tokenTotal = web3.utils.fromWei(tokens, 'ether');
+	              amount = web3.utils.fromWei(tokens, 'ether');
 	        }
 
         return web3.eth.getPastLogs({
@@ -156,18 +144,6 @@ controller.calculateScore = function(req, fres, web3){
 
             }//end for
 
-          /*try {
-            incoming = Object.keys(incoming).reverse().forEach();
-            outgoing = Object.keys(outgoing).reverse();
-          } catch (e){
-            console.log(e);
-          }*/
-
-            /*console.log("incoming\n\n");
-            console.log(incoming);
-            console.log("outgoing\n\n");
-            console.log(outgoing);*/
-
             var transactions = Object.entries(incoming).concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])));
             try {
               transactions = transactions.sort().reverse();
@@ -191,7 +167,7 @@ controller.calculateScore = function(req, fres, web3){
                     //console.log("after shift current transaction[i][1] value: " + transactions[i][1]);
                   } else {
                     //console.log(transactions[i][1]);
-                    transactions[i][2] = transactions[i][1]/tokenTotal; //adds decimal to the tuple
+                    transactions[i][2] = transactions[i][1]/amount; //adds decimal to the tuple
                     transactions[i][3] = parseInt(transactions[i][0]) * transactions[i][2]; //weight of block
                     if(i == 0){ //cumulative weight of block, so last index already has the value instead of needing to loop through again
                       transactions[i][4] = transactions[i][3]; 
@@ -212,7 +188,7 @@ controller.calculateScore = function(req, fres, web3){
 
                 //do final calculations for this stage
                 var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
-                var score = tokenTotal * (blockHeightDifference / divisor);
+                var score = amount * (blockHeightDifference / divisor);
                 var bonus = blockHeightDifference / divisor;
 
                 var resultJson = {
@@ -243,30 +219,30 @@ controller.calculateScore = function(req, fres, web3){
 				  	function(err, r){
 				  		if(err){
 					    	console.error('unable to write to db because: ', err);
-					    	fres.boom.badData();
+					    	if(callback && typeof callback === "function") { callback(err); }
 					    } else {
 					    	console.log("here is db writing response : " + r);
-					    	fres.status(200).json(resultJson);
+					    	if(callback && typeof callback === "function") { callback(null,resultJson); }
 					    } //end conditional
 					} //end function
 				  );
 
               } catch (e) {
                 console.log(e);
-                fres.status(500).send('Something broke!')
+                if(callback && typeof callback === "function") { callback(err); }
               }
 
 
             } catch (e) {
               console.log(e);
-              fres.status(500).send('Something broke!')
+              if(callback && typeof callback === "function") { callback(err); }
             }
 
           })//end second then promise
           .catch(function (err) {
             // API call failed...
             console.log(err);
-            fres.status(500).send('Something broke!')
+            if(callback && typeof callback === "function") { callback(err); }
           });
         });//end first then promise
       });//end 
@@ -275,39 +251,34 @@ controller.calculateScore = function(req, fres, web3){
 
 }
 
-controller.postContent = function(web3, body, fres){
+controller.postContent = function(body, fres){
 
 	//exposed endpoint to write content to database
-
-	mongodb.connect(connectionUrl, function(err, client) {
-	  assert.equal(null, err);
-	  //console.log("Connected correctly to server");
-
-	  const db = client.db(dbName);
-
 	  
 	  web3.eth.getBlock('latest')
         .then(function(res) {
 
           body.dateCreated = Date.now();
           body.block = res.number;
+          body.txHash = res.txHash || '0x0'; //this is done client side to cause an internal invocation
 
-          // Insert a single document
-		  db.collection('content').insertOne(
-			  	body, function(err, r) {
-			    //assert.equal(null, err);
-			    //assert.equal(1, r.insertedCount);
-			    if(err){
-			    	console.error('unable because: ', err);
-			    	fres.boom.badData();
-			    } else {
-			    	fres.status(200).json({status: "success"});
-			    }
+          /*
 
-			  });
-		  }); //end mongodb
+          * This may actually need a placeholder of txhash beforehand, and update the entry, needs state of tx like txconfirmed. or the system can just check when trying to access content?
 
-      });
+          */
+
+          const paretoContentObj = new ParetoContent(body);
+          paretoContentObj.save(function(err, obj){
+          		if (err) {
+          			console.log(err);
+          			fres.boom.badData();
+          		} else {
+          			fres.status(200).json({status: "success", objectId: obj.id});
+          		}
+          });
+
+      }); //end web3
 };
 
 
@@ -453,7 +424,7 @@ controller.retrieveRankAroundAddress = function(index){
 	3. optional - check that addresses' block height (for when it was last calculated), if it wasn't long ago then don't update it and let that user do it on their own volition, to save some processing
 	4. run entire score promises chain
 */
-controller.calculateAllScores = function(web3, fres){
+controller.seedLatestEvents = function(fres){
 
 	var blockHeight = 0;
 
@@ -464,7 +435,7 @@ controller.calculateAllScores = function(web3, fres){
       console.log("blockheight: " + blockHeight);
 
 	return web3.eth.getPastLogs({
-      fromBlock: contractCreationBlockHeightHexString,
+      fromBlock: '0x501331', //contractCreationBlockHeightHexString,
       toBlock: 'latest',
       address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
       topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
@@ -481,29 +452,6 @@ controller.calculateAllScores = function(web3, fres){
 				var score = 0.0;
 
 				//get all addresses first and add to the collection where necessary
-				/*if(i == 0){
-					var dbQuery = { 
-					  	address : dataB
-					  };
-					  var dbValues = { 
-					  		$set: { 
-					  				score : score, 
-					  				block: Long.fromInt(blockHeight)
-					  		} 
-					  };
-					  var dbOptions = {
-							upsert : true
-					  };
-
-					db.collection('address').updateOne(dbQuery, dbValues, dbOptions, function(err, addressObject){
-						if(err){
-							//no address entry found, add entry and calculate everything
-						} else {
-							//address found, update current entry
-						}
-
-					});
-				}*/
 				
 				bulk.find({address : dataB}).upsert().updateOne({
 					address : dataB,
@@ -512,15 +460,75 @@ controller.calculateAllScores = function(web3, fres){
 				});
 
 			}
-			bulk.execute();
+			bulk.execute(function (err) {
+
+				controller.calculateAllScores(fres);
+
+			});
 			//controller.calculateAllRanks(db, fres);
 
-		//fres.status(200).json({status:"success"});
+		fres.status(200).json({status:"success"});
 
       }); // end events
 	}); // end block height
 
 };
+
+controller.calculateAllScores = function(callback){
+	
+	console.log('addresses retrieval started');
+
+	ParetoAddress.find({}, 'address score', function(err, results){
+
+		if(err){
+			callback(err);
+		}
+		else {
+			//loop through and calculate scores and save them
+
+			console.log('addresses retrieved finished');
+
+			async function processArray(results){
+
+				console.log("processing addresses asynchronously");
+
+				for (const item of results) {
+					console.log("item : " + item.address);
+					await controller.calculateScore(item.address, 0);
+				}
+				console.log("score calculation operation complete");
+		        if(callback && typeof callback === "function") { callback(null, {} ); }
+			}
+
+			console.log('addresses updating method finished');
+
+			/*
+			var i = results.length-1;
+			controller.calculateScore(results[i].address, 0, function(err, result, cb){
+
+				console.log(results[i].address);
+				i--;
+
+		        if(err){
+		          console.log(err.message);
+		        }
+
+		        if( i > -1){
+		        	console.log("attempting callback for index: " + i);
+		            controller.calculateScore(results[i].address, 0, cb);
+		        } else {
+		        	console.log("score calculation operation complete");
+		        	if(callback && typeof callback === "function") { callback(null, {} ); }
+		        }
+
+		    }); */ //end callback 
+		}
+
+	});
+
+};
+
+
 
 /* Given the complete set of scores, rank them from highest to lowest (just the sort() command and looping through all, adding the current i to each object's rank)
    1. get db.address.find().sort()
