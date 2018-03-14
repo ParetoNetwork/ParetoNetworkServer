@@ -93,8 +93,26 @@ function start() {
           res.boom.unauthorized();
       }
       else {
-        controller.seedLatestEvents(null, res);  
+        //controller.seedLatestEvents(null, res);  
       }
+
+  });
+
+  app.get('/v1/rank', function(req, res){
+
+    var rank = 1;
+    var limit = 1;
+    var page = 0;
+
+    //if()
+
+    controller.retrieveRanksAtAddress(req.query.rank, function(err, result){
+      if(err){
+        res.boom.badRequest(err.message); 
+      } else {
+        res.status(200).json(result);
+      }
+    });
 
   });
 

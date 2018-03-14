@@ -111,7 +111,7 @@ window.addEventListener('load', function() {
                     decimal: '.',
                   };
                   console.log("Counting till: " + tokenTotal);
-                  var rankCountInit = new CountUp('rank-counter', 0, tokenTotal, 2, 3, counterOptions);
+                  var rankCountInit = new CountUp('score-counter', 0, tokenTotal, 2, 3, counterOptions);
                   if (!rankCountInit.error) {
                     rankCountInit.start();
                   } else {
@@ -132,15 +132,28 @@ window.addEventListener('load', function() {
                   success: function (data, textStatus, jqXHR) {
                       console.log("HODLING Bonus: " + data.bonus);
                       console.log("Counting till: " + data.score);
-                      var rankCount = new CountUp('rank-counter', tokenTotal, data.score, 2, 2.5, counterOptions);
-                       if (!rankCount.error) {
+                      var scoreCount = new CountUp('score-counter', tokenTotal, data.score, 2, 2.5, counterOptions);
+                       if (!scoreCount.error) {
 
                         //would like to briefly change color and font of text
 
+                        scoreCount.start();
+                      } else {
+                        console.error(scoreCount.error);
+                      }
+
+                      var rankCount = new CountUp('rank-counter', data.totalRanks, data.rank, 0, 2.5, counterOptions);
+                      if(!rankCount.error){
                         rankCount.start();
                       } else {
-                        console.error(rankCount.error);
+                        console.error(rankCount.error);
                       }
+
+                      var addressMetricsDiv = document.getElementById('address-metrics');
+                      addressMetricsDiv.style.opacity = 1; //For real browsers;
+                      addressMetricsDiv.style.filter = "alpha(opacity=100)"; //For IE;
+
+                      document.getElementById('rank-total').innerHTML = data.totalRanks;
 
                       searchLookup();
                       var lookupInputField = document.getElementById('lookup-input');
