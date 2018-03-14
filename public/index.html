@@ -67,8 +67,15 @@
 
     <script>
         function dispatchView(){
+
+            //reset
+            var addressMetricsDiv = document.getElementById('address-metrics');
+            addressMetricsDiv.style.opacity = 0; //For real browsers;
+            addressMetricsDiv.style.filter = "alpha(opacity=0)"; //For IE;
+
             let event = new Event("load");
             window.dispatchEvent(event);
+
         }
     	/*
 		 * reasons to calculate ranking server side: possible to do less API calls to the Ethereum node. possible to keep a single web socket open to the Ethereum node microservice, as opposed to thousands or an infinite number of websockets client side from users checking their ranking
