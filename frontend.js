@@ -140,19 +140,20 @@ window.addEventListener('load', function() {
                       } else {
                         console.error(scoreCount.error);
                       }
+                      if(data.rank > 0){
+                        var rankCount = new CountUp('rank-counter', data.totalRanks, data.rank, 0, 2.5, counterOptions);
+                        if(!rankCount.error){
+                          rankCount.start();
+                        } else {
+                          console.error(rankCount.error);
+                        }
 
-                      var rankCount = new CountUp('rank-counter', data.totalRanks, data.rank, 0, 2.5, counterOptions);
-                      if(!rankCount.error){
-                        rankCount.start();
-                      } else {
-                        console.error(rankCount.error);
+                        var addressMetricsDiv = document.getElementById('address-metrics');
+                        addressMetricsDiv.style.opacity = 1; //For real browsers;
+                        addressMetricsDiv.style.filter = "alpha(opacity=100)"; //For IE;
+
+                        document.getElementById('rank-total').innerHTML = data.totalRanks;
                       }
-
-                      var addressMetricsDiv = document.getElementById('address-metrics');
-                      addressMetricsDiv.style.opacity = 1; //For real browsers;
-                      addressMetricsDiv.style.filter = "alpha(opacity=100)"; //For IE;
-
-                      document.getElementById('rank-total').innerHTML = data.totalRanks;
 
                       searchLookup();
                       var lookupInputField = document.getElementById('lookup-input');
