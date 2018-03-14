@@ -118,9 +118,9 @@ function start() {
       else if(req.body.admin == "scores")
         controller.calculateAllScores(function(err, result){
           if(err){
-            fres.boom.badRequest(err.message);
+            res.boom.badRequest(err.message);
           } else {
-            fres.status(200).json(result);
+            res.status(200).json(result);
           }
         });
     }
