@@ -17,8 +17,6 @@ function start() {
   var requestp = require('request-promise');
   var controller = require('./backend-controller.js');
   var app = express();
-  var Web3 = require('web3');
-  var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
   var uniqueRandomArray = require('unique-random-array');
   const debug = require('debug')('pareto-ranking')
   const appName = 'Pareto Ranking Backend'
@@ -57,9 +55,19 @@ function start() {
   /********* v1 APIs *********/
 
   app.get('/v1/summation', function(req, fres){
-      
-      controller.calculateScore(req, fres, web3);
+      fres.setHeader('Content-Type', 'application/json');
 
+      controller.calculateScore(req.query.address, req.query.total, function(err, result){
+        if(err){
+          console.log(err.message);
+          fres.boom.badImplementation(err.message);
+        } else {
+          fres.status(200).json(result);
+        }
+
+      });
+
+     
   });//end entire function
 
   app.post('/v1/content', function(req, res){
@@ -70,7 +78,7 @@ function start() {
     else if(req.body.address === undefined || req.body.title === undefined || req.body.body === undefined ){
       res.boom.badRequest('POST body missing, needs address, title and body'); 
     } else {
-      controller.postContent(web3, req.body, res);
+      controller.postContent(req.body, res);
     }
 
   }); //end content post
@@ -85,7 +93,7 @@ function start() {
           res.boom.unauthorized();
       }
       else {
-        controller.calculateAllRanks(null, res);  
+        controller.seedLatestEvents(null, res);  
       }
 
   });
@@ -105,7 +113,16 @@ function start() {
     else if(req.body.admin === undefined){
       res.boom.badRequest('POST body missing, needs keys'); 
     } else {
-      controller.calculateAllScores(web3, res);
+      if(req.body.admin == "events")
+        controller.seedLatestEvents(res);
+      else if(req.body.admin == "scores")
+        controller.calculateAllScores(function(err, result){
+          if(err){
+            fres.boom.badRequest(err.message);
+          } else {
+            fres.status(200).json(result);
+          }
+        });
     }
 
   });
