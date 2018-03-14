@@ -186,9 +186,19 @@ controller.calculateScore = function(address, amount, callback){
                 var blockHeightDifference = blockHeight - weightAverageBlockHeight;
                 console.log("weighted avg block height difference: " + blockHeightDifference);
 
-                //do final calculations for this stage
+                //do final calculations for this stage. 
+
+                //the problem with this is that this always increases and makes it hard for people to get a positive boost
+                //which is okay if the decimal is added to the total as well, but for everyone
+
+                //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
                 var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
-                var score = amount * (blockHeightDifference / divisor);
+
+                console.log("divisor: " + divisor);
+
+                var multiple = 1 + (blockHeightDifference / divisor);
+                
+                var score = amount * multiple;
                 var bonus = blockHeightDifference / divisor;
 
                 var resultJson = {
@@ -214,15 +224,15 @@ controller.calculateScore = function(address, amount, callback){
 						returnNewDocument: true
 				  };
 
+				  if(callback && typeof callback === "function") { callback(null,resultJson); }
+
 				  //should queue for writing later
 				  ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions, 
 				  	function(err, r){
 				  		if(err){
 					    	console.error('unable to write to db because: ', err);
-					    	if(callback && typeof callback === "function") { callback(err); }
 					    } else {
 					    	console.log("here is db writing response : " + r);
-					    	if(callback && typeof callback === "function") { callback(null,resultJson); }
 					    } //end conditional
 					} //end function
 				  );
@@ -499,6 +509,8 @@ controller.calculateAllScores = function(callback){
 				console.log("score calculation operation complete");
 		        if(callback && typeof callback === "function") { callback(null, {} ); }
 			}
+
+			processArray(results);
 
 			console.log('addresses updating method finished');
 
