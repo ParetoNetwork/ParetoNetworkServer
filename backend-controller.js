@@ -81,146 +81,202 @@ controller.calculateScore = function(address, amount, callback){
 	        if (result) { 
 	              var tokens = web3.utils.toBN(result).toString();
 	              amount = web3.utils.fromWei(tokens, 'ether');
+	              console.log("amount: " + amount);
 	        }
 
-        return web3.eth.getPastLogs({
-          fromBlock: contractCreationBlockHeightHexString,
-          toBlock: 'latest',
-          address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
-          topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
-        }).then(function (txObjects){
-          //console.log(txObjects);
-            for(i = 0; i < txObjects.length; i++){
+	        if(amount > 0){
+		        return web3.eth.getPastLogs({
+		          fromBlock: contractCreationBlockHeightHexString,
+		          toBlock: 'latest',
+		          address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+		          topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
+		        }).then(function (txObjects){
+		          //console.log(txObjects);
+		            for(i = 0; i < txObjects.length; i++){
 
-                //these are hex values
-                //get data field, to hex, then from wei to ether
-                var data = txObjects[i].data;
-                var blockHex = txObjects[i].blockNumber;
-                
-                var quantityWei = web3.utils.toBN(data, 16).toString();
-                var blockNumber = web3.utils.toBN(blockHex, 16).toString();
-                var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
-                quantityEth = parseInt(quantityEth);
-                
-                //basically pushes
-                if(blockNumber in incoming)
-                {
-                  incoming[blockNumber] = incoming[blockNumber] + quantityEth;
-                }
-                else {
-                  incoming[blockNumber] = quantityEth;
-                }
-            }
+		                //these are hex values
+		                //get data field, to hex, then from wei to ether
+		                var data = txObjects[i].data;
+		                var blockHex = txObjects[i].blockNumber;
+		                
+		                var quantityWei = web3.utils.toBN(data, 16).toString();
+		                var blockNumber = web3.utils.toBN(blockHex, 16).toString();
+		                var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
+		                quantityEth = parseInt(quantityEth);
+		                
+		                //basically pushes
+		                if(blockNumber in incoming)
+		                {
+		                  incoming[blockNumber] = incoming[blockNumber] + quantityEth;
+		                }
+		                else {
+		                  incoming[blockNumber] = quantityEth;
+		                }
+		            }
 
-            return web3.eth.getPastLogs({
-              fromBlock: contractCreationBlockHeightHexString,
-              toBlock: 'latest',
-              address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
-              topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
-            }).then(function (txObjects){
-            //console.log(txObjects);
-            for(i = 0; i < txObjects.length; i++){
+		            return web3.eth.getPastLogs({
+		              fromBlock: contractCreationBlockHeightHexString,
+		              toBlock: 'latest',
+		              address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+		              topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
+		            }).then(function (txObjects){
+		            //console.log(txObjects);
+		            for(i = 0; i < txObjects.length; i++){
 
-                //these are hex values
-                //get data field, to hex, then from wei to ether
-                var data = txObjects[i].data;
+		                //these are hex values
+		                //get data field, to hex, then from wei to ether
+		                var data = txObjects[i].data;
 
-                var blockHex = txObjects[i].blockNumber;
+		                var blockHex = txObjects[i].blockNumber;
 
-                var quantityWei = web3.utils.toBN(data, 16).toString();
-                var blockNumber = web3.utils.toBN(blockHex, 16).toString();
+		                var quantityWei = web3.utils.toBN(data, 16).toString();
+		                var blockNumber = web3.utils.toBN(blockHex, 16).toString();
 
-                var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
-                quantityEth = parseInt(quantityEth);
+		                var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
+		                quantityEth = parseInt(quantityEth);
 
-                //basically pushes
-                if(blockNumber in outgoing)
-                {
-                  outgoing[blockNumber] = outgoing[blockNumber] + quantityEth;
-                }
-                else {
-                  outgoing[blockNumber] = quantityEth;
-                }
+		                //basically pushes
+		                if(blockNumber in outgoing)
+		                {
+		                  outgoing[blockNumber] = outgoing[blockNumber] + quantityEth;
+		                }
+		                else {
+		                  outgoing[blockNumber] = quantityEth;
+		                }
 
-            }//end for
+		            }//end for
 
-            var transactions = Object.entries(incoming).concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])));
-            try {
-              transactions = transactions.sort().reverse();
-             
-              try {
-                var i = 0;
-                var removableIndex = 0;
-                
-                //sorts down to remaining transactions, since we already know the total and the system block height
-                while(i < transactions.length){
-                  
-                  if(transactions[i][1] < 0 /*&& transactions[i+1] !== 'undefined'*/){
-                    transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
-                    //console.log("current transaction[i][1] value: " + transactions[i][1]);
-                    if(transactions[0][1] <= 0){
-                      transactions.shift(); //or remove index 0
-                    } else {
-                      //remove first negative index after processing
-                      transactions.splice(removableIndex, 1);
-                    }
-                    //console.log("after shift current transaction[i][1] value: " + transactions[i][1]);
-                  } else {
-                    //console.log(transactions[i][1]);
-                    transactions[i][2] = transactions[i][1]/amount; //adds decimal to the tuple
-                    transactions[i][3] = parseInt(transactions[i][0]) * transactions[i][2]; //weight of block
-                    if(i == 0){ //cumulative weight of block, so last index already has the value instead of needing to loop through again
-                      transactions[i][4] = transactions[i][3]; 
-                    } else {
-                      transactions[i][4] = transactions[i][3] + transactions[i-1][4];
-                    }
-                    i++;
-                    removableIndex = i;
+		            var transactions = Object.entries(incoming).concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])));
+		            try {
+		              transactions = transactions.sort().reverse();
+		             
+		              try {
+		                var i = 0;
+		                var removableIndex = 0;
+		                
+		                //sorts down to remaining transactions, since we already know the total and the system block height
+		                while(i < transactions.length){
+		                  
+		                  if(transactions[i][1] < 0 /*&& transactions[i+1] !== 'undefined'*/){
+		                    transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
+		                    //console.log("current transaction[i][1] value: " + transactions[i][1]);
+		                    if(transactions[0][1] <= 0){
+		                      transactions.shift(); //or remove index 0
+		                    } else {
+		                      //remove first negative index after processing
+		                      transactions.splice(removableIndex, 1);
+		                    }
+		                    //console.log("after shift current transaction[i][1] value: " + transactions[i][1]);
+		                  } else {
+		                    //console.log(transactions[i][1]);
+		                    transactions[i][2] = transactions[i][1]/amount; //adds decimal to the tuple
+		                    transactions[i][3] = parseInt(transactions[i][0]) * transactions[i][2]; //weight of block
+		                    if(i == 0){ //cumulative weight of block, so last index already has the value instead of needing to loop through again
+		                      transactions[i][4] = transactions[i][3]; 
+		                    } else {
+		                      transactions[i][4] = transactions[i][3] + transactions[i-1][4];
+		                    }
+		                    i++;
+		                    removableIndex = i;
 
-                  }
-                } // end while
-                //console.log(transactions);
+		                  }
+		                } // end while
+		                //console.log(transactions);
 
-                //now find weighted average block number
-                var weightAverageBlockHeight = transactions[transactions.length-1][4];
-                var blockHeightDifference = blockHeight - weightAverageBlockHeight;
-                console.log("weighted avg block height difference: " + blockHeightDifference);
+		                //now find weighted average block number
+		                var weightAverageBlockHeight = transactions[transactions.length-1][4];
+		                var blockHeightDifference = blockHeight - weightAverageBlockHeight;
+		                console.log("weighted avg block height difference: " + blockHeightDifference);
 
-                //do final calculations for this stage. 
+		                //do final calculations for this stage. 
 
-                //the problem with this is that this always increases and makes it hard for people to get a positive boost
-                //which is okay if the decimal is added to the total as well, but for everyone
+		                //the problem with this is that this always increases and makes it hard for people to get a positive boost
+		                //which is okay if the decimal is added to the total as well, but for everyone
 
-                //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
-                var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
+		                //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
+		                var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
 
-                console.log("divisor: " + divisor);
+		                console.log("divisor: " + divisor);
 
-                var multiple = 1 + (blockHeightDifference / divisor);
-                
-                var score = amount * multiple;
-                var bonus = blockHeightDifference / divisor;
+		                var multiple = 1 + (blockHeightDifference / divisor);
+		                
+		                var score = amount * multiple;
+		                var bonus = blockHeightDifference / divisor;
 
-                var resultJson = {
-                	'address' : address,
-                	'score' : score,
-                	'block' : blockHeight,
-                	'bonus' : bonus
-                };
+		                var resultJson = {
+		                	'address' : address,
+		                	'score' : score,
+		                	'block' : blockHeight,
+		                	'bonus' : bonus
+		                };
 
-                //write to db as well
+		                //write to db as well
 
-				  var dbQuery = { 
+						  var dbQuery = { 
+						  	address : address 
+						  };
+						  var dbValues = { 
+						  		$set: { 
+						  				score : score, 
+						  				block: blockHeight 
+						  		} 
+						  };
+						  var dbOptions = {
+								upsert : true,
+								returnNewDocument: true
+						  };
+
+						  if(callback && typeof callback === "function") { callback(null,resultJson); }
+
+						  //should queue for writing later
+						  ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions, 
+						  	function(err, r){
+						  		if(err){
+							    	console.error('unable to write to db because: ', err);
+							    } else {
+							    	console.log("here is db writing response : " + r);
+							    } //end conditional
+							} //end function
+						  );
+
+		              } catch (e) {
+		                console.log(e);
+		                if(callback && typeof callback === "function") { callback(err); }
+		              }
+
+
+		            } catch (e) {
+		              console.log(e);
+		              if(callback && typeof callback === "function") { callback(err); }
+		            }
+
+		          })//end second then promise
+		          .catch(function (err) {
+		            // API call failed...
+		            console.log(err);
+		            if(callback && typeof callback === "function") { callback(err); }
+		          });
+		        });//end first then promise
+	        } else {
+	 			var resultJson = {
+		                	'address' : address,
+		                	'score' : 0.0,
+		                	'block' : blockHeight,
+		                	'bonus' : 0.0
+		        };
+
+		        //update entry in database if it exists, do not put additional entry invar 
+		        dbQuery = { 
 				  	address : address 
 				  };
 				  var dbValues = { 
 				  		$set: { 
-				  				score : score, 
+				  				score : 0.0, 
 				  				block: blockHeight 
 				  		} 
 				  };
 				  var dbOptions = {
-						upsert : true,
+						upsert : false,
 						returnNewDocument: true
 				  };
 
@@ -237,26 +293,11 @@ controller.calculateScore = function(address, amount, callback){
 					} //end function
 				  );
 
-              } catch (e) {
-                console.log(e);
-                if(callback && typeof callback === "function") { callback(err); }
-              }
+	 		} //end
 
-
-            } catch (e) {
-              console.log(e);
-              if(callback && typeof callback === "function") { callback(err); }
-            }
-
-          })//end second then promise
-          .catch(function (err) {
-            // API call failed...
-            console.log(err);
-            if(callback && typeof callback === "function") { callback(err); }
-          });
-        });//end first then promise
-      });//end 
-	 }); //end promise related to balance
+	        
+	      });//end promise related to balance
+	 }); //end promise related to block height
     } //end address validation
 
 }
