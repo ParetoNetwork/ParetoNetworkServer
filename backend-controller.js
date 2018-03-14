@@ -22,6 +22,7 @@ const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 
 var Web3 = require('web3');
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
 
 /*project files*/
@@ -34,7 +35,7 @@ const contractCreationBlockHeightInt = 4953750;
 
 const dbName = 'pareto';
 
-controller.calculateScore = function(address, amount, callback){
+controller.calculateScore = async function(address, amount, callback){
 
     var blockHeight = 0;
 
@@ -280,6 +281,7 @@ controller.calculateScore = function(address, amount, callback){
 						returnNewDocument: true
 				  };
 
+				  //can also return unauthorized, PARETO balance 0.00, list of places to purchase some
 				  if(callback && typeof callback === "function") { callback(null,resultJson); }
 
 				  //should queue for writing later
@@ -513,10 +515,15 @@ controller.seedLatestEvents = function(fres){
 			}
 			bulk.execute(function (err) {
 
-				controller.calculateAllScores(fres);
+				controller.calculateAllScores(function(err, result){
+
+					if(err){}
+
+					//controller.calculateAllRanks();
+
+				});
 
 			});
-			//controller.calculateAllRanks(db, fres);
 
 		fres.status(200).json({status:"success"});
 
@@ -529,7 +536,7 @@ controller.calculateAllScores = function(callback){
 	
 	console.log('addresses retrieval started');
 
-	ParetoAddress.find({}, 'address score', function(err, results){
+	ParetoAddress.find({ score : {$eq: 0} }, 'address score', { limit : 5000 }, function(err, results){
 
 		if(err){
 			callback(err);
@@ -586,9 +593,11 @@ controller.calculateAllScores = function(callback){
 /* Given the complete set of scores, rank them from highest to lowest (just the sort() command and looping through all, adding the current i to each object's rank)
    1. get db.address.find().sort()
 */
-controller.calculateAllRanks = function(db, res){ //only runs inside of a mongodb connection
+controller.calculateAllRanks = function(callback){
 
-	var i = 1;
+
+
+	/*var i = 1;
 
 	if(db === null){
 		mongodb.connect(connectionUrl, function(err, client) {
@@ -612,5 +621,5 @@ controller.calculateAllRanks = function(db, res){ //only runs inside of a mongod
 		});
 
 		res.status(200).json({status:"success"});
-	}
+	}*/
 };
