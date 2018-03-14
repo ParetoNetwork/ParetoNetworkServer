@@ -35,7 +35,9 @@ const contractCreationBlockHeightInt = 4953750;
 
 const dbName = 'pareto';
 
-controller.calculateScore = async function(address, amount, callback){
+controller.calculateScore = async function(address, amount, blockHeightFixed, callback){
+
+	address = address.toLowerCase();
 
     var blockHeight = 0;
 
@@ -65,9 +67,12 @@ controller.calculateScore = async function(address, amount, callback){
 
         console.log(address);
 
-		var tknAddress = (address).substring(2); //this call doesn't use the padded address
+        //this call doesn't use the padded address
+		var tknAddress = (address).substring(2);
         var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
 
+		//ethereum servers suck, give them 5ms to breath
+        await new Promise(r => setTimeout(() => r(), 5)); 
         //get current blocknumber too
         web3.eth.getBlock('latest')
          .then(function(res) {
@@ -183,6 +188,9 @@ controller.calculateScore = async function(address, amount, callback){
 		                  }
 		                } // end while
 		                //console.log(transactions);
+		                if(blockHeightFixed > 0){
+		                	blockHeight = blockHeightFixed;
+		                }
 
 		                //now find weighted average block number
 		                var weightAverageBlockHeight = transactions[transactions.length-1][4];
@@ -208,6 +216,7 @@ controller.calculateScore = async function(address, amount, callback){
 		                	'address' : address,
 		                	'score' : score,
 		                	'block' : blockHeight,
+		                	'rank'	: -1,
 		                	'bonus' : bonus
 		                };
 
@@ -218,7 +227,7 @@ controller.calculateScore = async function(address, amount, callback){
 						  };
 						  var dbValues = { 
 						  		$set: { 
-						  				score : score, 
+						  				score : score,
 						  				block: blockHeight 
 						  		} 
 						  };
@@ -262,6 +271,7 @@ controller.calculateScore = async function(address, amount, callback){
 	 			var resultJson = {
 		                	'address' : address,
 		                	'score' : 0.0,
+		                	'rank'  : -1,
 		                	'block' : blockHeight,
 		                	'bonus' : 0.0
 		        };
@@ -272,7 +282,8 @@ controller.calculateScore = async function(address, amount, callback){
 				  };
 				  var dbValues = { 
 				  		$set: { 
-				  				score : 0.0, 
+				  				score : 0.0,
+				  				rank : -1, 
 				  				block: blockHeight 
 				  		} 
 				  };
@@ -488,7 +499,7 @@ controller.seedLatestEvents = function(fres){
       console.log("blockheight: " + blockHeight);
 
 	return web3.eth.getPastLogs({
-      fromBlock: '0x501331', //contractCreationBlockHeightHexString,
+      fromBlock: contractCreationBlockHeightHexString,//'0x501331', //contractCreationBlockHeightHexString,
       toBlock: 'latest',
       address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
       topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
@@ -507,12 +518,16 @@ controller.seedLatestEvents = function(fres){
 				//get all addresses first and add to the collection where necessary
 				
 				bulk.find({address : dataB}).upsert().updateOne({
-					address : dataB,
-					score : score,
-					block : blockHeight
+					$set : {
+						address : dataB,
+						score : score,
+						block : blockHeight,
+						rank : -1
+					}
 				});
 
 			}
+			console.log("writing all events now");
 			bulk.execute(function (err) {
 
 				controller.calculateAllScores(function(err, result){
@@ -536,90 +551,111 @@ controller.calculateAllScores = function(callback){
 	
 	console.log('addresses retrieval started');
 
-	ParetoAddress.find({ score : {$eq: 0} }, 'address score', { limit : 5000 }, function(err, results){
+	web3.eth.getBlock('latest')
+        .then(function(res) {
+          blockHeight = res.number;
+          console.log("blockheight: " + blockHeight);
 
-		if(err){
-			callback(err);
-		}
-		else {
-			//loop through and calculate scores and save them
 
-			console.log('addresses retrieved finished');
+		ParetoAddress.find({ score : {$eq: 0} }, 'address score', { /*limit : 10000*/ }, function(err, results){
+		//ParetoAddress.find({ score : {$eq: 0} }, 'address score', { limit : 10000 }, function(err, results){	
+			if(err){
+				callback(err);
+			}
+			else {
+				//loop through and calculate scores and save them
 
-			async function processArray(results){
+				async function processArray(results){
 
-				console.log("processing addresses asynchronously");
+					console.log("processing addresses asynchronously");
 
-				for (const item of results) {
-					console.log("item : " + item.address);
-					await controller.calculateScore(item.address, 0);
+					for (const item of results) {
+						console.log("item : " + item.address);
+						//possible optimization: initialize bulk here, push function into this, queue all results and bulk write later
+						await controller.calculateScore(item.address, 0, blockHeight);
+					}
+					
+			        if(callback && typeof callback === "function") { callback(null, {} ); }
 				}
-				console.log("score calculation operation complete");
-		        if(callback && typeof callback === "function") { callback(null, {} ); }
+
+				processArray(results);
+
+				console.log('addresses updating method finished');
 			}
 
-			processArray(results);
-
-			console.log('addresses updating method finished');
-
-			/*
-			var i = results.length-1;
-			controller.calculateScore(results[i].address, 0, function(err, result, cb){
-
-				console.log(results[i].address);
-				i--;
-
-		        if(err){
-		          console.log(err.message);
-		        }
-
-		        if( i > -1){
-		        	console.log("attempting callback for index: " + i);
-		            controller.calculateScore(results[i].address, 0, cb);
-		        } else {
-		        	console.log("score calculation operation complete");
-		        	if(callback && typeof callback === "function") { callback(null, {} ); }
-		        }
-
-		    }); */ //end callback 
-		}
-
+		});
 	});
 
 };
 
 
 
-/* Given the complete set of scores, rank them from highest to lowest (just the sort() command and looping through all, adding the current i to each object's rank)
-   1. get db.address.find().sort()
+/* Given the complete set of scores, 
+   rank them from highest to lowest 
+   (just the sort() command and looping through all, adding the current i to each object's rank)
+   get db.address.find().sort()
 */
 controller.calculateAllRanks = function(callback){
-
-
-
-	/*var i = 1;
-
-	if(db === null){
-		mongodb.connect(connectionUrl, function(err, client) {
-	        assert.equal(null, err);
-
-	        const db = client.db(dbName);
-
-	        db.collection('address').find().sort({ score : 1 }).forEach( function(addressObject) {
-				db.collection('address').update({ _id : addressObject._id }, {$set:{ rank : i } }) ;
+	console.log("updating ranks begun");
+	//-1 desc, 1 asc, limit just for testing
+	ParetoAddress.find({}, 'address score', { score : -1 , limit : 5 }, function(err, results){
+		if(err){
+			callback(err);
+		}
+		else {
+			console.log("updating ranks finished querying");
+			if(callback && typeof callback === "function") { callback(null, {} ); }
+			
+			var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
+			var i = 1;
+			results.forEach(function(result){
+				bulk.find({ address : result.address }).updateOne({
+					$set : { rank : i } 
+				});
+				//console.log("updating : " + result.address);
+				
 				i++;
 			});
+			bulk.execute(function (err) {
+				//optional logic here
+				console.log("updating ranks finished");
+			});
 
-			res.status(200).json({status:"success"});
-	        
-	      });
-        
-	} else {
-		db.collection('address').find().sort({ score : 1 }).forEach( function(addressObject) {
-			db.collection('address').update({ _id : addressObject._id }, {$set:{ rank : i } }) ;
-			i++;
-		});
+			
+		}
+	});
+};
 
-		res.status(200).json({status:"success"});
-	}*/
+/*
+* Set all rank to -1, nullifying them
+*/
+
+controller.resetRanks = function(callback){
+	console.log("resetting ranks begun");
+	ParetoAddress.find({}, function(err, results) {
+		if(err){
+			callback(err);
+		}
+		else {
+			console.log("resetting ranks finished querying");
+			if(callback && typeof callback === "function") { callback(null, {} ); }
+			
+			var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
+			var i = 1;
+			results.forEach(function(result){
+				bulk.find({ address : result.address }).updateOne({
+					$set : { rank : -1 } 
+				});
+				//console.log("updating : " + result.address);
+				
+				i++;
+			});
+			bulk.execute(function (err) {
+				//optional logic here
+				console.log("resetting ranks finished");
+			});
+
+			
+		}
+	});
 };
