@@ -28,6 +28,8 @@ var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/T
 /*project files*/
 var utils = require('./backend-utils.js');
 
+module.exports.mongoose = mongoose;
+
 
 /*ways of writing contract creation block height*/
 const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
