@@ -113,13 +113,11 @@ function start() {
 
   app.get('/v1/rank', function(req, res){
 
-    var rank = 1;
-    var limit = 1;
-    var page = 0;
+    var rank = req.query.rank || 1;
+    var limit = req.query.limit || 15;
+    var page = req.query.page || 0;
 
-    //if()
-
-    controller.retrieveRanksAtAddress(req.query.rank, function(err, result){
+    controller.retrieveRanksAtAddress(rank, limit, page, function(err, result){
       if(err){
         res.boom.badRequest(err.message); 
       } else {
