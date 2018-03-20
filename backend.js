@@ -16,18 +16,31 @@ function start() {
   var boom = require('express-boom-2');
   var requestp = require('request-promise');
   var controller = require('./backend-controller.js');
+
   var app = express();
+  var compression = require('compression')
+
   var uniqueRandomArray = require('unique-random-array');
   const debug = require('debug')('pareto-ranking')
   const appName = 'Pareto Ranking Backend'
   debug('booting %s', appName)
 
   var bodyParser = require('body-parser');
+
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(express.static('public'));
+  app.use(compression());
 
-  app.use(boom()); //handles error codes in a consistent way and format
+  //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
+  app.use(boom());
+
+  const session = require('express-session');
+  const MongoStore = require('connect-mongo')(session);
+ 
+  /*app.use(session({
+    store: new MongoStore(mongooseConnection: module.exports.mongoose.connection)
+  }));*/
 
   //web3Auth.attach(app, "Cryptographically sign this to prove ownership.");
 
