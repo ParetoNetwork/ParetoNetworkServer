@@ -113,9 +113,14 @@ function start() {
 
   app.get('/v1/rank', function(req, res){
 
-    var rank = req.query.rank || 1;
-    var limit = req.query.limit || 15;
-    var page = req.query.page || 0;
+    var rank = parseInt(req.query.rank) || 1;
+    var limit = parseInt(req.query.limit) || 100;
+    var page = parseInt(req.query.page) || 0;
+
+    //max limit
+    if(limit > 500){
+      limit = 500;
+    }
 
     controller.retrieveRanksAtAddress(rank, limit, page, function(err, result){
       if(err){
@@ -127,6 +132,10 @@ function start() {
 
   });
 
+
+  /*
+  * re-calculate rank?
+  */
   app.post('/v1/rank', function(req, res){
 
   });

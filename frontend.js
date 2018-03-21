@@ -131,6 +131,9 @@ window.addEventListener('load', function() {
                   success: function (data, textStatus, jqXHR) {
                       console.log("HODLING Bonus: " + data.bonus);
                       console.log("Counting till: " + data.score);
+
+                      window.dispatchEvent(new CustomEvent("leaderboard", { 'detail' : { rank : data.rank, limit : 100, page: 0} }));
+
                       var scoreCount = new CountUp('score-counter', tokenTotal, data.score, 2, 2.5, counterOptions);
                        if (!scoreCount.error) {
 

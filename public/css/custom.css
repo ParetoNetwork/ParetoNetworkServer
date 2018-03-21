@@ -198,6 +198,11 @@ video {
     color: #ffffff;
 }
 
+.vcenter {
+    display: flex;
+    align-items: center;
+}
+
 .flex-row {
     display: flex;
     flex-direction: row;
