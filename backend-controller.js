@@ -459,7 +459,7 @@ controller.retrieveRankScoreOfAddress = function(address, res){
 
 controller.retrieveRanksAtAddress = function(rank, limit, page, callback){
 
-	var queryRank = rank - 11;
+	var queryRank = rank - 3;
 	if(queryRank <= 0){
 		queryRank = 1;
 	}
