@@ -57,7 +57,7 @@
                                   <label>Input your Ethereum Address</label>
                                 </div>
                             </form>
-                            <button id="lookup-button" class="button" style="margin:5px; width:50px; height: 25px; opacity: 0;" type="button" form="lookup" value="View" onclick="dispatchView()">View</button>
+                            <button id="lookup-button" type="button" class="button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating" style="margin: 5px; width: 50px; height: 25px; opacity: 0;" type="button" form="lookup" value="View" onclick="dispatchView()">View</button>
                         </div>
                         
                         <div class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
@@ -108,6 +108,8 @@
             var addressMetricsDiv = document.getElementById('address-metrics');
             addressMetricsDiv.style.opacity = 0; //For real browsers;
             addressMetricsDiv.style.filter = "alpha(opacity=0)"; //For IE;
+
+            //document.getElementById('lookup-button').button('loading');
 
             let event = new Event("load");
             window.dispatchEvent(event);
