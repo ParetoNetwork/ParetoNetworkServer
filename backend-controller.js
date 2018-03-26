@@ -347,7 +347,7 @@ controller.postContent = function(body, fres){
           			console.log(err);
           			fres.boom.badData();
           		} else {
-          			fres.status(200).json({status: "success", objectId: obj.id});
+          			fres.status(200).json({status: "success", objectId: obj.id, content: obj});
           		}
           });
 
@@ -355,7 +355,7 @@ controller.postContent = function(body, fres){
 };
 
 
-controller.getAllAvailableContent = function(){
+controller.getAllAvailableContent = function(params, callback){
 
 	//check if user, then return what the user is privy to see
 
@@ -365,26 +365,18 @@ controller.getAllAvailableContent = function(){
 
 	//get standard deviation
 
+	var query = ParetoContent.find().sort({block : -1});
+	query.exec(function(err, results){
+		if(err){ 
+			if(callback && typeof callback === "function") { 
+				callback(err); 
+			}
+		}
+		else {
+			if(callback && typeof callback === "function") { callback(null, results ); }
+		}
 
-
-	mongodb.connect(connectionUrl, function(err, client) {
-	  assert.equal(null, err);
-	  //console.log("Connected correctly to server");
-
-	  const db = client.db(dbName);
-
-	  db.collection('content').findOne({ block : block }, 
-	  	function(err, r){
-	  		if(err){
-			    	console.error('unable because: ', err);
-			    	res.boom.badData();
-		    } else {
-		    	res.status(200).json(r);
-		    } //end conditional
-		} //end function
-	  );
-	});//end mongo
-
+	});
 };
 
 controller.getContentById = function(){

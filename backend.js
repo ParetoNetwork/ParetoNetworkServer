@@ -58,7 +58,17 @@ function start() {
 
   app.get('/',function(req,res){
     //__dirname : It will resolve to your project folder.
-    res.sendFile(path.join(__dirname+'/public/index.html'));
+    res.sendFile(path.join(__dirname+'/public/index.html')); //this will be dashboard
+  });
+
+  app.get('/rank',function(req,res){
+    //__dirname : It will resolve to your project folder.
+    res.sendFile(path.join(__dirname+'/public/rank.html'));
+  });
+
+  app.get('/dashboard',function(req,res){
+    //__dirname : It will resolve to your project folder.
+    res.sendFile(path.join(__dirname+'/public/dashboard.html'));
   });
 
   app.get('/intel',function(req,res){
@@ -97,6 +107,16 @@ function start() {
   }); //end content post
 
   app.get('/v1/content', function(req, res){
+
+    //this needs a session id, basically an authenticated address
+
+    controller.getAllAvailableContent(req.params, function(err, result){
+        if(err){
+          res.boom.badData({message : err});
+        } else {
+          res.status(200).json(result);
+        }
+    });
 
   });
 
