@@ -30,12 +30,15 @@ var utils = require('./backend-utils.js');
 
 module.exports.mongoose = mongoose;
 
-
 /*ways of writing contract creation block height*/
 const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
 const contractCreationBlockHeightInt = 4953750;
 
 const dbName = 'pareto';
+
+/*system constants*/
+const PARETO_SCORE_MINIMUM 					=			100000; 	//minimum score to get intel
+const PARETO_RANK_GRANULARIZED_LIMIT 		= 			10; 		//how far down to go through ranks until separating by tiers
 
 controller.calculateScore = async function(address, amount, blockHeightFixed, callback){
 
@@ -324,10 +327,13 @@ controller.calculateScore = async function(address, amount, blockHeightFixed, ca
 
 }
 
-controller.postContent = function(body, fres){
+controller.postContent = function(body, callback){
 
 	//exposed endpoint to write content to database
-	  
+	if(web3.utils.isAddress(body.address) == false){
+       if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    } else {
+
 	  web3.eth.getBlock('latest')
         .then(function(res) {
 
@@ -343,15 +349,17 @@ controller.postContent = function(body, fres){
 
           const paretoContentObj = new ParetoContent(body);
           paretoContentObj.save(function(err, obj){
-          		if (err) {
-          			console.log(err);
-          			fres.boom.badData();
-          		} else {
-          			fres.status(200).json({status: "success", objectId: obj.id, content: obj});
-          		}
+          		if(err){ 
+					if(callback && typeof callback === "function") { callback(err); }
+				}
+				else {
+					if(callback && typeof callback === "function") { callback(null, obj); }
+				}
           });
 
       }); //end web3
+    } // end else
+	  
 };
 
 
@@ -363,20 +371,140 @@ controller.getAllAvailableContent = function(params, callback){
 
 	var acceptableBlockHeight = 0; //system block height. global var determined by worker? stored on S3? stored on db? dynamic based on rank %?
 
-	//get standard deviation
 
-	var query = ParetoContent.find().sort({block : -1});
-	query.exec(function(err, results){
-		if(err){ 
-			if(callback && typeof callback === "function") { 
+	//1. get score from address, then get standard deviation of score
+	retrieveAddress(params.address, function(err,result){
+		if(err){
+	       if(callback && typeof callback === "function") { 
 				callback(err); 
 			}
-		}
-		else {
-			if(callback && typeof callback === "function") { callback(null, results ); }
-		}
+	    } else {
 
+	    	//1b. get block height
+	    	web3.eth.getBlock('latest')
+		     .then(function(res) {
+		      	blockHeight = res.number;
+
+		    	//2. get percentile
+
+		    	//2a. get total rank where score > 0
+		    	ParetoAddress.count({ score : { $gt : 0 }}, function(count){
+		    		var count = count;
+
+		    		var percentile = 1 - (result.rank / count); //this should be a decimal number
+
+		    		var blockDelay = 0;
+
+		    		if(percentile > .99) {
+
+		    			//then do multiplication times the rank to determine the block height delta.
+		    			if(result.rank < PARETO_RANK_GRANULARIZED_LIMIT){
+		    				blockDelay = result.rank * 10;
+		    			} else {
+		    				blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 10;
+		    			}
+	    			/*} else { //this would be a dynamic method where var factor = Math.pow(10, -1);
+	    					   //would be used with var wholePercentile = percentile * 100;
+	    					   //Math.round(wholePercentile * factor) / factor in order to get the percentile
+						
+						var factor = Math.pow(10, -1);
+						var wholePercentile = percentile * 100;
+						var roundedToNearestPercentile = Math.round(wholePercentile * factor) / factor;
+						//var multiplier = 100 * Math.floor(percentile);
+						blockDelay = (100 - roundedToNearestPercentile)) * PARETO_RANK_GRANULARIZED_LIMIT;
+
+					}*/
+	    		
+		    		} else if (percentile > .90) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 20;
+
+		    		} else if (percentile > .80) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 30;
+
+		    		} else if (percentile > .70) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 40;
+
+		    		} else if (percentile > .60) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 50;
+
+		    		} else if (percentile > .50) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 60;
+
+		    		} else if (percentile > .40) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 70;
+
+		    		} else if (percentile > .30) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 80;
+
+		    		} else if (percentile > .20) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 90;
+
+		    		} else if (percentile > .10) {
+
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 100;
+
+		    		} else {
+		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
+		    		}
+
+		    		var blockHeightDelta = blockHeight - blockDelay;
+		       
+					var query = ParetoContent
+					.find({block : { $lte : blockHeightDelta*1 }}, {speed : 1})
+					 .and({block : { $lte : blockHeightDelta*2 }}, {speed : 2})
+					 .and({block : { $lte : blockHeightDelta*3 }}, {speed : 3})
+					 .and({block : { $lte : blockHeightDelta*4 }}, {speed : 4})
+					.sort({block : -1});
+					
+					query.exec(function(err, results){
+						if(err){ 
+							if(callback && typeof callback === "function") { 
+								callback(err); 
+							}
+						}
+						else {
+							if(callback && typeof callback === "function") { callback(null, results ); }
+						}
+
+					});
+		    	});
+	    	});
+	    	
+	    }
 	});
+
+};
+
+controller.retrieveAddress = function(params, callback){
+
+	var address = params.address || '';
+	address = address.toLowerCase();
+   
+    if(web3.utils.isAddress(address) == false){
+       if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    } else {
+		var query = ParetoAddress.findOne({address : address});
+		
+		query.exec(function(err, results){
+			if(err){ 
+				if(callback && typeof callback === "function") { 
+					callback(err); 
+				}
+			}
+			else {
+				if(callback && typeof callback === "function") { callback(null, results ); }
+			}
+		});
+	}
+
 };
 
 controller.getContentById = function(){
@@ -422,33 +550,9 @@ controller.retrieveRank = function(){
 
 };
 
-
 /*
-*	Send an address, get the address and its current score and current ranking
+* Retrieves rank around address
 */
-controller.retrieveRankScoreOfAddress = function(address, res){
-
-	mongodb.connect(connectionUrl, function(err, client) {
-	  assert.equal(null, err);
-	  //console.log("Connected correctly to server");
-
-	  const db = client.db(dbName);
-
-	  db.collection('address').findOne({ address : address }, 
-	  	function(err, r){
-	  		if(err){
-			    	console.error('unable because: ', err);
-			    	res.boom.badData();
-		    } else {
-		    	res.status(200).json(r);
-		    } //end conditional
-		} //end function
-	  );
-	});//end mongo
-
-};
-
-
 controller.retrieveRanksAtAddress = function(rank, limit, page, callback){
 
 	var queryRank = rank - 3;
@@ -638,7 +742,6 @@ controller.resetRanks = function(callback){
 				bulk.find({ address : result.address }).updateOne({
 					$set : { rank : -1 } 
 				});
-				//console.log("updating : " + result.address);
 				
 				i++;
 			});

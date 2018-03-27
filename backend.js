@@ -101,7 +101,15 @@ function start() {
     else if(req.body.address === undefined || req.body.title === undefined || req.body.body === undefined ){
       res.boom.badRequest('POST body missing, needs address, title and body'); 
     } else {
-      controller.postContent(req.body, res);
+      controller.postContent(req.body, function(err, obj){
+        if (err) {
+          console.log(err);
+          res.boom.badData(err);
+        } else {
+          res.status(200).json({status: "success", content: obj});
+        }
+
+      });
     }
 
   }); //end content post
@@ -152,6 +160,18 @@ function start() {
 
   });
 
+  //get info about address
+  app.get('/v1/address', function(req, res){
+    
+    controller.retrieveAddress(req.query, function(err, result){
+      if(err){
+        res.boom.badRequest(err.message); 
+      } else {
+        res.status(200).json(result);
+      }
+    });
+
+  });
 
   /*
   * re-calculate rank?
