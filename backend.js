@@ -118,9 +118,9 @@ function start() {
 
     //this needs a session id, basically an authenticated address
 
-    controller.getAllAvailableContent(req.params, function(err, result){
+    controller.getAllAvailableContent(req.query, function(err, result){
         if(err){
-          res.boom.badData({message : err});
+          res.boom.badData(err);
         } else {
           res.status(200).json(result);
         }

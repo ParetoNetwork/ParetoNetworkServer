@@ -340,6 +340,7 @@ controller.postContent = function(body, callback){
           body.dateCreated = Date.now();
           body.block = res.number;
           body.txHash = res.txHash || '0x0'; //this is done client side to cause an internal invocation
+          body.speed = 3; //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
 
           /*
 
@@ -363,123 +364,161 @@ controller.postContent = function(body, callback){
 };
 
 
-controller.getAllAvailableContent = function(params, callback){
+controller.getAllAvailableContent = function(params, callback) {
 
 	//check if user, then return what the user is privy to see
 
 	//check block number or block age, then retrieve all content after that block. add more limitations/filters later
 
-	var acceptableBlockHeight = 0; //system block height. global var determined by worker? stored on S3? stored on db? dynamic based on rank %?
+	if(web3.utils.isAddress(params.address) == false){
+       if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    } else {
 
+		//1. get score from address, then get standard deviation of score
+		controller.retrieveAddress(params, function(err,result) {
+			if(err){
+		       if(callback && typeof callback === "function") { 
+					callback(err); 
+				}
+		    } else {
 
-	//1. get score from address, then get standard deviation of score
-	retrieveAddress(params.address, function(err,result){
-		if(err){
-	       if(callback && typeof callback === "function") { 
-				callback(err); 
-			}
-	    } else {
+		    	//1b. get block height
+		    	web3.eth.getBlock('latest')
+			     .then(function(res) {
+			      	blockHeight = res.number;
 
-	    	//1b. get block height
-	    	web3.eth.getBlock('latest')
-		     .then(function(res) {
-		      	blockHeight = res.number;
+			    	//2. get percentile
 
-		    	//2. get percentile
+			    	//2a. get total rank where score > 0
+			    	ParetoAddress.count({ score : { $gt : 0 }}, async(count) => {
+			    		var count = count;
 
-		    	//2a. get total rank where score > 0
-		    	ParetoAddress.count({ score : { $gt : 0 }}, function(count){
-		    		var count = count;
+			    		var percentile = 1 - (result.rank / count); //this should be a decimal number
 
-		    		var percentile = 1 - (result.rank / count); //this should be a decimal number
+			    		var blockDelay = 0;
 
-		    		var blockDelay = 0;
+			    		if(percentile > .99) {
 
-		    		if(percentile > .99) {
+			    			//then do multiplication times the rank to determine the block height delta.
+			    			if(result.rank < PARETO_RANK_GRANULARIZED_LIMIT){
+			    				blockDelay = result.rank * 10;
+			    			} else {
+			    				blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 10;
+			    			}
+		    			/*} else { //this would be a dynamic method where var factor = Math.pow(10, -1);
+		    					   //would be used with var wholePercentile = percentile * 100;
+		    					   //Math.round(wholePercentile * factor) / factor in order to get the percentile
+							
+							var factor = Math.pow(10, -1);
+							var wholePercentile = percentile * 100;
+							var roundedToNearestPercentile = Math.round(wholePercentile * factor) / factor;
+							//var multiplier = 100 * Math.floor(percentile);
+							blockDelay = (100 - roundedToNearestPercentile)) * PARETO_RANK_GRANULARIZED_LIMIT;
 
-		    			//then do multiplication times the rank to determine the block height delta.
-		    			if(result.rank < PARETO_RANK_GRANULARIZED_LIMIT){
-		    				blockDelay = result.rank * 10;
-		    			} else {
-		    				blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 10;
-		    			}
-	    			/*} else { //this would be a dynamic method where var factor = Math.pow(10, -1);
-	    					   //would be used with var wholePercentile = percentile * 100;
-	    					   //Math.round(wholePercentile * factor) / factor in order to get the percentile
+						}*/
+		    		
+			    		} else if (percentile > .90) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 20;
+
+			    		} else if (percentile > .80) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 30;
+
+			    		} else if (percentile > .70) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 40;
+
+			    		} else if (percentile > .60) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 50;
+
+			    		} else if (percentile > .50) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 60;
+
+			    		} else if (percentile > .40) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 70;
+
+			    		} else if (percentile > .30) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 80;
+
+			    		} else if (percentile > .20) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 90;
+
+			    		} else if (percentile > .10) {
+
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 100;
+
+			    		} else {
+			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
+			    		}
+
+			    		var blockHeightDelta = blockHeight - blockDelay;
+			       
+						var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1});
+						var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1});
+						var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1});
+						var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1});
 						
-						var factor = Math.pow(10, -1);
-						var wholePercentile = percentile * 100;
-						var roundedToNearestPercentile = Math.round(wholePercentile * factor) / factor;
-						//var multiplier = 100 * Math.floor(percentile);
-						blockDelay = (100 - roundedToNearestPercentile)) * PARETO_RANK_GRANULARIZED_LIMIT;
+						try{
+							let resultsVeryFast = await queryVeryFast.exec();
+							let resultsFast = await queryFast.exec();
+							let resultsNormal = await queryNormal.exec();
+							let resultsSlow = await querySlow.exec();
 
-					}*/
-	    		
-		    		} else if (percentile > .90) {
+							let allResults = [];
 
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 20;
+							resultsVeryFast.forEach(function(entry){
+								allResults.push(entry);
+							});
 
-		    		} else if (percentile > .80) {
+							resultsFast.forEach(function(entry){
+								allResults.push(entry);
+							});
 
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 30;
+							resultsNormal.forEach(function(entry){
+								allResults.push(entry);
+							});
 
-		    		} else if (percentile > .70) {
+							resultsSlow.forEach(function(entry){
+								allResults.push(entry);
+							});
 
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 40;
-
-		    		} else if (percentile > .60) {
-
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 50;
-
-		    		} else if (percentile > .50) {
-
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 60;
-
-		    		} else if (percentile > .40) {
-
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 70;
-
-		    		} else if (percentile > .30) {
-
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 80;
-
-		    		} else if (percentile > .20) {
-
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 90;
-
-		    		} else if (percentile > .10) {
-
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 100;
-
-		    		} else {
-		    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
-		    		}
-
-		    		var blockHeightDelta = blockHeight - blockDelay;
-		       
-					var query = ParetoContent
-					.find({block : { $lte : blockHeightDelta*1 }}, {speed : 1})
-					 .and({block : { $lte : blockHeightDelta*2 }}, {speed : 2})
-					 .and({block : { $lte : blockHeightDelta*3 }}, {speed : 3})
-					 .and({block : { $lte : blockHeightDelta*4 }}, {speed : 4})
-					.sort({block : -1});
-					
-					query.exec(function(err, results){
-						if(err){ 
-							if(callback && typeof callback === "function") { 
-								callback(err); 
+							function compare(a, b) {
+							  const blockA = a.block;
+							  const blockB = b.block;
+							  
+							  let comparison = 0;
+							  if (blockB > blockA) {
+							    comparison = 1;
+							  } else if (blockB < blockA) {
+							    comparison = -1;
+							  }
+							  return comparison;
 							}
-						}
-						else {
-							if(callback && typeof callback === "function") { callback(null, results ); }
+
+							allResults = allResults.sort(compare);
+
+							//sort results
+							console.log(allResults);
+
+							if(callback && typeof callback === "function") { callback(null, allResults ); }
+
+						} catch (err) {
+							if(callback && typeof callback === "function") { callback(err); }
 						}
 
-					});
+						
+			    	});
 		    	});
-	    	});
-	    	
-	    }
-	});
+		    	
+		    }
+		});
+	} // end else for address validation
 
 };
 
