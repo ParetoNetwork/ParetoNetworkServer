@@ -26,7 +26,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
     </head>
-    <body>
+    <body style="overflow: scroll">
 
     	<div id="gradient" class="row" style="vertical-align: top;
     		height: 5px; 
@@ -42,15 +42,22 @@
             <div class="navbar-header">
               <a class="navbar-brand" href="https://www.pareto.network"><img src="images/LogoReverse.svg" width="150"/></a>
             </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <!-- <button id="access-toggle" type="button" class="btn btn-info" style="background-color:#6ec378;" onClick="revert()">Disconnect</button> -->
+                </li>
+            </ul>
           </div>
         </nav>
 
         <div class="container" style="background: white; min-height: 100vh;">
-            
-            <!-- my intel feed, add user management elements later -->
-            <div class="col col-lg-auto"> 
+            <img src="images/pareto-info.png" style="z-index: 1;"/>
 
-                <!-- throw in data table, and then supplement with vue.js later -->
+            <!-- <button id="access-only" type="button" class="btn btn-info font-body" style="background-color:#6ec378; z-index:2;" onClick="revert()">Access</button> -->
+            <!-- my intel feed, add user management elements later -->
+            <!-- <div id="intel-feed" class="col col-lg-auto"> 
+
+                // throw in data table, and then supplement with vue.js later
                 <table id="pareto-content" class="table font-body" style="width:100%">
                         <thead>
                             <tr>
@@ -64,7 +71,7 @@
 
                     </table>
 
-            </div>
+            </div> -->
 
         </div>
 
@@ -77,19 +84,6 @@
     </body>
     <script src="bundle.js"></script>
     <script>
-        function dispatchView(){
-
-            //reset
-            var addressMetricsDiv = document.getElementById('address-metrics');
-            addressMetricsDiv.style.opacity = 0; //For real browsers;
-            addressMetricsDiv.style.filter = "alpha(opacity=0)"; //For IE;
-
-            //document.getElementById('lookup-button').button('loading');
-
-            let event = new Event("load");
-            window.dispatchEvent(event);
-
-        }
 
         window.addEventListener('content', function (e){
           
@@ -121,14 +115,69 @@
                     });
 
         });
-    	/*
-		 * reasons to calculate ranking server side: possible to do less API calls to the Ethereum node. possible to keep a single web socket open to the Ethereum node microservice, as opposed to thousands or an infinite number of websockets client side from users checking their ranking
-    	 */
+
+        window.addEventListener('revert', function(){
+            //var accessValue = $("#access-toggle").value;
+            //if(accessValue === "Disconnect"){
+
+                //clear cookie and clear dashboard view and go back to access view
+
+                 $.ajax({
+                      method: 'POST',
+                      url: '/v1/unsign',
+                      body: {},
+                      dataType: 'json',
+                      success: function (data, textStatus, jqXHR) {
+
+                        //if here then user authenticated, could also return address/user information.
+                        $("#access-toggle").value = "Access";
+                        console.log("no signature");
+
+                      },
+                      error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                      }
+                  });
+            /*} else {
+                $("#access-toggle").value = "Disconnect";
+                //sign
+                //let event = new Event("sign");
+                //window.dispatchEvent(event);
+
+            }*/
+
+        });
 
         $(document).ready(function() {
-            window.dispatchEvent(new CustomEvent("content", { }));
-             $.fn.dataTableExt.errMode = 'ignore';
+
+            $.ajax({
+                  method: 'GET',
+                  url: '/v1/auth',
+                  dataType: 'json',
+                  success: function (data, textStatus, jqXHR) {
+
+                    //if here then user authenticated, could also return address/user information.
+
+                    $("#access-toggle").value = "Disconnect";
+
+
+                    window.dispatchEvent(new CustomEvent("content", { }));
+                     $.fn.dataTableExt.errMode = 'ignore';
+
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+
+                    $("#access-toggle").value = "Access";
+                  }
+              });
+
         });
+
+        function revert(){
+            let event = new Event("revert");
+            window.dispatchEvent(event);
+        };
 
     </script>
 

@@ -62,7 +62,7 @@ function start() {
 
   app.get('/',function(req,res){
     //__dirname : It will resolve to your project folder.
-    res.sendFile(path.join(__dirname+'/public/rank.html')); //this will be dashboard
+    res.sendFile(path.join(__dirname+'/public/dashboard.html')); //this will be dashboard
   });
 
   app.get('/rank',function(req,res){
@@ -89,7 +89,7 @@ function start() {
           res.boom.badData(err);
         } else {
          if(process.env.DEBUG == 1){
-          res.cookie("authorization", result.token, {httpOnly: true});
+          res.cookie("authorization", result.token, { httpOnly: true });
          }
          else {
            res.cookie("authorization", result.token, { domain: 'pareto.network', path: '/', httpOnly: true, secure : true }); //should set a debug flag for env variable
@@ -125,21 +125,59 @@ function start() {
   /********* AUTHENTICATED v1 APIs *********/
 
   app.use(function(req, res, next) {
-    var authorization = req.cookies.authorization;
-    if(authorization.includes('Bearer')){
-      authorization = authorization.replace('Bearer', '');
-    }
-    authorization = authorization.trim();
 
-    jwt.verify(authorization, 'Pareto', function(err, decoded) {
-      if (err) { 
-        res.boom.unauthorized('Failed to authenticate token.'); 
+    if(req.cookies === undefined || req.cookies.authorization === undefined){
+
+      res.boom.unauthorized('Token missing, failed to authenticate token.'); 
+
+    } else {
+
+      var authorization = req.cookies.authorization;
+      if(authorization.includes('Bearer')){
+        authorization = authorization.replace('Bearer', '');
       }
-      else {
-        req.user = decoded.user;
-        next();
-      };
+      authorization = authorization.trim();
+
+      jwt.verify(authorization, 'Pareto', function(err, decoded) {
+        if (err) { 
+          res.boom.unauthorized('Failed to authenticate token.'); 
+        }
+        else {
+          req.user = decoded.user;
+          next();
+        };
+      });
+    }
+
+  });
+
+  /*
+  * Auth, simple authenticated method to determine if user is properly authenticated. Necessary because client side js 
+  * cannot read the cookie we store for security reasons.
+  */
+  app.get('/v1/auth', function(req, res){
+    res.status(200).json({auth: "ok"});
+  });
+
+  /*
+  * Unsign - clears cookie session for the client side, which cannot access secure httpOnly cookies
+  */
+  app.post('/v1/unsign', function(req, res){
+    controller.unsign(function(err, result){
+        if (err) {
+          console.log(err);
+          res.boom.badData(err);
+        } else {
+         if(process.env.DEBUG == 1){
+          res.cookie("authorization", result.token, { httpOnly: true,  maxAge: 1231006505 });
+         }
+         else {
+           res.cookie("authorization", result.token, { domain: 'pareto.network', path: '/', httpOnly: true, secure : true , maxAge: 1231006505}); //should set a debug flag for env variable
+         }
+         res.status(200).json({status: "success", result});
+        }
     });
+
   });
 
 

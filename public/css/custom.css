@@ -338,3 +338,9 @@ textarea:focus, input:focus {
   from { background:#5264AE; }
   to  { width:0; background:transparent; }
 }
+
+/* for dashboard */
+img {
+    max-width: 100%;
+    max-height: 100%;
+}

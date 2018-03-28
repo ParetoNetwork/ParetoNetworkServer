@@ -64,7 +64,7 @@
                                   <label>Wallet Address</label>
                                 </div>
                             </form>
-                            <button id="lookupSignButton" type="button" class="button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating" style="margin: 5px; width: 50px; height: 25px;" type="button" form="lookup" value="View">Sign</button>
+                            <button id="lookupSignButton" type="button" class="button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating" style="margin: 5px; width: 50px; height: 25px;" type="button" form="lookup" value="View" onClick="sign()">Sign</button>
                         </div>
                         
                         <div class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
@@ -109,6 +109,12 @@
     </body>
     <script src="bundle.js"></script>
     <script>
+
+        function sign(){
+            let event = new Event("sign");
+            window.dispatchEvent(event);
+        }
+
 
         window.addEventListener('leaderboard', function (e){
 
