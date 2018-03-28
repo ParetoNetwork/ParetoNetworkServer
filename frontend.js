@@ -170,11 +170,9 @@ lookupSignButton.addEventListener('click', function(event) {
                   dataType: 'json',
                   success: function (data, textStatus, jqXHR) {
                       
-                      //show success
-                      console.log(data);
                       //wait for 200 OK result from server and then run calculate method
 
-                      var jwt = data.result.token;
+                      //server response has cookie parameter set and is stored in browser.
 
                       calculate();
                   
