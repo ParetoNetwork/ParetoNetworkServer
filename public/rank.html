@@ -54,7 +54,7 @@
 
         <div class="container" style="min-height: 100vh;">
             <div class="row" style="">
-                <div class="col-md-8 font-body" style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
+                <div class="col-md-6 font-body" style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
                     <div>
                        <div class="row" style="color: #ffffff; justify-content: center;">
 
@@ -86,14 +86,15 @@
                 </div>
 
 
-                <div class="col-lg-4 font-body">
-                    <h4>Leaderboards</h4>
+                <div class="col-md-6 font-body">
+                    <h4>Leaderboard</h4>
                     <!-- for rank lists -->
-                    <table id="pareto-leaderboard" class="table" style="width:100%">
+                    <table id="pareto-leaderboard" class="table" style="width:100%; font-size: 12px;">
                         <thead>
                             <tr>
                                 <th>Rank</th>
                                 <th>Score</th>
+                                <th>Address</th>
                             </tr>
                         </thead>
 
@@ -157,7 +158,8 @@
                             { 
                                 data : 'score',
                                 render: $.fn.dataTable.render.number( ',', '.', 2)
-                            }
+                            },
+                            { data : 'address'}
                         ]
                     });
 
