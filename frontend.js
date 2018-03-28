@@ -141,7 +141,7 @@ lookupSignButton.addEventListener('click', function(event) {
 
             //console.log('CLICKED, SENDING PERSONAL SIGN REQ');
             var params = [msgParams, from];
-            console.dir(params);
+            //console.dir(params);
             var method = 'eth_signTypedData';
             
             //Web3.providers.HttpProvider.prototype.sendAsync = Web3.providers.HttpProvider.prototype.send;
@@ -151,7 +151,7 @@ lookupSignButton.addEventListener('click', function(event) {
                 console.log(result.error.message)
               }
               if (result.error) return console.error(result)
-              console.log('PERSONAL SIGNED:' + JSON.stringify(result.result))
+              //console.log('PERSONAL SIGNED:' + JSON.stringify(result.result))
 
               const recovered = sigUtil.recoverTypedSignature({ data: msgParams, sig: result.result })
 
