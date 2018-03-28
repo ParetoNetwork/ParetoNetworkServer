@@ -89,10 +89,10 @@ function start() {
           res.boom.badData(err);
         } else {
          if(process.env.DEBUG == 1){
-          res.cookie("authorization", result.token, { httpOnly: true});
+          res.cookie("authorization", result.token, {httpOnly: true});
          }
          else {
-           res.cookie("authorization", result.token, { httpOnly: true, secure : true }); //should set a debug flag for env variable
+           res.cookie("authorization", result.token, { domain: 'pareto.network', path: '/', httpOnly: true, secure : true }); //should set a debug flag for env variable
          }
          res.status(200).json({status: "success", result});
         }
