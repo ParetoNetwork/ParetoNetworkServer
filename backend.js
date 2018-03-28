@@ -208,6 +208,7 @@ function start() {
       res.boom.badRequest('POST body missing');
     }
     else if(req.user === undefined || req.body.title === undefined || req.body.body === undefined ){
+      console.log(req.body);
       res.boom.badRequest('POST body missing, needs address, title and body'); 
     } else {
       controller.postContent(req, function(err, obj){
@@ -337,7 +338,7 @@ function start() {
         fileExtension: "gz"
     }]
   }));
-  
+
   app.listen(process.env.PORT || 3000, function () {
     console.log('Pareto Network ranking app listening on port 3000!')
   });
