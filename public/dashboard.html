@@ -106,7 +106,7 @@
                         scrollY: "100vh",
                         scrollCollapse : false,
                         ajax: {
-                            url: '/v1/content'/*?rank='+rank+'&limit='+limit+'&page='+page*/,
+                            url: '/v1/content'/*+'?rank='+rank+'&limit='+limit+'&page='+page*/,
                             dataSrc: ''
                         },
                         columns: [
@@ -127,6 +127,7 @@
 
         $(document).ready(function() {
             window.dispatchEvent(new CustomEvent("content", { }));
+             $.fn.dataTableExt.errMode = 'ignore';
         });
 
     </script>

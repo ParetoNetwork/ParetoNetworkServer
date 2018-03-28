@@ -130,7 +130,6 @@ function start() {
       authorization = authorization.replace('Bearer', '');
     }
     authorization = authorization.trim();
-    console.log(authorization);
 
     jwt.verify(authorization, 'Pareto', function(err, decoded) {
       if (err) { 
@@ -185,7 +184,7 @@ function start() {
 
     //this needs a session id, basically an authenticated address
 
-    controller.getAllAvailableContent(req.query, function(err, result){
+    controller.getAllAvailableContent(req, function(err, result){
         if(err){
           res.boom.badData(err);
         } else {

@@ -376,14 +376,12 @@ controller.getAllAvailableContent = function(req, callback) {
 
 	//check block number or block age, then retrieve all content after that block. add more limitations/filters later
 
-	var params = req.params;
-
 	if(web3.utils.isAddress(req.user) == false){
        if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
     } else {
 
 		//1. get score from address, then get standard deviation of score
-		controller.retrieveAddress(params, function(err,result) {
+		controller.retrieveAddress(req.user, function(err,result) {
 			if(err){
 		       if(callback && typeof callback === "function") { 
 					callback(err); 
@@ -530,9 +528,9 @@ controller.getAllAvailableContent = function(req, callback) {
 
 };
 
-controller.retrieveAddress = function(params, callback){
+controller.retrieveAddress = function(address, callback){
 
-	var address = params.address || '';
+	var address = address;
 	address = address.toLowerCase();
    
     if(web3.utils.isAddress(address) == false){
