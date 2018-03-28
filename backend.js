@@ -11,7 +11,9 @@ throng({
 }, start);
 
 function start() {
+  var compression = require('compression')
   var express = require('express');
+  const expressStaticGzip = require("express-static-gzip")
   var path    = require("path");
   var boom = require('express-boom-2');
   var requestp = require('request-promise');
@@ -60,6 +62,7 @@ function start() {
     res.end();
   });*/
 
+
   app.get('/',function(req,res){
     //__dirname : It will resolve to your project folder.
     res.sendFile(path.join(__dirname+'/public/dashboard.html')); //this will be dashboard
@@ -78,6 +81,8 @@ function start() {
   app.get('/intel',function(req,res){
     res.sendFile(path.join(__dirname+'/public/intel.html'));
   });
+
+
   
   /********* UNAUTHENTICATED v1 APIs *********/
 
@@ -326,6 +331,13 @@ function start() {
     } //end else
   });
 
+  app.use('/public/static/', expressStaticGzip('/public/static/', {
+    customCompressions: [{
+        encodingName: "gzip",
+        fileExtension: "gz"
+    }]
+  }));
+  
   app.listen(process.env.PORT || 3000, function () {
     console.log('Pareto Network ranking app listening on port 3000!')
   });
