@@ -26,7 +26,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
     </head>
-    <body style="overflow: scroll">
+    <body style="overflow: scroll;">
         <div style="position: fixed; width: 100%;">
         	<div id="gradient" class="row" style="vertical-align: top;
         		height: 5px; 
@@ -40,7 +40,7 @@
             <nav class="navbar navbar-default font-body" style="background-color: #040f1e; color: #ffffff;">
               <div class="container-fluid">
                 <div class="navbar-header">
-                  <a class="navbar-brand" href="https://www.pareto.network"><img src="static/images/LogoReverse.svg" width="150"/></a>
+                  <a class="navbar-brand" href="https://www.pareto.network"><img src="static/images/LogoReverse.svg" class="header-img" width="150"/></a>
                 </div>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
@@ -51,8 +51,31 @@
             </nav>
         </div>
 
-        <div class="container" style="background: white; min-height: 100vh;">
-            <img src="static/images/pareto-info.png" style="margin-top: 30px; z-index: 1;"/>
+        <div class="container" style="background: white; min-height: 100vh; padding-top:40px">
+            
+                            
+            <img id="splash-img" src="static/images/pareto-info.png"/>
+                
+            <br/>
+            <br/>
+
+            <div class="row">
+                <div class="col-md-12 font-body" style="font-size: 12px;">
+                    <h4 style="text-align: center;">Leaderboard</h4>
+                    <!-- for rank lists -->
+                    <table id="pareto-leaderboard" class="table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Score</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+            </div>
 
             <!-- <button id="access-only" type="button" class="btn btn-info font-body" style="background-color:#6ec378; z-index:2;" onClick="revert()">Access</button> -->
             <!-- my intel feed, add user management elements later -->
@@ -173,12 +196,47 @@
                   }
               });
 
+            window.dispatchEvent(new CustomEvent("leaderboard", { 'detail' : { rank : 1, limit : 100, page: 0}}));
+
         });
 
         function revert(){
             let event = new Event("revert");
             window.dispatchEvent(event);
         };
+
+        window.addEventListener('leaderboard', function (e){
+
+          var rank = e.detail.rank;
+          var limit = e.detail.limit;
+          var page = e.detail.page;
+          
+          if($.fn.dataTable.isDataTable( '#pareto-leaderboard' )){
+                table.destroy();
+          }
+
+          table = $('#pareto-leaderboard').DataTable({
+                        searching: false, 
+                        paging: false, 
+                        ordering: false, 
+                        info: false,
+                        scrollY: "70vh",
+                        scrollCollapse : false,
+                        ajax: {
+                            url: '/v1/rank?rank='+rank+'&limit='+limit+'&page='+page,
+                            dataSrc: ''
+                        },
+                        columns: [
+                            { data : 'rank'},
+                            { 
+                                data : 'score',
+                                render: $.fn.dataTable.render.number( ',', '.', 2)
+                            },
+                            { data : 'address'}
+                        ]
+                    });
+
+        });
 
     </script>
 

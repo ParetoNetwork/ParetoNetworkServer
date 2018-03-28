@@ -18,72 +18,235 @@
         <link rel="stylesheet" href="static/css/general.css">
         <link rel="stylesheet" href="static/css/custom.css">
         
+        <!-- include libraries BS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script
+          src="https://code.jquery.com/jquery-3.3.1.min.js"
+          integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+          crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+        <!-- include summernote -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote-bs4.css">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote-bs4.js"></script>
+
+        <style type="text/css">
+          .popover { 
+              background-color: #6bc27a;
+           }
+
+           textarea a {
+              text-decoration: underline; color: blue;
+           } 
+           .note-editable a {
+              text-decoration: underline; color: blue;
+           }
+           #preview a {
+              text-decoration: underline; color: blue;
+           }
+
+
+
+            @media all and (max-width: 1199px) { ... } 
+            @media all and (max-width: 991px) { ... } 
+            @media all and (max-width: 768px) { 
+              .header-img {
+                width: 100px;
+              }
+            } 
+            @media all and (max-width: 575px) { 
+              .header-img {
+                width: 90px;
+              }
+             }
+
+        </style>
         
     </head>
-    <body style="background-color: #040f1e;">
+    <body style="background-color: #040f1e; overflow: scroll;">
 
-        <div id="gradient" class="flex-row" style="vertical-align: top;
+       <div style="/*position: fixed;*/ width: 100%;">
+          <div id="gradient" class="row" style="vertical-align: top;
             height: 5px; 
             background: #295087; /* Old browsers */
-            background: -moz-linear-gradient(left, #295087 0%, #3f7989 50%, #6aba82 77%, #85c568 100%); /* FF3.6-15 */
-            background: -webkit-linear-gradient(left, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* Chrome10-25,Safari5.1-6 */
-            background: linear-gradient(to right, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
-            ">&nbsp;</div>
+          background: -moz-linear-gradient(left, #295087 0%, #3f7989 50%, #6aba82 77%, #85c568 100%); /* FF3.6-15 */
+          background: -webkit-linear-gradient(left, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* Chrome10-25,Safari5.1-6 */
+          background: linear-gradient(to right, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+          filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
+                ">&nbsp;</div>
 
-        <div class="font-body center-page" style="color: #ffffff;">
-                    
-            <div class="flex-row">
-                <!-- hidden by default unless metamask connect -->
-                <form id="intel" style="margin: 5px;"">
-                    <div class="group">      
-                      <input id="lookup-input" type="text" name="address">
-                      <span class="highlight"></span>
-                      <span class="bar"></span>
-                      <label>Input your Ethereum Address</label>
-                    </div>
-                    <p>&nbsp;</p>
-                    <p>&nbsp;</p>
-                    <div class="group">      
-                      <input id="intel-title-input" type="text" name="intel-title">
-                      <span class="highlight"></span>
-                      <span class="bar"></span>
-                      <label>Title</label>
-                    </div>
-                    <p>&nbsp;</p>
-                    <p>&nbsp;</p>
-                    <div class="group">  
-                      <input id="intel-body-input" type="text" name="intel-body" cols="40" rows="5">
-                      <span class="highlight"></span>
-                      <span class="bar"></span>
-                      <label>Body</label>
-                    </div>
-                </form>
+            <nav class="navbar navbar-default font-body" style="background-color: #040f1e; color: #ffffff;">
+              <div class="container-fluid">
+                <div class="navbar-header">
+                  <a class="navbar-brand" href="https://www.pareto.network"><img src="static/images/LogoReverse.svg" class="header-img" width="150"/></a>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                         <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button>
+                    </li>
+                </ul>
+              </div>
+            </nav>
+        </div>
+        <div class="container" style="min-height: 100vh;">
+          <div class="row">
+              <div class="col-md-4 font-body center-page" style="color: #040f1e; margin-top: 30px; padding-top: 20px; text-align: left;">
+                  
+                  <div class="flex-row">
+                      <!-- hidden by default unless metamask connect -->
+                      <form id="intel" style="margin: 5px;"">
+                          <div class="group">      
+                            <input id="lookup-input" type="text" name="address">
+                            <span class="highlight"></span>
+                            <span class="bar"></span>
+                            <label class="pareto-label">Authorized Contributor</label>
+                          </div>
+                          <p>&nbsp;</p>
+                          
+                          <div class="group">      
+                            <input id="intel-title-input" type="text" name="intel-title">
+                            <span class="highlight"></span>
+                            <span class="bar"></span>
+                            <label class="pareto-label">Title</label>
+                          </div>
+                          <p>&nbsp;</p>
+                          
+                          <!-- intel-body-input -->
+                          <textarea id="intel-body-input" name="editordata"></textarea>
+                          
+                      </form>
+                  </div>
 
+                  <button id="intel-body-button" class="button" style="margin:5px; width:100px; height: 35px;" type="button" form="intel" value="View" onclick="dispatchView()">Submit</button>
 
-            </div>
+              </div> <!-- end post new intel section -->
 
-            <button id="intel-body-button" class="button" style="margin:5px; width:50px; height: 25px;" type="button" form="intel" value="View" onclick="dispatchView()">View</button>
+              <div class="col-md-6 font-body" style="color: #fff; min-height: 80vh;">
+                  <b>Intel Content Preview</b>
 
+                  <div id="preview" style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 100%; border: 1px solid #a9a9a9; border-radius: 5px;"></div>
+
+              </div>
+          </div>
         </div>
 
 
-        <div id="bottom-row" class="font-body flex-row" style="color: #ffffff; vertical-align: bottom; height: 10px;">
+        <!-- <div id="bottom-row" class="font-body flex-row" style="color: #ffffff; vertical-align: bottom; height: 10px;">
          
-          <a href="https://www.pareto.network" target="_blank">About</a>
+          <a href="https://www.pareto.network" target="">About</a>
 
-        </div>
+        </div> -->
+
 
           
     </body>
 
      <script>
+        var accessToggle = $("#access-sign");
+        var lookupInput = $("#lookup-input");
+
         function dispatchView(){
             let event = new Event("intel");
             window.dispatchEvent(event);
         }
+
+        function sign(){
+          if(accessToggle.text() === 'ACCESS'){
+            let event = new Event("sign");
+            window.dispatchEvent(event);
+          } else if(accessToggle.text() === 'RESET'){
+            let event = new Event("revert");
+            window.dispatchEvent(event);
+          }
+        }
+
+        $(document).ready(function() {
+          $('#intel-body-input').summernote({
+            height: 300,                 // set editor height
+            minHeight: null,             // set minimum height of editor
+            maxHeight: null,             // set maximum height of editor
+            focus: true,                 // set focus to editable area after initializing summernote
+            toolbar: [
+              ['font', ['bold', 'italic', 'underline'/*, 'clear'*/]],
+              // ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+              //['color', ['color']],
+              ['para', [/*'ul', 'ol', */'paragraph']],
+              //['height', ['height']],
+              //['table', ['table']],
+              ['insert', ['link', /*'picture',*/]],
+              //['view', ['fullscreen' /*, 'codeview'*/]],
+              //['help', ['help']]
+            ]
+          });
+
+          $.ajax({
+                method: 'GET',
+                url: '/v1/auth',
+                dataType: 'json',
+                success: function (data, textStatus, jqXHR) {
+
+                  //if here then user authenticated, could also return address/user information.
+                  
+                  accessToggle.text("RESET");
+                  accessToggle.css("background-color", "rgb(12, 95, 136)");
+                  accessToggle.css("opacity",100);
+
+                  //set address or alias to input field and set it to read-only
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  
+                  console.log(errorThrown);
+                  
+                  accessToggle.text("ACCESS");
+                  accessToggle.css("background-color", "rgb(107, 194, 123)");
+                  accessToggle.css("opacity",100);
+
+                  lookupInput.val("");
+
+
+                }
+            }); //end ajax
+
+        }); //end document ready
+
+        window.addEventListener('revert', function(){
+            //var accessValue = $("#access-toggle").value;
+            //if(accessValue === "Disconnect"){
+
+            //clear cookie and clear dashboard view and go back to access view
+
+             $.ajax({
+                  method: 'POST',
+                  url: '/v1/unsign',
+                  body: {},
+                  dataType: 'json',
+                  success: function (data, textStatus, jqXHR) {
+
+                    //if here then user authenticated, could also return address/user information.
+                    accessToggle.text("ACCESS");
+                    accessToggle.css("background-color", "rgb(107, 194, 123)");
+                    accessToggle.css("opacity",100);
+
+                    lookupInput.val("");
+
+                    console.log("no signature");
+
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+
+                    lookupInput.val("");
+                  }
+              });
+
+        });
+
+        
     </script>
 
     <script src="static/js/bundle.js"></script>
+
     
 </html>

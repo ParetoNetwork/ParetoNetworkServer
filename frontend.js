@@ -19,8 +19,8 @@ function getUrlParameter(name) {
 function searchLookup(){
   var lookupField = document.getElementById('lookup');
   var lookupSignButton = document.getElementById('lookupSignButton');
-  lookupField.style.opacity = "100";
-  lookupSignButton.style.opacity = "100";
+  if(lookupField !== null) lookupField.style.opacity = "100";
+  if(lookupSignButton !== null) lookupSignButton.style.opacity = "100";
 }
 
 window.addEventListener('intel', function() {
@@ -28,28 +28,37 @@ window.addEventListener('intel', function() {
   var titleField = document.getElementById('intel-title-input');
   var bodyField = document.getElementById('intel-body-input');
 
+
   var data = {};
-  data.address = ''; //authed address, or maybe just keep the session and extrapolate the associated address server side
+  //data.address comes from the cookie parsed server side
   data.title = titleField.value;
   data.body = bodyField.value;
   data.block = blockNumber;
 
-  var jsonData = JSON.stringify(data.serializeArray());
-  console.log(jsonData);
-
   $.ajax({
     method: 'POST',
     url: '/v1/content',
-    data: jsonData,
+    data: data,
     dataType: 'json',
     success: function (data, textStatus, jqXHR) {
         
         //show success
         console.log('success');
+
+        //clear upon success
+        titleField.value = '';
+        //bodyField.summernote('code', '');
+
+        var preview = document.getElementById('preview');
+        if(preview !== null){
+          preview.innerHTML = "<b>"+data.content.title+"</b>"+ "<br/><br/>" + data.content.body;
+          preview.style.backgroundColor = 'rgba(245,245,245,1)';
+        }
     
     },
     error: function (jqXHR, textStatus, errorThrown) {
-      console.log('error');
+      
+        console.log('error');
     }
   });
 
@@ -173,6 +182,13 @@ window.addEventListener('sign', function(event) {
                       //wait for 200 OK result from server and then run calculate method
 
                       //server response has cookie parameter set and is stored in browser.
+
+                      var accessToggle = document.getElementById('access-sign');
+                      if(accessToggle !== null){
+                        accessToggle.innerHTML = "RESET";
+                        accessToggle.style.backgroundColor =  "rgb(12, 95, 136)";
+                        accessToggle.style.opacity = 100;
+                      }
 
                       calculate();
                   
@@ -306,10 +322,12 @@ function calculate() {
                   };
                   console.log("Counting till: " + tokenTotal);
                   var rankCountInit = new CountUp('score-counter', 0, tokenTotal, 2, 3, counterOptions);
-                  if (!rankCountInit.error) {
-                    rankCountInit.start();
-                  } else {
-                    console.error(rankCountInit.error);
+                  if(rankCountInit !== 'undefined'){
+                      if (!rankCountInit.error) {
+                        rankCountInit.start();
+                      } else {
+                        console.error(rankCountInit.error);
+                      }
                   }
                   
                   console.log('Tokens Owned: ' + web3.utils.fromWei(tokens, 'ether'));
@@ -340,17 +358,21 @@ function calculate() {
                       }
                       if(data.rank > 0){
                         var rankCount = new CountUp('rank-counter', data.totalRanks, data.rank, 0, 2.5, counterOptions);
-                        if(!rankCount.error){
-                          rankCount.start();
-                        } else {
-                          console.error(rankCount.error);
+                        if(rankCountInit !== 'undefined'){
+                          if(!rankCount.error){
+                            rankCount.start();
+                          } else {
+                            console.error(rankCount.error);
+                          }
                         }
 
                         var addressMetricsDiv = document.getElementById('address-metrics');
-                        addressMetricsDiv.style.opacity = 1; //For real browsers;
-                        addressMetricsDiv.style.filter = "alpha(opacity=100)"; //For IE;
+                        if(addressMetricsDiv !== null){
+                            addressMetricsDiv.style.opacity = 1; //For real browsers;
+                            addressMetricsDiv.style.filter = "alpha(opacity=100)"; //For IE;
 
-                        document.getElementById('rank-total').innerHTML = data.totalRanks;
+                            document.getElementById('rank-total').innerHTML = data.totalRanks;
+                        }
                       }
 
                       searchLookup();
