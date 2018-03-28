@@ -37,15 +37,24 @@
     			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
                 ">&nbsp;</div>
 
-            <nav class="navbar navbar-default font-body" style="background-color: #040f1e; color: #ffffff;">
+            <nav class="navbar navbar-expand-md font-body" style="background-color: #040f1e; color: #ffffff;">
               <div class="container-fluid">
                 <div class="navbar-header">
                   <a class="navbar-brand" href="https://www.pareto.network"><img src="static/images/LogoReverse.svg" class="header-img" width="150"/></a>
                 </div>
-                <ul class="nav navbar-nav navbar-right">
+                <ul class="nav navbar-nav navbar-right navbar-space" style="flex-direction: row;">
                     <li>
-                        <!-- <button id="access-toggle" type="button" class="btn btn-info" style="background-color:#6ec378;" onClick="revert()">Disconnect</button> -->
+                        <a href="/rank" style="text-decoration: none;">Rank</a>
                     </li>
+                    <!-- <li>
+                        About
+                    </li>
+                    <li>
+                        Partners
+                    </li>
+                    <li>
+                         <button id="access-toggle" type="button" class="btn btn-info" style="background-color:#6ec378;" onClick="revert()">Disconnect</button> 
+                    </li> -->
                 </ul>
               </div>
             </nav>
@@ -61,6 +70,8 @@
 
             <div class="row">
                 <div class="col-md-12 font-body" style="font-size: 12px;">
+                    <h6 style="text-align: center;">A higher PARETO score allows for more access to information in the Pareto Network. View the top 100 scores below.</h6>
+
                     <h4 style="text-align: center;">Leaderboard</h4>
                     <!-- for rank lists -->
                     <table id="pareto-leaderboard" class="table" style="width:100%">

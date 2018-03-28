@@ -368,3 +368,7 @@ img#splash-img {
     width: 90px;
   }
  }
+
+.navbar-space > li { 
+  padding: 10px;
+}
