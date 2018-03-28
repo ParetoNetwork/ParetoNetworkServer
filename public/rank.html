@@ -47,19 +47,24 @@
 
         <div class="container" style="min-height: 100vh;">
             <div class="row" style="">
-                <div class="col-lg-8 font-body" style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
+                <div class="col-md-8 font-body" style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
                     <div>
                        <div class="row" style="color: #ffffff; justify-content: center;">
+
+                            <p class="font-body" style="padding: 35px; font-size: 16px;">Check your <b>PARETO</b> scores easily by signing your wallet address using a web3-enabled browser. Otherwise, sign manually.</p>
+                            <br/>
+                            <br/>
+                            <br/>
                             <!-- hidden by default unless metamask connect -->
-                            <form id="lookup" style="opacity: 0; margin: 5px;"">
+                            <form id="lookup" style="margin: 5px;"">
                                 <div class="group">      
                                   <input id="lookup-input" type="text" name="address">
                                   <span class="highlight"></span>
                                   <span class="bar"></span>
-                                  <label>Input your Ethereum Address</label>
+                                  <label>Wallet Address</label>
                                 </div>
                             </form>
-                            <button id="lookup-button" type="button" class="button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating" style="margin: 5px; width: 50px; height: 25px; opacity: 0;" type="button" form="lookup" value="View" onclick="dispatchView()">View</button>
+                            <button id="lookupSignButton" type="button" class="button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating" style="margin: 5px; width: 50px; height: 25px;" type="button" form="lookup" value="View">Sign</button>
                         </div>
                         
                         <div class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
@@ -67,7 +72,7 @@
                             <div>&nbsp;</div>
                             <div id="score-counter">0</div>
                         </div>
-                        <div id="address-metrics" class="row" style="word-wrap:break-word; overflow-wrap: break-word; opacity: 0; justify-content: center;">
+                        <div id="address-metrics" class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center; opacity: 0">
                             <div id="rank-text">You rank:&nbsp;</div><div id="rank-counter" style="font-weight: bold;">0</div><div id="rank-text-cont">&nbsp;out of&nbsp;</div><div id="rank-total">0</div>
                         </div>
                     </div>
@@ -104,19 +109,6 @@
     </body>
     <script src="bundle.js"></script>
     <script>
-        function dispatchView(){
-
-            //reset
-            var addressMetricsDiv = document.getElementById('address-metrics');
-            addressMetricsDiv.style.opacity = 0; //For real browsers;
-            addressMetricsDiv.style.filter = "alpha(opacity=0)"; //For IE;
-
-            //document.getElementById('lookup-button').button('loading');
-
-            let event = new Event("load");
-            window.dispatchEvent(event);
-
-        }
 
         window.addEventListener('leaderboard', function (e){
 

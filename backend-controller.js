@@ -25,6 +25,9 @@ var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
 
+var sigUtil = require('eth-sig-util');
+var jwt = require('jsonwebtoken');
+
 /*project files*/
 var utils = require('./backend-utils.js');
 
@@ -40,7 +43,7 @@ const dbName = 'pareto';
 const PARETO_SCORE_MINIMUM 					=			100000; 	//minimum score to get intel
 const PARETO_RANK_GRANULARIZED_LIMIT 		= 			10; 		//how far down to go through ranks until separating by tiers
 
-controller.calculateScore = async function(address, amount, blockHeightFixed, callback){
+controller.calculateScore = async function(address, blockHeightFixed, callback){
 
 	address = address.toLowerCase();
 
@@ -89,6 +92,7 @@ controller.calculateScore = async function(address, amount, blockHeightFixed, ca
           to: paretoContractAddress, 
           data: contractData  
         }).then(function(result) {
+        	var amount = 0;
 	        if (result) { 
 	              var tokens = web3.utils.toBN(result).toString();
 	              amount = web3.utils.fromWei(tokens, 'ether');
@@ -240,7 +244,7 @@ controller.calculateScore = async function(address, amount, blockHeightFixed, ca
 							    	console.error('unable to write to db because: ', err);
 							    } else {
 							    	
-							    	ParetoAddress.count({}, function(err, count){
+							    	ParetoAddress.count({ score : { $gt : 0 } }, function(err, count){
 							    		if(err){}
 							    		else {
 							    			var resultJson = {
@@ -327,10 +331,12 @@ controller.calculateScore = async function(address, amount, blockHeightFixed, ca
 
 }
 
-controller.postContent = function(body, callback){
+controller.postContent = function(req, callback){
+
+	var body = req.body;
 
 	//exposed endpoint to write content to database
-	if(web3.utils.isAddress(body.address) == false){
+	if(web3.utils.isAddress(req.user) == false){
        if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
     } else {
 
@@ -364,13 +370,15 @@ controller.postContent = function(body, callback){
 };
 
 
-controller.getAllAvailableContent = function(params, callback) {
+controller.getAllAvailableContent = function(req, callback) {
 
 	//check if user, then return what the user is privy to see
 
 	//check block number or block age, then retrieve all content after that block. add more limitations/filters later
 
-	if(web3.utils.isAddress(params.address) == false){
+	var params = req.params;
+
+	if(web3.utils.isAddress(req.user) == false){
        if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
     } else {
 
@@ -550,43 +558,49 @@ controller.getContentById = function(){
 
 	//check if user, then check if the user is privy to see it
 
-};
 
-controller.retrieveScores = function(){
-
-	//makes the rank by sorting server side, stores all ranks in db, also sends result client side if requested
 
 };
 
-controller.retrieveRank = function(){
+controller.getContentByCurrentUser = function(address, callback){
 
-	//quick way to retrieve the current snapshot of rankings. can limit to a range
+	if(web3.utils.isAddress(address) == false){
+       if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    } else {
+    	var query = ParetoContent.find({address : address}).sort({block : -1});
 
-	//get your rank number, so retrieve by address
-	mongodb.connect(connectionUrl, function(err, client) {
-	  assert.equal(null, err);
-	  //console.log("Connected correctly to server");
+    	query.exec(function(err, results){
+			if(err){ 
+				if(callback && typeof callback === "function") { 
+					callback(err); 
+				}
+			}
+			else {
+				if(callback && typeof callback === "function") { callback(null, results ); }
+			}
+		});
+    }
 
-	  const db = client.db(dbName);
+};
 
-	  db.collection('address').findOne({ address : address }, 
-	  	function(err, r){
-	  		if(err){
-			    	console.error('unable because: ', err);
-			    	res.boom.badData();
-		    } else {
+controller.sign = function(params, callback){
+	  
+	  var owner = params.owner;
+	  
+	  const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result })
 
-		    	var rankIndex = r.rank;
+      if (recovered === owner ) {
+		// If the signature matches the owner supplied, create a
+	    // JSON web token for the owner that expires in 24 hours.
+	    var token = jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" });
 
-		    	//want ranks -5 to +5
-		    	//db.address.findOne({ rank : rank }).limit
+	    var results = { token: token };
 
-		    	res.status(200).json(r);
-		    } //end conditional
-		} //end function
-	  );
-	});//end mongo
-
+	    if(callback && typeof callback === "function") { callback(null, results ); }
+      } else {
+      	var err = 'Signature did not match.'
+		if(callback && typeof callback === "function") { callback(err); } 
+      }
 };
 
 /*
@@ -705,7 +719,7 @@ controller.calculateAllScores = function(callback){
 					for (const item of results) {
 						console.log("item : " + item.address);
 						//possible optimization: initialize bulk here, push function into this, queue all results and bulk write later
-						await controller.calculateScore(item.address, 0, blockHeight);
+						await controller.calculateScore(item.address, blockHeight);
 					}
 					
 			        if(callback && typeof callback === "function") { callback(null, {} ); }

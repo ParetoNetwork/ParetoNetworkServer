@@ -15,6 +15,9 @@ function start() {
   var path    = require("path");
   var boom = require('express-boom-2');
   var requestp = require('request-promise');
+  var jwt = require('jsonwebtoken');
+  var cookieParser = require('cookie-parser')
+
   var controller = require('./backend-controller.js');
 
   var app = express();
@@ -30,6 +33,7 @@ function start() {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(express.static('public'));
+  app.use(cookieParser());
   app.use(compression());
 
   //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
@@ -58,7 +62,7 @@ function start() {
 
   app.get('/',function(req,res){
     //__dirname : It will resolve to your project folder.
-    res.sendFile(path.join(__dirname+'/public/index.html')); //this will be dashboard
+    res.sendFile(path.join(__dirname+'/public/rank.html')); //this will be dashboard
   });
 
   app.get('/rank',function(req,res){
@@ -74,23 +78,86 @@ function start() {
   app.get('/intel',function(req,res){
     res.sendFile(path.join(__dirname+'/public/intel.html'));
   });
+  
+  /********* UNAUTHENTICATED v1 APIs *********/
 
-  /********* v1 APIs *********/
+  app.post('/v1/sign', function(req, res){
 
-  app.get('/v1/summation', function(req, fres){
-      fres.setHeader('Content-Type', 'application/json');
+    controller.sign(req.body, function(err, result){
+        if (err) {
+          console.log(err);
+          res.boom.badData(err);
+        } else {
+         if(process.env.DEBUG == 1){
+          res.cookie("authorization", result.token, { httpOnly: true});
+         }
+         else {
+           res.cookie("authorization", result.token, { httpOnly: true, secure : true }); //should set a debug flag for env variable
+         }
+         res.status(200).json({status: "success", result});
+        }
+    });
 
-      controller.calculateScore(req.query.address, req.query.total, 0, function(err, result){
+  });
+
+
+  app.get('/v1/rank', function(req, res){
+
+    var rank = parseInt(req.query.rank) || 1;
+    var limit = parseInt(req.query.limit) || 100;
+    var page = parseInt(req.query.page) || 0;
+
+    //max limit
+    if(limit > 500){
+      limit = 500;
+    }
+
+    controller.retrieveRanksAtAddress(rank, limit, page, function(err, result){
+      if(err){
+        res.boom.badRequest(err.message); 
+      } else {
+        res.status(200).json(result);
+      }
+    });
+
+  });
+
+  /********* AUTHENTICATED v1 APIs *********/
+
+  app.use(function(req, res, next) {
+    var authorization = req.cookies.authorization;
+    if(authorization.includes('Bearer')){
+      authorization = authorization.replace('Bearer', '');
+    }
+    authorization = authorization.trim();
+    console.log(authorization);
+
+    jwt.verify(authorization, 'Pareto', function(err, decoded) {
+      if (err) { 
+        res.boom.unauthorized('Failed to authenticate token.'); 
+      }
+      else {
+        req.user = decoded.user;
+        next();
+      };
+    });
+  });
+
+
+  app.get('/v1/summation', function(req, res){
+      res.setHeader('Content-Type', 'application/json');
+
+      //req.user is an address
+      controller.calculateScore(req.user, 0, function(err, result){
         if(err){
           console.log(err.message);
-          fres.boom.badImplementation(err.message);
+          res.boom.badImplementation(err.message);
         } else {
-          fres.status(200).json(result);
+          res.status(200).json(result);
         }
 
       });
 
-     
   });//end entire function
 
   app.post('/v1/content', function(req, res){
@@ -98,10 +165,10 @@ function start() {
     if(req.body.constructor === Object && Object.keys(req.body).length === 0){
       res.boom.badRequest('POST body missing');
     }
-    else if(req.body.address === undefined || req.body.title === undefined || req.body.body === undefined ){
+    else if(req.user === undefined || req.body.title === undefined || req.body.body === undefined ){
       res.boom.badRequest('POST body missing, needs address, title and body'); 
     } else {
-      controller.postContent(req.body, function(err, obj){
+      controller.postContent(req, function(err, obj){
         if (err) {
           console.log(err);
           res.boom.badData(err);
@@ -128,6 +195,17 @@ function start() {
 
   });
 
+  app.get('/v1/content/me/', function(req, res){
+
+    controller.getContentByCurrentUser(req.user, function(err, result){
+      if(err){
+          res.boom.badData(err);
+        } else {
+          res.status(200).json(result);
+        }
+      });
+  });
+
   app.get('/v1/ranking', function(req, res){
 
       if(req.query.admin === undefined){ //endpoint protection from DDOS
@@ -139,26 +217,6 @@ function start() {
 
   });
 
-  app.get('/v1/rank', function(req, res){
-
-    var rank = parseInt(req.query.rank) || 1;
-    var limit = parseInt(req.query.limit) || 100;
-    var page = parseInt(req.query.page) || 0;
-
-    //max limit
-    if(limit > 500){
-      limit = 500;
-    }
-
-    controller.retrieveRanksAtAddress(rank, limit, page, function(err, result){
-      if(err){
-        res.boom.badRequest(err.message); 
-      } else {
-        res.status(200).json(result);
-      }
-    });
-
-  });
 
   //get info about address
   app.get('/v1/address', function(req, res){
