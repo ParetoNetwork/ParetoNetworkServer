@@ -96,7 +96,7 @@ window.addEventListener('intel', function() {
 
 });*/
 
-lookupSignButton.addEventListener('click', function(event) {
+window.addEventListener('sign', function(event) {
   //event.preventDefault();
 
   var msgParams = [
@@ -238,7 +238,9 @@ window.addEventListener('load', function(){
         
         addr = ((typeof accounts[0] !== 'undefined') ? accounts[0] : '');//getUrlParameter('address'));//accounts[0]; //kucoin 0x2b5634c42055806a59e9107ed44d43c426e58258
         
-        lookupInputField.value = addr;
+        if(lookupInputField !== null){
+          lookupInputField.value = addr;
+        }
 
       }//end if !error
     });
@@ -353,7 +355,9 @@ function calculate() {
 
                       searchLookup();
                       var lookupInputField = document.getElementById('lookup-input');
-                      lookupInputField.value = addr;
+                      if(lookupInputField !== 'undefined'){
+                        lookupInputField.value = addr;
+                      }
 
 
                       //update every 5 blocks
@@ -369,7 +373,7 @@ function calculate() {
                   
                   },
                   error: function (jqXHR, textStatus, errorThrown) {
-                    console.log('error');
+                    console.log(errorThrown);
                   }
                 });
               });

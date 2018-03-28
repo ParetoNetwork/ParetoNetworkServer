@@ -343,10 +343,12 @@ controller.postContent = function(req, callback){
 	  web3.eth.getBlock('latest')
         .then(function(res) {
 
+          body.address = req.user;
           body.dateCreated = Date.now();
           body.block = res.number;
-          body.txHash = res.txHash || '0x0'; //this is done client side to cause an internal invocation
+          body.txHash = req.body.txHash || '0x0'; //this is done client side to cause an internal invocation
           body.speed = 3; //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
+          body.reward =  req.body.reward || 1;
 
           /*
 
@@ -494,6 +496,7 @@ controller.getAllAvailableContent = function(req, callback) {
 								allResults.push(entry);
 							});
 
+							//inline function to sort results by newest block
 							function compare(a, b) {
 							  const blockA = a.block;
 							  const blockB = b.block;
@@ -507,10 +510,11 @@ controller.getAllAvailableContent = function(req, callback) {
 							  return comparison;
 							}
 
+							//sort results
 							allResults = allResults.sort(compare);
 
-							//sort results
-							console.log(allResults);
+							
+							//console.log(allResults);
 
 							if(callback && typeof callback === "function") { callback(null, allResults ); }
 
@@ -599,6 +603,13 @@ controller.sign = function(params, callback){
       	var err = 'Signature did not match.'
 		if(callback && typeof callback === "function") { callback(err); } 
       }
+};
+
+controller.unsign = function(callback){
+
+	var token = 'deleted';
+	if(callback && typeof callback === "function") { callback(null, token ); }
+
 };
 
 /*
