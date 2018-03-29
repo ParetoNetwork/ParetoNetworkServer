@@ -26,8 +26,8 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
     </head>
-    <body style="overflow: scroll;">
-        <div style="position: fixed; width: 100%;">
+    <body style="overflow: scroll; background: #172e4f;">
+        <div style="position: fixed; width: 100%; z-index: 999;">
         	<div id="gradient" class="row" style="vertical-align: top;
         		height: 5px; 
         		background: #295087; /* Old browsers */
@@ -40,7 +40,7 @@
             <nav class="navbar navbar-expand-md font-body" style="background-color: #040f1e; color: #ffffff;">
               <div class="container-fluid">
                 <div class="navbar-header">
-                  <a class="navbar-brand" href="https://www.pareto.network"><img src="static/images/LogoReverse.svg" class="header-img" width="150"/></a>
+                  <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 0;"/></a>
                 </div>
                 <ul class="nav navbar-nav navbar-right navbar-space" style="flex-direction: row;">
                     <li>
@@ -60,16 +60,34 @@
             </nav>
         </div>
 
-        <div class="container" style="background: white; min-height: 100vh; padding-top:40px">
+        <div class="container" style="min-height: 100vh; padding-top:120px; color: #fff;">
+            <div class="row middle-xs">
+                <div class="col-xs-12 col-sm-12 col-md-6">
+                    <div class="site-moto">
+                        <img src="static/images/LogoReverse.svg" style="width: 400px; max-width: 100%;" malt="">
+                        <h1 class="font-body" style="color: #fff;">Current, reputable & actionable intel for digital currency traders and investors.</h1>
+                        <br/>
+                        <br/>
+                    </div>
+                </div>
+
+                <div class="col-xs-12 col-sm-12 col-md-6">
+                    <div class="site-moto conditional-center">
+                        
+                            <button id="access-sign" type="button" class="btn btn-info font-body" style="background-color:rgb(107, 194, 123); font-size:30px; width:200px; opacity:100" onClick="sign()">Access</button>
+                        
+                    </div>
+                   
+                </div>
+
+            </div>
             
-                            
-            <img id="splash-img" src="static/images/pareto-info.png"/>
-                
+            <br/>
             <br/>
             <br/>
 
             <div class="row">
-                <div class="col-md-12 font-body" style="font-size: 12px;">
+                <div class="col-md-12 font-body conditional-leaderboard-font-size">
                     <h6 style="text-align: center;">A higher PARETO score allows for more access to information in the Pareto Network. View the top 100 scores below.</h6>
 
                     <h4 style="text-align: center;">Leaderboard</h4>
