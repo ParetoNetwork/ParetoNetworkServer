@@ -253,7 +253,8 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 							                	'block' : blockHeight,
 							                	'bonus' : bonus,
 							                	'rank'  : r.rank,
-							                	'totalRanks' : count
+							                	'totalRanks' : count,
+							                	'tokens': amount,
 							                };
 							    			console.log("here is db writing response : " + JSON.stringify(resultJson));
 						  					if(callback && typeof callback === "function") { callback(null,resultJson); }
@@ -289,7 +290,8 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 		                	'score' : 0.0,
 		                	'rank'  : -1,
 		                	'block' : blockHeight,
-		                	'bonus' : 0.0
+		                	'bonus' : 0.0,
+		                	'tokens': amount
 		        };
 
 		        //update entry in database if it exists, do not put additional entry invar 
@@ -300,7 +302,8 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 				  		$set: { 
 				  				score : 0.0,
 				  				rank : -1, 
-				  				block: blockHeight 
+				  				block: blockHeight,
+				  				tokens: amount 
 				  		} 
 				  };
 				  var dbOptions = {
@@ -678,6 +681,7 @@ controller.seedLatestEvents = function(fres){
 						address : dataB,
 						score : score,
 						block : blockHeight,
+						tokens: 0.0,
 						rank : -1
 					}
 				});
