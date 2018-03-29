@@ -356,16 +356,36 @@ img#splash-img {
     max-height: 100%;
 }
 
+.conditional-center {
+  text-align: right;
+}
+
+.conditional-leaderboard-font-size {
+  font-size: 14px;
+}
+
 @media all and (max-width: 1199px) { ... } 
 @media all and (max-width: 991px) { ... } 
 @media all and (max-width: 768px) { 
   .header-img {
     width: 100px;
   }
+  .conditional-center {
+    text-align: center;
+  }
+  .conditional-leaderboard-font-size {
+    font-size: 12px;
+  }
 } 
 @media all and (max-width: 575px) { 
   .header-img {
     width: 90px;
+  }
+  .conditional-center {
+    text-align: center;
+  }
+  .conditional-leaderboard-font-size {
+    font-size: 12px;
   }
  }
 
