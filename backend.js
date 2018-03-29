@@ -65,7 +65,7 @@ function start() {
 
   app.get('/',function(req,res){
     //__dirname : It will resolve to your project folder.
-    res.sendFile(path.join(__dirname+'/public/dashboard.html')); //this will be dashboard
+    res.sendFile(path.join(__dirname+'/public/splash.html')); //this will be dashboard
   });
 
   app.get('/rank',function(req,res){
@@ -162,6 +162,10 @@ function start() {
   */
   app.get('/v1/auth', function(req, res){
     res.status(200).json({auth: "ok"});
+  });
+
+  app.get('/v1/splash-auth', function(req, res){
+    res.sendFile(path.join(__dirname+'/public/dashboard.html'));
   });
 
   /*
