@@ -401,7 +401,7 @@ controller.getAllAvailableContent = function(req, callback) {
 			    	//2. get percentile
 
 			    	//2a. get total rank where score > 0
-			    	ParetoAddress.count({ score : { $gt : 0 }}, async(count) => {
+			    	ParetoAddress.count({ score : { $gte : 0 }}, async(count) => {
 			    		var count = count;
 
 			    		var percentile = 1 - (result.rank / count); //this should be a decimal number

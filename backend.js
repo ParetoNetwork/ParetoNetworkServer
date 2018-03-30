@@ -161,7 +161,7 @@ function start() {
   * cannot read the cookie we store for security reasons.
   */
   app.get('/v1/auth', function(req, res){
-    res.status(200).json({auth: "ok"});
+    res.status(200).json({auth: req.user});
   });
 
   app.get('/v1/splash-auth', function(req, res){
@@ -268,7 +268,7 @@ function start() {
   //get info about address
   app.get('/v1/address', function(req, res){
     
-    controller.retrieveAddress(req.query, function(err, result){
+    controller.retrieveAddress(req.user, function(err, result){
       if(err){
         res.boom.badRequest(err.message); 
       } else {
