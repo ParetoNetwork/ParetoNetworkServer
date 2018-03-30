@@ -265,10 +265,23 @@ function start() {
   });
 
 
-  //get info about address
+  //get info about your address
   app.get('/v1/address', function(req, res){
     
     controller.retrieveAddress(req.user, function(err, result){
+      if(err){
+        res.boom.badRequest(err.message); 
+      } else {
+        res.status(200).json(result);
+      }
+    });
+
+  });
+
+  //get info about another address
+  app.get('/v1/address/:address', function(req, res){
+    
+    controller.retrieveAddress(req.params.address, function(err, result){
       if(err){
         res.boom.badRequest(err.message); 
       } else {
