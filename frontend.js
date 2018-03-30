@@ -137,7 +137,7 @@ window.addEventListener('sign', function(event) {
         var lookupInputField = document.getElementById('lookup-input');
 
         var addr = '';
-        if(lookupInputField.value !== 'undefined' && lookupInputField.value !== ''){
+        if(lookupInputField !== null && lookupInputField.value !== 'undefined' && lookupInputField.value !== ''){
           addr = lookupInputField.value;
         }
         else {
@@ -291,7 +291,7 @@ function calculate() {
         var lookupInputField = document.getElementById('lookup-input');
 
         var addr = '';
-        if(lookupInputField.value !== 'undefined' && lookupInputField.value !== ''){
+        if(lookupInputField !== null && lookupInputField.value !== 'undefined' && lookupInputField.value !== ''){
           addr = lookupInputField.value;
         }
         else {

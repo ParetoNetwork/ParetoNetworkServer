@@ -25,8 +25,20 @@
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
+        <style type="text/css">
+
+        .dataTables_wrapper table thead{
+           display:none;
+        }
+
+        .content-borders {
+            border: 1px solid #d3d3d3;
+        }
+
+        </style>
+
     </head>
-    <body style="overflow: scroll; background: #172e4f;">
+    <body style="overflow: scroll; background: #fff">
         <div style="position: fixed; width: 100%; z-index: 999;">
         	<div id="gradient" class="row" style="vertical-align: top;
         		height: 5px; 
@@ -40,11 +52,13 @@
             <nav class="navbar navbar-expand-md font-body" style="background-color: #040f1e; color: #ffffff;">
               <div class="container-fluid">
                 <div class="navbar-header">
-                  <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 0;"/></a>
+                  <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 100;"/></a>
                 </div>
                 <ul class="nav navbar-nav navbar-right navbar-space" style="flex-direction: row;">
                     <li>
-                        <a href="/rank" style="text-decoration: none;">Rank</a>
+                        <!-- <a href="/rank" style="text-decoration: none;">Rank</a> --><li>
+                         
+                         <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button> 
                     </li>
                     <!-- <li>
                         About
@@ -52,79 +66,46 @@
                     <li>
                         Partners
                     </li>
-                    <li>
-                         <button id="access-toggle" type="button" class="btn btn-info" style="background-color:#6ec378;" onClick="revert()">Disconnect</button> 
-                    </li> -->
+                     -->
                 </ul>
               </div>
             </nav>
         </div>
 
-        <div class="container" style="min-height: 100vh; padding-top:120px; color: #fff;">
-            <div class="row middle-xs">
-                <div class="col-xs-12 col-sm-12 col-md-6">
-                    <div class="site-moto">
-                        <img src="static/images/LogoReverse.svg" style="width: 400px; max-width: 100%;" malt="">
-                        <h1 class="font-body" style="color: #fff;">Current, reputable & actionable intel for digital currency traders and investors.</h1>
-                        <br/>
-                        <br/>
-                    </div>
-                </div>
+        <div class="container" style="min-height: 100vh; padding-top:120px; color: #000;">
+            <div class="row" style="padding-left: 10px; padding-right: 10px;">
+                <div class="col-md-4" style="margin-bottom: 5px;">
 
-                <div class="col-xs-12 col-sm-12 col-md-6">
-                    <div class="site-moto conditional-center">
-                        
-                            <button id="access-sign" type="button" class="btn btn-info font-body" style="background-color:rgb(107, 194, 123); font-size:30px; width:200px; opacity:100" onClick="sign()">Access</button>
+                    <!-- user management cells -->
+                    
+                    <div id="address-details" class="content-borders font-body" style="font-size: 12px; padding: 5px; overflow: hidden;">
                         
                     </div>
-                   
-                </div>
-
-            </div>
-            
-            <br/>
-            <br/>
-            <br/>
-
-            <div class="row">
-                <div class="col-md-12 font-body conditional-leaderboard-font-size">
-                    <h6 style="text-align: center;">A higher PARETO score allows for more access to information in the Pareto Network. View the top 100 scores below.</h6>
-
-                    <h4 style="text-align: center;">Leaderboard</h4>
-                    <!-- for rank lists -->
-                    <table id="pareto-leaderboard" class="table" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Score</th>
-                                <th>Address</th>
-                            </tr>
-                        </thead>
-
-                    </table>
 
                 </div>
+
+                <!-- my intel feed, add user management elements later -->
+                 <div id="intel-feed" class="col-md-8 content-borders" style="margin-bottom: 10px;"> 
+
+                    <div style="font-size: 12px; color: #a3a3a3; padding-left: 10px; padding-top: 10px;">MY INTEL FEED</div>
+
+                    <!-- throw in data table, and then supplement with vue.js later -->
+                    <table id="pareto-content" class="table font-body" style="width:90%">
+                            <thead>
+                                <tr>
+                                    <th>.</th>
+                                    <!-- 
+                                    <th>Body</th>
+                                    <th>Author</th>
+                                    <th>Reward</th>
+                                    <th>Block</th> -->
+                                </tr>
+                            </thead>
+
+                        </table>
+
+                </div> 
             </div>
-
-            <!-- <button id="access-only" type="button" class="btn btn-info font-body" style="background-color:#6ec378; z-index:2;" onClick="revert()">Access</button> -->
-            <!-- my intel feed, add user management elements later -->
-            <!-- <div id="intel-feed" class="col col-lg-auto"> 
-
-                // throw in data table, and then supplement with vue.js later
-                <table id="pareto-content" class="table font-body" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Body</th>
-                                <th>Author</th>
-                                <th>Reward</th>
-                                <th>Block</th>
-                            </tr>
-                        </thead>
-
-                    </table>
-
-            </div> -->
 
         </div>
 
@@ -137,6 +118,20 @@
     </body>
     <script src="static/js/bundle.js"></script>
     <script>
+
+        var accessToggle = $("#access-sign");
+        var lookupInput = $("#lookup-input");
+
+
+        function sign(){
+          if(accessToggle.text() === 'ACCESS'){
+            let event = new Event("sign");
+            window.dispatchEvent(event);
+          } else if(accessToggle.text() === 'RESET'){
+            let event = new Event("revert");
+            window.dispatchEvent(event);
+          }
+        }
 
         window.addEventListener('content', function (e){
           
@@ -156,15 +151,28 @@
                             url: '/v1/content'/*+'?rank='+rank+'&limit='+limit+'&page='+page*/,
                             dataSrc: ''
                         },
+                        columnDefs: [ 
+                            { 
+                                targets: 0, 
+                                data : 'body', 
+                                render : function ( data, type, row ) {
+                                    var alias = '';
+                                    if(row.alias !== undefined){
+                                        alias = "(" + row.alias + ")";
+                                    }
+
+                                     return '<b>'+row.title+'</b><br/>'+'<div style="font-size: 12px;">Disclosed by: '+row.address + alias + ' at block ' + row.block + '</div><br/>' + row.body; 
+                                 } //end function 
+                            }
+                        ],
+                        language: {
+                            emptyTable: "No intel currently available for you, check back momentarily!"
+                        }/*,
                         columns: [
-                            { data : 'title'},
                             { 
                                 data : 'body'
-                            },
-                            { data : 'address'},
-                            { data : 'reward'},
-                            { data : 'block'}
-                        ]
+                            }
+                        ]*/
                     });
 
         });
@@ -186,6 +194,9 @@
                         $("#access-toggle").value = "Access";
                         console.log("no signature");
 
+                        //push to homepage
+                        window.location.replace("/");
+
                       },
                       error: function (jqXHR, textStatus, errorThrown) {
                         console.log(errorThrown);
@@ -203,27 +214,39 @@
 
         $(document).ready(function() {
 
-            $.ajax({
-                  method: 'GET',
-                  url: '/v1/auth',
-                  dataType: 'json',
-                  success: function (data, textStatus, jqXHR) {
+            
+          $.ajax({
+                method: 'GET',
+                url: '/v1/auth',
+                dataType: 'json',
+                success: function (data, textStatus, jqXHR) {
 
-                    //if here then user authenticated, could also return address/user information.
+                  //if here then user authenticated, could also return address/user information.
+                  
+                  accessToggle.text("RESET");
+                  accessToggle.css("background-color", "rgb(12, 95, 136)");
+                  accessToggle.css("opacity",100);
 
-                    $("#access-toggle").value = "Disconnect";
+                  $('#address-details').html("Authorization granted to:<br/>" + data.auth);
 
-
-                    window.dispatchEvent(new CustomEvent("content", { }));
+                  //set address or alias to input field and set it to read-only
+                  window.dispatchEvent(new CustomEvent("content", { }));
                      $.fn.dataTableExt.errMode = 'ignore';
 
-                  },
-                  error: function (jqXHR, textStatus, errorThrown) {
-                    console.log(errorThrown);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  
+                  console.log(errorThrown);
+                  
+                  accessToggle.text("ACCESS");
+                  accessToggle.css("background-color", "rgb(107, 194, 123)");
+                  accessToggle.css("opacity",100);
 
-                    $("#access-toggle").value = "Access";
-                  }
-              });
+                  lookupInput.val("");
+
+
+                }
+            }); //end ajax
 
             window.dispatchEvent(new CustomEvent("leaderboard", { 'detail' : { rank : 1, limit : 100, page: 0}}));
 
