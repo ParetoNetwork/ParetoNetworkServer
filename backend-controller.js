@@ -475,6 +475,9 @@ controller.getAllAvailableContent = function(req, callback) {
 						var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1});
 						var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1});
 						
+						//stop gap solution, more censored content can come down and be manipulated before posting client side
+						var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
+
 						try{
 							let resultsVeryFast = await queryVeryFast.exec();
 							let resultsFast = await queryFast.exec();
