@@ -18,6 +18,25 @@
         <link rel="stylesheet" href="static/css/splash-general.css">
         <link rel="stylesheet" href="static/css/splash-custom.css">
 
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+        <script>
+            $.ajax({
+                    method: 'GET',
+                    url: '/v1/auth',
+                    dataType: 'json',
+                    success: function (data, textStatus, jqXHR) {
+                      //set address or alias to input field and set it to read-only
+
+                      window.location.replace("/dashboard");
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                      
+                      console.log(errorThrown);
+                    }
+                }); //end ajax
+        </script>
+
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
@@ -81,7 +100,7 @@
                 </div>
                 <ul class="nav navbar-nav navbar-right navbar-space" style="flex-direction: row;">
                     <li>
-                        <a href="/rank" style="text-decoration: none;"></a>
+                        <a href="https://t.me/paretonetworkdiscussion" class="header-link telegram-link"><i class="fa fa-paper-plane" aria-hidden="true"></i> <span>Telegram</span></a>
                     </li>
                     <!-- <li>
                         About
@@ -135,8 +154,8 @@
                                 <h1 class="font-body">Current, reputable & actionable intel for digital currency traders and investors.
                                     <br/>
                                 </h1>
-
                             </div>
+
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-6">
                             <div class="site-moto font-body conditional-center">
@@ -151,7 +170,7 @@
                                  <div class="font-body"><h1 style="font-size: 25px; font-weight: bold">Post. Trade. Earn.</h1></div>
                                 <br/>
 
-                                 <a style="font-size: 40px;" href="#"><button class="button button--transparent" style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"><b>Access</b></button></a><br/>
+                                 <button class="button button--transparent" style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;" onClick="sign()"><b>Access</b></button><br/>
                                  <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform license.<br /> More information <a style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;" href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a> <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> --></h6></div>
                             </div>
                            
@@ -330,7 +349,7 @@
         <script src="static/js/main.js"></script>
 
 
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
         <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
@@ -391,6 +410,22 @@
                     d: 'M1493.9,56.7C1245,57,986.7,27.5,731.1,9.4C475.4-8.8,229.1-4.2,0,56.7h0c0,7.7,0,15.5,0,23.2h1493.9C1493.9,72.1,1493.9,64.4,1493.9,56.7z'
                 }, 4e3, mina.easeinout, g_animateTopWave);
             }*/
+        </script>
+        <script src="static/js/bundle.js"></script>
+        <script>
+            var accessToggle = $("#access-sign");
+
+            function sign(){
+               let event = new Event("signSplash");
+               window.dispatchEvent(event);
+            }
+
+
+            $(document).ready(function() {
+
+                
+            });
+
         </script>
     </body>
 </html>
