@@ -404,6 +404,11 @@ controller.getAllAvailableContent = function(req, callback) {
 			    	ParetoAddress.count({ score : { $gte : 0 }}, async(count) => {
 			    		var count = count;
 
+			    		//and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
+			    		if(result.rank == null){
+			    			result.rank = count - 1;
+			    		}
+
 			    		var percentile = 1 - (result.rank / count); //this should be a decimal number
 
 			    		var blockDelay = 0;
