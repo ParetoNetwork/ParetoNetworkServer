@@ -94,8 +94,7 @@ function start() {
 
     controller.sign(req.body, function(err, result){
         if (err) {
-          console.log(err);
-          res.boom.badData(err);
+          res.boom.badData(/*{ error : err.message, note : "Make sure address owns the minimum amount of PARETO"}*/);
         } else {
          if(process.env.DEBUG == 1){
           res.cookie("authorization", result.token, { httpOnly: true });
