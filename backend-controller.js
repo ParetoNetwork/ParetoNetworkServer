@@ -312,7 +312,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 				  };
 
 				  //can also return unauthorized, PARETO balance 0.00, list of places to purchase some
-				  if(callback && typeof callback === "function") { callback(null,resultJson); }
+				  if(callback && typeof callback === "function") { callback(null, resultJson); }
 
 				  //should queue for writing later
 				  ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions, 
@@ -393,150 +393,158 @@ controller.getAllAvailableContent = function(req, callback) {
 				}
 		    } else {
 
+		    	if(result == null){
+
+		    		//this can happen if a new address is found which is not in the system yet. in reality it should be calculated beforehand, or upon initial auth
+
+		    		if(callback && typeof callback === "function") { callback(null, [] ); }
+		    	} else {
 		    	//1b. get block height
-		    	web3.eth.getBlock('latest')
-			     .then(function(res) {
-			      	blockHeight = res.number;
+			    	web3.eth.getBlock('latest')
+				     .then(function(res) {
+				      	blockHeight = res.number;
 
-			    	//2. get percentile
+				    	//2. get percentile
 
-			    	//2a. get total rank where score > 0
-			    	ParetoAddress.count({ score : { $gte : 0 }}, async(count) => {
-			    		var count = count;
+				    	//2a. get total rank where score > 0
+				    	ParetoAddress.count({ score : { $gte : 0 }}, async(count) => {
+				    		var count = count;
 
-			    		//and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
-			    		if(result.rank == null){
-			    			result.rank = count - 1;
-			    		}
+				    		//and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
+				    		if(result.rank == null){
+				    			result.rank = count - 1;
+				    		}
 
-			    		var percentile = 1 - (result.rank / count); //this should be a decimal number
+				    		var percentile = 1 - (result.rank / count); //this should be a decimal number
 
-			    		var blockDelay = 0;
+				    		var blockDelay = 0;
 
-			    		if(percentile > .99) {
+				    		if(percentile > .99) {
 
-			    			//then do multiplication times the rank to determine the block height delta.
-			    			if(result.rank < PARETO_RANK_GRANULARIZED_LIMIT){
-			    				blockDelay = result.rank * 10;
-			    			} else {
-			    				blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 10;
-			    			}
-		    			/*} else { //this would be a dynamic method where var factor = Math.pow(10, -1);
-		    					   //would be used with var wholePercentile = percentile * 100;
-		    					   //Math.round(wholePercentile * factor) / factor in order to get the percentile
+				    			//then do multiplication times the rank to determine the block height delta.
+				    			if(result.rank < PARETO_RANK_GRANULARIZED_LIMIT){
+				    				blockDelay = result.rank * 10;
+				    			} else {
+				    				blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 10;
+				    			}
+			    			/*} else { //this would be a dynamic method where var factor = Math.pow(10, -1);
+			    					   //would be used with var wholePercentile = percentile * 100;
+			    					   //Math.round(wholePercentile * factor) / factor in order to get the percentile
+								
+								var factor = Math.pow(10, -1);
+								var wholePercentile = percentile * 100;
+								var roundedToNearestPercentile = Math.round(wholePercentile * factor) / factor;
+								//var multiplier = 100 * Math.floor(percentile);
+								blockDelay = (100 - roundedToNearestPercentile)) * PARETO_RANK_GRANULARIZED_LIMIT;
+
+							}*/
+			    		
+				    		} else if (percentile > .90) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 20;
+
+				    		} else if (percentile > .80) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 30;
+
+				    		} else if (percentile > .70) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 40;
+
+				    		} else if (percentile > .60) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 50;
+
+				    		} else if (percentile > .50) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 60;
+
+				    		} else if (percentile > .40) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 70;
+
+				    		} else if (percentile > .30) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 80;
+
+				    		} else if (percentile > .20) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 90;
+
+				    		} else if (percentile > .10) {
+
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 100;
+
+				    		} else {
+				    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
+				    		}
+
+				    		var blockHeightDelta = blockHeight - blockDelay;
+				       
+							var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1});
+							var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1});
+							var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1});
+							var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1});
 							
-							var factor = Math.pow(10, -1);
-							var wholePercentile = percentile * 100;
-							var roundedToNearestPercentile = Math.round(wholePercentile * factor) / factor;
-							//var multiplier = 100 * Math.floor(percentile);
-							blockDelay = (100 - roundedToNearestPercentile)) * PARETO_RANK_GRANULARIZED_LIMIT;
+							//stop gap solution, more censored content can come down and be manipulated before posting client side
+							var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
 
-						}*/
-		    		
-			    		} else if (percentile > .90) {
+							try{
+								let resultsVeryFast = await queryVeryFast.exec();
+								let resultsFast = await queryFast.exec();
+								let resultsNormal = await queryNormal.exec();
+								let resultsSlow = await querySlow.exec();
 
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 20;
+								let allResults = [];
 
-			    		} else if (percentile > .80) {
+								resultsVeryFast.forEach(function(entry){
+									allResults.push(entry);
+								});
 
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 30;
+								resultsFast.forEach(function(entry){
+									allResults.push(entry);
+								});
 
-			    		} else if (percentile > .70) {
+								resultsNormal.forEach(function(entry){
+									allResults.push(entry);
+								});
 
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 40;
+								resultsSlow.forEach(function(entry){
+									allResults.push(entry);
+								});
 
-			    		} else if (percentile > .60) {
+								//inline function to sort results by newest block
+								function compare(a, b) {
+								  const blockA = a.block;
+								  const blockB = b.block;
+								  
+								  let comparison = 0;
+								  if (blockB > blockA) {
+								    comparison = 1;
+								  } else if (blockB < blockA) {
+								    comparison = -1;
+								  }
+								  return comparison;
+								}
 
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 50;
+								//sort results
+								allResults = allResults.sort(compare);
 
-			    		} else if (percentile > .50) {
+								
+								//console.log(allResults);
 
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 60;
+								if(callback && typeof callback === "function") { callback(null, allResults ); }
 
-			    		} else if (percentile > .40) {
-
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 70;
-
-			    		} else if (percentile > .30) {
-
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 80;
-
-			    		} else if (percentile > .20) {
-
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 90;
-
-			    		} else if (percentile > .10) {
-
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 100;
-
-			    		} else {
-			    			blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
-			    		}
-
-			    		var blockHeightDelta = blockHeight - blockDelay;
-			       
-						var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1});
-						var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1});
-						var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1});
-						var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1});
-						
-						//stop gap solution, more censored content can come down and be manipulated before posting client side
-						var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
-
-						try{
-							let resultsVeryFast = await queryVeryFast.exec();
-							let resultsFast = await queryFast.exec();
-							let resultsNormal = await queryNormal.exec();
-							let resultsSlow = await querySlow.exec();
-
-							let allResults = [];
-
-							resultsVeryFast.forEach(function(entry){
-								allResults.push(entry);
-							});
-
-							resultsFast.forEach(function(entry){
-								allResults.push(entry);
-							});
-
-							resultsNormal.forEach(function(entry){
-								allResults.push(entry);
-							});
-
-							resultsSlow.forEach(function(entry){
-								allResults.push(entry);
-							});
-
-							//inline function to sort results by newest block
-							function compare(a, b) {
-							  const blockA = a.block;
-							  const blockB = b.block;
-							  
-							  let comparison = 0;
-							  if (blockB > blockA) {
-							    comparison = 1;
-							  } else if (blockB < blockA) {
-							    comparison = -1;
-							  }
-							  return comparison;
+							} catch (err) {
+								if(callback && typeof callback === "function") { callback(err); }
 							}
-
-							//sort results
-							allResults = allResults.sort(compare);
-
 							
-							//console.log(allResults);
+				    	});
+			    	}).catch((error) => {
+				       if(callback && typeof callback === "function") { callback(err); }
+				    });//end web3
 
-							if(callback && typeof callback === "function") { callback(null, allResults ); }
-
-						} catch (err) {
-							if(callback && typeof callback === "function") { callback(err); }
-						}
-						
-			    	});
-		    	}).catch((error) => {
-			       if(callback && typeof callback === "function") { callback(err); }
-			    });
+			    }//end else
 		    	
 		    }
 		});
@@ -610,7 +618,65 @@ controller.sign = function(params, callback){
 
 	    var results = { token: token };
 
-	    if(callback && typeof callback === "function") { callback(null, results ); }
+	    controller.calculateScore(owner, 0, function(err, result){
+	    	if(err){
+	    		if(callback && typeof callback === "function") { 
+					callback(err);
+				}
+	    	} else {
+	    		if(callback && typeof callback === "function") { callback(null, results ); }
+	    	}
+	    });
+
+	    //if not in database already, then calculate score. this can also happen because a user has no PARETO tokens in the address they are signing. Should check that first. Might as well do the whole score calculation
+	    /*ParetoAddress.count({ address : owner }, function(err, count){
+	    	if(err){}
+	    	else {
+	    		if (count == 0){
+	    			//then add. This is done instead of simply find + upsert because I don't want to check web3 for the current block every time.
+	    			//if the system already knew the blockheight, then it would always just do a findOne w/ upsert and keep it rolling.
+
+	    			 web3.eth.getBlock('latest')
+				         .then(function(res) {
+				          blockHeight = res.number;
+				          console.log("blockheight: " + blockHeight);
+
+				          //add address to database and return, while initiating a score calculation
+				          var dbQuery = { 
+						  	address : owner 
+						  };
+						  var dbValues = { 
+						  		$set: { 
+						  				score : 0,
+						  				block: blockHeight,
+						  				address: owner,
+						  				rank: -1,
+						  				tokens: 0
+						  		} 
+						  };
+						  var dbOptions = {
+								upsert : true,
+								returnNewDocument: true
+						  };
+				          ParetoAddress.findOne(dbQuery, dbValues, dbOptions, function(err, result){
+				          	if(err){}
+				          	else{
+				          		if(callback && typeof callback === "function") { callback(null, results ); }
+				          		controller.calculateScore(owner, 0, null);
+				          	}
+				          });
+
+				          
+					  }); //end web3
+				 } //end if
+				 else {
+				 	if(callback && typeof callback === "function") { callback(null, results ); }
+				 }
+	    	} //end else
+
+	    });*/
+	    
+
       } else {
       	var err = 'Signature did not match.'
 		if(callback && typeof callback === "function") { callback(err); } 
