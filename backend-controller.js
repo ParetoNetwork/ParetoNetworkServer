@@ -532,10 +532,11 @@ controller.getAllAvailableContent = function(req, callback) {
 						} catch (err) {
 							if(callback && typeof callback === "function") { callback(err); }
 						}
-
 						
 			    	});
-		    	});
+		    	}).catch((error) => {
+			       if(callback && typeof callback === "function") { callback(err); }
+			    });
 		    	
 		    }
 		});
