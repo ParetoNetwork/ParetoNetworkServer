@@ -218,6 +218,9 @@ function start() {
       console.log(req.body);
       res.boom.badRequest('POST body missing, needs address, title and body'); 
     } else {
+
+      //needs to check address whitelist against the authorized address, if people figure out the post body format.
+
       controller.postContent(req, function(err, obj){
         if (err) {
           console.log(err);
