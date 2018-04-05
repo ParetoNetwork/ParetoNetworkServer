@@ -229,7 +229,8 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 						  var dbValues = { 
 						  		$set: { 
 						  				score : score,
-						  				block: blockHeight 
+						  				block: blockHeight,
+						  				tokens : amount 
 						  		} 
 						  };
 						  var dbOptions = {
@@ -254,7 +255,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 							                	'bonus' : bonus,
 							                	'rank'  : r.rank,
 							                	'totalRanks' : count,
-							                	'tokens': amount,
+							                	'tokens': r.tokens,
 							                };
 							    			console.log("here is db writing response : " + JSON.stringify(resultJson));
 						  					if(callback && typeof callback === "function") { callback(null,resultJson); }
