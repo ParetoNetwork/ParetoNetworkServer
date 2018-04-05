@@ -25,9 +25,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
         <link href="static/css/open-iconic-bootstrap.css" rel="stylesheet">
 
-        <!-- this has to load after bootstrap -->
-        <link rel="stylesheet" href="static/css/general.css">
-        <link rel="stylesheet" href="static/css/custom.css">
+       
 
         <style type="text/css">
 
@@ -46,12 +44,11 @@
         #pareto-content > a:link, a:visited, a:hover, a:active {
             text-decoration: underline; color: #007bff;
         }
-
-        .nav-bar-link > a:link, a:visited, a:hover, a:active {
-            text-decoration: none; color: white;
-        }
-
         </style>
+
+         <!-- this has to load after bootstrap -->
+        <link rel="stylesheet" href="static/css/general.css">
+        <link rel="stylesheet" href="static/css/custom.css">
 
     </head>
     <body style="overflow: scroll; background: #fff">
@@ -65,7 +62,7 @@
     			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
                 ">&nbsp;</div>
 
-            <nav class="navbar navbar-expand-md font-body" style="background-color: #040f1e; color: #ffffff;">
+            <nav class="navbar navbar-expand-md font-body" style="background-color: #040f1e; color: #ffffff; height: 12vh;">
               <div class="container-fluid">
                 <div class="navbar-header">
                   <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 100;"/></a>
@@ -73,7 +70,7 @@
                 <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div id="navbarNavDropdown" class="navbar-collapse collapse" style="flex-grow: unset; /*polyfill because something is broken in the navbar-collapse class*/">
+                <div id="navbarNavDropdown" class="navbar-collapse collapse" style="flex-grow: unset; font-weight: bold; /*polyfill because something is broken in the navbar-collapse class*/">
                     <ul class="navbar-nav mr-auto" id="navbar-links">
                         <li class="nav-item">
                             <a class="nav-link nav-bar-link" href="/about">About</a>
