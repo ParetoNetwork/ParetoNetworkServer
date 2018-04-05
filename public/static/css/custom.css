@@ -395,6 +395,12 @@ img#splash-img {
 
  }
 
-.navbar-space > li { 
-  padding: 10px;
+
+.nav-bar-link > a:link, a:visited, a:hover, a:active {
+    text-decoration: none; color: white;
+}
+
+.navbar-nav > li{
+  margin-left:30px;
+  margin-right:30px;
 }
