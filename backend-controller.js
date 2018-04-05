@@ -172,7 +172,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 		                //sorts down to remaining transactions, since we already know the total and the system block height
 		                while(i < transactions.length){
 		                  
-		                  if(transactions[i][1] < 0 /*&& transactions[i+1] !== 'undefined'*/){
+		                  if(transactions[i][1] < 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
 		                    transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
 		                    //console.log("current transaction[i][1] value: " + transactions[i][1]);
 		                    if(transactions[0][1] <= 0){
@@ -201,10 +201,15 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 		                	blockHeight = blockHeightFixed;
 		                }
 
+		                //the transactions array generates: [block, remaining eligible amount, weight of block, cumulative weight of block, and cumulative weight + preior cumulative weight?
+
+		                //console.log(transactions); //final transactions array state
+
 		                //now find weighted average block number
 		                var weightAverageBlockHeight = transactions[transactions.length-1][4];
 		                var blockHeightDifference = blockHeight - weightAverageBlockHeight;
-		                console.log("weighted avg block height difference: " + blockHeightDifference);
+		                //console.log("weighted avg block height: " + weightAverageBlockHeight);
+		                //console.log("weighted avg block height difference: " + blockHeightDifference);
 
 		                //do final calculations for this stage. 
 
@@ -239,33 +244,32 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 						  };
 
 						  //should queue for writing later
-						  ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions, 
-						  	function(err, r){
-						  		if(err){
-							    	console.error('unable to write to db because: ', err);
-							    } else {
-							    	
-							    	ParetoAddress.count({ score : { $gt : 0 } }, function(err, count){
-							    		if(err){}
-							    		else {
-							    			var resultJson = {
-							                	'address' : r.address,
-							                	'score' : r.score,
-							                	'block' : blockHeight,
-							                	'bonus' : bonus,
-							                	'rank'  : r.rank,
-							                	'totalRanks' : count,
-							                	'tokens': r.tokens,
-							                };
-							    			console.log("here is db writing response : " + JSON.stringify(resultJson));
-						  					if(callback && typeof callback === "function") { callback(null,resultJson); }
-							    		}
-							    	}); //end count
-							    	
-							    	//if(callback && typeof callback === "function") { callback(null,r); }
-							    } //end conditional
-							} //end function
-						  );
+						  var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions); 
+						  //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
+						  
+						  updateQuery.exec().then(function(r){
+						  		ParetoAddress.count({ score : { $gt : 0 } }, function(err, count){
+						    		if(err){
+						    			console.error('unable to finish db operation because: ', err);
+						    			if(callback && typeof callback === "function") { callback(err); }
+						    		}
+						    		else {
+						    			var resultJson = {
+						                	'address' : r.address,
+						                	'score' : r.score,
+						                	'block' : blockHeight,
+						                	'bonus' : bonus,
+						                	'rank'  : r.rank,
+						                	'totalRanks' : count,
+						                	'tokens': r.tokens,
+						                };
+						    			console.log("here is db writing response : " + JSON.stringify(resultJson));
+
+					  					if(callback && typeof callback === "function") { callback(null,resultJson); }
+						    		}
+						    	}); //end count
+						  });
+							 
 
 		              } catch (e) {
 		                console.log(e);

@@ -305,6 +305,14 @@ function start() {
   */
   app.post('/v1/rank', function(req, res){
 
+    controller.calculateScore(req.body.address, 0, function(err, result){
+      if(err){
+        res.boom.badRequest(err.message); 
+      } else {
+        res.status(200).json(result);
+      }
+    });
+
   });
 
   /*
