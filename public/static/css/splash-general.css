@@ -4645,15 +4645,10 @@ body {
     z-index: 1;
 }
 @media (max-width: 991px) {
-    .offer .content {
-        padding-top: 50px;
-        margin-top: 66px
-    }
+    
 }
 @media (max-width: 767px) {
-    .offer .content {
-        margin-top: 56px
-    }
+   
 }
 .offer .content:after {
     content: '';
