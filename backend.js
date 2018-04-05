@@ -68,9 +68,9 @@ function start() {
     res.sendFile(path.join(__dirname+'/public/splash.html')); //this will be dashboard
   });
 
-  /*app.get('/.well-known/security.txt', function(req, res){
-
-  });*/
+  app.get('/about', function(req, res){
+    res.sendFile(path.join(__dirname+'/public/about.html'));
+  });
 
   app.get('/rank',function(req,res){
     //__dirname : It will resolve to your project folder.
