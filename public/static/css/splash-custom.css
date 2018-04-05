@@ -172,6 +172,10 @@ video {
   text-align: right;
 }
 
+nav {
+    height: 12vh;
+}
+
 
 @media all and (max-width: 1199px) { 
 
@@ -184,6 +188,10 @@ video {
 @media all and (max-width: 768px) { 
   .conditional-center {
     text-align: center;
+  }
+
+  nav {
+    height: auto;
   }
 } 
 @media all and (max-width: 575px) { 
