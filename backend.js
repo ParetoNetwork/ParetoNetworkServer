@@ -103,6 +103,8 @@ function start() {
          else {
            res.cookie("authorization", result.token, { domain: 'pareto.network', path: '/', httpOnly: true, secure : true }); //should set a debug flag for env variable
          }
+
+         delete result.token;
          res.status(200).json({status: "success", result});
         }
     });

@@ -617,7 +617,7 @@ controller.sign = function(params, callback){
 	    // JSON web token for the owner that expires in 24 hours.
 	    var token = jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" });
 
-	    var results = { token: token };
+	    //var results = { token: token };
 
 	    controller.calculateScore(owner, 0, function(err, result){
 	    	if(err){
@@ -625,7 +625,8 @@ controller.sign = function(params, callback){
 					callback(err);
 				}
 	    	} else {
-	    		if(callback && typeof callback === "function") { callback(null, results ); }
+	    		result.token = token;
+	    		if(callback && typeof callback === "function") { callback(null, result ); }
 	    	}
 	    });
 
