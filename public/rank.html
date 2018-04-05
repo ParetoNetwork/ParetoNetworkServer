@@ -50,6 +50,9 @@
                 <div id="navbarNavDropdown" class="navbar-collapse collapse" style="flex-grow: unset; font-weight: bold; /*polyfill because something is broken in the navbar-collapse class*/">
                     <ul class="navbar-nav mr-auto" id="navbar-links">
                         <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/dashboard">Feed</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link nav-bar-link" href="/about">About</a>
                         </li>
                         <li class="nav-item">
@@ -217,7 +220,7 @@
                   
                   console.log(errorThrown);
 
-                  $('#nav-user-access').html("&nbsp;SIGN IN...&nbsp;");
+                  $('#nav-user-access').html("&nbsp;SIGN IN&nbsp;");
                   $('#dropdown-user-address').html("No user authenticated");
 
                   
@@ -302,7 +305,7 @@
                   success: function (data, textStatus, jqXHR) {
 
                     //if here then user authenticated, could also return address/user information.
-                    $('#nav-user-access').html("&nbsp;SIGN IN...&nbsp;");
+                    $('#nav-user-access').html("&nbsp;SIGN IN&nbsp;");
                     $('#dropdown-user-address').html("No user authenticated");
 
                     $('#access').css('opacity', 0.0); //logout button

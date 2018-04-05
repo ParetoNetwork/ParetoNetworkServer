@@ -191,3 +191,16 @@ video {
     text-align: center;
   }
  }
+
+ .nav-bar-link {
+    text-decoration: none; color: white;
+}
+
+.navbar-nav > li{
+  margin-left:30px;
+  margin-right:30px;
+}
+
+a:link, a:visited, a:hover, a:active {
+  text-decoration: none; color: #ffffff;
+}
