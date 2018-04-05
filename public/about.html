@@ -31,11 +31,11 @@
         </script>
 
         <!-- Google Tag Manager -->
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        <!-- <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j = d.createElement (s), df = l = 'dataLayer' '& l =' + l ''; j.async = true; j.src =?
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-TQ825N7');</script>
+        })(window,document,'script','dataLayer','GTM-TQ825N7');</script> -->
         <!-- End Google Tag Manager -->
 
         <!-- Facebook Pixel Code -->
@@ -58,6 +58,13 @@
 
     </head>
     <body style="overflow-x: hidden; background: #fff">
+
+
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TQ825N7"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+
 
         <div style="/*position: fixed;*/ width: 100%;">
           <div id="gradient" class="row" style="vertical-align: top;
@@ -104,15 +111,6 @@
               </div>
             </nav>
         </div>
-
-        <!-- Google Tag Manager (noscript) -->
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TQ825N7"
-        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-        <!-- End Google Tag Manager (noscript) -->
-
-       
-      
-
 
         <!--=================================================================================================-->
                                                     <!-- OFFER SECTION -->
@@ -345,10 +343,9 @@
         </section>
 
         <section class="section marketplace-section no-pt no-pb zfix">
-
             <div class="content container demo-1">
                 <div class="wide-title">
-                    <h2 class="font-header">A true peer-to-peer content marketplace.</h2>
+                    <h2 class="font-header">We built a true peer-to-peer content marketplace.</h2>
                     <p class="subtitle font-body">The Pareto Network is the first real-time actionable intelligence platform for investors. </p>
                 </div>
                 
@@ -691,7 +688,9 @@
         <div id="modal-popup" class="fncb-hide zoom-anim-dialog popup"></div>
 
 
-        <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
         <script type='text/javascript' src='https://s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js'></script>
         <script type='text/javascript'>(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
 
@@ -752,6 +751,60 @@
                     d: 'M1493.9,56.7C1245,57,986.7,27.5,731.1,9.4C475.4-8.8,229.1-4.2,0,56.7h0c0,7.7,0,15.5,0,23.2h1493.9C1493.9,72.1,1493.9,64.4,1493.9,56.7z'
                 }, 4e3, mina.easeinout, g_animateTopWave);
             }
+
+            function sign(){
+                let event = new Event("sign");
+                window.dispatchEvent(event);
+            }
+
+            function logout(){
+               let event = new Event("revert");
+               window.dispatchEvent(event); 
+            }
+
+            $(document).ready(function() {
+
+                $.ajax({
+                    method: 'GET',
+                    url: '/v1/auth',
+                    dataType: 'json',
+                    success: function (data, textStatus, jqXHR) {
+
+                      //if here then user authenticated, could also return address/user information.
+                      
+                      //set address or alias to input field and set it to read-only
+
+                      $('#nav-user-access').html("&nbsp;"+data.auth.substring(0, 10)+"...&nbsp;");
+                      $('#dropdown-user-address').html(data.auth);
+
+                      
+                      $('#access').css('opacity', 1.0); //logout button
+                      $('#access-in').css('opacity', 0.0); //signin button
+
+                      //do the thing
+
+                      //the address endpoint already has everything, as well as the sign method, so make a counting method that is faster and pulls from stored results. then the frontend bundle can be cleaner.
+                      window.dispatchEvent(new CustomEvent("scores", {}));
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                      
+                      console.log(errorThrown);
+
+                      $('#nav-user-access').html("&nbsp;SIGN IN&nbsp;");
+                      $('#dropdown-user-address').html("No user authenticated");
+
+                      
+                      $('#access').css('opacity', 0.0); //logout button
+                      $('#access-in').css('opacity', 1.0); //signin button
+
+
+
+                    }
+                }); //end ajax
+
+            });
+
         </script>
     </body>
 </html>
