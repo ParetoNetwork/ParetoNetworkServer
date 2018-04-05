@@ -15,15 +15,16 @@
         <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="stylesheet" href="static/css/general.css">
-        <link rel="stylesheet" href="static/css/custom.css">
-
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <link href="static/css/open-iconic-bootstrap.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="static/css/general.css">
+        <link rel="stylesheet" href="static/css/custom.css">
 
     </head>
     <body style="background-color: #040f1e; color: #ffffff;">
@@ -38,16 +39,34 @@
           filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
                 ">&nbsp;</div>
 
-            <nav class="navbar navbar-default font-body" style="background-color: #040f1e; color: #ffffff;">
+            <nav class="navbar navbar-expand-md font-body" style="background-color: #040f1e; color: #ffffff; height: 12vh;">
               <div class="container-fluid">
                 <div class="navbar-header">
-                  <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150"/></a>
+                  <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 100;"/></a>
                 </div>
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                         <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button>
-                    </li>
-                </ul>
+                <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="navbarNavDropdown" class="navbar-collapse collapse" style="flex-grow: unset; font-weight: bold; /*polyfill because something is broken in the navbar-collapse class*/">
+                    <ul class="navbar-nav mr-auto" id="navbar-links">
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/rank">Leaderboards</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <span class="oi oi-person text-truncate"></span><span id="nav-user-access"></span> 
+                            </a>
+                            <div class="dropdown-menu" id="navbar-dropdown" aria-labelledby="navbarDropdownMenuLink" style="font-size: 11px; right: 0; left: auto;">
+                             <!-- <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button>  -->
+                                <span class="dropdown-item" id="dropdown-user-address"></span>
+                                <a href="#" id="access" class="dropdown-item dropdown-menu-link" onClick="logout()" style="color: #000;">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
               </div>
             </nav>
         </div>
@@ -58,7 +77,7 @@
                     <div>
                        <div class="row" style="color: #ffffff; justify-content: center;">
 
-                            <p class="font-body" style="padding: 35px; font-size: 12px;">Check your <b>PARETO</b> scores easily by signing your wallet address using a web3-enabled browser. Otherwise, sign manually.</p>
+                            <p class="font-body" style="padding: 35px; font-size: 12px;">Check your <b>PARETO</b> scores easily by signing your wallet address using Metamask or a web3-enabled browser. Otherwise, sign manually.</p>
                             <br/>
                             <br/>
                             <br/>
@@ -122,15 +141,14 @@
         var lookupInput = $("#lookup-input");
 
         function sign(){
-          if(accessToggle.text() === 'ACCESS'){
             let event = new Event("sign");
             window.dispatchEvent(event);
-          } else if(accessToggle.text() === 'RESET'){
-            let event = new Event("revert");
-            window.dispatchEvent(event);
-          }
         }
 
+        function logout(){
+           let event = new Event("revert");
+           window.dispatchEvent(event); 
+        }
 
         window.addEventListener('leaderboard', function (e){
 
@@ -178,9 +196,8 @@
 
                   //if here then user authenticated, could also return address/user information.
                   
-                  accessToggle.text("RESET");
-                  accessToggle.css("background-color", "rgb(12, 95, 136)");
-                  accessToggle.css("opacity",100);
+                  $('#nav-user-access').html("&nbsp;"+data.auth.substring(0, 10)+"...&nbsp;");
+                  $('#dropdown-user-address').html(data.auth);
 
                   //set address or alias to input field and set it to read-only
 
@@ -188,10 +205,9 @@
                 error: function (jqXHR, textStatus, errorThrown) {
                   
                   console.log(errorThrown);
-                  
-                  accessToggle.text("ACCESS");
-                  accessToggle.css("background-color", "rgb(107, 194, 123)");
-                  accessToggle.css("opacity",100);
+
+                  $('#nav-user-access').html("&nbsp;SIGN IN...&nbsp;");
+                  $('#dropdown-user-address').html("No user authenticated");
 
                   lookupInput.val("");
 
@@ -216,10 +232,8 @@
                   success: function (data, textStatus, jqXHR) {
 
                     //if here then user authenticated, could also return address/user information.
-                    accessToggle.text("ACCESS");
-                    accessToggle.css("background-color", "rgb(107, 194, 123)");
-                    accessToggle.css("opacity",100);
-
+                    $('#nav-user-access').html("&nbsp;SIGN IN...&nbsp;");
+                    $('#dropdown-user-address').html("No user authenticated");
                     lookupInput.val("");
 
                     console.log("no signature");
@@ -229,6 +243,8 @@
                     console.log(errorThrown);
 
                     lookupInput.val("");
+
+
                   }
               });
 
