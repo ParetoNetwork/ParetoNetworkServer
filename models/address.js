@@ -5,7 +5,8 @@ var paretoAddressSchema = new Schema({
 	address : String,
 	rank 	: Number,
 	score 	: Number,
-	block 	: Number
+	block 	: Number,
+	tokens	: Number,
 }, { collection : 'address' });
 
 const ParetoAddress = mongoose.model('address', paretoAddressSchema);
