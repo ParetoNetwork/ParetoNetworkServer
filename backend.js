@@ -94,7 +94,8 @@ function start() {
 
     controller.sign(req.body, function(err, result){
         if (err) {
-          res.boom.badData(/*{ error : err.message, note : "Make sure address owns the minimum amount of PARETO"}*/);
+          console.log(err); //if this is a message
+          res.boom.badData(err);
         } else {
          if(process.env.DEBUG == 1){
           res.cookie("authorization", result.token, { httpOnly: true });
@@ -361,6 +362,16 @@ function start() {
         fileExtension: "gz"
     }]
   }));
+
+  /*app.get('/v1/content/social', function(req, res){
+    //add solume API key to config + environment variable
+    //use request promises and get solume result
+
+    //use controller to process result
+
+
+
+  }); */
 
   app.listen(process.env.PORT || 3000, function () {
     console.log('Pareto Network ranking app listening on port 3000!')
