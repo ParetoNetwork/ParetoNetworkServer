@@ -15,8 +15,7 @@
         <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="stylesheet" href="static/css/general.css">
-        <link rel="stylesheet" href="static/css/custom.css">
+       
 
         <!-- Required meta tags -->
         <meta charset="utf-8">
@@ -24,10 +23,19 @@
 
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <link href="static/css/open-iconic-bootstrap.css" rel="stylesheet">
+
+        <!-- this has to load after bootstrap -->
+        <link rel="stylesheet" href="static/css/general.css">
+        <link rel="stylesheet" href="static/css/custom.css">
 
         <style type="text/css">
 
         #pareto-content_wrapper.dataTables_wrapper table thead{
+           display:none;
+        }
+
+        #my-posts_wrapper.dataTables_wrapper table thead{
            display:none;
         }
 
@@ -37,6 +45,10 @@
 
         #pareto-content > a:link, a:visited, a:hover, a:active {
             text-decoration: underline; color: #007bff;
+        }
+
+        .nav-bar-link > a:link, a:visited, a:hover, a:active {
+            text-decoration: none; color: white;
         }
 
         </style>
@@ -58,20 +70,29 @@
                 <div class="navbar-header">
                   <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 100;"/></a>
                 </div>
-                <ul class="nav navbar-nav navbar-right navbar-space" style="flex-direction: row;">
-                    <li>
-                        <!-- <a href="/rank" style="text-decoration: none;">Rank</a> --><li>
-                         
-                         <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button> 
-                    </li>
-                    <!-- <li>
-                        About
-                    </li>
-                    <li>
-                        Partners
-                    </li>
-                     -->
-                </ul>
+                <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="navbarNavDropdown" class="navbar-collapse collapse" style="flex-grow: unset; /*polyfill because something is broken in the navbar-collapse class*/">
+                    <ul class="navbar-nav mr-auto" id="navbar-links">
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/rank">Leaderboards</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <span class="oi oi-person text-truncate"></span><span id="nav-user-access"></span> 
+                            </a>
+                            <div class="dropdown-menu" id="navbar-dropdown" aria-labelledby="navbarDropdownMenuLink" style="font-size: 11px; right: 0; left: auto;">
+                             <!-- <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button>  -->
+                                <span class="dropdown-item" id="dropdown-user-address"></span>
+                                <a href="#" id="access" class="dropdown-item dropdown-menu-link" onClick="logout()" style="color: #000;">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
               </div>
             </nav>
         </div>
@@ -81,13 +102,31 @@
                 <div class="col-md-4" style="margin-bottom: 5px;">
 
                     <!-- user management cells -->
-                    
-                    <div id="address-details" class="content-borders font-body" style="font-size: 12px; padding: 5px; overflow: hidden;">
-                        
+                    <div style="margin-right: 5px;">
+                        <!-- imagine there are two cells, one for profile pic and edit profile, the other for user details -->
+                        <div id="address-details" class="row content-borders font-body" style="font-size: 12px; padding-left: 5px; padding-right: 5px; overflow: hidden;">
+                            <div class="col-4">
+                                <div class="content-borders" style="margin: 5px; display: block; text-align: center; overflow: hidden; width:60px; height:60px;">
+                                    <span style="font-size: 50px; padding: 5px; color: gray; background: #b2b2b2; width:100%; height:100%;" class="oi oi-person"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-8" style="padding-top:5px;">
+                                
+                                <div id="address-alias" class="text-truncate" style="font-weight: bold; font-size: 14px;"></div>
+                                <div id="address-balance-holder" style="display: inline-block;"><img src="static/images/LogoMarkColor.svg" style="float:left;" width="20"/><div id="address-balance" style="float:left;"></div></div> <!-- set HTML w/ the icon size and all concatenation -->
+                                <div id="address-score" style="color: grey;"></div>
+
+                                <!-- <div id="address-stat"></div> --><!--use this cell to show improvements in stats, OR optional Bio -->
+                                
+                            </div>
+                        </div>
+
+                        <br />
+                        <br />
+                        <br />
                     </div>
 
-                    <br />
-                    <br />
 
                     <!-- <div class="content-borders" style="font-size: 12px; padding: 5px;">
                         <div style="font-size: 12px; color: #a3a3a3; padding-left: 10px; padding-top: 10px;">LEADERBOARD</div>
@@ -101,29 +140,29 @@
 
                         </table>
                     </div> -->
+                    <div style="width: 100%">
+                        <div class="content-borders" id="my-posts-holder" style="font-size: 12px; padding: 5px; height: 50vh;">
+                            <div style="font-size: 12px; color: #a3a3a3; padding-left: 10px; padding-top: 10px;">MY POSTS</div>
+                                <table id="my-posts" class="table font-body" style="width:100%"></table>
+                        </div>
+                    </div>
 
                 </div>
 
-                <!-- my intel feed, add user management elements later -->
-                <div id="intel-feed" class="col-md-8 content-borders" style="margin-bottom: 10px;"> 
+                <div class="col-md-1">
+                    &nbsp; <!-- spacer lol -->
+                </div>
 
-                    <div style="font-size: 12px; color: #a3a3a3; padding-left: 10px; padding-top: 10px;">MY INTEL FEED</div>
+                <div class="col-md-7"  style="padding-right: 5px; padding-left: 5px;">
+                    <!-- my intel feed, add user management elements later -->
+                    <div id="intel-feed" class="content-borders" style="margin-bottom: 10px;"> 
 
-                    <!-- throw in data table, and then supplement with vue.js later -->
-                    <table id="pareto-content" class="table font-body" style="width:90%">
-                            <thead>
-                                <tr>
-                                    <th>.</th>
-                                    <!-- 
-                                    <th>Body</th>
-                                    <th>Author</th>
-                                    <th>Reward</th>
-                                    <th>Block</th> -->
-                                </tr>
-                            </thead>
+                        <div style="font-size: 12px; color: #a3a3a3; padding-left: 10px; padding-top: 10px;">MY INTEL FEED</div>
 
-                        </table>
+                        <!-- throw in data table, and then supplement with vue.js later -->
+                        <table id="pareto-content" class="table font-body" style="width:90%"></table>
 
+                    </div>
                 </div> 
             </div>
 
@@ -144,13 +183,13 @@
 
 
         function sign(){
-          if(accessToggle.text() === 'ACCESS'){
             let event = new Event("sign");
             window.dispatchEvent(event);
-          } else if(accessToggle.text() === 'RESET'){
-            let event = new Event("revert");
-            window.dispatchEvent(event);
-          }
+        }
+
+        function logout(){
+           let event = new Event("revert");
+           window.dispatchEvent(event); 
         }
 
         window.addEventListener('content', function (e){
@@ -245,10 +284,14 @@
                   accessToggle.css("background-color", "rgb(12, 95, 136)");
                   accessToggle.css("opacity",100);
 
-                  $('#address-details').html("Authorization granted to:<br/>" + data.auth);
+                  //$('#address-details').html("Authorization granted to:<br/>" + data.auth);
+                  $('#nav-user-access').html("&nbsp;"+data.auth.substring(0, 10)+"...&nbsp;");
+                  $('#dropdown-user-address').html(data.auth);
 
                   //set address or alias to input field and set it to read-only
+                  window.dispatchEvent(new CustomEvent("address", { }));
                   window.dispatchEvent(new CustomEvent("content", { }));
+                  window.dispatchEvent(new CustomEvent("my-posts", { }));
                      $.fn.dataTableExt.errMode = 'ignore';
 
                 },
@@ -274,6 +317,43 @@
             let event = new Event("revert");
             window.dispatchEvent(event);
         };
+
+        window.addEventListener('address', function(e){
+             $.ajax({
+                method: 'GET',
+                url: '/v1/address',
+                dataType: 'json',
+                success: function (data, textStatus, jqXHR) {
+
+                    //set address info to localStorage maybe.
+
+                    //display address info in profile cell
+
+                    /* data that is available
+                    {
+                        "_id": "5aa8bafabb2fc932b37959d4",
+                        "address": "0x1cd35769e5e5e03493dc532bddd0d94f5a8723b2",
+                        "block": 5383677,
+                        "score": 16772.878023478403,
+                        "rank": 3365,
+                        "tokens": 0
+                    }
+                    */
+
+                    $('#address-alias').html(data.address);
+                    $('#address-balance').html("&nbsp;" + data.tokens + "&nbsp;PARETO");
+                    if(data.tokens <= 0){
+                        //run web3 count algo
+                    }
+                    $('#address-score').html("Network Rank " + data.rank/*Number(data.score).toFixed(5)*/);
+
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+
+                }
+            }); //end ajax
+        });
 
         window.addEventListener('leaderboard', function (e){
 
@@ -303,6 +383,43 @@
                                 render: $.fn.dataTable.render.number( ',', '.', 2)
                             }
                         ]
+                    });
+
+        });
+
+        window.addEventListener('my-posts', function (e){
+          
+          if($.fn.dataTable.isDataTable( '#my-posts' )){
+                table.destroy();
+          }
+
+          table = $('#my-posts').DataTable({
+                        responsive: true,
+                        searching: false, 
+                        paging: false, 
+                        ordering: false, 
+                        info: false,
+                        ajax: {
+                            url: '/v1/content/me',
+                            dataSrc: ''
+                        },
+                        columnDefs: [ 
+                            { 
+                                targets: 0, 
+                                data : 'body', 
+                                render : function ( data, type, row ) {
+                                    var alias = '';
+                                    if(row.alias !== undefined){
+                                        alias = "(" + row.alias + ")";
+                                    }
+
+                                     return '<b>'+row.title+'</b><br/>'+'<div style="font-size: 12px;">Disclosed by: '+row.address + alias + ' at block ' + row.block + '</div><br/>' + row.body; 
+                                 } //end function 
+                            }
+                        ],
+                        language: {
+                            emptyTable: "No data to display"
+                        }
                     });
 
         });
