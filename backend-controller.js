@@ -269,13 +269,13 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 
 		              } catch (e) {
 		                console.log(e);
-		                if(callback && typeof callback === "function") { callback(err); }
+		                if(callback && typeof callback === "function") { callback(e); }
 		              }
 
 
 		            } catch (e) {
 		              console.log(e);
-		              if(callback && typeof callback === "function") { callback(err); }
+		              if(callback && typeof callback === "function") { callback(e); }
 		            }
 
 		          })//end second then promise
