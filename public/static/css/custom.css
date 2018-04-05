@@ -385,6 +385,9 @@ nav {
   #my-posts-holder {
     display: none;
   }
+  nav {
+    height: auto;
+  }
 } 
 @media all and (max-width: 575px) { 
   .header-img {
@@ -397,9 +400,7 @@ nav {
     font-size: 12px;
   }
 
-  nav {
-    height: auto;
-  }
+  
 
  }
 

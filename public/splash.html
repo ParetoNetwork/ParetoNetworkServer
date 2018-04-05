@@ -14,11 +14,14 @@
         <link rel="manifest" href="manifest.json">
         <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
         <meta name="theme-color" content="#ffffff">
-
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <link href="static/css/open-iconic-bootstrap.css" rel="stylesheet">
         <link rel="stylesheet" href="static/css/splash-general.css">
         <link rel="stylesheet" href="static/css/splash-custom.css">
 
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+        
         <script>
             $.ajax({
                     method: 'GET',
@@ -33,12 +36,18 @@
                     error: function (jqXHR, textStatus, errorThrown) {
                       
                       console.log(errorThrown);
+
+                      $('#nav-user-access').html("&nbsp;SIGN IN&nbsp;");
+                      $('#dropdown-user-address').html("No user authenticated");
+
+                      
+                      $('#access').css('opacity', 0.0); //logout button
+                      $('#access-in').css('opacity', 1.0); //signin button
                     }
                 }); //end ajax
         </script>
 
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
 
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-108222959-1"></script>
@@ -98,22 +107,30 @@
                 <div class="navbar-header">
                   <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 100;"/></a>
                 </div>
-                <ul class="nav navbar-nav navbar-right navbar-space" style="flex-direction: row;">
-                    <li>
-                        <a href="https://t.me/paretonetworkdiscussion" class="header-link telegram-link"><i class="fa fa-paper-plane" aria-hidden="true"></i> <span>Telegram</span></a>
-                    </li>
-                    <!-- <li>
-                        About
-                    </li>
-                    <li>
-                        Partners
-                    </li>
-                    <li>
-                         <button id="access-toggle" type="button" class="btn btn-info" style="background-color:#6ec378;" onClick="revert()">Disconnect</button> 
-                    </li> -->
-                </ul>
+                <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="navbarNavDropdown" class="navbar-collapse collapse" style="flex-grow: unset; font-weight: bold; /*polyfill because something is broken in the navbar-collapse class*/">
+                    <ul class="navbar-nav mr-auto" id="navbar-links">
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/rank">Leaderboards</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <span class="oi oi-person text-truncate"></span><span id="nav-user-access"></span> 
+                            </a>
+                            <div class="dropdown-menu" id="navbar-dropdown" aria-labelledby="navbarDropdownMenuLink" style="font-size: 11px; right: 0; left: auto;">
+                             <!-- <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button>  -->
+                                <span class="dropdown-item" id="dropdown-user-address"></span>
+                                <a href="#" id="access-in" class="dropdown-item dropdown-menu-link" onClick="sign()" style="color: #000; opacity:0;">Sign In</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
               </div>
-            </nav>
         </div>
 
        
