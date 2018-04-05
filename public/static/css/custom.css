@@ -366,7 +366,7 @@ img#splash-img {
 
 @media all and (max-width: 1199px) { ... } 
 @media all and (max-width: 991px) { ... } 
-@media all and (max-width: 768px) { 
+@media all and (max-width: 767px) { 
   .header-img {
     width: 100px;
   }
@@ -375,6 +375,11 @@ img#splash-img {
   }
   .conditional-leaderboard-font-size {
     font-size: 12px;
+  }
+
+
+  #my-posts-holder {
+    display: none;
   }
 } 
 @media all and (max-width: 575px) { 
@@ -387,6 +392,7 @@ img#splash-img {
   .conditional-leaderboard-font-size {
     font-size: 12px;
   }
+
  }
 
 .navbar-space > li { 
