@@ -73,7 +73,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
         var incoming = {};
         var outgoing = {};
 
-        console.log(address);
+       	//console.log(address);
 
         //this call doesn't use the padded address
 		var tknAddress = (address).substring(2);
@@ -85,7 +85,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
         web3.eth.getBlock('latest')
          .then(function(res) {
           blockHeight = res.number;
-          console.log("blockheight: " + blockHeight);
+         	//console.log("blockheight: " + blockHeight);
 
         //then re-tally total
         return web3.eth.call({
@@ -96,7 +96,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 	        if (result) { 
 	              var tokens = web3.utils.toBN(result).toString();
 	              amount = web3.utils.fromWei(tokens, 'ether');
-	              console.log("amount: " + amount);
+	             	//console.log("amount: " + amount);
 	        }
 
 	        if(amount > 0){
@@ -219,7 +219,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 		                //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
 		                var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
 
-		                console.log("divisor: " + divisor);
+		               	//console.log("divisor: " + divisor);
 
 		                var multiple = 1 + (blockHeightDifference / divisor);
 		                
@@ -263,7 +263,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 						                	'totalRanks' : count,
 						                	'tokens': r.tokens,
 						                };
-						    			console.log("here is db writing response : " + JSON.stringify(resultJson));
+						    			//console.log("here is db writing response : " + JSON.stringify(resultJson));
 
 					  					if(callback && typeof callback === "function") { callback(null,resultJson); }
 						    		}
@@ -272,20 +272,20 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 							 
 
 		              } catch (e) {
-		                console.log(e);
+		               	//console.log(e);
 		                if(callback && typeof callback === "function") { callback(e); }
 		              }
 
 
 		            } catch (e) {
-		              console.log(e);
+		             	//console.log(e);
 		              if(callback && typeof callback === "function") { callback(e); }
 		            }
 
 		          })//end second then promise
 		          .catch(function (err) {
 		            // API call failed...
-		            console.log(err);
+		           	//console.log(err);
 		            if(callback && typeof callback === "function") { callback(err); }
 		          });
 		        });//end first then promise
@@ -325,7 +325,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 				  		if(err){
 					    	console.error('unable to write to db because: ', err);
 					    } else {
-					    	console.log("here is db writing response : " + r);
+					    	//console.log("here is db writing response : " + r);
 					    } //end conditional
 					} //end function
 				  );
@@ -645,7 +645,7 @@ controller.sign = function(params, callback){
 	    			 web3.eth.getBlock('latest')
 				         .then(function(res) {
 				          blockHeight = res.number;
-				          console.log("blockheight: " + blockHeight);
+				         	//console.log("blockheight: " + blockHeight);
 
 				          //add address to database and return, while initiating a score calculation
 				          var dbQuery = { 
@@ -736,7 +736,7 @@ controller.seedLatestEvents = function(fres){
     web3.eth.getBlock('latest')
      .then(function(res) {
       blockHeight = res.number;
-      console.log("blockheight: " + blockHeight);
+     	//console.log("blockheight: " + blockHeight);
 
 	return web3.eth.getPastLogs({
       fromBlock: contractCreationBlockHeightHexString,//'0x501331', //contractCreationBlockHeightHexString,
@@ -745,7 +745,7 @@ controller.seedLatestEvents = function(fres){
       topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
     }).then(function (txObjects){
 
-    	console.log("tx count here: " + txObjects.length);
+    	//console.log("tx count here: " + txObjects.length);
 
 		    var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
 
@@ -768,7 +768,7 @@ controller.seedLatestEvents = function(fres){
 				});
 
 			}
-			console.log("writing all events now");
+			//console.log("writing all events now");
 			bulk.execute(function (err) {
 
 				controller.calculateAllScores(function(err, result){
@@ -790,12 +790,12 @@ controller.seedLatestEvents = function(fres){
 
 controller.calculateAllScores = function(callback){
 	
-	console.log('addresses retrieval started');
+	//console.log('addresses retrieval started');
 
 	web3.eth.getBlock('latest')
         .then(function(res) {
           blockHeight = res.number;
-          console.log("blockheight: " + blockHeight);
+         	//console.log("blockheight: " + blockHeight);
 
 
 		ParetoAddress.find({ score : {$eq: 0} }, 'address score', { /*limit : 10000*/ }, function(err, results){
@@ -808,10 +808,10 @@ controller.calculateAllScores = function(callback){
 
 				async function processArray(results){
 
-					console.log("processing addresses asynchronously");
+					//console.log("processing addresses asynchronously");
 
 					for (const item of results) {
-						console.log("item : " + item.address);
+						//console.log("item : " + item.address);
 						//possible optimization: initialize bulk here, push function into this, queue all results and bulk write later
 						await controller.calculateScore(item.address, blockHeight);
 					}
@@ -821,7 +821,7 @@ controller.calculateAllScores = function(callback){
 
 				processArray(results);
 
-				console.log('addresses updating method finished');
+				//console.log('addresses updating method finished');
 			}
 
 		});
@@ -837,7 +837,7 @@ controller.calculateAllScores = function(callback){
    get db.address.find().sort()
 */
 controller.calculateAllRanks = function(callback){
-	console.log("updating ranks begun");
+	//console.log("updating ranks begun");
 	//-1 desc where greatest number to smallest number, 1 asc for smallest number to greatest number, limit just for testing
 	var query = ParetoAddress.find().sort({score : -1});
 
@@ -846,10 +846,10 @@ controller.calculateAllRanks = function(callback){
 			callback(err);
 		}
 		else {
-			console.log("updating ranks finished querying with results.length : " + results.length);
+			//console.log("updating ranks finished querying with results.length : " + results.length);
 			if(callback && typeof callback === "function") { callback(null, {} ); }
 			
-			console.log(results);
+			//console.log(results);
 
 			var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
 			var i = 1;
@@ -863,7 +863,7 @@ controller.calculateAllRanks = function(callback){
 			});
 			bulk.execute(function (err) {
 				//optional logic here
-				console.log("updating ranks finished");
+				//console.log("updating ranks finished");
 			});
 		}
 	});
@@ -874,13 +874,13 @@ controller.calculateAllRanks = function(callback){
 */
 
 controller.resetRanks = function(callback){
-	console.log("resetting ranks begun");
+	//console.log("resetting ranks begun");
 	ParetoAddress.find({}, function(err, results) {
 		if(err){
 			callback(err);
 		}
 		else {
-			console.log("resetting ranks finished querying");
+			//console.log("resetting ranks finished querying");
 			if(callback && typeof callback === "function") { callback(null, {} ); }
 			
 			var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
@@ -894,7 +894,7 @@ controller.resetRanks = function(callback){
 			});
 			bulk.execute(function (err) {
 				//optional logic here
-				console.log("resetting ranks finished");
+				//console.log("resetting ranks finished");
 			});
 
 			
