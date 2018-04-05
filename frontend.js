@@ -64,47 +64,6 @@ window.addEventListener('intel', function() {
 
 });
 
-/*window.addEventListener('sign', function() {
-
-  if (typeof web3 !== 'undefined') {
-    // Use Mist/MetaMask's provider
-    window.web3 = new Web3(web3.currentProvider);
-  } else {
-    console.log('No web3? You should consider trying MetaMask!')
-    searchLookup();
-    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    window.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
-  }
-
-  if (typeof web3 !== 'undefined') {
-
-     web3.eth.getAccounts(function(error, accounts) {
-      if(!error) {
-
-        var lookupInputField = document.getElementById('lookup-input');
-
-        var addr = '';
-        if(lookupInputField.value !== 'undefined' && lookupInputField.value !== ''){
-          addr = lookupInputField.value;
-        }
-        else {
-           addr = ((typeof accounts[0] !== 'undefined') ? accounts[0] : lookupInputField.value);//getUrlParameter('address'));//accounts[0]; //kucoin 0x2b5634c42055806a59e9107ed44d43c426e58258
-        }
-        var contractData = '';
-
-        if(web3.utils.isAddress(addr)){
-          web3.eth.personal.sign("pareto", addr, )
-
-          }
-
-        }
-      }
-    });
-
-  
-
-});*/
-
 window.addEventListener('sign', function(event) {
   //event.preventDefault();
 
@@ -190,7 +149,73 @@ window.addEventListener('sign', function(event) {
                         accessToggle.style.opacity = 100;
                       }
 
-                      calculate();
+                      var navUserAccess = document.getElementById('nav-user-access');
+                      var dropdownUserAccess = document.getElementById('dropdown-user-address');
+                      var logoutMenuItem = document.getElementById('access');
+                      var signInMenuItem = document.getElementById('access-in');
+
+                      if(navUserAccess !== null){
+                        navUserAccess.innerHTML = "&nbsp;"+data.result.address.substring(0, 10)+"...&nbsp;";
+                      }
+                      if(dropdownUserAccess !== null){
+                        dropdownUserAccess.innerHTML = data.result.address;
+                      }
+
+                      if(logoutMenuItem !== null){
+                        logoutMenuItem.style.opacity = "1.0"; //logout button
+                      }
+                      if(signInMenuItem !== null){
+                        signInMenuItem.style.opacity = "0.0"; //signin button
+                      }
+
+                      window.dispatchEvent(new CustomEvent("leaderboard", { 'detail' : { rank : data.result.rank, limit : 100, page: 0} }));
+
+                      var scoreCountHolders = document.getElementById('score-counter');
+                      var counterOptions = {
+                        useEasing: true, 
+                        useGrouping: true, 
+                        separator: ',', 
+                        decimal: '.',
+                      };
+                      if(scoreCountHolders !== null) {
+
+                          var scoreCount = new CountUp('score-counter', 0.0, data.result.score, 2, 2.5, counterOptions);
+                           if (!scoreCount.error) {
+
+                            //would like to briefly change color and font of text
+
+                            scoreCount.start();
+                          } else {
+                            console.error(scoreCount.error);
+                          }
+                          if(data.rank > 0){
+                            var rankCount = new CountUp('rank-counter', data.result.totalRanks, data.result.rank, 0, 2.5, counterOptions);
+                            if(rankCountInit !== 'undefined'){
+                              if(!rankCount.error){
+                                rankCount.start();
+                              } else {
+                                console.error(rankCount.error);
+                              }
+                            }
+
+                            var addressMetricsDiv = document.getElementById('address-metrics');
+                            if(addressMetricsDiv !== null){
+                                addressMetricsDiv.style.opacity = 1; //For real browsers;
+                                addressMetricsDiv.style.filter = "alpha(opacity=100)"; //For IE;
+
+                                document.getElementById('rank-total').innerHTML = data.result.totalRanks;
+                            }
+                          }
+
+                          searchLookup();
+                          var lookupInputField = document.getElementById('lookup-input');
+                          if(lookupInputField !== 'undefined'){
+                            lookupInputField.value = addr;
+                          }
+
+                      }
+
+                      //calculate(); //the sign function already calculates now and returns the details
                   
                   },
                   error: function (jqXHR, textStatus, errorThrown) {

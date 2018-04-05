@@ -270,7 +270,7 @@ input:focus     { outline:none; }
   position:absolute;
   pointer-events:none;
   left:5px;
-  top:10px;
+  top:-20px;
   transition:0.2s ease all; 
   -moz-transition:0.2s ease all; 
   -webkit-transition:0.2s ease all;
@@ -364,6 +364,10 @@ img#splash-img {
   font-size: 14px;
 }
 
+nav {
+    height: 12vh;
+}
+
 @media all and (max-width: 1199px) { ... } 
 @media all and (max-width: 991px) { ... } 
 @media all and (max-width: 767px) { 
@@ -393,14 +397,22 @@ img#splash-img {
     font-size: 12px;
   }
 
+  nav {
+    height: auto;
+  }
+
  }
 
 
-.nav-bar-link > a:link, a:visited, a:hover, a:active {
+.nav-bar-link {
     text-decoration: none; color: white;
 }
 
 .navbar-nav > li{
   margin-left:30px;
   margin-right:30px;
+}
+
+#pareto-content a {
+  text-decoration: underline; color: #007bff;
 }
