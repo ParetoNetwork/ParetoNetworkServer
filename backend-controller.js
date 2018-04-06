@@ -240,7 +240,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 						  };
 						  var dbOptions = {
 								upsert : true,
-								returnNewDocument: true
+								new: true //mongo uses returnNewDocument, mongo uses new
 						  };
 
 						  //should queue for writing later
