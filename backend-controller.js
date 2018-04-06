@@ -254,20 +254,27 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 						    			if(callback && typeof callback === "function") { callback(err); }
 						    		}
 						    		else {
-						    			var resultJson = {
-						                	'address' : r.address,
-						                	'score' : r.score,
-						                	'block' : blockHeight,
-						                	'bonus' : bonus,
-						                	'rank'  : r.rank,
-						                	'totalRanks' : count,
-						                	'tokens': r.tokens,
-						                };
-						    			//console.log("here is db writing response : " + JSON.stringify(resultJson));
+						    			if(r == null){
+							    			if(callback && typeof callback === "function") { callback("null response"); }
+					  					} else { 
+					  						var resultJson = {
+							                	'address' : r.address,
+							                	'score' : r.score,
+							                	'block' : blockHeight,
+							                	'bonus' : bonus,
+							                	'rank'  : r.rank,
+							                	'totalRanks' : count,
+							                	'tokens': r.tokens,
+							                };
+							    			//console.log("here is db writing response : " + JSON.stringify(resultJson));
 
-					  					if(callback && typeof callback === "function") { callback(null,resultJson); }
+						  					if(callback && typeof callback === "function") { callback(null,resultJson); }
+					  					}
 						    		}
 						    	}); //end count
+						  }).catch(function(err){
+						    	console.error('unable to finish db operation because: ', err);
+						    	if(callback && typeof callback === "function") { callback(err); }
 						  });
 							 
 
