@@ -5,6 +5,7 @@ var paretoContentSchema = new Schema({
 	address : String,
 	title 	: String,
 	body	: String,
+	text	: String, //this is the plain text version of the html formatted body
 	reward	: Number, //set required { type: Number, required: true }
 	txHash  : String, //set required { type: String, required: true }
 	speed	: Number, 
