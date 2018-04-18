@@ -1,8 +1,8 @@
-# ParetoRankingServer
+# ParetoNetworkServer
 
-Frontand and Backend for calculating ranking.
+Frontand and Backend for calculating ranking and all other functions of the Pareto Network intel feed.
 
-This implements two parts of the ranking algorithm so far, and it does a client side calculation first primarily for cosmetic purposes.
+This implements two parts of the ranking algorithm so far, and can do a client side calculation first primarily for cosmetic purposes.
 
 Client Side:
 Gets current balance of Pareto holdings.
