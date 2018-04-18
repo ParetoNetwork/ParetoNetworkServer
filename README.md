@@ -4,11 +4,30 @@ Frontand and Backend for calculating ranking and all other functions of the Pare
 
 This implements two parts of the ranking algorithm so far, and can do a client side calculation first primarily for cosmetic purposes.
 
-Client Side:
-Gets current balance of Pareto holdings.
+There are only several views:
+The splash view - intended to be straight to the point with a clear call to action.
+The about view - goes into more detail about what the Pareto Network is and who is behind it
+The dashboard - the product, where users can view the stream of intel that they are privy to see
+The rank - shows the user their current score and ranking within the Pareto system.
 
-Server Side:
-Gets weighted average of Pareto holdings.
+## API
 
+Unauthenticated routes include:
 
-web3.js can accomplish all aspects of this algorithm client side or server side, but I plan for more to happen server side as we make improvements for performance reasons, and also begin writing rankings in a database.
+POST  /v1/sign
+
+GET   /v1/rank
+
+Authenticated routes include:
+
+GET   /v1/auth
+
+GET   /v1/splash-auth
+
+POST  /v1/unsign
+
+GET   /v1/summation
+
+GET   /v1/content
+
+POST  /v1/content
