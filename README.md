@@ -1,4 +1,4 @@
-# ParetoNetworkServer
+# Pareto Network Server
 
 Frontand and Backend for calculating ranking and all other functions of the Pareto Network intel feed.
 
