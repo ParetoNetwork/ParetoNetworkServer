@@ -87,8 +87,6 @@ function start() {
     res.sendFile(path.join(__dirname+'/public/intel.html'));
   });
 
-
-  
   /********* UNAUTHENTICATED v1 APIs *********/
 
   app.post('/v1/sign', function(req, res){
