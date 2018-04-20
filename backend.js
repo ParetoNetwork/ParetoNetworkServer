@@ -96,7 +96,7 @@ function start() {
           console.log(err); //if this is a message
           res.boom.badData(err);
         } else {
-         if(process.env.DEBUG == 1){
+         if(process.env.DEBUG == 1){ //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
           res.cookie("authorization", result.token, { httpOnly: true });
          }
          else {
