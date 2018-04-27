@@ -1,7 +1,7 @@
 var controller = module.exports = {};
 
 /*constants*/
-var connectionUrl = process.env.MONGODB_URI || require('./backend-private-constants.json').mongodb_connection;
+var connectionUrl = process.env.MONGODB_URI; //now needs you to start with environement variable, better use a script // || require('./backend-private-constants.json').mongodb_connection;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || require('./backend-public-constants.json').pareto_contract_address;
 
 const fs = require('fs');
