@@ -12,10 +12,34 @@ fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);
 })
 
+
+const redis = require("redis");
+redisClient = redis.createClient(
+  process.env.REDIS_PORT  || require('./backend-private-constants.json').redis_port,
+	process.env.REDIS_HOST || require('./backend-private-constants.json').redis_host
+);
+
+redisClient.on("connect", function () {
+	console.log("PARETO: Success connecting to Redis ")
+});
+
+redisClient.on("error", function (err) {
+  console.log("PARETO: Problems connecting to Redis "+ err );
+});
+
+
 /*db initialization*/
 var mongoose = require('mongoose');
 //var models = require('./models/address');
-mongoose.connect(connectionUrl);
+mongoose.connect(connectionUrl).then(tmp=>{
+  console.log("PARETO: Success connecting to Mongo ")
+}).catch(err=>{
+  console.log("PARETO: Problems connecting to Mongo: "+err)
+});
+
+
+
+
 
 /*db model initializations*/
 const ParetoAddress = mongoose.model('address');
