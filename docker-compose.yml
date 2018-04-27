@@ -1,0 +1,24 @@
+version: "2"
+
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "27019:6379"
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27018:27017"
+  mongomigration:
+    container_name: mongomigration
+    image: mongo:latest
+    volumes:
+          - ./dump:/data/dump
+    links:
+          - mongo
+    entrypoint: ["mongorestore", "--drop", "--gzip","--host", "mongo", "--archive=/data/dump/ParetoContent.agz"]
+
