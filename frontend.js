@@ -380,7 +380,7 @@ window.addEventListener('signSplash', function (event) {
                 }//end if valid address
                 else {
                     console.log('address invalid!');
-                    alert('Please login on MetaMask in order to access the Pareto Network');
+                    alert('Please login into MetaMask in order to access the Pareto Network');
                     stopLoading();
 
                     //set error state on input field
