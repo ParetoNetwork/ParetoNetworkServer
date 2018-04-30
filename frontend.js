@@ -306,10 +306,14 @@ window.addEventListener('signSplash', function (event) {
     }
 
     if (typeof web3 !== 'undefined') {
+
         var contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
         var rankCalculation = 0;
         var tokenTotal = 0;
-
+        if(! web3.currentProvider.isMetaMask){
+            stopLoading();
+            return alert('Please install MetaMask in order to access the Pareto Network');
+        }
         web3.eth.getAccounts(function (error, accounts) {
             if (!error) {
 
@@ -376,7 +380,7 @@ window.addEventListener('signSplash', function (event) {
                 }//end if valid address
                 else {
                     console.log('address invalid!');
-                    alert('Please install MetaMask in order to access the Pareto Network');
+                    alert('Please login on MetaMask in order to access the Pareto Network');
                     stopLoading();
 
                     //set error state on input field
