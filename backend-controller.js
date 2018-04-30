@@ -29,6 +29,7 @@ redisClient = redis.createClient(
   process.env.REDIS_URL  || constants.redis_url,
 );
 
+
 redisClient.on("connect", function () {
   console.log("PARETO: Success connecting to Redis ")
 });
