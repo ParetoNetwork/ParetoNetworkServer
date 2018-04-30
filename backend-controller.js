@@ -15,8 +15,7 @@ fs.readdirSync(modelsPath).forEach(file => {
 
 const redis = require("redis");
 redisClient = redis.createClient(
-  process.env.REDIS_PORT  || require('./backend-private-constants.json').redis_port,
-	process.env.REDIS_HOST || require('./backend-private-constants.json').redis_host
+  process.env.REDIS_URL  || require('./backend-private-constants.json').redis_url,
 );
 
 redisClient.on("connect", function () {
