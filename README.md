@@ -45,7 +45,7 @@ POST  /v1/content
 - Before running the _Node.js_ application run: *docker-compose up*
 - Finally, the following configuration ass environment variables:
     -  For _Mongo_ the docker container will expose port *27018* so update *MONGODB_URI* properly to point to your local instance like this: *mongodb://localhost:27018/pareto*
-    -  For _Redis_ the docker container will export port  *27017* so you will need to add the following enviroment variabled: *REDIS_HOST* with value *localhost* and *REDIS_PORT* with value *27017*
+    -  For _Redis_ the docker container will export port  *27017* so you will need to add the following enviroment variable: *REDIS_URL* with the full connection URL to *Redis*
 - if the configuration is successful you should see something like this on your console after you run the *Node.js* app:
 
 ```
