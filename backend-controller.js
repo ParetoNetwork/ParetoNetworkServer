@@ -21,8 +21,7 @@ var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.pareto_
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);
-})
-
+});
 
 const redis = require("redis");
 redisClient = redis.createClient(
