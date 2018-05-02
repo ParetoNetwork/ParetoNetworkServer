@@ -741,27 +741,113 @@ controller.unsign = function(callback){
 * Retrieves rank around address
 */
 controller.retrieveRanksAtAddress = function(rank, limit, page, callback){
+  controller.retrieveRanksWithRedis(rank, limit, page, true,callback)
+};
 
-  var queryRank = rank - 3;
+/**
+ *
+ * *********** Functions with Redis ************
+ *
+ */
+
+
+/**
+ * Get the sorted score from MongoDB and indexing with rank. The result data is saved in Redis.
+ * The function supposes that the address and the score is updated in MongoDB
+ * @param callback Response when the process is finished
+ */
+
+controller.getScoreAndSaveRedis = function(callback){
+
+  //get all address sorted by score, then grouping all by self and retrieve with ranking index
+  const query = ParetoAddress.aggregate().sort({score : -1}).group(
+    { "_id": false,
+      "addresses": {
+        "$push": {
+          "address" : "$address",
+          "score" : "$score"
+        }
+      }}).unwind({
+    "path": "$addresses",
+    "includeArrayIndex": "rank"
+  });
+
+  query.exec(function(err, results){
+    if(err){
+      callback(err);
+    }
+    else {
+      // Put the data in  Redis hashing by rank
+      const multi = redisClient.multi();
+      results.forEach(function(result){
+        result.addresses.rank = result.rank +1;
+        multi.hmset(result.addresses.rank+ "",  result.addresses);
+
+      });
+
+      multi.exec(function(errors, results) {
+        console.log("updating ranks finished querying with results.length : " + results.length);
+        if(callback && typeof callback === "function") { callback(null, {} ); }
+      })
+
+
+
+
+    }
+  });
+};
+
+/**
+ * Get ranking from Redis.
+ * getScoreAndSaveRedis must be called at some time before
+ * @param rank the rank around the search
+ * @param limit The size of page
+ * @param page The skipped page
+ * @param callback Response when the process is finished
+ * @param attempts when is true, try with mongodb if results is zero
+ */
+controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callback){
+
+  let queryRank = rank - 3;
+
   if(queryRank <= 0){
     queryRank = 1;
   }
-
-  var query = ParetoAddress.find({ rank : {$gte : queryRank}}).limit(limit).skip(page);
-
-  query.exec(function(err, results){
+  const multi = redisClient.multi();
+  for (let i =queryRank+page ; i<queryRank+limit+page; i=i+1){
+    multi.hgetall(i+ "");
+  }
+  multi.exec(function(err, results) {
 
     if(err){
-      if(callback && typeof callback === "function") {
-        callback(err);
-      }
+        return callback(err);
     }
-    else {
-      if(callback && typeof callback === "function") { callback(null, results ); }
+
+    // if there's no ranking stored in redis, add it there.
+    if((!results || results.length ===0 || !results[0]) && attempts){
+      controller.getScoreAndSaveRedis(function(err, result){
+        if(err){
+            return callback(err);
+        } else {
+          controller.retrieveRanksWithRedis(rank, limit, page,false ,callback);
+        }
+      });
+    }else{
+      // return the cached ranking
+      return  callback(null, results);
     }
+
+
   });
 
 };
+
+
+/**
+ *
+ * *********** End Functions with Redis ************
+ *
+ */
 
 /*  Way to do all the ranking calculations
 	1. cycle through each erc20 transfer eventget receiving address,
