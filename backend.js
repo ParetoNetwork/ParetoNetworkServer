@@ -382,7 +382,8 @@ function start() {
 
   }); */
 
-  app.listen(process.env.PORT || 3000, function () {
+ var server = app.listen(process.env.PORT || 3000, function () {
     console.log('Pareto Network ranking app listening on port 3000!')
   });
+ module.exports = server;
 }

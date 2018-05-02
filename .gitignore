@@ -66,3 +66,6 @@ typings/
 data/
 .DS_Store
 
+#mocha_environment
+*mocha.env.js
+
