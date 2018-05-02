@@ -4,7 +4,7 @@
   "description": "PARETO",
   "scripts": {
     "start": "node backend.js",
-    "test": "scripts/test"
+    "test": "node scripts/test"
   },
   "author": "",
   "license": "Apache-2.0",
