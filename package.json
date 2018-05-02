@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "PARETO",
   "scripts": {
-    "start": "node backend.js"
+    "start": "node backend.js",
+    "test": "scripts/test"
   },
   "author": "",
   "license": "Apache-2.0",
