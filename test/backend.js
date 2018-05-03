@@ -1,27 +1,16 @@
 const request = require('supertest');
-var serverApp =  require('./../backend.js');
-var startServer =  request.agent(serverApp);
-var server =  request.agent(process.env.TEST_URL);
-var assert = require('chai').assert;
+const assert = require('chai').assert;
+const serverApp =  require('./../app.js');
 
-
-before(function(done) {
-    setTimeout(function () {
-
-        done()
-    },1500)
-
-});
 describe('Server application /', function() {
-
     it('Server connection', () => {
-        server.get("/")
+        request(serverApp.app).get("/")
             .expect(200)
             .expect(res => true)
     });
 
     it('Ranking url test',  function (done) {
-        server.get("/v1/rank")
+        request(serverApp.app).get("/v1/rank")
             .expect('Content-Type', /json/)
             .expect(200)
             .end(function(err, res) {
@@ -31,7 +20,7 @@ describe('Server application /', function() {
     });
 
     it('Ranking data test', function (done) {
-        server.get("/v1/rank")
+        request(serverApp.app).get("/v1/rank")
             .expect('Content-Type', /json/)
             .expect(200)
             .expect( function (res) {
@@ -44,6 +33,9 @@ describe('Server application /', function() {
                 if (err) { return done(err); }
                 done();
             })
-    })
+    });
+
+
 
 });
+
