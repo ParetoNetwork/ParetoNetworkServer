@@ -1,7 +1,9 @@
 const request = require('supertest');
+const assert = require('chai').assert;
 const serverApp =  require('./../app.js');
 
 describe('Pareto Network Page /', function() {
+
     it('Server connection', () => {
         request(serverApp.app).get("/")
             .expect(200)

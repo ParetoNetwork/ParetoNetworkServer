@@ -35,6 +35,16 @@ describe('Server application /', function() {
             })
     });
 
+    it('User address is needed to get content', function (done) {
+        request(serverApp.app).get("/v1/content/")
+            .expect(401)
+            .end(function(err, res) {
+                if (err) { return done(err); }
+                done();
+            })
+    });
+
+
 
 
 });
