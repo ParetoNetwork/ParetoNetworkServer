@@ -1,21 +1,21 @@
 const request = require('supertest');
-var server =  request.agent(process.env.TEST_URL);
+const serverApp =  require('./../app.js');
 
 describe('Pareto Network Page /', function() {
-
     it('Server connection', () => {
-        server.get("/")
+        request(serverApp.app).get("/")
             .expect(200)
             .expect(res => true)
     });
 
     it('leaderboard url test',  function (done) {
-        server.get("/rank")
+        request(serverApp.app).get("/rank")
             .expect(200)
             .end(function(err, res) {
                 if (err) { return done(err); }
                 done();
             })
     });
+
 
 });
