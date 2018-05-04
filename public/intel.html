@@ -118,7 +118,7 @@
                       </form>
                   </div>
 
-                  <button id="intel-body-button" class="button" style="margin:5px; width:100px; height: 35px;" type="button" form="intel" value="View" onclick="dispatchView()">Submit</button>
+                  <button id="intel-body-button" class="button" style="margin:5px; width:100px; height: 35px;" type="button" form="intel" value="View" >Submit</button>
 
               </div> <!-- end post new intel section -->
 
@@ -142,111 +142,8 @@
           
     </body>
 
-     <script>
-        var accessToggle = $("#access-sign");
-        var lookupInput = $("#lookup-input");
-
-        function dispatchView(){
-            let event = new Event("intel");
-            window.dispatchEvent(event);
-        }
-
-        function sign(){
-          if(accessToggle.text() === 'ACCESS'){
-            let event = new Event("sign");
-            window.dispatchEvent(event);
-          } else if(accessToggle.text() === 'RESET'){
-            let event = new Event("revert");
-            window.dispatchEvent(event);
-          }
-        }
-
-        $(document).ready(function() {
-          $('#intel-body-input').summernote({
-            height: 300,                 // set editor height
-            minHeight: null,             // set minimum height of editor
-            maxHeight: null,             // set maximum height of editor
-            focus: true,                 // set focus to editable area after initializing summernote
-            toolbar: [
-              ['font', ['bold', 'italic', 'underline'/*, 'clear'*/]],
-              // ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-              //['color', ['color']],
-              ['para', [/*'ul', 'ol', */'paragraph']],
-              //['height', ['height']],
-              //['table', ['table']],
-              ['insert', ['link', /*'picture',*/]],
-              //['view', ['fullscreen' /*, 'codeview'*/]],
-              //['help', ['help']]
-            ]
-          });
-
-          $.ajax({
-                method: 'GET',
-                url: '/v1/auth',
-                dataType: 'json',
-                success: function (data, textStatus, jqXHR) {
-
-                  //if here then user authenticated, could also return address/user information.
-                  
-                  accessToggle.text("RESET");
-                  accessToggle.css("background-color", "rgb(12, 95, 136)");
-                  accessToggle.css("opacity",100);
-
-                  //set address or alias to input field and set it to read-only
-
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                  
-                  console.log(errorThrown);
-                  
-                  accessToggle.text("ACCESS");
-                  accessToggle.css("background-color", "rgb(107, 194, 123)");
-                  accessToggle.css("opacity",100);
-
-                  lookupInput.val("");
-
-
-                }
-            }); //end ajax
-
-        }); //end document ready
-
-        window.addEventListener('revert', function(){
-            //var accessValue = $("#access-toggle").value;
-            //if(accessValue === "Disconnect"){
-
-            //clear cookie and clear dashboard view and go back to access view
-
-             $.ajax({
-                  method: 'POST',
-                  url: '/v1/unsign',
-                  body: {},
-                  dataType: 'json',
-                  success: function (data, textStatus, jqXHR) {
-
-                    //if here then user authenticated, could also return address/user information.
-                    accessToggle.text("ACCESS");
-                    accessToggle.css("background-color", "rgb(107, 194, 123)");
-                    accessToggle.css("opacity",100);
-
-                    lookupInput.val("");
-
-                    console.log("no signature");
-
-                  },
-                  error: function (jqXHR, textStatus, errorThrown) {
-                    console.log(errorThrown);
-
-                    lookupInput.val("");
-                  }
-              });
-
-        });
-
-
-    </script>
-
-    <script src="static/js/bundle.js"></script>
+    <script src="static/js/intelCompiled.js"></script>
+    <script src="static/js/"></script>
 
     
 </html>
