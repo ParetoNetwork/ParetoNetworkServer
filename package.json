@@ -4,7 +4,7 @@
   "description": "PARETO",
   "scripts": {
     "start": "node backend.js",
-    "build-frontend": "browserify public/static/js/about.js -o public/static/js/aboutCompiled.js && browserify public/static/js/splash.js -o public/static/js/splashCompiled.js && browserify public/static/js/rank.js -o public/static/js/rankCompiled.js && browserify public/static/js/dashboard.js -o public/static/js/dashboardCompiled.js"
+    "test": "node scripts/test"
   },
   "author": "",
   "license": "Apache-2.0",

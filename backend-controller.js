@@ -25,7 +25,7 @@ fs.readdirSync(modelsPath).forEach(file => {
 
 const redis = require("redis");
 redisClient = redis.createClient(
-  process.env.REDIS_URL  || constants.redis_url,
+  process.env.REDIS_URL  || constants.redis_url
 );
 
 
