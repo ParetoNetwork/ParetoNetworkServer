@@ -3,6 +3,21 @@ const assert = require('chai').assert;
 const serverApp =  require('./../app.js');
 
 describe('Server application /', function() {
+
+    const data = JSON.parse(process.env.SIGN);
+
+    const getAuthenticatedCookie = function (data, done) {
+        request(serverApp.app).post("/v1/sign")
+            .send(data)
+            .end(function (error, response) {
+                if (error) {
+                    throw error;
+                }
+                const loginCookie = response.headers['set-cookie'];
+                done(loginCookie);
+            });
+    };
+
     it('Server connection', () => {
         request(serverApp.app).get("/")
             .expect(200)
@@ -42,6 +57,14 @@ describe('Server application /', function() {
                 if (err) { return done(err); }
                 done();
             })
+    });
+
+    it('Sign up test', function (done) {
+        getAuthenticatedCookie(data,  function(cookie) {
+            request(serverApp.app).get("/v1/auth")
+                .set('cookie', cookie)
+                .expect(200, done);
+        });
     });
 
 
