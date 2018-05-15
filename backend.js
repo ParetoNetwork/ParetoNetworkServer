@@ -381,6 +381,12 @@ function start() {
 
 
   }); */
+  if(process.env.DEBUG == 1){
+      var swaggerUi = require('swagger-ui-express'),
+          swaggerDocument = require('./swagger.json');
+
+      app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  }
 
   app.listen(process.env.PORT || 3000, function () {
     console.log('Pareto Network ranking app listening on port 3000!')

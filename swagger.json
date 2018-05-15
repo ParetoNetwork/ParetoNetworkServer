@@ -1,0 +1,89 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a doc Api of Pareto Network",
+    "version": "1.0.0",
+    "title": "Pareto Network 1.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/v1",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/sign": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "get token of a utorization token",
+        "description": "",
+        "operationId": "sign",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "pareto_auth": {
+      "type": "http",
+      "scheme": "bearer"
+    },
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "Address": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "User address token"
+        },
+        "rank": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "score": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "block": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more in white Paper",
+    "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
+  }
+}
