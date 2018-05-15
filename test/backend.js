@@ -67,6 +67,21 @@ describe('Server application /', function() {
         });
     });
 
+    it('Get information about current user', function (done) {
+        getAuthenticatedCookie(data,  function(cookie) {
+            request(serverApp.app).get("/v1/address")
+                .set('cookie', cookie)
+                .expect(200)
+                .expect( function (res) {
+                    assert.hasAllKeys(res.body,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
+                })
+                .end(function(err, res) {
+                    if (err) { return done(err); }
+                    done();
+                })
+        });
+    });
+
 
 
 
