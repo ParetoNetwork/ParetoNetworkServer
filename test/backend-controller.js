@@ -28,7 +28,7 @@ describe('backend-controller /', function() {
     it('Current user get data Test',  function (done) {
         serverApp.controller.getAllAvailableContent({user: data.owner}, function(err, result){
             assert.notExists(err, 'The current data shouldnt get error');
-            assert.exists(result, 'The content must be gotten');
+            assert.exists(result, 'The content must be fetched');
             done();
         });
     });
@@ -39,7 +39,7 @@ describe('backend-controller /', function() {
         fakeData.owner = "0x000123";
         fakeData.result = data.result.split("1").join("2");
         try{
-            serverApp.controller.sign(fakeData, function(err, result){
+            serverApp.controller.sign(fakeData, function(err, res){
                 assert.exists(err, 'Invalid user cannot be allowed');
                 done();
             });
@@ -50,9 +50,26 @@ describe('backend-controller /', function() {
     });
 
     it('Sign up test',  function (done) {
-        serverApp.controller.sign(data, function(err, result){
+        serverApp.controller.sign(data, function(err, res){
             assert.notExists(err, 'sign up must be sucessfully');
-            assert.exists(result, 'sign up must be sucessfully');
+            assert.exists(res, 'sign up must be sucessfully');
+            done();
+        });
+    });
+
+    it('Only valid address can get information',  function (done) {
+        serverApp.controller.retrieveAddress("asdf", function(err, res){
+            assert.exists(err, 'An error must be throwed');
+            assert.notExists(res, 'The result must be empry');
+            done();
+        });
+    });
+
+    it('Get information about a specific address',  function (done) {
+        serverApp.controller.retrieveAddress(data.owner, function(err, res){
+            assert.notExists(err, 'no error should be throwed');
+            res = res.toJSON();
+            assert.hasAllKeys(res,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
             done();
         });
     });
