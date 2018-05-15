@@ -128,7 +128,7 @@
                             <div class="dropdown-menu" id="navbar-dropdown" aria-labelledby="navbarDropdownMenuLink" style="font-size: 11px; right: 0; left: auto;">
                              <!-- <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button>  -->
                                 <span class="dropdown-item" id="dropdown-user-address"></span>
-                                <a href="#" id="access-in" class="dropdown-item dropdown-menu-link" onClick="sign()" style="color: #000; opacity:0;">Sign In</a>
+                                <a href="#" id="access-in" class="dropdown-item button--login dropdown-menu-link" style="color: #000; opacity:0;">Sign In</a>
                             </div>
                         </li>
                     </ul>
@@ -190,7 +190,7 @@
                                  <div class="font-body"><h1 style="font-size: 25px; font-weight: bold">Post. Trade. Earn.</h1></div>
                                 <br/>
 
-                                 <button class="button button--transparent" style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;" onClick="sign()"><b>Access</b></button><br/>
+                                 <button class="button button--transparent button--login" style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;" ><b>Access</b></button><br/>
                                  <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform license.<br /> More information <a style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;" href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a> <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> --></h6></div>
                             </div>
                            
@@ -431,21 +431,7 @@
                 }, 4e3, mina.easeinout, g_animateTopWave);
             }*/
         </script>
-        <script src="static/js/bundle.js"></script>
-        <script>
-            var accessToggle = $("#access-sign");
+        <script src="static/js/splashCompiled.js"></script>
 
-            function sign(){
-               let event = new Event("signSplash");
-               window.dispatchEvent(event);
-            }
-
-
-            $(document).ready(function() {
-
-                
-            });
-
-        </script>
     </body>
 </html>
