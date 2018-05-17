@@ -1,40 +1,44 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.0",
   "info": {
     "description": "This is a doc Api of Pareto Network",
     "version": "1.0.0",
     "title": "Pareto Network 1.0"
   },
-  "host": "localhost:3000",
-  "basePath": "/v1",
-  "schemes": [
-    "http"
+  "servers": [
+    {
+      "url": "http://localhost:3000/v1"
+    }
   ],
   "paths": {
     "/sign": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
-        "summary": "get token of a utorization token",
-        "description": "",
+        "summary": "Cookie authentication",
+        "description": "Test the hash between a message and public key. If the test is passed, a cookie is stored.This parameters are gotten from MetaMask",
         "operationId": "sign",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": ""
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignData"
+              }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
-            "description": "successful operation"
+            "description": "successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "authorization=abcde12345; Path=/; HttpOnly"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -48,36 +52,59 @@
       }
     }
   },
-  "securityDefinitions": {
-    "pareto_auth": {
-      "type": "http",
-      "scheme": "bearer"
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "authorization"
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
     },
-    "api_key": {
-      "type": "apiKey",
-      "name": "api_key",
-      "in": "header"
-    }
-  },
-  "definitions": {
-    "Address": {
-      "type": "object",
-      "properties": {
-        "address": {
-          "type": "string",
-          "description": "User address token"
-        },
-        "rank": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "score": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "block": {
-          "type": "integer",
-          "format": "int64"
+    "schemas": {
+      "Address": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SignData": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "description": "the hast to be tested",
+            "type": "string"
+          },
+          "data": {
+            "description": "Array of data along with types, as per EIP712.",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "result": {
+            "description": "the public key used in the hash test",
+            "type": "string"
+          }
         }
       }
     }
