@@ -14,6 +14,7 @@
     "/sign": {
       "post": {
         "tags": [
+          "Unauthenticated routes",
           "Auth"
         ],
         "summary": "Cookie authentication",
@@ -47,6 +48,345 @@
         "security": [
           {
             "api_key": []
+          }
+        ]
+      }
+    },
+    "/rank": {
+      "get": {
+        "tags": [
+          "Unauthenticated routes",
+          "Rank"
+        ],
+        "summary": "Get the list of all addresses sorted by rank",
+        "description": "Get all the addresses sorted by rank. The ranking is gotten from the Ethereum score",
+        "operationId": "rank",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Addresses"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/auth": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Auth"
+        ],
+        "summary": "Test if user is properly authenticated",
+        "description": "Simple authenticated method to determine if user is properly authenticated.",
+        "operationId": "auth",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleUser"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/unsign": {
+      "post": {
+        "tags": [
+          "Authenticated routes",
+          "Auth"
+        ],
+        "summary": "Unsign http client for the current user",
+        "description": "clears cookie session for the client side, which cannot access secure httpOnly cookies.",
+        "operationId": "unsign",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "authorization=abcde12345; Path=/; HttpOnly; maxAge=1231006505;"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/updatescores": {
+      "post": {
+        "tags": [
+          "Authenticated routes",
+          "Update Scores"
+        ],
+        "summary": "Update the score in the DB",
+        "description": "Fetch score form Ethereum and save in DB",
+        "operationId": "updatescores",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Admin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Addresses"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/address": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Address"
+        ],
+        "summary": "Get the information of the current user",
+        "description": "Get the information of the curren user. The current user is fetched using the auth cookie.",
+        "operationId": "address",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/address/{addres}": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Address"
+        ],
+        "summary": "Get the information of a specific user",
+        "description": "Get the information of a specific user.",
+        "operationId": "address",
+        "parameters": [
+          {
+            "name": "addres",
+            "in": "path",
+            "description": "address to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/content": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Content"
+        ],
+        "summary": "Get the content about the actionable investing intels",
+        "description": "Get all available content about the actionable investing intels.",
+        "operationId": "content",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contens"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/content/me": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Content"
+        ],
+        "summary": "Get the content available for current user",
+        "description": "Get the content available for current user",
+        "operationId": "content_me",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contens"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
           }
         ]
       }
@@ -87,6 +427,39 @@
           }
         }
       },
+      "Addresses": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Address"
+        }
+      },
+      "Content": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "alias": {
+            "type": "string",
+            "description": "alias"
+          },
+          "body": {
+            "type": "string",
+            "description": "the information in html string"
+          },
+          "block": {
+            "type": "string",
+            "description": "the block in Etherium"
+          }
+        }
+      },
+      "Contens": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Content"
+        }
+      },
       "SignData": {
         "type": "object",
         "properties": {
@@ -103,6 +476,43 @@
           },
           "result": {
             "description": "the public key used in the hash test",
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SimpleUser": {
+        "required": [
+          "auth"
+        ],
+        "properties": {
+          "auth": {
+            "description": "Address of the current user",
+            "type": "string"
+          }
+        }
+      },
+      "Admin": {
+        "required": [
+          "admin"
+        ],
+        "properties": {
+          "admin": {
+            "description": "Protection from DDOS (value =  events or scores)",
             "type": "string"
           }
         }
