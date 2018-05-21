@@ -74,5 +74,13 @@ describe('backend-controller /', function() {
         });
     });
 
+    it('Calculate score of specific address',  function (done) {
+        serverApp.controller.calculateScore(data.owner, 0,function(err, res){
+            assert.notExists(err, 'no error should be throwed');
+            assert.hasAllKeys(res,  [ 'address', 'score', 'bonus', 'block', 'rank', 'tokens' ]);
+            done();
+        });
+    });
+
 
 });
