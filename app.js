@@ -29,12 +29,8 @@ app.use(cookieParser());
 app.use(compression());
 app.all('/*', function (req, res, next) {
     // add details of what is allowed in HTTP request headers to the response headers
-    if (process.env.DEBUG == 1) {
-        res.header('Access-Control-Allow-Origin', "http://localhost:8080");
 
-    }else{
-        res.header('Access-Control-Allow-Origin', "*");
-    }
+    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_SERVER || "*");
     res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, HEAD');
     res.header('Access-Control-Allow-Credentials', true);
     res.header('Access-Control-Max-Age', '86400');
