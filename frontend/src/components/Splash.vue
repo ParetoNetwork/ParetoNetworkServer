@@ -1,65 +1,70 @@
 <template>
     <div class="">
-        <div class="content" style="height:100%; display: flex; align-items: flex-end;">
-            <div class="overlay"></div>
-            <div>
-                <video preload="metadata" loop="" muted="" autoplay width="100%" playsinline="">
-                    <source src="../assets/download/Pareto-Introduction.webm" type="video/webm">
-                    <source src="../assets/download/Pareto-Introduction.mp4" type="video/mp4">
-                    <img src="../assets/images/overlay.png" title="">
-                </video>
-
-            </div>
-
-            <div class="wrapper">
-                <div class="row middle-xs">
-                    <div class="col-xs-12 col-sm-12 col-md-6">
-
-                        <div class="site-moto">
-                            <img src="../assets/images/LogoReverse.svg" style="width: 400px; max-width: 100%;" malt="">
-                            <h1 class="font-body">Current, reputable & actionable intel for digital currency traders and
-                                investors.
-                                <br/>
-                            </h1>
-                        </div>
-
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-6">
-                        <div class="site-moto font-body conditional-center">
-                            <!-- <center>
-                                <div class="video-box">
-                                    <iframe style="width: 100%; height: 100%;" src="https://www.youtube.com/embed/j6MFoSQkT7U?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
-                                </div>
-
-                            </center>
-                            -->
-
-                            <div class="font-body"><h1 style="font-size: 25px; font-weight: bold">Post. Trade.
-                                Earn.</h1></div>
-                            <br/>
-
-                            <button class="button button--transparent button--login"
-                                    style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;">
-                                <b>Access</b></button>
-                            <br/>
-                            <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform license.<br/>
-                                More information <a
-                                        style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;"
-                                        href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a>
-                                <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> -->
-                            </h6></div>
-                        </div>
-
-                    </div>
-
+        <header class="offer" style="height:100%;">
+            <div class="content" style="height:100%; display: flex; align-items: flex-end;">
+                <div class="overlay"></div>
+                <div>
+                    <video preload="metadata" loop muted autoplay playsinline>
+                        <source src="../assets/download/Pareto-Introduction.mp4" type="video/mp4">
+                        <img src="../assets/images/overlay.png" title="">
+                    </video>
                 </div>
-                <br/>
-                <br/>
-                <br/>
-            </div>
-        </div>
 
-        <div id="particles-js"></div>
+                <div class="wrapper d-flex align-items-end p-5">
+                    <div class="row middle-xs">
+                        <div class="col-xs-12 col-sm-12 col-md-6">
+
+                            <div class="site-moto">
+                                <img src="../assets/images/LogoReverse.svg" style="width: 400px; max-width: 100%;"
+                                     malt="">
+                                <h1 class="font-body">Current, reputable & actionable intel for digital currency traders
+                                    and investors.
+                                    <br/>
+                                </h1>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-6">
+                            <div class="site-moto font-body conditional-center">
+                                <!-- <center>
+                                    <div class="video-box">
+                                        <iframe style="width: 100%; height: 100%;" src="https://www.youtube.com/embed/j6MFoSQkT7U?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                                    </div>
+
+                                </center>
+                                -->
+
+                                <div class="font-body"><h1 style="font-size: 25px; font-weight: bold">Post. Trade.
+                                    Earn.</h1></div>
+                                <br/>
+
+                                <button class="button button--transparent button--login"
+                                        style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"><b>Access</b>
+                                </button>
+                                <br/>
+                                <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform
+                                    license.<br/> More information <a
+                                            style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;"
+                                            href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a>
+                                    <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> -->
+                                </h6></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                </div>
+            </div>
+            <svg id="offer-wave" x="0px" y="0px" viewBox="0 0 1400 37" style="enable-background:new 0 0 1400 37;     fill: #679ab4
+" xml:space="preserve">
+                <path class="offer-wave" d="M0,0h1400c0,0-332.5,37-570.4,37c-202.6,0-390-7.4-390-7.4S255.8,30.1,194.5,29C98.3,27.3,0,11.7,0,11.7V0z"/>
+            </svg>
+        </header><!-- end offer section -->
+
+        <div id="particles-js" class="mb-5"></div>
         <div class="footer-apps">
             <h4 class="font-body">Follow on Social Media</h4>
 
@@ -244,29 +249,47 @@
         height: 100vh;
     }
 
-    .content {
-        position: fixed;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        color: #f1f1f1;
-        width: 100%;
+    .overlay {
+        position: absolute;
+        background: url('../assets/images/overlayblend.png');
+        background-size: 100% 100%;
+        top: 0px;
+        left: 0px; /* fixed to left. Replace it by right if you want.*/
+        height: 75vh;
+        z-index: -1;
     }
 
-    #myVideo {
+    .offer .content:after {
+        content: '';
+        width: 619px;
+        height: 100vh;
+        /*background-image: url(../images/star.svg);*/
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
+        background-size: 100%;
+        position: absolute;
+        top: 45%;
+        left: 65%;
+        -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        z-index: -1
+    }
 
+    video {
+        position: absolute;
+        background: url('../assets/images/whitespacer.png');
+        background-size: 100% 100%;
+        top: 0px;
+        left: 0px; /* fixed to left. Replace it by right if you want.*/
         min-width: 100%;
         min-height: 100%;
         width: auto;
         height: auto;
+        z-index: -2;
+    }
 
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translateX(-50%) translateY(-50%);
-
-        z-index: -100;
-
-        background-size: cover;
-
+    .wrapper {
+        height: 91vh;
     }
 </style>
