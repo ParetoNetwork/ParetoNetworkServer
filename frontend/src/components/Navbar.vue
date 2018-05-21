@@ -1,53 +1,53 @@
 <template>
-    <div>
+    <div class="main">
 
-        <div
-                id="gradient"
-                class="bar">&nbsp;
+    <div
+            id="gradient"
+            class="bar">&nbsp;
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark header">
+        <router-link tag="a" class="navbar-brand" to="/"><img
+                src="../assets/images/LogoReverse.svg"
+                width="150"
+                class="d-inline-block align-top"
+                alt=""></router-link>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
+            <ul class="navbar-nav ">
+                <li class="nav-item mx-lg-4">
+                    <router-link tag="a" class="nav-link" :active-class="'active'" to="/" exact>Intel</router-link>
+                </li>
+                <li class="nav-item mx-lg-4">
+                    <router-link tag="a" class="nav-link" :active-class="'active'" to="/leaderboards">Leaderboards
+                    </router-link>
+                </li>
+                <li class="nav-item mx-lg-4">
+                    <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
+
+
+                </li>
+                <li class="nav-item dropdown mx-lg-4">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        SIGN IN
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">No user AUTHENTICATED</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" v-on:click="login()">Sign In</a>
+
+                        <a class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
+
+                    </div>
+                </li>
+            </ul>
         </div>
-
-        <nav class="navbar navbar-expand-lg navbar-dark header">
-            <router-link tag="a" class="navbar-brand" to="/"><img
-                    src="../assets/images/LogoReverse.svg"
-                    width="150"
-                    class="d-inline-block align-top"
-                    alt=""></router-link>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
-                <ul class="navbar-nav ">
-                    <li class="nav-item mx-lg-4">
-                        <router-link tag="a" class="nav-link" :active-class="'active'" to="/" exact>Intel</router-link>
-                    </li>
-                    <li class="nav-item mx-lg-4">
-                        <router-link tag="a" class="nav-link" :active-class="'active'" to="/leaderboards">Leaderboards
-                        </router-link>
-                    </li>
-                    <li class="nav-item mx-lg-4">
-                        <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
-
-
-                    </li>
-                    <li class="nav-item dropdown mx-lg-4">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            SIGN IN
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">No user AUTHENTICATED</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#" v-on:click="login()">Sign In</a>
-
-                            <a class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
-
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+    </nav>
     </div>
 
 </template>
@@ -128,6 +128,11 @@
     .header {
         background-color: #040f1e;
 
+    }
+    .main{
+        z-index: 999;
+        position: fixed;
+        width: 100%;
     }
 
     @media (min-width: 992px) {
