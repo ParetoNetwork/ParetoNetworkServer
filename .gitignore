@@ -68,4 +68,5 @@ data/
 
 #mocha_environment
 *mocha.env.js
+*test/mocha.env.js
 
