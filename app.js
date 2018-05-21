@@ -29,7 +29,12 @@ app.use(cookieParser());
 app.use(compression());
 app.all('/*', function (req, res, next) {
     // add details of what is allowed in HTTP request headers to the response headers
-    res.header('Access-Control-Allow-Origin', "*");
+    if (process.env.DEBUG == 1) {
+        res.header('Access-Control-Allow-Origin', "http://localhost:8080");
+
+    }else{
+        res.header('Access-Control-Allow-Origin', "*");
+    }
     res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, HEAD');
     res.header('Access-Control-Allow-Credentials', true);
     res.header('Access-Control-Max-Age', '86400');
@@ -90,7 +95,7 @@ app.get('/intel', function (req, res) {
 /********* UNAUTHENTICATED v1 APIs *********/
 
 app.post('/v1/sign', function (req, res) {
-   console.log(req.body);
+
     controller.sign(req.body, function (err, result) {
         if (err) {
             console.log(err); //if this is a message

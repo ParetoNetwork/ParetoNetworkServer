@@ -73,7 +73,7 @@
         ]),
         methods: {
             login: function () {
-                this.authService.signSplash(token => {
+                authService.signSplash(token => {
                     this.$cookie.set('authorization', token, 1);
                     this.$router.push('/dashboard');
                 }, error => {
