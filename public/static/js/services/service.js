@@ -99,6 +99,7 @@ module.exports = {
                                         //wait for 200 OK result from server and then run calculate method
 
                                         //server response has cookie parameter set and is stored in browser.
+                                        debugger
                                         return onSuccess(data);
                                     },
                                     error: function (jqXHR, textStatus, errorThrown) {
