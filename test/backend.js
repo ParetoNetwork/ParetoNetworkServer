@@ -40,7 +40,7 @@ describe('Server application /', function() {
             .expect(200)
             .expect( function (res) {
                 assert(res.body.length>0, "no data available");
-                assert.hasAllKeys(res.body[0],  ['rank', 'address', 'score']);
+                assert.containsAllKeys(res.body[0],  ['rank', 'address', 'score']);
                 assert.sameOrderedMembers(res.body.map( it =>{return parseInt(it.rank)}),
                  Array(res.body.length -parseInt(res.body[0].rank)+1 ).fill().map((_, idx) => parseInt(res.body[0].rank) + idx),'Rank is not sorted');
             })
@@ -73,7 +73,7 @@ describe('Server application /', function() {
                 .set('cookie', cookie)
                 .expect(200)
                 .expect( function (res) {
-                    assert.hasAllKeys(res.body,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
+                    assert.containsAllKeys(res.body,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
