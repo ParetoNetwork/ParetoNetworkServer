@@ -72,5 +72,9 @@ To start unitTest follow the next steps:
     - process.env.MONGODB_URI
     - process.env.FRONTEND_SERVER
     - process.env.SIGN
+    - process.env.CRED_MONGODB
+    - process.env.CRED_PARETOCONTRACT
+    - process.env.SPECTED_SCORE
+    - process.env.SPECTED_PRECISION
 - Execute unit_test backend  *npm run-script test --  --opts ./mocha.opts*
 - Execute unit_test frontend  *npm run-script --prefix frontend test:unit*

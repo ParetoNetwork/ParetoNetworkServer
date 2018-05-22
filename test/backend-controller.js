@@ -11,7 +11,7 @@ describe('backend-controller /', function() {
         done();
     });
 
-    it('No update wrong address',  function (done) {
+    it('calculate current score',  function (done) {
         serverApp.controller.calculateScore("alsdkfjouasdf", 0, function(err, result){
             assert.exists(err, 'The controller should validate fake address');
             done();
@@ -69,15 +69,17 @@ describe('backend-controller /', function() {
         serverApp.controller.retrieveAddress(data.owner, function(err, res){
             assert.notExists(err, 'no error should be throwed');
             res = res.toJSON();
-            assert.hasAllKeys(res,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
+            assert.containsAllKeys(res,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
             done();
         });
     });
 
     it('Calculate score of specific address',  function (done) {
         serverApp.controller.calculateScore(data.owner, 0,function(err, res){
-            assert.notExists(err, 'no error should be throwed');
-            assert.hasAllKeys(res,  [ 'address', 'score', 'bonus', 'block', 'rank', 'tokens' ]);
+            assert.notExists(err, 'No error should be throwed');
+            assert.containsAllKeys(res,  [ 'address', 'score', 'bonus', 'block', 'rank', 'tokens' ]);
+            assert.isAtLeast(parseFloat(res.score),parseFloat(process.env.SPECTED_SCORE)-parseFloat(process.env.SPECTED_PRECISION), "The score is not equal to the spected");
+            assert.isAtMost(res.score,parseFloat(process.env.SPECTED_SCORE)+parseFloat(process.env.SPECTED_PRECISION), "The score is not equal to the spected");
             done();
         });
     });
