@@ -21,7 +21,6 @@ describe('App.vue', () => {
         localVue
     });
     const button = wrapper.find('#navbarDropdown');
-    console.log("HOLA")
     button.trigger('click');
     expect(wrapper.html()).contain('No user AUTHENTICATED');
   })

@@ -1,5 +1,5 @@
 <template>
-    <div class="main">
+    <div class="head">
 
     <div
             id="gradient"
@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
             <ul class="navbar-nav ">
                 <li class="nav-item mx-lg-4">
-                    <router-link tag="a" class="nav-link" :active-class="'active'" to="/" exact>Intel</router-link>
+                    <router-link tag="a" class="nav-link" :active-class="'active'" to="/dashboard" exact>Intel</router-link>
                 </li>
                 <li class="nav-item mx-lg-4">
                     <router-link tag="a" class="nav-link" :active-class="'active'" to="/leaderboards">Leaderboards
@@ -129,7 +129,7 @@
         background-color: #040f1e;
 
     }
-    .main{
+    .head{
         z-index: 999;
         position: fixed;
         width: 100%;
