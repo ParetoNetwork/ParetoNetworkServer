@@ -1,8 +1,8 @@
 <template>
-    <div class="pareto-bg-dark leaderView">
+    <div class="pareto-bg-dark main leaderView">
         <div class="container">
             <div class="row">
-                <div class="col-6">
+                <div class="col-6 d-flex align-items-center">
                     <div class="">
                         <span>
                                                 Check your PARETO scores easily by signing your wallet address using Metamask or a
@@ -15,7 +15,7 @@
                                 </label>
                                 <input id="wallet" type="text">
                             </div>
-                            <button class="btn btn-primary">SIGN</button>
+                            <button class="button-signin">SIGN</button>
                         </div>
 
 
@@ -29,7 +29,7 @@
                         <div class="table-area">
                             <table class="table text-left">
                                 <thead>
-                                <tr >
+                                <tr>
                                     <th width="55px">
                                         Rank
                                     </th>
@@ -56,32 +56,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!--<div class="table-responsive">-->
-
-                    <!--<table class="table">-->
-                    <!--<thead>-->
-                    <!--<tr>-->
-                    <!--<th>-->
-                    <!--Rank-->
-                    <!--</th>-->
-                    <!--<th>-->
-                    <!--Score-->
-                    <!--</th>-->
-                    <!--<th>-->
-                    <!--Address-->
-                    <!--</th>-->
-                    <!--</tr>-->
-                    <!--</thead>-->
-                    <!--<tbody class="">-->
-                    <!--<tr v-for="rank in leader" :key="rank.address">-->
-                    <!--<td>{{rank.rank}}</td>-->
-                    <!--<td>{{rank.score}}</td>-->
-                    <!--<td>{{rank.address}}</td>-->
-                    <!--</tr>-->
-                    <!--</tbody>-->
-                    <!--</table>-->
-                    <!--</div>-->
                 </div>
             </div>
         </div>
@@ -121,10 +95,17 @@
         width: 100%;
         position: relative;
     }
-
-    .table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th {
+    .button-signin{
+        margin: 5px;
+        width: 50px;
+        height: 25px;
+        font-size: 10px;
+        color: blue;
+        border-radius: 4px;
+        cursor: pointer;
+        background-color: white;
+        text-align: center;
+        vertical-align: middle;
     }
 
-    .table-fixed tbody td, .table-fixed thead > tr > th {
-    }
 </style>

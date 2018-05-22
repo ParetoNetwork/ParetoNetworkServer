@@ -1,5 +1,5 @@
 <template>
-    <div class="">
+    <div class="main">
         <header class="offer" style="height:100%;">
             <div class="content" style="height:100%; display: flex; align-items: flex-end;">
                 <div class="overlay"></div>
@@ -10,7 +10,7 @@
                     </video>
                 </div>
 
-                <div class="wrapper d-flex align-items-end p-5">
+                <div class="wrapper d-flex align-items-center p-5">
                     <div class="row middle-xs">
                         <div class="col-xs-12 col-sm-12 col-md-6">
 
@@ -58,13 +58,14 @@
                     <br/>
                 </div>
             </div>
-            <svg id="offer-wave" x="0px" y="0px" viewBox="0 0 1400 37" style="enable-background:new 0 0 1400 37;     fill: #679ab4
+            <svg id="offer-wave" x="0px" y="0px  " viewBox="0 0 1400 37" style="enable-background:new 0 0 1400 37;     fill: #679ab4
 " xml:space="preserve">
                 <path class="offer-wave" d="M0,0h1400c0,0-332.5,37-570.4,37c-202.6,0-390-7.4-390-7.4S255.8,30.1,194.5,29C98.3,27.3,0,11.7,0,11.7V0z"/>
             </svg>
         </header><!-- end offer section -->
 
-        <div id="particles-js" class="mb-5"></div>
+        <VParticles class="mb-5"/>
+
         <div class="footer-apps">
             <h4 class="font-body">Follow on Social Media</h4>
 
@@ -112,134 +113,19 @@
 
 <script>
     /* eslint-disable */
-
+    import VParticles from './VParticles';
     export default {
         name: 'SplashDashboard',
-        components: {},
+        components: {VParticles},
         data() {
             return {
                 message: 'Hello Vue.js!'
             };
         },
         mounted() {
-            require('particles.js');
-            this.$nextTick(() => {
-                this.initParticleJS();
-            });
+
         },
         methods: {
-            initParticleJS() {
-                particlesJS('particles-js', {
-                    particles: {
-                        number: {
-                            value: 240,
-                            density: {
-                                enable: true,
-                                value_area: 800
-                            }
-                        },
-                        color: {
-                            value: '#3e3e3e'
-                        },
-                        shape: {
-                            type: 'circle',
-                            stroke: {
-                                width: 0,
-                                color: '#000000'
-                            },
-                            polygon: {
-                                nb_sides: 5
-                            },
-                            image: {
-                                src: 'img/github.svg',
-                                width: 100,
-                                height: 100
-                            }
-                        },
-                        opacity: {
-                            value: 0.8,
-                            random: false,
-                            anim: {
-                                enable: false,
-                                speed: 1,
-                                opacity_min: 0.1,
-                                sync: false
-                            }
-                        },
-                        size: {
-                            value: 4,
-                            random: true,
-                            anim: {
-                                enable: false,
-                                speed: 40,
-                                size_min: 0.1,
-                                sync: false
-                            }
-                        },
-                        line_linked: {
-                            enable: true,
-                            distance: 120,
-                            color: '#3e3e3e',
-                            opacity: 0.8,
-                            width: 1
-                        },
-                        move: {
-                            enable: true,
-                            speed: 1.5,
-                            direction: 'none',
-                            random: false,
-                            straight: false,
-                            out_mode: 'out',
-                            bounce: false,
-                            attract: {
-                                enable: false,
-                                rotateX: 10000,
-                                rotateY: 10000
-                            }
-                        }
-                    },
-                    interactivity: {
-                        detect_on: 'canvas',
-                        events: {
-                            onhover: {
-                                enable: false,
-                                mode: 'repulse'
-                            },
-                            onclick: {
-                                enable: false,
-                                mode: 'push'
-                            },
-                            resize: true
-                        },
-                        modes: {
-                            grab: {
-                                distance: 400,
-                                line_linked: {
-                                    opacity: 1
-                                }
-                            },
-                            bubble: {
-                                distance: 400,
-                                size: 40,
-                                duration: 2,
-                                opacity: 8,
-                                speed: 3
-                            },
-                            repulse: {
-                                distance: 200,
-                                duration: 0.4
-                            },
-                            push: {
-                                particles_nb: 4
-                            },
-                            remove: {
-                                particles_nb: 2
-                            }
-                        }
-                    },
-                    retina_detect: true
-                });
-            }
         }
     };
 </script>

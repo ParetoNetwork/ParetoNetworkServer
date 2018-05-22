@@ -1,5 +1,5 @@
 <template>
-    <div class="main">
+    <div class="head">
 
     <div
             id="gradient"
@@ -73,7 +73,7 @@
         ]),
         methods: {
             login: function () {
-                this.authService.signSplash(token => {
+                authService.signSplash(token => {
                     this.$cookie.set('authorization', token, 1);
                     this.$router.push('/dashboard');
                 }, error => {
@@ -129,7 +129,7 @@
         background-color: #040f1e;
 
     }
-    .main{
+    .head{
         z-index: 999;
         position: fixed;
         width: 100%;
