@@ -4,7 +4,7 @@
   "description": "PARETO",
   "scripts": {
     "start": "node backend.js",
-    "test": "node scripts/test"
+    "test": "mocha test/*.js  --timeout 150000 --exit"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -43,7 +43,10 @@
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babelify": "^8.0.0",
+    "swagger-ui-express": "^3.0.9",
+    "chai": "^4.1.2",
     "debug": "^3.1.0",
-    "swagger-ui-express": "^3.0.9"
+    "mocha": "^5.1.1",
+    "supertest": "^3.0.0"
   }
 }

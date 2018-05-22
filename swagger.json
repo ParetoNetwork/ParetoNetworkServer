@@ -18,7 +18,7 @@
           "Auth"
         ],
         "summary": "Cookie authentication",
-        "description": "Test the hash between a message and public key. If the test is passed, a cookie is stored.This parameters are gotten from MetaMask",
+        "description": "Test the hash between a message and public key. If the test is passed, a cookie is stored. The token on response must be set on cookies by Client like authorization=token ( see User Model). The parameters of this request are gotten from MetaMask",
         "operationId": "sign",
         "requestBody": {
           "content": {
@@ -37,6 +37,13 @@
                 "schema": {
                   "type": "string",
                   "example": "authorization=abcde12345; Path=/; HttpOnly"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -138,7 +145,7 @@
           "Auth"
         ],
         "summary": "Unsign http client for the current user",
-        "description": "clears cookie session for the client side, which cannot access secure httpOnly cookies.",
+        "description": "Manage unsign proccess. The cookie auth must be clear from Client size.",
         "operationId": "unsign",
         "responses": {
           "200": {
@@ -406,6 +413,38 @@
       }
     },
     "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bonus": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tokens": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "the auth token, this must be set on cookies. authorization=token"
+          }
+        }
+      },
       "Address": {
         "type": "object",
         "properties": {
@@ -482,13 +521,12 @@
       },
       "Error": {
         "required": [
-          "code",
+          "status",
           "message"
         ],
         "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32"
+          "status": {
+            "type": "boolean"
           },
           "message": {
             "type": "string"

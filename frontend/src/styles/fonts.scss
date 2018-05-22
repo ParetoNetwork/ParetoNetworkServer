@@ -1,0 +1,46 @@
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('/src/assets/fonts/fontawesome-webfont.eot?v=4.7.0');
+  src: url('/src/assets/fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format("embedded-opentype"), url("/src/assets/fonts/fontawesome-webfont.woff2?v=4.7.0") format("woff2"), url("/src/assets/fonts/fontawesome-webfont.woff?v=4.7.0") format("woff"), url("/src/assets/fonts/fontawesome-webfont.ttf?v=4.7.0") format("truetype"), url("/src/assets/fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular") format("svg");
+  font-weight: normal;
+  font-style: normal
+}
+
+@font-face {
+  font-family: 'Header';
+  src: url('/src/assets/fonts/font-header.eot'); /* IE9 Compat Modes */
+  src: url('/src/assets/fonts/font-header.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('/src/assets/fonts/font-header.woff') format('woff'), /* Pretty Modern Browsers */
+  url('/src/assets/fonts/font-header.ttf')  format('truetype'), /* Safari, Android, iOS */
+  url('/src/assets/fonts/font-header.svg#svgFontName') format('svg'); /* Legacy iOS */
+}
+
+@font-face {
+  font-family: 'Body';
+  src: url('/src/assets/fonts/font-body.eot'); /* IE9 Compat Modes */
+  src: url('/src/assets/fonts/font-body.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('/src/assets/fonts/font-body.woff') format('woff'), /* Pretty Modern Browsers */
+  url('/src/assets/fonts/font-body.ttf')  format('truetype'), /* Safari, Android, iOS */
+  url('/src/assets/fonts/font-body.svg#svgFontName') format('svg'); /* Legacy iOS */
+}
+
+@font-face {
+  font-family: 'Body-Regular';
+  src: url('/src/assets/fonts/font-body-regular.eot'); /* IE9 Compat Modes */
+  src: url('/src/assets/fonts/font-body-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('/src/assets/fonts/font-body-regular.woff') format('woff'), /* Pretty Modern Browsers */
+  url('/src/assets/fonts/font-body-regular.ttf')  format('truetype'), /* Safari, Android, iOS */
+  url('/src/assets/fonts/font-body-regular.svg#svgFontName') format('svg'); /* Legacy iOS */
+}
+
+.font-header {
+  font-family: 'Header';
+}
+
+.font-body {
+  font-family: 'Body';
+}
+
+.font-body-regular {
+  font-family: 'Body-Regular';
+}
