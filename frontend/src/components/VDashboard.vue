@@ -1,5 +1,5 @@
 <template>
-    <div class="container  wrapp">
+    <div class="container main wrapp">
         <div class="row ">
             <div class="col-md-4">
 

@@ -35,3 +35,19 @@ body{
   display: inline-block;
   max-width: 25%;
 }
+
+@mixin flexible-top($elementHeight) {
+  top: ($elementHeight / (-2));
+}
+
+
+
+
+.main{
+  padding-top: 12vh;
+
+  @media (max-width: 770px) {
+      padding-top: 10vh;
+  }
+}
+
