@@ -39,7 +39,7 @@ redisClient.on("error", function (err) {
 
 
 /*db initialization*/
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 //var models = require('./models/address');
 mongoose.connect(connectionUrl).then(tmp=>{
   console.log("PARETO: Success connecting to Mongo ")
@@ -66,6 +66,12 @@ var jwt = require('jsonwebtoken');
 var utils = require('./backend-utils.js');
 
 module.exports.mongoose = mongoose;
+module.exports.redisClient = redisClient;
+
+controller.endConnections= function(){
+    mongoose.connection.close();
+    redisClient.end(true);
+}
 
 /*ways of writing contract creation block height*/
 const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
