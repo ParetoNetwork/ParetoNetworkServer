@@ -13,8 +13,9 @@ describe('Server application /', function() {
                 if (error) {
                     throw error;
                 }
-                const loginCookie = response.body.result.token;
-                done("authorization ="+ loginCookie);
+                // const loginCookie = response.body.result.token;
+                // done("authorization ="+ loginCookie);
+                done(response.headers['set-cookie'])
             });
     };
 
