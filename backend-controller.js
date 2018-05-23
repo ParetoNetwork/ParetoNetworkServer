@@ -209,7 +209,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                 try {
                   //sort by default sort string data, in string 10 < 20
                   transactions = transactions.sort(function (a, b) {
-                    return b[0]- a[0] === 0 ? a[1]- b[1] : b[0] - a[0];
+                    return b[0]- a[0] === 0 ? b[1]- a[1] : b[0] - a[0];
                   });
 
                   try {
