@@ -3,6 +3,8 @@
 @import "~font-awesome/css/font-awesome.min.css";
 @import "~bootstrap/scss/bootstrap";
 @import "styles/splash";
+@import "styles/splash-custom";
+
 
 .header {
   background-color: blue;
@@ -33,7 +35,7 @@ body{
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
-  max-width: 25%;
+  max-width: 60%;
 }
 
 @mixin flexible-top($elementHeight) {
