@@ -102,7 +102,7 @@ export default class authService {
                                         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
                                     }
                                 }).then(response => {
-                                    const token = response.data.result.token;
+                                    const token = response.data.result;
 
                                     logged = true;
                                     this.auth(data => {

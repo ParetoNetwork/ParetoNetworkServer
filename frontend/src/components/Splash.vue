@@ -1,6 +1,6 @@
 <template>
     <div class="main">
-        <header class="offer" style="height:100%;">
+        <header class="offer mb-5" style="height:100%;">
             <div class="content" style="height:100%; display: flex; align-items: flex-end;">
                 <div class="overlay"></div>
                 <div>
@@ -39,7 +39,9 @@
                                 <br/>
 
                                 <button class="button button--transparent button--login"
-                                        style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"><b>Access</b>
+                                        style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"
+                                        v-on:click="authLogin()"><b v-if="!makingLogin">Access</b> <span v-else
+                                                                                                     class="fa fa-spinner fa-spin"></span>
                                 </button>
                                 <br/>
                                 <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform
@@ -114,18 +116,36 @@
 <script>
     /* eslint-disable */
     import VParticles from './VParticles';
+    import Auth from '../services/authService';
+    import {mapState,mapMutations} from 'vuex';
+
     export default {
         name: 'SplashDashboard',
         components: {VParticles},
+        computed: {...mapState(['makingLogin'])},
         data() {
             return {
-                message: 'Hello Vue.js!'
+                loading: false
             };
         },
         mounted() {
-
         },
         methods: {
+            authLogin() {
+                this.loadingLogin();
+                Auth.signSplash(data => {
+                    this.loading = false;
+                    this.$store.dispatch({
+                        type: 'login',
+                        address: data.address,
+                    });
+                    this.$router.push('/dashboard');
+                }, error => {
+                    alert(error);
+                });
+            }, ...mapMutations(
+                ['login','loadingLogin']
+            )
         }
     };
 </script>
