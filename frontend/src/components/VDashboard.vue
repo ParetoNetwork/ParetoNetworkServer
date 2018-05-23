@@ -1,15 +1,20 @@
 <template>
-    <div class="container main wrapp">
-        <div class="row ">
+    <div class="container main  wrapp">
+        <div class="row pt-5">
             <div class="col-md-4">
 
                 <template v-if="address">
-                    <div class="media border mb-5">
-                        <img src="" alt="">
-                        <div class="media-body ">
+                    <div class="media py-1 px-4 border mb-5 align-items-center">
+                        <span style="font-size: 50px;  color: gray; background: #b2b2b2" class="fa fa-user p-2"></span>
 
+                        <div class="d-flex p-3 flex-column text-left">
                             <span style="font-size: 12px;" class="pareto-truncate-text">{{address.address}}</span>
-                            <span>{{'&nbsp;' + address.tokens + '&nbsp;PARETO'}}</span>
+
+                            <div class="">
+                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                <span class="text">{{'&nbsp;' + address.tokens + '&nbsp;PARETO'}}</span>
+
+                            </div>
                             <span>{{'Network Rank ' + address.rank}}</span>
                         </div>
                     </div>
@@ -20,6 +25,7 @@
                     <th>MY POSTS</th>
                     </thead>
                     <tbody>
+
                     <template v-if="!myContent.length">
                         <tr>
                             <td>
@@ -52,6 +58,13 @@
                         </tr>
                         </thead>
                         <tbody>
+                        <template v-if="loading">
+                            <tr>
+                                <td>
+                                    <span>Loading...</span>
+                                </td>
+                            </tr>
+                        </template>
                         <tr :key="row._id" v-for="row of content">
                             <td>
                                 <b> {{row.title }}</b><br/>
@@ -80,8 +93,10 @@
             return {
                 address: null,
                 content: [],
-                myContent: []
-            };
+                myContent: [],
+                loading: true
+        }
+            ;
         },
         mounted: function () {
             this.loadAddress();
@@ -91,11 +106,13 @@
             loadAddress: function () {
                 dashboardService.getAddress(res => {
                     this.address = res;
+
                 }, error => {
-                    alert(error);
+                    // alert(error);
                 });
             }, loadContent: function () {
                 dashboardService.getAllContent(res => {
+                    this.loading = false;
                     this.content = res;
                 }, error => {
                     alert(error);
