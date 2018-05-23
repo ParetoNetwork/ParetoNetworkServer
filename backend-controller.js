@@ -157,7 +157,8 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                 var quantityWei = web3.utils.toBN(data, 16).toString();
                 var blockNumber = web3.utils.toBN(blockHex, 16).toString();
                 var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
-                quantityEth = parseInt(quantityEth);
+                  //can be float
+                quantityEth = parseFloat(quantityEth);
 
                 //basically pushes
                 if(blockNumber in incoming)
@@ -188,7 +189,8 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                   var blockNumber = web3.utils.toBN(blockHex, 16).toString();
 
                   var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
-                  quantityEth = parseInt(quantityEth);
+                    //can be float
+                  quantityEth = parseFloat(quantityEth);
 
                   //basically pushes
                   if(blockNumber in outgoing)
@@ -201,9 +203,14 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 
                 }//end for
 
-                var transactions = Object.entries(incoming).concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])));
+                var transactions = Object.entries(incoming)
+                    .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])))
+                    .map(([ts, val]) => ([parseInt(ts), val]));
                 try {
-                  transactions = transactions.sort().reverse();
+                  //sort by default sort string data, in string 10 < 20
+                  transactions = transactions.sort(function (a, b) {
+                    return b[0]- a[0] === 0 ? a[1]- b[1] : b[0] - a[0];
+                  });
 
                   try {
                     var i = 0;
