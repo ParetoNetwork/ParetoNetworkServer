@@ -1,0 +1,564 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This is a doc Api of Pareto Network",
+    "version": "1.0.0",
+    "title": "Pareto Network 1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/v1"
+    }
+  ],
+  "paths": {
+    "/sign": {
+      "post": {
+        "tags": [
+          "Unauthenticated routes",
+          "Auth"
+        ],
+        "summary": "Cookie authentication",
+        "description": "Test the hash between a message and public key. If the test is passed, a cookie is stored. The token on response must be set on cookies by Client like authorization=token ( see User Model). The parameters of this request are gotten from MetaMask",
+        "operationId": "sign",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "authorization=abcde12345; Path=/; HttpOnly"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/rank": {
+      "get": {
+        "tags": [
+          "Unauthenticated routes",
+          "Rank"
+        ],
+        "summary": "Get the list of all addresses sorted by rank",
+        "description": "Get all the addresses sorted by rank. The ranking is gotten from the Ethereum score",
+        "operationId": "rank",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Addresses"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/auth": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Auth"
+        ],
+        "summary": "Test if user is properly authenticated",
+        "description": "Simple authenticated method to determine if user is properly authenticated.",
+        "operationId": "auth",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleUser"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/unsign": {
+      "post": {
+        "tags": [
+          "Authenticated routes",
+          "Auth"
+        ],
+        "summary": "Unsign http client for the current user",
+        "description": "Manage unsign proccess. The cookie auth must be clear from Client size.",
+        "operationId": "unsign",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "authorization=abcde12345; Path=/; HttpOnly; maxAge=1231006505;"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/updatescores": {
+      "post": {
+        "tags": [
+          "Authenticated routes",
+          "Update Scores"
+        ],
+        "summary": "Update the score in the DB",
+        "description": "Fetch score form Ethereum and save in DB",
+        "operationId": "updatescores",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Admin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Addresses"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/address": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Address"
+        ],
+        "summary": "Get the information of the current user",
+        "description": "Get the information of the curren user. The current user is fetched using the auth cookie.",
+        "operationId": "address",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/address/{addres}": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Address"
+        ],
+        "summary": "Get the information of a specific user",
+        "description": "Get the information of a specific user.",
+        "operationId": "address",
+        "parameters": [
+          {
+            "name": "addres",
+            "in": "path",
+            "description": "address to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/content": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Content"
+        ],
+        "summary": "Get the content about the actionable investing intels",
+        "description": "Get all available content about the actionable investing intels.",
+        "operationId": "content",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contens"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/content/me": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "Content"
+        ],
+        "summary": "Get the content available for current user",
+        "description": "Get the content available for current user",
+        "operationId": "content_me",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contens"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "authorization"
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bonus": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tokens": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "the auth token, this must be set on cookies. authorization=token"
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Addresses": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Address"
+        }
+      },
+      "Content": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "alias": {
+            "type": "string",
+            "description": "alias"
+          },
+          "body": {
+            "type": "string",
+            "description": "the information in html string"
+          },
+          "block": {
+            "type": "string",
+            "description": "the block in Etherium"
+          }
+        }
+      },
+      "Contens": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Content"
+        }
+      },
+      "SignData": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "description": "the hast to be tested",
+            "type": "string"
+          },
+          "data": {
+            "description": "Array of data along with types, as per EIP712.",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "result": {
+            "description": "the public key used in the hash test",
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "required": [
+          "status",
+          "message"
+        ],
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SimpleUser": {
+        "required": [
+          "auth"
+        ],
+        "properties": {
+          "auth": {
+            "description": "Address of the current user",
+            "type": "string"
+          }
+        }
+      },
+      "Admin": {
+        "required": [
+          "admin"
+        ],
+        "properties": {
+          "admin": {
+            "description": "Protection from DDOS (value =  events or scores)",
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more in white Paper",
+    "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
+  }
+}
