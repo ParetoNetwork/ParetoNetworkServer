@@ -619,18 +619,7 @@ controller.retrieveAddress = function(address, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoAddress.findOne({address : address});
-
-    query.exec(function(err, results){
-      if(err){
-        if(callback && typeof callback === "function") {
-          callback(err);
-        }
-      }
-      else {
-        if(callback && typeof callback === "function") { callback(null, results ); }
-      }
-    });
+      controller.retrieveAddressRankWithRedis(address,true,callback);
   }
 
 };
@@ -684,6 +673,9 @@ controller.sign = function(params, callback){
         }
       } else {
         result.token = token;
+        controller.getScoreAndSaveRedis(function(err, result){
+
+        });
         if(callback && typeof callback === "function") { callback(null, result ); }
       }
     });
@@ -778,7 +770,9 @@ controller.getScoreAndSaveRedis = function(callback){
       "addresses": {
         "$push": {
           "address" : "$address",
-          "score" : "$score"
+          "score" : "$score",
+            "block" : "block",
+            "tokens" : "tokens"
         }
       }}).unwind({
     "path": "$addresses",
@@ -795,11 +789,14 @@ controller.getScoreAndSaveRedis = function(callback){
       results.forEach(function(result){
         result.addresses.rank = result.rank +1;
         multi.hmset(result.addresses.rank+ "",  result.addresses);
+        const rank = { rank: result.addresses.rank+ ""}
+        multi.hmset("address"+result.addresses.address+ "", rank );
 
       });
 
       multi.exec(function(errors, results) {
-        console.log("updating ranks finished querying with results.length : " + results.length);
+          if(!errors){  console.log("updating ranks finished querying with results.length : " + results.length);  }
+            else{ console.log(errors)}
         if(callback && typeof callback === "function") { callback(null, {} ); }
       })
 
@@ -852,6 +849,46 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
 
 
   });
+
+};
+
+/**
+ * Get ranking from Redis.
+ * getScoreAndSaveRedis must be called at some time before
+ * @param callback Response when the process is finished
+ * @param address addressTobeGet
+ *  @param attempts when is true, try with mongodb if results is zero
+ */
+controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
+
+    const multi = redisClient.multi();
+    multi.hgetall("address"+address);
+    multi.exec(function(err, results) {
+        if(err){
+            return callback(err);
+        }
+        if((!results || results.length ===0 || !results[0]) && attempts){
+            controller.getScoreAndSaveRedis(function(err, result){
+                if(err){
+                    return callback(err);
+                } else {
+                    controller.retrieveAddressRankWithRedis(address ,false,callback);
+                }
+            });
+        }else{
+            const multi = redisClient.multi();
+            multi.hgetall(results[0].rank+ "");
+            multi.exec(function(err, results) {
+                if(err){
+                    return callback(err);
+                }
+                // return the cached ranking
+                return callback(null, results[0]);
+            });
+        }
+
+
+    });
 
 };
 
