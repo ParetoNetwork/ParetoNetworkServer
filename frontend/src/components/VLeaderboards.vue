@@ -139,7 +139,7 @@
 </script>
 
 <style scoped lang="scss">
-    @import "/src/styles/custom.css";
+
 
     .leaderView {
         min-height: 100vh;
