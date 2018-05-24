@@ -74,7 +74,7 @@ describe('Server application /', function() {
                 .set('cookie', cookie)
                 .expect(200)
                 .expect( function (res) {
-                    assert.containsAllKeys(res.body,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
+                    assert.containsAllKeys(res.body,  [ 'address', 'block', 'rank', 'score', 'tokens' ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
