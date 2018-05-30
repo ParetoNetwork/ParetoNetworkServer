@@ -109,7 +109,7 @@ app.post('/v1/sign', function (req, res) {
                 }); //should set a debug flag for env variable
             }
 
-            // delete result.token;
+             delete result.token;
             res.status(200).json({status: 'success', result});
         }
     });
