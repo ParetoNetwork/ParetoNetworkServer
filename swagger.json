@@ -18,7 +18,7 @@
           "Auth"
         ],
         "summary": "Cookie authentication",
-        "description": "Test the hash between a message and public key. If the test is passed, a cookie is stored. The token on response must be set on cookies by Client like authorization=token ( see User Model). The parameters of this request are gotten from MetaMask",
+        "description": "Test the hash between a message and public key. If the test is passed, a cookie is stored. The parameters of this request are gotten from MetaMask",
         "operationId": "sign",
         "requestBody": {
           "content": {
@@ -145,7 +145,7 @@
           "Auth"
         ],
         "summary": "Unsign http client for the current user",
-        "description": "Manage unsign proccess. The cookie auth must be clear from Client size.",
+        "description": "Manage unsign proccess. Delete cookie with header set-cookie",
         "operationId": "unsign",
         "responses": {
           "200": {
@@ -438,10 +438,6 @@
           },
           "tokens": {
             "type": "string"
-          },
-          "token": {
-            "type": "string",
-            "description": "the auth token, this must be set on cookies. authorization=token"
           }
         }
       },
