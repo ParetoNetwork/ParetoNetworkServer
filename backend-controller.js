@@ -795,8 +795,7 @@ controller.getScoreAndSaveRedis = function(callback){
       });
 
       multi.exec(function(errors, results) {
-          if(!errors){ }// console.log("updating ranks finished querying with results.length : " + results.length);  }
-            else{ console.log(errors)}
+          if(errors){ console.log(errors)}
         if(callback && typeof callback === "function") { callback(null, {} ); }
       })
 
