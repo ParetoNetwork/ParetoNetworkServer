@@ -17,7 +17,7 @@
                             <div class="site-moto">
                                 <img src="../assets/images/LogoReverse.svg" style="width: 400px; max-width: 100%;"
                                      malt="">
-                                <h1 class="font-body">Current, reputable & actionable intel for digital currency traders
+                                <h1 class="font-body text-left">Current, reputable & actionable intel for digital currency traders
                                     and investors.
                                     <br/>
                                 </h1>
@@ -142,9 +142,10 @@
                     this.$router.push('/dashboard');
                 }, error => {
                     alert(error);
+                    this.stopLogin();
                 });
             }, ...mapMutations(
-                ['login','loadingLogin']
+                ['login','loadingLogin','stopLogin']
             )
         }
     };
