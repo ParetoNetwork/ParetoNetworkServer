@@ -8,7 +8,7 @@ const localVue = createLocalVue()
 localVue.use(Vuex)
 
 describe('App.vue', () => {
-  it('renders Navbar click', () => {
+  it('renders Navbar, and  click in menu', () => {
 
     const wrapper = shallowMount(Navbar, {
         mocks: {
