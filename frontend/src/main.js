@@ -25,6 +25,8 @@ const store = new Vuex.Store({
             state.address = null;
         },loadingLogin(state){
             state.makingLogin = true;
+        },stopLogin(state){
+            state.makingLogin = false
         }
     },
     actions: {
