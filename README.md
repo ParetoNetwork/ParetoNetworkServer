@@ -65,6 +65,8 @@ To start frontEnd application follow the next steps:
 
 To start unitTest follow the next steps:
 - make sure that all dependecies are installed (docker, package.json in root project folder, package.json in /frondtend folder)
+- install vue unit test dependencies with
+    - vue add @vue/unit-mocha   (inside /frontend folder)
 - Before running the test application run: *docker-compose up*
 - create a file in /test/ and named mocha.env.js
 - inside the /test/mocha.env.js create the environment variables according DEVELOPMENT SETUP. The variable *SIGN* must be contain in json string the return data from MetaMask of the user to be tested:
