@@ -313,6 +313,41 @@ app.get('/v1/address/:address', function (req, res) {
 
 });
 
+//get info of himself
+app.get('/v1/userinfo', function (req, res) {
+    controller.getUserInfo(req.user,  function (err, result) {
+        if (err) {
+            res.boom.badRequest(err.message);
+        } else {
+            res.status(200).json(result);
+        }
+    });
+
+});
+
+//get info about another address
+app.get('/v1/userinfo/:address', function (req, res) {
+    controller.getUserInfo(req.params.params,  function (err, result) {
+        if (err) {
+            res.boom.badRequest(err.message);
+        } else {
+            res.status(200).json(result);
+        }
+    });
+
+});
+
+//update info user
+app.post('/v1/updateuser', function (req, res) {
+    controller.updateUser(req.user, req.body, function (err, result) {
+        if (err) {
+            res.boom.badRequest(err.message);
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
 /*
 * re-calculate rank?
 */

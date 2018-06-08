@@ -624,6 +624,32 @@ controller.retrieveAddress = function(address, callback){
 
 };
 
+controller.updateUser = function(address, userinfo ,callback){
+
+    let fixaddress  = address.toLowerCase();
+
+    if(web3.utils.isAddress(fixaddress) == false){
+         callback(new Error('Invalid Address'));
+    } else {
+        callback( null, userinfo );
+    }
+
+};
+
+controller.getUserInfo = function(address ,callback){
+
+    let fixaddress  = address.toLowerCase();
+
+    if(web3.utils.isAddress(fixaddress) == false){
+        callback(new Error('Invalid Address'));
+    } else {
+        callback( null, { 'address': address,   'rank': 1, 'score': 123456781234,
+            'first_name': "Carlos", "last_name": "De los Reyes",
+            'biography': "Lorem ipsum ...", "profile_pic" : "https://www.ienglishstatus.com/wp-content/uploads/2018/04/Anonymous-Whatsapp-profile-picture.jpg"  } );
+    }
+
+};
+
 controller.getContentById = function(){
 
   //check if user, then check if the user is privy to see it
@@ -795,8 +821,7 @@ controller.getScoreAndSaveRedis = function(callback){
       });
 
       multi.exec(function(errors, results) {
-          if(!errors){ }// console.log("updating ranks finished querying with results.length : " + results.length);  }
-            else{ console.log(errors)}
+          if(errors){ console.log(errors)}
         if(callback && typeof callback === "function") { callback(null, {} ); }
       })
 

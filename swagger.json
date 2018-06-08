@@ -230,7 +230,7 @@
           "Address"
         ],
         "summary": "Get the information of the current user",
-        "description": "Get the information of the curren user. The current user is fetched using the auth cookie.",
+        "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
         "operationId": "address",
         "responses": {
           "200": {
@@ -397,6 +397,139 @@
           }
         ]
       }
+    },
+    "/userinfo": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "User Profile"
+        ],
+        "summary": "Get the information of the profile user",
+        "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
+        "operationId": "userinfo",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/userinfo/{addres}": {
+      "get": {
+        "tags": [
+          "Authenticated routes",
+          "User Profile"
+        ],
+        "summary": "Get the profile of a specific user",
+        "description": "Get the profile of a specific user.",
+        "operationId": "userinfo",
+        "parameters": [
+          {
+            "name": "addres",
+            "in": "path",
+            "description": "address to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/updateuser": {
+      "post": {
+        "tags": [
+          "Authenticated routes",
+          "User Profile"
+        ],
+        "summary": "Update the profile of the current user",
+        "description": "Update the profile of the current user",
+        "operationId": "updateuser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -438,6 +571,60 @@
           },
           "tokens": {
             "type": "string"
+          }
+        }
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "biography": {
+            "type": "string",
+            "description": "An description about user"
+          },
+          "profile_pic": {
+            "type": "string",
+            "description": "public url of the image"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "biography": {
+            "type": "string",
+            "description": "An description about user"
+          },
+          "profile_pic": {
+            "type": "string",
+            "description": "url of the image"
           }
         }
       },
