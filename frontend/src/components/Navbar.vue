@@ -6,7 +6,7 @@
                 class="bar">&nbsp;
         </div>
 
-        <nav class="navbar navbar-expand-lg navbar-dark header">
+        <nav class="navbar navbar-expand-lg navbar-dark header font-weight-bold font-body text-white">
             <router-link tag="a" class="navbar-brand" to="/"><img
                     src="../assets/images/LogoReverse.svg"
                     width="150"
@@ -32,9 +32,10 @@
 
 
                     </li>
-                    <li class="nav-item dropdown mx-lg-4">
+                    <li class="nav-item dropdown mx-lg-4 active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-user">&nbsp;</i>
                             <span v-if="address">
                                 {{address.slice(0,10) + '...'}}
                             </span>
@@ -43,8 +44,7 @@
                         <div class="dropdown-menu dropdown-menu-right" style="font-size: 11px"
                              aria-labelledby="navbarDropdown">
                             <a v-if="address" class="dropdown-item" href="#">{{address}}</a>
-                            <a v-else class="dropdown-item" href="#">No user AUTHENTICATED</a>
-                            <div class="dropdown-divider"></div>
+                            <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">Sign In</a>
 
                             <a v-else class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
