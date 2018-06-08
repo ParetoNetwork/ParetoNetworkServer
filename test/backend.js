@@ -13,8 +13,9 @@ describe('Server application /', function() {
                 if (error) {
                     throw error;
                 }
-                const loginCookie = response.body.result.token;
-                done("authorization ="+ loginCookie);
+                // const loginCookie = response.body.result.token;
+                // done("authorization ="+ loginCookie);
+                done(response.headers['set-cookie'])
             });
     };
 
@@ -73,7 +74,7 @@ describe('Server application /', function() {
                 .set('cookie', cookie)
                 .expect(200)
                 .expect( function (res) {
-                    assert.containsAllKeys(res.body,  [ '__v', '_id', 'address', 'block', 'rank', 'score', 'tokens' ]);
+                    assert.containsAllKeys(res.body,  [ 'address', 'block', 'rank', 'score', 'tokens' ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
