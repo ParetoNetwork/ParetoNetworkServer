@@ -76,7 +76,7 @@
                     type: 'login',
                     address: res.address
                 });
-            }, error => {
+            }, () => {
 
                 // alert(error);
             });
