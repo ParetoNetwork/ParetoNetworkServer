@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000/v1"
+      "url": "https://api.pareto.network/v1"
     }
   ],
   "paths": {
@@ -173,56 +173,6 @@
         ]
       }
     },
-    "/updatescores": {
-      "post": {
-        "tags": [
-          "Authenticated routes",
-          "Update Scores"
-        ],
-        "summary": "Update the score in the DB",
-        "description": "Fetch score form Ethereum and save in DB",
-        "operationId": "updatescores",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Admin"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Addresses"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": []
-          },
-          {
-            "cookieAuth": []
-          }
-        ]
-      }
-    },
     "/address": {
       "get": {
         "tags": [
@@ -264,7 +214,7 @@
         ]
       }
     },
-    "/address/{addres}": {
+    "/address/{address}": {
       "get": {
         "tags": [
           "Authenticated routes",
@@ -489,7 +439,7 @@
           }
         }
       },
-      "Contens": {
+      "Contents": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/Content"
@@ -554,7 +504,7 @@
     }
   },
   "externalDocs": {
-    "description": "Find out more in white Paper",
-    "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
+    "description": "Find out more in our Telegram Chat",
+    "url": "https://t.me/paretonetworkdiscussion"
   }
 }
