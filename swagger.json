@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "description": "API for the Pareto Network and documentation",
+    "description": "This is a doc Api of Pareto Network",
     "version": "1.0.0",
-    "title": "Pareto Network v1.0"
+    "title": "Pareto Network 1.0"
   },
   "servers": [
     {
-      "url": "https://api.pareto.network/v1"
+      "url": "http://localhost:3000/v1"
     }
   ],
   "paths": {
@@ -173,6 +173,56 @@
         ]
       }
     },
+    "/updatescores": {
+      "post": {
+        "tags": [
+          "Authenticated routes",
+          "Update Scores"
+        ],
+        "summary": "Update the score in the DB",
+        "description": "Fetch score form Ethereum and save in DB",
+        "operationId": "updatescores",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Admin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Addresses"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
     "/address": {
       "get": {
         "tags": [
@@ -214,7 +264,7 @@
         ]
       }
     },
-    "/address/{address}": {
+    "/address/{addres}": {
       "get": {
         "tags": [
           "Authenticated routes",
@@ -477,6 +527,99 @@
         "security": [
           {
             "api_key": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/profile-image": {
+      "get": {
+        "tags": [
+          "Unauthenticated routes",
+          "User Profile"
+        ],
+        "summary": "Get the image profile",
+        "description": "Get the image profile",
+        "operationId": "profile-image",
+        "parameters": [
+          {
+            "name": "image",
+            "in": "query",
+            "description": "address to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/upload-profile": {
+      "post": {
+        "tags": [
+          "Authenticated routes",
+          "User Profile"
+        ],
+        "summary": "Upload image",
+        "description": "Upload Image",
+        "operationId": "updateuser",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "cookieAuth": []
           }
         ]
       }
@@ -626,7 +769,16 @@
           }
         }
       },
-      "Contents": {
+      "File": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "User address token"
+          }
+        }
+      },
+      "Contens": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/Content"
@@ -691,7 +843,7 @@
     }
   },
   "externalDocs": {
-    "description": "Find out more in our Telegram Chat",
-    "url": "https://t.me/paretonetworkdiscussion"
+    "description": "Find out more in white Paper",
+    "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
   }
 }
