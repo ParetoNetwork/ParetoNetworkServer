@@ -31,6 +31,9 @@ redisClient = redis.createClient(
 
 redisClient.on("connect", function () {
   console.log("PARETO: Success connecting to Redis ")
+    redisClient.flushall( function (err, succeeded) {
+        console.log(succeeded); // will be true if successfull
+    });
 });
 
 redisClient.on("error", function (err) {
@@ -54,6 +57,7 @@ mongoose.connect(connectionUrl).then(tmp=>{
 /*db model initializations*/
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
+const ParetoProfile = mongoose.model('profile');
 
 var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
@@ -631,7 +635,17 @@ controller.updateUser = function(address, userinfo ,callback){
     if(web3.utils.isAddress(fixaddress) == false){
          callback(new Error('Invalid Address'));
     } else {
-        callback( null, userinfo );
+        const profile = {address: address};
+        if(userinfo.first_name) {profile.firstName = userinfo.first_name}
+        if(userinfo.last_name) {profile.lastName = userinfo.last_name}
+        if(userinfo.biography) {profile.biography = userinfo.biography}
+        if(userinfo.profile_pic) {profile.profilePic = userinfo.profile_pic}
+        controller.insertProfile(profile, function (error, result) {
+          if(error){ callback(error)}
+          else{
+              controller.getUserInfo(address, callback)
+          }
+        })
     }
 
 };
@@ -643,9 +657,17 @@ controller.getUserInfo = function(address ,callback){
     if(web3.utils.isAddress(fixaddress) == false){
         callback(new Error('Invalid Address'));
     } else {
-        callback( null, { 'address': address,   'rank': 1, 'score': 123456781234,
-            'first_name': "Carlos", "last_name": "De los Reyes",
-            'biography': "Lorem ipsum ...", "profile_pic" : "https://www.ienglishstatus.com/wp-content/uploads/2018/04/Anonymous-Whatsapp-profile-picture.jpg"  } );
+        controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
+            if(error){ callback(error)}
+            controller.retrieveProfileWithRedis(address, function (error, profile) {
+                if(error){ callback(error)}
+                callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score,
+                    'first_name': profile.firstName, "last_name": profile.lastName,
+                    'biography': profile.biography, "profile_pic" : profile.profilePic } );
+            });
+        });
+
+
     }
 
 };
@@ -699,9 +721,8 @@ controller.sign = function(params, callback){
         }
       } else {
         result.token = token;
-        controller.getScoreAndSaveRedis(function(err, result){
-
-        });
+        controller.getScoreAndSaveRedis(function(err, result){ });
+        controller.getProfileAndSaveRedis(owner,function(err, result){ });
         if(callback && typeof callback === "function") { callback(null, result ); }
       }
     });
@@ -831,6 +852,92 @@ controller.getScoreAndSaveRedis = function(callback){
     }
   });
 };
+
+
+
+/**
+ * insert user
+ * @param callback Response when the process is finished
+ */
+
+controller.insertProfile = function(profile,callback){
+
+    ParetoProfile.findOneAndUpdate({address: profile.address},profile, {upsert: true},
+          function(err, r){
+              if(err){
+                  console.error('unable to write to db because: ', err);
+              } else {
+                  const multi = redisClient.multi();
+                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+                  multi.hmset("profile"+profile.address+ "", profile );
+                  multi.exec(function(errors, results) {
+                      if(errors){ console.log(errors); return(errors)}
+                      return callback(null, profile );
+                  })
+              }
+          }
+      );
+
+
+};
+
+
+/**
+ * Get Profile in MongoDB. The result data is saved in Redis. If no Profile exist for the address, a new register is created,
+ * @param callback Response when the process is finished
+ */
+
+controller.getProfileAndSaveRedis = function(address,callback){
+
+   ParetoProfile.findOne({  address : address } ,
+       function(err, r){
+           if(r){
+               let profile = {address: address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+               const multi = redisClient.multi();
+               multi.hmset("profile"+profile.address+ "", profile );
+               multi.exec(function(errors, results) {
+                   if(errors){ console.log(errors); return(errors)}
+                   return callback(null, profile );
+               })
+           } else{
+              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "" };
+               controller.insertProfile(profile, callback)
+           }
+       }
+   );
+
+
+};
+
+
+/**
+ * Get profile from Redis.
+ * @param address
+ */
+controller.retrieveProfileWithRedis = function(address , callback){
+
+    const multi = redisClient.multi();
+    multi.hgetall( "profile"+address+ "");
+    multi.exec(function(err, results) {
+        if(err){
+             callback(err);
+        }
+        if((!results || results.length ===0 || !results[0])){
+            controller.getProfileAndSaveRedis(function(err, result){
+                if(err){
+                     callback(err);
+                } else {
+                     callback(null, result)
+                }
+            });
+        }else{
+              callback(null, results[0]);
+        }
+
+    });
+
+};
+
 
 /**
  * Get ranking from Redis.
