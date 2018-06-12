@@ -88,6 +88,12 @@ app.get('/intel', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/intel.html'));
 });
 
+var swaggerUi = require('swagger-ui-express'),
+swaggerDocument = require('./swagger.json');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
 /********* UNAUTHENTICATED v1 APIs *********/
 
 app.post('/v1/sign', function (req, res) {
@@ -395,13 +401,5 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 
 
 }); */
-
-if(process.env.DEBUG == 1){
-    var swaggerUi = require('swagger-ui-express'),
-        swaggerDocument = require('./swagger.json');
-
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-}
-
 
 module.exports = {app: app, controller: controller };
