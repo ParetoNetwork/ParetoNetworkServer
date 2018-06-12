@@ -93,6 +93,7 @@
         },
         methods: {
             login: function () {
+                this.loadingLogin();
                 authService.signSplash(data => {
                     this.$store.dispatch({
                         type: 'login',
@@ -100,6 +101,7 @@
                     });
                     this.$router.push('/dashboard');
                 }, error => {
+                    this.stopLogin();
                     alert(error);
                 });
             },
@@ -110,7 +112,12 @@
                 }, error => {
                     alert(error);
                 });
-            }, ...mapMutations({loginVuex: 'login', logoutVuex: 'logout'})
+            }, ...mapMutations({
+                loginVuex: 'login',
+                loadingLogin: 'loadingLogin',
+                stopLogin: 'stopLogin',
+                logoutVuex: 'logout'
+            })
         }
     }
     ;
