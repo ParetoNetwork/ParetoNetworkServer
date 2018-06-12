@@ -24,9 +24,9 @@ var bodyParser = require('body-parser');
 //the key/value pairs fixes the error PayloadTooLargeError: request entity too large
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50000}));
-app.use(express.static('public'));
 app.use(cookieParser());
 app.use(compression());
+app.use(express.static('public'));
 app.all('/*', function (req, res, next) {
     // add details of what is allowed in HTTP request headers to the response headers
 
@@ -87,6 +87,12 @@ app.get('/dashboard', function (req, res) {
 app.get('/intel', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/intel.html'));
 });
+
+var swaggerUi = require('swagger-ui-express'),
+swaggerDocument = require('./swagger.json');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 /********* UNAUTHENTICATED v1 APIs *********/
 
@@ -430,13 +436,5 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 
 
 }); */
-
-if(process.env.DEBUG == 1){
-    var swaggerUi = require('swagger-ui-express'),
-        swaggerDocument = require('./swagger.json');
-
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-}
-
 
 module.exports = {app: app, controller: controller };
