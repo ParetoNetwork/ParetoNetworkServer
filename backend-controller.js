@@ -31,9 +31,6 @@ redisClient = redis.createClient(
 
 redisClient.on("connect", function () {
   console.log("PARETO: Success connecting to Redis ")
-    redisClient.flushall( function (err, succeeded) {
-        console.log(succeeded); // will be true if successfull
-    });
 });
 
 redisClient.on("error", function (err) {
