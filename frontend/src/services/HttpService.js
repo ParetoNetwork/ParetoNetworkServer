@@ -4,7 +4,8 @@ export default axios.create({
     headers: {
         'Accept': 'application/json',
 
-    }, withCredentials: true
+    }, withCredentials: true,
+    baseURL: document.domain === 'localhost' ? 'http://localhost:3000' : ''
 });
 
 // export default class HttpService {
