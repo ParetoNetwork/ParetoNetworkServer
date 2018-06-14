@@ -4,7 +4,7 @@
             <div class="row gradient">
                 <div class="col-6">
                     <img width="400" src="../assets/images/LogoReverse.svg" alt="">
-                    <h1 class="font-body padding-main text-left text-white font-weight-light">Current, reputable &
+                    <h1 class="font-body padding-main text-left text-white mb-5">Current, reputable &
                         actionable intel for digital currency traders and
                         investors.</h1>
                     <a href="download/Pareto-Brochure.pdf" class="mr-2 btn btn-primary" target="_blank">Brochure</a>
@@ -850,6 +850,7 @@
     .padding-main {
         padding-left: 136px;
         padding-right: 50px;
+        line-height: 30px;
     }
     .data-drips>span:first-child > span {
         background-image: url("../assets/images/data-drip-1.png");

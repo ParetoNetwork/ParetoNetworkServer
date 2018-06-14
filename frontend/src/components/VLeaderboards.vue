@@ -7,7 +7,7 @@
                     <div>
                         <div class="row" style="color: #ffffff; justify-content: center;">
 
-                            <p class="font-body" style="padding: 35px; font-size: 12px;">Check your <b>PARETO</b> scores
+                            <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">Check your <b>PARETO</b> scores
                                 easily by signing your wallet address using Metamask or a web3-enabled browser.
                                 Otherwise, sign manually.</p>
                             <br/>
@@ -18,10 +18,10 @@
                                 <div class="group">
                                     <div class="d-flex flex-column justify-content-center">
 
-                                        <label class="pareto-label" for="lookup-input">Wallet Address</label>
+                                        <label class="pareto-label  font-weight-bold m-0 text-left" for="lookup-input">Wallet Address</label>
 
                                         <input id="lookup-input" type="text" name="address" readonly="readonly"
-                                               v-bind:value="address || null">
+                                               v-bind:value="address || null" class="font-weight-bold">
                                     </div>
                                     <span class="highlight"></span>
                                     <span class="bar"></span>
@@ -130,9 +130,10 @@
                     });
                 }, error => {
                     alert(error);
+                    this.stopLogin();
                 });
             }, ...mapMutations(
-                ['login', 'loadingLogin']
+                ['login', 'loadingLogin','stopLogin']
             )
         }
     };
