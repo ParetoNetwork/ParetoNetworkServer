@@ -1,0 +1,95 @@
+
+#rank-logo-holder {
+    padding-top: 30px;
+}
+
+#rank-logo {
+    width: 100px;
+}
+
+#score-counter{
+    font-size: 100px;
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 767px) {
+    .header .whitepaper {
+        line-height: 24px;
+    }
+
+    #rank-logo-holder {
+        padding-top: 5px;
+    }
+
+    #rank-logo {
+        width: 40px;
+    }
+
+    #score-counter{
+        font-size: 30px;
+        overflow-wrap: break-word;
+    }
+}
+
+#mce-responses {
+    margin-top: 8px;
+    font-family: 'Body';
+}
+
+
+/* LABEL ======================================= */
+.pareto-label          {
+    color:#ffffff;
+    font-size:18px;
+    font-weight:normal;
+    position:absolute;
+    pointer-events:none;
+    left:5px;
+    top:-20px;
+    transition:0.2s ease all;
+    -moz-transition:0.2s ease all;
+    -webkit-transition:0.2s ease all;
+}
+
+/* HIGHLIGHTER ================================== */
+.highlight {
+    position:absolute;
+    height:60%;
+    width:100px;
+    top:25%;
+    left:0;
+    pointer-events:none;
+    opacity:0.5;
+}
+
+/* ANIMATIONS ================ */
+@-webkit-keyframes inputHighlighter {
+    from { background:#5264AE; }
+    to  { width:0; background:transparent; }
+}
+@-moz-keyframes inputHighlighter {
+    from { background:#5264AE; }
+    to  { width:0; background:transparent; }
+}
+@keyframes inputHighlighter {
+    from { background:#5264AE; }
+    to  { width:0; background:transparent; }
+}
+
+/* for dashboard */
+img#splash-img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.conditional-center {
+    text-align: right;
+}
+
+.conditional-leaderboard-font-size {
+    font-size: 14px;
+}
+
+#pareto-content a {
+    text-decoration: underline; color: #007bff;
+}
