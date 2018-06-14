@@ -1,0 +1,437 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>P A R E T O .</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Place favicon.ico in the root directory -->
+        <link rel="apple-touch-icon" sizes="180x180" href="../frontend/public/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../frontend/public/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../frontend/public/favicon-16x16.png">
+        <link rel="manifest" href="manifest.json">
+        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+        <meta name="theme-color" content="#ffffff">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <link href="static/css/open-iconic-bootstrap.css" rel="stylesheet">
+        <link rel="stylesheet" href="static/css/splash-general.css">
+        <link rel="stylesheet" href="static/css/splash-custom.css">
+
+        
+        <script>
+            $.ajax({
+                    method: 'GET',
+                    url: '/v1/auth',
+                    dataType: 'json',
+                    success: function (data, textStatus, jqXHR) {
+                      //set address or alias to input field and set it to read-only
+
+                      window.location.replace("/dashboard");
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                      
+                      console.log(errorThrown);
+
+                      $('#nav-user-access').html("&nbsp;SIGN IN&nbsp;");
+                      $('#dropdown-user-address').html("No user authenticated");
+
+                      
+                      $('#access').css('opacity', 0.0); //logout button
+                      $('#access-in').css('opacity', 1.0); //signin button
+                    }
+                }); //end ajax
+        </script>
+
+
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-108222959-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-108222959-1');
+        </script>
+
+        <!-- Google Tag Manager -->
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j = d.createElement (s), df = l = 'dataLayer' '& l =' + l ''; j.async = true; j.src =?
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-TQ825N7');</script>
+        <!-- End Google Tag Manager -->
+
+        <!-- Facebook Pixel Code -->
+        <script>
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '1882412108678225');
+          fbq('track', 'PageView');
+        </script>
+        <noscript><img height="1" width="1" style="display:none"
+          src="https://www.facebook.com/tr?id=1882412108678225&ev=PageView&noscript=1"
+        /></noscript>
+        <!-- End Facebook Pixel Code -->
+
+    </head>
+    <body>
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TQ825N7"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+
+        <div style="position: fixed; width: 100%; z-index: 999;">
+            <div id="gradient" class="row" style="vertical-align: top;
+                height: 5px; 
+                background: #295087; /* Old browsers */
+                background: -moz-linear-gradient(left, #295087 0%, #3f7989 50%, #6aba82 77%, #85c568 100%); /* FF3.6-15 */
+                background: -webkit-linear-gradient(left, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* Chrome10-25,Safari5.1-6 */
+                background: linear-gradient(to right, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+                filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
+                ">&nbsp;</div>
+
+            <nav class="navbar navbar-expand-md font-body" style="background-color: #040f1e; color: #ffffff;">
+              <div class="container-fluid">
+                <div class="navbar-header">
+                  <a class="navbar-brand" href="/"><img src="static/images/LogoReverse.svg" class="header-img" width="150" style="opacity: 100;"/></a>
+                </div>
+                <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="navbarNavDropdown" class="navbar-collapse collapse" style="flex-grow: unset; font-weight: bold; /*polyfill because something is broken in the navbar-collapse class*/">
+                    <ul class="navbar-nav mr-auto" id="navbar-links">
+                       <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/dashboard">Intel</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/rank">Leaderboards</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-bar-link" href="/about">About</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <span class="oi oi-person text-truncate"></span><span id="nav-user-access"></span> 
+                            </a>
+                            <div class="dropdown-menu" id="navbar-dropdown" aria-labelledby="navbarDropdownMenuLink" style="font-size: 11px; right: 0; left: auto;">
+                             <!-- <button id="access-sign" type="button" class="btn btn-info" style="background-color:rgb(107, 194, 123); height:35px; font-size:14px; opacity:0" onClick="sign()">Access</button>  -->
+                                <span class="dropdown-item" id="dropdown-user-address"></span>
+                                <a href="#" id="access-in" class="dropdown-item button--login dropdown-menu-link" style="color: #000; opacity:0;">Sign In</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+              </div>
+        </div>
+
+       
+        <!--=================================================================================================-->
+
+        <!--nav bar-->
+                                                    <!-- HEADER -->
+        <!--<header class="header">
+           
+            <a href="static/download/Pareto-Brochure.pdf" class="whitepaper" target="_blank">Brochure</a>
+            <a href="static/download/Pareto-Technical-White-Paper.pdf" class="whitepaper" target="_blank">Whitepaper</a>
+
+            <a href="https://t.me/paretonetworkdiscussion" class="header-link telegram-link"><i class="fa fa-paper-plane" aria-hidden="true"></i> <span>Telegram</span></a>
+            
+
+        </header> --><!-- end header -->
+    
+        <!--=================================================================================================-->
+                                                    <!-- OFFER SECTION -->
+        <header class="offer" style="height:100%;">
+            <div class="content" style="height:100%; display: flex; align-items: flex-end;">
+                <div class="overlay"></div>
+                <div>
+                    <video preload="metadata" loop muted autoplay playsinline>
+                        <source src="download/Pareto-Introduction.webm" type="video/webm">
+                        <source src="download/Pareto-Introduction.mp4" type="video/mp4">
+                        <source src="download/Pareto-Introduction.ogv" type="video/ogg">
+                        <img src="static/images/overlay.png" title="">
+                    </video>
+                </div>
+
+                <div class="wrapper">
+                    <div class="row middle-xs">
+                        <div class="col-xs-12 col-sm-12 col-md-6">
+                            
+                            <div class="site-moto">
+                                <img src="static/images/LogoReverse.svg" style="width: 400px; max-width: 100%;" malt="">
+                                <h1 class="font-body">Current, reputable & actionable intel for digital currency traders and investors.
+                                    <br/>
+                                </h1>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-6">
+                            <div class="site-moto font-body conditional-center">
+                                <!-- <center>
+                                    <div class="video-box">
+                                        <iframe style="width: 100%; height: 100%;" src="https://www.youtube.com/embed/j6MFoSQkT7U?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                                    </div>
+
+                                </center>
+                                -->
+
+                                 <div class="font-body"><h1 style="font-size: 25px; font-weight: bold">Post. Trade. Earn.</h1></div>
+                                <br/>
+
+                                 <button class="button button--transparent button--login" style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;" ><b>Access</b></button><br/>
+                                 <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform license.<br /> More information <a style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;" href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a> <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> --></h6></div>
+                            </div>
+                           
+                        </div>
+                        
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                </div>    
+            </div>
+            
+        </header><!-- end offer section --> 
+
+
+
+        <section class="section marketplace-section no-pt no-pb zfix">
+            <svg id="offer-wave" x="0px" y="0px" viewBox="0 0 1400 37" style="enable-background:new 0 0 1400 37;" xml:space="preserve">
+                <path class="offer-wave" d="M0,0h1400c0,0-332.5,37-570.4,37c-202.6,0-390-7.4-390-7.4S255.8,30.1,194.5,29C98.3,27.3,0,11.7,0,11.7V0z"/>
+            </svg>
+
+            <div class="content container demo-1">
+                <div class="wide-title">
+                    <h2 class="font-header">A true peer-to-peer content marketplace.</h2>
+                    <p class="subtitle font-body">The Pareto Network is the first real-time actionable intelligence platform for investors. </p>
+                </div>
+                
+                <div id="particles-js"></div>
+
+                <div class="wrapper">
+                    <div class="reviews-block font-body">
+
+                        <div class="css-script-clear"></div>
+
+                        <div class="review" style="left: 60px; top: 0;">
+                            <div class="review__avatar"><img src="static/images/p1.png" alt=""></div>
+                            <div class="review__content">
+                                <p>Critical bug found in new hardware wallet, effects 10% of market. Here are the details to execute or short.</p>
+                                <p align="right" style="color: orange;">est. reward <b style="font-size: 20px; color: #008000">$15,000</b></p>
+                            </div>
+                        </div> <!-- end review -->
+
+                        <div class="review" style="left: 40%; top: 6%;">
+                            <div class="review__avatar"><img src="static/images/p5.jpg" alt=""></div>
+                            <div class="review__content">
+                                <p>NEO transaction demand from new AI infrastructure will affect GAS prices 35% according this analysis</p>
+                                <p align="right" style="color: orange;">est. reward <b style="font-size: 20px; color: #008000">$8,300</b></p>
+                            </div>
+                        </div> <!-- end review -->
+
+                        <div class="review" style="left: 50%; top: 35%;">
+                            <div class="review__avatar"><img src="static/images/p2.jpg" alt=""></div>
+                            <div class="review__content">
+                                <p>How to double spend on the IOTA tangle, before everyone else figures it out</p>
+                                <p align="right" style="color: orange;">est. reward <b style="font-size: 20px; color: #008000">$200,000</b></p>
+                            </div>
+                        </div> <!-- end review -->
+
+                        <div class="review" style="left: 30%; top: 65%;">
+                            <div class="review__avatar"><img src="static/images/p3.jpg" alt=""></div>
+                            <div class="review__content">
+                                <p>Vulnerability in Monero affects all cryptonote forks. Here are the coins that haven’t updated</p>
+                                <p align="right" style="color: orange;">est. reward <b style="font-size: 20px; color: #008000">$35,000</b></p>
+                            </div>
+                        </div> <!-- end review -->
+
+                        <div class="review" style="left: 75%; top: 55%;">
+                            <div class="review__avatar"><img src="static/images/p4.jpg" alt=""></div>
+                            <div class="review__content">
+                                <p>Chinese government planning to announce eased restrictions on cryptocurrencies, opening capital flows by 250%</p>
+                                <p align="right" style="color: orange;">est. reward <b style="font-size: 20px; color: #008000">$120,000</b></p>
+                            </div>
+                        </div> <!-- end review -->
+
+                    </div> <!-- end reviews-block -->
+                </div>    
+            </div>
+
+           
+        </section> <!-- end marketplace section -->
+
+
+
+               <!-- <div class="companies-partners">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="company">
+                                <figure class="company__image">
+                                    <img src="images/coinfabric.jpg" alt="">
+                                </figure>
+                                <h3 class="company__name">Coin<span style="color: #51aaf1;">Fabric</span></h3>
+                                <p class="company__role">ICO Advisor</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                -->
+            </div>
+        </section>
+
+  	    <!-- //////////////////////////////////////////////////////////////////////// -->
+
+        <footer class="footer zfix">
+            <div class="wrapper">
+                <div class="footer-top">
+                    <!-- <div class="footer-partners">
+                        <h4 class="font-body">Pareto In The Media</h4>
+
+                        <div class="footer-partners__row">
+                            <a href="https://www.forbes.com/sites/tinamulqueen/2017/08/08/heres-why-payment-considerations-are-more-important-than-ever-in-retail-marketing/#2c7666b4bb7f" target="_blank"><img src="images/forbes.jpg" alt=""></a>
+                            <a href="https://www.inc.com/jeff-barrett/how-starbucks-apple-and-more-make-content-work-for.html" target="_blank">
+                            <img src="images/inc.jpg" alt=""></a>
+                            <a href="https://themerkle.com/4-key-misconceptions-about-cryptocurrency/" target="_blank">
+                            <img src="images/me.jpg" alt=""></a>
+                            <a href="https://www.huffingtonpost.com/entry/4-misconceptions-of-cryptocurrency_us_59a89f1fe4b0bef3378cd75c" target="_blank">
+                            <img src="images/huffpost.jpg" alt=""></a>
+                            <a href="https://cointelegraph.com/press-releases/pareto-network-the-peer-to-peer-financial-content-marketplace-announces-their-token-sale" target="_blank">
+                            <img src="images/cointelegraph.png" alt=""></a>
+                            <a href="http://www.newsbtc.com/2017/10/18/pareto-p2p-financial-content-marketplace/" target="_blank">
+                            <img src="images/newsbtc.png" alt=""></a>
+                            <a href="https://ccinews.net/pareto-network-poised-disrupt-16-billion-dollar-financial-research-industry/" target="_blank">
+                            <img src="images/cci.png" alt="" width="300"></a>
+                        </div>
+                    </div> -->
+
+                    <div class="footer-apps">
+                        <h4 class="font-body">Follow on Social Media</h4>
+
+                        <div class="footer-apps__row">
+                            <a href="https://t.me/paretonetworkdiscussion" class="app-icon telegram" target="_blank"><i class="fa fa-paper-plane" aria-hidden="true"></i></a>
+                            <!-- <a href="https://fb.me/paretonetworkofficial" class="app-icon facebook" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+                            <a href="https://www.linkedin.com/company/11252108/" class="app-icon linkedin" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                            <a href="https://github.com/ParetoNetwork" class="app-icon git" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+                             -->
+                            <a href="https://blog.pareto.network/" class="app-icon medium" target="_blank"><i class="fa fa-medium" aria-hidden="true"></i></a>
+                            <a href="https://twitter.com/ParetoNetwork" class="app-icon twitter" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+                            <a href="https://www.youtube.com/channel/UCWbAwsAEmNksqhhDlgBaSQA" class="app-icon youtube" target="_blank"><i class="fa fa-youtube" aria-hidden="true"></i></a>
+                            
+                        
+                        </div>
+                        <br/>
+                        <br/>
+                        <div class="footer-apps__row">
+                            <form action="https://network.us17.list-manage.com/subscribe/post?u=4cb27761708b4fe0c548f1151&amp;id=41974997b2" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate sign-up-form" style="padding-left: 0px;" target="_blank" novalidate>
+                                <p class="sign-up-form__title font-header" style="color: #679ab4;">Receive updates about Pareto</p>
+
+                                <div class="form-group">
+                                    <input style="background-color: " type="email" value="" name="EMAIL" required="" placeholder="Email address" class="required email" id="mce-EMAIL">
+                                    <input type="hidden" name="b_4cb27761708b4fe0c548f1151_41974997b2" tabindex="-1" value="">
+                                    <button class="submit-button" type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe">Go</button>
+                                    <div id="mce-responses" class="clear">
+                                        <div class="response" id="mce-error-response" style="display:none"></div>
+                                        <div class="response" id="mce-success-response" style="display:none"></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div> <!-- end footer-top -->
+
+                <div class="footer-bottom">
+                    <p class="copyright font-body">Copyright Pareto Network Ltd 2018</p>
+                </div> <!-- end footer-bootom -->
+
+            </div> <!-- end wrapper -->
+        </footer> <!-- end footer -->
+
+        <div id="modal-popup" class="fncb-hide zoom-anim-dialog popup"></div>
+
+
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script type='text/javascript' src='https://s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js'></script>
+        <script type='text/javascript'>(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+
+        <script src="static/js/plugins.js"></script>
+        <script src="static/js/main.js"></script>
+
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+
+        <script>
+            /*var b_w = Snap.select('.down-wave');
+            var bottom_wave = Snap("#bottom-wave");
+            
+            animateBottomWave();
+            function animateBottomWave(){
+                b_w.animate({
+                    d: 'M0,0c0,3,0,27.5,0,30.5c115.2,39,244.5,54.6,630.5,12.6c262-28.5,461-42.4,863.4-41.8c0-3.2,0,1.9,0-1.4H0z'
+                }, 12e3, mina.easeinout, resetBottomWave);
+            }
+            function resetBottomWave(){
+                b_w.animate({
+                    d: 'M0,0c0,3,0,6,0,9c249,0.6,500.1,34.6,750.3,55.1c250.2,20.6,472.3,13.3,743.7-44.2c0-3.2,0-16.7,0-19.9H0z'
+                }, 8e3, mina.easeinout, animateBottomWave);
+            }
+            var top_wave = Snap('#top-wave');
+            var t_w = Snap.select('.top-wave');
+            animateTopWave();
+            function animateTopWave(){
+                t_w.animate({
+                    d: 'M1493.9,39.9c-135.4-22-229-51.2-497.4-32C717.5,28,291.7,76.1,0,73.6l0,0c0,7.7,0,0,0,6.2h1493.9C1493.9,72.1,1493.9,47.7,1493.9,39.9z'
+                }, 9e3, mina.easeinout, resetTopWave);
+            }
+            function resetTopWave(){
+                t_w.animate({
+                    d: 'M1493.9,56.7C1245,57,986.7,27.5,731.1,9.4C475.4-8.8,229.1-4.2,0,56.7h0c0,7.7,0,15.5,0,23.2h1493.9C1493.9,72.1,1493.9,64.4,1493.9,56.7z'
+                }, 4e3, mina.easeinout, animateTopWave);
+            }
+
+            var g_bottom_wave = Snap("#green-bottom-wave");
+            var g_b_w = Snap.select('.green-down-wave');
+            g_animateBottomWave();
+            function g_animateBottomWave(){
+                g_b_w.animate({
+                    d: 'M0,0c0,3,0,27.5,0,30.5c115.2,39,244.5,54.6,630.5,12.6c262-28.5,461-42.4,863.4-41.8c0-3.2,0,1.9,0-1.4H0z'
+                }, 12e3, mina.easeinout, g_resetBottomWave);
+            }
+            function g_resetBottomWave(){
+                g_b_w.animate({
+                    d: 'M0,0c0,3,0,6,0,9c249,0.6,500.1,34.6,750.3,55.1c250.2,20.6,472.3,13.3,743.7-44.2c0-3.2,0-16.7,0-19.9H0z'
+                }, 8e3, mina.easeinout, g_animateBottomWave);
+            }
+            var g_top_wave = Snap('#green-top-wave');
+            var g_t_w = Snap.select('.green-top-wave');
+            g_animateTopWave();
+            function g_animateTopWave(){
+                g_t_w.animate({
+                    d: 'M1493.9,39.9c-135.4-22-229-51.2-497.4-32C717.5,28,291.7,76.1,0,73.6l0,0c0,7.7,0,0,0,6.2h1493.9C1493.9,72.1,1493.9,47.7,1493.9,39.9z'
+                }, 9e3, mina.easeinout, g_resetTopWave);
+            }
+            function g_resetTopWave(){
+                g_t_w.animate({
+                    d: 'M1493.9,56.7C1245,57,986.7,27.5,731.1,9.4C475.4-8.8,229.1-4.2,0,56.7h0c0,7.7,0,15.5,0,23.2h1493.9C1493.9,72.1,1493.9,64.4,1493.9,56.7z'
+                }, 4e3, mina.easeinout, g_animateTopWave);
+            }*/
+        </script>
+        <script src="static/js/splashCompiled.js"></script>
+
+    </body>
+</html>

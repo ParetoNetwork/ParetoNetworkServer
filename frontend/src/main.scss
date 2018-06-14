@@ -1,0 +1,55 @@
+@import "./styles/variables";
+@import './styles/fonts';
+@import "~font-awesome/css/font-awesome.min.css";
+@import "~bootstrap/scss/bootstrap";
+@import "styles/splash";
+@import "styles/splash-custom";
+
+
+.header {
+  background-color: blue;
+}
+
+.pareto-bg-dark{
+  background-color: $dark-pareto;
+}
+
+body{
+  height: 100%;
+  width: 100%;
+  color: #FFFFFF;
+}
+
+.gradient {
+  background: -webkit-gradient(linear, left top, left bottom, from(#54ae5c), to(#679ab4));
+  background: -webkit-linear-gradient(top, #54ae5c 0%, #679ab4 100%);
+  background: -o-linear-gradient(top, #54ae5c 0%, #679ab4 100%);
+  background: linear-gradient(to bottom, #54ae5c 0%, #679ab4 100%);
+  padding: 110px 0 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.pareto-truncate-text{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 60%;
+}
+
+@mixin flexible-top($elementHeight) {
+  top: ($elementHeight / (-2));
+}
+
+
+
+
+.main{
+  padding-top: 12vh;
+
+  @media (max-width: 770px) {
+      padding-top: 10vh;
+  }
+}
+
