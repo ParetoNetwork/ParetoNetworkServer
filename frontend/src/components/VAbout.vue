@@ -232,7 +232,25 @@
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
-                                    <img src="../assets/images/chirs.png" alt="" class="rounded-circle" width="85">
+                                    <img src="../assets/images/team-jonklein.png" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Jon Klein</span>
+                                    <span class="position">Advisor.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Fmr. President of CNN/U.S. | Has successfully led both traditional and online companies (CNN, CBS News) into new frontiers while generating superior profits and major industry awards.</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/jon-klein-a2761327/" target="_blank"><i
+                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-chris.png" alt="" class="rounded-circle" width="85">
                                 </figure>
                                 <div class="d-flex flex-column">
                                     <span class="name">Christopher Aguilar</span>
