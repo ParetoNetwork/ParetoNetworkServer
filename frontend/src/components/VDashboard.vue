@@ -24,7 +24,7 @@
                     <thead>
                     <th>MY POSTS</th>
                     </thead>
-                    <tbody>
+                    <tbody class="p-3">
 
                     <template v-if="!myContent.length">
                         <tr>
@@ -34,7 +34,7 @@
                         </tr>
                     </template>
                     <tr :key="row._id" v-for="row of myContent">
-                        <td>
+                        <td class="text-left">
                             <b> {{row.title }}</b><br/>
                             <div style="font-size: 12px;">Disclosed by: {{row.address }} <span v-if="row.alias">({{row.alias}})</span>
                                 at block
@@ -57,7 +57,7 @@
                             <th>MY INTEL FEED</th>
                         </tr>
                         </thead>
-                        <tbody>
+                        <tbody >
                         <template v-if="loading">
                             <tr>
                                 <td>
@@ -65,8 +65,8 @@
                                 </td>
                             </tr>
                         </template>
-                        <tr :key="row._id" v-for="row of content">
-                            <td>
+                        <tr  :key="row._id" v-for="row of content">
+                            <td class="text-left p-3">
                                 <b> {{row.title }}</b><br/>
                                 <div style="font-size: 12px;">Disclosed by: {{row.address}} <span v-if="row.alias">({{row.alias}})</span>
                                     at block
