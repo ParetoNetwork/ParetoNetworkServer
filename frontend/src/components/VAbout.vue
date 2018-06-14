@@ -232,7 +232,7 @@
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
-                                    <img src="../assets/images/team-jonklein.png" alt="" class="rounded-circle" width="85">
+                                    <img src="../assets/images/team-jonklein.jpg" alt="" class="rounded-circle" width="85">
                                 </figure>
                                 <div class="d-flex flex-column">
                                     <span class="name">Jon Klein</span>
