@@ -682,6 +682,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "tokens": {
+            "type": "string"
+          },
           "first_name": {
             "type": "string",
             "description": "First name"

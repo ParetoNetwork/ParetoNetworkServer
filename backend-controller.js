@@ -658,7 +658,7 @@ controller.getUserInfo = function(address ,callback){
             if(error){ callback(error)}
             controller.retrieveProfileWithRedis(address, function (error, profile) {
                 if(error){ callback(error)}
-                callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score,
+                callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
                     'first_name': profile.firstName, "last_name": profile.lastName,
                     'biography': profile.biography, "profile_pic" : profile.profilePic } );
             });
@@ -814,8 +814,8 @@ controller.getScoreAndSaveRedis = function(callback){
         "$push": {
           "address" : "$address",
           "score" : "$score",
-            "block" : "block",
-            "tokens" : "tokens"
+            "block" : "$block",
+            "tokens" : "$tokens"
         }
       }}).unwind({
     "path": "$addresses",
@@ -832,7 +832,7 @@ controller.getScoreAndSaveRedis = function(callback){
       results.forEach(function(result){
         result.addresses.rank = result.rank +1;
         multi.hmset(result.addresses.rank+ "",  result.addresses);
-        const rank = { rank: result.addresses.rank+ ""}
+        const rank = { rank: result.addresses.rank+ ""};
         multi.hmset("address"+result.addresses.address+ "", rank );
 
       });
