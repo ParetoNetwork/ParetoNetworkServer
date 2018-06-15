@@ -832,7 +832,7 @@ controller.getScoreAndSaveRedis = function(callback){
       results.forEach(function(result){
         result.addresses.rank = result.rank +1;
         multi.hmset(result.addresses.rank+ "",  result.addresses);
-        const rank = { rank: result.addresses.rank+ ""}
+        const rank = { rank: result.addresses.rank+ ""};
         multi.hmset("address"+result.addresses.address+ "", rank );
 
       });
