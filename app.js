@@ -146,6 +146,7 @@ app.post('/v1/sign', function (req, res) {
                     }
                     user.score = result.score;
                     user.rank = result.rank;
+                    user.tokens = result.tokens;
                     res.status(200).json({status: 'success',result: user});
                 }
             })
