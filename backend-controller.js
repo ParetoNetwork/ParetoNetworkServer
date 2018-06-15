@@ -658,7 +658,7 @@ controller.getUserInfo = function(address ,callback){
             if(error){ callback(error)}
             controller.retrieveProfileWithRedis(address, function (error, profile) {
                 if(error){ callback(error)}
-                callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score,
+                callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
                     'first_name': profile.firstName, "last_name": profile.lastName,
                     'biography': profile.biography, "profile_pic" : profile.profilePic } );
             });
