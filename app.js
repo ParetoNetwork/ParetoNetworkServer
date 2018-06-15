@@ -128,20 +128,28 @@ app.post('/v1/sign', function (req, res) {
             console.log(err); //if this is a message
             res.boom.badData(err);
         } else {
-            if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
-                res.cookie('authorization', result.token, {httpOnly: true});
-            }
-            else {
-                res.cookie('authorization', result.token, {
-                    domain: 'pareto.network',
-                    path: '/',
-                    httpOnly: true,
-                    secure: true
-                }); //should set a debug flag for env variable
-            }
+            controller.getProfileAndSaveRedis(req.body.owner, function (err, user) {
+                if (err) {
+                    console.log(err); //if this is a message
+                    res.boom.badData(err);
+                } else {
+                    if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
+                        res.cookie('authorization', result.token, {httpOnly: true});
+                    }
+                    else {
+                        res.cookie('authorization', result.token, {
+                            domain: 'pareto.network',
+                            path: '/',
+                            httpOnly: true,
+                            secure: true
+                        }); //should set a debug flag for env variable
+                    }
+                    user.score = result.score;
+                    user.rank = result.rank;
+                    res.status(200).json({status: 'success',result: user});
+                }
+            })
 
-             delete result.token;
-            res.status(200).json({status: 'success', result});
         }
     });
 

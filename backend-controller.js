@@ -719,7 +719,6 @@ controller.sign = function(params, callback){
       } else {
         result.token = token;
         controller.getScoreAndSaveRedis(function(err, result){ });
-        controller.getProfileAndSaveRedis(owner,function(err, result){ });
         if(callback && typeof callback === "function") { callback(null, result ); }
       }
     });
@@ -920,6 +919,7 @@ controller.retrieveProfileWithRedis = function(address , callback){
              callback(err);
         }
         if((!results || results.length ===0 || !results[0])){
+          console.log("no lo encontro");
             controller.getProfileAndSaveRedis(function(err, result){
                 if(err){
                      callback(err);
