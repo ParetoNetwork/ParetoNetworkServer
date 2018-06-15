@@ -110,6 +110,7 @@
                 </form>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -118,10 +119,11 @@
     import VParticles from './VParticles';
     import Auth from '../services/authService';
     import {mapState,mapMutations} from 'vuex';
+    import VFab from './VFab';
 
     export default {
         name: 'SplashDashboard',
-        components: {VParticles},
+        components: {VFab, VParticles},
         computed: {...mapState(['makingLogin'])},
         data() {
             return {
