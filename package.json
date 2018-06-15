@@ -30,6 +30,7 @@
     "mongoose": "^5.0.10",
     "redis": "2.8.0",
     "request-promise": "4.2.2",
+    "swagger-ui-dist": "^3.17.0",
     "throng": "4.0.0",
     "uglify-es": "^3.3.9",
     "uglify-js": "^3.3.9",
@@ -46,7 +47,6 @@
     "chai": "^4.1.2",
     "debug": "^3.1.0",
     "mocha": "^5.1.1",
-    "supertest": "^3.0.0",
-    "swagger-ui-express": "^3.0.9"
+    "supertest": "^3.0.0"
   }
 }
