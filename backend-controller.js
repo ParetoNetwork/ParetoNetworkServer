@@ -814,8 +814,8 @@ controller.getScoreAndSaveRedis = function(callback){
         "$push": {
           "address" : "$address",
           "score" : "$score",
-            "block" : "block",
-            "tokens" : "tokens"
+            "block" : "$block",
+            "tokens" : "$tokens"
         }
       }}).unwind({
     "path": "$addresses",
