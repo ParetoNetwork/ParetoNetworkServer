@@ -4,7 +4,9 @@
   "description": "PARETO",
   "scripts": {
     "start": "node backend.js",
-    "test": "mocha test/*.js  --timeout 150000 --exit"
+    "test": "mocha test/*.js  --timeout 150000 --exit",
+    "build": "npm run-script --prefix frontend build && rm -rf public && mv frontend/dist/ public",
+    "serve": "npm run-script --prefix frontend serve"
   },
   "author": "",
   "license": "Apache-2.0",
