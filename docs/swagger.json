@@ -1,9 +1,8 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "description": "This is a doc Api of Pareto Network",
-    "version": "1.0.0",
-    "title": "Pareto Network"
+    "version": "1.0",
+    "title": "PARETO NETWORK API"
   },
   "servers": [
     {
