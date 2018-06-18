@@ -106,7 +106,7 @@
                 });
             },
             logout: function () {
-                authService.logout(data => {
+                authService.logout(() => {
                     this.logoutVuex();
                     this.$router.push('/');
                 }, error => {
