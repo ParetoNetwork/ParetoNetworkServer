@@ -115,13 +115,6 @@ app.get('/intel', function (req, res) {
 });
 
 
-if (process.env.DEBUG == 1) {
-
-}
-// var swaggerUi = require('swagger-ui-express'),
-// swaggerDocument = require('./swagger.json');
-//
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
 /********* UNAUTHENTICATED v1 APIs *********/
