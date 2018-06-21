@@ -2,17 +2,20 @@
     <div id="app">
         <Navbar/>
         <router-view></router-view>
+        <VFab/>
+
     </div>
 </template>
 
 <script>
     import Navbar from './components/Navbar.vue';
     import SplashDashboard from './components/Splash.vue';
+    import VFab from './components/VFab.vue';
 
     export default {
         name: 'App',
         components: {
-            Navbar,
+            Navbar,VFab,
             SplashDashboard
         }
     };
