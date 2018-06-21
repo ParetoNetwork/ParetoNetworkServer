@@ -368,7 +368,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
             ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions,
               function(err, r){
                   //c
-                 callback({code: 401, message: "Your PARETO balance is 0, please buy/obtain some PARETO first"})
+                 callback({code: 401, message: "We are sorry, you will need Pareto balance in order to be able to Sign In."})
               } //end function
             );
 
@@ -890,7 +890,8 @@ controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
             });
         }else{
           if((!results || results.length ===0 || !results[0])){
-              callback("You are a user available, make sure you have some PARETO balance")
+              // hopefully, users without pareto shouldn't get here now.
+              callback("We are sorry, you will need Pareto balance in order to be able to Sign In.")
           }else{
               const multi = redisClient.multi();
               multi.hgetall(results[0].rank+ "");
