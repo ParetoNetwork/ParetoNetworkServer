@@ -686,30 +686,32 @@ controller.getContentByCurrentUser = function(address, callback){
 
 };
 
+
+controller.updateScore = function(address, callback){
+    //var results = { token: token };
+    controller.calculateScore(owner, 0, function(err, result){
+        if(err){
+            if(callback && typeof callback === "function") {
+                callback(err);
+            }
+        } else {
+            controller.getScoreAndSaveRedis(callback);
+
+        }
+    });
+};
+
 controller.sign = function(params, callback){
 
   var owner = params.owner;
 
-  const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result })
+  const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
 
   if (recovered === owner ) {
     // If the signature matches the owner supplied, create a
     // JSON web token for the owner that expires in 24 hours.
-    var token = jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" });
+      callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
 
-    //var results = { token: token };
-
-    controller.calculateScore(owner, 0, function(err, result){
-      if(err){
-        if(callback && typeof callback === "function") {
-          callback(err);
-        }
-      } else {
-        result.token = token;
-        controller.getScoreAndSaveRedis(function(err, result){ });
-        if(callback && typeof callback === "function") { callback(null, result ); }
-      }
-    });
 
     //if not in database already, then calculate score. this can also happen because a user has no PARETO tokens in the address they are signing. Should check that first. Might as well do the whole score calculation
     /*ParetoAddress.count({ address : owner }, function(err, count){
@@ -818,9 +820,9 @@ controller.getScoreAndSaveRedis = function(callback){
       // Put the data in  Redis hashing by rank
       const multi = redisClient.multi();
       results.forEach(function(result){
-        result.addresses.rank = result.rank +1;
+        result.addresses.rank = result.rank + 1;
         multi.hmset(result.addresses.rank+ "",  result.addresses);
-        const rank = { rank: result.addresses.rank+ ""};
+        const rank = { rank: result.addresses.rank + ""};
         multi.hmset("address"+result.addresses.address+ "", rank );
 
       });
@@ -908,7 +910,7 @@ controller.retrieveProfileWithRedis = function(address , callback){
         }
         if((!results || results.length ===0 || !results[0])){
           console.log("no lo encontro");
-            controller.getProfileAndSaveRedis(function(err, result){
+            controller.getProfileAndSaveRedis(address, function(err, result){
                 if(err){
                      callback(err);
                 } else {
