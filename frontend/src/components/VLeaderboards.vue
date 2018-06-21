@@ -7,7 +7,9 @@
                     <div>
                         <div class="row" style="color: #ffffff; justify-content: center;">
 
-                            <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">Check your <b>PARETO</b> scores
+                            <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
+                                Check
+                                your<b>PARETO</b> scores
                                 easily by signing your wallet address using Metamask or a web3-enabled browser.
                                 Otherwise, sign manually.</p>
                             <br/>
@@ -18,7 +20,8 @@
                                 <div class="group">
                                     <div class="d-flex flex-column justify-content-center">
 
-                                        <label class="pareto-label  font-weight-bold m-0 text-left" for="lookup-input">Wallet Address</label>
+                                        <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Wallet
+                                            Address</label>
 
                                         <input id="lookup-input" type="text" name="address" readonly="readonly"
                                                v-bind:value="address || null" class="font-weight-bold">
@@ -38,14 +41,16 @@
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
                             <div id="rank-logo-holder"><img id="rank-logo"
                                                             src="../assets/images/pareto-logo-mark-color.svg"
-                                                            alt="Pareto Logo for Ranking"></div>
+                                                            alt="Pareto Logo for Ranking">
+                            </div>
                             <div>&nbsp;</div>
                             <div id="score-counter">{{rank}}</div>
                         </div>
                         <div id="address-metrics" class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center; opacity: 0">
                             <div id="rank-text">You rank:&nbsp;</div>
-                            <div id="rank-counter" style="font-weight: bold;">0</div>
+                            <div id="rank-counter" style="font-weight: bold;">0
+                            </div>
                             <div id="rank-text-cont">&nbsp;out of&nbsp;</div>
                             <div id="rank-total">0</div>
                         </div>
@@ -133,7 +138,7 @@
                     this.stopLogin();
                 });
             }, ...mapMutations(
-                ['login', 'loadingLogin','stopLogin']
+                ['login', 'loadingLogin', 'stopLogin']
             )
         }
     };
@@ -227,6 +232,16 @@
 
     .address-header{
         @media (max-width: 500px){
+            width: 150px;
+        }
+    }
+
+    .break-line {
+        word-break: break-all;
+    }
+
+    .address-header {
+        @media (max-width: 500px) {
             width: 150px;
         }
     }

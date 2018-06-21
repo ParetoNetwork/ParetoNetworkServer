@@ -54,6 +54,7 @@ app.all('/*', function (req, res, next) {
     next();
 });
 
+app.use("/api-docs", express.static('docs'));
 //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
 app.use(boom());
 
@@ -113,10 +114,7 @@ app.get('/intel', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/intel.html'));
 });
 
-var swaggerUi = require('swagger-ui-express'),
-swaggerDocument = require('./swagger.json');
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
 /********* UNAUTHENTICATED v1 APIs *********/
@@ -146,6 +144,7 @@ app.post('/v1/sign', function (req, res) {
                     }
                     user.score = result.score;
                     user.rank = result.rank;
+                    user.tokens = result.tokens;
                     res.status(200).json({status: 'success',result: user});
                 }
             })
