@@ -4,6 +4,7 @@ services:
   redis:
     container_name: redis
     image: redis:latest
+    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
     ports:
       - "27019:6379"
   mongo:
