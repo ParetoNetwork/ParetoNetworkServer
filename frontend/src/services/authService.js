@@ -105,7 +105,7 @@ export default class authService {
                                     const token = response.data.result;
 
                                     logged = true;
-                                    this.auth(data => {
+                                    this.auth(() => {
                                         return onSuccess(token);
 
                                     }, err => {
