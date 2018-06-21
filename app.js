@@ -123,8 +123,14 @@ app.post('/v1/sign', function (req, res) {
 
     controller.sign(req.body, function (err, result) {
         if (err) {
-            console.log(err); //if this is a message
-            res.boom.badData(err);
+            console.log(err);
+            if(err.code){
+                res.status(err.code).json(err)
+            }else{
+                //if this is a message
+                res.boom.badData(err);
+            }
+
         } else {
             controller.getProfileAndSaveRedis(req.body.owner, function (err, user) {
                 if (err) {
