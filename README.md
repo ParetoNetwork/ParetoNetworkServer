@@ -1,4 +1,6 @@
 # Pareto Network Server
+\n
+[![CircleCI](https://circleci.com/gh/ParetoNetwork/ParetoNetworkServer.svg?style=svg&circle-token=e339e4460b358243490aae6827bba097c3d1c74a)](https://circleci.com/gh/ParetoNetwork/ParetoNetworkServer)
 
 Frontand and Backend for calculating ranking and all other functions of the Pareto Network intel feed.
 
