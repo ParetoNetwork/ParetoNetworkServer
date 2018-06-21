@@ -51,7 +51,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-md-6">
                     <h4>Leaderboard</h4>
                     <div class="" style="font-size: 12px">
                         <div class="table-area">
@@ -64,7 +64,7 @@
                                     <th width="123px">
                                         Score
                                     </th>
-                                    <th width="332px">
+                                    <th class="address-header" width="250px">
                                         Address
                                     </th>
                                 </tr>
@@ -77,7 +77,7 @@
                                     <tr v-for="rank in leader" :key="rank.address">
                                         <td>{{rank.rank}}</td>
                                         <td>{{rank.score}}</td>
-                                        <td>{{rank.address}}</td>
+                                        <td class="break-line">{{rank.address}}</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -220,6 +220,15 @@
 
     #rank-logo-holder {
         padding-top: 30px;
+    }
+    .break-line{
+        word-break: break-all;
+    }
+
+    .address-header{
+        @media (max-width: 500px){
+            width: 150px;
+        }
     }
 
 </style>
