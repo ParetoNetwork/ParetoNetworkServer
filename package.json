@@ -5,9 +5,10 @@
   "scripts": {
     "start": "node backend.js",
     "test": "mocha test/*.js  --timeout 150000 --exit",
-    "build": "npm run-script --prefix frontend build && rm -rf public && mv frontend/dist/ public",
+    "build": "npm run-script --prefix frontend build && rm -rf public && mv frontend/dist/ public && cp -R frontend/src/assets/download/ public/download",
     "serve": "npm run-script --prefix frontend serve",
     "docs": "git submodule update"
+
   },
   "author": "",
   "license": "Apache-2.0",
