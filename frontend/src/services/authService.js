@@ -44,43 +44,43 @@ export default class authService {
                 value: 'Pareto' //replace with TOS
             }
         ];
-        let metaMask;
+        let provider;
         if (typeof web3 !== 'undefined') {
             // Use Mist/MetaMask's provider
-            metaMask = new Web3(web3.currentProvider);
+            provider = new Web3(web3.currentProvider);
         } else {
             console.log('No web3? You should consider trying MetaMask!');
-            onError('Please install MetaMask in order to access the Pareto Network');
+            onError('Please install MetaMask (or other web3 browser) in order to access the Pareto Network');
 
 
             // searchLookup();
             // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-            metaMask = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
+            provider = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
         }
-        if (typeof metaMask !== 'undefined') {
+        if (typeof provider !== 'undefined') {
 
             // const contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
             // const rankCalculation = 0;
             // const tokenTotal = 0;
-            if (!metaMask.currentProvider.isMetaMask) {
+            /*if (!metaMask.currentProvider.isMetaMask) { //no mobile users use Metamask, this is too strict
 
                 return onError('Please install MetaMask in order to access the Pareto Network');
-            }
-            metaMask.eth.getAccounts((error, accounts) => {
+            }*/
+            provider.eth.getAccounts((error, accounts) => {
                 if (!error) {
 
                     const addr = accounts[0];
 
-                    if (metaMask.utils.isAddress(addr)) {
+                    if (provider.utils.isAddress(addr)) {
                         const from = addr.toLowerCase();
 
                         const params = [msgParams, from];
                         const method = 'eth_signTypedData';
 
-                        metaMask.currentProvider.sendAsync({method, params, from}, (err, result) => {
+                        provider.currentProvider.sendAsync({method, params, from}, (err, result) => {
                             if (err) return console.dir(err);
                             if (result.error) {
-                                return onError('Please login into MetaMask in order to access the Pareto Network');
+                                return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
                             }
                             if (result.error) {
                                 return console.error(result);
@@ -126,7 +126,7 @@ export default class authService {
                     }//end if valid address
                     else {
                         console.log('address invalid!');
-                        return onError('Please login into MetaMask in order to access the Pareto Network');
+                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
 
                         //set error state on input field
                     }
