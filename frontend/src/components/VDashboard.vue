@@ -10,18 +10,20 @@
                                 <span style="font-size: 50px;  color: gray; background: #b2b2b2" class="fa fa-user p-2"></span>
 
                             </div>
+                            <!--
                             <button class="btn btn-primary">
                                 EDIT PROFILE
                             </button>
+                            -->
                         </div>
 
 
                         <div class="media-body flex-column text-left">
-                            <span>Bryce Waldorf</span>
+                            <span>{{address.address.slice(0,20) + "..."}}</span>
 
                             <div class="">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                <span class="text"><b>3700</b></span>
+                                <span class="text"><b>{{address.tokens + "PARETO"}}</b></span>
                                 <div class="pl-2">
 
                                 </div>
