@@ -113,7 +113,12 @@ export default class authService {
                                     });
 
                                 }).catch(error => {
-                                    return onError(error);
+                                    if(error.response && error.response.data){
+                                        return onError(error.response.data.message);
+                                    }else{
+                                        return onError(error);
+                                    }
+
                                 });
 
                             } else {

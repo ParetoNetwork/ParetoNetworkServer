@@ -344,14 +344,6 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                 });
             });//end first then promise
           } else {
-            var resultJson = {
-              'address' : address,
-              'score' : 0.0,
-              'rank'  : -1,
-              'block' : blockHeight,
-              'bonus' : 0.0,
-              'tokens': amount
-            };
 
             //update entry in database if it exists, do not put additional entry invar
             dbQuery = {
@@ -370,17 +362,13 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
               returnNewDocument: true
             };
 
-            //can also return unauthorized, PARETO balance 0.00, list of places to purchase some
-            if(callback && typeof callback === "function") { callback(null, resultJson); }
 
-            //should queue for writing later
+
+            //User never has Pareto or User spent all pareto (if it is last one, update)
             ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions,
               function(err, r){
-                if(err){
-                  console.error('unable to write to db because: ', err);
-                } else {
-                  //console.log("here is db writing response : " + r);
-                } //end conditional
+                  //c
+                 callback({code: 401, message: "Your PARETO balance is 0, please buy/obtain some PARETO first"})
               } //end function
             );
 
@@ -901,15 +889,20 @@ controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
                 }
             });
         }else{
-            const multi = redisClient.multi();
-            multi.hgetall(results[0].rank+ "");
-            multi.exec(function(err, results) {
-                if(err){
-                    return callback(err);
-                }
-                // return the cached ranking
-                return callback(null, results[0]);
-            });
+          if((!results || results.length ===0 || !results[0])){
+              callback("You are a user available, make sure you have some PARETO balance")
+          }else{
+              const multi = redisClient.multi();
+              multi.hgetall(results[0].rank+ "");
+              multi.exec(function(err, results) {
+                  if(err){
+                      return callback(err);
+                  }
+                  // return the cached ranking
+                  return callback(null, results[0]);
+              });
+          }
+
         }
 
 
