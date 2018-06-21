@@ -100,8 +100,14 @@ app.post('/v1/sign', function (req, res) {
 
     controller.sign(req.body, function (err, result) {
         if (err) {
-            console.log(err); //if this is a message
-            res.boom.badData(err);
+            console.log(err);
+            if(err.code){
+                res.status(err.code).json(err)
+            }else{
+                //if this is a message
+                res.boom.badData(err);
+            }
+
         } else {
             if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
                 res.cookie('authorization', result.token, {httpOnly: true});
