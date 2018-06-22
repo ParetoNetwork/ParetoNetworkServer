@@ -4,6 +4,7 @@ import App from './App.vue';
 import VueRouter from 'vue-router';
 import router from './utils/routes';
 import Vuex from 'vuex';
+
 const snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
 
 Vue.config.productionTip = false;
@@ -14,22 +15,24 @@ const store = new Vuex.Store({
         isLogged: false,
         address: null,
         makingLogin: false,
-        madeLogin: false
+        madeLogin: 0
     },
     mutations: {
         login(state, {address}) {
             state.isLogged = true;
             state.address = address;
             state.makingLogin = false;
-            state.madeLogin = true;
+            
         }, logout(state) {
             state.isLogged = false;
             state.address = null;
-            state.madeLogin = false;
+            state.madeLogin = 0;
 
-        },loadingLogin(state){
+        }, intelEnter(state) {
+            state.madeLogin++;
+        }, loadingLogin(state) {
             state.makingLogin = true;
-        },stopLogin(state){
+        }, stopLogin(state) {
             state.makingLogin = false;
         }
     },
@@ -42,5 +45,5 @@ const store = new Vuex.Store({
 new Vue({
     render: h => h(App),
     router,
-    store,snap
+    store, snap
 }).$mount('#app');
