@@ -89,7 +89,7 @@ describe('Server application /', function() {
                 .set('cookie', cookie)
                 .expect(200)
                 .expect( function (res) {
-                    assert.containsAllKeys(res.body,  [  'address',  'rank' , 'score' , 'first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    assert.containsAllKeys(res.body,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
