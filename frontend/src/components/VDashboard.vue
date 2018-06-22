@@ -102,7 +102,7 @@
     import dashboardService from '../services/dashboardService';
     import AuthService from '../services/authService';
 
-    import {mapState} from 'vuex';
+    import {mapMutations, mapState} from 'vuex';
 
     export default {
         name: 'VDashboard',
@@ -120,6 +120,7 @@
             ...mapState(['madeLogin'])
         },
         methods: {
+            ...mapMutations(['intelEnter']),
             loadAddress: function () {
                 dashboardService.getAddress(res => {
                     this.address = res;
@@ -147,12 +148,13 @@
             }
             ,
             main: function () {
-                if (this.madeLogin) {
+                this.intelEnter();
+                if (this.madeLogin === 1) {
                     AuthService.postSign(res => {
                         this.loadAddress();
                         this.loadContent();
                     }, () => {
-                        console.log('error')
+                        console.log('error');
                     });
                 } else {
                     this.loadAddress();
