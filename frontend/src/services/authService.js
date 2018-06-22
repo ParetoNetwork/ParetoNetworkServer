@@ -105,12 +105,8 @@ export default class authService {
                                     const token = response.data.result;
 
                                     logged = true;
-                                    this.postSign(data => {
-                                        return onSuccess(from);
+                                    return onSuccess(from);
 
-                                    }, err => {
-                                        return onError(err);
-                                    });
 
                                 }).catch(error => {
                                     if (error.response && error.response.data) {
