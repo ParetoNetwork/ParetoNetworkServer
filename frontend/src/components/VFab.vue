@@ -17,7 +17,7 @@
         background-repeat: no-repeat;
         background-size: cover; 
         border-radius: 50%;
-        box-shadow: 0 6px 10px 0 #666;
+        box-shadow: 0 6px 5px 0 #d8d8d8;
         transition: all 0.1s ease-in-out;
 
         font-size: 50px;
@@ -33,6 +33,12 @@
 
     .fab:hover {
         box-shadow: 0 6px 14px 0 #666;
+    }
+
+    @media (max-width: 812px) {
+        .fab {
+            right: 10px;
+        }
     }
 
 </style>
