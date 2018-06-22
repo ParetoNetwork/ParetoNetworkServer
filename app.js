@@ -54,7 +54,7 @@ app.all('/*', function (req, res, next) {
     next();
 });
 
-app.use("/api-docs", express.static('docs'));
+app.use("/api-docs", express.static('api-docs'));
 //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
 app.use(boom());
 
@@ -354,8 +354,8 @@ app.get('/v1/address/:address', function (req, res) {
 
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
-    if(req.query.latest===true){
-        controller.updateScore(req.body.address, function (err, success) {
+    if(req.query.latest==='true'){
+        controller.updateScore(req.user, function (err, success) {
             if (err) {
                 res.boom.badRequest(err.message);
             } else {
@@ -416,7 +416,7 @@ app.post('/v1/updatescores', function (req, res) {
     else if (req.body.admin === undefined) {
         res.boom.badRequest('POST body missing, needs keys');
     } else {
-        controller.updateScore(req.body.address, function (err, result) {
+        controller.updateScore(req.user, function (err, result) {
             if (err) {
                 res.boom.badRequest(err.message);
             } else {

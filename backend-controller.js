@@ -689,7 +689,7 @@ controller.getContentByCurrentUser = function(address, callback){
 
 controller.updateScore = function(address, callback){
     //var results = { token: token };
-    controller.calculateScore(owner, 0, function(err, result){
+    controller.calculateScore(address, 0, function(err, result){
         if(err){
             if(callback && typeof callback === "function") {
                 callback(err);
@@ -909,7 +909,6 @@ controller.retrieveProfileWithRedis = function(address , callback){
              callback(err);
         }
         if((!results || results.length ===0 || !results[0])){
-          console.log("no lo encontro");
             controller.getProfileAndSaveRedis(address, function(err, result){
                 if(err){
                      callback(err);
