@@ -13,20 +13,24 @@ const store = new Vuex.Store({
     state: {
         isLogged: false,
         address: null,
-        makingLogin: false
+        makingLogin: false,
+        madeLogin: false
     },
     mutations: {
         login(state, {address}) {
             state.isLogged = true;
             state.address = address;
-            state.makingLogin = false
+            state.makingLogin = false;
+            state.madeLogin = true;
         }, logout(state) {
             state.isLogged = false;
             state.address = null;
+            state.madeLogin = false;
+
         },loadingLogin(state){
             state.makingLogin = true;
         },stopLogin(state){
-            state.makingLogin = false
+            state.makingLogin = false;
         }
     },
     actions: {

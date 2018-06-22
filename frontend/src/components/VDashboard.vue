@@ -6,8 +6,9 @@
                 <template v-if="address">
                     <div class="media py-1 px-4 border mb-5 align-items-center">
                         <div class="d-flex flex-column">
-                            <div class="border p-2 mb-2 mr-2" >
-                                <span style="font-size: 50px;  color: gray; background: #b2b2b2" class="fa fa-user p-2"></span>
+                            <div class="border p-2 mb-2 mr-2">
+                                <span style="font-size: 50px;  color: gray; background: #b2b2b2"
+                                      class="fa fa-user p-2"></span>
 
                             </div>
                             <!--
@@ -19,11 +20,11 @@
 
 
                         <div class="media-body flex-column text-left">
-                            <span>{{address.address.slice(0,20) + "..."}}</span>
+                            <span>{{address.address.slice(0,20) + '...'}}</span>
 
                             <div class="">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                <span class="text"><b>{{address.tokens + "PARETO"}}</b></span>
+                                <span class="text"><b>{{address.tokens + 'PARETO'}}</b></span>
                                 <div class="pl-2">
 
                                 </div>
@@ -70,7 +71,7 @@
                             <th>MY INTEL FEED</th>
                         </tr>
                         </thead>
-                        <tbody >
+                        <tbody>
                         <template v-if="loading">
                             <tr>
                                 <td>
@@ -78,7 +79,7 @@
                                 </td>
                             </tr>
                         </template>
-                        <tr  :key="row._id" v-for="row of content">
+                        <tr :key="row._id" v-for="row of content">
                             <td class="text-left p-3">
                                 <b> {{row.title }}</b><br/>
                                 <div style="font-size: 12px;">Disclosed by: {{row.address}} <span v-if="row.alias">({{row.alias}})</span>
@@ -99,6 +100,9 @@
 
 <script>
     import dashboardService from '../services/dashboardService';
+    import AuthService from '../services/authService';
+
+    import {mapState} from 'vuex';
 
     export default {
         name: 'VDashboard',
@@ -108,12 +112,12 @@
                 content: [],
                 myContent: [],
                 loading: true
-        }
-            ;
+            };
         },
         mounted: function () {
-            this.loadAddress();
-            this.loadContent();
+            this.main();
+        }, computed: {
+            ...mapState(['madeLogin'])
         },
         methods: {
             loadAddress: function () {
@@ -123,22 +127,42 @@
                 }, () => {
                     // alert(error);
                 });
-            }, loadContent: function () {
+            }
+            ,
+            loadContent: function () {
                 dashboardService.getAllContent(res => {
                     this.loading = false;
                     this.content = res;
                 }, error => {
                     alert(error);
                 });
-            }, loadMyContent: function () {
+            }
+            ,
+            loadMyContent: function () {
                 dashboardService.getContent(res => {
                     this.myContent = res;
                 }, error => {
                     alert(error);
                 });
             }
+            ,
+            main: function () {
+                if (this.madeLogin) {
+                    AuthService.postSign(res => {
+                        this.loadAddress();
+                        this.loadContent();
+                    }, () => {
+                        console.log('error')
+                    });
+                } else {
+                    this.loadAddress();
+                    this.loadContent();
+                }
+
+            }
         }
-    };
+    }
+    ;
 </script>
 
 <style scoped>
