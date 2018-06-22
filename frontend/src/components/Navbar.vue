@@ -97,7 +97,7 @@
                 authService.signSplash(data => {
                     this.$store.dispatch({
                         type: 'login',
-                        address: data.address,
+                        address: data,
                     });
                     this.$router.push('/dashboard');
                 }, error => {

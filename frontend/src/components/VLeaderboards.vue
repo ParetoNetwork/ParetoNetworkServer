@@ -128,10 +128,12 @@
                 this.loadingLogin();
                 Auth.signSplash(data => {
                     this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                    this.address = data.address;
+                    this.address = data;
                     this.$store.dispatch({
                         type: 'login',
-                        address: data.address
+                        address: data
+                    });
+                    Auth.postSign(() => {
                     });
                 }, error => {
                     alert(error);
