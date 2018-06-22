@@ -74,7 +74,7 @@
                 this.address = res;
                 this.$store.dispatch({
                     type: 'login',
-                    address: res.address
+                    data: {address: res.address}
                 });
             }, () => {
 

@@ -131,7 +131,7 @@
                     this.address = data.address;
                     this.$store.dispatch({
                         type: 'login',
-                        address: data.address
+                        data: {address: data.address}
                     });
                 }, error => {
                     alert(error);
@@ -225,15 +225,6 @@
 
     #rank-logo-holder {
         padding-top: 30px;
-    }
-    .break-line{
-        word-break: break-all;
-    }
-
-    .address-header{
-        @media (max-width: 500px){
-            width: 150px;
-        }
     }
 
     .break-line {
