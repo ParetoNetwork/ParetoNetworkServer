@@ -1,19 +1,32 @@
 <template>
     <div class="container main  wrapp">
         <div class="row pt-5">
-            <div class="col-md-4">
+            <div class="col-md-5">
 
                 <template v-if="address">
                     <div class="media py-1 px-4 border mb-5 align-items-center">
-                        <span style="font-size: 50px;  color: gray; background: #b2b2b2" class="fa fa-user p-2"></span>
+                        <div class="d-flex flex-column">
+                            <div class="border p-2 mb-2 mr-2" >
+                                <span style="font-size: 50px;  color: gray; background: #b2b2b2" class="fa fa-user p-2"></span>
 
-                        <div class="d-flex p-3 flex-column text-left">
-                            <span style="font-size: 12px;" class="pareto-truncate-text">{{address.address}}</span>
+                            </div>
+                            <!--
+                            <button class="btn btn-primary">
+                                EDIT PROFILE
+                            </button>
+                            -->
+                        </div>
+
+
+                        <div class="media-body flex-column text-left">
+                            <span>{{address.address.slice(0,20) + "..."}}</span>
 
                             <div class="">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                <span class="text">{{'&nbsp;' + address.tokens + '&nbsp;PARETO'}}</span>
+                                <span class="text"><b>{{address.tokens + "PARETO"}}</b></span>
+                                <div class="pl-2">
 
+                                </div>
                             </div>
                             <span>{{'Network Rank ' + address.rank}}</span>
                         </div>
@@ -48,7 +61,7 @@
                 </table>
 
             </div>
-            <div class="col-md-8">
+            <div class="col-md-7">
                 <div class="border">
                     <span></span>
                     <table class="table table-responsive">
@@ -107,7 +120,7 @@
                 dashboardService.getAddress(res => {
                     this.address = res;
 
-                }, error => {
+                }, () => {
                     // alert(error);
                 });
             }, loadContent: function () {
