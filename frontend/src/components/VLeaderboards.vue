@@ -78,12 +78,11 @@
                             <div class="" style="position: relative; overflow: auto; height: 70vh; width: 100%;">
                                 <table class="table table-responsive-lg">
                                     <tbody>
-
-                                    <tr v-for="rank in leader" :key="rank.address">
-                                        <td>{{rank.rank}}</td>
-                                        <td>{{rank.score}}</td>
-                                        <td class="break-line">{{rank.address}}</td>
-                                    </tr>
+                                        <tr v-for="rank in leader" :key="rank.address">
+                                            <td>{{rank.rank}}</td>
+                                            <td>{{rank.score}}</td>
+                                            <td class="break-line">{{rank.address}}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
 
