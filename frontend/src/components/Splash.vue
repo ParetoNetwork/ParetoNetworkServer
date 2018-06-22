@@ -139,7 +139,7 @@
                     this.loading = false;
                     this.$store.dispatch({
                         type: 'login',
-                        address: data.address,
+                        data: {address: data.address},
                     });
                     this.$router.push('/dashboard');
                 }, error => {

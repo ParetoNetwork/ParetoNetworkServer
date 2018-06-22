@@ -3,7 +3,7 @@
         <div class="row pt-5">
             <div class="col-md-5">
 
-                <template v-if="address">
+                <template v-if="user">
                     <div class="media py-1 px-4 border mb-5 align-items-center">
                         <div class="d-flex flex-column">
                             <div class="border p-2 mb-2 mr-2">
@@ -18,7 +18,7 @@
 
 
                         <div class="media-body flex-column text-left">
-                            <span>Bryce Waldorf</span>
+                            <span>{{user.first_name|| 'Bryce Waldorf'}}</span>
 
                             <div class="">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
@@ -31,7 +31,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <span>{{'Network Rank ' + address.rank}}</span>
+                            <span>{{'Network Rank ' + user.rank}}</span>
                         </div>
                     </div>
                 </template>
@@ -124,15 +124,18 @@
                 <form action="">
                     <label for="first_name">First Name</label>
                     <div class="input-group mb-3">
-                        <input v-model="firstName" type="text" class="form-control" id="first_name" aria-describedby="basic-addon3">
+                        <input v-model="firstName" type="text" class="form-control" id="first_name"
+                               aria-describedby="basic-addon3">
                     </div>
                     <label for="last_name">Last Name</label>
                     <div class="input-group mb-3">
-                        <input  type="text" class="form-control" id="last_name"  v-model="lastName" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control" id="last_name" v-model="lastName"
+                               aria-describedby="basic-addon3">
                     </div>
                     <label for="bio">Biography</label>
                     <div class="input-group mb-3">
-                        <textarea v-model="bio" class="form-control" id="bio" aria-describedby="basic-addon3"> </textarea>
+                        <textarea v-model="bio" class="form-control" id="bio"
+                                  aria-describedby="basic-addon3"> </textarea>
                     </div>
                 </form>
             </div>
@@ -143,6 +146,7 @@
 <script>
     import dashboardService from '../services/dashboardService';
     import profileService from '../services/profileService';
+    import {mapState} from 'vuex';
     import moment from 'moment';
 
     export default {
@@ -161,11 +165,11 @@
                 loading: true,
                 moment: moment,
                 firstName: '',
-                lastName:'',
-                bio:'',
-                picture:''
-            }
-                ;
+                lastName: '',
+                bio: '',
+                picture: '',
+                user: {}
+            };
         }, filters: {
             date: function formatDate(date) {
                 const temp = moment(date);
@@ -173,8 +177,8 @@
             }
         },
         mounted: function () {
-            this.loadAddress();
             this.loadContent();
+            this.loadProfile();
         },
         methods: {
             loadAddress: function () {
@@ -191,6 +195,12 @@
                 }, error => {
                     alert(error);
                 });
+            }, loadProfile: function () {
+                profileService.getProfile(res => {
+                    this.user = res;
+                }, () => {
+
+                });
             }, loadMyContent: function () {
                 dashboardService.getContent(res => {
                     this.myContent = res;
@@ -203,15 +213,15 @@
             },
             updateProfile() {
                 const profile = {
-                    "first_name": this.firstName,
-                    "last_name": this.lastName,
-                    "biography": this.bio
+                    'first_name': this.firstName,
+                    'last_name': this.lastName,
+                    'biography': this.bio
                 };
-                profileService.updateProfile(profile,res => {
-                    this.$refs.myModalRef.hide()
+                profileService.updateProfile(profile, res => {
+                    this.$refs.myModalRef.hide();
                 }, error => {
 
-                })
+                });
             }
         }
     };
