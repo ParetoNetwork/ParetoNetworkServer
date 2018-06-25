@@ -42,7 +42,7 @@ app.use(cookieParser());
 app.use(compression());
 app.use('/api-docs', express.static('docs'));
 app.get('/api-docs/*', function(req, res){
-    res.sendFile(path.join(__dirname + '/api-docs/index.html'));
+    res.sendFile(path.join(__dirname + '../api-docs/index.html'));
 });
 app.use('/', express.static('public'));
 app.all('/*', function (req, res, next) {
