@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000/v1"
+      "url": "https://api.pareto.network/v1"
     }
   ],
   "paths": {
