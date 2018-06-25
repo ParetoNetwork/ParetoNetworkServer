@@ -148,8 +148,9 @@
             }
             ,
             main: function () {
-                this.intelEnter();
-                if (this.madeLogin === 1) {
+                if (!this.madeLogin) {
+                    this.intelEnter();
+
                     AuthService.postSign(res => {
                         this.loadAddress();
                         this.loadContent();
