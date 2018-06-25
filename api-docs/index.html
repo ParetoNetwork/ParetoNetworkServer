@@ -36,48 +36,8 @@
     <nav style="background-color: #040f1e;  padding: 16px 32px;"> >
       <img data-v-762b674a="" src="./LogoReverse.svg" width="150" alt="" >
    </nav>
+   <redoc spec-url="swagger.json"></redoc>
+   <script src="redoc.standalone.js"></script>
   </div>
-    <div id="swagger-ui"></div>
-
-    <script src="./swagger-ui-bundle.js"> </script>
-    <script src="./swagger-ui-standalone-preset.js"> </script>
-    <script>
-
-        const HideInfoUrlPartsPlugin = () => {
-            return {
-                wrapComponents: {
-                    InfoUrl: () => () => null
-                }
-            }
-        };
-        const HideTopBar = () => {
-            return {
-                wrapComponents: {
-                    Topbar: () => () => null
-                }
-            }
-        }
-        window.onload = function() {
-
-      // Build a system
-      const ui = SwaggerUIBundle({
-        url: "https://raw.githubusercontent.com/ParetoNetwork/ParetoSentinelAPI/master/swagger.json",
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-            SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl,
-            HideInfoUrlPartsPlugin,
-            HideTopBar
-        ],
-        layout: "StandaloneLayout"
-      });
-
-      window.ui = ui
-    }
-  </script>
   </body>
 </html>
