@@ -15,21 +15,22 @@ const store = new Vuex.Store({
         isLogged: false,
         address: null,
         makingLogin: false,
-        madeLogin: 0
+        madeLogin: JSON.parse(window.localStorage.getItem('logged'))
     },
     mutations: {
         login(state, {address}) {
             state.isLogged = true;
             state.address = address;
             state.makingLogin = false;
-            
         }, logout(state) {
             state.isLogged = false;
             state.address = null;
             state.madeLogin = 0;
+            window.localStorage.setItem('logged', false);
 
         }, intelEnter(state) {
-            state.madeLogin++;
+            state.madeLogin = true;
+            window.localStorage.setItem('logged', true);
         }, loadingLogin(state) {
             state.makingLogin = true;
         }, stopLogin(state) {
