@@ -2,18 +2,24 @@
   "openapi": "3.0.0",
   "info": {
     "version": "1.0",
-    "title": "PARETO NETWORK API"
-  },
-  "servers": [
-    {
-      "url": "https://api.pareto.network/v1"
+    "title": "PARETO NETWORK API",
+    "description": "The Pareto Network API is used by Sentinels to catalogue and relay information between nodes. Interacting with a Pareto Sentinel uses this standardized RESTful API. Authentication is done using a JSON Web Token (JWT) stored as a secure browser cookie. Any RESTful client will need to set the cookie.",
+    "contact": {
+      "url": "https://github.com/ParetoNetwork/ParetoSentinelAPI/issues"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
-  ],
+  },
+  "servers": [{
+    "url": "https://api.pareto.network/v1"
+  }],
   "paths": {
     "/sign": {
       "post": {
         "tags": [
-          "Unauthenticated routes",
+
           "Auth"
         ],
         "summary": "Cookie authentication",
@@ -50,18 +56,13 @@
           "400": {
             "description": "Bad Request"
           }
-        },
-        "security": [
-          {
-            "api_key": []
-          }
-        ]
+        }
       }
     },
     "/rank": {
       "get": {
         "tags": [
-          "Unauthenticated routes",
+
           "Rank"
         ],
         "summary": "Get the list of all addresses sorted by rank",
@@ -88,18 +89,13 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "api_key": []
-          }
-        ]
+        }
       }
     },
     "/auth": {
       "get": {
         "tags": [
-          "Authenticated routes",
+
           "Auth"
         ],
         "summary": "Test if user is properly authenticated",
@@ -127,20 +123,15 @@
             }
           }
         },
-        "security": [
-          {
-            "api_key": []
-          },
-          {
-            "cookieAuth": []
-          }
-        ]
+        "security": [{
+          "cookieAuth": []
+        }]
       }
     },
     "/unsign": {
       "post": {
         "tags": [
-          "Authenticated routes",
+
           "Auth"
         ],
         "summary": "Unsign http client for the current user",
@@ -162,70 +153,15 @@
             "description": "Bad Request"
           }
         },
-        "security": [
-          {
-            "api_key": []
-          },
-          {
-            "cookieAuth": []
-          }
-        ]
-      }
-    },
-    "/updatescores": {
-      "post": {
-        "tags": [
-          "Authenticated routes",
-          "Update Scores"
-        ],
-        "summary": "Update the score in the DB",
-        "description": "Fetch score form Ethereum and save in DB",
-        "operationId": "updatescores",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Admin"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Addresses"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": []
-          },
-          {
-            "cookieAuth": []
-          }
-        ]
+        "security": [{
+          "cookieAuth": []
+        }]
       }
     },
     "/address": {
       "get": {
         "tags": [
-          "Authenticated routes",
+
           "Address"
         ],
         "summary": "Get the information of the current user",
@@ -253,36 +189,29 @@
             }
           }
         },
-        "security": [
-          {
-            "api_key": []
-          },
-          {
-            "cookieAuth": []
-          }
-        ]
+        "security": [{
+          "cookieAuth": []
+        }]
       }
     },
-    "/address/{addres}": {
+    "/address/{address}": {
       "get": {
         "tags": [
-          "Authenticated routes",
+
           "Address"
         ],
         "summary": "Get the information of a specific user",
         "description": "Get the information of a specific user.",
         "operationId": "address",
-        "parameters": [
-          {
-            "name": "addres",
-            "in": "path",
-            "description": "address to use",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+        "parameters": [{
+          "name": "address",
+          "in": "path",
+          "description": "address to use",
+          "required": true,
+          "schema": {
+            "type": "string"
           }
-        ],
+        }],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -307,9 +236,6 @@
         },
         "security": [
           {
-            "api_key": []
-          },
-          {
             "cookieAuth": []
           }
         ]
@@ -318,7 +244,7 @@
     "/content": {
       "get": {
         "tags": [
-          "Authenticated routes",
+
           "Content"
         ],
         "summary": "Get the content about the actionable investing intels",
@@ -348,9 +274,6 @@
         },
         "security": [
           {
-            "api_key": []
-          },
-          {
             "cookieAuth": []
           }
         ]
@@ -359,7 +282,7 @@
     "/content/me": {
       "get": {
         "tags": [
-          "Authenticated routes",
+
           "Content"
         ],
         "summary": "Get the content available for current user",
@@ -389,9 +312,6 @@
         },
         "security": [
           {
-            "api_key": []
-          },
-          {
             "cookieAuth": []
           }
         ]
@@ -400,23 +320,21 @@
     "/userinfo": {
       "get": {
         "tags": [
-          "Authenticated routes",
+
           "User Profile"
         ],
         "summary": "Get the information of the profile user",
         "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
         "operationId": "userinfo",
-        "parameters": [
-          {
-            "name": "latest",
-            "in": "query",
-            "description": "if true force update ranking. This must be call only after sign process",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
+        "parameters": [{
+          "name": "latest",
+          "in": "query",
+          "description": "if true force update ranking. This must be call only after sign process",
+          "required": false,
+          "schema": {
+            "type": "boolean"
           }
-        ],
+        }],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -440,35 +358,30 @@
           }
         },
         "security": [
-          {
-            "api_key": []
-          },
           {
             "cookieAuth": []
           }
         ]
       }
     },
-    "/userinfo/{addres}": {
+    "/userinfo/{address}": {
       "get": {
         "tags": [
-          "Authenticated routes",
+
           "User Profile"
         ],
         "summary": "Get the profile of a specific user",
         "description": "Get the profile of a specific user.",
         "operationId": "userinfo",
-        "parameters": [
-          {
-            "name": "addres",
-            "in": "path",
-            "description": "address to use",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+        "parameters": [{
+          "name": "address",
+          "in": "path",
+          "description": "address to use",
+          "required": true,
+          "schema": {
+            "type": "string"
           }
-        ],
+        }],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -492,9 +405,6 @@
           }
         },
         "security": [
-          {
-            "api_key": []
-          },
           {
             "cookieAuth": []
           }
@@ -504,7 +414,7 @@
     "/updateuser": {
       "post": {
         "tags": [
-          "Authenticated routes",
+
           "User Profile"
         ],
         "summary": "Update the profile of the current user",
@@ -536,9 +446,6 @@
         },
         "security": [
           {
-            "api_key": []
-          },
-          {
             "cookieAuth": []
           }
         ]
@@ -547,23 +454,21 @@
     "/profile-image": {
       "get": {
         "tags": [
-          "Unauthenticated routes",
+
           "User Profile"
         ],
         "summary": "Get the image profile",
         "description": "Get the image profile",
         "operationId": "profile-image",
-        "parameters": [
-          {
-            "name": "image",
-            "in": "query",
-            "description": "resource to be gotten",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+        "parameters": [{
+          "name": "image",
+          "in": "query",
+          "description": "resource to be gotten",
+          "required": true,
+          "schema": {
+            "type": "string"
           }
-        ],
+        }],
         "responses": {
           "200": {
             "description": "successful operation"
@@ -579,17 +484,13 @@
             }
           }
         },
-        "security": [
-          {
-            "api_key": []
-          }
-        ]
+        "security": []
       }
     },
     "/upload-profile": {
       "post": {
         "tags": [
-          "Authenticated routes",
+
           "User Profile"
         ],
         "summary": "Upload image",
@@ -626,9 +527,6 @@
         },
         "security": [
           {
-            "api_key": []
-          },
-          {
             "cookieAuth": []
           }
         ]
@@ -641,11 +539,6 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "authorization"
-      },
-      "api_key": {
-        "type": "apiKey",
-        "name": "api_key",
-        "in": "header"
       }
     },
     "schemas": {
@@ -810,7 +703,7 @@
         "type": "object",
         "properties": {
           "owner": {
-            "description": "the hast to be tested",
+            "description": "the hash to be tested",
             "type": "string"
           },
           "data": {
@@ -868,4 +761,5 @@
     "description": "Find out more in the white Paper",
     "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
   }
+
 }
