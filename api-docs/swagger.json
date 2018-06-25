@@ -2,7 +2,15 @@
   "openapi": "3.0.0",
   "info": {
     "version": "1.0",
-    "title": "PARETO NETWORK API"
+    "title": "PARETO NETWORK API",
+    "description": "The Pareto Network API is used by Sentinels to catalogue and relay information between nodes. Interacting with a Pareto Sentinel uses this standardized RESTful API. Authentication is done using a JSON Web Token (JWT) stored as a secure browser cookie. Any RESTful client will need to set the cookie.",
+    "contact": {
+      "email": "hello@pareto.network"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
   },
   "servers": [{
     "url": "https://api.pareto.network/v1"
@@ -82,696 +90,676 @@
             }
           }
         }
-      },
-      "/auth": {
-        "get": {
-          "tags": [
+      }
+    },
+    "/auth": {
+      "get": {
+        "tags": [
 
-            "Auth"
-          ],
-          "summary": "Test if user is properly authenticated",
-          "description": "Simple authenticated method to determine if user is properly authenticated.",
-          "operationId": "auth",
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/SimpleUser"
-                  }
-                }
-              }
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-            "cookieAuth": []
-          }]
-        }
-      },
-      "/unsign": {
-        "post": {
-          "tags": [
-
-            "Auth"
-          ],
-          "summary": "Unsign http client for the current user",
-          "description": "Manage unsign proccess. Delete cookie with header set-cookie",
-          "operationId": "unsign",
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "headers": {
-                "Set-Cookie": {
-                  "schema": {
-                    "type": "string",
-                    "example": "authorization=abcde12345; Path=/; HttpOnly; maxAge=1231006505;"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Bad Request"
-            }
-          },
-          "security": [{
-            "cookieAuth": []
-          }]
-        }
-      },
-      "/address": {
-        "get": {
-          "tags": [
-
-            "Address"
-          ],
-          "summary": "Get the information of the current user",
-          "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
-          "operationId": "address",
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Address"
-                  }
-                }
-              }
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-            "cookieAuth": []
-          }]
-        }
-      },
-      "/address/{address}": {
-        "get": {
-          "tags": [
-
-            "Address"
-          ],
-          "summary": "Get the information of a specific user",
-          "description": "Get the information of a specific user.",
-          "operationId": "address",
-          "parameters": [{
-            "name": "address",
-            "in": "path",
-            "description": "address to use",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }],
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Address"
-                  }
-                }
-              }
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-              "api_key": []
-            },
-            {
-              "cookieAuth": []
-            }
-          ]
-        }
-      },
-      "/content": {
-        "get": {
-          "tags": [
-
-            "Content"
-          ],
-          "summary": "Get the content about the actionable investing intels",
-          "description": "Get all available content about the actionable investing intels.",
-          "operationId": "content",
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Contens"
-                  }
-                }
-              }
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-              "api_key": []
-            },
-            {
-              "cookieAuth": []
-            }
-          ]
-        }
-      },
-      "/content/me": {
-        "get": {
-          "tags": [
-
-            "Content"
-          ],
-          "summary": "Get the content available for current user",
-          "description": "Get the content available for current user",
-          "operationId": "content_me",
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Contens"
-                  }
-                }
-              }
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-              "api_key": []
-            },
-            {
-              "cookieAuth": []
-            }
-          ]
-        }
-      },
-      "/userinfo": {
-        "get": {
-          "tags": [
-
-            "User Profile"
-          ],
-          "summary": "Get the information of the profile user",
-          "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
-          "operationId": "userinfo",
-          "parameters": [{
-            "name": "latest",
-            "in": "query",
-            "description": "if true force update ranking. This must be call only after sign process",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          }],
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/UserInfo"
-                  }
-                }
-              }
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-              "api_key": []
-            },
-            {
-              "cookieAuth": []
-            }
-          ]
-        }
-      },
-      "/userinfo/{address}": {
-        "get": {
-          "tags": [
-
-            "User Profile"
-          ],
-          "summary": "Get the profile of a specific user",
-          "description": "Get the profile of a specific user.",
-          "operationId": "userinfo",
-          "parameters": [{
-            "name": "address",
-            "in": "path",
-            "description": "address to use",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }],
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/UserInfo"
-                  }
-                }
-              }
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-              "api_key": []
-            },
-            {
-              "cookieAuth": []
-            }
-          ]
-        }
-      },
-      "/updateuser": {
-        "post": {
-          "tags": [
-
-            "User Profile"
-          ],
-          "summary": "Update the profile of the current user",
-          "description": "Update the profile of the current user",
-          "operationId": "updateuser",
-          "requestBody": {
+          "Auth"
+        ],
+        "summary": "Test if user is properly authenticated",
+        "description": "Simple authenticated method to determine if user is properly authenticated.",
+        "operationId": "auth",
+        "responses": {
+          "200": {
+            "description": "successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfile"
+                  "$ref": "#/components/schemas/SimpleUser"
                 }
               }
             }
           },
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/UserInfo"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Bad Request"
-            }
-          },
-          "security": [{
-              "api_key": []
-            },
-            {
-              "cookieAuth": []
-            }
-          ]
-        }
-      },
-      "/profile-image": {
-        "get": {
-          "tags": [
-
-            "User Profile"
-          ],
-          "summary": "Get the image profile",
-          "description": "Get the image profile",
-          "operationId": "profile-image",
-          "parameters": [{
-            "name": "image",
-            "in": "query",
-            "description": "resource to be gotten",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }],
-          "responses": {
-            "200": {
-              "description": "successful operation"
-            },
-            "default": {
-              "description": "unexpected error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Error"
-                  }
-                }
-              }
-            }
-          },
-          "security": [{
-            "api_key": []
-          }]
-        }
-      },
-      "/upload-profile": {
-        "post": {
-          "tags": [
-
-            "User Profile"
-          ],
-          "summary": "Upload image",
-          "description": "Upload Image",
-          "operationId": "updateuser",
-          "requestBody": {
+          "default": {
+            "description": "unexpected error",
             "content": {
-              "multipart/form-data": {
+              "application/json": {
                 "schema": {
-                  "properties": {
-                    "file": {
-                      "type": "string",
-                      "format": "binary"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
-          },
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/File"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Bad Request"
-            }
-          },
-          "security": [{
-              "api_key": []
-            },
-            {
-              "cookieAuth": []
-            }
-          ]
-        }
+          }
+        },
+        "security": [{
+          "cookieAuth": []
+        }]
       }
     },
-    "components": {
-      "securitySchemes": {
-        "cookieAuth": {
-          "type": "apiKey",
-          "in": "cookie",
-          "name": "authorization"
+    "/unsign": {
+      "post": {
+        "tags": [
+
+          "Auth"
+        ],
+        "summary": "Unsign http client for the current user",
+        "description": "Manage unsign proccess. Delete cookie with header set-cookie",
+        "operationId": "unsign",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "authorization=abcde12345; Path=/; HttpOnly; maxAge=1231006505;"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
         },
-        "api_key": {
-          "type": "apiKey",
-          "name": "api_key",
-          "in": "header"
+        "security": [{
+          "cookieAuth": []
+        }]
+      }
+    },
+    "/address": {
+      "get": {
+        "tags": [
+
+          "Address"
+        ],
+        "summary": "Get the information of the current user",
+        "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
+        "operationId": "address",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [{
+          "cookieAuth": []
+        }]
+      }
+    },
+    "/address/{address}": {
+      "get": {
+        "tags": [
+
+          "Address"
+        ],
+        "summary": "Get the information of a specific user",
+        "description": "Get the information of a specific user.",
+        "operationId": "address",
+        "parameters": [{
+          "name": "address",
+          "in": "path",
+          "description": "address to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/content": {
+      "get": {
+        "tags": [
+
+          "Content"
+        ],
+        "summary": "Get the content about the actionable investing intels",
+        "description": "Get all available content about the actionable investing intels.",
+        "operationId": "content",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contens"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/content/me": {
+      "get": {
+        "tags": [
+
+          "Content"
+        ],
+        "summary": "Get the content available for current user",
+        "description": "Get the content available for current user",
+        "operationId": "content_me",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contens"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/userinfo": {
+      "get": {
+        "tags": [
+
+          "User Profile"
+        ],
+        "summary": "Get the information of the profile user",
+        "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
+        "operationId": "userinfo",
+        "parameters": [{
+          "name": "latest",
+          "in": "query",
+          "description": "if true force update ranking. This must be call only after sign process",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/userinfo/{address}": {
+      "get": {
+        "tags": [
+
+          "User Profile"
+        ],
+        "summary": "Get the profile of a specific user",
+        "description": "Get the profile of a specific user.",
+        "operationId": "userinfo",
+        "parameters": [{
+          "name": "address",
+          "in": "path",
+          "description": "address to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/updateuser": {
+      "post": {
+        "tags": [
+
+          "User Profile"
+        ],
+        "summary": "Update the profile of the current user",
+        "description": "Update the profile of the current user",
+        "operationId": "updateuser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/profile-image": {
+      "get": {
+        "tags": [
+
+          "User Profile"
+        ],
+        "summary": "Get the image profile",
+        "description": "Get the image profile",
+        "operationId": "profile-image",
+        "parameters": [{
+          "name": "image",
+          "in": "query",
+          "description": "resource to be gotten",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/upload-profile": {
+      "post": {
+        "tags": [
+
+          "User Profile"
+        ],
+        "summary": "Upload image",
+        "description": "Upload Image",
+        "operationId": "updateuser",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "authorization"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bonus": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tokens": {
+            "type": "string"
+          }
         }
       },
-      "schemas": {
-        "User": {
-          "type": "object",
-          "properties": {
-            "address": {
-              "type": "string",
-              "description": "User address token"
-            },
-            "rank": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "score": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "block": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "bonus": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "tokens": {
-              "type": "string"
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tokens": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "biography": {
+            "type": "string",
+            "description": "An description about user"
+          },
+          "profile_pic": {
+            "type": "string",
+            "description": "public url of the image"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "biography": {
+            "type": "string",
+            "description": "An description about user"
+          },
+          "profile_pic": {
+            "type": "string",
+            "description": "url of the image"
+          }
+        }
+      },
+      "SignResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Succes operation"
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Addresses": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Address"
+        }
+      },
+      "Content": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "alias": {
+            "type": "string",
+            "description": "alias"
+          },
+          "body": {
+            "type": "string",
+            "description": "the information in html string"
+          },
+          "block": {
+            "type": "string",
+            "description": "the block in Etherium"
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "User address token"
+          }
+        }
+      },
+      "Contens": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Content"
+        }
+      },
+      "SignData": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "description": "the hash to be tested",
+            "type": "string"
+          },
+          "data": {
+            "description": "Array of data along with types, as per EIP712.",
+            "type": "array",
+            "items": {
+              "type": "object"
             }
+          },
+          "result": {
+            "description": "the public key used in the hash test",
+            "type": "string"
           }
-        },
-        "UserInfo": {
-          "type": "object",
-          "properties": {
-            "address": {
-              "type": "string",
-              "description": "User address token"
-            },
-            "rank": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "score": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "tokens": {
-              "type": "string"
-            },
-            "first_name": {
-              "type": "string",
-              "description": "First name"
-            },
-            "last_name": {
-              "type": "string",
-              "description": "Last name"
-            },
-            "biography": {
-              "type": "string",
-              "description": "An description about user"
-            },
-            "profile_pic": {
-              "type": "string",
-              "description": "public url of the image"
-            }
+        }
+      },
+      "Error": {
+        "required": [
+          "status",
+          "message"
+        ],
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
           }
-        },
-        "UserProfile": {
-          "type": "object",
-          "properties": {
-            "first_name": {
-              "type": "string",
-              "description": "First name"
-            },
-            "last_name": {
-              "type": "string",
-              "description": "Last name"
-            },
-            "biography": {
-              "type": "string",
-              "description": "An description about user"
-            },
-            "profile_pic": {
-              "type": "string",
-              "description": "url of the image"
-            }
+        }
+      },
+      "SimpleUser": {
+        "required": [
+          "auth"
+        ],
+        "properties": {
+          "auth": {
+            "description": "Address of the current user",
+            "type": "string"
           }
-        },
-        "SignResponse": {
-          "type": "object",
-          "properties": {
-            "success": {
-              "type": "boolean",
-              "description": "Succes operation"
-            }
-          }
-        },
-        "Address": {
-          "type": "object",
-          "properties": {
-            "address": {
-              "type": "string",
-              "description": "User address token"
-            },
-            "rank": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "score": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "block": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        },
-        "Addresses": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/Address"
-          }
-        },
-        "Content": {
-          "type": "object",
-          "properties": {
-            "address": {
-              "type": "string",
-              "description": "User address token"
-            },
-            "alias": {
-              "type": "string",
-              "description": "alias"
-            },
-            "body": {
-              "type": "string",
-              "description": "the information in html string"
-            },
-            "block": {
-              "type": "string",
-              "description": "the block in Etherium"
-            }
-          }
-        },
-        "File": {
-          "type": "object",
-          "properties": {
-            "filename": {
-              "type": "string",
-              "description": "User address token"
-            }
-          }
-        },
-        "Contens": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/Content"
-          }
-        },
-        "SignData": {
-          "type": "object",
-          "properties": {
-            "owner": {
-              "description": "the hast to be tested",
-              "type": "string"
-            },
-            "data": {
-              "description": "Array of data along with types, as per EIP712.",
-              "type": "array",
-              "items": {
-                "type": "object"
-              }
-            },
-            "result": {
-              "description": "the public key used in the hash test",
-              "type": "string"
-            }
-          }
-        },
-        "Error": {
-          "required": [
-            "status",
-            "message"
-          ],
-          "properties": {
-            "status": {
-              "type": "boolean"
-            },
-            "message": {
-              "type": "string"
-            }
-          }
-        },
-        "SimpleUser": {
-          "required": [
-            "auth"
-          ],
-          "properties": {
-            "auth": {
-              "description": "Address of the current user",
-              "type": "string"
-            }
-          }
-        },
-        "Admin": {
-          "required": [
-            "admin"
-          ],
-          "properties": {
-            "admin": {
-              "description": "Protection from DDOS (value =  events or scores)",
-              "type": "string"
-            }
+        }
+      },
+      "Admin": {
+        "required": [
+          "admin"
+        ],
+        "properties": {
+          "admin": {
+            "description": "Protection from DDOS (value =  events or scores)",
+            "type": "string"
           }
         }
       }
-    },
-    "externalDocs": {
-      "description": "Find out more in the white Paper",
-      "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
     }
+  },
+  "externalDocs": {
+    "description": "Find out more in the white Paper",
+    "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
   }
+
 }
