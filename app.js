@@ -41,6 +41,9 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50
 app.use(cookieParser());
 app.use(compression());
 app.use('/api-docs', express.static('docs'));
+app.get('/api-docs/*', function(req, res){
+    res.sendFile(path.join(__dirname + '/api-docs/index.html'));
+});
 app.use('/', express.static('public'));
 app.all('/*', function (req, res, next) {
     // add details of what is allowed in HTTP request headers to the response headers
