@@ -40,7 +40,6 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50000}));
 app.use(cookieParser());
 app.use(compression());
-app.use('/api-docs', express.static('docs'));
 app.use('/', express.static('public'));
 app.all('/*', function (req, res, next) {
     // add details of what is allowed in HTTP request headers to the response headers
@@ -54,6 +53,8 @@ app.all('/*', function (req, res, next) {
     // the next() function continues execution and will move onto the requested URL/URI
     next();
 });
+
+app.use('/api-docs', express.static('docs'));
 //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
 app.use(boom());
 
