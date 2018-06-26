@@ -12,8 +12,8 @@ if (fs.existsSync(constantsPath)) {
 }
 
 /*constants*/
-var connectionUrl = process.env.MONGODB_URI || constants.mongodb_connection;
-var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.pareto_contract_address;
+var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
+var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
 
 
 
@@ -25,7 +25,7 @@ fs.readdirSync(modelsPath).forEach(file => {
 
 const redis = require("redis");
 redisClient = redis.createClient(
-  process.env.REDIS_URL  || constants.redis_url
+  process.env.REDIS_URL  || constants.REDIS_URL
 );
 
 
