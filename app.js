@@ -2,6 +2,7 @@
 
 var compression = require('compression');
 var express = require('express');
+const cors = require('cors');
 const fs = require("fs");
 const expressStaticGzip = require('express-static-gzip');
 var path = require('path');
@@ -23,14 +24,14 @@ debug('booting %s', appName);
 var bodyParser = require('body-parser');
 
 var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dir = path.join(__dirname, "/images");
+  destination: function (req, file, cb) {
+    const dir = path.join(__dirname, "/images");
 
-        fs.mkdir(dir, err => cb(err, dir))
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now())
-    }
+    fs.mkdir(dir, err => cb(err, dir))
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now())
+  }
 });
 
 var upload = multer({ storage: storage });
@@ -40,21 +41,19 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50000}));
 app.use(cookieParser());
 app.use(compression());
-app.use(express.static('public'));
-app.all('/*', function (req, res, next) {
-    // add details of what is allowed in HTTP request headers to the response headers
 
-    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_SERVER || "*");
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, HEAD');
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Max-Age', '86400');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, App-Key,Authorization,Accept');
+const corsOptions = {
+  origin: 'http://localhost:8080',
+  credentials: true
+};
+app.use(cors(corsOptions));
 
-    // the next() function continues execution and will move onto the requested URL/URI
-    next();
-});
 
-app.use("/api-docs", express.static('docs'));
+app.use("/api-docs", express.static('api-docs'));
+app.use('/', express.static('public'));
+
+
+
 //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
 app.use(boom());
 
