@@ -13,9 +13,9 @@
                             <div class="group">
                                 <label class="pareto-label">Authorized Contributor</label>
 
-                                <input id="lookup-input"
+                                <input class="lookup-input"
                                        type="text"
-                                       name="address">
+                                       name="address" readonly v-model="blockChainAddress">
                                 <span class="highlight"></span>
                                 <span class="bar"></span>
                             </div>
@@ -25,7 +25,7 @@
                                 <label class="pareto-label">Title</label>
 
                                 <input id="intel-title-input"
-                                       type="text"
+                                       type="text" class="lookup-input"
                                        name="intel-title" v-model="title">
                                 <span class="highlight"></span>
                                 <span class="bar"></span>
@@ -81,7 +81,8 @@
                 logged: false,
                 block: null,
                 body:'',
-                title:''
+                title:'',
+                blockChainAddress:''
             };
         },
         mounted: function () {
@@ -107,6 +108,7 @@
             address: function () {
                 DashboardService.getAddress(res => {
                     this.block = res.block;
+                    this.blockChainAddress = res.address
                 }, () => {
 
                 });
@@ -165,5 +167,14 @@
         transition: 0.2s ease all;
         -moz-transition: 0.2s ease all;
         -webkit-transition: 0.2s ease all;
+    }
+    .lookup-input {
+        padding: 10px 10px 10px 5px;
+        display: block;
+        width: 350px;
+        border: none;
+        background-color: #040f1e;
+        border-bottom: 1px solid #757575;
+        color: white;
     }
 </style>
