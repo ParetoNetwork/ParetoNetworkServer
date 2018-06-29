@@ -7,7 +7,9 @@
                     <div>
                         <div class="row" style="color: #ffffff; justify-content: center;">
 
-                            <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">Check your <b>PARETO</b> scores
+                            <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
+                                Check
+                                your<b>PARETO</b> scores
                                 easily by signing your wallet address using Metamask or a web3-enabled browser.
                                 Otherwise, sign manually.</p>
                             <br/>
@@ -18,7 +20,8 @@
                                 <div class="group">
                                     <div class="d-flex flex-column justify-content-center">
 
-                                        <label class="pareto-label  font-weight-bold m-0 text-left" for="lookup-input">Wallet Address</label>
+                                        <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Wallet
+                                            Address</label>
 
                                         <input id="lookup-input" type="text" name="address" readonly="readonly"
                                                v-bind:value="address || null" class="font-weight-bold">
@@ -38,20 +41,22 @@
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
                             <div id="rank-logo-holder"><img id="rank-logo"
                                                             src="../assets/images/pareto-logo-mark-color.svg"
-                                                            alt="Pareto Logo for Ranking"></div>
+                                                            alt="Pareto Logo for Ranking">
+                            </div>
                             <div>&nbsp;</div>
                             <div id="score-counter">{{rank}}</div>
                         </div>
                         <div id="address-metrics" class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center; opacity: 0">
                             <div id="rank-text">You rank:&nbsp;</div>
-                            <div id="rank-counter" style="font-weight: bold;">0</div>
+                            <div id="rank-counter" style="font-weight: bold;">0
+                            </div>
                             <div id="rank-text-cont">&nbsp;out of&nbsp;</div>
                             <div id="rank-total">0</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-md-6">
                     <h4>Leaderboard</h4>
                     <div class="" style="font-size: 12px">
                         <div class="table-area">
@@ -64,7 +69,7 @@
                                     <th width="123px">
                                         Score
                                     </th>
-                                    <th width="332px">
+                                    <th class="address-header" width="250px">
                                         Address
                                     </th>
                                 </tr>
@@ -73,12 +78,11 @@
                             <div class="" style="position: relative; overflow: auto; height: 70vh; width: 100%;">
                                 <table class="table table-responsive-lg">
                                     <tbody>
-
-                                    <tr v-for="rank in leader" :key="rank.address">
-                                        <td>{{rank.rank}}</td>
-                                        <td>{{rank.score}}</td>
-                                        <td>{{rank.address}}</td>
-                                    </tr>
+                                        <tr v-for="rank in leader" :key="rank.address">
+                                            <td>{{rank.rank}}</td>
+                                            <td>{{rank.score}}</td>
+                                            <td class="break-line">{{rank.address}}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
 
@@ -95,20 +99,16 @@
     import LeaderboardService from '../services/leaderboardService';
     import DashboardService from '../services/dashboardService';
     import Auth from '../services/authService';
-    import {mapMutations} from 'vuex';
+    import {mapMutations, mapState} from 'vuex';
 
     export default {
         name: 'VLeaderboards',
         data: function () {
             return {leader: [], rank: 0, address: ''};
         },
-        computed: {},
+        computed: {...mapState(['madeLogin'])},
         mounted: function () {
-            LeaderboardService.getLeaderboard({rank: 1, limit: 100, page: 0}, res => {
-                this.leader = res;
-            }, error => {
-                alert(error);
-            });
+            this.getLeaderboard();
             this.getAddress();
         },
         methods: {
@@ -119,21 +119,36 @@
                 }, () => {
 
                 });
-            }, authLogin() {
-                this.loadingLogin();
-                Auth.signSplash(data => {
-                    this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                    this.address = data.address;
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: data.address
-                    });
+            }, getLeaderboard: function () {
+                LeaderboardService.getLeaderboard({rank: 1, limit: 100, page: 0}, res => {
+                    this.leader = res;
                 }, error => {
                     alert(error);
-                    this.stopLogin();
                 });
+            }, authLogin() {
+                if (this.madeLogin) {
+                    Auth.postSign(() => {
+                        this.getAddress();
+                        this.getLeaderboard();
+                    });
+                } else {
+                    this.loadingLogin();
+                    Auth.signSplash(data => {
+                        this.rank = data.rank <= 0 ? 0.0 : data.rank;
+                        this.address = data;
+                        this.$store.dispatch({
+                            type: 'login',
+                            address: data
+                        });
+
+                    }, error => {
+                        alert(error);
+                        this.stopLogin();
+                    });
+                }
+
             }, ...mapMutations(
-                ['login', 'loadingLogin','stopLogin']
+                ['login', 'loadingLogin', 'stopLogin']
             )
         }
     };
@@ -220,6 +235,16 @@
 
     #rank-logo-holder {
         padding-top: 30px;
+    }
+
+    .break-line {
+        word-break: break-all;
+    }
+
+    .address-header {
+        @media (max-width: 500px) {
+            width: 150px;
+        }
     }
 
 </style>

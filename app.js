@@ -52,8 +52,6 @@ app.use(cors(corsOptions));
 app.use("/api-docs", express.static('api-docs'));
 app.use('/', express.static('public'));
 
-
-
 //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
 app.use(boom());
 
@@ -122,31 +120,26 @@ app.post('/v1/sign', function (req, res) {
 
     controller.sign(req.body, function (err, result) {
         if (err) {
-            console.log(err); //if this is a message
-            res.boom.badData(err);
+            console.log(err);
+            if(err.code){
+                res.status(err.code).json(err)
+            }else{
+                //if this is a message
+                res.boom.badData(err);
+            }
+
         } else {
-            controller.getProfileAndSaveRedis(req.body.owner, function (err, user) {
-                if (err) {
-                    console.log(err); //if this is a message
-                    res.boom.badData(err);
-                } else {
-                    if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
-                        res.cookie('authorization', result.token, {httpOnly: true});
-                    }
-                    else {
-                        res.cookie('authorization', result.token, {
-                            domain: 'pareto.network',
-                            path: '/',
-                            httpOnly: true,
-                            secure: true
-                        }); //should set a debug flag for env variable
-                    }
-                    user.score = result.score;
-                    user.rank = result.rank;
-                    user.tokens = result.tokens;
-                    res.status(200).json({status: 'success',result: user});
-                }
-            })
+            if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
+                res.cookie('authorization', result.token, {httpOnly: true});
+            } else {
+                res.cookie('authorization', result.token, {
+                    domain: 'pareto.network',
+                    path: '/',
+                    httpOnly: true,
+                    secure: true
+                }); //should set a debug flag for env variable
+            }
+            res.status(200).json({success: true})
 
         }
     });
@@ -337,6 +330,12 @@ app.get('/v1/address', function (req, res) {
 
 });
 
+//force update inforamtion
+app.post('/v1/update', function (req, res) {
+
+
+});
+
 //get info about another address
 app.get('/v1/address/:address', function (req, res) {
 
@@ -352,13 +351,29 @@ app.get('/v1/address/:address', function (req, res) {
 
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
-    controller.getUserInfo(req.user,  function (err, result) {
-        if (err) {
-            res.boom.badRequest(err.message);
-        } else {
-            res.status(200).json(result);
-        }
-    });
+    if(req.query.latest==='true'){
+        controller.updateScore(req.user, function (err, success) {
+            if (err) {
+                res.boom.badRequest(err.message);
+            } else {
+                controller.getUserInfo(req.user,  function (err, result) {
+                    if (err) {
+                        res.boom.badRequest(err.message);
+                    } else {
+                        res.status(200).json(result);
+                    }
+                });
+            }
+        });
+    }else{
+        controller.getUserInfo(req.user,  function (err, result) {
+            if (err) {
+                res.boom.badRequest(err.message);
+            } else {
+                res.status(200).json(result);
+            }
+        });
+    }
 
 });
 
@@ -385,20 +400,7 @@ app.post('/v1/updateuser', function (req, res) {
     });
 });
 
-/*
-* re-calculate rank?
-*/
-app.post('/v1/rank', function (req, res) {
 
-    controller.calculateScore(req.body.address, 0, function (err, result) {
-        if (err) {
-            res.boom.badRequest(err.message);
-        } else {
-            res.status(200).json(result);
-        }
-    });
-
-});
 
 /*
   This should be a cron job or background process using the 2nd concurrent worker
@@ -411,45 +413,16 @@ app.post('/v1/updatescores', function (req, res) {
     else if (req.body.admin === undefined) {
         res.boom.badRequest('POST body missing, needs keys');
     } else {
-        if (req.body.admin == 'events')
-            controller.seedLatestEvents(res);
-        else if (req.body.admin == 'scores')
-            controller.calculateAllScores(function (err, result) {
-                if (err) {
-                    res.boom.badRequest(err.message);
-                } else {
-                    res.status(200).json(result);
-                }
-            });
+        controller.updateScore(req.user, function (err, result) {
+            if (err) {
+                res.boom.badRequest(err.message);
+            } else {
+                res.status(200).json(result);
+            }
+        });
     }
 });
 
-app.post('/v1/updateranks', function (req, res) {
-    if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
-        res.boom.badRequest('POST body missing');
-    }
-    else if (req.body.admin === undefined) {
-        res.boom.badRequest('POST body missing, needs keys');
-    } else {
-        if (req.body.admin == 'update') {
-            controller.calculateAllRanks(function (err, result) {
-                if (err) {
-                    res.boom.badRequest(err.message);
-                } else {
-                    res.status(200).json(result);
-                }
-            });
-        } else if (req.body.admin == 'reset') {
-            controller.resetRanks(function (err, result) {
-                if (err) {
-                    res.boom.badRequest(err.message);
-                } else {
-                    res.status(200).json(result);
-                }
-            });
-        }
-    } //end else
-});
 
 
 app.use('/public/static/', expressStaticGzip('/public/static/', {

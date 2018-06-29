@@ -105,15 +105,16 @@ export default class authService {
                                     const token = response.data.result;
 
                                     logged = true;
-                                    this.auth(data => {
-                                        return onSuccess(token);
+                                    return onSuccess(from);
 
-                                    }, err => {
-                                        return onError(err);
-                                    });
 
                                 }).catch(error => {
-                                    return onError(error);
+                                    if (error.response && error.response.data) {
+                                        return onError(error.response.data.message);
+                                    } else {
+                                        return onError(error);
+                                    }
+
                                 });
 
                             } else {
@@ -134,6 +135,14 @@ export default class authService {
             });
         }//end if
         return true;
+    }
+
+    static postSign(onSuccess, onError) {
+        http.get('/v1/userinfo?latest=true').then(res => {
+            onSuccess(res);
+        }).catch(error => {
+            onError(error);
+        });
     }
 }
 
