@@ -382,6 +382,77 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
 
 }
 
+controller.getBalance = async function(address, blockHeightFixed, callback){
+
+    address = address.toLowerCase();
+
+    var blockHeight = 0;
+
+    var rankCalculation = 0;
+
+    if(web3.utils.isAddress(address) == false){
+        if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    } else {
+
+        //pad address +32 bits for web3 API
+        var padding=66;
+        var n = address.length;
+        if(n!==padding)
+        {
+            var paddingLength = 66 - (n)
+            var zeroes = "0";
+            for (var i = 0; i < paddingLength-1; i++)
+            {
+                zeroes += "0";
+            }
+            var addressPadded = "0x" + zeroes + address.substring(2,n);
+        }
+
+        var txs = [];
+        var incoming = {};
+        var outgoing = {};
+
+        //console.log(address);
+
+        //this call doesn't use the padded address
+        var tknAddress = (address).substring(2);
+        var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
+
+        //ethereum servers suck, give them 5ms to breath
+        await new Promise(r => setTimeout(() => r(), 5));
+        //get current blocknumber too
+        web3.eth.getBlock('latest')
+            .then(function(res) {
+                blockHeight = res.number;
+                //console.log("blockheight: " + blockHeight);
+
+                //then re-tally total
+                return web3.eth.call({
+                    to: paretoContractAddress,
+                    data: contractData
+                }).then(function(result) {
+                    var amount = 0;
+                    if (result) {
+                        var tokens = web3.utils.toBN(result).toString();
+                        amount = web3.utils.fromWei(tokens, 'ether');
+                        //console.log("amount: " + amount);
+                    }
+
+                    if(amount > 0){
+                        callback(null,amount)
+                    } else {
+
+                        callback({code: 401, message: "We are sorry, you will need Pareto balance in order to be able to Sign In."})
+
+                    } //end
+
+
+                });//end promise related to balance
+            }); //end promise related to block height
+    } //end address validation
+
+};
+
 controller.postContent = function(req, callback){
 
   var body = req.body;
@@ -703,63 +774,20 @@ controller.updateScore = function(address, callback){
 
 controller.sign = function(params, callback){
 
-  var owner = params.owner;
+  const owner = params.owner;
 
   const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
 
   if (recovered === owner ) {
     // If the signature matches the owner supplied, create a
     // JSON web token for the owner that expires in 24 hours.
-      callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
-
-
-    //if not in database already, then calculate score. this can also happen because a user has no PARETO tokens in the address they are signing. Should check that first. Might as well do the whole score calculation
-    /*ParetoAddress.count({ address : owner }, function(err, count){
-      if(err){}
-      else {
-        if (count == 0){
-          //then add. This is done instead of simply find + upsert because I don't want to check web3 for the current block every time.
-          //if the system already knew the blockheight, then it would always just do a findOne w/ upsert and keep it rolling.
-
-           web3.eth.getBlock('latest')
-               .then(function(res) {
-                blockHeight = res.number;
-                 //console.log("blockheight: " + blockHeight);
-
-                //add address to database and return, while initiating a score calculation
-                var dbQuery = {
-              address : owner
-            };
-            var dbValues = {
-                $set: {
-                    score : 0,
-                    block: blockHeight,
-                    address: owner,
-                    rank: -1,
-                    tokens: 0
-                }
-            };
-            var dbOptions = {
-              upsert : true,
-              returnNewDocument: true
-            };
-                ParetoAddress.findOne(dbQuery, dbValues, dbOptions, function(err, result){
-                  if(err){}
-                  else{
-                    if(callback && typeof callback === "function") { callback(null, results ); }
-                    controller.calculateScore(owner, 0, null);
-                  }
-                });
-
-
-          }); //end web3
-       } //end if
-       else {
-         if(callback && typeof callback === "function") { callback(null, results ); }
-       }
-      } //end else
-
-    });*/
+      controller.getBalance(owner,0, function(err, count){
+        if(!err){
+            callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
+        }else{
+          callback(err);
+        }
+      });
 
 
   } else {
