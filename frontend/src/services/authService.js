@@ -36,6 +36,62 @@ export default class authService {
         });
     }
 
+    static signParetoServer(msgParams, from, result, onSuccess, onError){
+        let jsonData = {
+            data: msgParams,
+            owner: from,
+            result: result
+        };
+
+        http.post('/v1/sign', qs.stringify(jsonData), {
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            }
+        }).then(response => {
+            const token = response.data.result;
+
+            logged = true;
+            return onSuccess(from);
+
+
+        }).catch(error => {
+            if (error.response && error.response.data) {
+                return onError(error.response.data.message);
+            } else {
+                return onError(error);
+            }
+
+        });
+    }
+
+    static manualLogin(from, privatekey, onSuccess, onError){
+        const msgParams = [
+            {
+                type: 'string',
+                name: 'Message',
+                value: 'Pareto' //replace with TOS
+            }
+        ];
+
+        const params = {
+            data: msgParams
+        };
+        const privKey = Buffer.from(privatekey, 'hex');
+        const sig = Sig.signTypedData(privKey, params);
+        const recovered = Sig.recoverTypedSignature({data: msgParams, sig: sig});
+
+        if (recovered === from) {
+            authService.signParetoServer(msgParams, from, sig, onSuccess, onError)
+
+        } else {
+            console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
+            // stopLoading();
+            return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
+        }
+
+    }
+
     static signSplash(onSuccess, onError) {
         const msgParams = [
             {
@@ -89,37 +145,12 @@ export default class authService {
                             const recovered = Sig.recoverTypedSignature({data: msgParams, sig: result.result});
 
                             if (recovered === from) {
-
-                                var jsonData = {
-                                    data: msgParams,
-                                    owner: from,
-                                    result: result.result
-                                };
-
-                                http.post('/v1/sign', qs.stringify(jsonData), {
-                                    headers: {
-                                        'accept': 'application/json',
-                                        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                                    }
-                                }).then(response => {
-                                    const token = response.data.result;
-
-                                    logged = true;
-                                    return onSuccess(from);
-
-
-                                }).catch(error => {
-                                    if (error.response && error.response.data) {
-                                        return onError(error.response.data.message);
-                                    } else {
-                                        return onError(error);
-                                    }
-
-                                });
+                                authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
 
                             } else {
                                 console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
                                 // stopLoading();
+                                return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
                             }
 
                         });
