@@ -12,8 +12,8 @@ if (fs.existsSync(constantsPath)) {
 }
 
 /*constants*/
-var connectionUrl = process.env.MONGODB_URI || constants.mongodb_connection;
-var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.pareto_contract_address;
+var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
+var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
 
 
 
@@ -25,7 +25,7 @@ fs.readdirSync(modelsPath).forEach(file => {
 
 const redis = require("redis");
 redisClient = redis.createClient(
-  process.env.REDIS_URL  || constants.redis_url
+  process.env.REDIS_URL  || constants.REDIS_URL
 );
 
 
@@ -345,14 +345,6 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                 });
             });//end first then promise
           } else {
-            var resultJson = {
-              'address' : address,
-              'score' : 0.0,
-              'rank'  : -1,
-              'block' : blockHeight,
-              'bonus' : 0.0,
-              'tokens': amount
-            };
 
             //update entry in database if it exists, do not put additional entry invar
             dbQuery = {
@@ -371,17 +363,13 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
               returnNewDocument: true
             };
 
-            //can also return unauthorized, PARETO balance 0.00, list of places to purchase some
-            if(callback && typeof callback === "function") { callback(null, resultJson); }
 
-            //should queue for writing later
+
+            //User never has Pareto or User spent all pareto (if it is last one, update)
             ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions,
               function(err, r){
-                if(err){
-                  console.error('unable to write to db because: ', err);
-                } else {
-                  //console.log("here is db writing response : " + r);
-                } //end conditional
+                  //c
+                 callback({code: 401, message: "We are sorry, you will need Pareto balance in order to be able to Sign In."})
               } //end function
             );
 
@@ -698,30 +686,32 @@ controller.getContentByCurrentUser = function(address, callback){
 
 };
 
+
+controller.updateScore = function(address, callback){
+    //var results = { token: token };
+    controller.calculateScore(address, 0, function(err, result){
+        if(err){
+            if(callback && typeof callback === "function") {
+                callback(err);
+            }
+        } else {
+            controller.getScoreAndSaveRedis(callback);
+
+        }
+    });
+};
+
 controller.sign = function(params, callback){
 
   var owner = params.owner;
 
-  const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result })
+  const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
 
   if (recovered === owner ) {
     // If the signature matches the owner supplied, create a
     // JSON web token for the owner that expires in 24 hours.
-    var token = jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" });
+      callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
 
-    //var results = { token: token };
-
-    controller.calculateScore(owner, 0, function(err, result){
-      if(err){
-        if(callback && typeof callback === "function") {
-          callback(err);
-        }
-      } else {
-        result.token = token;
-        controller.getScoreAndSaveRedis(function(err, result){ });
-        if(callback && typeof callback === "function") { callback(null, result ); }
-      }
-    });
 
     //if not in database already, then calculate score. this can also happen because a user has no PARETO tokens in the address they are signing. Should check that first. Might as well do the whole score calculation
     /*ParetoAddress.count({ address : owner }, function(err, count){
@@ -830,9 +820,9 @@ controller.getScoreAndSaveRedis = function(callback){
       // Put the data in  Redis hashing by rank
       const multi = redisClient.multi();
       results.forEach(function(result){
-        result.addresses.rank = result.rank +1;
+        result.addresses.rank = result.rank + 1;
         multi.hmset(result.addresses.rank+ "",  result.addresses);
-        const rank = { rank: result.addresses.rank+ ""};
+        const rank = { rank: result.addresses.rank + ""};
         multi.hmset("address"+result.addresses.address+ "", rank );
 
       });
@@ -919,8 +909,7 @@ controller.retrieveProfileWithRedis = function(address , callback){
              callback(err);
         }
         if((!results || results.length ===0 || !results[0])){
-          console.log("no lo encontro");
-            controller.getProfileAndSaveRedis(function(err, result){
+            controller.getProfileAndSaveRedis(address, function(err, result){
                 if(err){
                      callback(err);
                 } else {
@@ -1005,15 +994,21 @@ controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
                 }
             });
         }else{
-            const multi = redisClient.multi();
-            multi.hgetall(results[0].rank+ "");
-            multi.exec(function(err, results) {
-                if(err){
-                    return callback(err);
-                }
-                // return the cached ranking
-                return callback(null, results[0]);
-            });
+          if((!results || results.length ===0 || !results[0])){
+              // hopefully, users without pareto shouldn't get here now.
+              callback("We are sorry, you will need Pareto balance in order to be able to Sign In.")
+          }else{
+              const multi = redisClient.multi();
+              multi.hgetall(results[0].rank+ "");
+              multi.exec(function(err, results) {
+                  if(err){
+                      return callback(err);
+                  }
+                  // return the cached ranking
+                  return callback(null, results[0]);
+              });
+          }
+
         }
 
 
