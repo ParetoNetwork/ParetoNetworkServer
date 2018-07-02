@@ -46,7 +46,7 @@
                             <a v-if="address" class="dropdown-item" href="#">{{address}}</a>
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
-                            <a v-if="!isLogged" class="dropdown-item" href="#">Manually</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
 
                             <a v-else class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
 
@@ -88,11 +88,14 @@
         computed: {
             ...mapState([
                 // map this.count to store.state.count
-                'isLogged', 'address'
+                'isLogged', 'address' , 'showModalSign'
             ])
 
         },
         methods: {
+            manual: function() {
+              this.$store.state.showModalSign = true;
+            },
             collapseContent: function () {
                 if($( window ).width() < 990){
                     $('#navbarSupportedContent').collapse("toggle");
