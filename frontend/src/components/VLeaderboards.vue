@@ -92,6 +92,7 @@
                 </div>
             </div>
         </div>
+        <ModalSignIn v-if="showModalSign"></ModalSignIn>
     </div>
 </template>
 
@@ -100,13 +101,15 @@
     import DashboardService from '../services/dashboardService';
     import Auth from '../services/authService';
     import {mapMutations, mapState} from 'vuex';
+    import ModalSignIn from "./VModalManualSigIn";
 
     export default {
         name: 'VLeaderboards',
+        comments: {ModalSignIn},
         data: function () {
             return {leader: [], rank: 0, address: ''};
         },
-        computed: {...mapState(['madeLogin'])},
+        computed: {...mapState(['madeLogin', 'showModalSign'])},
         mounted: function () {
             this.getLeaderboard();
             this.getAddress();

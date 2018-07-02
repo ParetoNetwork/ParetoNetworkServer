@@ -65,31 +65,16 @@ export default class authService {
         });
     }
 
-    static manualLogin(from, privatekey, onSuccess, onError){
+    static manualLogin(message, signed, onSuccess, onError){
         const msgParams = [
             {
                 type: 'string',
                 name: 'Message',
-                value: 'Pareto' //replace with TOS
+                value: message //replace with TOS
             }
         ];
-
-        const params = {
-            data: msgParams
-        };
-        const privKey = Buffer.from(privatekey, 'hex');
-        const sig = Sig.signTypedData(privKey, params);
-        const recovered = Sig.recoverTypedSignature({data: msgParams, sig: sig});
-
-        if (recovered === from) {
-            authService.signParetoServer(msgParams, from, sig, onSuccess, onError)
-
-        } else {
-            console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
-            // stopLoading();
-            return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
-        }
-
+        const recovered = Sig.recoverTypedSignature({data: msgParams, sig: signed});
+        authService.signParetoServer(msgParams, recovered, signed, onSuccess, onError)
     }
 
     static signSplash(onSuccess, onError) {
