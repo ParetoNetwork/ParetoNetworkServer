@@ -66,15 +66,20 @@ export default class authService {
     }
 
     static manualLogin(message, signed, onSuccess, onError){
-        const msgParams = [
-            {
-                type: 'string',
-                name: 'Message',
-                value: message //replace with TOS
-            }
-        ];
-        const recovered = Sig.recoverTypedSignature({data: msgParams, sig: signed});
-        authService.signParetoServer(msgParams, recovered, signed, onSuccess, onError)
+        try{
+            const msgParams = [
+                {
+                    type: 'string',
+                    name: 'Message',
+                    value: message //replace with TOS
+                }
+            ];
+            const recovered = Sig.recoverTypedSignature({data: msgParams, sig: signed});
+            authService.signParetoServer(msgParams, recovered, signed, onSuccess, onError)
+        }catch (e) {
+            onError(e);
+        }
+
     }
 
     static signSplash(onSuccess, onError) {
@@ -154,7 +159,7 @@ export default class authService {
     }
 
     static postSign(onSuccess, onError) {
-        http.get('/v1/userinfo?latest=true').then(res => {
+        http.get('/v1/userinfo?latest=true',{  withCredentials: true}).then(res => {
             onSuccess(res);
         }).catch(error => {
             onError(error);
