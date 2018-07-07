@@ -414,7 +414,7 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
     var rankCalculation = 0;
 
     if(web3.utils.isAddress(address) == false){
-        if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
     } else {
 
         //pad address +32 bits for web3 API
@@ -465,13 +465,21 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
                         callback(null,amount)
                     } else {
 
-                        callback({code: 401, message: "We are sorry, you will need Pareto balance in order to be able to Sign In."})
+                        callback(ErrorHandler.zeroParetoBalanceMessage)
 
                     } //end
 
 
-                });//end promise related to balance
-            }); //end promise related to block height
+                }, function (error) {
+                    callback(error);
+                }).catch(function (err) {
+                    callback(error);
+                });//end promise related to balance//end promise related to balance
+            }, function (error) {
+                callback(error);
+            }).catch(function (err) {
+            callback(error);
+        });//end promise related to balance //end promise related to block height
     } //end address validation
 
 };

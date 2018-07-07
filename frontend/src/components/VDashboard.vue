@@ -151,11 +151,12 @@
                 if (!this.madeLogin) {
                     this.intelEnter();
 
-                    AuthService.postSign(res => {
+                    AuthService.postSign(() => {
                         this.loadAddress();
                         this.loadContent();
                     }, () => {
-                        console.log('error');
+                        this.loadAddress();
+                        this.loadContent();
                     });
                 } else {
                     this.loadAddress();
