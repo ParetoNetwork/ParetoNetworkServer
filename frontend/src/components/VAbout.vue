@@ -2,8 +2,8 @@
     <div class="main">
         <div class="container-fluid ">
             <div class="row gradient">
-                <div class="col-6">
-                    <img width="400" src="../assets/images/LogoReverse.svg" alt="">
+                <div class="col-12 col-lg-6 mb-lg-0 mb-4">
+                    <img style="width: 400px; max-width: 100%;" src="../assets/images/LogoReverse.svg" alt="">
                     <h1 class="font-body padding-main text-left text-white mb-5">Current, reputable &
                         actionable intel for digital currency traders and
                         investors.</h1>
@@ -12,10 +12,14 @@
                     <a href="https://github.com/ParetoNetwork/Pareto-Network-Roadmap/projects/1?fullscreen=true"
                        class="btn btn-primary" target="_blank">Roadmap</a>
                 </div>
-                <div class="col-6">
-                    <iframe height="315" width="460"
-                            src="https://www.youtube.com/embed/j6MFoSQkT7U?rel=0&amp;showinfo=0" frameborder="0"
-                            allowfullscreen></iframe>
+                <div class="col-12 col-lg-6">
+                    <div class="video-box">
+                        <iframe width="100%" height="100%"
+                                src="https://www.youtube.com/embed/j6MFoSQkT7U?rel=0&amp;showinfo=0" frameborder="0"
+                                allowfullscreen></iframe>
+                    </div>
+
+
                 </div>
             </div>
         </div>
