@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="visual-debugger">
+    <div id="app">
         <Navbar/>
         <router-view></router-view>
         <VFab/>

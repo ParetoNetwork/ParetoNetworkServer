@@ -19,11 +19,7 @@ errorHandler.nullResponseMessage = 'null response';
  * @return {{success: boolean, message: *}}
  */
 errorHandler.getError = function (message)  {
-    let msg = message;
-    if( typeof  message === 'object' && message.message){
-        msg = message.message;
-    }
-    return {success: false, message: msg};
+    return {success: false, message: errorHandler.validateMessage(message)};
 };
 
 /**
@@ -33,7 +29,7 @@ errorHandler.getError = function (message)  {
  * @return {{success: boolean, message: *, code: number}}
  */
 errorHandler.getErrorWithCode = function (message, code)  {
-    return {success: false, message: message, code: code};
+    return {success: false, message: errorHandler.validateMessage(message), code: code};
 };
 
 /**
@@ -44,6 +40,19 @@ errorHandler.getErrorWithCode = function (message, code)  {
 errorHandler.getSuccess = function (data)  {
     return {success: true, data: data};
 };
+
+// validatingMessage
+errorHandler.validateMessage = function(message){
+    let msg = message;
+    if( typeof  message === 'object' && message.message){
+        msg = message.message;
+    }
+    if(msg.indexOf('Invalid JSON RPC') > -1){
+        msg = 'Ethereum server response failed , please try again';
+    }
+
+    return msg;
+}
 
 
 //Template Errors
