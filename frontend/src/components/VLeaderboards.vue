@@ -130,6 +130,8 @@
                     Auth.postSign(() => {
                         this.getAddress();
                         this.getLeaderboard();
+                    }, error => {
+                        alert(error);
                     });
                 } else {
                     this.loadingLogin();
