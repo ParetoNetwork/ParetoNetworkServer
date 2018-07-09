@@ -125,8 +125,11 @@ describe('Server application /', function() {
                 .expect(200)
                 .expect( function (res) {
                     let body = res.body;
-                    assert(body.success, "must be true");
-                    assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    if(body.success){
+                        assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    }else{
+                        assert('Ethereum server response failed , please try again'===body.message, 'Only Ethereum servers error are allowed');
+                    }
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
