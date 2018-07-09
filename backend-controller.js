@@ -352,7 +352,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                             }, function (error) {
                                 callback(error);
                             }).catch(function (err) {
-                                    callback(error);
+                                    callback(err);
                                 });
                             //end first then promise
                         } else {
@@ -390,12 +390,12 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                     }, function (error) {
                         callback(error);
                     }).catch(function (err) {
-                        callback(error);
+                        callback(err);
                     });//end promise related to balance
                 }, function (error) {
                     callback(error);
                 }).catch(function (err) {
-                callback(error);
+                callback(err);
             }); //end promise related to block height
         } //end address validation
     }catch (e) {
@@ -473,12 +473,12 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
                 }, function (error) {
                     callback(error);
                 }).catch(function (err) {
-                    callback(error);
+                    callback(err);
                 });//end promise related to balance//end promise related to balance
             }, function (error) {
                 callback(error);
             }).catch(function (err) {
-            callback(error);
+            callback(err);
         });//end promise related to balance //end promise related to block height
     } //end address validation
 
@@ -522,7 +522,7 @@ controller.postContent = function(req, callback){
       }, function (error) {
           callback(error);
       }).catch(function (err) {
-        callback(error);
+        callback(err);
     }); //end web3
   } // end else
 
@@ -697,7 +697,7 @@ controller.getAllAvailableContent = function(req, callback) {
             }, function (error) {
                 callback(error);
             }).catch(function (err) {
-              callback(error);
+              callback(err);
           });//end web3
 
         }//end else
