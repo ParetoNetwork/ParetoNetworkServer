@@ -2,6 +2,7 @@ import Splash from '../components/Splash';
 import VDashboard from '../components/VDashboard';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
+import VIntel from '../components/VIntel';
 import VueRouter from 'vue-router';
 import AuthService from '../services/authService';
 
@@ -29,6 +30,7 @@ const routes = [
     },
     {path: '/about', component: VAbout},
     {path: '/leaderboards', component: VLeaderboards},
+    {path: '/intel', component: VIntel},
 ];
 const router = new VueRouter({routes});
 export default router;

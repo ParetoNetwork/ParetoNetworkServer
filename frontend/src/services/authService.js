@@ -17,8 +17,12 @@ export default class authService {
 
     static logout(onSuccess, onError) {
         http.post('/v1/unsign').then(res => {
-            logged = false;
-            onSuccess(res);
+            if(res.data.success){
+                logged = false;
+                onSuccess(res.data.data);
+            }else{
+                onError(res.data.message);
+            }
         }).catch(error => {
             onError(error);
         });
@@ -28,8 +32,11 @@ export default class authService {
         http.get('/v1/auth', {
             dataType: 'json'
         }).then(res => {
-            return onSuccess(res);
-
+            if(res.data.success){
+              return  onSuccess(res.data.data);
+            }else{
+              return   onError(res.data.message);
+            }
         }).catch(error => {
             return onError(error);
 
@@ -102,11 +109,12 @@ export default class authService {
                                         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
                                     }
                                 }).then(response => {
-                                    const token = response.data.result;
-
-                                    logged = true;
-                                    return onSuccess(from);
-
+                                    if(response.data.success){
+                                        logged = true;
+                                        return onSuccess(from);
+                                    }else{
+                                        return onError(response.data.message)
+                                    }
 
                                 }).catch(error => {
                                     if (error.response && error.response.data) {
@@ -139,7 +147,11 @@ export default class authService {
 
     static postSign(onSuccess, onError) {
         http.get('/v1/userinfo?latest=true').then(res => {
-            onSuccess(res);
+            if(res.data.success){
+                onSuccess(res.data.data);
+            }else{
+                onError(res.data.message);
+            }
         }).catch(error => {
             onError(error);
         });
