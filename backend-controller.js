@@ -84,303 +84,405 @@ const dbName = 'pareto';
 const PARETO_SCORE_MINIMUM 					=			100000; 	//minimum score to get intel
 const PARETO_RANK_GRANULARIZED_LIMIT 		= 			10; 		//how far down to go through ranks until separating by tiers
 
+const ErrorHandler = require('./error-handler.js');
+
 controller.calculateScore = async function(address, blockHeightFixed, callback){
+    //Web3 can throw error
+    try{
+        address = address.toLowerCase();
 
-  address = address.toLowerCase();
+        var blockHeight = 0;
 
-  var blockHeight = 0;
+        var rankCalculation = 0;
 
-  var rankCalculation = 0;
+        if(web3.utils.isAddress(address) == false){
+            if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+        } else {
 
-  if(web3.utils.isAddress(address) == false){
-    if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
-  } else {
+            //pad address +32 bits for web3 API
+            var padding=66;
+            var n = address.length;
+            if(n!==padding)
+            {
+                var paddingLength = 66 - (n)
+                var zeroes = "0";
+                for (var i = 0; i < paddingLength-1; i++)
+                {
+                    zeroes += "0";
+                }
+                var addressPadded = "0x" + zeroes + address.substring(2,n);
+            }
 
-    //pad address +32 bits for web3 API
-    var padding=66;
-    var n = address.length;
-    if(n!==padding)
-    {
-      var paddingLength = 66 - (n)
-      var zeroes = "0";
-      for (var i = 0; i < paddingLength-1; i++)
-      {
-        zeroes += "0";
-      }
-      var addressPadded = "0x" + zeroes + address.substring(2,n);
+            var txs = [];
+            var incoming = {};
+            var outgoing = {};
+
+            //console.log(address);
+
+            //this call doesn't use the padded address
+            var tknAddress = (address).substring(2);
+            var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
+
+            //ethereum servers suck, give them 5ms to breath
+            await new Promise(r => setTimeout(() => r(), 5));
+            //get current blocknumber too
+            web3.eth.getBlock('latest')
+                .then(function(res) {
+
+                    blockHeight = res.number;
+                    //console.log("blockheight: " + blockHeight);
+
+                    //then re-tally total
+                    return web3.eth.call({
+                        to: paretoContractAddress,
+                        data: contractData
+                    }).then(function(result) {
+                        var amount = 0;
+                        if (result) {
+                            var tokens = web3.utils.toBN(result).toString();
+                            amount = web3.utils.fromWei(tokens, 'ether');
+                            //console.log("amount: " + amount);
+                        }
+
+                        if(amount > 0){
+                            return web3.eth.getPastLogs({
+                                fromBlock: contractCreationBlockHeightHexString,
+                                toBlock: 'latest',
+                                address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+                                topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
+                            }).then(function (txObjects){
+                                //console.log(txObjects);
+                                for(i = 0; i < txObjects.length; i++){
+
+                                    //these are hex values
+                                    //get data field, to hex, then from wei to ether
+                                    var data = txObjects[i].data;
+                                    var blockHex = txObjects[i].blockNumber;
+
+                                    var quantityWei = web3.utils.toBN(data, 16).toString();
+                                    var blockNumber = web3.utils.toBN(blockHex, 16).toString();
+                                    var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
+                                    //can be float
+                                    quantityEth = parseFloat(quantityEth);
+
+                                    //basically pushes
+                                    if(blockNumber in incoming)
+                                    {
+                                        incoming[blockNumber] = incoming[blockNumber] + quantityEth;
+                                    }
+                                    else {
+                                        incoming[blockNumber] = quantityEth;
+                                    }
+                                }
+
+                                return web3.eth.getPastLogs({
+                                    fromBlock: contractCreationBlockHeightHexString,
+                                    toBlock: 'latest',
+                                    address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+                                    topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
+                                }).then(function (txObjects){
+                                    //console.log(txObjects);
+                                    for(i = 0; i < txObjects.length; i++){
+
+                                        //these are hex values
+                                        //get data field, to hex, then from wei to ether
+                                        var data = txObjects[i].data;
+
+                                        var blockHex = txObjects[i].blockNumber;
+
+                                        var quantityWei = web3.utils.toBN(data, 16).toString();
+                                        var blockNumber = web3.utils.toBN(blockHex, 16).toString();
+
+                                        var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
+                                        //can be float
+                                        quantityEth = parseFloat(quantityEth);
+
+                                        //basically pushes
+                                        if(blockNumber in outgoing)
+                                        {
+                                            outgoing[blockNumber] = outgoing[blockNumber] + quantityEth;
+                                        }
+                                        else {
+                                            outgoing[blockNumber] = quantityEth;
+                                        }
+
+                                    }//end for
+
+                                    var transactions = Object.entries(incoming)
+                                        .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])))
+                                        .map(([ts, val]) => ([parseInt(ts), val]));
+                                    try {
+                                        //sort by default sort string data, in string 10 < 20
+                                        transactions = transactions.sort(function (a, b) {
+                                            return b[0]- a[0] === 0 ? b[1]- a[1] : b[0] - a[0];
+                                        });
+
+                                        try {
+                                            var i = 0;
+                                            var removableIndex = 0;
+
+                                            //sorts down to remaining transactions, since we already know the total and the system block height
+                                            while(i < transactions.length){
+
+                                                if(transactions[i][1] < 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
+                                                    transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
+                                                    //console.log("current transaction[i][1] value: " + transactions[i][1]);
+                                                    if(transactions[0][1] <= 0){
+                                                        transactions.shift(); //or remove index 0
+                                                    } else {
+                                                        //remove first negative index after processing
+                                                        transactions.splice(removableIndex, 1);
+                                                    }
+                                                    //console.log("after shift current transaction[i][1] value: " + transactions[i][1]);
+                                                } else {
+                                                    //console.log(transactions[i][1]);
+                                                    transactions[i][2] = transactions[i][1]/amount; //adds decimal to the tuple
+                                                    transactions[i][3] = parseInt(transactions[i][0]) * transactions[i][2]; //weight of block
+                                                    if(i == 0){ //cumulative weight of block, so last index already has the value instead of needing to loop through again
+                                                        transactions[i][4] = transactions[i][3];
+                                                    } else {
+                                                        transactions[i][4] = transactions[i][3] + transactions[i-1][4];
+                                                    }
+                                                    i++;
+                                                    removableIndex = i;
+
+                                                }
+                                            } // end while
+                                            //console.log(transactions);
+                                            if(blockHeightFixed > 0){
+                                                blockHeight = blockHeightFixed;
+                                            }
+
+                                            //the transactions array generates: [block, remaining eligible amount, weight of block, cumulative weight of block, and cumulative weight + preior cumulative weight?
+
+                                            //console.log(transactions); //final transactions array state
+
+                                            //now find weighted average block number
+                                            var weightAverageBlockHeight = transactions[transactions.length-1][4];
+                                            var blockHeightDifference = blockHeight - weightAverageBlockHeight;
+                                            //console.log("weighted avg block height: " + weightAverageBlockHeight);
+                                            //console.log("weighted avg block height difference: " + blockHeightDifference);
+
+                                            //do final calculations for this stage.
+
+                                            //the problem with this is that this always increases and makes it hard for people to get a positive boost
+                                            //which is okay if the decimal is added to the total as well, but for everyone
+
+                                            //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
+                                            var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
+
+                                            //console.log("divisor: " + divisor);
+
+                                            var multiple = 1 + (blockHeightDifference / divisor);
+
+                                            var score = amount * multiple;
+                                            var bonus = blockHeightDifference / divisor;
+
+                                            //write to db as well
+
+                                            var dbQuery = {
+                                                address : address
+                                            };
+                                            var dbValues = {
+                                                $set: {
+                                                    score : score,
+                                                    block: blockHeight,
+                                                    tokens : amount
+                                                }
+                                            };
+                                            var dbOptions = {
+                                                upsert : true,
+                                                new: true //mongo uses returnNewDocument, mongo uses new
+                                            };
+
+                                            //should queue for writing later
+                                            var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
+                                            //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
+
+                                            updateQuery.exec().then(function(r){
+                                                ParetoAddress.count({ score : { $gt : 0 } }, function(err, count){
+                                                    if(err){
+                                                        console.error('unable to finish db operation because: ', err);
+                                                        if(callback && typeof callback === "function") { callback(err); }
+                                                    }
+                                                    else {
+                                                        if(r == null){
+                                                            if(callback && typeof callback === "function") { callback(ErrorHandler.nullResponseMessage); }
+                                                        } else {
+                                                            var resultJson = {
+                                                                'address' : r.address,
+                                                                'score' : r.score,
+                                                                'block' : blockHeight,
+                                                                'bonus' : bonus,
+                                                                'rank'  : r.rank,
+                                                                'totalRanks' : count,
+                                                                'tokens': r.tokens,
+                                                            };
+                                                            //console.log("here is db writing response : " + JSON.stringify(resultJson));
+
+                                                            if(callback && typeof callback === "function") { callback(null,resultJson); }
+                                                        }
+                                                    }
+                                                }); //end count
+                                            }).catch(function(err){
+                                                console.error('unable to finish db operation because: ', err);
+                                                if(callback && typeof callback === "function") { callback(err); }
+                                            });
+
+
+                                        } catch (e) {
+                                            //console.log(e);
+                                            if(callback && typeof callback === "function") { callback(e); }
+                                        }
+
+
+                                    } catch (e) {
+                                        //console.log(e);
+                                        if(callback && typeof callback === "function") { callback(e); }
+                                    }
+
+                                }, function (error) {
+                                    callback(error);
+                                })//end second then promise
+                                    .catch(function (err) {
+                                        // API call failed...
+                                        //console.log(err);
+                                        if(callback && typeof callback === "function") { callback(err); }
+                                    });
+                            }, function (error) {
+                                callback(error);
+                            }).catch(function (err) {
+                                    callback(err);
+                                });
+                            //end first then promise
+                        } else {
+
+                            //update entry in database if it exists, do not put additional entry invar
+                            dbQuery = {
+                                address : address
+                            };
+                            var dbValues = {
+                                $set: {
+                                    score : 0.0,
+                                    rank : -1,
+                                    block: blockHeight,
+                                    tokens: amount
+                                }
+                            };
+                            var dbOptions = {
+                                upsert : false,
+                                returnNewDocument: true
+                            };
+
+
+
+                            //User never has Pareto or User spent all pareto (if it is last one, update)
+                            ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions,
+                                function(err, r){
+                                    //c
+                                    callback(ErrorHandler.zeroParetoBalanceMessage)
+                                } //end function
+                            );
+
+                        } //end
+
+
+                    }, function (error) {
+                        callback(error);
+                    }).catch(function (err) {
+                        callback(err);
+                    });//end promise related to balance
+                }, function (error) {
+                    callback(error);
+                }).catch(function (err) {
+                callback(err);
+            }); //end promise related to block height
+        } //end address validation
+    }catch (e) {
+        console.log(e);
+        callback(e);
     }
 
-    var txs = [];
-    var incoming = {};
-    var outgoing = {};
+};
 
-    //console.log(address);
+controller.getBalance = async function(address, blockHeightFixed, callback){
 
-    //this call doesn't use the padded address
-    var tknAddress = (address).substring(2);
-    var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
+    address = address.toLowerCase();
 
-    //ethereum servers suck, give them 5ms to breath
-    await new Promise(r => setTimeout(() => r(), 5));
-    //get current blocknumber too
-    web3.eth.getBlock('latest')
-      .then(function(res) {
-        blockHeight = res.number;
-        //console.log("blockheight: " + blockHeight);
+    var blockHeight = 0;
 
-        //then re-tally total
-        return web3.eth.call({
-          to: paretoContractAddress,
-          data: contractData
-        }).then(function(result) {
-          var amount = 0;
-          if (result) {
-            var tokens = web3.utils.toBN(result).toString();
-            amount = web3.utils.fromWei(tokens, 'ether');
-            //console.log("amount: " + amount);
-          }
+    var rankCalculation = 0;
 
-          if(amount > 0){
-            return web3.eth.getPastLogs({
-              fromBlock: contractCreationBlockHeightHexString,
-              toBlock: 'latest',
-              address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
-              topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
-            }).then(function (txObjects){
-              //console.log(txObjects);
-              for(i = 0; i < txObjects.length; i++){
+    if(web3.utils.isAddress(address) == false){
+        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+    } else {
 
-                //these are hex values
-                //get data field, to hex, then from wei to ether
-                var data = txObjects[i].data;
-                var blockHex = txObjects[i].blockNumber;
+        //pad address +32 bits for web3 API
+        var padding=66;
+        var n = address.length;
+        if(n!==padding)
+        {
+            var paddingLength = 66 - (n)
+            var zeroes = "0";
+            for (var i = 0; i < paddingLength-1; i++)
+            {
+                zeroes += "0";
+            }
+            var addressPadded = "0x" + zeroes + address.substring(2,n);
+        }
 
-                var quantityWei = web3.utils.toBN(data, 16).toString();
-                var blockNumber = web3.utils.toBN(blockHex, 16).toString();
-                var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
-                  //can be float
-                quantityEth = parseFloat(quantityEth);
+        var txs = [];
+        var incoming = {};
+        var outgoing = {};
 
-                //basically pushes
-                if(blockNumber in incoming)
-                {
-                  incoming[blockNumber] = incoming[blockNumber] + quantityEth;
-                }
-                else {
-                  incoming[blockNumber] = quantityEth;
-                }
-              }
+        //console.log(address);
 
-              return web3.eth.getPastLogs({
-                fromBlock: contractCreationBlockHeightHexString,
-                toBlock: 'latest',
-                address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
-                topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
-              }).then(function (txObjects){
-                //console.log(txObjects);
-                for(i = 0; i < txObjects.length; i++){
+        //this call doesn't use the padded address
+        var tknAddress = (address).substring(2);
+        var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
 
-                  //these are hex values
-                  //get data field, to hex, then from wei to ether
-                  var data = txObjects[i].data;
+        //ethereum servers suck, give them 5ms to breath
+        await new Promise(r => setTimeout(() => r(), 5));
+        //get current blocknumber too
+        web3.eth.getBlock('latest')
+            .then(function(res) {
+                blockHeight = res.number;
+                //console.log("blockheight: " + blockHeight);
 
-                  var blockHex = txObjects[i].blockNumber;
-
-                  var quantityWei = web3.utils.toBN(data, 16).toString();
-                  var blockNumber = web3.utils.toBN(blockHex, 16).toString();
-
-                  var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
-                    //can be float
-                  quantityEth = parseFloat(quantityEth);
-
-                  //basically pushes
-                  if(blockNumber in outgoing)
-                  {
-                    outgoing[blockNumber] = outgoing[blockNumber] + quantityEth;
-                  }
-                  else {
-                    outgoing[blockNumber] = quantityEth;
-                  }
-
-                }//end for
-
-                var transactions = Object.entries(incoming)
-                    .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])))
-                    .map(([ts, val]) => ([parseInt(ts), val]));
-                try {
-                  //sort by default sort string data, in string 10 < 20
-                  transactions = transactions.sort(function (a, b) {
-                    return b[0]- a[0] === 0 ? b[1]- a[1] : b[0] - a[0];
-                  });
-
-                  try {
-                    var i = 0;
-                    var removableIndex = 0;
-
-                    //sorts down to remaining transactions, since we already know the total and the system block height
-                    while(i < transactions.length){
-
-                      if(transactions[i][1] < 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
-                        transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
-                        //console.log("current transaction[i][1] value: " + transactions[i][1]);
-                        if(transactions[0][1] <= 0){
-                          transactions.shift(); //or remove index 0
-                        } else {
-                          //remove first negative index after processing
-                          transactions.splice(removableIndex, 1);
-                        }
-                        //console.log("after shift current transaction[i][1] value: " + transactions[i][1]);
-                      } else {
-                        //console.log(transactions[i][1]);
-                        transactions[i][2] = transactions[i][1]/amount; //adds decimal to the tuple
-                        transactions[i][3] = parseInt(transactions[i][0]) * transactions[i][2]; //weight of block
-                        if(i == 0){ //cumulative weight of block, so last index already has the value instead of needing to loop through again
-                          transactions[i][4] = transactions[i][3];
-                        } else {
-                          transactions[i][4] = transactions[i][3] + transactions[i-1][4];
-                        }
-                        i++;
-                        removableIndex = i;
-
-                      }
-                    } // end while
-                    //console.log(transactions);
-                    if(blockHeightFixed > 0){
-                      blockHeight = blockHeightFixed;
+                //then re-tally total
+                return web3.eth.call({
+                    to: paretoContractAddress,
+                    data: contractData
+                }).then(function(result) {
+                    var amount = 0;
+                    if (result) {
+                        var tokens = web3.utils.toBN(result).toString();
+                        amount = web3.utils.fromWei(tokens, 'ether');
+                        //console.log("amount: " + amount);
                     }
 
-                    //the transactions array generates: [block, remaining eligible amount, weight of block, cumulative weight of block, and cumulative weight + preior cumulative weight?
+                    if(amount > 0){
+                        callback(null,amount)
+                    } else {
 
-                    //console.log(transactions); //final transactions array state
+                        callback(ErrorHandler.zeroParetoBalanceMessage)
 
-                    //now find weighted average block number
-                    var weightAverageBlockHeight = transactions[transactions.length-1][4];
-                    var blockHeightDifference = blockHeight - weightAverageBlockHeight;
-                    //console.log("weighted avg block height: " + weightAverageBlockHeight);
-                    //console.log("weighted avg block height difference: " + blockHeightDifference);
-
-                    //do final calculations for this stage.
-
-                    //the problem with this is that this always increases and makes it hard for people to get a positive boost
-                    //which is okay if the decimal is added to the total as well, but for everyone
-
-                    //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
-                    var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
-
-                    //console.log("divisor: " + divisor);
-
-                    var multiple = 1 + (blockHeightDifference / divisor);
-
-                    var score = amount * multiple;
-                    var bonus = blockHeightDifference / divisor;
-
-                    //write to db as well
-
-                    var dbQuery = {
-                      address : address
-                    };
-                    var dbValues = {
-                      $set: {
-                        score : score,
-                        block: blockHeight,
-                        tokens : amount
-                      }
-                    };
-                    var dbOptions = {
-                      upsert : true,
-                      new: true //mongo uses returnNewDocument, mongo uses new
-                    };
-
-                    //should queue for writing later
-                    var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
-                    //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
-
-                    updateQuery.exec().then(function(r){
-                      ParetoAddress.count({ score : { $gt : 0 } }, function(err, count){
-                        if(err){
-                          console.error('unable to finish db operation because: ', err);
-                          if(callback && typeof callback === "function") { callback(err); }
-                        }
-                        else {
-                          if(r == null){
-                            if(callback && typeof callback === "function") { callback("null response"); }
-                          } else {
-                            var resultJson = {
-                              'address' : r.address,
-                              'score' : r.score,
-                              'block' : blockHeight,
-                              'bonus' : bonus,
-                              'rank'  : r.rank,
-                              'totalRanks' : count,
-                              'tokens': r.tokens,
-                            };
-                            //console.log("here is db writing response : " + JSON.stringify(resultJson));
-
-                            if(callback && typeof callback === "function") { callback(null,resultJson); }
-                          }
-                        }
-                      }); //end count
-                    }).catch(function(err){
-                      console.error('unable to finish db operation because: ', err);
-                      if(callback && typeof callback === "function") { callback(err); }
-                    });
+                    } //end
 
 
-                  } catch (e) {
-                    //console.log(e);
-                    if(callback && typeof callback === "function") { callback(e); }
-                  }
+                }, function (error) {
+                    callback(error);
+                }).catch(function (err) {
+                    callback(err);
+                });//end promise related to balance//end promise related to balance
+            }, function (error) {
+                callback(error);
+            }).catch(function (err) {
+            callback(err);
+        });//end promise related to balance //end promise related to block height
+    } //end address validation
 
-
-                } catch (e) {
-                  //console.log(e);
-                  if(callback && typeof callback === "function") { callback(e); }
-                }
-
-              })//end second then promise
-                .catch(function (err) {
-                  // API call failed...
-                  //console.log(err);
-                  if(callback && typeof callback === "function") { callback(err); }
-                });
-            });//end first then promise
-          } else {
-
-            //update entry in database if it exists, do not put additional entry invar
-            dbQuery = {
-              address : address
-            };
-            var dbValues = {
-              $set: {
-                score : 0.0,
-                rank : -1,
-                block: blockHeight,
-                tokens: amount
-              }
-            };
-            var dbOptions = {
-              upsert : false,
-              returnNewDocument: true
-            };
-
-
-
-            //User never has Pareto or User spent all pareto (if it is last one, update)
-            ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions,
-              function(err, r){
-                  //c
-                 callback({code: 401, message: "We are sorry, you will need Pareto balance in order to be able to Sign In."})
-              } //end function
-            );
-
-          } //end
-
-
-        });//end promise related to balance
-      }); //end promise related to block height
-  } //end address validation
-
-}
+};
 
 controller.postContent = function(req, callback){
 
@@ -388,7 +490,7 @@ controller.postContent = function(req, callback){
 
   //exposed endpoint to write content to database
   if(web3.utils.isAddress(req.user) == false){
-    if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
 
     web3.eth.getBlock('latest')
@@ -417,7 +519,11 @@ controller.postContent = function(req, callback){
           }
         });
 
-      }); //end web3
+      }, function (error) {
+          callback(error);
+      }).catch(function (err) {
+        callback(err);
+    }); //end web3
   } // end else
 
 };
@@ -430,7 +536,7 @@ controller.getAllAvailableContent = function(req, callback) {
   //check block number or block age, then retrieve all content after that block. add more limitations/filters later
 
   if(web3.utils.isAddress(req.user) == false){
-    if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
 
     //1. get score from address, then get standard deviation of score
@@ -588,8 +694,10 @@ controller.getAllAvailableContent = function(req, callback) {
                 }
 
               });
-            }).catch((error) => {
-            if(callback && typeof callback === "function") { callback(err); }
+            }, function (error) {
+                callback(error);
+            }).catch(function (err) {
+              callback(err);
           });//end web3
 
         }//end else
@@ -606,7 +714,7 @@ controller.retrieveAddress = function(address, callback){
   address = address.toLowerCase();
 
   if(web3.utils.isAddress(address) == false){
-    if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
+    if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
       controller.retrieveAddressRankWithRedis(address,true,callback);
   }
@@ -703,68 +811,24 @@ controller.updateScore = function(address, callback){
 
 controller.sign = function(params, callback){
 
-  var owner = params.owner;
+  const owner = params.owner;
 
   const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
 
   if (recovered === owner ) {
     // If the signature matches the owner supplied, create a
     // JSON web token for the owner that expires in 24 hours.
-      callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
-
-
-    //if not in database already, then calculate score. this can also happen because a user has no PARETO tokens in the address they are signing. Should check that first. Might as well do the whole score calculation
-    /*ParetoAddress.count({ address : owner }, function(err, count){
-      if(err){}
-      else {
-        if (count == 0){
-          //then add. This is done instead of simply find + upsert because I don't want to check web3 for the current block every time.
-          //if the system already knew the blockheight, then it would always just do a findOne w/ upsert and keep it rolling.
-
-           web3.eth.getBlock('latest')
-               .then(function(res) {
-                blockHeight = res.number;
-                 //console.log("blockheight: " + blockHeight);
-
-                //add address to database and return, while initiating a score calculation
-                var dbQuery = {
-              address : owner
-            };
-            var dbValues = {
-                $set: {
-                    score : 0,
-                    block: blockHeight,
-                    address: owner,
-                    rank: -1,
-                    tokens: 0
-                }
-            };
-            var dbOptions = {
-              upsert : true,
-              returnNewDocument: true
-            };
-                ParetoAddress.findOne(dbQuery, dbValues, dbOptions, function(err, result){
-                  if(err){}
-                  else{
-                    if(callback && typeof callback === "function") { callback(null, results ); }
-                    controller.calculateScore(owner, 0, null);
-                  }
-                });
-
-
-          }); //end web3
-       } //end if
-       else {
-         if(callback && typeof callback === "function") { callback(null, results ); }
-       }
-      } //end else
-
-    });*/
+      controller.getBalance(owner,0, function(err, count){
+        if(!err){
+            callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
+        }else{
+          callback(err);
+        }
+      });
 
 
   } else {
-    var err = 'Signature did not match.'
-    if(callback && typeof callback === "function") { callback(err); }
+    if(callback && typeof callback === "function") { callback(ErrorHandler.signatureFailedMessage); }
   }
 };
 
@@ -857,7 +921,7 @@ controller.insertProfile = function(profile,callback){
                   let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
                   multi.hmset("profile"+profile.address+ "", profile );
                   multi.exec(function(errors, results) {
-                      if(errors){ console.log(errors); return(errors)}
+                      if(errors){ console.log(errors); callback(errors)}
                       return callback(null, profile );
                   })
               }
@@ -882,7 +946,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
                const multi = redisClient.multi();
                multi.hmset("profile"+profile.address+ "", profile );
                multi.exec(function(errors, results) {
-                   if(errors){ console.log(errors); return(errors)}
+                   if(errors){ console.log(errors); callback(errors)}
                    return callback(null, profile );
                })
            } else{

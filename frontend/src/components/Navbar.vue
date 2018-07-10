@@ -19,15 +19,15 @@
 
             <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
                 <ul class="navbar-nav ">
-                    <li class="nav-item mx-lg-4">
+                    <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
                         <router-link tag="a" class="nav-link" :active-class="'active'" to="/dashboard" exact>Intel
                         </router-link>
                     </li>
-                    <li class="nav-item mx-lg-4">
+                    <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
                         <router-link tag="a" class="nav-link" :active-class="'active'" to="/leaderboards">Leaderboards
                         </router-link>
                     </li>
-                    <li class="nav-item mx-lg-4">
+                    <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
                         <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
 
 
@@ -61,7 +61,7 @@
 <script>
     /* eslint-disable no-console */
     import {mapMutations, mapState} from 'vuex';
-
+    import 'jquery'
     import authService from '../services/authService';
     import dashboardService from '../services/dashboardService';
 
@@ -92,6 +92,12 @@
 
         },
         methods: {
+            collapseContent: function () {
+                if($( window ).width() < 990){
+                    $('#navbarSupportedContent').collapse("toggle");
+                }
+
+            } ,
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
@@ -99,6 +105,7 @@
                         type: 'login',
                         address: data,
                     });
+                    this.collapseContent();
                     this.$router.push('/dashboard');
                 }, error => {
                     this.stopLogin();
@@ -108,6 +115,7 @@
             logout: function () {
                 authService.logout(() => {
                     this.logoutVuex();
+                    this.collapseContent();
                     this.$router.push('/');
                 }, error => {
                     alert(error);
