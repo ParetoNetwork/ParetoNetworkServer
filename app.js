@@ -2,6 +2,7 @@
 
 var compression = require('compression');
 var express = require('express');
+const cors = require('cors');
 const fs = require("fs");
 const expressStaticGzip = require('express-static-gzip');
 var path = require('path');
@@ -23,14 +24,14 @@ debug('booting %s', appName);
 var bodyParser = require('body-parser');
 
 var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dir = path.join(__dirname, "/images");
+  destination: function (req, file, cb) {
+    const dir = path.join(__dirname, "/images");
 
-        fs.mkdir(dir, err => cb(err, dir))
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now())
-    }
+    fs.mkdir(dir, err => cb(err, dir))
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now())
+  }
 });
 
 var upload = multer({ storage: storage });
@@ -40,27 +41,23 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50000}));
 app.use(cookieParser());
 app.use(compression());
+
+const corsOptions = {
+  origin: 'http://localhost:8080',
+  credentials: true
+};
+app.use(cors(corsOptions));
+
+
 app.use("/api-docs", express.static('api-docs'));
 app.use('/', express.static('public'));
-app.all('/*', function (req, res, next) {
-    // add details of what is allowed in HTTP request headers to the response headers
-
-    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_SERVER || "*");
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, HEAD');
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Max-Age', '86400');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, App-Key,Authorization,Accept');
-
-    // the next() function continues execution and will move onto the requested URL/URI
-    next();
-});
-
 
 //handles only error codes in a consistent way and format, doesn't do anything for 2XX responses
 app.use(boom());
 
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const ErrorHandler = require('./error-handler.js');
 
 /*app.use(session({
   store: new MongoStore(mongooseConnection: module.exports.mongoose.connection)
@@ -124,14 +121,7 @@ app.post('/v1/sign', function (req, res) {
 
     controller.sign(req.body, function (err, result) {
         if (err) {
-            console.log(err);
-            if(err.code){
-                res.status(err.code).json(err)
-            }else{
-                //if this is a message
-                res.boom.badData(err);
-            }
-
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
             if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
                 res.cookie('authorization', result.token, {httpOnly: true});
@@ -143,7 +133,7 @@ app.post('/v1/sign', function (req, res) {
                     secure: true
                 }); //should set a debug flag for env variable
             }
-            res.status(200).json({success: true})
+            res.status(200).json(ErrorHandler.getSuccess({}))
 
         }
     });
@@ -164,9 +154,10 @@ app.get('/v1/rank', function (req, res) {
 
     controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
         if (err) {
-            res.boom.badRequest(err.message);
-        } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getError(err));
+
+        }  else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 
@@ -178,11 +169,11 @@ app.use(function (req, res, next) {
 
     if (req.cookies === undefined || req.cookies.authorization === undefined) {
 
-        res.boom.unauthorized('Token missing, failed to authenticate token.');
+      res.status(200).json(ErrorHandler.tokenMissingError())
 
     } else {
 
-        var authorization = req.cookies.authorization;
+        let authorization = req.cookies.authorization;
         if (authorization.includes('Bearer')) {
             authorization = authorization.replace('Bearer', '');
         }
@@ -190,13 +181,11 @@ app.use(function (req, res, next) {
 
         jwt.verify(authorization, 'Pareto', function (err, decoded) {
             if (err) {
-                res.boom.unauthorized('Failed to authenticate token.');
-            }
-            else {
+                res.status(200).json(ErrorHandler.jwtFailedError())
+            } else {
                 req.user = decoded.user;
                 next();
             }
-            ;
         });
     }
 
@@ -208,7 +197,7 @@ app.use(function (req, res, next) {
 */
 app.get('/v1/auth', function (req, res) {
 
-    res.status(200).json({auth: req.user});
+    res.status(200).json(ErrorHandler.getSuccess({auth: req.user}));
 });
 
 app.get('/v1/splash-auth', function (req, res) {
@@ -221,8 +210,7 @@ app.get('/v1/splash-auth', function (req, res) {
 app.post('/v1/unsign', function (req, res) {
     controller.unsign(function (err, result) {
         if (err) {
-            console.log(err);
-            res.boom.badData(err);
+            res.status(200).json(ErrorHandler.getError(err))
         } else {
             if (process.env.DEBUG == 1) {
                 res.cookie('authorization', result.token, {httpOnly: true, maxAge: 1231006505});
@@ -236,7 +224,7 @@ app.post('/v1/unsign', function (req, res) {
                     maxAge: 1231006505
                 }); //should set a debug flag for env variable
             }
-            res.status(200).json({status: 'success', result});
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 
@@ -250,9 +238,9 @@ app.get('/v1/summation', function (req, res) {
     controller.calculateScore(req.user, 0, function (err, result) {
         if (err) {
             console.log(err.message);
-            res.boom.badImplementation(err.message);
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
 
     });
@@ -262,21 +250,20 @@ app.get('/v1/summation', function (req, res) {
 app.post('/v1/content', function (req, res) {
 
     if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
-        res.boom.badRequest('POST body missing');
+        res.status(200).json(ErrorHandler.bodyMissingError());
     }
     else if (req.user === undefined || req.body.title === undefined || req.body.body === undefined) {
         console.log(req.body);
-        res.boom.badRequest('POST body missing, needs address, title and body');
+        res.status(200).json(ErrorHandler.contentMissingError());
     } else {
 
         //needs to check address whitelist against the authorized address, if people figure out the post body format.
 
         controller.postContent(req, function (err, obj) {
             if (err) {
-                console.log(err);
-                res.boom.badData(err);
+                res.status(200).json(ErrorHandler.getError(err));
             } else {
-                res.status(200).json({status: 'success', content: obj});
+                res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
             }
 
         });
@@ -290,9 +277,9 @@ app.get('/v1/content', function (req, res) {
 
     controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
-            res.boom.badData(err);
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 
@@ -302,9 +289,9 @@ app.get('/v1/content/me/', function (req, res) {
 
     controller.getContentByCurrentUser(req.user, function (err, result) {
         if (err) {
-            res.boom.badData(err);
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 });
@@ -326,9 +313,9 @@ app.get('/v1/address', function (req, res) {
 
     controller.retrieveAddress(req.user, function (err, result) {
         if (err) {
-            res.boom.badRequest(err.message);
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 
@@ -345,9 +332,9 @@ app.get('/v1/address/:address', function (req, res) {
 
     controller.retrieveAddress(req.params.address, function (err, result) {
         if (err) {
-            res.boom.badRequest(err.message);
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 
@@ -358,13 +345,13 @@ app.get('/v1/userinfo', function (req, res) {
     if(req.query.latest==='true'){
         controller.updateScore(req.user, function (err, success) {
             if (err) {
-                res.boom.badRequest(err.message);
+                res.status(200).json(ErrorHandler.getError(err));
             } else {
                 controller.getUserInfo(req.user,  function (err, result) {
                     if (err) {
-                        res.boom.badRequest(err.message);
+                        res.status(200).json(ErrorHandler.getError(err));
                     } else {
-                        res.status(200).json(result);
+                        res.status(200).json(ErrorHandler.getSuccess(result));
                     }
                 });
             }
@@ -372,9 +359,9 @@ app.get('/v1/userinfo', function (req, res) {
     }else{
         controller.getUserInfo(req.user,  function (err, result) {
             if (err) {
-                res.boom.badRequest(err.message);
+                res.status(200).json(ErrorHandler.getError(err));
             } else {
-                res.status(200).json(result);
+                res.status(200).json(ErrorHandler.getSuccess(result));
             }
         });
     }
@@ -385,9 +372,9 @@ app.get('/v1/userinfo', function (req, res) {
 app.get('/v1/userinfo/:address', function (req, res) {
     controller.getUserInfo(req.params.params,  function (err, result) {
         if (err) {
-            res.boom.badRequest(err.message);
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 
@@ -397,9 +384,9 @@ app.get('/v1/userinfo/:address', function (req, res) {
 app.post('/v1/updateuser', function (req, res) {
     controller.updateUser(req.user, req.body, function (err, result) {
         if (err) {
-            res.boom.badRequest(err.message);
+            res.status(200).json(ErrorHandler.getError(err));
         } else {
-            res.status(200).json(result);
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
 });
@@ -412,16 +399,16 @@ app.post('/v1/updateuser', function (req, res) {
 
 app.post('/v1/updatescores', function (req, res) {
     if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
-        res.boom.badRequest('POST body missing');
+        res.status(200).json(ErrorHandler.bodyMissingError())
     }
     else if (req.body.admin === undefined) {
-        res.boom.badRequest('POST body missing, needs keys');
+        res.status(200).json(ErrorHandler.contentMissingError())
     } else {
         controller.updateScore(req.user, function (err, result) {
             if (err) {
-                res.boom.badRequest(err.message);
+                res.status(200).json(ErrorHandler.getError(err));
             } else {
-                res.status(200).json(result);
+                res.status(200).json(ErrorHandler.getSuccess(result));
             }
         });
     }
