@@ -60,13 +60,11 @@ const ParetoProfile = mongoose.model('profile');
 const ParetoIntel = mongoose.model('intel');
 
 
-// var Web3 = require('web3');
-// //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
-// var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
 var Web3 = require('web3');
-//var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
-// var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
-var web3 = new Web3("ws://localhost:8545");
+// //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
+var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
+
+// var web3 = new Web3("ws://localhost:8545");
 
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
