@@ -2,6 +2,8 @@ var controller = module.exports = {};
 
 const fs = require('fs');
 const path = require('path');
+const contract = require("truffle-contract");
+
 
 
 let constants = {};
@@ -55,10 +57,30 @@ mongoose.connect(connectionUrl).then(tmp=>{
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
+const ParetoIntel = mongoose.model('intel');
 
+
+// var Web3 = require('web3');
+// //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
+// var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
 var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
-var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
+// var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
+var web3 = new Web3("ws://localhost:8545");
+
+// set up Pareto and Intel contracts instances
+const Intel_Contract_Schema = require("./build/contracts/Intel.json");
+const Intel_Contract_Instance = contract(Intel_Contract_Schema);
+Intel_Contract_Instance.setProvider(web3.currentProvider);
+
+//dirty hack for web3@1.0.0 support for localhost testrpc, see https://github.com/trufflesuite/truffle-contract/issues/56#issuecomment-331084530
+if (typeof Intel_Contract_Instance.currentProvider.sendAsync !== "function") {
+  Intel_Contract_Instance.currentProvider.sendAsync = function () {
+    return Intel_Contract_Instance.currentProvider.send.apply(
+      Intel_Contract_Instance.currentProvider, arguments
+    );
+  };
+}
 
 var sigUtil = require('eth-sig-util');
 var jwt = require('jsonwebtoken');
@@ -1266,3 +1288,48 @@ controller.resetRanks = function(callback){
     }
   });
 };
+
+controller.createIntel = function (params, callback) {
+
+    let Intel = new ParetoIntel({
+      address: params.address,
+      title: params.title,
+      body: params.body,
+      text: params.text
+    });
+  
+    Intel.save((err, savedIntel) => {
+  
+      if (err) {
+        if (callback && typeof callback === "function") { callback(err); }
+      } else {
+  
+        Intel_Contract_Instance.deployed().then(instance => {
+  
+          const newIntel_Event = instance.NewIntel({ fromBlock: "latest" });
+          newIntel_Event.watch((err, event) => {
+  
+            if (err) {
+              throw err;
+            }
+  
+            const initialBalance = event.args.depositAmount.toNumber();
+            const expiry_time = event.args.ttl.toNumber();
+  
+            if (event.args.intelID.toNumber() == savedIntel.id) {
+              console.log("matches");
+  
+              ParetoIntel.update({ _id: savedIntel._id }, { validated: true, reward: initialBalance, expires: expiry_time }, { multi: false }, function (err, data) {
+                if (err) {
+                  throw err;
+                }
+  
+              });
+            }
+          })
+        })
+        if (callback && typeof callback === "function") { callback(null, savedIntel.id); }
+  
+      }
+    })
+  }
