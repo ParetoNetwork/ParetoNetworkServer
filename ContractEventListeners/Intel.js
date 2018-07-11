@@ -2,7 +2,9 @@ var Web3 = require('web3');
 const mongoose = require('mongoose');
 const contract = require("truffle-contract");
 
-var web3 = new Web3("ws://localhost:8545");
+// var web3 = new Web3("ws://localhost:8545");
+var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
+
 const ParetoIntel = mongoose.model('intel');
 
 
