@@ -12,8 +12,6 @@ var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser');
 const multer = require("multer");
 var controller = require('./backend-controller.js');
-require("./ContractEventListeners/Intel");
-
 
 var app = express();
 var compression = require('compression');
@@ -167,31 +165,31 @@ app.get('/v1/rank', function (req, res) {
 
 /********* AUTHENTICATED v1 APIs *********/
 
-// app.use(function (req, res, next) {
+app.use(function (req, res, next) {
 
-//     if (req.cookies === undefined || req.cookies.authorization === undefined) {
+    if (req.cookies === undefined || req.cookies.authorization === undefined) {
 
-//       res.status(200).json(ErrorHandler.tokenMissingError())
+      res.status(200).json(ErrorHandler.tokenMissingError())
 
-//     } else {
+    } else {
 
-//         let authorization = req.cookies.authorization;
-//         if (authorization.includes('Bearer')) {
-//             authorization = authorization.replace('Bearer', '');
-//         }
-//         authorization = authorization.trim();
+        let authorization = req.cookies.authorization;
+        if (authorization.includes('Bearer')) {
+            authorization = authorization.replace('Bearer', '');
+        }
+        authorization = authorization.trim();
 
-//         jwt.verify(authorization, 'Pareto', function (err, decoded) {
-//             if (err) {
-//                 res.status(200).json(ErrorHandler.jwtFailedError())
-//             } else {
-//                 req.user = decoded.user;
-//                 next();
-//             }
-//         });
-//     }
+        jwt.verify(authorization, 'Pareto', function (err, decoded) {
+            if (err) {
+                res.status(200).json(ErrorHandler.jwtFailedError())
+            } else {
+                req.user = decoded.user;
+                next();
+            }
+        });
+    }
 
-// });
+});
 
 /*
 * Auth, simple authenticated method to determine if user is properly authenticated. Necessary because client side js
@@ -417,24 +415,6 @@ app.post('/v1/updatescores', function (req, res) {
 });
 
 
-app.post('/v1/createIntel', function (req, res) {
-    controller.createIntel(req.body, function (err, result) {
-        if (err) {
-            console.log(err);
-            if(err.code){
-                res.status(err.code).json(err)
-            }else{
-                //if this is a message
-                res.boom.badData(err);
-            }
-
-        } else {
-           
-            res.status(200).json({Intel_Id: result})
-
-        }
-    });
-});
 
 app.use('/public/static/', expressStaticGzip('/public/static/', {
     customCompressions: [{
