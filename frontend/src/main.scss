@@ -43,11 +43,20 @@ body {
   top: ($elementHeight / (-2));
 }
 
-.main {
+
+
+
+.visual-debugger *{
+  outline: 1px solid red;
+}.main{
   padding-top: 12vh;
 
-  @media (max-width: 770px) {
-    padding-top: 10vh;
+  @media (max-width: 768px) {
+    padding-top: 8vh;
   }
+}
+
+.pareto-text-blue{
+  color: $blue-light;
 }
 

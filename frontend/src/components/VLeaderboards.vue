@@ -78,12 +78,11 @@
                             <div class="" style="position: relative; overflow: auto; height: 70vh; width: 100%;">
                                 <table class="table table-responsive-lg">
                                     <tbody>
-
-                                    <tr v-for="rank in leader" :key="rank.address">
-                                        <td>{{rank.rank}}</td>
-                                        <td>{{rank.score}}</td>
-                                        <td class="break-line">{{rank.address}}</td>
-                                    </tr>
+                                        <tr v-for="rank in leader" :key="rank.address">
+                                            <td>{{rank.rank}}</td>
+                                            <td>{{rank.score}}</td>
+                                            <td class="break-line">{{rank.address}}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
 
@@ -100,20 +99,16 @@
     import LeaderboardService from '../services/leaderboardService';
     import DashboardService from '../services/dashboardService';
     import Auth from '../services/authService';
-    import {mapMutations} from 'vuex';
+    import {mapMutations, mapState} from 'vuex';
 
     export default {
         name: 'VLeaderboards',
         data: function () {
             return {leader: [], rank: 0, address: ''};
         },
-        computed: {},
+        computed: {...mapState(['madeLogin'])},
         mounted: function () {
-            LeaderboardService.getLeaderboard({rank: 1, limit: 100, page: 0}, res => {
-                this.leader = res;
-            }, error => {
-                alert(error);
-            });
+            this.getLeaderboard();
             this.getAddress();
         },
         methods: {
@@ -124,19 +119,36 @@
                 }, () => {
 
                 });
-            }, authLogin() {
-                this.loadingLogin();
-                Auth.signSplash(data => {
-                    this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                    this.address = data.address;
-                    this.$store.dispatch({
-                        type: 'login',
-                        data: {address: data.address}
-                    });
+            }, getLeaderboard: function () {
+                LeaderboardService.getLeaderboard({rank: 1, limit: 100, page: 0}, res => {
+                    this.leader = res;
                 }, error => {
                     alert(error);
-                    this.stopLogin();
                 });
+            }, authLogin() {
+                if (this.madeLogin) {
+                    Auth.postSign(() => {
+                        this.getAddress();
+                        this.getLeaderboard();
+                    }, error => {
+                        alert(error);
+                    });
+                } else {
+                    this.loadingLogin();
+                    Auth.signSplash(data => {
+                        this.rank = data.rank <= 0 ? 0.0 : data.rank;
+                        this.address = data;
+                        this.$store.dispatch({
+                            type: 'login',
+                            address: data
+                        });
+
+                    }, error => {
+                        alert(error);
+                        this.stopLogin();
+                    });
+                }
+
             }, ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']
             )

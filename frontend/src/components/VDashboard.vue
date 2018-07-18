@@ -11,9 +11,11 @@
                                       class="fa fa-user p-2"></span>
 
                             </div>
+                            <!--
                             <button class="btn btn-primary-pareto" @click="showModal">
                                 EDIT PROFILE
                             </button>
+                            -->
                         </div>
 
 
@@ -21,16 +23,15 @@
                             <span class="name-title"><b>{{user.first_name|| 'Bryce Waldorf'}}</b></span>
                             <div class="">
 
-                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <span class="title"><b>3700 <sup>PXT</sup></b></span>
-                            </div>
-                            <div class="d-flex flex-column" style="padding-left: 1.8rem;">
+                            <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""class="mr-2">
+                                <span class="title"><b>{{address.tokens + 'PARETO'}}<sup>PXT</sup></b></span></div>
+                                <div class="d-flex flex-column" style="padding-left: 1.8rem;">
 
                                 <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{300}}</span>
                                 <div class="">
                                     <span class="subtitle-dashboard"><b>BIO:</b></span>
                                     <p class="text-dashboard text-pareto-gray">
-                                        lorem ipsu
+lorem ipsu
                                     </p>
                                 </div>
                             </div>
@@ -63,29 +64,29 @@
 
             </div>
             <div class="col-md-7">
-                <div class="border p-2">
+                <div class="borderp-2">
                     <h5 class="text-left">My intel: </h5>
                     <div class="">
                         <ul class="list-unstyled list-group">
-                            <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
+                        <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
 
-                                <div class="d-flex split ">
-                                    <img width="50" height="50" src="../assets/logo.png" alt="" class="mr-2 border p-2">
-                                    <div class="d-flex justify-content-between flex-grow-1">
-                                        <div class="d-flex flex-column flex-grow-1 pr-5">
-                                            <h1 class="title">{{row.title}}</h1>
-                                            <div class="d-flex justify-content-between">
-                                                <span class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Posted By: {{row.postedBy}}</span>
-                                                <span class="text-dashboard">{{row.ago}} Blocks Ago</span>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-column justify-content-end">
-                                            <div class="text-right font-weight-bold">
-                                                <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                                <span class="text-right">{{row.pxt}} PXT</span>
-                                            </div>
-                                            <button class="btn btn-primary-pareto">REWARD</button>
+                        <div class="d-flex split ">
+                        <img width="50" height="50" src="../assets/logo.png" alt="" class="mr-2 border p-2">
+                        <div class="d-flex justify-content-between flex-grow-1" >
+                        <div class="d-flex flex-column flex-grow-1 pr-5">
+                            <h1 class="title">{{row.title}}</h1>
+                                <div class="d-flex justify-content-between">
+                                    <spanclass="text-dashboard">Rewarded {{row.rewarded}} Times</span>
+                                <span class="text-dashboard">Posted By: {{row.postedBy}}</span>
+                            <span class="text-dashboard">{{row.ago}} Blocks Ago</span>
+                        </div>
+                        </div>
+                                        <div class="d-flex flex-column justify- content-end">
+                            <div class="text-right font-weight-bold">
+                                <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
+                                <span class="text-right">{{row.pxt}} PXT</span>
+                                    </div>
+                                    <button class="btn btn-primary-pareto">REWARD</button>
                                         </div>
                                     </div>
 
@@ -97,26 +98,23 @@
             </div>
         </div>
         <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
-            <div class="d-block text-center">
-                <form action="">
+                                <divclass="d-block text-center">
+                                <form action="">
                     <label for="first_name">First Name</label>
-                    <div class="input-group mb-3">
-                        <input v-model="firstName" type="text" class="form-control" id="first_name"
+                                <div class="input-group mb-3">
+                        <inputv-model="firstName" type="text" class="form-control" id="first_name"
                                aria-describedby="basic-addon3">
                     </div>
-                    <label for="last_name">Last Name</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="last_name" v-model="lastName"
-                               aria-describedby="basic-addon3">
-                    </div>
+                    <label for="last_name">Last Name</label><divclass="input-group mb-3">
+                            <input type="text" class="form-control" id="last_name" v-model="lastName"
+                        aria-describedby="basic-addon3">
+                        </div>
                     <label for="bio">Biography</label>
-                    <div class="input-group mb-3">
+                <divclass="input-group mb-3">
                         <textarea v-model="bio" class="form-control" id="bio"
                                   aria-describedby="basic-addon3"> </textarea>
-                    </div>
-                </form>
-            </div>
-        </b-modal>
+            </div></form>
+        </div></b-modal>
     </div>
 </template>
 
@@ -124,6 +122,9 @@
     import dashboardService from '../services/dashboardService';
     import profileService from '../services/profileService';
     import moment from 'moment';
+    import AuthService from '../services/authService';
+
+    import {mapMutations, mapState} from 'vuex';
 
     export default {
         name: 'VDashboard',
@@ -132,22 +133,20 @@
             return {
                 address: null,
                 content: [
-                    {title: 'test', rewarded: 10, postedBy: 'Hans', ago: 1200, pxt: 200}, {
+                {title: 'test', rewarded: 10, postedBy: 'Hans', ago: 1200, pxt: 200}, {
                         title: 'test',
                         rewarded: 10,
                         postedBy: 'Hans',
                         ago: 1200,
                         pxt: 200
-                    }],
-                myContent: [
-                    {title: 'title', date: new Date(), trd: 1231212312, id: 1}, {
+                    }],myContent: [
+                {title: 'title', date: new Date(), trd: 1231212312, id: 1}, {
                         title: 'title',
                         date: new Date(),
                         trd: 1231212312,
                         id: 2
-                    }],
-                loading: true,
-                moment: moment,
+                    }],loading: true,
+        moment: moment,
                 firstName: '',
                 lastName: '',
                 bio: '',
@@ -161,10 +160,14 @@
             }
         },
         mounted: function () {
+            this.main();
+        }, computed: {
+            ...mapState(['madeLogin'])
             // this.loadContent();
             // this.loadProfile();
         },
         methods: {
+            ...mapMutations(['intelEnter']),
             loadAddress: function () {
                 dashboardService.getAddress(res => {
                     this.address = res;
@@ -172,7 +175,9 @@
                 }, () => {
                     // alert(error);
                 });
-            }, loadContent: function () {
+            }
+            ,
+            loadContent: function () {
                 dashboardService.getAllContent(res => {
                     this.loading = false;
                     this.content = res;
@@ -185,7 +190,9 @@
                 }, () => {
 
                 });
-            }, loadMyContent: function () {
+            }
+            ,
+            loadMyContent: function () {
                 dashboardService.getContent(res => {
                     this.myContent = res;
                 }, error => {
@@ -207,8 +214,27 @@
 
                 });
             }
+            ,
+            main: function () {
+                if (!this.madeLogin) {
+                    this.intelEnter();
+
+                    AuthService.postSign(() => {
+                        this.loadAddress();
+                        this.loadContent();
+                    }, () => {
+                        this.loadAddress();
+                        this.loadContent();
+                    });
+                } else {
+                    this.loadAddress();
+                    this.loadContent();
+                }
+
+            }
         }
-    };
+    }
+    ;
 </script>
 
 <style scoped lang="scss">
