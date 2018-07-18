@@ -12,7 +12,7 @@ export default class profileService {
 
     static getProfile(onSuccess, onError, profile = null) {
         http.get('/v1/userinfo', profile).then(res => {
-            return onSuccess(res.data);
+            return onSuccess(res.data.data);
         }).catch(error => {
             return onError(error);
         });

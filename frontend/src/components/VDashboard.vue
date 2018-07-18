@@ -7,31 +7,30 @@
                     <div class="media py-1 px-4 border mb-5">
                         <div class="d-flex flex-column">
                             <div class="border p-2 mb-2 mr-2">
-                                <span style="font-size: 50px;  color: gray; background: #b2b2b2"
+                                <img v-bind:src="enviroment.baseURL+ '/profile-image?image=' + user.profile_pic" alt="" v-if="user.profile_pic">
+                                <span v-else style="font-size: 50px;  color: gray; background: #b2b2b2"
                                       class="fa fa-user p-2"></span>
 
                             </div>
-                            <!--
                             <button class="btn btn-primary-pareto" @click="showModal">
                                 EDIT PROFILE
                             </button>
-                            -->
                         </div>
 
 
                         <div class="media-body flex-column text-left">
-                            <span class="name-title"><b>{{user.first_name|| 'Bryce Waldorf'}}</b></span>
+                            <span class="name-title"><b>{{user.first_name|| 'Bryce Waldorf'}}  {{user.last_name || ''}}</b></span>
                             <div class="">
 
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <span class="title"><b>{{address.tokens + 'PARETO'}}<sup>PXT</sup></b></span></div>
+                                <span class="title"><b>{{user.tokens + 'PARETO'}}<sup>PXT</sup></b></span></div>
                             <div class="d-flex flex-column" style="padding-left: 1.8rem;">
 
-                                <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{300}}</span>
+                                <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{user.rank}}</span>
                                 <div class="">
                                     <span class="subtitle-dashboard"><b>BIO:</b></span>
                                     <p class="text-dashboard text-pareto-gray">
-                                        lorem ipsu
+                                        {{user.biography || 'No biography provided'}}
                                     </p>
                                 </div>
                             </div>
@@ -45,7 +44,7 @@
                         <button class="btn btn-success-pareto">POST NEW INTEL</button>
                     </div>
                     <div class="">
-                        <ul class="list-group list-unstyled">
+                        <ul v-if="myContent.length" class="list-group list-unstyled">
                             <li class="list-group-item border-0" v-for="post in myContent" :key="post.id">
                                 <div class="d-flex justify-content-between split align-items-center">
                                     <div class="d-flex flex-column text-left">
@@ -59,12 +58,13 @@
 
                             </li>
                         </ul>
+                        <span v-else class="text-pareto-gray">You don't have posted</span>
                     </div>
                 </div>
 
             </div>
             <div class="col-md-7">
-                <div class="borderp-2">
+                <div class="border p-2">
                     <h5 class="text-left">My intel: </h5>
                     <div class="">
                         <ul class="list-unstyled list-group">
@@ -74,19 +74,19 @@
                                     <img width="50" height="50" src="../assets/logo.png" alt="" class="mr-2 border p-2">
                                     <div class="d-flex justify-content-between flex-grow-1">
                                         <div class="d-flex flex-column flex-grow-1 pr-5">
-                                            <h1 class="title">{{row.title}}</h1>
+                                            <h1 class="title">{{row.title || 'No title'}}</h1>
                                             <div class="d-flex justify-content-between">
-                                                <span class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Posted By: {{row.postedBy}}</span>
-                                                <span class="text-dashboard">{{row.ago}} Blocks Ago</span>
+                                                <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
+                                                <span class="text-dashboard">Posted By: {{row.address}}</span>
+                                                <span class="text-dashboard">{{row.block}} Blocks Ago</span>
                                             </div>
                                         </div>
                                         <div class="d-flex flex-column justify- content-end">
-                                            <div class="text-right font-weight-bold">
+                                            <div v-if="false" class="text-right font-weight-bold">
                                                 <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                                 <span class="text-right">{{row.pxt}} PXT</span>
                                             </div>
-                                            <button class="btn btn-primary-pareto">REWARD</button>
+                                            <button class="btn btn-primary-pareto" v-if="false">REWARD</button>
                                         </div>
                                     </div>
 
@@ -126,6 +126,7 @@
     import profileService from '../services/profileService';
     import moment from 'moment';
     import AuthService from '../services/authService';
+    import enviroment from '../utils/enviroment'
 
     import {mapMutations, mapState} from 'vuex';
 
@@ -166,8 +167,6 @@
             this.main();
         }, computed: {
             ...mapState(['madeLogin'])
-            // this.loadContent();
-            // this.loadProfile();
         },
         methods: {
             ...mapMutations(['intelEnter']),
@@ -190,6 +189,9 @@
             }, loadProfile: function () {
                 profileService.getProfile(res => {
                     this.user = res;
+                    this.firstName = res.first_name;
+                    this.lastName = res.last_name;
+                    this.bio = res.biography;
                 }, () => {
 
                 });
@@ -213,6 +215,7 @@
                 };
                 profileService.updateProfile(profile, res => {
                     this.$refs.myModalRef.hide();
+                    this.loadProfile();
                 }, error => {
 
                 });
@@ -223,15 +226,19 @@
                     this.intelEnter();
 
                     AuthService.postSign(() => {
-                        this.loadAddress();
+                        this.loadProfile();
+                        this.loadMyContent();
+
                         this.loadContent();
                     }, () => {
-                        this.loadAddress();
+                        this.loadProfile();
                         this.loadContent();
+                        this.loadMyContent();
                     });
                 } else {
-                    this.loadAddress();
+                    this.loadProfile();
                     this.loadContent();
+                    this.loadMyContent();
                 }
 
             }
