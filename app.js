@@ -12,7 +12,6 @@ var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser');
 const multer = require("multer");
 var controller = require('./backend-controller.js');
-require("./ContractEventListeners/Intel");
 
 
 var app = express();
