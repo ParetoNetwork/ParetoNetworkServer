@@ -1,5 +1,8 @@
 # Pareto Network Server
 
+
+[![CircleCI](https://circleci.com/gh/ParetoNetwork/ParetoNetworkServer.svg?style=shield&circle-token=e339e4460b358243490aae6827bba097c3d1c74a)](https://circleci.com/gh/ParetoNetwork/ParetoNetworkServer)
+
 Frontand and Backend for calculating ranking and all other functions of the Pareto Network intel feed.
 
 This implements two parts of the ranking algorithm so far, and can do a client side calculation first primarily for cosmetic purposes.

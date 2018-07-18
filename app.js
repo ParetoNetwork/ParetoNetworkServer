@@ -26,14 +26,14 @@ debug('booting %s', appName);
 var bodyParser = require('body-parser');
 
 var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dir = path.join(__dirname, "/images");
+  destination: function (req, file, cb) {
+    const dir = path.join(__dirname, "/images");
 
-        fs.mkdir(dir, err => cb(err, dir))
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now())
-    }
+    fs.mkdir(dir, err => cb(err, dir))
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now())
+  }
 });
 
 var upload = multer({ storage: storage });
@@ -44,11 +44,11 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50
 app.use(cookieParser());
 app.use(compression());
 
-const corsOptions = {
+    const corsOptions = {
     origin: 'http://localhost:8080',
     credentials: true
-};
-app.use(cors(corsOptions));
+    };
+    app.use(cors(corsOptions));
 
 
 app.use("/api-docs", express.static('api-docs'));
@@ -171,7 +171,7 @@ app.use(function (req, res, next) {
 
     if (req.cookies === undefined || req.cookies.authorization === undefined) {
 
-        res.status(200).json(ErrorHandler.tokenMissingError())
+      res.status(200).json(ErrorHandler.tokenMissingError())
 
     } else {
 
@@ -417,24 +417,6 @@ app.post('/v1/updatescores', function (req, res) {
 });
 
 
-app.post('/v1/createIntel', function (req, res) {
-    controller.createIntel(req.body, function (err, result) {
-        if (err) {
-            console.log(err);
-            if(err.code){
-                res.status(err.code).json(err)
-            }else{
-                //if this is a message
-                res.boom.badData(err);
-            }
-
-        } else {
-
-            res.status(200).json({Intel_Id: result})
-
-        }
-    });
-});
 
 app.use('/public/static/', expressStaticGzip('/public/static/', {
     customCompressions: [{

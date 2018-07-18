@@ -6,7 +6,11 @@ export default class LeaderboardService {
         return http.get('/v1/rank?rank=' + rank + '&limit=' + limit + '&page=' + page, {
             withCredentials: true
         }).then(res => {
-            return onSuccess(res.data);
+            if(res.data.success){
+                return onSuccess(res.data.data);
+            }else{
+                return onError(res.data.message);
+            }
         }).catch(error => {
             return onError(error);
         });
