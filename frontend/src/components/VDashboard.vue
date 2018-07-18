@@ -4,42 +4,44 @@
             <div class="col-md-5">
 
                 <template v-if="user">
-                    <div class="media py-1 px-4 border mb-5 align-items-center">
+                    <div class="media py-1 px-4 border mb-5">
                         <div class="d-flex flex-column">
                             <div class="border p-2 mb-2 mr-2">
                                 <span style="font-size: 50px;  color: gray; background: #b2b2b2"
                                       class="fa fa-user p-2"></span>
 
                             </div>
-                            <button class="btn btn-primary" @click="showModal">
+                            <button class="btn btn-primary-pareto" @click="showModal">
                                 EDIT PROFILE
                             </button>
                         </div>
 
 
                         <div class="media-body flex-column text-left">
-                            <span>{{user.first_name|| 'Bryce Waldorf'}}</span>
-
+                            <span class="name-title"><b>{{user.first_name|| 'Bryce Waldorf'}}</b></span>
                             <div class="">
-                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                <span class="text"><b>3700</b></span>
-                                <div class="pl-2">
-                                    <span>NETWORK RANKING: {{300}}</span>
-                                    <span><b>BIO:</b></span>
-                                    <p>
 
+                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
+                                <span class="title"><b>3700 <sup>PXT</sup></b></span>
+                            </div>
+                            <div class="d-flex flex-column" style="padding-left: 1.8rem;">
+
+                                <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{300}}</span>
+                                <div class="">
+                                    <span class="subtitle-dashboard"><b>BIO:</b></span>
+                                    <p class="text-dashboard text-pareto-gray">
+                                        lorem ipsu
                                     </p>
                                 </div>
                             </div>
-                            <span>{{'Network Rank ' + user.rank}}</span>
                         </div>
                     </div>
                 </template>
 
                 <div class="border">
                     <div class="d-flex justify-content-between align-items-center p-3 mb-3">
-                        <span>MY POSTS: </span>
-                        <button class="btn btn-success">POST NEW INTEL</button>
+                        <span class="text-dashboard text-pareto-gray"> <b>MY POSTS:</b> </span>
+                        <button class="btn btn-success-pareto">POST NEW INTEL</button>
                     </div>
                     <div class="">
                         <ul class="list-group list-unstyled">
@@ -49,7 +51,7 @@
                                         <h5><b>{{post.title}}</b></h5>
                                         <span>{{post.date | date}}</span>
                                     </div>
-                                    <div class="">
+                                    <div class="d-flex ">
                                         <span class="underline text-primary"><u><b>TXID:</b> {{post.trd}}</u></span>
                                     </div>
                                 </div>
@@ -58,64 +60,39 @@
                         </ul>
                     </div>
                 </div>
-                <!--<table class="table border">-->
-                <!--<thead>-->
-                <!--<th>MY POSTS</th>-->
-                <!--</thead>-->
-                <!--<tbody class="p-3">-->
-
-                <!--<template v-if="!myContent.length">-->
-                <!--<tr>-->
-                <!--<td>-->
-                <!--<span>No data to display</span>-->
-                <!--</td>-->
-                <!--</tr>-->
-                <!--</template>-->
-                <!--<tr :key="row._id" v-for="row of myContent">-->
-                <!--<td class="text-left">-->
-                <!--<b> {{row.title }}</b><br/>-->
-                <!--<div style="font-size: 12px;">Disclosed by: {{row.address }} <span v-if="row.alias">({{row.alias}})</span>-->
-                <!--at block-->
-                <!--{{row.block}}-->
-                <!--</div>-->
-                <!--<br/>-->
-                <!--<div class="" v-html="row.body"></div>-->
-                <!--</td>-->
-                <!--</tr>-->
-                <!--</tbody>-->
-                <!--</table>-->
 
             </div>
             <div class="col-md-7">
-                <div class="border">
-                    <span></span>
-                    <table class="table table-responsive">
-                        <thead>
-                        <tr>
-                            <th>MY INTEL FEED</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <template v-if="loading">
-                            <tr>
-                                <td>
-                                    <span>Loading...</span>
-                                </td>
-                            </tr>
-                        </template>
-                        <tr :key="row._id" v-for="row of content">
-                            <td class="text-left p-3">
-                                <b> {{row.title }}</b><br/>
-                                <div style="font-size: 12px;">Disclosed by: {{row.address}} <span v-if="row.alias">({{row.alias}})</span>
-                                    at block
-                                    {{row.block}}
+                <div class="border p-2">
+                    <h5 class="text-left">My intel: </h5>
+                    <div class="">
+                        <ul class="list-unstyled list-group">
+                            <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
+
+                                <div class="d-flex split ">
+                                    <img width="50" height="50" src="../assets/logo.png" alt="" class="mr-2 border p-2">
+                                    <div class="d-flex justify-content-between flex-grow-1">
+                                        <div class="d-flex flex-column flex-grow-1 pr-5">
+                                            <h1 class="title">{{row.title}}</h1>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
+                                                <span class="text-dashboard">Posted By: {{row.postedBy}}</span>
+                                                <span class="text-dashboard">{{row.ago}} Blocks Ago</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column justify-content-end">
+                                            <div class="text-right font-weight-bold">
+                                                <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
+                                                <span class="text-right">{{row.pxt}} PXT</span>
+                                            </div>
+                                            <button class="btn btn-primary-pareto">REWARD</button>
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <br/>
-                                <div v-html="row.body"></div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -146,7 +123,6 @@
 <script>
     import dashboardService from '../services/dashboardService';
     import profileService from '../services/profileService';
-    import {mapState} from 'vuex';
     import moment from 'moment';
 
     export default {
@@ -155,13 +131,21 @@
         data: function () {
             return {
                 address: null,
-                content: [],
-                myContent: [{title: 'title', date: new Date(), trd: 1231212312, id: 1}, {
-                    title: 'title',
-                    date: new Date(),
-                    trd: 1231212312,
-                    id: 2
-                }],
+                content: [
+                    {title: 'test', rewarded: 10, postedBy: 'Hans', ago: 1200, pxt: 200}, {
+                        title: 'test',
+                        rewarded: 10,
+                        postedBy: 'Hans',
+                        ago: 1200,
+                        pxt: 200
+                    }],
+                myContent: [
+                    {title: 'title', date: new Date(), trd: 1231212312, id: 1}, {
+                        title: 'title',
+                        date: new Date(),
+                        trd: 1231212312,
+                        id: 2
+                    }],
                 loading: true,
                 moment: moment,
                 firstName: '',
@@ -177,8 +161,8 @@
             }
         },
         mounted: function () {
-            this.loadContent();
-            this.loadProfile();
+            // this.loadContent();
+            // this.loadProfile();
         },
         methods: {
             loadAddress: function () {
@@ -243,5 +227,50 @@
     li, .list-group-item:last-child > .split {
         border-bottom: 0;
 
+    }
+
+    .name-title {
+        font-size: 21px;
+        font-weight: bold;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: center;
+        color: #020f1f;
+    }
+
+    .icon-mini {
+        object-fit: contain;
+        height: auto;
+        margin-right: 5px;
+    }
+
+    .title {
+        font-size: 18px;
+        font-weight: bold;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+    }
+
+    .text-dashboard {
+        font-size: 10px;
+        font-weight: normal;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+    }
+
+    .subtitle-dashboard {
+        font-size: 9px;
+        font-weight: bold;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: center;
     }
 </style>
