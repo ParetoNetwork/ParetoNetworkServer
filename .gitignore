@@ -71,3 +71,5 @@ data/
 *mocha.env.js
 *test/mocha.env.js
 
+images/*
+

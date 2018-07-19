@@ -7,7 +7,7 @@
                     <div class="media py-1 px-4 border mb-5">
                         <div class="d-flex flex-column">
                             <div class="border p-2 mb-2 mr-2" @click="openInput()">
-                                <img v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic" alt=""
+                                <img width="100" v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic" alt=""
                                      v-if="user.profile_pic">
                                 <span v-else style="font-size: 50px;  color: gray; background: #b2b2b2"
                                       class="fa fa-user p-2"></span>
@@ -188,6 +188,7 @@
                 let formData = new FormData();
                 formData.append('file', file);
                 profileService.uploadProfilePic(formData, res => {
+
                     this.user.profile_pic = res;
                 })
             },
