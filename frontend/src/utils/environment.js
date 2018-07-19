@@ -1,3 +1,3 @@
 export default {
-    baseURL: document.domain === 'localhost' ? 'localhost:3000' : ''
+    baseURL: document.domain === 'localhost' ? 'http://localhost:3000' : ''
 }
