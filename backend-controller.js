@@ -14,7 +14,7 @@ if (fs.existsSync(constantsPath)) {
 /*constants*/
 var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
-console.log(paretoContractAddress);
+
 
 
 const modelsPath = path.resolve(__dirname, 'models');
