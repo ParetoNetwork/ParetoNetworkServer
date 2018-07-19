@@ -20,7 +20,7 @@ export default class profileService {
 
     static uploadProfilePic(form, onSuccess, onError) {
         http.post('/upload-profile', form).then(res => {
-            onSuccess(res.data.filename);
+            onSuccess(res.data.data.profile_pic);
         }).catch(error => {
             onError(error);
         });
