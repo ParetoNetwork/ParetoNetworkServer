@@ -6,10 +6,13 @@
                 <template v-if="user">
                     <div class="media py-1 px-4 border mb-5">
                         <div class="d-flex flex-column">
-                            <div class="border p-2 mb-2 mr-2">
-                                <img v-bind:src="enviroment.baseURL+ '/profile-image?image=' + user.profile_pic" alt="" v-if="user.profile_pic">
+                            <div class="border p-2 mb-2 mr-2" @click="openInput()">
+                                <img v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic" alt=""
+                                     v-if="user.profile_pic">
                                 <span v-else style="font-size: 50px;  color: gray; background: #b2b2b2"
                                       class="fa fa-user p-2"></span>
+                                <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
+
 
                             </div>
                             <button class="btn btn-primary-pareto" @click="showModal">
@@ -126,9 +129,9 @@
     import profileService from '../services/profileService';
     import moment from 'moment';
     import AuthService from '../services/authService';
-    import enviroment from '../utils/enviroment'
 
     import {mapMutations, mapState} from 'vuex';
+    import environment from '../utils/environment';
 
     export default {
         name: 'VDashboard',
@@ -165,6 +168,7 @@
         },
         mounted: function () {
             this.main();
+            this.baseURL = environment.baseURL;
         }, computed: {
             ...mapState(['madeLogin'])
         },
@@ -177,8 +181,16 @@
                 }, () => {
                     // alert(error);
                 });
-            }
-            ,
+            }, openInput: function () {
+                document.getElementById('file').click();
+            },updatePicture: function () {
+                let file = this.$refs.file.files[0];
+                let formData = new FormData();
+                formData.append('file', file);
+                profileService.uploadProfilePic(formData, res => {
+                    this.user.profile_pic = res;
+                })
+            },
             loadContent: function () {
                 dashboardService.getAllContent(res => {
                     this.loading = false;
