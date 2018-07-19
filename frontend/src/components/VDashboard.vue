@@ -7,13 +7,17 @@
                     <div class="media py-1 px-4 border mb-5">
                         <div class="d-flex flex-column">
                             <div class="border p-2 mb-2 mr-2" @click="openInput()">
-                                <img width="100" v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic" alt=""
-                                     v-if="user.profile_pic">
-                                <span v-else style="font-size: 50px;  color: gray; background: #b2b2b2"
-                                      class="fa fa-user p-2"></span>
+                                <div id="wrapper">
+                                    <img width="100" v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic"
+                                         alt=""
+                                         v-if="user.profile_pic">
+                                    <span v-else style="font-size: 50px;  color: gray; background: #b2b2b2"
+                                          class="fa fa-user p-2"></span>
+                                    <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i class="fa fa-pencil"
+                                                                                              aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
                                 <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
-
-
                             </div>
                             <button class="btn btn-primary-pareto" @click="showModal">
                                 EDIT PROFILE
@@ -183,14 +187,14 @@
                 });
             }, openInput: function () {
                 document.getElementById('file').click();
-            },updatePicture: function () {
+            }, updatePicture: function () {
                 let file = this.$refs.file.files[0];
                 let formData = new FormData();
                 formData.append('file', file);
                 profileService.uploadProfilePic(formData, res => {
 
                     this.user.profile_pic = res;
-                })
+                });
             },
             loadContent: function () {
                 dashboardService.getAllContent(res => {
@@ -321,5 +325,20 @@
         line-height: normal;
         letter-spacing: normal;
         text-align: center;
+    }
+
+    #wrapper {
+        position: relative;
+    }
+
+    #wrapper .text {
+        position: absolute;
+        bottom: 0;
+        display: none;
+    }
+
+    #wrapper:hover .text {
+        display: flex;
+        background: rgba(0,0,0,0.5);
     }
 </style>
