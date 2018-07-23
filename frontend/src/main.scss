@@ -2,19 +2,20 @@
 @import './styles/fonts';
 @import "~font-awesome/css/font-awesome.min.css";
 @import "~bootstrap/scss/bootstrap";
+@import "~bootstrap-vue/dist/bootstrap-vue.css";
 @import "styles/splash";
 @import "styles/splash-custom";
-
+@import "styles/button";
 
 .header {
   background-color: blue;
 }
 
-.pareto-bg-dark{
+.pareto-bg-dark {
   background-color: $dark-pareto;
 }
 
-body{
+body {
   height: 100%;
   width: 100%;
   color: #FFFFFF;
@@ -30,7 +31,7 @@ body{
   z-index: 1;
 }
 
-.pareto-truncate-text{
+.pareto-truncate-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -43,17 +44,15 @@ body{
 }
 
 
+
+
 .visual-debugger *{
   outline: 1px solid red;
-}
-
-
-
-.main{
+}.main{
   padding-top: 12vh;
 
   @media (max-width: 768px) {
-      padding-top: 8vh;
+    padding-top: 8vh;
   }
 }
 

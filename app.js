@@ -13,6 +13,7 @@ var cookieParser = require('cookie-parser');
 const multer = require("multer");
 var controller = require('./backend-controller.js');
 
+
 var app = express();
 var compression = require('compression');
 
@@ -26,8 +27,11 @@ var bodyParser = require('body-parser');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = path.join(__dirname, "/images");
-
-    fs.mkdir(dir, err => cb(err, dir))
+      if (fs.existsSync(dir)) {
+          cb(null, dir)
+      }else{
+          fs.mkdir(dir, err => cb(err, dir))
+      }
   },
   filename: function (req, file, cb) {
     cb(null, file.fieldname + '-' + Date.now())
@@ -42,11 +46,11 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50
 app.use(cookieParser());
 app.use(compression());
 
-const corsOptions = {
-  origin: 'http://localhost:8080',
-  credentials: true
-};
-app.use(cors(corsOptions));
+    const corsOptions = {
+    origin: 'http://localhost:8080',
+    credentials: true
+    };
+    app.use(cors(corsOptions));
 
 
 app.use("/api-docs", express.static('api-docs'));
@@ -77,11 +81,7 @@ const ErrorHandler = require('./error-handler.js');
   res.end();
 });*/
 
-app.post('/upload-profile', upload.single('file'), function (req, res, next) {
-    // req.file is the `avatar` file
-    // req.body will hold the text fields, if there were any
-    res.status(200).json({filename: req.file.filename});
-});
+
 
 app.get('/profile-image', function (req, res) {
     // req.file is the `avatar` file
@@ -365,6 +365,19 @@ app.get('/v1/userinfo', function (req, res) {
             }
         });
     }
+
+});
+
+app.post('/upload-profile', upload.single('file'), function (req, res, next) {
+    // req.file is the `avatar` file
+    // req.body will hold the text fields, if there were any
+    controller.updateUser(req.user, {profile_pic: req.file.filename}, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
 
 });
 

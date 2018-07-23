@@ -43,6 +43,53 @@ export default class authService {
         });
     }
 
+    static signParetoServer(msgParams, from, result, onSuccess, onError){
+        let jsonData = {
+            data: msgParams,
+            owner: from,
+            result: result
+        };
+
+        http.post('/v1/sign', qs.stringify(jsonData), {
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            }
+        }).then(response => {
+            if(response.data.success){
+                logged = true;
+                return onSuccess(from);
+            }else{
+                return onError(response.data.message)
+            }
+
+        }).catch(error => {
+            if (error.response && error.response.data) {
+                return onError(error.response.data.message);
+            } else {
+                return onError(error);
+            }
+
+        });
+    }
+
+    static manualLogin(message, signed, onSuccess, onError){
+        try{
+            const msgParams = [
+                {
+                    type: 'string',
+                    name: 'Message',
+                    value: message //replace with TOS
+                }
+            ];
+            const recovered = Sig.recoverTypedSignature({data: msgParams, sig: signed});
+            authService.signParetoServer(msgParams, recovered, signed, onSuccess, onError)
+        }catch (e) {
+            onError(e);
+        }
+
+    }
+
     static signSplash(onSuccess, onError) {
         const msgParams = [
             {
@@ -96,38 +143,12 @@ export default class authService {
                             const recovered = Sig.recoverTypedSignature({data: msgParams, sig: result.result});
 
                             if (recovered === from) {
-
-                                var jsonData = {
-                                    data: msgParams,
-                                    owner: from,
-                                    result: result.result
-                                };
-
-                                http.post('/v1/sign', qs.stringify(jsonData), {
-                                    headers: {
-                                        'accept': 'application/json',
-                                        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                                    }
-                                }).then(response => {
-                                    if(response.data.success){
-                                        logged = true;
-                                        return onSuccess(from);
-                                    }else{
-                                        return onError(response.data.message)
-                                    }
-
-                                }).catch(error => {
-                                    if (error.response && error.response.data) {
-                                        return onError(error.response.data.message);
-                                    } else {
-                                        return onError(error);
-                                    }
-
-                                });
+                                authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
 
                             } else {
                                 console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
                                 // stopLoading();
+                                return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
                             }
 
                         });
@@ -146,7 +167,7 @@ export default class authService {
     }
 
     static postSign(onSuccess, onError) {
-        http.get('/v1/userinfo?latest=true').then(res => {
+        http.get('/v1/userinfo?latest=true',{  withCredentials: true}).then(res => {
             if(res.data.success){
                 onSuccess(res.data.data);
             }else{

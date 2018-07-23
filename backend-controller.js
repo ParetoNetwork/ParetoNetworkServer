@@ -17,7 +17,6 @@ var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PA
 
 
 
-
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);
@@ -912,7 +911,7 @@ controller.getScoreAndSaveRedis = function(callback){
 
 controller.insertProfile = function(profile,callback){
 
-    ParetoProfile.findOneAndUpdate({address: profile.address},profile, {upsert: true},
+    ParetoProfile.findOneAndUpdate({address: profile.address},profile, {upsert: true, new: true},
           function(err, r){
               if(err){
                   console.error('unable to write to db because: ', err);
