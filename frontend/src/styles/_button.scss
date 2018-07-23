@@ -1,0 +1,10 @@
+.btn-success-pareto {
+  @extend .btn-success;
+  border-radius: 7px;
+  background-image: linear-gradient(to top, #59bf90, #97ca47);
+}
+.btn-primary-pareto {
+  @extend .btn-primary;
+  border-radius: 7px;
+  background-image: linear-gradient(to bottom, #00628f, #1b4e8b);
+}

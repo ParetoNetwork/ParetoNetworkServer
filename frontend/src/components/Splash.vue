@@ -110,7 +110,7 @@
                 </form>
             </div>
         </div>
-
+    <ModalSignIn v-if="showModalSign"></ModalSignIn>
     </div>
 </template>
 
@@ -120,11 +120,12 @@
     import Auth from '../services/authService';
     import {mapState,mapMutations} from 'vuex';
     import VFab from './VFab';
+    import ModalSignIn from "./VModalManualSigIn";
 
     export default {
         name: 'SplashDashboard',
-        components: {VFab, VParticles},
-        computed: {...mapState(['makingLogin'])},
+        components: {ModalSignIn, VFab, VParticles},
+        computed: {...mapState(['makingLogin', 'showModalSign'])},
         data() {
             return {
                 loading: false
@@ -139,7 +140,7 @@
                     this.loading = false;
                     this.$store.dispatch({
                         type: 'login',
-                        address: data,
+                        data: {address: data.address},
                     });
                     this.$router.push('/dashboard');
                 }, error => {
