@@ -29,6 +29,9 @@ describe('Server application /', function() {
         request(serverApp.app).get("/v1/rank")
             .expect('Content-Type', /json/)
             .expect(200)
+            .expect( function (res) {
+                assert(res.body.success, "must be true");
+            })
             .end(function(err, res) {
                 if (err) { return done(err); }
                 done();
@@ -40,10 +43,12 @@ describe('Server application /', function() {
             .expect('Content-Type', /json/)
             .expect(200)
             .expect( function (res) {
-                assert(res.body.length>0, "no data available");
-                assert.containsAllKeys(res.body[0],  ['rank', 'address', 'score']);
-                assert.sameOrderedMembers(res.body.map( it =>{return parseInt(it.rank)}),
-                 Array(res.body.length -parseInt(res.body[0].rank)+1 ).fill().map((_, idx) => parseInt(res.body[0].rank) + idx),'Rank is not sorted');
+                let body = res.body;
+                assert(body.success, "must be true");
+                assert(body.data.length>0, "no data available");
+                assert.containsAllKeys(body.data[0],  ['rank', 'address', 'score']);
+                assert.sameOrderedMembers(body.data.map( it =>{return parseInt(it.rank)}),
+                 Array(body.data.length -parseInt(body.data[0].rank)+1 ).fill().map((_, idx) => parseInt(body.data[0].rank) + idx),'Rank is not sorted');
             })
             .end(function(err, res) {
                 if (err) { return done(err); }
@@ -53,7 +58,10 @@ describe('Server application /', function() {
 
     it('User address is needed to get content', function (done) {
         request(serverApp.app).get("/v1/content/")
-            .expect(401)
+            .expect(200)
+            .expect( function (res) {
+                assert(res.body.success === false, "must be false");
+            })
             .end(function(err, res) {
                 if (err) { return done(err); }
                 done();
@@ -64,7 +72,14 @@ describe('Server application /', function() {
         getAuthenticatedCookie(data,  function(cookie) {
             request(serverApp.app).get("/v1/auth")
                 .set('cookie', cookie)
-                .expect(200, done);
+                .expect(200)
+                .expect( function (res) {
+                    assert(res.body.success, "must be true");
+                })
+                .end(function(err, res) {
+                    if (err) { return done(err); }
+                    done();
+                })
         });
     });
 
@@ -74,7 +89,9 @@ describe('Server application /', function() {
                 .set('cookie', cookie)
                 .expect(200)
                 .expect( function (res) {
-                    assert.containsAllKeys(res.body,  [ 'address', 'block', 'rank', 'score', 'tokens' ]);
+                    let body = res.body;
+                    assert(body.success, "must be true");
+                    assert.containsAllKeys(body.data,  [ 'address', 'block', 'rank', 'score', 'tokens' ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
@@ -89,7 +106,9 @@ describe('Server application /', function() {
                 .set('cookie', cookie)
                 .expect(200)
                 .expect( function (res) {
-                    assert.containsAllKeys(res.body,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    let body = res.body;
+                    assert(body.success, "must be true");
+                    assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
@@ -105,7 +124,12 @@ describe('Server application /', function() {
                 .query({ latest: true})
                 .expect(200)
                 .expect( function (res) {
-                    assert.containsAllKeys(res.body,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    let body = res.body;
+                    if(body.success){
+                        assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    }else{
+                        assert('Ethereum server response failed , please try again'===body.message, 'Only Ethereum servers error are allowed');
+                    }
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
@@ -123,7 +147,9 @@ describe('Server application /', function() {
                 .set('cookie', cookie)
                 .expect(200)
                 .expect( function (res) {
-                    assert.containsAllKeys(res.body,  [  'first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    let body = res.body;
+                    assert(body.success, "must be true");
+                    assert.containsAllKeys(body.data,  [  'first_name' , "last_name", 'biography' , "profile_pic" ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
