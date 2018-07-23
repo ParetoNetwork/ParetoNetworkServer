@@ -6,7 +6,11 @@ export default class ContentService {
 
     static uploadContent(content, onSuccess, onError) {
         http.post('/v1/content', content).then(res => {
-            return onSuccess(res);
+           if(res.data.success){
+               return onSuccess(res.data.data);
+           }else{
+               return onError(res.data.message);
+           }
 
         }).catch(error => {
             return onError(error);

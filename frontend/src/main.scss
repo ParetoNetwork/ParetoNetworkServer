@@ -43,13 +43,17 @@ body{
 }
 
 
+.visual-debugger *{
+  outline: 1px solid red;
+}
+
 
 
 .main{
   padding-top: 12vh;
 
-  @media (max-width: 770px) {
-      padding-top: 10vh;
+  @media (max-width: 768px) {
+      padding-top: 8vh;
   }
 }
 

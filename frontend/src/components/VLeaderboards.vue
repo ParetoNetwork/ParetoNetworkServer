@@ -105,7 +105,7 @@
 
     export default {
         name: 'VLeaderboards',
-        comments: {ModalSignIn},
+        components: {ModalSignIn},
         data: function () {
             return {leader: [], rank: 0, address: ''};
         },
@@ -133,6 +133,8 @@
                     Auth.postSign(() => {
                         this.getAddress();
                         this.getLeaderboard();
+                    }, error => {
+                        alert(error);
                     });
                 } else {
                     this.loadingLogin();
