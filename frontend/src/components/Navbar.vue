@@ -47,6 +47,7 @@
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="hardware()">Ledger Nano</a>
 
                             <a v-else class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
 
@@ -101,6 +102,21 @@
                     $('#navbarSupportedContent').collapse("toggle");
                 }
 
+            },
+
+            hardware: function () {
+                this.loadingLogin();
+                authService.signWallet(data => {
+                    this.$store.dispatch({
+                        type: 'login',
+                        address: data,
+                    });
+                    this.collapseContent();
+                    this.$router.push('/dashboard');
+                }, error => {
+                    this.stopLogin();
+                    alert(error);
+                });
             },
             login: function () {
                 this.loadingLogin();
