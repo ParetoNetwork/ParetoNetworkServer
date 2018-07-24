@@ -22,6 +22,7 @@ const store = new Vuex.Store({
     },
     mutations: {
         login(state, data) {
+            debugger
             state.isLogged = true;
             state.address = data.address;
             state.user = data;
@@ -46,7 +47,7 @@ const store = new Vuex.Store({
     },
     actions: {
         login(context, address) {
-            context.commit('login', address);
+            context.commit('login', address.address);
         }
     }
 });
