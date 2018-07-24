@@ -73,3 +73,6 @@ data/
 
 images/*
 
+#conflict npm vs yarn
+*package-lock.json
+
