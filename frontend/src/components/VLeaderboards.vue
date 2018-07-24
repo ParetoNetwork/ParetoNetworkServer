@@ -78,11 +78,11 @@
                             <div class="" style="position: relative; overflow: auto; height: 70vh; width: 100%;">
                                 <table class="table table-responsive-lg">
                                     <tbody>
-                                        <tr v-for="rank in leader" :key="rank.address">
-                                            <td>{{rank.rank}}</td>
-                                            <td>{{rank.score}}</td>
-                                            <td class="break-line">{{rank.address}}</td>
-                                        </tr>
+                                    <tr v-for="rank in leader" :key="rank.address">
+                                        <td>{{rank.rank}}</td>
+                                        <td>{{rank.score}}</td>
+                                        <td class="break-line">{{rank.address}}</td>
+                                    </tr>
                                     </tbody>
                                 </table>
 
@@ -101,7 +101,7 @@
     import DashboardService from '../services/dashboardService';
     import Auth from '../services/authService';
     import {mapMutations, mapState} from 'vuex';
-    import ModalSignIn from "./VModalManualSigIn";
+    import ModalSignIn from './VModalManualSigIn';
 
     export default {
         name: 'VLeaderboards',
@@ -139,12 +139,17 @@
                 } else {
                     this.loadingLogin();
                     Auth.signSplash(data => {
-                        this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                        this.address = data;
-                        this.$store.dispatch({
-                            type: 'login',
-                            address: data
+                        DashboardService.getAddress(res => {
+                            this.rank = data.rank <= 0 ? 0.0 : data.rank;
+                            this.address = data;
+                            this.$store.dispatch({
+                                type: 'login',
+                                address: res
+                            });
+                        }, () => {
+
                         });
+
 
                     }, error => {
                         alert(error);

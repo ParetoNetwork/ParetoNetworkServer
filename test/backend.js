@@ -141,7 +141,7 @@ describe('Server application /', function() {
     it('Update Information about User', function (done) {
         getAuthenticatedCookie(data,  function(cookie) {
             request(serverApp.app).post("/v1/updateuser")
-                .send({ 'first_name': "Carlos", "last_name": "De los Reyes",
+                .send({ 'first_name': "Test Name", "last_name": "Test Last Name",
                         'biography': "Lorem ipsum ...", "profile_pic" : "https://www.ienglishstatus.com/wp-content/uploads/2018/04/Anonymous-Whatsapp-profile-picture.jpg"
                 })
                 .set('cookie', cookie)
