@@ -3,6 +3,10 @@ import Sig from 'eth-sig-util';
 import qs from 'qs';
 import http from './HttpService';
 
+import ProviderEngine from 'web3-provider-engine';
+import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
+var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+
 /* eslint-disable no-console */
 let logged = false;
 export default class authService {
@@ -90,20 +94,30 @@ export default class authService {
 
     }
 
-    static async signWallet(onSuccess, onError) {
-        var ProviderEngine = require('web3-provider-engine');
-        var RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
-        var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+    static  signWallet(onSuccess, onError) {
 
-        var engine = new ProviderEngine();
-        var provider = new Web3(engine);
 
-        var ledgerWalletSubProvider = await LedgerWalletSubproviderFactory();
-        engine.addProvider(ledgerWalletSubProvider);
-        engine.addProvider(new RpcSubprovider({rpcUrl: 'https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'})); // you need RPC endpoint
-        engine.start();
+        const engine = new ProviderEngine();
+        const provider = new Web3(engine);
 
-        this.signWithProider(provider,onSuccess,onError);
+        LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
+            console.log(ledgerWalletSubProvider);
+            const isSupported = ledgerWalletSubProvider.isSupported;
+
+                console.log(isSupported ? 'Yes' : 'No');
+                if(isSupported){
+                    engine.addProvider(ledgerWalletSubProvider);
+                    engine.addProvider(new RpcSubprovider({rpcUrl: 'https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'})); // you need RPC endpoint
+                    engine.start();
+
+                    this.signWithProider(provider,onSuccess,onError);
+                }else{
+                    onError('Your browser not support this feature')
+                }
+
+        });
+
+
         return true;
     }
 
