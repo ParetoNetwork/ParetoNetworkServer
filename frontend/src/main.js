@@ -22,7 +22,6 @@ const store = new Vuex.Store({
     },
     mutations: {
         login(state, data) {
-            debugger
             state.isLogged = true;
             state.address = data.address;
             state.user = data;

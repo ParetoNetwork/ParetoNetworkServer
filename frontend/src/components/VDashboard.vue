@@ -77,7 +77,7 @@
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
 
-                                <div class="d-flex split ">
+                                <router-link tag="div" class="d-flex split" :to="'/dashboard/' + row._id" @click="showDetails(row)">
                                     <img width="50" height="50" src="../assets/logo.png" alt="" class="mr-2 border p-2">
                                     <div class="d-flex justify-content-between flex-grow-1">
                                         <div class="d-flex flex-column flex-grow-1 pr-5">
@@ -97,7 +97,7 @@
                                         </div>
                                     </div>
 
-                                </div>
+                                </router-link >
                             </li>
                         </ul>
                     </div>
@@ -196,6 +196,10 @@
                     this.user.profile_pic = res;
                 });
             },
+            showDetails: function(row){
+                console.log(row);
+            }
+            ,
             loadContent: function () {
                 dashboardService.getAllContent(res => {
                     this.loading = false;
@@ -271,7 +275,7 @@
     }
 
     li > .split {
-
+        cursor: pointer;
         border-bottom: 1px solid rgba(0, 0, 0, 0.125);
         padding-bottom: 0.5rem;
 
