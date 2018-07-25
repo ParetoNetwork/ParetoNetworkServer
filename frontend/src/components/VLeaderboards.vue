@@ -39,12 +39,22 @@
 
                         <div class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
-                            <div id="rank-logo-holder"><img id="rank-logo"
+                            <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
                                                             src="../assets/images/pareto-logo-mark-color.svg"
                                                             alt="Pareto Logo for Ranking">
                             </div>
-                            <div>&nbsp;</div>
-                            <div id="score-counter">{{rank}}</div>
+                            <div id="score-counter" class="d-flex">
+                                <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
+                                    <ICountUp
+                                            :startVal="countUp.startVal"
+                                            :endVal="score"
+                                            :decimals="countUp.decimals"
+                                            :duration="countUp.duration"
+                                            :options="countUp.options"
+                                            @ready="onReady"
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div id="address-metrics" class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center; opacity: 0">
@@ -103,11 +113,35 @@
     import {mapMutations, mapState} from 'vuex';
     import ModalSignIn from './VModalManualSigIn';
 
+    import ICountUp from 'vue-countup-v2';
+
     export default {
         name: 'VLeaderboards',
-        components: {ModalSignIn},
+        components: {
+            ModalSignIn,
+            ICountUp
+        },
         data: function () {
-            return {leader: [], rank: 0, address: ''};
+            return {
+                leader: [],
+                rank: 0,
+                score: 0,
+                address: '',
+                textSize : 100,
+                countUp : {
+                    startVal: 0,
+                    decimals: 0,
+                    duration: 2.5,
+                    options: {
+                        useEasing: true,
+                        useGrouping: true,
+                        separator: ',',
+                        decimal: '.',
+                        prefix: '',
+                        suffix: ''
+                    }
+                }
+            };
         },
         computed: {...mapState(['madeLogin', 'showModalSign'])},
         mounted: function () {
@@ -117,8 +151,13 @@
         methods: {
             getAddress() {
                 return DashboardService.getAddress(data => {
+                    console.log(data);
                     this.rank = data.rank <= 0 ? 0.0 : data.rank;
                     this.address = data.address;
+
+                    data.score = Number(data.score);
+                    this.score = Number(data.score.toFixed(5));
+                    this.changeFontSize(this.score);
                 }, () => {
 
                 });
@@ -157,7 +196,27 @@
                     });
                 }
 
-            }, ...mapMutations(
+            },
+            onReady: function(instance, CountUp) {
+                const that = this;
+                instance.update(that.endVal + 100);
+            },
+            changeFontSize : function ( score ) {
+                let textLength = score.toString().length;
+                console.log(score)
+                if(textLength < 9) {
+                    this.textSize = 100;
+                } else if (textLength >= 9 && textLength <= 10){
+                    this.textSize = 80;
+                } else if ( textLength > 10 && textLength < 13){
+                    this.textSize = 60;
+                }else if( textLength < 19){
+                    this.textSize = 40;
+                } else{
+                    this.textSize = 30;
+                }
+            },
+            ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']
             )
         }
