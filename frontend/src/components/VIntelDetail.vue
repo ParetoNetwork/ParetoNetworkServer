@@ -29,7 +29,7 @@
                             <span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>
                         </button>
                         <div class="border-bottom mt-3 p-2">
-                            <i class="fa fa-search"></i> <span class="text-pareto-gray ml-3"> You don't have posted </span>
+                            <i class="fa fa-search"></i> <span class="text-pareto-gray ml-3"> View Author Profile </span>
                         </div>
                         <div class="border-bottom mt-3 p-2">
                             <i class="fa fa-book"></i> <span class="text-pareto-gray ml-3"> View Author's Articles </span>
