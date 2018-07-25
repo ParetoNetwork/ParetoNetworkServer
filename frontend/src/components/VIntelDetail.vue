@@ -25,7 +25,7 @@
                             <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                             <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{profile.rank}} </span>
                         </div>
-                        <button class="btn btn-success mt-5">
+                        <button class="btn btn-success-pareto mt-5">
                             <span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>
                         </button>
                         <div class="border-bottom mt-3 p-2">
