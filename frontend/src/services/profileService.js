@@ -19,7 +19,8 @@ export default class profileService {
     }
 
     static getSpecificProfile(onSuccess, onError, address){
-        http.get('/v1/userinfo', address).then(res => {
+        console.log(address);
+        http.get('/v1/userinfo/' + address).then(res => {
             return onSuccess(res.data.data);
         }).catch(error => {
             return onError(error);

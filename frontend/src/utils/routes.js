@@ -30,10 +30,7 @@ const routes = [
         }
     },
     {
-        path: '/dashboard/:id', component: VIntelDetail, name: 'VIntelDetail', beforeEnter: (to, from, next) => {
-            console.log("Granularity Route beforeEnter")
-            next();
-        }
+        path: '/dashboard/:id', component: VIntelDetail, name: 'VIntelDetail'
     },
     {path: '/about', component: VAbout},
     {path: '/leaderboards', component: VLeaderboards},

@@ -404,7 +404,7 @@ app.post('/upload-profile', upload.single('file'), function (req, res, next) {
 
 //get info about another address
 app.get('/v1/userinfo/:address', function (req, res) {
-    controller.getUserInfo(req.params.params,  function (err, result) {
+    controller.getUserInfo(req.params.address,  function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
