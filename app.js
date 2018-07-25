@@ -289,16 +289,17 @@ app.get('/v1/content', function (req, res) {
 //get info about another address
 app.get('/v1/content/:content', function (req, res) {
 
-    controller.getContentByCurrentUser(req.user, function (err, result) {
+    controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
             let mycontent = {};
-            result.forEach(function(content) {
-                if(content.id === req.params.content){
-                    mycontent = content;
+            for (let i = 0; i < result.length; i = i+1){
+                if(result[i]._id.toString() === req.params.content){
+                    mycontent = result[i];
+                    break;
                 }
-            });
+            }
             res.status(200).json(ErrorHandler.getSuccess(mycontent));
         }
     });
