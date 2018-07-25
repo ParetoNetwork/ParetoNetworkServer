@@ -37,7 +37,7 @@
                     </div>
                 </div>
 
-                <div v-if="loading" class="col-md-9">
+                <div v-if="loading" class="col-md-9 ">
                     <div class="row">
                         <div class="d-flex split mt-4 mx-auto">
                             <i class="fa fa-spinner fa-spin fa-5x">
@@ -45,7 +45,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-else class="col-md-9">
+                <div v-else class="col-md-9 mb-4">
                     <div class="row text-group ml-4">
                         <div class="border p-4">
                             <div class="row py-4 border-bottom m-0">
