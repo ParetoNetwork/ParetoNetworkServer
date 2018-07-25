@@ -15,8 +15,8 @@
                     </div>
                     <div class="row border p-5">
                         <div class="text-group">
-                            <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></h6>
-                            <h6 v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></h6>
+                            <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> About {{profile.first_name}} {{profile.last_name}} :</b></h6>
+                            <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address.slice(0,15) + '...'}} :</b></h6>
 
                             <p v-if="profile.biography"> {{profile.biography}} </p>
                             <p v-else> No Bio to show </p>
