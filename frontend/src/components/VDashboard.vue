@@ -144,19 +144,9 @@
             return {
                 address: null,
                 content: [
-                    {title: 'test', rewarded: 10, postedBy: 'Hans', ago: 1200, pxt: 200}, {
-                        title: 'test',
-                        rewarded: 10,
-                        postedBy: 'Hans',
-                        ago: 1200,
-                        pxt: 200
-                    }], myContent: [
-                    {title: 'title', date: new Date(), trd: 1231212312, id: 1}, {
-                        title: 'title',
-                        date: new Date(),
-                        trd: 1231212312,
-                        id: 2
-                    }], loading: true,
+                    ], myContent: [
+                    ],
+                loading: true,
                 moment: moment,
                 firstName: '',
                 lastName: '',

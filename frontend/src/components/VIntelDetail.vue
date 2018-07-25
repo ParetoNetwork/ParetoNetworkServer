@@ -6,23 +6,24 @@
                     <div class="row">
                         <div class="media p-3 border mb-3 w-100">
                             <div class="d-flex flex-column">
-                                <span style="font-size: 320px; color: gray; background: #b2b2b2"
-                                      class="fa fa-user p-2"></span>
+                                <!--<span  style="font-size: 320px; color: gray; background: #b2b2b2"-->
+                                      <!--class="fa fa-user p-2"></span>-->
+                                <img v-if="profile.profile_pic" src="profile.profile_pic" width="100%" height="200px" alt="" class="mr-2">
+                                <img v-else src="../assets/images/user_placeholder.png" width="100%" height="200px" alt="" class="mr-2">
                             </div>
                         </div>
                     </div>
                     <div class="row border p-5">
                         <div class="text-group">
-                            <h6 class="subtitle-dashboard"><b> ABOUT BRYCE W. </b></h6>
-                            <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua.
-                                Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                                laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-                                reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  </p>
+                            <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></h6>
+                            <h6 v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></h6>
+
+                            <p v-if="profile.biography"> {{profile.biography}} </p>
+                            <p v-else> No Bio to show </p>
                         </div>
                         <div class="mt-2">
                             <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                            <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> 20000 </span>
+                            <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{profile.rank}} </span>
                         </div>
                         <button class="btn btn-success mt-5">
                             <span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>
@@ -41,31 +42,20 @@
                         <div class="border p-4">
                             <div class="row py-4 border-bottom m-0">
                                 <div class="col-md-10 p-0">
-                                    <span class="name-title"> Research Initiated on iExec RLC token and decentralized computing sector </span>
+                                    <span class="name-title"> {{intel.title}} </span>
                                 </div>
                                 <div class="col-md-2 p-0">
                                     <div class="text-group-right">
-                                        <h6 class="subtitle-dashboard"><b> BRYCE W. </b></h6>
-                                        <p> 1408 Blocks Ago... </p>
-                                        <span class="text-dashboard text-pareto-gray"> REWARDED 34 TIMES </span>
+                                        <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></h6>
+                                        <h6 v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></h6>
+                                        <p> {{intel.block}} Blocks Ago... </p>
+                                        <span class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="text-group mt-4">
-                                <p> The standard Lorem Ipsum passage, used since the 1500s
-                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-                                    voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-
-                                    Section 1.10.32 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
-                                    "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
-                                    architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
-                                    voluptatem sequi nesciunt. Neque porro quisquam est,
-                                    qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
-                                    labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut
-                                    aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum
-                                    fugiat quo voluptas nulla pariatur?"  </p>
+                                <p v-html="intel.body"> </p>
                             </div>
                         </div>
                     </div>
@@ -84,38 +74,37 @@
         data: function () {
             return {
                 id: this.$route.params.id,
-                addre: ''
+                intel: {},
+                profile: {
+                    address: '',
+                    first_name: '' ,
+                    last_name: '',
+                    biography: '',
+                    rank: 1000
+                }
             };
         },
-        mounted: function () {
-            console.log(this.id);
-            this.address();
-            this.intel();
+        beforeMount: function () {
+            this.getIntel();
         },
         methods: {
-            address: function () {
-                DashboardService.getAddress(res => {
-                    console.log(res);
-                    this.profile()
-                }, () => {
-
-                });
-            },
-
-            intel: function () {
+            getIntel: function () {
                 DashboardService.getIntel(res => {
+                   this.getProfile(res.address);
+                   this.intel = res;
                    console.log(res);
                 }, error => {
                     console.log(error);
                 }, this.id);
             },
 
-            profile: function () {
-                ProfileService.getSpecificProfile( res=> {
+            getProfile: function (address) {
+                ProfileService.getSpecificProfile( res => {
+                    this.profile = res;
                     console.log(res);
                 }, error => {
                     console.log(error);
-                }, this.addre)
+                }, address)
             }
         }
     };
