@@ -53,10 +53,10 @@
                                     <span class="name-title"> {{intel.title}} </span>
                                 </div>
                                 <div class="col-md-2 p-0">
-                                    <div class="text-group-right">
-                                        <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></h6>
-                                        <h6 v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></h6>
-                                        <p> {{intel.block}} Blocks Ago... </p>
+                                    <div class="d-flex flex-column align-items-end ">
+                                        <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
+                                        <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
+                                        <span class="mb-2"> {{intel.block}} Blocks Ago... </span>
                                         <span class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
                                     </div>
                                 </div>

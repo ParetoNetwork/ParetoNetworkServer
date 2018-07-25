@@ -107,7 +107,7 @@
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: data,
+                            address: res,
                         });
                         this.collapseContent();
                         this.$router.push('/dashboard');
