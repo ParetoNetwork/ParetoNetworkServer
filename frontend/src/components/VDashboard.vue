@@ -73,10 +73,13 @@
             <div class="col-md-7">
                 <div class="border p-2">
                     <h5 class="text-left">My intel: </h5>
+                    <div v-if="loading" class="d-flex split">
+                            <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
+                            </i>
+                    </div>
                     <div class="">
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
-
                                 <router-link tag="div" class="d-flex split" :to="'/dashboard/' + row._id" @click="showDetails(row)">
                                     <img width="50" height="50" src="../assets/logo.png" alt="" class="mr-2 border p-2">
                                     <div class="d-flex justify-content-between flex-grow-1">
