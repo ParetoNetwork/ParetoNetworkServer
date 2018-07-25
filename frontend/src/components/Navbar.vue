@@ -62,24 +62,23 @@
 <script>
     /* eslint-disable no-console */
     import {mapMutations, mapState} from 'vuex';
-    import 'jquery'
+    import 'jquery';
     import authService from '../services/authService';
-    import dashboardService from '../services/dashboardService';
+    import DashboardService from '../services/dashboardService';
 
 
     export default {
         name: 'Navbar',
         components: {},
         mounted: function () {
-            dashboardService.getAddress(res => {
-                this.address = res;
+            DashboardService.getAddress(res => {
                 this.$store.dispatch({
                     type: 'login',
-                    data: {address: res.address}
+                    address: res,
                 });
+                this.collapseContent();
             }, () => {
 
-                // alert(error);
             });
         },
         data: function () {
@@ -88,7 +87,7 @@
         computed: {
             ...mapState([
                 // map this.count to store.state.count
-                'isLogged', 'address' , 'showModalSign'
+                'isLogged','address' , 'showModalSign'
             ])
 
         },
@@ -97,20 +96,25 @@
               this.$store.state.showModalSign = true;
             },
             collapseContent: function () {
-                if($( window ).width() < 990){
-                    $('#navbarSupportedContent').collapse("toggle");
+                if ($(window).width() < 990) {
+                    $('#navbarSupportedContent').collapse('toggle');
                 }
 
             },
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: data,
+                    DashboardService.getAddress(res => {
+                        this.$store.dispatch({
+                            type: 'login',
+                            address: data,
+                        });
+                        this.collapseContent();
+                        this.$router.push('/dashboard');
+                    }, () => {
+
                     });
-                    this.collapseContent();
-                    this.$router.push('/dashboard');
+
                 }, error => {
                     this.stopLogin();
                     alert(error);
