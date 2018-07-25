@@ -285,6 +285,26 @@ app.get('/v1/content', function (req, res) {
 
 });
 
+
+//get info about another address
+app.get('/v1/content/:content', function (req, res) {
+
+    controller.getContentByCurrentUser(req.user, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            let mycontent = {};
+            result.forEach(function(content) {
+                if(content.id === req.params.content){
+                    mycontent = content;
+                }
+            });
+            res.status(200).json(ErrorHandler.getSuccess(mycontent));
+        }
+    });
+
+});
+
 app.get('/v1/content/me/', function (req, res) {
 
     controller.getContentByCurrentUser(req.user, function (err, result) {
