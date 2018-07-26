@@ -27,6 +27,7 @@
     "snapsvg": "^0.5.1",
     "vue": "^2.5.16",
     "vue-countup-v2": "^1.0.3",
+    "vue-infinite-scroll": "^2.0.2",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
     "web3": "1.0.0-beta.29"
