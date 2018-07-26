@@ -5,6 +5,7 @@ import VLeaderboards from '../components/VLeaderboards';
 import VIntel from '../components/VIntel';
 import VueRouter from 'vue-router';
 import AuthService from '../services/authService';
+import VIntelDetail from '../components/VIntelDetail';
 
 
 const routes = [
@@ -27,6 +28,9 @@ const routes = [
                 next('/');
             });
         }
+    },
+    {
+        path: '/dashboard/:id', component: VIntelDetail, name: 'VIntelDetail'
     },
     {path: '/about', component: VAbout},
     {path: '/leaderboards', component: VLeaderboards},
