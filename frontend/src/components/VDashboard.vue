@@ -30,7 +30,7 @@
                             <div class="">
 
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup>PXT</sup></b></span></div>
+                                <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span></div>
                             <div class="d-flex flex-column" style="padding-left: 1.8rem;">
 
                                 <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{user.rank || ''}}</span>
@@ -94,7 +94,7 @@
                                         <div class="d-flex flex-column justify- content-end">
                                             <div v-if="false" class="text-right font-weight-bold">
                                                 <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                                <span class="text-right">{{row.pxt}} PXT</span>
+                                                <span class="text-right">{{row.pxt}}</span>
                                             </div>
                                             <button class="btn btn-primary-pareto" v-if="false">REWARD</button>
                                         </div>
