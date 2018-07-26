@@ -98,16 +98,72 @@ export default class authService {
         const provider = new Web3(engine);
 
         LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
-            console.log(ledgerWalletSubProvider);
             const isSupported = ledgerWalletSubProvider.isSupported;
-
-                console.log(isSupported ? 'Yes' : 'No');
                 if(isSupported){
                     engine.addProvider(ledgerWalletSubProvider);
                     engine.addProvider(new RpcSubprovider({rpcUrl: 'https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'})); // you need RPC endpoint
                     engine.start();
 
-                    this.signWithProider(provider,onSuccess,onError);
+                    if (typeof provider !== 'undefined') {
+                        const msgParams = [
+                            {
+                                type: 'string',
+                                name: 'Message',
+                                value: 'Pareto' //replace with TOS
+                            }
+                        ];
+                        // const contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
+                        // const rankCalculation = 0;
+                        // const tokenTotal = 0;
+                        /*if (!metaMask.currentProvider.isMetaMask) { //no mobile users use Metamask, this is too strict
+
+                            return onError('Please install MetaMask in order to access the Pareto Network');
+                        }*/
+                        console.log(provider);
+                        provider.eth.getAccounts((error, accounts) => {
+                            if (!error) {
+                                if(accounts && accounts[0]){
+
+                                    const addr = accounts[0];
+
+
+                                    if (provider.utils.isAddress(addr)) {
+                                        const from = addr.toLowerCase();
+
+                                        provider.currentProvider._providers[0].signMessage({data:  provider.utils.toHex('Pareto')}, (err, result) => {
+                                            if (err) return console.dir(err);
+                                            if (result.error) {
+                                                return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
+                                            }
+                                            if (result.error) {
+                                                return console.error(result);
+                                            }
+
+                                            const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
+
+                                            if (recovered === from) {
+                                                authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
+
+                                            } else {
+                                                console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                                // stopLoading();
+                                                return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                            }
+
+                                        });
+
+                                    }//end if valid address
+                                    else {
+                                        console.log('address invalid!');
+                                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+
+                                        //set error state on input field
+                                    }
+                                }//end if !error
+
+                            }//end if !error
+                        });
+                    }//end if
                 }else{
                     onError('Your browser not support this feature')
                 }
@@ -118,7 +174,22 @@ export default class authService {
         return true;
     }
 
-    static signWithProider(provider, onSuccess, onError) {
+
+    static signSplash(onSuccess, onError) {
+
+        let provider;
+        if (typeof web3 !== 'undefined') {
+            // Use Mist/MetaMask's provider
+            provider = new Web3(web3.currentProvider);
+        } else {
+            console.log('No web3? You should consider trying MetaMask!');
+            onError('Please install MetaMask (or other web3 browser) in order to access the Pareto Network');
+
+
+            // searchLookup();
+            // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+            provider = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
+        }
         if (typeof provider !== 'undefined') {
             const msgParams = [
                 {
@@ -134,6 +205,7 @@ export default class authService {
 
                 return onError('Please install MetaMask in order to access the Pareto Network');
             }*/
+            console.log(provider);
             provider.eth.getAccounts((error, accounts) => {
                 console.log(accounts);
                 if (!error) {
@@ -183,24 +255,6 @@ export default class authService {
                 }//end if !error
             });
         }//end if
-    }
-
-    static signSplash(onSuccess, onError) {
-
-        let provider;
-        if (typeof web3 !== 'undefined') {
-            // Use Mist/MetaMask's provider
-            provider = new Web3(web3.currentProvider);
-        } else {
-            console.log('No web3? You should consider trying MetaMask!');
-            onError('Please install MetaMask (or other web3 browser) in order to access the Pareto Network');
-
-
-            // searchLookup();
-            // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-            provider = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
-        }
-       this.signWithProider(provider,onSuccess,onError);
         return true;
     }
 
