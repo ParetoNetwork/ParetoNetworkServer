@@ -142,7 +142,7 @@ export default class authService {
                                             const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
 
                                             if (recovered === from) {
-                                                authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
+                                                authService.signParetoServer(msgParams, from, result, onSuccess, onError)
 
                                             } else {
                                                 console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
