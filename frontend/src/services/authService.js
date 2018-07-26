@@ -14,7 +14,6 @@ export default class authService {
         return logged;
     }
 
-
     static logout(onSuccess, onError) {
         http.post('/v1/unsign').then(res => {
             if(res.data.success){

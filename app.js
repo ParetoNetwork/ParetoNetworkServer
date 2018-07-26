@@ -285,6 +285,27 @@ app.get('/v1/content', function (req, res) {
 
 });
 
+
+//get info about another address
+app.get('/v1/content/:content', function (req, res) {
+
+    controller.getAllAvailableContent(req, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            let mycontent = {};
+            for (let i = 0; i < result.length; i = i+1){
+                if(result[i]._id.toString() === req.params.content){
+                    mycontent = result[i];
+                    break;
+                }
+            }
+            res.status(200).json(ErrorHandler.getSuccess(mycontent));
+        }
+    });
+
+});
+
 app.get('/v1/content/me/', function (req, res) {
 
     controller.getContentByCurrentUser(req.user, function (err, result) {
@@ -383,7 +404,7 @@ app.post('/upload-profile', upload.single('file'), function (req, res, next) {
 
 //get info about another address
 app.get('/v1/userinfo/:address', function (req, res) {
-    controller.getUserInfo(req.params.params,  function (err, result) {
+    controller.getUserInfo(req.params.address,  function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {

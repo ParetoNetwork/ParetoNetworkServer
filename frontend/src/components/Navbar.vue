@@ -72,6 +72,7 @@
         components: {},
         mounted: function () {
             DashboardService.getAddress(res => {
+                console.log(res);
                 this.$store.dispatch({
                     type: 'login',
                     address: res,
@@ -107,7 +108,7 @@
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: data,
+                            address: res,
                         });
                         this.collapseContent();
                         this.$router.push('/dashboard');
