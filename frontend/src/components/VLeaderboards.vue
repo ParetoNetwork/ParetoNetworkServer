@@ -153,6 +153,7 @@
                     distance: 0,
                     active: false
                 },
+
                 countUp : {
                     startVal: 0,
                     decimals: 0,
