@@ -22,6 +22,15 @@ const debug = require('debug')('pareto-ranking');
 const appName = 'Pareto Ranking Backend';
 debug('booting %s', appName);
 
+let constants = {};
+const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
+
+if (fs.existsSync(constantsPath)) {
+  constants = require(constantsPath);
+}
+/*constants*/
+var sessionDebug = process.env.DEBUG || constants.DEBUG;
+
 var bodyParser = require('body-parser');
 
 var storage = multer.diskStorage({
@@ -123,7 +132,7 @@ app.post('/v1/sign', function (req, res) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
-            if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
+            if (sessionDebug == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
                 res.cookie('authorization', result.token, {httpOnly: true});
             } else {
                 res.cookie('authorization', result.token, {
@@ -212,7 +221,7 @@ app.post('/v1/unsign', function (req, res) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err))
         } else {
-            if (process.env.DEBUG == 1) {
+            if (sessionDebug == 1) {
                 res.cookie('authorization', result.token, {httpOnly: true, maxAge: 1231006505});
             }
             else {
