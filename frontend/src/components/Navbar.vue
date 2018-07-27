@@ -47,7 +47,7 @@
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
-                            <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="hardware()">Ledger Nano</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" @click="showModal">Ledger Nano</a>
 
                             <a v-else class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
 
@@ -56,7 +56,36 @@
                 </ul>
             </div>
         </nav>
+
+        <b-modal ref="myModalRef"
+                 centered
+                 title="Ledger Wallet Nano S"
+                 :header-bg-variant="'dark'"
+                 :header-text-variant="'light'"
+                 :body-bg-variant="'dark'"
+                 :body-text-variant="'light'"
+                 hide-footer>
+
+                <b-container fluid>
+                    <div class="text-left">
+                        <p> Before SignIn with Ledger Nano S, verify the next items: </p>
+                        <div class="m-2 ml-4">
+                            <ul>
+                                <li> Plugged-in their Ledger Wallet Nano S </li>
+                                <li> Input digits pin </li>
+                                <li> Navigated to the Ethereum app on their device </li>
+                                <li> Enabled 'browser' support from the Ethereum app settings </li>
+                            </ul>
+                        </div>
+                    </div>
+                </b-container>
+            <b-row class="m-2 mt-4 float-right">
+                <b-btn size="sm" class="mx-2" variant="danger" @click="hideModal">Cancel</b-btn>
+                <b-btn size="sm" variant="success" @click="hardware(); hideModal();">Continue</b-btn>
+            </b-row>
+        </b-modal>
     </div>
+
 
 </template>
 
@@ -145,7 +174,14 @@
                 }, error => {
                     alert(error);
                 });
-            }, ...mapMutations({
+            },
+            showModal () {
+                this.$refs.myModalRef.show()
+            },
+            hideModal () {
+                this.$refs.myModalRef.hide()
+            }
+            , ...mapMutations({
                 loginVuex: 'login',
                 loadingLogin: 'loadingLogin',
                 stopLogin: 'stopLogin',
