@@ -96,9 +96,11 @@ export default class authService {
         var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
         const engine = new ProviderEngine();
         const provider = new Web3(engine);
+        var derivation_path = "44'/60'/0'/0/0";
 
         LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
             const isSupported = ledgerWalletSubProvider.isSupported;
+            ledgerWalletSubProvider.ledger.setDerivationPath(derivation_path);
                 if(isSupported){
                     engine.addProvider(ledgerWalletSubProvider);
                     engine.addProvider(new RpcSubprovider({rpcUrl: 'https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'})); // you need RPC endpoint
@@ -112,14 +114,7 @@ export default class authService {
                                 value: 'Pareto' //replace with TOS
                             }
                         ];
-                        // const contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
-                        // const rankCalculation = 0;
-                        // const tokenTotal = 0;
-                        /*if (!metaMask.currentProvider.isMetaMask) { //no mobile users use Metamask, this is too strict
 
-                            return onError('Please install MetaMask in order to access the Pareto Network');
-                        }*/
-                        console.log(provider);
                         provider.eth.getAccounts((error, accounts) => {
                             if (!error) {
                                 if(accounts && accounts[0]){
@@ -205,9 +200,8 @@ export default class authService {
 
                 return onError('Please install MetaMask in order to access the Pareto Network');
             }*/
-            console.log(provider);
+
             provider.eth.getAccounts((error, accounts) => {
-                console.log(accounts);
                 if (!error) {
                     if(accounts && accounts[0]){
                         console.log(accounts);
