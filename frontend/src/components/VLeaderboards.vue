@@ -70,7 +70,9 @@
                     <h4>Leaderboard</h4>
                     <div class="" style="font-size: 12px">
                         <div class="table-area">
+
                             <table class="table text-left">
+                                <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa fa-arrow-up"></i> Scroll Back </button>
                                 <thead>
                                 <tr>
                                     <th width="55px">
@@ -85,17 +87,19 @@
                                 </tr>
                                 </thead>
                             </table>
-                            <div class="" style="position: relative; overflow: auto; height: 70vh; width: 100%;">
-                                <table class="table table-responsive-lg">
-                                    <tbody>
-                                    <tr v-for="rank in leader" :key="rank.address">
-                                        <td>{{rank.rank}}</td>
-                                        <td>{{rank.score}}</td>
-                                        <td class="break-line">{{rank.address}}</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                            <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
+                                <table class="table table-responsive-lg position-relative"  v-scroll="onScroll">
 
+                                    <div v-infinite-scroll="infiniteScrollFunction" infinite-scroll-disabled="busy" infinite-scroll-listen-for-event infinite-scroll-distance="100">
+                                        <tbody v-scroll="onScroll" >
+                                            <tr v-scroll="onScroll" v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
+                                                <td>{{rank.rank}}</td>
+                                                <td>{{rank.score}}</td>
+                                                <td class="break-line">{{rank.address}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </div>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -114,12 +118,26 @@
     import ModalSignIn from './VModalManualSigIn';
 
     import ICountUp from 'vue-countup-v2';
+    import infiniteScroll from 'vue-infinite-scroll';
 
     export default {
         name: 'VLeaderboards',
         components: {
             ModalSignIn,
             ICountUp
+        },
+        directives: {
+          infiniteScroll,
+            scroll : {
+                inserted: function (el, binding) {
+                    let f = function (evt) {
+                        if (binding.value(evt, el)) {
+                            window.removeEventListener('scroll', f)
+                        }
+                    }
+                    window.addEventListener('scroll', f)
+                }
+            }
         },
         data: function () {
             return {
@@ -128,6 +146,13 @@
                 score: 0,
                 address: '',
                 textSize : 100,
+                page: 0,
+                busy: false,
+                loading : true,
+                scroll : {
+                    distance: 0,
+                    active: false
+                },
                 countUp : {
                     startVal: 0,
                     decimals: 0,
@@ -143,50 +168,60 @@
                 }
             };
         },
+        watch: {
+            'scroll.distance' : function (value) {
+                if (value > 150 && this.scroll.active === false) {
+                    $('#button-scroll-up').stop(true, true).fadeIn();
+                    this.scroll.active = true;
+                } else if( value < 150 && this.scroll.active === true){
+                    $('#button-scroll-up').stop(true, true).fadeOut();
+                    this.scroll.active = false;
+                } else if (value > 150) {
+                    this.scroll.active = true;
+                }
+            }
+        },
         computed: {...mapState(['madeLogin', 'showModalSign'])},
         mounted: function () {
-            this.getLeaderboard();
             this.getAddress();
         },
         methods: {
             getAddress() {
                 return DashboardService.getAddress(data => {
-                    console.log(data);
-                    this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                    this.address = data.address;
-
-                    data.score = Number(data.score);
-                    this.score = Number(data.score.toFixed(5));
-                    this.changeFontSize(this.score);
+                    this.init(data);
                 }, () => {
-
+                    this.loading = false;
+                    this.infiniteScrollFunction();
                 });
             }, getLeaderboard: function () {
-                LeaderboardService.getLeaderboard({rank: 1, limit: 100, page: 0}, res => {
-                    this.leader = res;
+                LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
+                    this.leader = [...this.leader,... res];
+                    this.busy = false;
+                    this.page += 100;
                 }, error => {
                     alert(error);
                 });
             }, authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
-                        this.getAddress();
-                        this.getLeaderboard();
+                        this.getAddress()
                     }, error => {
                         alert(error);
                     });
                 } else {
                     this.loadingLogin();
                     Auth.signSplash(data => {
+                        this.leader = [];
+                        this.page = 0;
                         DashboardService.getAddress(res => {
-                            this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                            this.address = data;
+                            this.init(res);
                             this.$store.dispatch({
                                 type: 'login',
                                 address: res
                             });
                         }, () => {
-
+                            this.loading = false;
+                            this.infiniteScrollFunction();
                         });
 
 
@@ -197,24 +232,38 @@
                 }
 
             },
+            init : function(profile){
+                this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
+                this.address = profile.address;
+
+                this.loading = false;
+                profile.score = Number(profile.score);
+                this.score = Number(profile.score.toFixed(5));
+
+                this.changeFontSize(this.score);
+                this.infiniteScrollFunction();
+            },
             onReady: function(instance, CountUp) {
                 const that = this;
                 instance.update(that.endVal + 100);
             },
             changeFontSize : function ( score ) {
                 let textLength = score.toString().length;
-                console.log(score)
-                if(textLength < 9) {
-                    this.textSize = 100;
-                } else if (textLength >= 9 && textLength <= 10){
-                    this.textSize = 80;
-                } else if ( textLength > 10 && textLength < 13){
-                    this.textSize = 60;
-                }else if( textLength < 19){
-                    this.textSize = 40;
-                } else{
-                    this.textSize = 30;
-                }
+
+                this.textSize = 100 - textLength*4;
+            },
+            infiniteScrollFunction: function(){
+                this.busy = true;
+                if(!this.loading) this.getLeaderboard();
+            },
+            onScroll: function(){
+                var row = document.getElementById("leaderboard-table");
+                if(row) this.scroll.distance = row.scrollTop;
+            },
+            scrollBack: function () {
+                var row = document.getElementsByClassName("table-row-highlight")[0];
+                row.scrollIntoView();
+                this.scroll.distance = 0;
             },
             ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']
@@ -241,6 +290,10 @@
         position: relative;
     }
 
+    .table-row-highlight{
+        background-color: #5a6268;
+    }
+
     .button-signin {
         margin: 5px;
         width: 50px;
@@ -252,6 +305,14 @@
         background-color: white;
         text-align: center;
         vertical-align: middle;
+    }
+
+    #button-scroll-up{
+        position: absolute;
+        right: 70px;
+        top: 30px;
+        display: none;
+        font-size: 13px;
     }
 
     #rank-logo {
