@@ -30,7 +30,7 @@
                                     <span class="bar"></span>
                                 </div>
                             </form>
-                            <button v-on:click="authLogin()" id="lookupSignButton" type="button" class="mt-5"
+                            <button v-on:click="showModal()" id="lookupSignButton" type="button" class="mt-5"
                                     data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating"
                                     form="lookup"
                             >Sign
@@ -107,6 +107,8 @@
             </div>
         </div>
         <ModalSignIn v-if="showModalSign"></ModalSignIn>
+        <LoginOptions :redirectRoute="'/leaderboards'" v-if="showModalLoginOptions"></LoginOptions>
+        <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
     </div>
 </template>
 
@@ -119,10 +121,14 @@
 
     import ICountUp from 'vue-countup-v2';
     import infiniteScroll from 'vue-infinite-scroll';
+    import LoginOptions from "./Modals/VLoginOptions";
+    import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
     export default {
         name: 'VLeaderboards',
         components: {
+            ModalLedgerNano,
+            LoginOptions,
             ModalSignIn,
             ICountUp
         },
@@ -153,7 +159,6 @@
                     distance: 0,
                     active: false
                 },
-
                 countUp : {
                     startVal: 0,
                     decimals: 0,
@@ -180,11 +185,21 @@
                 } else if (value > 150) {
                     this.scroll.active = true;
                 }
+            },
+            'address' : function (value) {
+                console.log(value);
             }
         },
-        computed: {...mapState(['madeLogin', 'showModalSign'])},
+        computed: {...mapState(['madeLogin',
+                'showModalSign',
+                'showModalLoginOptions',
+                'showModalLedgerNano'])
+        },
         mounted: function () {
             this.getAddress();
+        },
+        beforeRouteUpdate() {
+            console.log('vaya vaya');
         },
         methods: {
             getAddress() {
@@ -265,6 +280,9 @@
                 var row = document.getElementsByClassName("table-row-highlight")[0];
                 row.scrollIntoView();
                 this.scroll.distance = 0;
+            },
+            showModal () {
+                this.$store.state.showModalLoginOptions = true;
             },
             ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']
