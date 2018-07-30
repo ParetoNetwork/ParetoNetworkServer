@@ -29,8 +29,6 @@
                     </li>
                     <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
                         <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
-
-
                     </li>
                     <li class="nav-item dropdown mx-lg-4 active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -47,43 +45,16 @@
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
-                            <a v-if="!isLogged" class="dropdown-item" href="#" @click="showModal">Ledger Nano</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" @click="ledgerNanoLogin">Ledger Nano</a>
 
                             <a v-else class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
-
                         </div>
                     </li>
                 </ul>
             </div>
         </nav>
 
-        <b-modal ref="myModalRef"
-                 centered
-                 title="Ledger Wallet Nano S"
-                 :header-bg-variant="'dark'"
-                 :header-text-variant="'light'"
-                 :body-bg-variant="'dark'"
-                 :body-text-variant="'light'"
-                 hide-footer>
 
-                <b-container fluid>
-                    <div class="text-left">
-                        <p> Before SignIn with Ledger Nano S, verify the next items: </p>
-                        <div class="m-2 ml-4">
-                            <ul>
-                                <li> Plugged-in their Ledger Wallet Nano S </li>
-                                <li> Input digits pin </li>
-                                <li> Navigated to the Ethereum app on their device </li>
-                                <li> Enabled 'browser' support from the Ethereum app settings </li>
-                            </ul>
-                        </div>
-                    </div>
-                </b-container>
-            <b-row class="m-2 mt-4 float-right">
-                <b-btn size="sm" class="mx-2" variant="danger" @click="hideModal">Cancel</b-btn>
-                <b-btn size="sm" variant="success" @click="hardware(); hideModal();">Continue</b-btn>
-            </b-row>
-        </b-modal>
     </div>
 
 
@@ -95,11 +66,12 @@
     import 'jquery';
     import authService from '../services/authService';
     import DashboardService from '../services/dashboardService';
+    import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
 
     export default {
         name: 'Navbar',
-        components: {},
+        components: {ModalLedgerNano},
         mounted: function () {
             DashboardService.getAddress(res => {
                 console.log(res);
@@ -120,7 +92,6 @@
                 // map this.count to store.state.count
                 'isLogged','address' , 'showModalSign'
             ])
-
         },
         methods: {
             manual: function() {
@@ -130,9 +101,7 @@
                 if ($(window).width() < 990) {
                     $('#navbarSupportedContent').collapse('toggle');
                 }
-
             },
-
             hardware: function () {
                 this.loadingLogin();
                 authService.signWallet(data => {
@@ -175,11 +144,8 @@
                     alert(error);
                 });
             },
-            showModal () {
-                this.$refs.myModalRef.show()
-            },
-            hideModal () {
-                this.$refs.myModalRef.hide()
+            ledgerNanoLogin () {
+                this.$store.state.showModalLedgerNano = true;
             }
             , ...mapMutations({
                 loginVuex: 'login',
