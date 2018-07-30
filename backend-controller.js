@@ -16,7 +16,7 @@ var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
 
 
-console.log(process.env.MONGODB_URI);
+
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);

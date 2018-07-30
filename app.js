@@ -43,30 +43,16 @@ var sessionDebug = process.env.DEBUG || constants.DEBUG;
 
 var bodyParser = require('body-parser');
 
-// var storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     const dir = path.join(__dirname, "/images");
-//       if (fs.existsSync(dir)) {
-//           cb(null, dir)
-//       }else{
-//           fs.mkdir(dir, err => cb(err, dir))
-//       }
-//   },
-//   filename: function (req, file, cb) {
-//     cb(null, file.fieldname + '-' + Date.now())
-//   }
-// });
-
 var upload = multer({
     storage: multerS3({
         s3: s3,
         acl: 'private',
-        bucket: 'some-bucket',
+        bucket: 'pareto-images',
         metadata: function (req, file, cb) {
             cb(null, {fieldName: file.fieldname + '-' + Date.now() });
         },
         key: function (req, file, cb) {
-            cb(null, file.fieldname + '-' + Date.now())
+            cb(null,'profile-images/' + file.fieldname + '-' + Date.now())
         }
     })
 });
@@ -115,11 +101,13 @@ const ErrorHandler = require('./error-handler.js');
 
 
 app.get('/profile-image', function (req, res) {
-    // req.file is the `avatar` file
-    // req.body will hold the text fields, if there were any
-    var params = {Bucket: 'bucket', Key: req.query.image};
-    var url = s3.getSignedUrl('getObject', params);
-    res.sendFile( url);
+    var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
+   // var url = s3.getSignedUrl('getObject', params);
+    s3.getObject(params, function(err, data) {
+        //res.writeHead(200, {'Content-Type': 'image/jpeg'});
+        res.write(data.Body, 'binary');
+        res.end(null, 'binary');
+    });
 });
 
 app.get('/', function (req, res) {
@@ -424,8 +412,8 @@ app.get('/v1/userinfo', function (req, res) {
 
 app.post('/upload-profile', upload.single('file'), function (req, res, next) {
     // req.file is the `avatar` file
-    // req.body will hold the text fields, if there were any
-    controller.updateUser(req.user, {profile_pic: req.file.filename}, function (err, result) {
+    // req.body will hold the text fields, if there were any;
+    controller.updateUser(req.user, {profile_pic: req.file.metadata.fieldName}, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
