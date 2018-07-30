@@ -11,6 +11,16 @@ var requestp = require('request-promise');
 var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser');
 const multer = require("multer");
+var multerS3 = require('multer-s3')
+const AWS = require('aws-sdk');
+AWS.config.update({
+    region: process.env.S3_REGION || constants.S3_REGION,
+    accessKeyId: process.env.ACCESS_KEY || constants.ACCESS_KEY,
+    secretAccessKey: process.env.SECRET_KEY || constants.SECRET_KEY
+});
+
+const s3 = new AWS.S3();
+
 var controller = require('./backend-controller.js');
 
 
@@ -33,21 +43,33 @@ var sessionDebug = process.env.DEBUG || constants.DEBUG;
 
 var bodyParser = require('body-parser');
 
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(__dirname, "/images");
-      if (fs.existsSync(dir)) {
-          cb(null, dir)
-      }else{
-          fs.mkdir(dir, err => cb(err, dir))
-      }
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
-  }
-});
+// var storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     const dir = path.join(__dirname, "/images");
+//       if (fs.existsSync(dir)) {
+//           cb(null, dir)
+//       }else{
+//           fs.mkdir(dir, err => cb(err, dir))
+//       }
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, file.fieldname + '-' + Date.now())
+//   }
+// });
 
-var upload = multer({ storage: storage });
+var upload = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: 'private',
+        bucket: 'some-bucket',
+        metadata: function (req, file, cb) {
+            cb(null, {fieldName: file.fieldname + '-' + Date.now() });
+        },
+        key: function (req, file, cb) {
+            cb(null, file.fieldname + '-' + Date.now())
+        }
+    })
+});
 
 //the key/value pairs fixes the error PayloadTooLargeError: request entity too large
 app.use(bodyParser.json({limit: '50mb'}));
@@ -95,7 +117,9 @@ const ErrorHandler = require('./error-handler.js');
 app.get('/profile-image', function (req, res) {
     // req.file is the `avatar` file
     // req.body will hold the text fields, if there were any
-    res.sendFile( path.join(__dirname, "/images/"+req.query.image));
+    var params = {Bucket: 'bucket', Key: req.query.image};
+    var url = s3.getSignedUrl('getObject', params);
+    res.sendFile( url);
 });
 
 app.get('/', function (req, res) {
