@@ -72,7 +72,7 @@
                         <div class="table-area">
 
                             <table class="table text-left">
-                                <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa fa-arrow-up"></i> Scroll Back </button>
+                                <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button>
                                 <thead>
                                 <tr>
                                     <th width="55px">
@@ -149,12 +149,16 @@
             return {
                 leader: [],
                 rank: 0,
+                lastRank : 100,
                 score: 0,
                 address: '',
                 textSize : 100,
                 page: 0,
                 busy: false,
                 loading : true,
+                updated: 0,
+                table : '',
+                row : '',
                 scroll : {
                     distance: 0,
                     active: false
@@ -176,18 +180,32 @@
         },
         watch: {
             'scroll.distance' : function (value) {
-                if (value > 150 && this.scroll.active === false) {
-                    $('#button-scroll-up').stop(true, true).fadeIn();
+
+                let top = this.row.offsetTop + this.row.offsetHeight;
+                let bottom = this.row.offsetTop - this.table.offsetHeight;
+
+                let inRange = (value < top && value > bottom);
+
+                if ( !inRange && this.scroll.active === false) {
+
+                    let button = $('#button-scroll-up');
+
+                    if (value < top){
+                        button.removeClass( "fa-arrow-up" ).addClass( "fa-arrow-down" );
+                    }else{
+                        button.removeClass( "fa-arrow-down" ).addClass( "fa-arrow-up" );
+                    }
+
+                    button.stop(true, true).fadeIn();
                     this.scroll.active = true;
-                } else if( value < 150 && this.scroll.active === true){
-                    $('#button-scroll-up').stop(true, true).fadeOut();
+                } else if( inRange && this.scroll.active === true){
+
+                    let button = $('#button-scroll-up');
+                    button.stop(true, true).fadeOut();
                     this.scroll.active = false;
-                } else if (value > 150) {
+                } else if ( !inRange ) {
                     this.scroll.active = true;
                 }
-            },
-            'address' : function (value) {
-                console.log(value);
             }
         },
         computed: {...mapState(['madeLogin',
@@ -198,8 +216,19 @@
         mounted: function () {
             this.getAddress();
         },
-        beforeRouteUpdate() {
-            console.log('vaya vaya');
+        updated: function() {
+            this.updated++;
+            this.$nextTick(function () {
+                let table = document.getElementById("leaderboard-table");
+                if(table) this.table = table
+
+                let row = document.getElementsByClassName("table-row-highlight")[0];
+                if(row) this.row = row;
+
+                if(this.updated == 2 && this.address){
+                    this.scrollBack();
+                }
+            })
         },
         methods: {
             getAddress() {
@@ -273,13 +302,29 @@
                 if(!this.loading) this.getLeaderboard();
             },
             onScroll: function(){
-                var row = document.getElementById("leaderboard-table");
-                if(row) this.scroll.distance = row.scrollTop;
+                if(this.table) this.scroll.distance = this.table.scrollTop;
+
+                if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
+                    this.table.scrollTop += 2;
+
+                    this.busy = true;
+                    let minimunLimit = 100;
+                    if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
+
+                    LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
+                        this.lastRank += 100;
+                        this.busy = false;
+                        this.leader = [... res,...this.leader];
+                    }, error => {
+                        alert(error);
+                    });
+                }
             },
             scrollBack: function () {
-                var row = document.getElementsByClassName("table-row-highlight")[0];
-                row.scrollIntoView();
-                this.scroll.distance = 0;
+                if(this.row){
+                    this.row.scrollIntoView();
+                    this.scroll.distance = this.table.scrollTop;
+                }
             },
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
