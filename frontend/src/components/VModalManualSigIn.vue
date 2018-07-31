@@ -11,6 +11,12 @@
                 <div class="modal-body form-horizontal">
                     <form class="form-horizontal" role="form">
                         <div class="form-group">
+                            <label for="addresstemp" class="control-label col-xs-2">Address</label>
+                            <div class="col-xs-10">
+                                <input type="text"  v-model="addresstemp" class="form-control" id="addresstemp">
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label for="message" class="control-label col-xs-2">Message</label>
                             <div class="col-xs-10">
                                 <input type="text"  v-model="message" class="form-control" id="message">
@@ -49,6 +55,7 @@
             return {
                 loading: false,
                  message: "",
+                addresstemp: "",
                 signed: ""
             };
         },
@@ -64,7 +71,7 @@
         methods: {
             manualLogin: function () {
                 this.loadingLogin();
-                Auth.manualLogin( this.message, this.signed ,data => {
+                Auth.manualLogin(this.addresstemp, this.message, this.signed ,data => {
                     this.$store.state.showModalSign = false;
                     $('#signModal').modal('hide');
                     this.$store.dispatch({

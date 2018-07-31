@@ -72,7 +72,7 @@ export default class authService {
         });
     }
 
-    static manualLogin(message, signed, onSuccess, onError){
+    static manualLogin(address, message, signed, onSuccess, onError){
         try{
             const msgParams = [
                 {
@@ -81,8 +81,7 @@ export default class authService {
                     value: message //replace with TOS
                 }
             ];
-            const recovered = Sig.recoverTypedSignature({data: msgParams, sig: signed});
-            authService.signParetoServer(msgParams, recovered, signed, onSuccess, onError)
+            authService.signParetoServer(msgParams, address, signed, onSuccess, onError)
         }catch (e) {
             onError(e);
         }
