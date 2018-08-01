@@ -5,8 +5,8 @@
 
                 <template v-if="user">
                     <div class="media py-1 px-4 border mb-5">
-                        <div class="d-flex flex-column">
-                            <div class="border p-2 mb-2 mr-2" @click="openInput()">
+                        <div class="d-flex flex-column mr-2">
+                            <div class="border p-2 mb-2" @click="openInput()">
                                 <div id="wrapper">
                                     <img width="100" v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic"
                                          alt=""
@@ -46,11 +46,11 @@
                 </template>
 
                 <div class="border">
-                    <div class="d-flex justify-content-between align-items-center p-3 mb-3">
-                        <span class="text-dashboard text-pareto-gray"> <b>MY POSTS:</b> </span>
+                    <div class="p-3 border-bottom">
+                        <span> <b>MY POSTS:</b> </span>
                         <button v-if="false" class="btn btn-success-pareto">POST NEW INTEL</button>
                     </div>
-                    <div class="">
+                    <div class="p-3">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
                             <li class="list-group-item border-0" v-for="post in myContent" :key="post.id">
                                 <div class="d-flex justify-content-between split align-items-center">
@@ -65,14 +65,14 @@
 
                             </li>
                         </ul>
-                        <span v-else class="text-pareto-gray">You don't have posted</span>
+                        <span v-else> No data to display </span>
                     </div>
                 </div>
 
             </div>
             <div class="col-md-7">
                 <div class="border p-2">
-                    <h5 class="text-left">My intel: </h5>
+                    <h5 class="text-left"> MY INTEL : </h5>
                     <div v-if="loading" class="d-flex split">
                             <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
                             </i>
