@@ -19,7 +19,7 @@
                         <div class="form-group">
                             <label for="message" class="control-label col-xs-2">Message</label>
                             <div class="col-xs-10">
-                                <input type="text"  v-model="message" class="form-control" id="message">
+                                <input type="text"  v-model="message" class="form-control" id="message" disabled>
                             </div>
                         </div>
                         <div class="form-group">
@@ -54,7 +54,7 @@
         data() {
             return {
                 loading: false,
-                 message: "",
+                 message: "Pareto",
                 addresstemp: "",
                 signed: ""
             };
