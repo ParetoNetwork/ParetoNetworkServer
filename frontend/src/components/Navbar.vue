@@ -29,8 +29,6 @@
                     </li>
                     <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
                         <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
-
-
                     </li>
                     <li class="nav-item dropdown mx-lg-4 active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -47,15 +45,18 @@
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" @click="ledgerNanoLogin">Ledger Nano</a>
 
                             <a v-else class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
-
                         </div>
                     </li>
                 </ul>
             </div>
         </nav>
+
+
     </div>
+
 
 </template>
 
@@ -65,11 +66,12 @@
     import 'jquery';
     import authService from '../services/authService';
     import DashboardService from '../services/dashboardService';
+    import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
 
     export default {
         name: 'Navbar',
-        components: {},
+        components: {ModalLedgerNano},
         mounted: function () {
             DashboardService.getAddress(res => {
                 console.log(res);
@@ -90,7 +92,6 @@
                 // map this.count to store.state.count
                 'isLogged','address' , 'showModalSign'
             ])
-
         },
         methods: {
             manual: function() {
@@ -100,7 +101,20 @@
                 if ($(window).width() < 990) {
                     $('#navbarSupportedContent').collapse('toggle');
                 }
-
+            },
+            hardware: function () {
+                this.loadingLogin();
+                authService.signWallet(data => {
+                    this.$store.dispatch({
+                        type: 'login',
+                        address: data,
+                    });
+                    this.collapseContent();
+                    this.$router.push('/dashboard');
+                }, error => {
+                    this.stopLogin();
+                    alert(error);
+                });
             },
             login: function () {
                 this.loadingLogin();
@@ -129,7 +143,11 @@
                 }, error => {
                     alert(error);
                 });
-            }, ...mapMutations({
+            },
+            ledgerNanoLogin () {
+                this.$store.state.showModalLedgerNano = true;
+            }
+            , ...mapMutations({
                 loginVuex: 'login',
                 loadingLogin: 'loadingLogin',
                 stopLogin: 'stopLogin',

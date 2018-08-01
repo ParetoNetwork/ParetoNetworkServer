@@ -16,7 +16,7 @@ var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
 
 
-console.log(process.env.MONGODB_URI);
+
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);
@@ -811,10 +811,10 @@ controller.updateScore = function(address, callback){
 controller.sign = function(params, callback){
 
   const owner = params.owner;
-
+    const recovered2 = sigUtil.recoverPersonalSignature({ data: params.data[0].value, sig: params.result });
   const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
 
-  if (recovered === owner ) {
+  if (recovered === owner || recovered2 === owner ) {
     // If the signature matches the owner supplied, create a
     // JSON web token for the owner that expires in 24 hours.
       controller.getBalance(owner,0, function(err, count){

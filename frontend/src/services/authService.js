@@ -72,7 +72,7 @@ export default class authService {
         });
     }
 
-    static manualLogin(message, signed, onSuccess, onError){
+    static manualLogin(address, message, signed, onSuccess, onError){
         try{
             const msgParams = [
                 {
@@ -81,22 +81,96 @@ export default class authService {
                     value: message //replace with TOS
                 }
             ];
-            const recovered = Sig.recoverTypedSignature({data: msgParams, sig: signed});
-            authService.signParetoServer(msgParams, recovered, signed, onSuccess, onError)
+            authService.signParetoServer(msgParams, address, signed, onSuccess, onError)
         }catch (e) {
             onError(e);
         }
 
     }
 
+    static  signWallet(onSuccess, onError) {
+
+        const ProviderEngine = require('web3-provider-engine');
+        const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+        var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+        const engine = new ProviderEngine();
+        const provider = new Web3(engine);
+        var derivation_path = "44'/60'/0'/0/0";
+
+        LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
+            const isSupported = ledgerWalletSubProvider.isSupported;
+            ledgerWalletSubProvider.ledger.setDerivationPath(derivation_path);
+                if(isSupported){
+                    engine.addProvider(ledgerWalletSubProvider);
+                    engine.addProvider(new RpcSubprovider({rpcUrl: 'https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'})); // you need RPC endpoint
+                    engine.start();
+
+                    if (typeof provider !== 'undefined') {
+                        const msgParams = [
+                            {
+                                type: 'string',
+                                name: 'Message',
+                                value: 'Pareto' //replace with TOS
+                            }
+                        ];
+
+                        provider.eth.getAccounts((error, accounts) => {
+                            if (!error) {
+                                if(accounts && accounts[0]){
+
+                                    const addr = accounts[0];
+
+
+                                    if (provider.utils.isAddress(addr)) {
+                                        const from = addr.toLowerCase();
+
+                                        provider.currentProvider._providers[0].signMessage({data:  provider.utils.toHex('Pareto')}, (err, result) => {
+                                            if (err) return console.dir(err);
+                                            if (result.error) {
+                                                return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
+                                            }
+                                            if (result.error) {
+                                                return console.error(result);
+                                            }
+
+                                            const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
+
+                                            if (recovered === from) {
+                                                authService.signParetoServer(msgParams, from, result, onSuccess, onError)
+
+                                            } else {
+                                                console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                                // stopLoading();
+                                                return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                            }
+
+                                        });
+
+                                    }//end if valid address
+                                    else {
+                                        console.log('address invalid!');
+                                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+
+                                        //set error state on input field
+                                    }
+                                }//end if !error
+
+                            }//end if !error
+                        });
+                    }//end if
+                }else{
+                    onError('Your browser not support this feature')
+                }
+
+        });
+
+
+        return true;
+    }
+
+
     static signSplash(onSuccess, onError) {
-        const msgParams = [
-            {
-                type: 'string',
-                name: 'Message',
-                value: 'Pareto' //replace with TOS
-            }
-        ];
+
         let provider;
         if (typeof web3 !== 'undefined') {
             // Use Mist/MetaMask's provider
@@ -111,7 +185,13 @@ export default class authService {
             provider = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
         }
         if (typeof provider !== 'undefined') {
-
+            const msgParams = [
+                {
+                    type: 'string',
+                    name: 'Message',
+                    value: 'Pareto' //replace with TOS
+                }
+            ];
             // const contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
             // const rankCalculation = 0;
             // const tokenTotal = 0;
@@ -119,46 +199,52 @@ export default class authService {
 
                 return onError('Please install MetaMask in order to access the Pareto Network');
             }*/
+
             provider.eth.getAccounts((error, accounts) => {
                 if (!error) {
+                    if(accounts && accounts[0]){
+                        console.log(accounts);
 
-                    const addr = accounts[0];
+                        const addr = accounts[0];
 
-                    if (provider.utils.isAddress(addr)) {
-                        const from = addr.toLowerCase();
 
-                        const params = [msgParams, from];
-                        const method = 'eth_signTypedData';
+                        if (provider.utils.isAddress(addr)) {
+                            const from = addr.toLowerCase();
 
-                        provider.currentProvider.sendAsync({method, params, from}, (err, result) => {
-                            if (err) return console.dir(err);
-                            if (result.error) {
-                                return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
-                            }
-                            if (result.error) {
-                                return console.error(result);
-                            }
+                            const params = [msgParams, from];
+                            const method = 'eth_signTypedData';
 
-                            const recovered = Sig.recoverTypedSignature({data: msgParams, sig: result.result});
+                            provider.currentProvider.sendAsync({method, params, from}, (err, result) => {
+                                if (err) return console.dir(err);
+                                if (result.error) {
+                                    return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
+                                }
+                                if (result.error) {
+                                    return console.error(result);
+                                }
 
-                            if (recovered === from) {
-                                authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
+                                const recovered = Sig.recoverTypedSignature({data: msgParams, sig: result.result});
 
-                            } else {
-                                console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
-                                // stopLoading();
-                                return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
-                            }
+                                if (recovered === from) {
+                                    authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
 
-                        });
+                                } else {
+                                    console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                    // stopLoading();
+                                    return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                }
 
-                    }//end if valid address
-                    else {
-                        console.log('address invalid!');
-                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+                            });
 
-                        //set error state on input field
-                    }
+                        }//end if valid address
+                        else {
+                            console.log('address invalid!');
+                            return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+
+                            //set error state on input field
+                        }
+                    }//end if !error
+
                 }//end if !error
             });
         }//end if
