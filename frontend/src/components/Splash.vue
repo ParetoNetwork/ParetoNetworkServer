@@ -39,9 +39,14 @@
                                     Earn.</h1></div>
                                 <br/>
 
+                                <!--<button class="button button&#45;&#45;transparent button&#45;&#45;login"-->
+                                        <!--style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"-->
+                                        <!--v-on:click="authLogin()"><b v-if="!makingLogin">Access</b> <span v-else-->
+                                                                                                         <!--class="fa fa-spinner fa-spin"></span>-->
+                                <!--</button>-->
                                 <button class="button button--transparent button--login"
                                         style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"
-                                        v-on:click="authLogin()"><b v-if="!makingLogin">Access</b> <span v-else
+                                        v-on:click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
                                                                                                          class="fa fa-spinner fa-spin"></span>
                                 </button>
                                 <br/>
@@ -112,6 +117,8 @@
             </div>
         </div>
         <ModalSignIn v-if="showModalSign"></ModalSignIn>
+        <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
+        <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
     </div>
 </template>
 
@@ -122,15 +129,23 @@
     import DashboardService from '../services/dashboardService';
     import {mapMutations, mapState} from 'vuex';
     import VFab from './VFab';
+    import LoginOptions from './Modals/VLoginOptions';
     import ModalSignIn from './VModalManualSigIn';
+    import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
     export default {
         name: 'SplashDashboard',
-        components: {ModalSignIn, VFab, VParticles},
-        computed: {...mapState(['makingLogin', 'showModalSign'])},
+        components: {ModalLedgerNano, LoginOptions, ModalSignIn, VFab, VParticles},
+        computed: {...mapState([
+                'makingLogin',
+                'showModalSign',
+                'showModalLoginOptions',
+                'showModalLedgerNano']
+            )},
         data() {
             return {
-                loading: false
+                loading: false,
+                option : ''
             };
         },
         mounted() {
@@ -154,7 +169,18 @@
                     alert(error);
                     this.stopLogin();
                 });
-            }, ...mapMutations(
+            },
+            showModal () {
+                this.$store.state.showModalLoginOptions = true;
+            },
+            hideModal () {
+                this.$refs.loginOptions.hide()
+            }
+            ,
+            checkLoginOption (option){
+                console.log(option);
+            }
+            , ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']
             )
         }

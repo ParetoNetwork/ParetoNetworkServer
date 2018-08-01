@@ -17,6 +17,8 @@ const store = new Vuex.Store({
         isLogged: false,
         address: null,
         showModalSign: false,
+        showModalLoginOptions : false,
+        showModalLedgerNano: false,
         makingLogin: false,
         madeLogin: JSON.parse(window.localStorage.getItem('logged'))
     },
@@ -26,11 +28,15 @@ const store = new Vuex.Store({
             state.address = data.address;
             state.user = data;
             state.showModalSign = false;
+            state.showModalLoginOptions = false;
+            state.showModalLedgerNano = false;
             state.makingLogin = false;
         }, logout(state) {
             state.isLogged = false;
             state.address = null;
             state.showModalSign = false;
+            state.showModalLoginOptions = false;
+            state.showModalLedgerNano = false;
             state.madeLogin = 0;
             window.localStorage.setItem('logged', false);
 
@@ -41,6 +47,8 @@ const store = new Vuex.Store({
             state.makingLogin = true;
         }, stopLogin(state) {
             state.showModalSign = false;
+            state.showModalLoginOptions = false;
+            state.showModalLedgerNano = false;
             state.makingLogin = false;
         }
     },
