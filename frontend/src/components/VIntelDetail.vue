@@ -1,43 +1,53 @@
 <template>
     <div class="main wrapp">
         <div class="container">
-            <div class="row  pt-5">
-                <div class="col-md-3">
+            <div class="row pt-5">
+                <div class="col-sm-3 m-3">
                     <div class="row">
                         <div class="media p-3 border mb-3 w-100">
-                            <div class="d-flex flex-column">
+                            <div class="d-flex flex-column m-auto">
                                 <!--<span  style="font-size: 320px; color: gray; background: #b2b2b2"-->
                                       <!--class="fa fa-user p-2"></span>-->
-                                <img v-if="profile.profile_pic" src="profile.profile_pic" width="100%" height="200px" alt="" class="mr-2">
-                                <img v-else src="../assets/images/user_placeholder.png" width="100%" height="200px" alt="" class="mr-2">
+                                <img v-if="profile.profile_pic" src="profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">
+                                <img v-else src="../assets/images/user_placeholder.png"  width="100%" height="200px"  alt="" class="mr-2 image-fit">
                             </div>
                         </div>
                     </div>
-                    <div class="row border p-5">
-                        <div class="text-group">
-                            <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> About {{profile.first_name}} {{profile.last_name}} :</b></h6>
-                            <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address.slice(0,15) + '...'}} :</b></h6>
+                    <div class="row border p-4">
+                        <div class="col-sm">
+                            <div class="row text-group">
+                                <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> About {{profile.first_name}} {{profile.last_name}} :</b></h6>
+                                <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address.slice(0,15) + '...'}} :</b></h6>
+                            </div>
+                            <div class="row text-group">
+                                <p v-if="profile.biography"> {{profile.biography}} </p>
+                                <p v-else> Lorem Ipsum Ispa Donum Adonai Maxim Isman Gerju irem </p>
+                            </div>
+                            <div class="row mt-4">
+                                <img src="../assets/images/LogoMarkColor.svg" width="20px" height="20px" alt="" class="mr-2">
+                                <span class="text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{profile.rank}} </span>
+                            </div>
 
-                            <p v-if="profile.biography"> {{profile.biography}} </p>
-                            <p v-else> No Bio to show </p>
+                            <div class="row border-bottom mt-5 px-0 py-3">
+                                <i class="fa fa-search"></i>
+                                <div class="m-auto">
+                                    <span class="text-pareto-gray ml-3"> View Author Profile </span>
+                                </div>
+                            </div>
+                            <div class="row border-bottom mt-3 px-0 py-3">
+                                <i class="fa fa-book"></i>
+                                <div class="m-auto">
+                                    <span class="text-pareto-gray ml-3"> View Author's Articles </span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-2">
-                            <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                            <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{profile.rank}} </span>
-                        </div>
-                        <button class="btn btn-success-pareto mt-5">
-                            <span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>
-                        </button>
-                        <div class="border-bottom mt-3 p-2">
-                            <i class="fa fa-search"></i> <span class="text-pareto-gray ml-3"> View Author Profile </span>
-                        </div>
-                        <div class="border-bottom mt-3 p-2">
-                            <i class="fa fa-book"></i> <span class="text-pareto-gray ml-3"> View Author's Articles </span>
-                        </div>
+                        <!--<button class="btn btn-success-pareto mt-5">-->
+                            <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
+                        <!--</button>-->
                     </div>
                 </div>
 
-                <div v-if="loading" class="col-md-9 ">
+                <div v-if="loading" class="col-md-8">
                     <div class="row">
                         <div class="d-flex split mt-4 mx-auto">
                             <i class="fa fa-spinner fa-spin fa-5x">
@@ -45,8 +55,8 @@
                         </div>
                     </div>
                 </div>
-                <div v-else class="col-md-9 mb-4">
-                    <div class="row text-group ml-4">
+                <div v-else class="col-md-8 m-3">
+                    <div class="row text-group">
                         <div class="border p-4">
                             <div class="row py-4 border-bottom m-0">
                                 <div class="col-md-10 p-0">
@@ -173,7 +183,7 @@
     }
 
     .text-dashboard {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: normal;
         font-style: normal;
         font-stretch: normal;
@@ -203,5 +213,9 @@
     #wrapper:hover .text {
         display: flex;
         background: rgba(0,0,0,0.5);
+    }
+
+    .image-fit {
+        object-fit:scale-down;
     }
 </style>

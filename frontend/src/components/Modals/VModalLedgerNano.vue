@@ -2,15 +2,15 @@
     <div>
         <b-modal ref="ledgerNano"
                  centered
-                 title="Ledger Wallet Nano S"
                  @hide="onClosedModal"
-                 :header-bg-variant="'dark'"
-                 :header-text-variant="'light'"
                  :body-bg-variant="'dark'"
                  :body-text-variant="'light'"
+                 hide-header
                  hide-footer>
 
             <b-container fluid>
+                <h2 class="font-body"> Ledger Wallet Nano S </h2>
+                <hr>
                 <div class="text-left">
                     <p> Before SignIn with Ledger Nano S, verify the next items: </p>
                     <div class="m-2 ml-4">
