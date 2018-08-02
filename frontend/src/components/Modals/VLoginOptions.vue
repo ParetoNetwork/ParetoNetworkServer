@@ -105,3 +105,14 @@
     }
 
 </script>
+
+<style lang="css">
+
+    .modal-content {
+        border-radius: 15px !important;
+    }
+
+    .modal-body {
+        border-radius: 11px !important;
+    }
+</style>
