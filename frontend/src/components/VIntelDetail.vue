@@ -82,7 +82,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="text-group mt-4">
                                 <p v-html="intel.body"> </p>
                             </div>
