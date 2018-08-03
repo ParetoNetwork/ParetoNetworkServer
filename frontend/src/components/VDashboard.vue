@@ -25,29 +25,30 @@
                         </div>
 
 
-                        <div class="media-body flex-column text-left">
+                        <div class="media-body flex-column text-left mt-2">
                             <span class="name-title"><b>{{user.first_name|| ''}}  {{user.last_name || ''}}</b></span>
-                            <div class="">
-
+                            <p><b> {{user.address}} </b></p>
+                            <div class="mt-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                 <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span></div>
-                            <div class="d-flex flex-column" style="padding-left: 1.8rem;">
+                                <p class="mb-3 mt-2"><b>Network Rank:</b> {{user.rank || ''}}</p>
+                            <!--<div class="d-flex flex-column" style="padding-left: 1.8rem;">-->
 
-                                <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{user.rank || ''}}</span>
-                                <div class="">
-                                    <span class="subtitle-dashboard"><b>BIO:</b></span>
-                                    <p class="text-dashboard text-pareto-gray">
-                                        {{user.biography || 'No biography provided'}}
-                                    </p>
-                                </div>
-                            </div>
+                                <!---->
+                                <!--<div class="">-->
+                                    <!--<span class="subtitle-dashboard"><b>BIO:</b></span>-->
+                                    <!--<p class="text-dashboard text-pareto-gray">-->
+                                        <!--{{user.biography || 'No biography provided'}}-->
+                                    <!--</p>-->
+                                <!--</div>-->
+                            <!--</div>-->
                         </div>
                     </div>
                 </template>
 
                 <div class="border">
                     <div class="p-3 border-bottom">
-                        <span> <b>MY POSTS:</b> </span>
+                        <span class="title"> <b>MY POSTS:</b> </span>
                         <button v-if="false" class="btn btn-success-pareto">POST NEW INTEL</button>
                     </div>
                     <div class="p-3">
@@ -72,7 +73,9 @@
             </div>
             <div class="col-md-7">
                 <div class="border p-2">
-                    <h5 class="text-left"> MY INTEL : </h5>
+                    <div class="p-3 border-bottom">
+                        <h5 class="title"> MY INTEL FEED: </h5>
+                    </div>
                     <div v-if="loading" class="d-flex split">
                             <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
                             </i>
@@ -87,8 +90,7 @@
                                             <h1 class="title">{{row.title || 'No title'}}</h1>
                                             <div class="d-flex justify-content-between">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Posted By: {{row.address}}</span>
-                                                <span class="text-dashboard">{{row.block}} Blocks Ago</span>
+                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block {{row.block}} </span>
                                             </div>
                                         </div>
                                         <div class="d-flex flex-column justify- content-end">
@@ -233,8 +235,7 @@
                 }, error => {
 
                 });
-            }
-            ,
+            },
             main: function () {
                 if (!this.madeLogin) {
                     this.intelEnter();
@@ -262,6 +263,11 @@
 </script>
 
 <style scoped lang="scss">
+
+    .container{
+        font-family: 'Body';
+    }
+
     .wrapp {
         color: black;
         font-size: 12px;
@@ -306,7 +312,7 @@
     }
 
     .text-dashboard {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: normal;
         font-style: normal;
         font-stretch: normal;
