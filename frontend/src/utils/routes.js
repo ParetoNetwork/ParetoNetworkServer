@@ -6,7 +6,7 @@ import VIntel from '../components/VIntel';
 import VueRouter from 'vue-router';
 import AuthService from '../services/authService';
 import VIntelDetail from '../components/VIntelDetail';
-
+import VScoreCalculator from '../components/VScoreCalculator';
 
 const routes = [
     {
@@ -31,6 +31,10 @@ const routes = [
     },
     {
         path: '/dashboard/:id', component: VIntelDetail, name: 'VIntelDetail'
+    },
+
+    {
+        path: '/calculator', component: VScoreCalculator, name: 'VScoreCalculator'
     },
     {path: '/about', component: VAbout},
     {path: '/leaderboards', component: VLeaderboards},
