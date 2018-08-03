@@ -27,7 +27,7 @@
 
                         <div class="media-body flex-column text-left mt-2">
                             <span class="name-title"><b>{{user.first_name|| ''}}  {{user.last_name || ''}}</b></span>
-                            <p><b> {{user.address}} </b></p>
+                            <p><b> {{user.address.slice(0,15) + '...'}} </b></p>
                             <div class="mt-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                 <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span></div>
@@ -90,7 +90,8 @@
                                             <h1 class="title">{{row.title || 'No title'}}</h1>
                                             <div class="d-flex justify-content-between">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block {{row.block}} </span>
+                                                <!-- Address has the last test block -->
+                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block {{address.block - row.block}} </span>
                                             </div>
                                         </div>
                                         <div class="d-flex flex-column justify- content-end">
@@ -176,7 +177,6 @@
             loadAddress: function () {
                 dashboardService.getAddress(res => {
                     this.address = res;
-
                 }, () => {
                     // alert(error);
                 });
@@ -187,7 +187,6 @@
                 let formData = new FormData();
                 formData.append('file', file);
                 profileService.uploadProfilePic(formData, res => {
-
                     this.user.profile_pic = res;
                 });
             },
@@ -205,14 +204,14 @@
             }, loadProfile: function () {
                 profileService.getProfile(res => {
                     this.user = res;
+                    console.log(this.user);
                     this.firstName = res.first_name;
                     this.lastName = res.last_name;
                     this.bio = res.biography;
                 }, () => {
 
                 });
-            }
-            ,
+            },
             loadMyContent: function () {
                 dashboardService.getContent(res => {
                     this.myContent = res;
@@ -243,15 +242,17 @@
                     AuthService.postSign(() => {
                         this.loadProfile();
                         this.loadMyContent();
-
+                        this.loadAddress();
                         this.loadContent();
                     }, () => {
                         this.loadProfile();
+                        this.loadAddress();
                         this.loadContent();
                         this.loadMyContent();
                     });
                 } else {
                     this.loadProfile();
+                    this.loadAddress();
                     this.loadContent();
                     this.loadMyContent();
                 }
