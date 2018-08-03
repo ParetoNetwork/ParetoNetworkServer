@@ -24,14 +24,14 @@
                             </button>
                         </div>
 
-
                         <div class="media-body flex-column text-left mt-2">
                             <span class="name-title"><b>{{user.first_name|| ''}}  {{user.last_name || ''}}</b></span>
-                            <p><b> {{user.address.slice(0,15) + '...'}} </b></p>
+                            <p v-if="user.address"><b> {{ user.address.slice(0,15) + '...'}} </b></p>
                             <div class="mt-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span></div>
-                                <p class="mb-3 mt-2"><b>Network Rank:</b> {{user.rank || ''}}</p>
+                                <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span>
+                            </div>
+                            <p class="mb-3 mt-2"><b>Network Rank:</b> {{user.rank || ''}}</p>
                             <!--<div class="d-flex flex-column" style="padding-left: 1.8rem;">-->
 
                                 <!---->
