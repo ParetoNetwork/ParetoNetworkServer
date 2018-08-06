@@ -170,7 +170,6 @@ export default class authService {
 
 
     static signSplash(onSuccess, onError) {
-
         let provider;
         if (typeof web3 !== 'undefined') {
             // Use Mist/MetaMask's provider
@@ -214,6 +213,9 @@ export default class authService {
                             const params = [msgParams, from];
                             const method = 'eth_signTypedData';
 
+                            // debugger;
+                            // console.log(provider.currentProvider)
+
                             provider.currentProvider.sendAsync({method, params, from}, (err, result) => {
                                 if (err) return console.dir(err);
                                 if (result.error) {
@@ -227,7 +229,6 @@ export default class authService {
 
                                 if (recovered === from) {
                                     authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
-
                                 } else {
                                     console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
                                     // stopLoading();

@@ -24,30 +24,36 @@
                             </button>
                         </div>
 
-
-                        <div class="media-body flex-column text-left">
+                        <div class="media-body flex-column text-left mt-2">
                             <span class="name-title"><b>{{user.first_name|| ''}}  {{user.last_name || ''}}</b></span>
-                            <div class="">
-
+                            <p v-if="user.address"><b> {{ user.address.slice(0,15) + '...'}} </b></p>
+                            <div class="mt-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span></div>
-                            <div class="d-flex flex-column" style="padding-left: 1.8rem;">
-
-                                <span class="mb-3 text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{user.rank || ''}}</span>
-                                <div class="">
-                                    <span class="subtitle-dashboard"><b>BIO:</b></span>
-                                    <p class="text-dashboard text-pareto-gray">
-                                        {{user.biography || 'No biography provided'}}
-                                    </p>
-                                </div>
+                                <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span>
                             </div>
+                            <p class="mb-3 mt-2"><b>Network Rank:</b> {{user.rank || ''}}</p>
+
+
+                            <router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">
+                                Calculate
+                            </router-link>
+                            <!--<div class="d-flex flex-column" style="padding-left: 1.8rem;">-->
+
+                                <!---->
+                                <!--<div class="">-->
+                                    <!--<span class="subtitle-dashboard"><b>BIO:</b></span>-->
+                                    <!--<p class="text-dashboard text-pareto-gray">-->
+                                        <!--{{user.biography || 'No biography provided'}}-->
+                                    <!--</p>-->
+                                <!--</div>-->
+                            <!--</div>-->
                         </div>
                     </div>
                 </template>
 
                 <div class="border">
                     <div class="p-3 border-bottom">
-                        <span> <b>MY POSTS:</b> </span>
+                        <span class="title"> <b>MY POSTS:</b> </span>
                         <button v-if="false" class="btn btn-success-pareto">POST NEW INTEL</button>
                     </div>
                     <div class="p-3">
@@ -72,7 +78,9 @@
             </div>
             <div class="col-md-7">
                 <div class="border p-2">
-                    <h5 class="text-left"> MY INTEL : </h5>
+                    <div class="p-3 border-bottom">
+                        <h5 class="title"> MY INTEL FEED: </h5>
+                    </div>
                     <div v-if="loading" class="d-flex split">
                             <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
                             </i>
@@ -87,8 +95,8 @@
                                             <h1 class="title">{{row.title || 'No title'}}</h1>
                                             <div class="d-flex justify-content-between">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Posted By: {{row.address}}</span>
-                                                <span class="text-dashboard">{{row.block}} Blocks Ago</span>
+                                                <!-- Address has the last test block -->
+                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block {{address.block - row.block}} </span>
                                             </div>
                                         </div>
                                         <div class="d-flex flex-column justify- content-end">
@@ -174,7 +182,6 @@
             loadAddress: function () {
                 dashboardService.getAddress(res => {
                     this.address = res;
-
                 }, () => {
                     // alert(error);
                 });
@@ -185,7 +192,6 @@
                 let formData = new FormData();
                 formData.append('file', file);
                 profileService.uploadProfilePic(formData, res => {
-
                     this.user.profile_pic = res;
                 });
             },
@@ -203,14 +209,14 @@
             }, loadProfile: function () {
                 profileService.getProfile(res => {
                     this.user = res;
+                    console.log(this.user);
                     this.firstName = res.first_name;
                     this.lastName = res.last_name;
                     this.bio = res.biography;
                 }, () => {
 
                 });
-            }
-            ,
+            },
             loadMyContent: function () {
                 dashboardService.getContent(res => {
                     this.myContent = res;
@@ -233,8 +239,7 @@
                 }, error => {
 
                 });
-            }
-            ,
+            },
             main: function () {
                 if (!this.madeLogin) {
                     this.intelEnter();
@@ -242,15 +247,17 @@
                     AuthService.postSign(() => {
                         this.loadProfile();
                         this.loadMyContent();
-
+                        this.loadAddress();
                         this.loadContent();
                     }, () => {
                         this.loadProfile();
+                        this.loadAddress();
                         this.loadContent();
                         this.loadMyContent();
                     });
                 } else {
                     this.loadProfile();
+                    this.loadAddress();
                     this.loadContent();
                     this.loadMyContent();
                 }
@@ -262,6 +269,11 @@
 </script>
 
 <style scoped lang="scss">
+
+    .container{
+        font-family: 'Body';
+    }
+
     .wrapp {
         color: black;
         font-size: 12px;
@@ -306,7 +318,7 @@
     }
 
     .text-dashboard {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: normal;
         font-style: normal;
         font-stretch: normal;

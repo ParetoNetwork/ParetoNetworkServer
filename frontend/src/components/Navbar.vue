@@ -196,6 +196,12 @@
 
     }
 
+    @media (max-width: 991px){
+        .header {
+            top: 5px;
+        }
+    }
+
     .head {
         z-index: 999;
         position: fixed;

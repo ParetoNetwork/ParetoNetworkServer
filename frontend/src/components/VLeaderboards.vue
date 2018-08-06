@@ -277,17 +277,6 @@
                 }
 
             },
-            init : function(profile){
-                this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
-                this.address = profile.address;
-
-                this.loading = false;
-                profile.score = Number(profile.score);
-                this.score = Number(profile.score.toFixed(5));
-
-                this.changeFontSize(this.score);
-                this.infiniteScrollFunction();
-            },
             onReady: function(instance, CountUp) {
                 const that = this;
                 instance.update(that.endVal + 100);
@@ -328,6 +317,18 @@
             },
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
+            },
+            init : function(profile){
+                console.log(profile);
+                this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
+                this.address = profile.address;
+
+                this.loading = false;
+                profile.score = Number(profile.score);
+                this.score = Number(profile.score.toFixed(5));
+
+                this.changeFontSize(this.score);
+                this.infiniteScrollFunction();
             },
             ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']
