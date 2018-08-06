@@ -31,7 +31,7 @@
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                 <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span>
                             </div>
-                            <p class="mb-3 mt-2"><b>Network Rank:</b> {{user.rank || ''}}</p>
+                            <p class="mb-2 mt-2"><b>Network Rank:</b> {{user.rank || ''}}</p>
 
 
                             <router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">
