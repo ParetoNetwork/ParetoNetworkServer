@@ -67,11 +67,11 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h4>Leaderboard</h4>
+                    <h4 class="font-body font-weight-bold mb-3">Leaderboard</h4>
                     <div class="" style="font-size: 12px">
                         <div class="table-area">
 
-                            <table class="table text-left">
+                            <table class="table text-left position-relative">
                                 <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button>
                                 <thead>
                                 <tr>
