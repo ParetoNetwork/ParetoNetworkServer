@@ -90,7 +90,7 @@
                             <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
                                 <table class="table table-responsive-lg position-relative"  v-scroll="onScroll">
 
-                                    <div v-infinite-scroll="infiniteScrollFunction" infinite-scroll-disabled="busy" infinite-scroll-listen-for-event infinite-scroll-distance="100">
+                                    <div >
                                         <tbody v-scroll="onScroll" >
                                             <tr v-scroll="onScroll" v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
                                                 <td>{{rank.rank}}</td>
@@ -226,6 +226,7 @@
                 if(row) this.row = row;
 
                 if(this.updated == 2 && this.address){
+                    console.log('o de aquí?')
                     this.scrollBack();
                 }
             })
@@ -243,6 +244,7 @@
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += 100;
+                    console.log('es aqui si');
                 }, error => {
                     alert(error);
                 });
@@ -291,11 +293,14 @@
                 if(!this.loading) this.getLeaderboard();
             },
             onScroll: function(){
-                if(this.table) this.scroll.distance = this.table.scrollTop;
+                let bottomReached = false;
+                if(this.table){
+                    this.scroll.distance = this.table.scrollTop;
 
+                    bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
+                }
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
                     this.table.scrollTop += 2;
-
                     this.busy = true;
                     let minimunLimit = 100;
                     if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
@@ -308,6 +313,10 @@
                         alert(error);
                     });
                 }
+
+                if(bottomReached && !this.busy){
+                    this.infiniteScrollFunction();
+                }
             },
             scrollBack: function () {
                 if(this.row){
@@ -319,7 +328,6 @@
                 this.$store.state.showModalLoginOptions = true;
             },
             init : function(profile){
-                console.log(profile);
                 this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
                 this.address = profile.address;
 
@@ -375,7 +383,7 @@
     #button-scroll-up{
         position: absolute;
         right: 70px;
-        top: 30px;
+        top: 0px;
         display: none;
         font-size: 13px;
     }
