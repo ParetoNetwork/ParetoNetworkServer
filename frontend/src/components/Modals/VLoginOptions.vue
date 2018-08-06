@@ -70,8 +70,8 @@
             },
             MetaMask: function () {
                 this.loadingLogin();
-                console.log(this.redirectRoute);
                 authService.signSplash(data => {
+                    console.log(data);
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
@@ -85,6 +85,7 @@
                     });
 
                 }, error => {
+                    console.log(error);
                     this.stopLogin();
                     alert(error);
                 });

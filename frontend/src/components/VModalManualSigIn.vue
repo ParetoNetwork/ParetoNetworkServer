@@ -1,14 +1,14 @@
 <template>
     <div class="modal fade" id="signModal"  role="dialog">
         <div class="modal-dialog" role="document">
-            <div class="modal-content">
+            <div class="modal-content bg-dark text-light">
                 <div class="modal-header">
-                    <h5 class="modal-title">Manual Sign in</h5>
+                    <h2 class="font-body">Manual Sign in</h2>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body form-horizontal">
+                <div class="modal-body form-horizontal ">
                     <form class="form-horizontal" role="form">
                         <div class="form-group">
                             <label for="addresstemp" class="control-label col-xs-2">Address</label>
@@ -32,8 +32,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" @click="manualLogin" >Sign In</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="modalcancel" >Cancel</button>
+                    <button type="button" class="btn btn-success" @click="manualLogin" style="background-color: rgb(107, 194, 123);">Sign In</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" @click="modalcancel" >Cancel</button>
                 </div>
             </div>
         </div>
