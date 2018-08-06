@@ -2,7 +2,7 @@
     <div class="main wrapp">
         <div class="container">
             <div class="row pt-5">
-                <div class="col-12 col-lg-4 mb-4 p-0">
+                <div class="col-12 col-lg-4 mb-4 p-0 mt-2">
                     <!--<div class="row">-->
                         <!--<div class="media p-3 border mb-3 w-100">-->
                             <!--<div class="d-flex flex-column m-auto">-->
