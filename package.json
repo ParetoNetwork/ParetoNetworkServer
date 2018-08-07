@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "PARETO",
   "scripts": {
-    "start": "node backend.js",
+    "start": "CRED_PARETOCONTRACT=0xbcce0c003b562f47a319dfca4bce30d322fa0f01 MONGODB_URI=mongodb://localhost:27018/pareto REDIS_HOST=localhost REDIS_PORT=27019 DEBUG=1 REDIS_URL=redis://localhost:27019 FRONTEND_SERVER=http://localhost:8080 ACCESS_KEY=AKIAJGMNENELH5BHAH3Q SECRET_KEY=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 S3_REGION=us-east-1 node backend.js",
     "test": "mocha test/*.js  --timeout 150000 --exit",
     "build": "npm run-script --prefix frontend build && rm -rf public && mv frontend/dist/ public && cp -R frontend/src/assets/download/ public/download",
     "serve": "npm run-script --prefix frontend serve",
@@ -14,6 +14,7 @@
   "dependencies": {
     "assert": "1.4.1",
     "aws-sdk": "^2.283.1",
+    "axios": "^0.18.0",
     "body-parser": "1.18.2",
     "browserify": "^16.1.1",
     "compression": "^1.7.2",
@@ -38,6 +39,7 @@
     "redoc": "^2.0.0-alpha.25",
     "request-promise": "4.2.2",
     "throng": "4.0.0",
+    "truffle-hdwallet-provider": "0.0.6",
     "uglify-es": "^3.3.9",
     "uglify-js": "^3.3.9",
     "unique-random-array": "1.0.0",

@@ -102,7 +102,7 @@ export default class authService {
             ledgerWalletSubProvider.ledger.setDerivationPath(derivation_path);
                 if(isSupported){
                     engine.addProvider(ledgerWalletSubProvider);
-                    engine.addProvider(new RpcSubprovider({rpcUrl: 'https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'})); // you need RPC endpoint
+                    engine.addProvider(new RpcSubprovider({rpcUrl: 'https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'})); // you need RPC endpoint
                     engine.start();
 
                     if (typeof provider !== 'undefined') {
@@ -181,7 +181,7 @@ export default class authService {
 
             // searchLookup();
             // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-            provider = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
+            provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
         }
         if (typeof provider !== 'undefined') {
             const msgParams = [
@@ -191,7 +191,7 @@ export default class authService {
                     value: 'Pareto' //replace with TOS
                 }
             ];
-            // const contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
+            // const contractAddr = ('0xbcce0c003b562f47a319dfca4bce30d322fa0f01');
             // const rankCalculation = 0;
             // const tokenTotal = 0;
             /*if (!metaMask.currentProvider.isMetaMask) { //no mobile users use Metamask, this is too strict
