@@ -74,7 +74,7 @@
         components: {ModalLedgerNano},
         mounted: function () {
             DashboardService.getAddress(res => {
-                console.log(res);
+               // console.log(res);
                 this.$store.dispatch({
                     type: 'login',
                     address: res,
