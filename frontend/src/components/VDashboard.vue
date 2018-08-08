@@ -196,7 +196,7 @@
                 });
             },
             showDetails: function(row){
-                console.log(row);
+               // console.log(row);
             }
             ,
             loadContent: function () {
@@ -209,7 +209,7 @@
             }, loadProfile: function () {
                 profileService.getProfile(res => {
                     this.user = res;
-                    console.log(this.user);
+                   // console.log(this.user);
                     this.firstName = res.first_name;
                     this.lastName = res.last_name;
                     this.bio = res.biography;
