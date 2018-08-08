@@ -1,7 +1,7 @@
 <template>
     <div class="container main  wrapp">
         <div class="row pt-5">
-            <div class="col-md-5">
+            <div class="col-md-5 mb-5 mt-2 m-sm-0">
 
                 <template v-if="user">
                     <div class="media py-1 px-4 border mb-5">
