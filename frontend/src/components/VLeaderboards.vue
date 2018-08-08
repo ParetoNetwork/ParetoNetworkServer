@@ -226,7 +226,6 @@
                 if(row) this.row = row;
 
                 if(this.updated == 2 && this.address){
-                    console.log('o de aquí?')
                     this.scrollBack();
                 }
             })
@@ -244,7 +243,6 @@
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += 100;
-                    console.log('es aqui si');
                 }, error => {
                     alert(error);
                 });
@@ -334,7 +332,6 @@
                 this.loading = false;
                 profile.score = Number(profile.score);
                 this.score = Number(profile.score.toFixed(5));
-
                 this.changeFontSize(this.score);
                 this.infiniteScrollFunction();
             },

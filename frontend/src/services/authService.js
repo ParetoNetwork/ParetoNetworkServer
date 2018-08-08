@@ -202,7 +202,7 @@ export default class authService {
             provider.eth.getAccounts((error, accounts) => {
                 if (!error) {
                     if(accounts && accounts[0]){
-                        console.log(accounts);
+                        //console.log(accounts);
 
                         const addr = accounts[0];
 
