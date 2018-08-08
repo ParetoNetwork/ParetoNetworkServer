@@ -17,7 +17,8 @@
                             <div class="site-moto">
                                 <img src="../assets/images/LogoReverse.svg" style="width: 400px; max-width: 100%;"
                                      malt="">
-                                <h1 class="font-body text-left">Current, reputable & actionable intel for digital currency traders
+                                <h1 class="font-body text-left">Current, reputable & actionable intel for digital
+                                    currency traders
                                     and investors.
                                     <br/>
                                 </h1>
@@ -38,10 +39,15 @@
                                     Earn.</h1></div>
                                 <br/>
 
+                                <!--<button class="button button&#45;&#45;transparent button&#45;&#45;login"-->
+                                        <!--style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"-->
+                                        <!--v-on:click="authLogin()"><b v-if="!makingLogin">Access</b> <span v-else-->
+                                                                                                         <!--class="fa fa-spinner fa-spin"></span>-->
+                                <!--</button>-->
                                 <button class="button button--transparent button--login"
                                         style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px;"
-                                        v-on:click="authLogin()"><b v-if="!makingLogin">Access</b> <span v-else
-                                                                                                     class="fa fa-spinner fa-spin"></span>
+                                        v-on:click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
+                                                                                                         class="fa fa-spinner fa-spin"></span>
                                 </button>
                                 <br/>
                                 <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform
@@ -110,7 +116,9 @@
                 </form>
             </div>
         </div>
-
+        <ModalSignIn v-if="showModalSign"></ModalSignIn>
+        <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
+        <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
     </div>
 </template>
 
@@ -118,16 +126,26 @@
     /* eslint-disable */
     import VParticles from './VParticles';
     import Auth from '../services/authService';
-    import {mapState,mapMutations} from 'vuex';
+    import DashboardService from '../services/dashboardService';
+    import {mapMutations, mapState} from 'vuex';
     import VFab from './VFab';
+    import LoginOptions from './Modals/VLoginOptions';
+    import ModalSignIn from './VModalManualSigIn';
+    import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
     export default {
         name: 'SplashDashboard',
-        components: {VFab, VParticles},
-        computed: {...mapState(['makingLogin'])},
+        components: {ModalLedgerNano, LoginOptions, ModalSignIn, VFab, VParticles},
+        computed: {...mapState([
+                'makingLogin',
+                'showModalSign',
+                'showModalLoginOptions',
+                'showModalLedgerNano']
+            )},
         data() {
             return {
-                loading: false
+                loading: false,
+                option : ''
             };
         },
         mounted() {
@@ -136,18 +154,34 @@
             authLogin() {
                 this.loadingLogin();
                 Auth.signSplash(data => {
-                    this.loading = false;
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: data,
+                    DashboardService.getAddress(res => {
+                        this.loading = false;
+                        this.$store.dispatch({
+                            type: 'login',
+                            address: res,
+                        });
+                        this.$router.push('/dashboard');
+                    }, () => {
+
                     });
-                    this.$router.push('/dashboard');
+
                 }, error => {
                     alert(error);
                     this.stopLogin();
                 });
-            }, ...mapMutations(
-                ['login','loadingLogin','stopLogin']
+            },
+            showModal () {
+                this.$store.state.showModalLoginOptions = true;
+            },
+            hideModal () {
+                this.$refs.loginOptions.hide()
+            }
+            ,
+            checkLoginOption (option){
+                console.log(option);
+            }
+            , ...mapMutations(
+                ['login', 'loadingLogin', 'stopLogin']
             )
         }
     };

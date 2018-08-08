@@ -30,7 +30,7 @@
                                     <span class="bar"></span>
                                 </div>
                             </form>
-                            <button v-on:click="authLogin()" id="lookupSignButton" type="button" class="mt-5"
+                            <button v-on:click="showModal()" id="lookupSignButton" type="button" class="mt-5"
                                     data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating"
                                     form="lookup"
                             >Sign
@@ -39,12 +39,22 @@
 
                         <div class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
-                            <div id="rank-logo-holder"><img id="rank-logo"
+                            <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
                                                             src="../assets/images/pareto-logo-mark-color.svg"
                                                             alt="Pareto Logo for Ranking">
                             </div>
-                            <div>&nbsp;</div>
-                            <div id="score-counter">{{rank}}</div>
+                            <div id="score-counter" class="d-flex">
+                                <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
+                                    <ICountUp
+                                            :startVal="countUp.startVal"
+                                            :endVal="score"
+                                            :decimals="countUp.decimals"
+                                            :duration="countUp.duration"
+                                            :options="countUp.options"
+                                            @ready="onReady"
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div id="address-metrics" class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center; opacity: 0">
@@ -57,10 +67,12 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h4>Leaderboard</h4>
+                    <h4 class="font-body font-weight-bold mb-3">Leaderboard</h4>
                     <div class="" style="font-size: 12px">
                         <div class="table-area">
-                            <table class="table text-left">
+
+                            <table class="table text-left position-relative">
+                                <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button>
                                 <thead>
                                 <tr>
                                     <th width="55px">
@@ -75,23 +87,28 @@
                                 </tr>
                                 </thead>
                             </table>
-                            <div class="" style="position: relative; overflow: auto; height: 70vh; width: 100%;">
-                                <table class="table table-responsive-lg">
-                                    <tbody>
-                                        <tr v-for="rank in leader" :key="rank.address">
-                                            <td>{{rank.rank}}</td>
-                                            <td>{{rank.score}}</td>
-                                            <td class="break-line">{{rank.address}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
+                                <table class="table table-responsive-lg position-relative"  v-scroll="onScroll">
 
+                                    <div >
+                                        <tbody v-scroll="onScroll" >
+                                            <tr v-scroll="onScroll" v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
+                                                <td>{{rank.rank}}</td>
+                                                <td>{{rank.score}}</td>
+                                                <td class="break-line">{{rank.address}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </div>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <ModalSignIn v-if="showModalSign"></ModalSignIn>
+        <LoginOptions :redirectRoute="'/leaderboards'" v-if="showModalLoginOptions"></LoginOptions>
+        <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
     </div>
 </template>
 
@@ -100,48 +117,160 @@
     import DashboardService from '../services/dashboardService';
     import Auth from '../services/authService';
     import {mapMutations, mapState} from 'vuex';
+    import ModalSignIn from './VModalManualSigIn';
+
+    import ICountUp from 'vue-countup-v2';
+    import infiniteScroll from 'vue-infinite-scroll';
+    import LoginOptions from "./Modals/VLoginOptions";
+    import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
     export default {
         name: 'VLeaderboards',
-        data: function () {
-            return {leader: [], rank: 0, address: ''};
+        components: {
+            ModalLedgerNano,
+            LoginOptions,
+            ModalSignIn,
+            ICountUp
         },
-        computed: {...mapState(['madeLogin'])},
+        directives: {
+          infiniteScroll,
+            scroll : {
+                inserted: function (el, binding) {
+                    let f = function (evt) {
+                        if (binding.value(evt, el)) {
+                            window.removeEventListener('scroll', f)
+                        }
+                    }
+                    window.addEventListener('scroll', f)
+                }
+            }
+        },
+        data: function () {
+            return {
+                leader: [],
+                rank: 0,
+                lastRank : 100,
+                score: 0,
+                address: '',
+                textSize : 100,
+                page: 0,
+                busy: false,
+                loading : true,
+                updated: 0,
+                table : '',
+                row : '',
+                scroll : {
+                    distance: 0,
+                    active: false
+                },
+                countUp : {
+                    startVal: 0,
+                    decimals: 0,
+                    duration: 2.5,
+                    options: {
+                        useEasing: true,
+                        useGrouping: true,
+                        separator: ',',
+                        decimal: '.',
+                        prefix: '',
+                        suffix: ''
+                    }
+                }
+            };
+        },
+        watch: {
+            'scroll.distance' : function (value) {
+
+                let top = this.row.offsetTop + this.row.offsetHeight;
+                let bottom = this.row.offsetTop - this.table.offsetHeight;
+
+                let inRange = (value < top && value > bottom);
+
+                if ( !inRange && this.scroll.active === false) {
+
+                    let button = $('#button-scroll-up');
+
+                    if (value < top){
+                        button.removeClass( "fa-arrow-up" ).addClass( "fa-arrow-down" );
+                    }else{
+                        button.removeClass( "fa-arrow-down" ).addClass( "fa-arrow-up" );
+                    }
+
+                    button.stop(true, true).fadeIn();
+                    this.scroll.active = true;
+                } else if( inRange && this.scroll.active === true){
+
+                    let button = $('#button-scroll-up');
+                    button.stop(true, true).fadeOut();
+                    this.scroll.active = false;
+                } else if ( !inRange ) {
+                    this.scroll.active = true;
+                }
+            }
+        },
+        computed: {...mapState(['madeLogin',
+                'showModalSign',
+                'showModalLoginOptions',
+                'showModalLedgerNano'])
+        },
         mounted: function () {
-            this.getLeaderboard();
             this.getAddress();
+        },
+        updated: function() {
+            this.updated++;
+            this.$nextTick(function () {
+                let table = document.getElementById("leaderboard-table");
+                if(table) this.table = table
+
+                let row = document.getElementsByClassName("table-row-highlight")[0];
+                if(row) this.row = row;
+
+                if(this.updated == 2 && this.address){
+                    console.log('o de aquí?')
+                    this.scrollBack();
+                }
+            })
         },
         methods: {
             getAddress() {
                 return DashboardService.getAddress(data => {
-                    this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                    this.address = data.address;
+                    this.init(data);
                 }, () => {
-
+                    this.loading = false;
+                    this.infiniteScrollFunction();
                 });
             }, getLeaderboard: function () {
-                LeaderboardService.getLeaderboard({rank: 1, limit: 100, page: 0}, res => {
-                    this.leader = res;
+                LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
+                    this.leader = [...this.leader,... res];
+                    this.busy = false;
+                    this.page += 100;
+                    console.log('es aqui si');
                 }, error => {
                     alert(error);
                 });
             }, authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
-                        this.getAddress();
-                        this.getLeaderboard();
+                        this.getAddress()
                     }, error => {
                         alert(error);
                     });
                 } else {
                     this.loadingLogin();
                     Auth.signSplash(data => {
-                        this.rank = data.rank <= 0 ? 0.0 : data.rank;
-                        this.address = data;
-                        this.$store.dispatch({
-                            type: 'login',
-                            address: data
+                        this.leader = [];
+                        this.page = 0;
+                        DashboardService.getAddress(res => {
+                            this.init(res);
+                            this.$store.dispatch({
+                                type: 'login',
+                                address: res
+                            });
+                        }, () => {
+                            this.loading = false;
+                            this.infiniteScrollFunction();
                         });
+
 
                     }, error => {
                         alert(error);
@@ -149,7 +278,67 @@
                     });
                 }
 
-            }, ...mapMutations(
+            },
+            onReady: function(instance, CountUp) {
+                const that = this;
+                instance.update(that.endVal + 100);
+            },
+            changeFontSize : function ( score ) {
+                let textLength = score.toString().length;
+
+                this.textSize = 100 - textLength*4;
+            },
+            infiniteScrollFunction: function(){
+                this.busy = true;
+                if(!this.loading) this.getLeaderboard();
+            },
+            onScroll: function(){
+                let bottomReached = false;
+                if(this.table){
+                    this.scroll.distance = this.table.scrollTop;
+
+                    bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
+                }
+                if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
+                    this.table.scrollTop += 2;
+                    this.busy = true;
+                    let minimunLimit = 100;
+                    if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
+
+                    LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
+                        this.lastRank += 100;
+                        this.busy = false;
+                        this.leader = [... res,...this.leader];
+                    }, error => {
+                        alert(error);
+                    });
+                }
+
+                if(bottomReached && !this.busy){
+                    this.infiniteScrollFunction();
+                }
+            },
+            scrollBack: function () {
+                if(this.row){
+                    this.row.scrollIntoView();
+                    this.scroll.distance = this.table.scrollTop;
+                }
+            },
+            showModal () {
+                this.$store.state.showModalLoginOptions = true;
+            },
+            init : function(profile){
+                this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
+                this.address = profile.address;
+
+                this.loading = false;
+                profile.score = Number(profile.score);
+                this.score = Number(profile.score.toFixed(5));
+
+                this.changeFontSize(this.score);
+                this.infiniteScrollFunction();
+            },
+            ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']
             )
         }
@@ -174,6 +363,10 @@
         position: relative;
     }
 
+    .table-row-highlight{
+        background-color: #5a6268;
+    }
+
     .button-signin {
         margin: 5px;
         width: 50px;
@@ -185,6 +378,14 @@
         background-color: white;
         text-align: center;
         vertical-align: middle;
+    }
+
+    #button-scroll-up{
+        position: absolute;
+        right: 70px;
+        top: 0px;
+        display: none;
+        font-size: 13px;
     }
 
     #rank-logo {

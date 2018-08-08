@@ -29,8 +29,6 @@
                     </li>
                     <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
                         <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
-
-
                     </li>
                     <li class="nav-item dropdown mx-lg-4 active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -45,40 +43,45 @@
                              aria-labelledby="navbarDropdown">
                             <a v-if="address" class="dropdown-item" href="#">{{address}}</a>
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
-                            <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">Sign In</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
+                            <a v-if="!isLogged" class="dropdown-item" href="#" @click="ledgerNanoLogin">Ledger Nano</a>
 
                             <a v-else class="dropdown-item" href="#" v-on:click="logout()">Logout</a>
-
                         </div>
                     </li>
                 </ul>
             </div>
         </nav>
+
+
     </div>
+
 
 </template>
 
 <script>
     /* eslint-disable no-console */
     import {mapMutations, mapState} from 'vuex';
-    import 'jquery'
+    import 'jquery';
     import authService from '../services/authService';
-    import dashboardService from '../services/dashboardService';
+    import DashboardService from '../services/dashboardService';
+    import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
 
     export default {
         name: 'Navbar',
-        components: {},
+        components: {ModalLedgerNano},
         mounted: function () {
-            dashboardService.getAddress(res => {
-                this.address = res;
+            DashboardService.getAddress(res => {
+                console.log(res);
                 this.$store.dispatch({
                     type: 'login',
-                    address: res.address
+                    address: res,
                 });
+                this.collapseContent();
             }, () => {
 
-                // alert(error);
             });
         },
         data: function () {
@@ -87,26 +90,46 @@
         computed: {
             ...mapState([
                 // map this.count to store.state.count
-                'isLogged', 'address'
+                'isLogged','address' , 'showModalSign'
             ])
-
         },
         methods: {
+            manual: function() {
+              this.$store.state.showModalSign = true;
+            },
             collapseContent: function () {
-                if($( window ).width() < 990){
-                    $('#navbarSupportedContent').collapse("toggle");
+                if ($(window).width() < 990) {
+                    $('#navbarSupportedContent').collapse('toggle');
                 }
-
-            } ,
-            login: function () {
+            },
+            hardware: function () {
                 this.loadingLogin();
-                authService.signSplash(data => {
+                authService.signWallet(data => {
                     this.$store.dispatch({
                         type: 'login',
                         address: data,
                     });
                     this.collapseContent();
                     this.$router.push('/dashboard');
+                }, error => {
+                    this.stopLogin();
+                    alert(error);
+                });
+            },
+            login: function () {
+                this.loadingLogin();
+                authService.signSplash(data => {
+                    DashboardService.getAddress(res => {
+                        this.$store.dispatch({
+                            type: 'login',
+                            address: res,
+                        });
+                        this.collapseContent();
+                        this.$router.push('/dashboard');
+                    }, () => {
+
+                    });
+
                 }, error => {
                     this.stopLogin();
                     alert(error);
@@ -120,7 +143,11 @@
                 }, error => {
                     alert(error);
                 });
-            }, ...mapMutations({
+            },
+            ledgerNanoLogin () {
+                this.$store.state.showModalLedgerNano = true;
+            }
+            , ...mapMutations({
                 loginVuex: 'login',
                 loadingLogin: 'loadingLogin',
                 stopLogin: 'stopLogin',
@@ -167,6 +194,12 @@
     .header {
         background-color: #040f1e;
 
+    }
+
+    @media (max-width: 991px){
+        .header {
+            top: 5px;
+        }
     }
 
     .head {
