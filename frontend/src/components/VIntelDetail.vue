@@ -68,7 +68,7 @@
                 </div>
                 <div v-else class="col-12 col-lg-7 offset-lg-1 mb-4 p-md-0">
                     <div class="row text-group">
-                        <div class="border p-4">
+                        <div class="col-12 border p-4">
                             <div class="row py-4 border-bottom m-0">
                                 <div class="col-md-10 p-0">
                                     <span class="name-title"> {{intel.title}} </span>
@@ -77,7 +77,7 @@
                                     <div class="d-flex flex-column align-items-end ">
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
-                                        <span class="mb-2"> {{intel.block}} Blocks Ago </span>
+                                        <span class="mb-2"> {{calculateBlock()}} Blocks Ago </span>
                                         <span class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
                                     </div>
                                 </div>
@@ -104,6 +104,7 @@
                 id: this.$route.params.id,
                 loading: true,
                 intel: {},
+                address : {},
                 profile: {
                     address: '',
                     first_name: '' ,
@@ -115,6 +116,7 @@
         },
         beforeMount: function () {
             this.getIntel();
+            this.getAddress();
         },
         methods: {
             getIntel: function () {
@@ -135,7 +137,19 @@
                 }, error => {
                     console.log(error);
                 }, address)
+            },
+            getAddress: function () {
+                DashboardService.getAddress(res => {
+                    this.address = res;
+                    console.log(res);
+                }, () => {
+                    // alert(error);
+                });
+            },
+            calculateBlock : function () {
+                return (this.address.block - this.intel.block || 0);
             }
+
         }
     };
 </script>
