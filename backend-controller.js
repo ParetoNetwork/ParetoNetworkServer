@@ -10,11 +10,10 @@ const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
 if (fs.existsSync(constantsPath)) {
   constants = require(constantsPath);
 }
-
+console.log(constants);
 /*constants*/
 var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
-
 
 
 
@@ -812,10 +811,10 @@ controller.updateScore = function(address, callback){
 controller.sign = function(params, callback){
 
   const owner = params.owner;
-
+    const recovered2 = sigUtil.recoverPersonalSignature({ data: params.data[0].value, sig: params.result });
   const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
 
-  if (recovered === owner ) {
+  if (recovered === owner || recovered2 === owner ) {
     // If the signature matches the owner supplied, create a
     // JSON web token for the owner that expires in 24 hours.
       controller.getBalance(owner,0, function(err, count){
@@ -912,7 +911,7 @@ controller.getScoreAndSaveRedis = function(callback){
 
 controller.insertProfile = function(profile,callback){
 
-    ParetoProfile.findOneAndUpdate({address: profile.address},profile, {upsert: true},
+    ParetoProfile.findOneAndUpdate({address: profile.address},profile, {upsert: true, new: true},
           function(err, r){
               if(err){
                   console.error('unable to write to db because: ', err);

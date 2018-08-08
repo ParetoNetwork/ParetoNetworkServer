@@ -22,4 +22,5 @@ services:
     links:
           - mongo
     entrypoint: ["mongorestore", "--drop", "--gzip","--host", "mongo", "--archive=/data/dump/ParetoContent.agz"]
-
+volumes:
+  backend:

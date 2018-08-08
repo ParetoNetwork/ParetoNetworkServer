@@ -772,15 +772,19 @@
             </div> <!-- end wrapper -->
         </footer> <!-- end footer -->
 
+        <ModalSignIn v-if="showModalSign"></ModalSignIn>
     </div>
 </template>
 
 <script>
     import VParticles from './VParticles.vue';
+    import ModalSignIn from "./VModalManualSigIn";
+    import {mapState} from 'vuex';
 
     export default {
         name: 'VAbout',
-        components: {VParticles},
+        components: {VParticles, ModalSignIn},
+        computed: {...mapState(['showModalSign'])},
         mounted: function () {
             this.move();
         },
