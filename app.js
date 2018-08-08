@@ -11,7 +11,18 @@ var requestp = require('request-promise');
 var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser');
 const multer = require("multer");
+var multerS3 = require('multer-s3')
+const AWS = require('aws-sdk');
+AWS.config.update({
+    region: process.env.S3_REGION || constants.S3_REGION,
+    accessKeyId: process.env.ACCESS_KEY || constants.ACCESS_KEY,
+    secretAccessKey: process.env.SECRET_KEY || constants.SECRET_KEY
+});
+
+const s3 = new AWS.S3();
+
 var controller = require('./backend-controller.js');
+
 
 var app = express();
 var compression = require('compression');
@@ -21,20 +32,30 @@ const debug = require('debug')('pareto-ranking');
 const appName = 'Pareto Ranking Backend';
 debug('booting %s', appName);
 
+let constants = {};
+const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
+
+if (fs.existsSync(constantsPath)) {
+  constants = require(constantsPath);
+}
+/*constants*/
+var sessionDebug = process.env.DEBUG || constants.DEBUG;
+
 var bodyParser = require('body-parser');
 
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(__dirname, "/images");
-
-    fs.mkdir(dir, err => cb(err, dir))
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
-  }
+var upload = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: 'private',
+        bucket: 'pareto-images',
+        metadata: function (req, file, cb) {
+            cb(null, {fieldName: file.fieldname + '-' + Date.now() });
+        },
+        key: function (req, file, cb) {
+            cb(null,'profile-images/' + file.fieldname + '-' + Date.now())
+        }
+    })
 });
-
-var upload = multer({ storage: storage });
 
 //the key/value pairs fixes the error PayloadTooLargeError: request entity too large
 app.use(bodyParser.json({limit: '50mb'}));
@@ -42,11 +63,11 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50
 app.use(cookieParser());
 app.use(compression());
 
-const corsOptions = {
-  origin: 'http://localhost:8080',
-  credentials: true
-};
-app.use(cors(corsOptions));
+    const corsOptions = {
+    origin: 'http://localhost:8080',
+    credentials: true
+    };
+    app.use(cors(corsOptions));
 
 
 app.use("/api-docs", express.static('api-docs'));
@@ -77,16 +98,16 @@ const ErrorHandler = require('./error-handler.js');
   res.end();
 });*/
 
-app.post('/upload-profile', upload.single('file'), function (req, res, next) {
-    // req.file is the `avatar` file
-    // req.body will hold the text fields, if there were any
-    res.status(200).json({filename: req.file.filename});
-});
+
 
 app.get('/profile-image', function (req, res) {
-    // req.file is the `avatar` file
-    // req.body will hold the text fields, if there were any
-    res.sendFile( path.join(__dirname, "/images/"+req.query.image));
+    var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
+   // var url = s3.getSignedUrl('getObject', params);
+    s3.getObject(params, function(err, data) {
+        //res.writeHead(200, {'Content-Type': 'image/jpeg'});
+        res.write(data.Body, 'binary');
+        res.end(null, 'binary');
+    });
 });
 
 app.get('/', function (req, res) {
@@ -123,7 +144,7 @@ app.post('/v1/sign', function (req, res) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
-            if (process.env.DEBUG == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
+            if (sessionDebug == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
                 res.cookie('authorization', result.token, {httpOnly: true});
             } else {
                 res.cookie('authorization', result.token, {
@@ -212,7 +233,7 @@ app.post('/v1/unsign', function (req, res) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err))
         } else {
-            if (process.env.DEBUG == 1) {
+            if (sessionDebug == 1) {
                 res.cookie('authorization', result.token, {httpOnly: true, maxAge: 1231006505});
             }
             else {
@@ -280,6 +301,27 @@ app.get('/v1/content', function (req, res) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
             res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+
+});
+
+
+//get info about another address
+app.get('/v1/content/:content', function (req, res) {
+
+    controller.getAllAvailableContent(req, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            let mycontent = {};
+            for (let i = 0; i < result.length; i = i+1){
+                if(result[i]._id.toString() === req.params.content){
+                    mycontent = result[i];
+                    break;
+                }
+            }
+            res.status(200).json(ErrorHandler.getSuccess(mycontent));
         }
     });
 
@@ -368,9 +410,22 @@ app.get('/v1/userinfo', function (req, res) {
 
 });
 
+app.post('/upload-profile', upload.single('file'), function (req, res, next) {
+    // req.file is the `avatar` file
+    // req.body will hold the text fields, if there were any;
+    controller.updateUser(req.user, {profile_pic: req.file.metadata.fieldName}, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+
+});
+
 //get info about another address
 app.get('/v1/userinfo/:address', function (req, res) {
-    controller.getUserInfo(req.params.params,  function (err, result) {
+    controller.getUserInfo(req.params.address,  function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {

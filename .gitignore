@@ -71,3 +71,8 @@ data/
 *mocha.env.js
 *test/mocha.env.js
 
+images/*
+
+#conflict npm vs yarn
+*package-lock.json
+
