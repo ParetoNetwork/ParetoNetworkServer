@@ -688,6 +688,7 @@ controller.getAllAvailableContent = function(req, callback) {
                             _id: entry._id,
                             blockAgo : blockHeight - entry.block,
                             title: entry.title,
+                            address: entry.address,
                             body: entry.body,
                             dateCreated: entry.dateCreated,
                             txHash: entry.txHash,
@@ -808,6 +809,7 @@ controller.getContentByCurrentUser = function(address, callback){
                       let data = {
                           _id: entry._id,
                           blockAgo : blockHeight - entry.block,
+                          address: entry.address,
                           title: entry.title,
                           body: entry.body,
                           dateCreated: entry.dateCreated,
