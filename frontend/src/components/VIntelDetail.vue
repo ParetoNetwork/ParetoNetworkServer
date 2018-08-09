@@ -77,7 +77,7 @@
                                     <div class="d-flex flex-column align-items-end ">
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
-                                        <span class="mb-2"> {{calculateBlock()}} Blocks Ago </span>
+                                        <span class="mb-2"> {{ intel.blockAgo }} Blocks Ago </span>
                                         <span class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
                                     </div>
                                 </div>
