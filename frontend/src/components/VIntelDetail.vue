@@ -147,11 +147,7 @@
                 }, () => {
                     // alert(error);
                 });
-            },
-            calculateBlock : function () {
-                return (this.address.block - this.intel.block || 0);
             }
-
         }
     };
 </script>
