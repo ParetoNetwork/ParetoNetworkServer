@@ -96,7 +96,7 @@
                                             <div class="d-flex justify-content-between">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <!-- Address has the last test block -->
-                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block {{address.block - row.block}} </span>
+                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block {{row.blockAgo}} </span>
                                             </div>
                                         </div>
                                         <div class="d-flex flex-column justify- content-end">
