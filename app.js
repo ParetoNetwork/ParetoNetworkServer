@@ -190,6 +190,20 @@ app.get('/v1/rank', function (req, res) {
 
 });
 
+app.get('/v1/balance', function (req, res) {
+
+    controller.getBalance(req.query.address,0, function(err, count){
+        if(!err){
+            res.status(200).json(ErrorHandler.getSuccess(count));
+        }else{
+            res.status(200).json(ErrorHandler.getError(err));
+        }
+    });
+
+});
+
+
+
 /********* AUTHENTICATED v1 APIs *********/
 
 app.use(function (req, res, next) {
