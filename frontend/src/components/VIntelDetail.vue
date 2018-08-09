@@ -19,7 +19,7 @@
                                 <div class="d-flex flex-column m-auto">
                                     <!--<span  style="font-size: 320px; color: gray; background: #b2b2b2"-->
                                     <!--class="fa fa-user p-2"></span>-->
-                                    <img v-if="profile.profile_pic" src="profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">
+                                    <img v-if="profile.profile_pic" v-bind:src="baseURL+ '/profile-image?image=' + profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">
                                     <img v-else src="../assets/images/user_placeholder.png"  width="100%" height="200px"  alt="" class="mr-2 image-fit">
                                 </div>
                             </div>
@@ -96,6 +96,7 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import ProfileService from '../services/profileService';
+    import environment from '../utils/environment';
 
     export default {
         name: 'VIntelDetail',
@@ -115,6 +116,7 @@
             };
         },
         beforeMount: function () {
+            this.baseURL = environment.baseURL;
             this.getIntel();
             this.getAddress();
         },
