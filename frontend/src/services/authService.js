@@ -202,7 +202,7 @@ export default class authService {
             provider.eth.getAccounts((error, accounts) => {
                 if (!error) {
                     if(accounts && accounts[0]){
-                        console.log(accounts);
+                        //console.log(accounts);
 
                         const addr = accounts[0];
 
@@ -210,13 +210,15 @@ export default class authService {
                         if (provider.utils.isAddress(addr)) {
                             const from = addr.toLowerCase();
 
-                            const params = [msgParams, from];
+                           // const params = [provider.utils.toHex('Pareto'), from];
+                          //  const method = 'personal_sign';
+                            const params = [msgParams,from];
                             const method = 'eth_signTypedData';
-
                             // debugger;
-                            // console.log(provider.currentProvider)
 
-                            provider.currentProvider.sendAsync({method, params, from}, (err, result) => {
+                            provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                console.log(result);
+                                console.log(err);
                                 if (err) return console.dir(err);
                                 if (result.error) {
                                     return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
@@ -224,11 +226,12 @@ export default class authService {
                                 if (result.error) {
                                     return console.error(result);
                                 }
-
-                                const recovered = Sig.recoverTypedSignature({data: msgParams, sig: result.result});
+                                result = result.result;
+                                const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
 
                                 if (recovered === from) {
-                                    authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
+                                    authService.signParetoServer(msgParams, from, result, onSuccess, onError)
+
                                 } else {
                                     console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
                                     // stopLoading();

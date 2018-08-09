@@ -37,7 +37,7 @@
     import 'jquery';
     import { mapMutations } from 'vuex';
     import authService from "../../services/authService";
-    import DashboardService from "../../services/dashboardService";
+    import dashboardService from "../../services/dashboardService";
     import ModalLedgerNano from "./VModalLedgerNano";
 
     export default {
@@ -72,7 +72,7 @@
                 this.loadingLogin();
                 authService.signSplash(data => {
                     console.log(data);
-                    DashboardService.getAddress(res => {
+                    dashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
                             address: res,

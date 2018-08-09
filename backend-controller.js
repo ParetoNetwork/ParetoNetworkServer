@@ -682,11 +682,25 @@ controller.getAllAvailableContent = function(req, callback) {
 
                   //sort results
                   allResults = allResults.sort(compare);
+                    let newResults = [];
+                    allResults.forEach(function(entry){
+                        let data = {
+                            _id: entry._id,
+                            blockAgo : blockHeight - entry.block,
+                            title: entry.title,
+                            body: entry.body,
+                            dateCreated: entry.dateCreated,
+                            txHash: entry.txHash,
+                            reward: entry.reward,
+                            speed: entry.speed,
+                            _v: entry._v,
 
-
+                        } ;
+                        newResults.push(data);
+                    });
                   //console.log(allResults);
 
-                  if(callback && typeof callback === "function") { callback(null, allResults ); }
+                  if(callback && typeof callback === "function") { callback(null, newResults ); }
 
                 } catch (err) {
                   if(callback && typeof callback === "function") { callback(err); }
@@ -786,7 +800,32 @@ controller.getContentByCurrentUser = function(address, callback){
         }
       }
       else {
-        if(callback && typeof callback === "function") { callback(null, results ); }
+          web3.eth.getBlock('latest')
+              .then(function(res) {
+                  blockHeight = res.number;
+                  let newResults = [];
+                  results.forEach(function(entry){
+                      let data = {
+                          _id: entry._id,
+                          blockAgo : blockHeight - entry.block,
+                          title: entry.title,
+                          body: entry.body,
+                          dateCreated: entry.dateCreated,
+                          txHash: entry.txHash,
+                          reward: entry.reward,
+                          speed: entry.speed,
+                          _v: entry._v,
+
+                      } ;
+                      newResults.push(data);
+                  });
+                  callback(null, newResults );
+              } , function (error) {
+                callback(error);
+            }).catch(function (err) {
+                callback(err);
+             });
+
       }
     });
   }

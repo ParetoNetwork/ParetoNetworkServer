@@ -1,10 +1,10 @@
 <template>
     <div class="container main  wrapp">
         <div class="row pt-5">
-            <div class="col-md-5">
+            <div class="col-md-5 mb-5 mt-2 m-sm-0">
 
                 <template v-if="user">
-                    <div class="media py-1 px-4 border mb-5">
+                    <div class="media py-1 px-4 border mb-3 mb-md-5">
                         <div class="d-flex flex-column mr-2">
                             <div class="border p-2 mb-2" @click="openInput()">
                                 <div id="wrapper">
@@ -51,7 +51,7 @@
                     </div>
                 </template>
 
-                <div class="border">
+                <div class="border  mb-3 mb-md-1">
                     <div class="p-3 border-bottom">
                         <span class="title"> <b>MY POSTS:</b> </span>
                         <button v-if="false" class="btn btn-success-pareto">POST NEW INTEL</button>
@@ -196,9 +196,8 @@
                 });
             },
             showDetails: function(row){
-                console.log(row);
-            }
-            ,
+               // console.log(row);
+            },
             loadContent: function () {
                 dashboardService.getAllContent(res => {
                     this.loading = false;
@@ -209,7 +208,8 @@
             }, loadProfile: function () {
                 profileService.getProfile(res => {
                     this.user = res;
-                    console.log(this.user);
+                    console.log(res);
+                   // console.log(this.user);
                     this.firstName = res.first_name;
                     this.lastName = res.last_name;
                     this.bio = res.biography;
