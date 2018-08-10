@@ -1,5 +1,5 @@
 import Splash from '../components/Splash';
-import VIntel from '../components/VIntel';
+import Vintel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
 import VCreateIntel from '../components/VCreateIntel';
@@ -20,7 +20,7 @@ const routes = [
         }
     },
     {
-        path: '/intel', component: VIntel, beforeEnter: (to, from, next) => {
+        path: '/intel', component: Vintel, beforeEnter: (to, from, next) => {
             // ...
             AuthService.auth(() => {
                 next();
