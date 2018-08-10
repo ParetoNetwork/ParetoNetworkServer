@@ -634,10 +634,10 @@ controller.getAllAvailableContent = function(req, callback) {
 
                 var blockHeightDelta = blockHeight - blockDelay;
 
-                var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1});
-                var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1});
-                var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1});
-                var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1});
+                var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1}).populate( 'createdBy' );
+                var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1}).populate( 'createdBy' );
+                var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1}).populate( 'createdBy' );
+                var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1}).populate( 'createdBy' );
 
                 //stop gap solution, more censored content can come down and be manipulated before posting client side
                 var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
@@ -695,6 +695,13 @@ controller.getAllAvailableContent = function(req, callback) {
                             reward: entry.reward,
                             speed: entry.speed,
                             _v: entry._v,
+                            createdBy: {
+                                address: entry.createdBy.address,
+                                firstName: entry.createdBy.firstName,
+                                lastName: entry.createdBy.lastName,
+                                biography: entry.createdBy.biography,
+                                profilePic: entry.createdBy.profilePic
+                            }
 
                         } ;
                         newResults.push(data);
@@ -792,7 +799,7 @@ controller.getContentByCurrentUser = function(address, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address}).sort({block : -1});
+    var query = ParetoContent.find({address : address}).sort({block : -1}).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
@@ -817,6 +824,13 @@ controller.getContentByCurrentUser = function(address, callback){
                           reward: entry.reward,
                           speed: entry.speed,
                           _v: entry._v,
+                          createdBy: {
+                              address: entry.createdBy.address,
+                              firstName: entry.createdBy.firstName,
+                              lastName: entry.createdBy.lastName,
+                              biography: entry.createdBy.biography,
+                              profilePic: entry.createdBy.profilePic
+                          }
 
                       } ;
                       newResults.push(data);
