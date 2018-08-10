@@ -81,8 +81,10 @@ controller.endConnections= function(){
 }
 
 /*ways of writing contract creation block height*/
-const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
-const contractCreationBlockHeightInt = 4953750;
+//const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
+const contractCreationBlockHeightHexString = '0x39CA84'; //need this in hex
+//const contractCreationBlockHeightInt = 4953750;
+const contractCreationBlockHeightInt = 3787396;
 
 const dbName = 'pareto';
 
