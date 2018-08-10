@@ -5,14 +5,21 @@
                 <div class="col-12 order-last order-lg-first col-lg-4 mb-4 p-0">
                     <div class="row">
                         <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
-                            <div class="media mb-3 w-100">
-                                <div class="d-flex flex-column m-auto">
-                                    <!--<span  style="font-size: 320px; color: gray; background: #b2b2b2"-->
-                                    <!--class="fa fa-user p-2"></span>-->
-                                    <img v-if="profile.profile_pic" v-bind:src="baseURL+ '/profile-image?image=' + profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">
-                                    <img v-else src="../assets/images/user_placeholder.png"  width="100%" height="200px"  alt="" class="mr-2 image-fit">
-                                </div>
-                            </div>
+
+                            <div data-v-514e8c24="" class="thumb"
+                                 v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', profile.profile_pic)}"
+                                 style="width: 300px; height: 300px;"></div>
+                            <!--<div class="media mb-3 w-100">-->
+                                <!--&lt;!&ndash;<div class="d-flex flex-column m-auto">&ndash;&gt;-->
+                                    <!--&lt;!&ndash;&lt;!&ndash;<span  style="font-size: 320px; color: gray; background: #b2b2b2"&ndash;&gt;&ndash;&gt;-->
+                                    <!--&lt;!&ndash;&lt;!&ndash;class="fa fa-user p-2"></span>&ndash;&gt;&ndash;&gt;-->
+                                    <!--&lt;!&ndash;&lt;!&ndash;<img v-if="profile.profile_pic" v-bind:src="baseURL+ '/profile-image?image=' + profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">&ndash;&gt;&ndash;&gt;-->
+                                    <!--&lt;!&ndash;&lt;!&ndash;<img v-else src="../assets/images/user_placeholder.png"  width="100%" height="200px"  alt="" class="mr-2 image-fit">&ndash;&gt;&ndash;&gt;-->
+
+                                <!--&lt;!&ndash;</div>&ndash;&gt;-->
+
+                                <!---->
+                            <!--</div>-->
                         </div>
 
                         <div class="col-12 col-sm-7 col-md-12 border p-5">
@@ -102,11 +109,11 @@
                     last_name: '',
                     biography: '',
                     rank: 1000
-                }
+                },
+                baseURL : environment.baseURL
             };
         },
         beforeMount: function () {
-            this.baseURL = environment.baseURL;
             this.getIntel();
             this.getAddress();
         },
@@ -129,6 +136,10 @@
                 }, error => {
                     console.log(error);
                 }, address)
+            },
+            showProfileImage: function(path, pic){
+                if (pic) return path + pic;
+                return '/img/user_placeholder.be08242f.png';
             },
             getAddress: function () {
                 DashboardService.getAddress(res => {

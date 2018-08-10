@@ -7,13 +7,10 @@
                     <div class="media py-1 px-4 border mb-3 mb-md-5">
                         <div class="d-flex flex-column mr-2">
                             <div class="border p-2 mb-2" @click="openInput()">
-                                <div id="wrapper">
-                                    <img width="100" v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic"
-                                         alt=""
-                                         v-if="user.profile_pic"
-                                        class="image-fit">
-                                    <span v-else style="font-size: 50px;  color: gray; background: #b2b2b2"
-                                          class="fa fa-user p-2"></span>
+
+                                <div data-v-514e8c24="" class="thumb" id="wrapper"
+                                     v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', user.profile_pic)}"
+                                     style="width: 100px; height: 100px;">
                                     <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i class="fa fa-pencil"
                                                                                               aria-hidden="true"></i></span>
                                     </div>
@@ -90,8 +87,13 @@
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
                                 <router-link tag="div" class="d-flex split" :to="'/dashboard/' + row._id" @click="showDetails(row)">
-                                    <img v-if="row.createdBy.profilePic" width="50" height="50" v-bind:src="baseURL+ '/profile-image?image=' + row.createdBy.profilePic" alt="" class="image-fit mr-2 border p-2">
-                                    <img v-else width="50" height="50" src="../assets/images/user_placeholder.png" alt="" class="image-fit mr-2 border p-2">
+                                    <div class="border p-1 mr-2">
+                                        <div data-v-514e8c24="" class="thumb"
+                                             v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', row.createdBy.profilePic)}"
+                                             style="width: 40px; height: 40px;"></div>
+                                    </div>
+                                    <!--<img v-if="row.createdBy.profilePic" width="50" height="50" v-bind:src="baseURL+ '/profile-image?image=' + row.createdBy.profilePic" alt="" class="image-fit mr-2 border p-2">-->
+                                    <!--<img v-else width="50" height="50" src="../assets/images/user_placeholder.png" alt="" class="image-fit mr-2 border p-2">-->
 
                                     <div class="d-flex justify-content-between flex-grow-1">
                                         <div class="d-flex flex-column flex-grow-1 pr-5">
@@ -165,6 +167,7 @@
                 lastName: '',
                 bio: '',
                 picture: '',
+                baseURL: environment.baseURL,
                 user: {}
             };
         }, filters: {
@@ -175,7 +178,6 @@
         },
         mounted: function () {
             this.main();
-            this.baseURL = environment.baseURL;
         }, computed: {
             ...mapState(['madeLogin'])
         },
@@ -199,6 +201,10 @@
             },
             showDetails: function(row){
                // console.log(row);
+            },
+            showProfileImage: function(path, pic){
+                if (pic) return path + pic;
+                return '/img/user_placeholder.be08242f.png';
             },
             loadContent: function () {
                 dashboardService.getAllContent(res => {
