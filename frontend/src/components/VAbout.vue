@@ -700,7 +700,7 @@
                             <a href="https://cointelegraph.com/press-releases/pareto-network-the-peer-to-peer-financial-content-marketplace-announces-their-token-sale"
                                target="_blank">
                                 <img src="../assets/images/cointelegraph.png" alt=""></a>
-                            <a href="http://www.newsbtc.com/2017/10/18/pareto-p2p-financial-content-marketplace/"
+                            <a href="https://www.newsbtc.com/2017/10/18/pareto-p2p-financial-content-marketplace/"
                                target="_blank">
                                 <img src="../assets/images/newsbtc.png" alt=""></a>
                             <a href="https://ccinews.net/pareto-network-poised-disrupt-16-billion-dollar-financial-research-industry/"

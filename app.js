@@ -103,10 +103,16 @@ const ErrorHandler = require('./error-handler.js');
 app.get('/profile-image', function (req, res) {
     var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
    // var url = s3.getSignedUrl('getObject', params);
+
     s3.getObject(params, function(err, data) {
         //res.writeHead(200, {'Content-Type': 'image/jpeg'});
-        res.write(data.Body, 'binary');
-        res.end(null, 'binary');
+        if(!err){
+            res.write(data.Body, 'binary');
+            res.end(null, 'binary');
+        }else{
+            res.sendFile(path.join(__dirname + '/default-avatar.png'));
+        }
+
     });
 });
 
@@ -183,6 +189,20 @@ app.get('/v1/rank', function (req, res) {
     });
 
 });
+
+app.get('/v1/balance', function (req, res) {
+
+    controller.getBalance(req.query.address,0, function(err, count){
+        if(!err){
+            res.status(200).json(ErrorHandler.getSuccess(count));
+        }else{
+            res.status(200).json(ErrorHandler.getError(err));
+        }
+    });
+
+});
+
+
 
 /********* AUTHENTICATED v1 APIs *********/
 
