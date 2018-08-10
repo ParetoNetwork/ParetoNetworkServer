@@ -139,7 +139,7 @@
             },
             showProfileImage: function(path, pic){
                 if (pic) return path + pic;
-                return '/img/user_placeholder.be08242f.png';
+                return 'http://www.uriux.com/wp-content/uploads/2017/09/male-placeholder.jpg';
             },
             getAddress: function () {
                 DashboardService.getAddress(res => {
