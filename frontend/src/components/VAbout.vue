@@ -96,6 +96,24 @@
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
+                                    <img src="../assets/images/team-chrisg.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Chris Gardner</span>
+                                    <span class="position">Product Manager.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>UC Berkeley Economics BA | Startup CEO | Marcus & Millichap Financial Analyst | Enthusiast of Decentralized Economic Models. At Pareto, Leading Content Operations, Building Partnerships and Conducting Asset Valuation Research</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/christopherwgardner/" target="_blank"><i
+                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
                                     <img src="../assets/images/team-3.jpg" alt="" class="rounded-circle" width="85">
                                 </figure>
                                 <div class="d-flex flex-column">
