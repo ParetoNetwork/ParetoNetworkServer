@@ -9,8 +9,9 @@ localVue.use(Vuex)
 
 describe('App.vue', () => {
     it('renders Dashboard', () => {
-
         const wrapper = shallowMount(VDashboard );
         expect(wrapper.html()).contain('MY INTEL FEED');
-    })
+    });
+    //
+    // it('Opens IntelDetail', () => {})
 });

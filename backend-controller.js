@@ -149,8 +149,9 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                             amount = web3.utils.fromWei(tokens, 'ether');
                             //console.log("amount: " + amount);
                         }
-
+                        console.log(tknAddress);
                         if(amount > 0){
+                            console.log(amount);
                             return web3.eth.getPastLogs({
                                 fromBlock: contractCreationBlockHeightHexString,
                                 toBlock: 'latest',
@@ -180,7 +181,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                         incoming[blockNumber] = quantityEth;
                                     }
                                 }
-
+                                console.log(incoming)
                                 return web3.eth.getPastLogs({
                                     fromBlock: contractCreationBlockHeightHexString,
                                     toBlock: 'latest',
@@ -213,7 +214,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                         }
 
                                     }//end for
-
+                                    console.log(outgoing)
                                     var transactions = Object.entries(incoming)
                                         .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])))
                                         .map(([ts, val]) => ([parseInt(ts), val]));
@@ -300,6 +301,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                                 upsert : true,
                                                 new: true //mongo uses returnNewDocument, mongo uses new
                                             };
+                                            console.log(dbValues);
 
                                             //should queue for writing later
                                             var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
@@ -657,10 +659,10 @@ controller.getAllAvailableContent = function(req, callback) {
 
                 var blockHeightDelta = blockHeight - blockDelay;
 
-                var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1});
-                var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1});
-                var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1});
-                var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1});
+                var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1}).populate( 'createdBy' );
+                var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1}).populate( 'createdBy' );
+                var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1}).populate( 'createdBy' );
+                var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1}).populate( 'createdBy' );
 
                 //stop gap solution, more censored content can come down and be manipulated before posting client side
                 var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
@@ -705,11 +707,33 @@ controller.getAllAvailableContent = function(req, callback) {
 
                   //sort results
                   allResults = allResults.sort(compare);
+                    let newResults = [];
+                    allResults.forEach(function(entry){
+                        let data = {
+                            _id: entry._id,
+                            blockAgo : blockHeight - entry.block,
+                            title: entry.title,
+                            address: entry.address,
+                            body: entry.body,
+                            dateCreated: entry.dateCreated,
+                            txHash: entry.txHash,
+                            reward: entry.reward,
+                            speed: entry.speed,
+                            _v: entry._v,
+                            createdBy: {
+                                address: entry.createdBy.address,
+                                firstName: entry.createdBy.firstName,
+                                lastName: entry.createdBy.lastName,
+                                biography: entry.createdBy.biography,
+                                profilePic: entry.createdBy.profilePic
+                            }
 
-
+                        } ;
+                        newResults.push(data);
+                    });
                   //console.log(allResults);
 
-                  if(callback && typeof callback === "function") { callback(null, allResults ); }
+                  if(callback && typeof callback === "function") { callback(null, newResults ); }
 
                 } catch (err) {
                   if(callback && typeof callback === "function") { callback(err); }
@@ -800,7 +824,7 @@ controller.getContentByCurrentUser = function(address, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address}).sort({block : -1});
+    var query = ParetoContent.find({address : address}).sort({block : -1}).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
@@ -809,7 +833,40 @@ controller.getContentByCurrentUser = function(address, callback){
         }
       }
       else {
-        if(callback && typeof callback === "function") { callback(null, results ); }
+          web3.eth.getBlock('latest')
+              .then(function(res) {
+                  blockHeight = res.number;
+                  let newResults = [];
+                  results.forEach(function(entry){
+                      let data = {
+                          _id: entry._id,
+                          blockAgo : blockHeight - entry.block,
+                          address: entry.address,
+                          title: entry.title,
+                          body: entry.body,
+                          dateCreated: entry.dateCreated,
+                          txHash: entry.txHash,
+                          reward: entry.reward,
+                          speed: entry.speed,
+                          _v: entry._v,
+                          createdBy: {
+                              address: entry.createdBy.address,
+                              firstName: entry.createdBy.firstName,
+                              lastName: entry.createdBy.lastName,
+                              biography: entry.createdBy.biography,
+                              profilePic: entry.createdBy.profilePic
+                          }
+
+                      } ;
+                      newResults.push(data);
+                  });
+                  callback(null, newResults );
+              } , function (error) {
+                callback(error);
+            }).catch(function (err) {
+                callback(err);
+             });
+
       }
     });
   }

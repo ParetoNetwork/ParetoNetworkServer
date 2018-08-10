@@ -19,7 +19,7 @@
                                 <div class="d-flex flex-column m-auto">
                                     <!--<span  style="font-size: 320px; color: gray; background: #b2b2b2"-->
                                     <!--class="fa fa-user p-2"></span>-->
-                                    <img v-if="profile.profile_pic" src="profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">
+                                    <img v-if="profile.profile_pic" v-bind:src="baseURL+ '/profile-image?image=' + profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">
                                     <img v-else src="../assets/images/user_placeholder.png"  width="100%" height="200px"  alt="" class="mr-2 image-fit">
                                 </div>
                             </div>
@@ -68,7 +68,7 @@
                 </div>
                 <div v-else class="col-12 col-lg-7 offset-lg-1 mb-4 p-md-0">
                     <div class="row text-group">
-                        <div class="border p-4">
+                        <div class="col-12 border p-4">
                             <div class="row py-4 border-bottom m-0">
                                 <div class="col-md-10 p-0">
                                     <span class="name-title"> {{intel.title}} </span>
@@ -77,7 +77,7 @@
                                     <div class="d-flex flex-column align-items-end ">
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
-                                        <span class="mb-2"> {{intel.block}} Blocks Ago </span>
+                                        <span class="mb-2"> {{ intel.blockAgo }} Blocks Ago </span>
                                         <span class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
                                     </div>
                                 </div>
@@ -96,6 +96,7 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import ProfileService from '../services/profileService';
+    import environment from '../utils/environment';
 
     export default {
         name: 'VIntelDetail',
@@ -104,6 +105,7 @@
                 id: this.$route.params.id,
                 loading: true,
                 intel: {},
+                address : {},
                 profile: {
                     address: '',
                     first_name: '' ,
@@ -114,7 +116,9 @@
             };
         },
         beforeMount: function () {
+            this.baseURL = environment.baseURL;
             this.getIntel();
+            this.getAddress();
         },
         methods: {
             getIntel: function () {
@@ -135,6 +139,14 @@
                 }, error => {
                     console.log(error);
                 }, address)
+            },
+            getAddress: function () {
+                DashboardService.getAddress(res => {
+                    this.address = res;
+                    console.log(res);
+                }, () => {
+                    // alert(error);
+                });
             }
         }
     };
