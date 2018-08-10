@@ -74,7 +74,7 @@
         components: {ModalLedgerNano},
         mounted: function () {
             DashboardService.getAddress(res => {
-               // console.log(res);
+                console.log(res);
                 this.$store.dispatch({
                     type: 'login',
                     address: res,
@@ -83,6 +83,20 @@
             }, () => {
 
             });
+        },
+        watch:{
+            $route (to){
+                if( to.fullPath !== '/' ){
+                    DashboardService.getAddress(res => {
+                        this.$store.dispatch({
+                            type: 'login',
+                            address: res,
+                        });
+                    }, () => {
+
+                    });
+                }
+            }
         },
         data: function () {
             return {};
@@ -119,7 +133,9 @@
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
+                    console.log(data);
                     DashboardService.getAddress(res => {
+                        console.log(res);
                         this.$store.dispatch({
                             type: 'login',
                             address: res,
