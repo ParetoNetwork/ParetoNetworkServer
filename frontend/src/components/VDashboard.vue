@@ -10,7 +10,8 @@
                                 <div id="wrapper">
                                     <img width="100" v-bind:src="baseURL+ '/profile-image?image=' + user.profile_pic"
                                          alt=""
-                                         v-if="user.profile_pic">
+                                         v-if="user.profile_pic"
+                                        class="image-fit">
                                     <span v-else style="font-size: 50px;  color: gray; background: #b2b2b2"
                                           class="fa fa-user p-2"></span>
                                     <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i class="fa fa-pencil"
@@ -89,13 +90,14 @@
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
                                 <router-link tag="div" class="d-flex split" :to="'/dashboard/' + row._id" @click="showDetails(row)">
-                                    <img width="50" height="50" src="../assets/logo.png" alt="" class="mr-2 border p-2">
+                                    <img v-if="row.createdBy.profilePic" width="50" height="50" v-bind:src="baseURL+ '/profile-image?image=' + row.createdBy.profilePic" alt="" class="image-fit mr-2 border p-2">
+                                    <img v-else width="50" height="50" src="../assets/images/user_placeholder.png" alt="" class="image-fit mr-2 border p-2">
+
                                     <div class="d-flex justify-content-between flex-grow-1">
                                         <div class="d-flex flex-column flex-grow-1 pr-5">
                                             <h1 class="title">{{row.title || 'No title'}}</h1>
                                             <div class="d-flex justify-content-between">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <!-- Address has the last test block -->
                                                 <span class="text-dashboard">Disclosed by: {{row.address}} at block {{row.blockAgo}} </span>
                                             </div>
                                         </div>
@@ -202,6 +204,7 @@
                 dashboardService.getAllContent(res => {
                     this.loading = false;
                     this.content = res;
+                    console.log(res);
                 }, error => {
                     alert(error);
                 });
