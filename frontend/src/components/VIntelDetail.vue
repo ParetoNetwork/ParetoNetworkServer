@@ -1,19 +1,9 @@
 <template>
     <div class="main wrapp">
         <div class="container">
-            <div class="row pt-5">
-                <div class="col-12 col-lg-4 mb-4 p-0 mt-2">
-                    <!--<div class="row">-->
-                        <!--<div class="media p-3 border mb-3 w-100">-->
-                            <!--<div class="d-flex flex-column m-auto">-->
-                                <!--&lt;!&ndash;<span  style="font-size: 320px; color: gray; background: #b2b2b2"&ndash;&gt;-->
-                                      <!--&lt;!&ndash;class="fa fa-user p-2"></span>&ndash;&gt;-->
-                                <!--<img v-if="profile.profile_pic" src="profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">-->
-                                <!--<img v-else src="../assets/images/user_placeholder.png"  width="100%" height="200px"  alt="" class="mr-2 image-fit">-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                    <div class="row mx-1 mr-md-auto ">
+            <div class="row mx-2 pt-5">
+                <div class="col-12 order-last order-lg-first col-lg-4 mb-4 p-0">
+                    <div class="row">
                         <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
                             <div class="media mb-3 w-100">
                                 <div class="d-flex flex-column m-auto">
@@ -39,13 +29,13 @@
                                 <span class="text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{profile.rank}} </span>
                             </div>
 
-                            <div class="row border-bottom mt-5 px-0 py-3">
+                            <div v-if="false" class="row border-bottom mt-5 px-0 py-3">
                                 <i class="fa fa-search"></i>
                                 <div class="m-auto">
                                     <span class="text-pareto-gray ml-3"> View Author Profile </span>
                                 </div>
                             </div>
-                            <div class="row border-bottom mt-3 px-0 py-3">
+                            <div v-if="false" class="row border-bottom mt-3 px-0 py-3">
                                 <i class="fa fa-book"></i>
                                 <div class="m-auto">
                                     <span class="text-pareto-gray ml-3"> View Author's Articles </span>
@@ -66,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-else class="col-12 col-lg-7 offset-lg-1 mb-4 p-md-0">
+                <div v-else class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
                     <div class="row text-group">
                         <div class="col-12 border p-4">
                             <div class="row py-4 border-bottom m-0">
@@ -78,7 +68,7 @@
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
                                         <span class="mb-2"> {{ intel.blockAgo }} Blocks Ago </span>
-                                        <span class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
+                                        <span v-if="false" class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
                                     </div>
                                 </div>
                             </div>
@@ -235,9 +225,5 @@
     #wrapper:hover .text {
         display: flex;
         background: rgba(0,0,0,0.5);
-    }
-
-    .image-fit {
-        object-fit:scale-down;
     }
 </style>
