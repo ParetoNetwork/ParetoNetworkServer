@@ -54,7 +54,7 @@
                             </div> <!-- end team-member -->
                         </div>
                         <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="d-flex flex-column">
+                            <div class="team-member text-center">
                                 <figure class="team-member__image">
                                     <img src="../assets/images/team-2.jpg" alt="" class="rounded-circle" width="85">
                                 </figure>
@@ -74,7 +74,7 @@
                             </div> <!-- end team-member -->
                         </div>
                         <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="d-flex flex-column">
+                            <div class="team-member text-center">
                                 <figure class="team-member__image">
                                     <img src="../assets/images/team-chiara.jpg" alt="" class="rounded-circle"
                                          width="85">
