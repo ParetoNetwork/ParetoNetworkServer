@@ -155,7 +155,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                             return web3.eth.getPastLogs({
                                 fromBlock: contractCreationBlockHeightHexString,
                                 toBlock: 'latest',
-                                address: '0xbcce0c003b562f47a319dfca4bce30d322fa0f01',
+                                address: paretoContractAddress,
                                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
                             }).then(function (txObjects){
                                 //console.log(txObjects);
@@ -185,7 +185,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                 return web3.eth.getPastLogs({
                                     fromBlock: contractCreationBlockHeightHexString,
                                     toBlock: 'latest',
-                                    address: '0xbcce0c003b562f47a319dfca4bce30d322fa0f01',
+                                    address: paretoContractAddress,
                                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
                                 }).then(function (txObjects){
                                     //console.log(txObjects);
