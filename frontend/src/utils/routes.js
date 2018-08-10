@@ -13,7 +13,7 @@ const routes = [
         path: '/', component: Splash, beforeEnter: (to, from, next) => {
             // ...
             AuthService.auth(() => {
-                next('/dashboard');
+                next('/intel');
             }, () => {
                 next();
             });
