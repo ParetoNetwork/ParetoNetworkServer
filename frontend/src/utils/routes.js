@@ -1,8 +1,8 @@
 import Splash from '../components/Splash';
-import VDashboard from '../components/VDashboard';
+import VIntel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
-import VIntel from '../components/VIntel';
+import VCreateIntel from '../components/VCreateIntel';
 import VueRouter from 'vue-router';
 import AuthService from '../services/authService';
 import VIntelDetail from '../components/VIntelDetail';
@@ -20,7 +20,7 @@ const routes = [
         }
     },
     {
-        path: '/dashboard', component: VDashboard, beforeEnter: (to, from, next) => {
+        path: '/intel', component: VIntel, beforeEnter: (to, from, next) => {
             // ...
             AuthService.auth(() => {
                 next();
@@ -30,7 +30,7 @@ const routes = [
         }
     },
     {
-        path: '/dashboard/:id', component: VIntelDetail, name: 'VIntelDetail'
+        path: '/intel/:id', component: VIntelDetail, name: 'VIntelDetail'
     },
 
     {
@@ -38,7 +38,7 @@ const routes = [
     },
     {path: '/about', component: VAbout},
     {path: '/leaderboards', component: VLeaderboards},
-    {path: '/intel', component: VIntel},
+    {path: '/create', component: VCreateIntel},
 ];
 const router = new VueRouter({routes});
 export default router;
