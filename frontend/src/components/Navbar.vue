@@ -20,7 +20,7 @@
             <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
                 <ul class="navbar-nav ">
                     <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
-                        <router-link tag="a" class="nav-link" :active-class="'active'" to="/dashboard" exact>Intel
+                        <router-link tag="a" class="nav-link" :active-class="'active'" to="/intel" exact>Intel
                         </router-link>
                     </li>
                     <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
@@ -110,7 +110,7 @@
                         address: data,
                     });
                     this.collapseContent();
-                    this.$router.push('/dashboard');
+                    this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
                     alert(error);
@@ -125,7 +125,7 @@
                             address: res,
                         });
                         this.collapseContent();
-                        this.$router.push('/dashboard');
+                        this.$router.push('/intel');
                     }, () => {
 
                     });

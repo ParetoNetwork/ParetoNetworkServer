@@ -60,3 +60,12 @@ body {
   color: $blue-light;
 }
 
+.image-fit{
+  object-fit: scale-down;
+}
+
+.thumb{
+  display: inline-block;
+  background-position: center top;
+  background-size: cover;
+}

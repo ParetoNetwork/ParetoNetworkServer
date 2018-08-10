@@ -160,7 +160,7 @@
                             type: 'login',
                             address: res,
                         });
-                        this.$router.push('/dashboard');
+                        this.$router.push('/intel');
                     }, () => {
 
                     });
