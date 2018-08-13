@@ -6,9 +6,9 @@
                     <div class="row">
                         <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
 
-                            <div data-v-514e8c24="" class="thumb"
-                                 v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', profile.profile_pic)}"
-                                 style="width: 300px; height: 300px;"></div>
+                            <div data-v-514e8c24="" class="thumb profile-pic"
+                                 v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage( profile.profile_pic)}"
+                                 ></div>
                             <!--<div class="media mb-3 w-100">-->
                                 <!--&lt;!&ndash;<div class="d-flex flex-column m-auto">&ndash;&gt;-->
                                     <!--&lt;!&ndash;&lt;!&ndash;<span  style="font-size: 320px; color: gray; background: #b2b2b2"&ndash;&gt;&ndash;&gt;-->
@@ -137,9 +137,9 @@
                     console.log(error);
                 }, address)
             },
-            showProfileImage: function(path, pic){
-                if (pic) return path + pic;
-                return 'http://www.uriux.com/wp-content/uploads/2017/09/male-placeholder.jpg';
+            loadProfileImage: function(pic){
+                let path = this.baseURL + '/profile-image?image=';
+                return ProfileService.getProfileImage(path, pic);
             },
             getAddress: function () {
                 DashboardService.getAddress(res => {
@@ -236,5 +236,19 @@
     #wrapper:hover .text {
         display: flex;
         background: rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 992px){
+        .profile-pic {
+            width: 200px;
+            height: 200px;
+        }
+    }
+
+    @media (min-width: 992px){
+        .profile-pic {
+            width: 300px;
+            height: 300px;
+        }
     }
 </style>

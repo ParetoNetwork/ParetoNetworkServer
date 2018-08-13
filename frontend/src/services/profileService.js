@@ -1,4 +1,5 @@
 import http from './HttpService';
+import environment from '../utils/environment';
 
 export default class profileService {
 
@@ -25,6 +26,12 @@ export default class profileService {
         }).catch(error => {
             return onError(error);
         });
+    }
+
+    static getProfileImage(path, pic){
+        if (pic) return path + pic;
+        return environment.baseURL + '/profile-image';
+        //return 'http://www.uriux.com/wp-content/uploads/2017/09/male-placeholder.jpg';
     }
 
     static uploadProfilePic(form, onSuccess, onError) {
