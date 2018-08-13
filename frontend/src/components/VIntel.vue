@@ -9,7 +9,7 @@
                             <div class="border p-2 mb-2" @click="openInput()">
 
                                 <div data-v-514e8c24="" class="thumb" id="wrapper"
-                                     v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', user.profile_pic)}"
+                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic)}"
                                      style="width: 100px; height: 100px;">
                                     <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i class="fa fa-pencil"
                                                                                               aria-hidden="true"></i></span>
@@ -89,7 +89,7 @@
                                 <router-link tag="div" class="d-flex split" :to="'/intel/' + row._id" @click="showDetails(row)">
                                     <div class="border p-1 mr-2">
                                         <div data-v-514e8c24="" class="thumb"
-                                             v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', row.createdBy.profilePic)}"
+                                             v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
                                              style="width: 40px; height: 40px;"></div>
                                     </div>
                                     <!--<img v-if="row.createdBy.profilePic" width="50" height="50" v-bind:src="baseURL+ '/profile-image?image=' + row.createdBy.profilePic" alt="" class="image-fit mr-2 border p-2">-->
@@ -202,9 +202,9 @@
             showDetails: function(row){
                // console.log(row);
             },
-            showProfileImage: function(path, pic){
-                if (pic) return path + pic;
-                return 'http://www.uriux.com/wp-content/uploads/2017/09/male-placeholder.jpg';
+            loadProfileImage: function(pic){
+                let path = this.baseURL + '/profile-image?image=';
+                return profileService.getProfileImage(path, pic);
             },
             loadContent: function () {
                 dashboardService.getAllContent(res => {
