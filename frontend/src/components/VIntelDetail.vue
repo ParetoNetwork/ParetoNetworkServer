@@ -114,12 +114,12 @@
             };
         },
         beforeMount: function () {
-            this.getIntel();
-            this.getAddress();
+            this.$store.state.makingRequest = true;
+            this.requestCall()
         },
         methods: {
             getIntel: function () {
-                DashboardService.getIntel(res => {
+                return DashboardService.getIntel(res => {
                    this.getProfile(res.address);
                    this.intel = res;
                    console.log(res);
@@ -132,9 +132,7 @@
                 ProfileService.getSpecificProfile( res => {
                     this.profile = res;
                     this.loading = false;
-                    console.log(res);
                 }, error => {
-                    console.log(error);
                 }, address)
             },
             loadProfileImage: function(pic){
@@ -142,11 +140,18 @@
                 return ProfileService.getProfileImage(path, pic);
             },
             getAddress: function () {
-                DashboardService.getAddress(res => {
+                return DashboardService.getAddress(res => {
                     this.address = res;
-                    console.log(res);
                 }, () => {
                     // alert(error);
+                });
+            },
+            requestCall : function(){
+                Promise.all([
+                    this.getIntel(),
+                    this.getAddress()
+                ]).then( values => {
+                    this.$store.state.makingRequest = false;
                 });
             }
         }

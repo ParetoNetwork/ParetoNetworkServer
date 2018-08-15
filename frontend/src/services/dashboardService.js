@@ -30,7 +30,7 @@ export default class dashboardService {
     // }
 
     static getIntel(onSuccess, onError, intel) {
-        http.get('/v1/content/' + intel).then(res => {
+        return http.get('/v1/content/' + intel).then(res => {
             if(res.data.success){
                 return onSuccess(res.data.data);
             }else{
