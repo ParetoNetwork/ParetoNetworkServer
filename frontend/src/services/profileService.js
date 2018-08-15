@@ -12,7 +12,7 @@ export default class profileService {
     }
 
     static getProfile(onSuccess, onError, profile = null) {
-        http.get('/v1/userinfo', profile).then(res => {
+        return http.get('/v1/userinfo', profile).then(res => {
             return onSuccess(res.data.data);
         }).catch(error => {
             return onError(error);
@@ -31,7 +31,6 @@ export default class profileService {
     static getProfileImage(path, pic){
         if (pic) return path + pic;
         return environment.baseURL + '/profile-image';
-        //return 'http://www.uriux.com/wp-content/uploads/2017/09/male-placeholder.jpg';
     }
 
     static uploadProfilePic(form, onSuccess, onError) {

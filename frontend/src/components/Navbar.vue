@@ -3,7 +3,8 @@
 
         <div
                 id="gradient"
-                class="bar">&nbsp;
+                class="bar"
+                @click="animateBar()">&nbsp;
         </div>
 
         <nav class="navbar navbar-expand-lg navbar-dark header font-weight-bold font-body text-white">
@@ -85,6 +86,21 @@
             });
         },
         watch:{
+            loadingNav(value){
+              if(value){
+                  console.log('start animation');
+                  $('#gradient').removeClass("animateBar").removeClass("animationEnd");
+                  $('#gradient').addClass( "animateBar");
+              }else{
+                  console.log('finish animation');
+                  $('#gradient').removeClass("animateBar").addClass( "animationEnd" );
+              }
+            },
+            finishLoading(value){
+                console.log(value);
+                if(value){
+                }
+            },
             $route (to){
                 if( to.fullPath !== '/' ){
                     DashboardService.getAddress(res => {
@@ -99,13 +115,22 @@
             }
         },
         data: function () {
-            return {};
+            return {
+                loading : false,
+                finish : false
+            };
         },
         computed: {
             ...mapState([
                 // map this.count to store.state.count
                 'isLogged','address' , 'showModalSign'
-            ])
+            ]),
+            loadingNav(){
+                return this.$store.state.makingRequest;
+            },
+            finishLoading(){
+                return this.$store.state.requestFinish;
+            }
         },
         methods: {
             manual: function() {
@@ -160,6 +185,10 @@
                     alert(error);
                 });
             },
+            animateBar(){
+                this.loading = !this.loading;
+                console.log('empezar')
+            },
             ledgerNanoLogin () {
                 this.$store.state.showModalLedgerNano = true;
             }
@@ -178,33 +207,39 @@
     .bar {
         vertical-align: top;
         height: 5px;
-        background: #295087; /* Old browsers */
-        background: -moz-linear-gradient(
-                        left,
-                        #295087 0%,
-                        #3f7989 50%,
-                        #6aba82 77%,
-                        #85c568 100%
-        );
-        background: -webkit-linear-gradient(
-                        left,
-                        #295087 0%,
-                        #3f7989 50%,
-                        #6aba82 77%,
-                        #85c568 100%
-        );
-        background: linear-gradient(
-                        to right,
-                        #295087 0%,
-                        #3f7989 50%,
-                        #6aba82 77%,
-                        #85c568 100%
-        );
-        filter: progid:DXImageTransform.Microsoft.gradient(
-                        startColorstr="#295087",
-                        endColorstr="#85c568",
-                        GradientType=1
-        );
+        background: linear-gradient(8deg, #295087, #3f7989, #6aba82, #85c568, #9ff677);
+    }
+
+    .animateBar{
+        background: linear-gradient(8deg, #3f7989, #6aba82, #85c568);
+        background-size: 1000% 1000%;
+        -webkit-animation: AnimationName 10s ease infinite;
+        -moz-animation: AnimationName 10s ease infinite;
+        animation: AnimationName 10s ease infinite;
+    }
+
+    .animationEnd{
+        background: linear-gradient(8deg, #295087, #3f7989, #6aba82, #85c568, #9ff677);
+        background-size: 1000% 1000%;
+        -webkit-animation: AnimationName 8s ease ;
+        -moz-animation: AnimationName 8s ease;
+        animation: AnimationName 8s ease;
+    }
+
+    @-webkit-keyframes AnimationName {
+        0%{background-position:30% 0%}
+        50%{background-position:71% 100%}
+        100%{background-position:30% 0%}
+    }
+    @-moz-keyframes AnimationName {
+        0%{background-position:30% 0%}
+        50%{background-position:71% 100%}
+        100%{background-position:30% 0%}
+    }
+    @keyframes AnimationName {
+        0%{background-position:30% 0%}
+        50%{background-position:71% 100%}
+        100%{background-position:30% 0%}
     }
 
     .header {

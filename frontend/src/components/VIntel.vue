@@ -151,6 +151,7 @@
 
     import {mapMutations, mapState} from 'vuex';
     import environment from '../utils/environment';
+    import http from '../services/HttpService';
 
     export default {
         name: 'VIntel',
@@ -184,7 +185,7 @@
         methods: {
             ...mapMutations(['intelEnter']),
             loadAddress: function () {
-                dashboardService.getAddress(res => {
+                return dashboardService.getAddress(res => {
                     this.address = res;
                 }, () => {
                     // alert(error);
@@ -207,7 +208,7 @@
                 return profileService.getProfileImage(path, pic);
             },
             loadContent: function () {
-                dashboardService.getAllContent(res => {
+                return dashboardService.getAllContent(res => {
                     this.loading = false;
                     this.content = res;
                     console.log(res);
@@ -215,7 +216,7 @@
                     alert(error);
                 });
             }, loadProfile: function () {
-                profileService.getProfile(res => {
+                return profileService.getProfile(res => {
                     this.user = res;
                     console.log(res);
                    // console.log(this.user);
@@ -227,7 +228,7 @@
                 });
             },
             loadMyContent: function () {
-                dashboardService.getContent(res => {
+                return dashboardService.getContent(res => {
                     this.myContent = res;
                 }, error => {
                     alert(error);
@@ -249,28 +250,29 @@
 
                 });
             },
+            requestCall : function(){
+                Promise.all([
+                    this.loadProfile(),
+                    this.loadMyContent(),
+                    this.loadAddress(),
+                    this.loadContent()
+                ]).then( values => {
+                    this.$store.state.makingRequest = false;
+                    console.log('start');
+                });
+            },
             main: function () {
+                this.$store.state.makingRequest = true;
                 if (!this.madeLogin) {
                     this.intelEnter();
-
                     AuthService.postSign(() => {
-                        this.loadProfile();
-                        this.loadMyContent();
-                        this.loadAddress();
-                        this.loadContent();
+                        this.requestCall();
                     }, () => {
-                        this.loadProfile();
-                        this.loadAddress();
-                        this.loadContent();
-                        this.loadMyContent();
+                        this.requestCall();
                     });
                 } else {
-                    this.loadProfile();
-                    this.loadAddress();
-                    this.loadContent();
-                    this.loadMyContent();
+                    this.requestCall();
                 }
-
             }
         }
     }
