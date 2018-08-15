@@ -3,8 +3,7 @@
 
         <div
                 id="gradient"
-                class="bar"
-                @click="animateBar()">&nbsp;
+                class="bar">&nbsp;
         </div>
 
         <nav class="navbar navbar-expand-lg navbar-dark header font-weight-bold font-body text-white">
@@ -74,6 +73,7 @@
         name: 'Navbar',
         components: {ModalLedgerNano},
         mounted: function () {
+            this.colorNav = $('#gradient')
             DashboardService.getAddress(res => {
                 console.log(res);
                 this.$store.dispatch({
@@ -88,18 +88,12 @@
         watch:{
             loadingNav(value){
               if(value){
-                  console.log('start animation');
                   $('#gradient').removeClass("animateBar").removeClass("animationEnd");
-                  $('#gradient').addClass( "animateBar");
+                  setTimeout("$('#gradient').addClass( 'animateBar');",1);
               }else{
-                  console.log('finish animation');
-                  $('#gradient').removeClass("animateBar").addClass( "animationEnd" );
+                  $('#gradient').removeClass("animateBar");
+                  setTimeout("$('#gradient').addClass( 'animationEnd');",1);
               }
-            },
-            finishLoading(value){
-                console.log(value);
-                if(value){
-                }
             },
             $route (to){
                 if( to.fullPath !== '/' ){
@@ -117,7 +111,8 @@
         data: function () {
             return {
                 loading : false,
-                finish : false
+                finish : false,
+                colorNav : {}
             };
         },
         computed: {
@@ -127,9 +122,6 @@
             ]),
             loadingNav(){
                 return this.$store.state.makingRequest;
-            },
-            finishLoading(){
-                return this.$store.state.requestFinish;
             }
         },
         methods: {
@@ -185,10 +177,6 @@
                     alert(error);
                 });
             },
-            animateBar(){
-                this.loading = !this.loading;
-                console.log('empezar')
-            },
             ledgerNanoLogin () {
                 this.$store.state.showModalLedgerNano = true;
             }
@@ -221,9 +209,9 @@
     .animationEnd{
         background: linear-gradient(8deg, #295087, #3f7989, #6aba82, #85c568, #9ff677);
         background-size: 1000% 1000%;
-        -webkit-animation: AnimationName 8s ease ;
-        -moz-animation: AnimationName 8s ease;
-        animation: AnimationName 8s ease;
+        -webkit-animation: AnimationName 2s ease ;
+        -moz-animation: AnimationName 2s ease;
+        animation: AnimationName 2s ease;
     }
 
     @-webkit-keyframes AnimationName {
