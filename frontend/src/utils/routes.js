@@ -20,6 +20,10 @@ const routes = [
         }
     },
     {
+        path: '*',
+        redirect: '/intel'
+    },
+    {
         path: '/intel', component: Vintel, beforeEnter: (to, from, next) => {
             // ...
             AuthService.auth(() => {
@@ -32,7 +36,6 @@ const routes = [
     {
         path: '/intel/:id', component: VIntelDetail, name: 'VIntelDetail'
     },
-
     {
         path: '/calculator', component: VScoreCalculator, name: 'VScoreCalculator'
     },
