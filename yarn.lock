@@ -2417,9 +2417,19 @@ isurl@^1.0.0-alpha5:
     has-to-string-tag-x "^1.2.0"
     is-object "^1.0.1"
 
+jQuery@latest:
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/jQuery/-/jQuery-1.7.4.tgz#f32dc5c85a7044ee864b4443b9ee45f9478ba137"
+
 jmespath@0.15.0:
   version "0.15.0"
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.15.0.tgz#a3f222a9aae9f966f5d27c796510e28091764217"
+
+jquery-color@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/jquery-color/-/jquery-color-1.0.0.tgz#003aba988a6f2d21d963d1f2eeeb6cdbc80471f1"
+  dependencies:
+    jQuery latest
 
 jquery@^3.2.1:
   version "3.3.1"
