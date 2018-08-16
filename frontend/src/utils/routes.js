@@ -1,5 +1,5 @@
 import Splash from '../components/Splash';
-import VIntel from '../components/VIntel';
+import Vintel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
 import VCreateIntel from '../components/VCreateIntel';
@@ -13,14 +13,18 @@ const routes = [
         path: '/', component: Splash, beforeEnter: (to, from, next) => {
             // ...
             AuthService.auth(() => {
-                next('/dashboard');
+                next('/intel');
             }, () => {
                 next();
             });
         }
     },
     {
-        path: '/intel', component: VIntel, beforeEnter: (to, from, next) => {
+        path: '*',
+        redirect: '/intel'
+    },
+    {
+        path: '/intel', component: Vintel, beforeEnter: (to, from, next) => {
             // ...
             AuthService.auth(() => {
                 next();
@@ -32,7 +36,6 @@ const routes = [
     {
         path: '/intel/:id', component: VIntelDetail, name: 'VIntelDetail'
     },
-
     {
         path: '/calculator', component: VScoreCalculator, name: 'VScoreCalculator'
     },
@@ -42,3 +45,4 @@ const routes = [
 ];
 const router = new VueRouter({routes});
 export default router;
+

@@ -88,11 +88,10 @@
                                 </thead>
                             </table>
                             <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
-                                <table class="table table-responsive-lg position-relative"  v-scroll="onScroll">
-
+                                <table class="table table-responsive-lg position-relative">
                                     <div >
-                                        <tbody v-scroll="onScroll" >
-                                            <tr v-scroll="onScroll" v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
+                                        <tbody>
+                                            <tr v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
                                                 <td>{{rank.rank}}</td>
                                                 <td>{{rank.score}}</td>
                                                 <td class="break-line">{{rank.address}}</td>
@@ -140,7 +139,7 @@
                         if (binding.value(evt, el)) {
                             window.removeEventListener('scroll', f)
                         }
-                    }
+                    };
                     window.addEventListener('scroll', f)
                 }
             }
@@ -239,7 +238,9 @@
                     this.infiniteScrollFunction();
                 });
             }, getLeaderboard: function () {
+                this.$store.state.makingRequest = true;
                 LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
+                    this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += 100;
@@ -275,7 +276,6 @@
                         this.stopLogin();
                     });
                 }
-
             },
             onReady: function(instance, CountUp) {
                 const that = this;
@@ -294,16 +294,19 @@
                 let bottomReached = false;
                 if(this.table){
                     this.scroll.distance = this.table.scrollTop;
-
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
+
+                    this.$store.state.makingRequest = true;
                     this.table.scrollTop += 2;
                     this.busy = true;
                     let minimunLimit = 100;
                     if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
 
                     LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
+                        console.log(res);
+                        this.$store.state.makingRequest = false;
                         this.lastRank += 100;
                         this.busy = false;
                         this.leader = [... res,...this.leader];

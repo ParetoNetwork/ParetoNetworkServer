@@ -59,7 +59,7 @@
                         address: data,
                     });
                     this.collapseContent();
-                    this.$router.push('/dashboard');
+                    this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
                     alert(error);
