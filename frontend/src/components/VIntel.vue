@@ -211,14 +211,12 @@
                 return dashboardService.getAllContent(res => {
                     this.loading = false;
                     this.content = res;
-                    console.log(res);
                 }, error => {
                     alert(error);
                 });
             }, loadProfile: function () {
                 return profileService.getProfile(res => {
                     this.user = res;
-                    console.log(res);
                    // console.log(this.user);
                     this.firstName = res.first_name;
                     this.lastName = res.last_name;
@@ -258,7 +256,6 @@
                     this.loadContent()
                 ]).then( values => {
                     this.$store.state.makingRequest = false;
-                    console.log('start');
                 });
             },
             main: function () {

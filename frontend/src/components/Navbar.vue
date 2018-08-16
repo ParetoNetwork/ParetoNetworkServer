@@ -95,9 +95,10 @@
                   setTimeout("$('#gradient').addClass( 'animationEnd');",1);
               }
             },
-            $route (to){
-                if( to.fullPath !== '/' ){
+            logged(value){
+                if(value) {
                     DashboardService.getAddress(res => {
+                        console.log('cosha')
                         this.$store.dispatch({
                             type: 'login',
                             address: res,
@@ -122,6 +123,9 @@
             ]),
             loadingNav(){
                 return this.$store.state.makingRequest;
+            },
+            logged(){
+                return this.$store.state.isLogged;
             }
         },
         methods: {
