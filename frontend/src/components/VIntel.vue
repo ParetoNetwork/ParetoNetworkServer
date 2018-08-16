@@ -9,7 +9,7 @@
                             <div class="border p-2 mb-2" @click="openInput()">
 
                                 <div data-v-514e8c24="" class="thumb" id="wrapper"
-                                     v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', user.profile_pic)}"
+                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic)}"
                                      style="width: 100px; height: 100px;">
                                     <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i class="fa fa-pencil"
                                                                                               aria-hidden="true"></i></span>
@@ -89,7 +89,7 @@
                                 <router-link tag="div" class="d-flex split" :to="'/intel/' + row._id" @click="showDetails(row)">
                                     <div class="border p-1 mr-2">
                                         <div data-v-514e8c24="" class="thumb"
-                                             v-bind:style="{ backgroundImage: 'url( ' + showProfileImage(baseURL + '/profile-image?image=', row.createdBy.profilePic)}"
+                                             v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
                                              style="width: 40px; height: 40px;"></div>
                                     </div>
                                     <!--<img v-if="row.createdBy.profilePic" width="50" height="50" v-bind:src="baseURL+ '/profile-image?image=' + row.createdBy.profilePic" alt="" class="image-fit mr-2 border p-2">-->
@@ -151,6 +151,7 @@
 
     import {mapMutations, mapState} from 'vuex';
     import environment from '../utils/environment';
+    import http from '../services/HttpService';
 
     export default {
         name: 'VIntel',
@@ -184,7 +185,7 @@
         methods: {
             ...mapMutations(['intelEnter']),
             loadAddress: function () {
-                dashboardService.getAddress(res => {
+                return dashboardService.getAddress(res => {
                     this.address = res;
                 }, () => {
                     // alert(error);
@@ -202,12 +203,12 @@
             showDetails: function(row){
                // console.log(row);
             },
-            showProfileImage: function(path, pic){
-                if (pic) return path + pic;
-                return 'http://www.uriux.com/wp-content/uploads/2017/09/male-placeholder.jpg';
+            loadProfileImage: function(pic){
+                let path = this.baseURL + '/profile-image?image=';
+                return profileService.getProfileImage(path, pic);
             },
             loadContent: function () {
-                dashboardService.getAllContent(res => {
+                return dashboardService.getAllContent(res => {
                     this.loading = false;
                     this.content = res;
                     console.log(res);
@@ -215,7 +216,7 @@
                     alert(error);
                 });
             }, loadProfile: function () {
-                profileService.getProfile(res => {
+                return profileService.getProfile(res => {
                     this.user = res;
                     console.log(res);
                    // console.log(this.user);
@@ -227,7 +228,7 @@
                 });
             },
             loadMyContent: function () {
-                dashboardService.getContent(res => {
+                return dashboardService.getContent(res => {
                     this.myContent = res;
                 }, error => {
                     alert(error);
@@ -249,28 +250,29 @@
 
                 });
             },
+            requestCall : function(){
+                Promise.all([
+                    this.loadProfile(),
+                    this.loadMyContent(),
+                    this.loadAddress(),
+                    this.loadContent()
+                ]).then( values => {
+                    this.$store.state.makingRequest = false;
+                    console.log('start');
+                });
+            },
             main: function () {
+                this.$store.state.makingRequest = true;
                 if (!this.madeLogin) {
                     this.intelEnter();
-
                     AuthService.postSign(() => {
-                        this.loadProfile();
-                        this.loadMyContent();
-                        this.loadAddress();
-                        this.loadContent();
+                        this.requestCall();
                     }, () => {
-                        this.loadProfile();
-                        this.loadAddress();
-                        this.loadContent();
-                        this.loadMyContent();
+                        this.requestCall();
                     });
                 } else {
-                    this.loadProfile();
-                    this.loadAddress();
-                    this.loadContent();
-                    this.loadMyContent();
+                    this.requestCall();
                 }
-
             }
         }
     }

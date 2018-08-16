@@ -12,6 +12,7 @@ Vue.use(BootstrapVue);
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(Vuex);
+
 const store = new Vuex.Store({
     state: {
         isLogged: false,
@@ -20,6 +21,8 @@ const store = new Vuex.Store({
         showModalLoginOptions : false,
         showModalLedgerNano: false,
         makingLogin: false,
+        makingRequest: false,
+        requestFinish: false,
         madeLogin: JSON.parse(window.localStorage.getItem('logged'))
     },
     mutations: {
@@ -39,7 +42,6 @@ const store = new Vuex.Store({
             state.showModalLedgerNano = false;
             state.madeLogin = 0;
             window.localStorage.setItem('logged', false);
-
         }, intelEnter(state) {
             state.madeLogin = true;
             window.localStorage.setItem('logged', true);
