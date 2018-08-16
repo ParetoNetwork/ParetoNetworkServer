@@ -47,7 +47,7 @@
                                 <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
                                     <ICountUp
                                             :startVal="countUp.startVal"
-                                            :endVal="score"
+                                            :endVal="100"
                                             :decimals="countUp.decimals"
                                             :duration="countUp.duration"
                                             :options="countUp.options"
@@ -94,6 +94,15 @@
                                             <tr v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
                                                 <td>{{rank.rank}}</td>
                                                 <td>{{rank.score}}</td>
+                                                <!--<td>-->
+                                                    <!--<ICountUp-->
+                                                            <!--:startVal="countUp.startVal"-->
+                                                            <!--:endVal=rank.score-->
+                                                            <!--:decimals="countUp.decimals"-->
+                                                            <!--:duration="randomNumber(3,6)"-->
+                                                            <!--:options="countUp.options"-->
+                                                            <!--@ready="onReady"></ICountUp>-->
+                                                <!--</td>-->
                                                 <td class="break-line">{{rank.address}}</td>
                                             </tr>
                                         </tbody>
@@ -165,7 +174,7 @@
                 countUp : {
                     startVal: 0,
                     decimals: 0,
-                    duration: 2.5,
+                    duration: this.randomNumber(5, 10),
                     options: {
                         useEasing: true,
                         useGrouping: true,
@@ -327,6 +336,9 @@
             },
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
+            },
+            randomNumber: function (min = 1, max = 3){
+              return Math.floor((Math.random() * (max-min + 1 )) + min)
             },
             init : function(profile){
                 this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
