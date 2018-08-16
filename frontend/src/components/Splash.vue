@@ -5,7 +5,9 @@
                 <div class="overlay"></div>
                 <div>
                     <video preload="metadata" loop muted autoplay playsinline>
+                        <source src="../assets/download/Pareto-Introduction.mp4" type="video/mp4">
                         <source src="../assets/download/Pareto-Introduction.webm" type="video/webm">
+                        <source src="../assets/download/Pareto-Introduction.ogv" type="video/ogg">
                         <img src="../assets/images/overlay.png" title="">
                     </video>
                 </div>
