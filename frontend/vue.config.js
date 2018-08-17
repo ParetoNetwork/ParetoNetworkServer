@@ -13,7 +13,7 @@ module.exports = {
                             {
                                 loader: 'file-loader',
                                 options: {
-                                    name: '[name].[ext]'
+                                    name: '/media/[name].[ext]'
                                 }
                             }
                         ]
