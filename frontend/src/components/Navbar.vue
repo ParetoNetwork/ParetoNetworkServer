@@ -20,7 +20,7 @@
             <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
                 <ul class="navbar-nav ">
                     <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
-                        <router-link tag="a" class="nav-link" :active-class="'active'" to="/dashboard" exact>Intel
+                        <router-link tag="a" class="nav-link" :active-class="'active'" to="/intel" exact>Intel
                         </router-link>
                     </li>
                     <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
@@ -73,8 +73,9 @@
         name: 'Navbar',
         components: {ModalLedgerNano},
         mounted: function () {
+            this.colorNav = $('#gradient')
             DashboardService.getAddress(res => {
-               // console.log(res);
+                console.log(res);
                 this.$store.dispatch({
                     type: 'login',
                     address: res,
@@ -84,14 +85,44 @@
 
             });
         },
+        watch:{
+            loadingNav(value){
+              if(value){
+                  $('#gradient').removeClass("animateBar").removeClass("animationEnd");
+                  setTimeout("$('#gradient').addClass( 'animateBar');",1);
+              }else{
+                  $('#gradient').removeClass("animateBar");
+                  setTimeout("$('#gradient').addClass( 'animationEnd');",1);
+              }
+            },
+            $route (to){
+                if( to.fullPath !== '/' ){
+                    DashboardService.getAddress(res => {
+                        this.$store.dispatch({
+                            type: 'login',
+                            address: res,
+                        });
+                    }, () => {
+
+                    });
+                }
+            }
+        },
         data: function () {
-            return {};
+            return {
+                loading : false,
+                finish : false,
+                colorNav : {}
+            };
         },
         computed: {
             ...mapState([
                 // map this.count to store.state.count
                 'isLogged','address' , 'showModalSign'
-            ])
+            ]),
+            loadingNav(){
+                return this.$store.state.makingRequest;
+            }
         },
         methods: {
             manual: function() {
@@ -110,7 +141,7 @@
                         address: data,
                     });
                     this.collapseContent();
-                    this.$router.push('/dashboard');
+                    this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
                     alert(error);
@@ -119,13 +150,15 @@
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
+                    console.log(data);
                     DashboardService.getAddress(res => {
+                        console.log(res);
                         this.$store.dispatch({
                             type: 'login',
                             address: res,
                         });
                         this.collapseContent();
-                        this.$router.push('/dashboard');
+                        this.$router.push('/intel');
                     }, () => {
 
                     });
@@ -162,33 +195,39 @@
     .bar {
         vertical-align: top;
         height: 5px;
-        background: #295087; /* Old browsers */
-        background: -moz-linear-gradient(
-                        left,
-                        #295087 0%,
-                        #3f7989 50%,
-                        #6aba82 77%,
-                        #85c568 100%
-        );
-        background: -webkit-linear-gradient(
-                        left,
-                        #295087 0%,
-                        #3f7989 50%,
-                        #6aba82 77%,
-                        #85c568 100%
-        );
-        background: linear-gradient(
-                        to right,
-                        #295087 0%,
-                        #3f7989 50%,
-                        #6aba82 77%,
-                        #85c568 100%
-        );
-        filter: progid:DXImageTransform.Microsoft.gradient(
-                        startColorstr="#295087",
-                        endColorstr="#85c568",
-                        GradientType=1
-        );
+        background: linear-gradient(8deg, #295087, #3f7989, #6aba82, #85c568, #9ff677);
+    }
+
+    .animateBar{
+        background: linear-gradient(8deg, #3f7989, #6aba82, #85c568);
+        background-size: 1000% 1000%;
+        -webkit-animation: AnimationName 10s ease infinite;
+        -moz-animation: AnimationName 10s ease infinite;
+        animation: AnimationName 10s ease infinite;
+    }
+
+    .animationEnd{
+        background: linear-gradient(8deg, #295087, #3f7989, #6aba82, #85c568, #9ff677);
+        background-size: 1000% 1000%;
+        -webkit-animation: AnimationName 2s ease ;
+        -moz-animation: AnimationName 2s ease;
+        animation: AnimationName 2s ease;
+    }
+
+    @-webkit-keyframes AnimationName {
+        0%{background-position:30% 0%}
+        50%{background-position:71% 100%}
+        100%{background-position:30% 0%}
+    }
+    @-moz-keyframes AnimationName {
+        0%{background-position:30% 0%}
+        50%{background-position:71% 100%}
+        100%{background-position:30% 0%}
+    }
+    @keyframes AnimationName {
+        0%{background-position:30% 0%}
+        50%{background-position:71% 100%}
+        100%{background-position:30% 0%}
     }
 
     .header {

@@ -11,12 +11,38 @@
     import Navbar from './components/Navbar.vue';
     import SplashDashboard from './components/Splash.vue';
     import VFab from './components/VFab.vue';
+    import http from './services/HttpService';
 
     export default {
         name: 'App',
         components: {
             Navbar,VFab,
             SplashDashboard
+        },
+        mounted : function () {
+            // this.interceptRequest();
+            // this.interceptResponses();
+        },
+        methods: {
+            // interceptRequest : function() {
+            //     http.interceptors.request.use( (config) => {
+            //         console.log('Request');
+            //         return config;
+            //     }, function(err) {
+            //         console.log(err);
+            //         return Promise.reject(err);
+            //     });
+            // },
+            // interceptResponses : function(){
+            //     http.interceptors.response.use( (config) => {
+            //         this.$store.state.makingRequest = false;
+            //         console.log('Response');
+            //         return config;
+            //     }, function(err) {
+            //         console.log(err);
+            //         return Promise.reject(err);
+            //     });
+            // }
         }
     };
 </script>
