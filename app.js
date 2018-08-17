@@ -500,6 +500,9 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
     }]
 }));
 
+/**
+ * This is a scheduled task that will update the calculation for the score every five minutes.
+ */
 cron.schedule("*/5 * * * *", function() {
     try{
         controller.calculateAllScores(function(err, result){

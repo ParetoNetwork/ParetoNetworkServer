@@ -220,7 +220,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                             var removableIndex = 0;
                                             //sorts down to remaining transactions, since we already know the total and the system block height
                                             while(i < transactions.length){
-
+                                                // Should allow zero too
                                                 if(transactions[i][1] <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
                                                     transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
                                                     //console.log("current transaction[i][1] value: " + transactions[i][1]);
@@ -789,9 +789,16 @@ controller.getUserInfo = function(address ,callback){
 
 };
 
+
+/**
+ *  Based in the Address and the score equations, this function will calculate the weightedBlock and then recalculate the new score for a given delta.
+ * @param delta how many blocks are passed from the last block
+ * @param callback
+ */
 controller.getAproxScoreAddress = function(address, delta ,callback){
     controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
         if(error){ callback(error)} else {
+            //wieghtedBlock
             const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
             ranking.block = ranking.block + delta;
             const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
@@ -801,13 +808,18 @@ controller.getAproxScoreAddress = function(address, delta ,callback){
         }
     });
 }
-
+/**
+ * Based in a set of ranks (rank, limit, page) and the score equations, this function will calculate the weightedBlock and then recalculate the new score for a given delta.
+ * @param delta how many blocks are passed from the last block
+ * @param callback
+ */
 controller.getAproxScoreRanking = function(rank, limit, page, delta ,callback){
     controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
         if (err) {
             callback(err)
         }  else {
             result = result.map( ranking => {
+                //wieghtedBlock
                 const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
                 ranking.block = ranking.block + delta;
                 const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
@@ -1263,6 +1275,8 @@ controller.calculateAllScores = function(callback){
         .then(function(res) {
             blockHeight = res.number;
            //   ParetoAddress.find({ score : {$eq: 0} }, 'address score', { /*limit : 10000*/ }, function(err, results){
+
+            //Find all Address
               ParetoAddress.find({}, 'address score', { /*limit : 10000*/ }, function(err, results){
 
                 //ParetoAddress.find({ score : {$eq: 0} }, 'address score', { limit : 10000 }, function(err, results){
