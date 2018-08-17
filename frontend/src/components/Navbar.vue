@@ -75,7 +75,6 @@
         mounted: function () {
             this.colorNav = $('#gradient')
             DashboardService.getAddress(res => {
-                console.log(res);
                 this.$store.dispatch({
                     type: 'login',
                     address: res,
@@ -98,7 +97,6 @@
             logged(value){
                 if(value) {
                     DashboardService.getAddress(res => {
-                        console.log('cosha')
                         this.$store.dispatch({
                             type: 'login',
                             address: res,
@@ -156,7 +154,6 @@
                 authService.signSplash(data => {
                     console.log(data);
                     DashboardService.getAddress(res => {
-                        console.log(res);
                         this.$store.dispatch({
                             type: 'login',
                             address: res,
