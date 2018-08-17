@@ -307,7 +307,6 @@
                     if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
 
                     LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
-                        console.log(res);
                         this.$store.state.makingRequest = false;
                         this.lastRank += 100;
                         this.busy = false;
