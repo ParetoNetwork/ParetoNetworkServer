@@ -78,7 +78,7 @@
                         type: 'login',
                         address: data,
                     });
-                    this.$router.push('/dashboard');
+                    this.$router.push('/intel');
                 }, error => {
                     $('#signModal').modal('hide');
                     this.stopLogin();

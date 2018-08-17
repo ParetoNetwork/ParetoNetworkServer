@@ -217,8 +217,6 @@ export default class authService {
                             // debugger;
 
                             provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                console.log(result);
-                                console.log(err);
                                 if (err) return console.dir(err);
                                 if (result.error) {
                                     return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
@@ -227,7 +225,7 @@ export default class authService {
                                     return console.error(result);
                                 }
                                 result = result.result;
-                                const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
+                                const recovered = Sig.recoverTypedSignature({ data: msgParams, sig: result });
 
                                 if (recovered === from) {
                                     authService.signParetoServer(msgParams, from, result, onSuccess, onError)

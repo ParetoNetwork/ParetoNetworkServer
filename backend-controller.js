@@ -843,6 +843,7 @@ controller.getContentByCurrentUser = function(address, callback){
                       let data = {
                           _id: entry._id,
                           blockAgo : blockHeight - entry.block,
+                          block : entry.block,
                           address: entry.address,
                           title: entry.title,
                           body: entry.body,
@@ -858,8 +859,7 @@ controller.getContentByCurrentUser = function(address, callback){
                               biography: entry.createdBy.biography,
                               profilePic: entry.createdBy.profilePic
                           }
-
-                      } ;
+                      };
                       newResults.push(data);
                   });
                   callback(null, newResults );
