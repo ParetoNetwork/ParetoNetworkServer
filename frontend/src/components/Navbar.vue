@@ -98,7 +98,6 @@
             logged(value){
                 if(value) {
                     DashboardService.getAddress(res => {
-                        console.log('cosha')
                         this.$store.dispatch({
                             type: 'login',
                             address: res,

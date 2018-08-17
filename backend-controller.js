@@ -127,7 +127,6 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
             //get current blocknumber too
             web3.eth.getBlock('latest')
                 .then(function(res) {
-
                     blockHeight = res.number;
                     //console.log("blockheight: " + blockHeight);
 
@@ -219,11 +218,10 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                         try {
                                             var i = 0;
                                             var removableIndex = 0;
-
                                             //sorts down to remaining transactions, since we already know the total and the system block height
                                             while(i < transactions.length){
 
-                                                if(transactions[i][1] < 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
+                                                if(transactions[i][1] <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
                                                     transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
                                                     //console.log("current transaction[i][1] value: " + transactions[i][1]);
                                                     if(transactions[0][1] <= 0){
@@ -268,12 +266,11 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                             //which is okay if the decimal is added to the total as well, but for everyone
 
                                             //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
-                                            var divisor = (blockHeight - contractCreationBlockHeightInt)/100;
+                                            var divisor =  Math.max((blockHeight - contractCreationBlockHeightInt),1)/100;
 
                                             //console.log("divisor: " + divisor);
 
                                             var multiple = 1 + (blockHeightDifference / divisor);
-
                                             var score = amount * multiple;
                                             var bonus = blockHeightDifference / divisor;
 
@@ -293,7 +290,10 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                                 upsert : true,
                                                 new: true //mongo uses returnNewDocument, mongo uses new
                                             };
-
+                                            // console.log({
+                                            //     addrees: dbQuery.address,
+                                            //     dbValues: dbValues
+                                            // });
                                             //should queue for writing later
                                             var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
                                             //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
@@ -398,7 +398,6 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
             }); //end promise related to block height
         } //end address validation
     }catch (e) {
-        console.log(e);
         callback(e);
     }
 
@@ -772,18 +771,52 @@ controller.getUserInfo = function(address ,callback){
         callback(new Error('Invalid Address'));
     } else {
         controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
-            if(error){ callback(error)}
-            controller.retrieveProfileWithRedis(address, function (error, profile) {
-                if(error){ callback(error)}
-                callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
-                    'first_name': profile.firstName, "last_name": profile.lastName,
-                    'biography': profile.biography, "profile_pic" : profile.profilePic } );
-            });
+            if(error){
+                callback(error)
+            }else{
+                controller.retrieveProfileWithRedis(address, function (error, profile) {
+                    if(error){ callback(error)}
+                    callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
+                        'first_name': profile.firstName, "last_name": profile.lastName,
+                        'biography': profile.biography, "profile_pic" : profile.profilePic } );
+                });
+            }
+
         });
 
 
     }
 
+};
+
+controller.getAproxScoreAddress = function(address, delta ,callback){
+    controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
+        if(error){ callback(error)} else {
+            const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
+            ranking.block = ranking.block + delta;
+            const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
+            ranking.score = newScore;
+            callback(ranking);
+
+        }
+    });
+}
+
+controller.getAproxScoreRanking = function(rank, limit, page, delta ,callback){
+    controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+        if (err) {
+            callback(err)
+        }  else {
+            result = result.map( ranking => {
+                const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
+                ranking.block = ranking.block + delta;
+                const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
+                ranking.score = newScore;
+                return ranking;
+            });
+            callback(result);
+        }
+    });
 };
 
 controller.getContentById = function(){
@@ -1114,7 +1147,7 @@ controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
         }else{
           if((!results || results.length ===0 || !results[0])){
               // hopefully, users without pareto shouldn't get here now.
-              callback("We are sorry, you will need Pareto balance in order to be able to Sign In.")
+              callback(ErrorHandler.addressNotFound)
           }else{
               const multi = redisClient.multi();
               multi.hgetall(results[0].rank+ "");
@@ -1147,7 +1180,7 @@ controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
 	3. optional - check that addresses' block height (for when it was last calculated), if it wasn't long ago then don't update it and let that user do it on their own volition, to save some processing
 	4. run entire score promises chain
 */
-controller.seedLatestEvents = function(fres){
+controller.seedLatestEvents = function(){
 
   var blockHeight = 0;
 
@@ -1155,8 +1188,7 @@ controller.seedLatestEvents = function(fres){
   web3.eth.getBlock('latest')
     .then(function(res) {
       blockHeight = res.number;
-      //console.log("blockheight: " + blockHeight);
-
+      console.log("blockheight: " + blockHeight);
       return web3.eth.getPastLogs({
         fromBlock: contractCreationBlockHeightHexString,//'0x501331', //contractCreationBlockHeightHexString,
         toBlock: 'latest',
@@ -1164,7 +1196,7 @@ controller.seedLatestEvents = function(fres){
         topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
       }).then(function (txObjects){
 
-        //console.log("tx count here: " + txObjects.length);
+        console.log("tx count here: " + txObjects.length);
 
         var bulk = ParetoAddress.collection.initializeUnorderedBulkOp();
 
@@ -1187,63 +1219,84 @@ controller.seedLatestEvents = function(fres){
           });
 
         }
-        //console.log("writing all events now");
+        console.log("writing all events now");
         bulk.execute(function (err) {
+            if(err){
+                console.log(err);
+            }else{
+                controller.calculateAllScores(function(err, result){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        controller.getScoreAndSaveRedis(function(err, result){
+                            if(err){
+                                console.log(err)
+                            }else{
+                                console.log('Sucessfully updated' )
+                            }
 
-          controller.calculateAllScores(function(err, result){
+                        });
+                    }
 
-            if(err){}
-
-            //controller.calculateAllRanks();
-
-          });
+                });
+            }
 
         });
 
-        fres.status(200).json({status:"success"});
-
-      }); // end events
-    }); // end block height
+      }, function (error) {
+          console.log(error)
+      }).catch(function (err) {
+          console.log(err)
+      });
+    }, function (error) {
+        console.log(error)
+    }).catch(function (err) {
+      console.log(err)
+  });
 
 };
 
 controller.calculateAllScores = function(callback){
 
-  //console.log('addresses retrieval started');
+  console.log('addresses retrieval started');
+    web3.eth.getBlock('latest')
+        .then(function(res) {
+            blockHeight = res.number;
+           //   ParetoAddress.find({ score : {$eq: 0} }, 'address score', { /*limit : 10000*/ }, function(err, results){
+              ParetoAddress.find({}, 'address score', { /*limit : 10000*/ }, function(err, results){
 
-  web3.eth.getBlock('latest')
-    .then(function(res) {
-      blockHeight = res.number;
-      //console.log("blockheight: " + blockHeight);
+                //ParetoAddress.find({ score : {$eq: 0} }, 'address score', { limit : 10000 }, function(err, results){
+                if(err){
+                  callback(err);
+                }
+                else {
+                  //loop through and calculate scores and save them
 
+                  async function processArray(results){
 
-      ParetoAddress.find({ score : {$eq: 0} }, 'address score', { /*limit : 10000*/ }, function(err, results){
-        //ParetoAddress.find({ score : {$eq: 0} }, 'address score', { limit : 10000 }, function(err, results){
-        if(err){
-          callback(err);
-        }
-        else {
-          //loop through and calculate scores and save them
+                    //console.log("processing addresses asynchronously");
 
-          async function processArray(results){
+                    for (const item of results) {
+                      //console.log("item : " + item.address);
+                      //possible optimization: initialize bulk here, push function into this, queue all results and bulk write later
+                      await controller.calculateScore(item.address, blockHeight, function (err, result) {
 
-            //console.log("processing addresses asynchronously");
+                      });
+                    }
 
-            for (const item of results) {
-              //console.log("item : " + item.address);
-              //possible optimization: initialize bulk here, push function into this, queue all results and bulk write later
-              await controller.calculateScore(item.address, blockHeight);
-            }
+                    if(callback && typeof callback === "function") { callback(null, {} ); }
+                  }
 
-            if(callback && typeof callback === "function") { callback(null, {} ); }
-          }
+                  processArray(results);
 
-          processArray(results);
+                  //console.log('addresses updating method finished');
+                }
 
-          //console.log('addresses updating method finished');
-        }
-
-      });
+              });
+        }, function (error) {
+            console.log(error)
+        }).catch(function (err) {
+        console.log(err)
     });
 
 };

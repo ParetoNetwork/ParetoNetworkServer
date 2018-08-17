@@ -11,7 +11,8 @@ var requestp = require('request-promise');
 var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser');
 const multer = require("multer");
-var multerS3 = require('multer-s3')
+var multerS3 = require('multer-s3');
+const cron = require("node-cron");
 const AWS = require('aws-sdk');
 AWS.config.update({
     region: process.env.S3_REGION || constants.S3_REGION,
@@ -404,29 +405,30 @@ app.get('/v1/address/:address', function (req, res) {
 
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
-    if(req.query.latest==='true'){
-        controller.updateScore(req.user, function (err, success) {
-            if (err) {
-                res.status(200).json(ErrorHandler.getError(err));
-            } else {
-                controller.getUserInfo(req.user,  function (err, result) {
-                    if (err) {
-                        res.status(200).json(ErrorHandler.getError(err));
-                    } else {
-                        res.status(200).json(ErrorHandler.getSuccess(result));
-                    }
-                });
-            }
-        });
-    }else{
-        controller.getUserInfo(req.user,  function (err, result) {
-            if (err) {
-                res.status(200).json(ErrorHandler.getError(err));
-            } else {
-                res.status(200).json(ErrorHandler.getSuccess(result));
-            }
-        });
-    }
+    //Get Info User
+     if (req.query.latest=='true'){
+         controller.updateScore(req.user, function (err, success) {
+             if (err) {
+                 res.status(200).json(ErrorHandler.getError(err));
+             } else {
+                 controller.getUserInfo(req.user,  function (err, result) {
+                     if (err) {
+                         res.status(200).json(ErrorHandler.getError(err));
+                     } else {
+                         res.status(200).json(ErrorHandler.getSuccess(result));
+                     }
+                 });
+             }
+         });
+     } else{
+         controller.getUserInfo(req.user,  function (err, result) {
+             if (err) {
+                 res.status(200).json(ErrorHandler.getError(err));
+             } else {
+                 res.status(200).json(ErrorHandler.getSuccess(result));
+             }
+         });
+     }
 
 });
 
@@ -497,6 +499,30 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
         fileExtension: 'gz'
     }]
 }));
+
+cron.schedule("*/5 * * * *", function() {
+    try{
+        controller.calculateAllScores(function(err, result){
+            if(err){
+                console.log(err)
+            }else{
+                controller.getScoreAndSaveRedis(function(err, result){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        console.log('Sucessfully updated' )
+                    }
+
+                });
+            }
+
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+});
+
 
 /*app.get('/v1/content/social', function(req, res){
   //add solume API key to config + environment variable
