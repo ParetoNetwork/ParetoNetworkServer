@@ -142,7 +142,7 @@ export default class ContentService {
           Pareto_Token_Schema.networks["3"].address
         );
 
-        const depositAmount = 10 * 10 ** 18;
+        const depositAmount = parseFloat(content.tokenAmount) * 10 ** 18;
 
         let gasApprove = await ParetoTokenInstance.methods
           .approve(Intel.options.address, depositAmount)
