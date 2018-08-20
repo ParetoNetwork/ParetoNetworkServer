@@ -29,8 +29,29 @@
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                 <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span>
                             </div>
-                            <p class="mb-2 mt-2"><b>Network Rank:</b> {{user.rank || ''}}</p>
+                            <p class="mb-2 mt-2">
+                                <b>Network Rank:</b>
+                                <ICountUp
+                                        :startVal="countUp.startVal"
+                                        :endVal="parseFloat(user.rank)"
+                                        :decimals="decimalsLength(user.rank)"
+                                        :duration="randomNumber(3,6)"
+                                        :options="countUp.options"
+                                        @ready="onReady"/>
+                            </p>
+                            <p class="mb-2 mt-2">
+                                <b>User Score:</b>
+                                <ICountUp
+                                        v-if="user.score"
+                                        :startVal="countUp.startVal"
+                                        :endVal="parseFloat(user.score)"
+                                        :decimals="decimalsLength(user.score)"
+                                        :duration="randomNumber(3,6)"
+                                        :options="countUp.options"
+                                        @ready="onReady"/>
+                                <span v-else> 0 </span>
 
+                            </p>
 
                             <!--<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">-->
                                 <!--Calculate-->
@@ -100,7 +121,14 @@
                                             <h1 class="title">{{row.title || 'No title'}}</h1>
                                             <div class="d-flex justify-content-between">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block {{row.blockAgo}} </span>
+                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block
+                                                <ICountUp
+                                                        :startVal="countUp.startVal"
+                                                        :endVal="parseFloat(row.blockAgo)"
+                                                        :decimals="decimalsLength(row.blockAgo)"
+                                                        :duration="randomNumber(4,7)"
+                                                        :options="countUp.options"
+                                                        @ready="onReady"/></span>
                                             </div>
                                         </div>
                                         <div class="d-flex flex-column justify- content-end">
@@ -150,20 +178,23 @@
     import moment from 'moment';
     import AuthService from '../services/authService';
     import ContentService from "../services/ContentService";
+    import ICountUp from 'vue-countup-v2';
 
     import {mapMutations, mapState} from 'vuex';
     import environment from '../utils/environment';
-    import http from '../services/HttpService';
+    import {countUpMixin} from "../mixins/countUp";
 
     export default {
         name: 'VIntel',
-        components: {},
+        mixins: [countUpMixin],
+        components: {
+            ICountUp
+        },
         data: function () {
             return {
                 address: null,
-                content: [
-                    ], myContent: [
-                    ],
+                content: [],
+                myContent: [],
                 loading: true,
                 moment: moment,
                 firstName: '',
@@ -171,7 +202,10 @@
                 bio: '',
                 picture: '',
                 baseURL: environment.baseURL,
-                user: {}
+                user: {
+                    rank : 0,
+                    score : 0
+                }
             };
         }, filters: {
             date: function formatDate(date) {
@@ -238,8 +272,6 @@
             }, loadProfile: function () {
                 return profileService.getProfile(res => {
                     this.user = res;
-                    console.log(res);
-                   // console.log(this.user);
                     this.firstName = res.first_name;
                     this.lastName = res.last_name;
                     this.bio = res.biography;
@@ -256,6 +288,9 @@
             },
             showModal() {
                 this.$refs.myModalRef.show();
+            },
+            randomNumber: function (min = 1, max = 3){
+                return Math.floor((Math.random() * (max-min + 1 )) + min)
             },
             updateProfile() {
                 const profile = {
@@ -278,7 +313,6 @@
                     this.loadContent()
                 ]).then( values => {
                     this.$store.state.makingRequest = false;
-                    console.log('start');
                 });
             },
             main: function () {
