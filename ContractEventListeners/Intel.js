@@ -23,7 +23,7 @@ Intel.events.Reward({
     }
     const rewardAmount = event.returnValues.rewardAmount;
     const intelIndex = event.returnValues.intelIndex;
-
+console.log("here we are", rewardAmount, intelIndex)
     ParetoIntel.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {
         if (err) {
             throw err;
