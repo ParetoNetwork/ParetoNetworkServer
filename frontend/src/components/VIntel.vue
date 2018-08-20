@@ -207,7 +207,7 @@
             rewardIntel: function(ID){
                 console.log(ID,"ID")
                 const tokenAmount = prompt("Please enter the number of Pareto Tokens to reward", "1");
-                ContentService.rewardIntel({ID}, (res) => {
+                ContentService.rewardIntel({ID,tokenAmount}, (res) => {
                     console.log(res)
                 }, (err) => {
                     
