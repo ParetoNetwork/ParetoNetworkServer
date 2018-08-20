@@ -108,7 +108,7 @@
                                                 <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                                 <span class="text-right">{{row.pxt}}</span>
                                             </div>
-                                            <button class="btn btn-primary-pareto" v-if="false">REWARD</button>
+                                            <button class="btn btn-primary-pareto" @click="rewardIntel(row.id)">REWARD</button>
                                         </div>
                                     </div>
 
@@ -148,6 +148,7 @@
     import profileService from '../services/profileService';
     import moment from 'moment';
     import AuthService from '../services/authService';
+    import ContentService from "../services/ContentService";
 
     import {mapMutations, mapState} from 'vuex';
     import environment from '../utils/environment';
@@ -203,6 +204,16 @@
             showDetails: function(row){
                // console.log(row);
             },
+            rewardIntel: function(ID){
+                console.log(ID,"ID")
+                const tokenAmount = prompt("Please enter the number of Pareto Tokens to reward", "1");
+                ContentService.rewardIntel({ID}, (res) => {
+                    console.log(res)
+                }, (err) => {
+                    
+                })
+            }
+            ,
             loadProfileImage: function(pic){
                 let path = this.baseURL + '/profile-image?image=';
                 return profileService.getProfileImage(path, pic);
@@ -211,7 +222,7 @@
                 return dashboardService.getAllContent(res => {
                     this.loading = false;
                     this.content = res;
-                    console.log(res);
+                    console.log(res,"a;;;");
                 }, error => {
                     alert(error);
                 });
