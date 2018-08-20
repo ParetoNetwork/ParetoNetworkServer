@@ -46,13 +46,17 @@
                             <div id="score-counter" class="d-flex">
                                 <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
                                     <ICountUp
+                                            v-if="score"
                                             :startVal="countUp.startVal"
-                                            :endVal="score"
-                                            :decimals="countUp.decimals"
-                                            :duration="countUp.duration"
+                                            :endVal="parseFloat(score)"
+                                            :decimals="decimalsLength(score + '')"
+                                            :duration="randomNumber(3,6)"
                                             :options="countUp.options"
                                             @ready="onReady"
                                     />
+                                    <span v-else>
+                                        0
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -89,11 +93,20 @@
                             </table>
                             <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
                                 <table class="table table-responsive-lg position-relative">
-                                    <div >
+                                    <div>
                                         <tbody>
                                             <tr v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
                                                 <td>{{rank.rank}}</td>
-                                                <td>{{rank.score}}</td>
+                                                <!--<td>{{rank.score}}</td>-->
+                                                <td>
+                                                    <ICountUp
+                                                            :startVal="countUp.startVal"
+                                                            :endVal="parseFloat(rank.score)"
+                                                            :decimals="decimalsLength(rank.score)"
+                                                            :duration="randomNumber(3,6)"
+                                                            :options="countUp.options"
+                                                            @ready="onReady"></ICountUp>
+                                                </td>
                                                 <td class="break-line">{{rank.address}}</td>
                                             </tr>
                                         </tbody>
@@ -123,8 +136,11 @@
     import LoginOptions from "./Modals/VLoginOptions";
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
+    import {countUpMixin} from '../mixins/countUp';
+
     export default {
         name: 'VLeaderboards',
+        mixins: [countUpMixin],
         components: {
             ModalLedgerNano,
             LoginOptions,
@@ -161,19 +177,6 @@
                 scroll : {
                     distance: 0,
                     active: false
-                },
-                countUp : {
-                    startVal: 0,
-                    decimals: 0,
-                    duration: 2.5,
-                    options: {
-                        useEasing: true,
-                        useGrouping: true,
-                        separator: ',',
-                        decimal: '.',
-                        prefix: '',
-                        suffix: ''
-                    }
                 }
             };
         },
@@ -277,14 +280,13 @@
                     });
                 }
             },
-            onReady: function(instance, CountUp) {
-                const that = this;
-                instance.update(that.endVal + 100);
-            },
             changeFontSize : function ( score ) {
-                let textLength = score.toString().length;
 
-                this.textSize = 100 - textLength*4;
+                let textLength = score.toString().length;
+                if (score < 1)
+                    this.textSize = 100 - (score.length - 4)*4;
+                else
+                    this.textSize = 100 - textLength*4;
             },
             infiniteScrollFunction: function(){
                 this.busy = true;
@@ -305,7 +307,6 @@
                     if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
 
                     LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
-                        console.log(res);
                         this.$store.state.makingRequest = false;
                         this.lastRank += 100;
                         this.busy = false;
@@ -331,10 +332,10 @@
             init : function(profile){
                 this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
                 this.address = profile.address;
-
+                this.score = profile.score;
                 this.loading = false;
-                profile.score = Number(profile.score);
-                this.score = Number(profile.score.toFixed(5));
+                // profile.score = Number(profile.score);
+                // this.score = Number(profile.score.toFixed(5));
                 this.changeFontSize(this.score);
                 this.infiniteScrollFunction();
             },
