@@ -88,15 +88,6 @@ export default class ContentService {
         return;
       }
       const rewarder_address = accounts[0];
-      const Intel = new web3.eth.Contract(
-        Intel_Contract_Schema.abi,
-        Intel_Contract_Schema.networks["3"].address
-      );
-
-      const ParetoTokenInstance = new web3.eth.Contract(
-        Pareto_Token_Schema.abi,
-        Pareto_Token_Schema.networks["3"].address
-      );
 
       const depositAmount = parseFloat(content.tokenAmount) * 10 ** 18;
 
@@ -130,10 +121,6 @@ export default class ContentService {
         return;
       }
       const distributor = accounts[0];
-      const Intel = new web3.eth.Contract(
-        Intel_Contract_Schema.abi,
-        Intel_Contract_Schema.networks["3"].address
-      );
 
       let gasDistribute = await Intel.methods
         .distributeReward(content.ID)
