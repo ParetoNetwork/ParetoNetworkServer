@@ -564,9 +564,9 @@ controller.getAllAvailableContent = function(req, callback) {
   if(web3.utils.isAddress(req.user) == false){
     if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
-
     //1. get score from address, then get standard deviation of score
     controller.retrieveAddress(req.user, function(err,result) {
+
       if(err){
         if(callback && typeof callback === "function") {
           callback(err);
@@ -710,7 +710,7 @@ controller.getAllAvailableContent = function(req, callback) {
                   //sort results
                   allResults = allResults.sort(compare);
                     let newResults = [];
-                    allResults.forEach(function(entry){
+                    allResults.forEach(function(entry){                        
                         let data = {
                             _id: entry._id,
                             blockAgo : blockHeight - entry.block,
@@ -723,11 +723,11 @@ controller.getAllAvailableContent = function(req, callback) {
                             speed: entry.speed,
                             _v: entry._v,
                             createdBy: {
-                                address: entry.createdBy.address,
-                                firstName: entry.createdBy.firstName,
-                                lastName: entry.createdBy.lastName,
-                                biography: entry.createdBy.biography,
-                                profilePic: entry.createdBy.profilePic
+                                address: "abc",
+                                firstName: "abc",
+                                lastName: "abc",
+                                biography: "abc",
+                                profilePic: "abc"
                             }
 
                         } ;
@@ -738,6 +738,8 @@ controller.getAllAvailableContent = function(req, callback) {
                   if(callback && typeof callback === "function") { callback(null, newResults ); }
 
                 } catch (err) {
+                    console.log("++++++++++++++",req.user)
+
                   if(callback && typeof callback === "function") { callback(err); }
                 }
 
@@ -822,10 +824,12 @@ controller.getContentById = function(){
 };
 
 controller.getContentByCurrentUser = function(address, callback){
+    console.log("addreeesss0")
 
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
+      console.log("addreeesss1")
     var query = ParetoContent.find({address : address}).sort({block : -1}).populate( 'createdBy' );
 
     query.exec(function(err, results){

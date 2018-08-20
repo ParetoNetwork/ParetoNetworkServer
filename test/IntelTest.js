@@ -76,7 +76,7 @@
 //         const decimals = await ParetoTokenInstance.methods.decimals().call();       // get decimals of Pareto token
 //         const _depositAmount = 500 * (10 ** decimals);
 //         const _desiredReward = "1000";
-//         const _ttl = Math.round(((new Date).getTime() / 1000)) + 174;  // add five seconds to to allow the rewarder to reward pareto tokens
+//         const _ttl = Math.round(((new Date).getTime() / 1000)) + 11174;  // add five seconds to to allow the rewarder to reward pareto tokens
 //         const provider_address = accounts[0];
 
 //         const result = await request.post(
@@ -88,7 +88,7 @@
 //                 "text": "Intel's text"
 
 //             });
-
+// console.log(result.data);
 //         _intelID = result.data.data.content.Intel_ID;
 
 
