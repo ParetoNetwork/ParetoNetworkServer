@@ -109,6 +109,7 @@
                                                 <span class="text-right">{{row.pxt}}</span>
                                             </div>
                                             <button class="btn btn-primary-pareto" @click="rewardIntel(row.id)">REWARD</button>
+                                            <button class="btn btn-primary-pareto" @click="distributeReward(row.id)">DISTRIBUTE</button>
                                         </div>
                                     </div>
 
@@ -210,6 +211,14 @@
                 ContentService.rewardIntel({ID,tokenAmount}, (res) => {
                     console.log(res)
                 }, (err) => {
+                    
+                })
+            }
+            ,
+            distributeReward: function(ID){
+                ContentService.distributeRewards({ID}, (res) => {
+                    console.log(res)
+                }, (error) => {
                     
                 })
             }
