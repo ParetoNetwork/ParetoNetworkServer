@@ -102,6 +102,7 @@ const ErrorHandler = require('./error-handler.js');
 
 
 app.get('/profile-image', function (req, res) {
+    0
     var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
    // var url = s3.getSignedUrl('getObject', params);
 

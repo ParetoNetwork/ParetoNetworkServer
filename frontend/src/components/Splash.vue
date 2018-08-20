@@ -4,8 +4,7 @@
             <div class="content" style="height:100%; display: flex; align-items: flex-end;">
                 <div class="overlay"></div>
                 <div>
-                    <video preload="metadata" loop muted autoplay playsinline>
-                        <source src="../assets/download/Pareto-Introduction.mp4" type="video/mp4">
+                    <video :src="video.src" loop muted autoplay playsinline>
                         <img src="../assets/images/overlay.png" title="">
                     </video>
                 </div>
@@ -13,7 +12,6 @@
                 <div class="wrapper d-flex align-items-center p-5">
                     <div class="row middle-xs">
                         <div class="col-xs-12 col-sm-12 col-md-6">
-
                             <div class="site-moto">
                                 <img src="../assets/images/LogoReverse.svg" style="width: 400px; max-width: 100%;"
                                      malt="">
@@ -23,7 +21,6 @@
                                     <br/>
                                 </h1>
                             </div>
-
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-6">
                             <div class="site-moto font-body conditional-center">
@@ -133,6 +130,10 @@
     import ModalSignIn from './VModalManualSigIn';
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
+    import VideoMp4 from "../assets/download/Pareto-Introduction.mp4";
+    import VideoWebm from "../assets/download/Pareto-Introduction.webm";
+    import VideoOgg from "../assets/download/Pareto-Introduction.ogv";
+
     export default {
         name: 'SplashDashboard',
         components: {ModalLedgerNano, LoginOptions, ModalSignIn, VFab, VParticles},
@@ -145,10 +146,12 @@
         data() {
             return {
                 loading: false,
-                option : ''
+                option : '',
+                video : {
+                    src : this.supportsVideoType(),
+                    type : ''
+                }
             };
-        },
-        mounted() {
         },
         methods: {
             authLogin() {
@@ -175,10 +178,34 @@
             },
             hideModal () {
                 this.$refs.loginOptions.hide()
-            }
-            ,
+            },
             checkLoginOption (option){
                 console.log(option);
+            },
+            supportsVideoType() {
+                let video;
+
+                let formats = {
+                    ogg: 'video/ogg; codecs="theora"',
+                    h264: 'video/mp4; codecs="avc1.42E01E"',
+                    webm: 'video/webm; codecs="vp8, vorbis"',
+                    vp9: 'video/webm; codecs="vp9"',
+                    hls: 'application/x-mpegURL; codecs="avc1.42E01E"'
+                };
+
+                if(!video) {
+                    video = document.createElement('video');
+                }
+
+                if(video.canPlayType(formats.webm) === "probably" || video.canPlayType(formats.vp9) === "probably"){
+                    return VideoWebm;
+                }
+                else if (video.canPlayType(formats.ogg) === "probably"){
+                    return VideoOgg;
+                }
+                else{
+                    return VideoMp4;
+                }
             }
             , ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin']

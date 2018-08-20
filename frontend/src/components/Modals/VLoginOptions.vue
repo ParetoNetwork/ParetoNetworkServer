@@ -78,7 +78,6 @@
                             address: res,
                         });
                         this.collapseContent();
-                        console.log(this.redirectRoute);
                         this.$router.go(this.redirectRoute || '/intel');
                     }, () => {
 

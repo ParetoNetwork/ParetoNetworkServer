@@ -71,9 +71,10 @@
         methods: {
             manualLogin: function () {
                 this.loadingLogin();
-                Auth.manualLogin(this.addresstemp, this.message, this.signed ,data => {
+                Auth.manualLogin( this.addresstemp, this.message, this.signed, data => {
                     this.$store.state.showModalSign = false;
                     $('#signModal').modal('hide');
+                    console.log(data);
                     this.$store.dispatch({
                         type: 'login',
                         address: data,
