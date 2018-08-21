@@ -1,9 +1,9 @@
 var Web3 = require('web3');
 const mongoose = require('mongoose');
-var web3_websocket_URL = process.env.web3_websocket_URL;
+var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 // var web3 = new Web3("ws://localhost:8545");
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
-var web3 = new Web3(web3_websocket_URL);
+var web3 = new Web3(WEB3_WEBSOCKET_URL);
 // var web3 = new Web3("ws://localhost:8545");
 
 
