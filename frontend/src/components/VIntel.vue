@@ -303,6 +303,7 @@ export default {
       return dashboardService.getContent(
         res => {
           this.myContent = res;
+          console.log(res);
         },
         error => {
           alert(error);

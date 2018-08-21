@@ -133,10 +133,6 @@
 </script>
 
 <style scoped lang="scss">
-    .popover {
-        background-color: #6bc27a;
-    }
-
     textarea a {
         text-decoration: underline;
         color: blue;
