@@ -91,13 +91,13 @@
                                                     :startVal="countUp.startVal"
                                                     :endVal="parseFloat(intel.blockAgo)"
                                                     :decimals="countUp.decimals"
-                                                    :duration="randomNumber(3,6)"
+                                                    :duration="randomNumber(1,3)"
                                                     :options="countUp.options"
                                                     @ready="onReady"/>
                                             <span v-else> 0 </span>
                                             Blocks Ago
                                         </span>
-                                        <span v-if="false" class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
+                                        <!-- <span v-if="false" class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span> -->
                                     </div>
                                 </div>
                             </div>
