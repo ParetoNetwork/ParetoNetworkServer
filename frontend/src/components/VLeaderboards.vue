@@ -137,6 +137,7 @@
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
     import {countUpMixin} from '../mixins/countUp';
+    import * as WebSocket from 'ws';
 
     export default {
         name: 'VLeaderboards',
@@ -177,7 +178,12 @@
                 scroll : {
                     distance: 0,
                     active: false
-                }
+                },
+                ws : new WebSocket ('ws://localhost:8000',{
+                    headers : {
+                        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaW9zdHJlYW1lciJ9.oNx-4e9hldyATpdPZghd_sjX8DhTkQFVDBxIhKh4MC4"
+                    }
+                })
             };
         },
         watch: {
@@ -217,6 +223,16 @@
         },
         mounted: function () {
             this.getAddress();
+
+            let params = {rank: this.rank, limit: 100, page: this.page};
+            let jParams = JSON.stringify(params);
+            this.ws.on(jParams, function open() {
+                this.ws.send('something');
+            });
+
+            this.ws.on('message', function incoming(data) {
+                console.log(data);
+            });
         },
         updated: function() {
             this.updated++;
