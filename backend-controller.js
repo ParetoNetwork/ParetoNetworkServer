@@ -57,7 +57,11 @@ const ParetoProfile = mongoose.model('profile');
 
 var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
-var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"));
+
+
+//provider should be an environment variable
+var provider = "https://internally-settling-racer.quiknode.io/b5d97fc4-1946-4411-87e1-c7d961fb0e8d/X2kLtRMEBbjEkSJCCK8hFA==/" //"https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"
+var web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
 var sigUtil = require('eth-sig-util');
 var jwt = require('jsonwebtoken');
