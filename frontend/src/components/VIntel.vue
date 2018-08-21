@@ -70,10 +70,10 @@
                     </div>
                 </template>
 
-                <div class="border  mb-3 mb-md-1">
-                    <div class="p-3 border-bottom">
+                <div class="border  mb-3 mb-md-1 px-4 py-3">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
                         <span class="title"> <b>MY POSTS:</b> </span>
-                        <button v-if="false" class="btn btn-success-pareto">POST NEW INTEL</button>
+                        <router-link tag="button" class="btn btn-success-pareto" :to="'/create'">POST NEW INTEL</router-link>
                     </div>
                     <div class="p-3">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
