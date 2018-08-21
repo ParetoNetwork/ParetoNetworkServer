@@ -726,11 +726,11 @@ controller.getAllAvailableContent = function(req, callback) {
                             id:entry.id,
                             _v: entry._v,
                             createdBy: {
-                                address: "abc",
-                                firstName: "abc",
-                                lastName: "abc",
-                                biography: "abc",
-                                profilePic: "abc"
+                                address: entry.createdBy.address,
+                                firstName: entry.createdBy.firstName,
+                                lastName: entry.createdBy.lastName,
+                                biography: entry.createdBy.biography,
+                                profilePic: entry.createdBy.profilePic
                             }
 
                         } ;
@@ -741,8 +741,6 @@ controller.getAllAvailableContent = function(req, callback) {
                   if(callback && typeof callback === "function") { callback(null, newResults ); }
 
                 } catch (err) {
-                    console.log("++++++++++++++",req.user)
-
                   if(callback && typeof callback === "function") { callback(err); }
                 }
 
