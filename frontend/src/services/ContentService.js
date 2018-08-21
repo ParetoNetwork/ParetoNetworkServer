@@ -26,7 +26,10 @@ export default class ContentService {
 
   static async createIntel(content, onSuccess, onError) {
     await this.Setup();
-    const tokenAmount = prompt("Please enter the number of Pareto Tokens to deposit for creating Intel", "1");
+    const tokenAmount = prompt(
+      "Please enter the number of Pareto Tokens to deposit for creating Intel",
+      "1"
+    );
 
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
@@ -45,7 +48,11 @@ export default class ContentService {
 
       await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
-        .send({ from: provider_address, gas: gasApprove })
+        .send({
+          from: provider_address,
+          gas: gasApprove,
+          gasPrice: "10000000000"
+        })
         .on("error", err => {
           onError(err);
         });
@@ -70,7 +77,8 @@ export default class ContentService {
         )
         .send({
           from: provider_address,
-          gas: gasCreateIntel
+          gas: gasCreateIntel,
+          gasPrice: "10000000000"
         })
         .on("error", err => {
           onError(err);
@@ -97,7 +105,11 @@ export default class ContentService {
 
       await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
-        .send({ from: rewarder_address, gas: gasApprove })
+        .send({
+          from: rewarder_address,
+          gas: gasApprove,
+          gasPrice: "10000000000"
+        })
         .on("error", err => {
           onError(err);
         });
@@ -105,9 +117,11 @@ export default class ContentService {
       const gasSendReward = await Intel.methods
         .sendReward(content.ID, depositAmount)
         .estimateGas({ from: rewarder_address });
-      await Intel.methods
-        .sendReward(content.ID, depositAmount)
-        .send({ from: rewarder_address, gas: gasSendReward });
+      await Intel.methods.sendReward(content.ID, depositAmount).send({
+        from: rewarder_address,
+        gas: gasSendReward,
+        gasPrice: "10000000000"
+      });
       onSuccess("success");
     });
   }
@@ -128,7 +142,11 @@ export default class ContentService {
 
       await Intel.methods
         .distributeReward(content.ID)
-        .send({ from: distributor, gas: gasDistribute })
+        .send({
+          from: distributor,
+          gas: gasDistribute,
+          gasPrice: "10000000000"
+        })
         .on("error", error => {
           onError(error);
         });
