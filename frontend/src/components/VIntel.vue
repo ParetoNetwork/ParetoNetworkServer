@@ -72,8 +72,8 @@
 
                 <div class="border  mb-3 mb-md-1">
                     <div class="p-3 border-bottom">
-                        <span class="title"> <b>MY POSTS:</b> </span>
-                        <button class="btn btn-success-pareto" @click="goToIntelPage()">POST NEW INTEL</button>
+                        <span class="title"> <b>MY POSTS</b> </span>
+                        <button class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL</button>
                     </div>
                     <div class="p-3">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
@@ -391,11 +391,13 @@ li,
   text-align: center;
   color: #020f1f;
 }
-
+.button-margin{
+    margin-left:15px;
+}
 .icon-mini {
   object-fit: contain;
   height: auto;
-  margin-right: 5px;
+  margin-right:5px;
 }
 
 .title {
