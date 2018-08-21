@@ -291,6 +291,7 @@ app.get('/v1/summation', function (req, res) {
 
 app.post('/v1/content', function (req, res) {
 
+
     if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }
@@ -316,6 +317,17 @@ app.post('/v1/content', function (req, res) {
 app.get('/v1/content', function (req, res) {
 
     //this needs a session id, basically an authenticated address
+
+    var limit = parseInt(req.query.limit) || 15;
+    var page = parseInt(req.query.page) || 0;
+
+    //max limit
+    if (limit > 50) {
+        limit = 50;
+    }
+
+    req.query.limit = limit;
+    req.query.page = page;
 
     controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
