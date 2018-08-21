@@ -530,6 +530,9 @@ controller.postContent = function(req, callback){
 
 controller.getAllAvailableContent = function(req, callback) {
 
+    var limit = parseInt(req.query.limit);
+    var page = parseInt(req.query.page);
+
   //check if user, then return what the user is privy to see
 
   //check block number or block age, then retrieve all content after that block. add more limitations/filters later
@@ -683,28 +686,42 @@ controller.getAllAvailableContent = function(req, callback) {
                   //sort results
                   allResults = allResults.sort(compare);
                     let newResults = [];
+                    let i = 0;
                     allResults.forEach(function(entry){
-                        let data = {
-                            _id: entry._id,
-                            blockAgo : blockHeight - entry.block,
-                            title: entry.title,
-                            address: entry.address,
-                            body: entry.body,
-                            dateCreated: entry.dateCreated,
-                            txHash: entry.txHash,
-                            reward: entry.reward,
-                            speed: entry.speed,
-                            _v: entry._v,
-                            createdBy: {
-                                address: entry.createdBy.address,
-                                firstName: entry.createdBy.firstName,
-                                lastName: entry.createdBy.lastName,
-                                biography: entry.createdBy.biography,
-                                profilePic: entry.createdBy.profilePic
-                            }
+                        /*
 
-                        } ;
-                        newResults.push(data);
+                         currently: force use of limit to keep json response smaller.
+                         limit isn't used earlier so that redis knows the full result,
+                         and because the queries for each speed of content are separate
+
+                         future: server should already have an idea of what content any user can see,
+                         since it knows their latest scores and the current block height. therefore the full content response can be queried at once, perhaps, and pages can be done fictionally
+
+                         */
+                        if(i < limit) {
+                            let data = {
+                                _id: entry._id,
+                                blockAgo: blockHeight - entry.block,
+                                title: entry.title,
+                                address: entry.address,
+                                body: entry.body,
+                                dateCreated: entry.dateCreated,
+                                txHash: entry.txHash,
+                                reward: entry.reward,
+                                speed: entry.speed,
+                                _v: entry._v,
+                                createdBy: {
+                                    address: entry.createdBy.address,
+                                    firstName: entry.createdBy.firstName,
+                                    lastName: entry.createdBy.lastName,
+                                    biography: entry.createdBy.biography,
+                                    profilePic: entry.createdBy.profilePic
+                                }
+
+                            };
+                            newResults.push(data);
+                            i++;
+                        } // end if
                     });
                   //console.log(allResults);
 
