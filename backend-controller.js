@@ -14,6 +14,8 @@ console.log(constants);
 /*constants*/
 var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
+var web3_URL = process.env.web3_URL;
+var web3_websocket_URL = process.env.web3_websocket_URL;
 
 
 
@@ -58,8 +60,8 @@ const ParetoProfile = mongoose.model('profile');
 var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
-var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
-var web3_events = new Web3("wss://ropsten.infura.io/ws");
+var web3 = new Web3(new Web3.providers.HttpProvider(web3_URL));
+var web3_events = new Web3(web3_websocket_URL);
 
 
 // set up Pareto and Intel contracts instances
