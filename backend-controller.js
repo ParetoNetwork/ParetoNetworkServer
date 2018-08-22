@@ -14,6 +14,8 @@ console.log(constants);
 /*constants*/
 var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
 var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
+var WEB3_URL = process.env.WEB3_URL;
+var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 
 
 
@@ -56,8 +58,14 @@ const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 
 var Web3 = require('web3');
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
+// var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
+var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
+var web3_events = new Web3(WEB3_WEBSOCKET_URL);
 
-var web3 = new Web3(new Web3.providers.HttpProvider("https://internally-settling-racer.quiknode.io/b5d97fc4-1946-4411-87e1-c7d961fb0e8d/X2kLtRMEBbjEkSJCCK8hFA==/")); //"https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i"
+
+// set up Pareto and Intel contracts instances
+const Intel_Contract_Schema = require("./build/contracts/Intel.json");
 
 var sigUtil = require('eth-sig-util');
 var jwt = require('jsonwebtoken');
@@ -74,8 +82,10 @@ controller.endConnections= function(){
 }
 
 /*ways of writing contract creation block height*/
-const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
-const contractCreationBlockHeightInt = 4953750;
+//const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
+const contractCreationBlockHeightHexString = '0x39CA84'; //need this in hex
+//const contractCreationBlockHeightInt = 4953750;
+const contractCreationBlockHeightInt = 3787396;
 
 const dbName = 'pareto';
 
@@ -464,7 +474,7 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
                     if (result) {
                         var tokens = web3.utils.toBN(result).toString();
                         amount = web3.utils.fromWei(tokens, 'ether');
-                        //console.log("amount: " + amount);
+                        console.log("amount: " + amount);
                     }
 
                     if(amount > 0){
@@ -490,50 +500,66 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
 
 };
 
-controller.postContent = function(req, callback){
+controller.postContent = function (req, callback) {
 
-  var body = req.body;
+    var body = req.body;
 
-  //exposed endpoint to write content to database
-  if(web3.utils.isAddress(req.user) == false){
-    if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
-  } else {
+    //exposed endpoint to write content to database
+      if(web3.utils.isAddress(req.user) == false){
+        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+      } else {
 
-    web3.eth.getBlock('latest')
-      .then(function(res) {
+    let Intel = new ParetoContent({
+        address: req.body.address,
+        title: req.body.title,
+        body: req.body.body,
+        text: req.bodytext,
+        dateCreated: Date.now(),
+        block: req.body.number || 0,
+        txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
+        speed: 3, //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
+        reward: req.body.reward || 1
 
-        body.address = req.user;
-        body.dateCreated = Date.now();
-        body.block = res.number;
-        body.txHash = req.body.txHash || '0x0'; //this is done client side to cause an internal invocation
-        body.speed = 3; //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
-        body.reward =  req.body.reward || 1;
+    });
+    Intel.save((err, savedIntel) => {
 
-        /*
+        if (err) {
+            if (callback && typeof callback === "function") { callback(err); }
+        } else {
 
-        * This may actually need a placeholder of txhash beforehand, and update the entry, needs state of tx like txconfirmed. or the system can just check when trying to access content?
 
-        */
+            const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+            intel.events.NewIntel({
+                fromBlock: 'latest'
+            }, function (error, event) {
+                if (error) {
+                    console.log(error);
+                    return;
+                }
 
-        const paretoContentObj = new ParetoContent(body);
-        paretoContentObj.save(function(err, obj){
-          if(err){
-            if(callback && typeof callback === "function") { callback(err); }
-          }
-          else {
-            if(callback && typeof callback === "function") { callback(null, obj); }
-          }
-        });
+                const initialBalance = event.returnValues.depositAmount;
+                const expiry_time = event.returnValues.ttl;
 
-      }, function (error) {
-          callback(error);
-      }).catch(function (err) {
-        callback(err);
-    }); //end web3
-  } // end else
+                if (event.returnValues.intelID == savedIntel.id) {
+
+                    ParetoContent.update({ _id: savedIntel._id }, { validated: true, reward: initialBalance, expires: expiry_time }, { multi: false }, function (err, data) {
+                        if (err) {
+                            throw err;
+                        }
+
+                    });
+                }
+            })
+
+
+            if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
+
+        }
+    })
+
+      } // end else
 
 };
-
 
 controller.getAllAvailableContent = function(req, callback) {
 
@@ -547,9 +573,9 @@ controller.getAllAvailableContent = function(req, callback) {
   if(web3.utils.isAddress(req.user) == false){
     if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
-
     //1. get score from address, then get standard deviation of score
     controller.retrieveAddress(req.user, function(err,result) {
+
       if(err){
         if(callback && typeof callback === "function") {
           callback(err);
@@ -724,6 +750,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                     biography: entry.createdBy.biography,
                                     profilePic: entry.createdBy.profilePic
                                 }
+
 
                             };
                             newResults.push(data);
@@ -983,10 +1010,12 @@ controller.getContentById = function(){
 };
 
 controller.getContentByCurrentUser = function(address, callback){
+    console.log("addreeesss0")
 
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
+      console.log("addreeesss1")
     var query = ParetoContent.find({address : address}).sort({block : -1}).populate( 'createdBy' );
 
     query.exec(function(err, results){
@@ -1347,7 +1376,7 @@ controller.seedLatestEvents = function(){
       return web3.eth.getPastLogs({
         fromBlock: contractCreationBlockHeightHexString,//'0x501331', //contractCreationBlockHeightHexString,
         toBlock: 'latest',
-        address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+        address: '0xbcce0c003b562f47a319dfca4bce30d322fa0f01',
         topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
       }).then(function (txObjects){
 
