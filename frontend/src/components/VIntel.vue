@@ -78,16 +78,17 @@
                     <div class="p-3">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
                             <li class="list-group-item border-0" v-for="post in myContent" :key="post.id">
-                                <div class="d-flex justify-content-between split align-items-center">
-                                    <div class="d-flex flex-column text-left">
-                                        <h5><b>{{post.title}}</b></h5>
-                                        <span>{{post.date | date}}</span>
+                                <router-link tag="div" class="split" :to="'/intel/' + post._id" @click="showDetails(post)">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex flex-column text-left">
+                                            <h5><b>{{post.title}}</b></h5>
+                                            <span>{{post.date | date}}</span>
+                                        </div>
+                                        <div class="d-flex ">
+                                            <span class="underline text-primary"><u><b>TXID:</b> {{post.trd}}</u></span>
+                                        </div>
                                     </div>
-                                    <div class="d-flex ">
-                                        <span class="underline text-primary"><u><b>TXID:</b> {{post.trd}}</u></span>
-                                    </div>
-                                </div>
-
+                                </router-link>
                             </li>
                         </ul>
                         <span v-else> No data to display </span>
@@ -281,7 +282,6 @@ export default {
         res => {
           this.loading = false;
           this.content = res;
-          console.log(res, "a;;;");
         },
         error => {
           alert(error);
@@ -303,7 +303,6 @@ export default {
       return dashboardService.getContent(
         res => {
           this.myContent = res;
-          console.log(res);
         },
         error => {
           alert(error);
