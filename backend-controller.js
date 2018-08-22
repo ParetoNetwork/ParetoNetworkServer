@@ -1011,12 +1011,10 @@ controller.getContentById = function(){
 };
 
 controller.getContentByCurrentUser = function(address, callback){
-    console.log("addreeesss0")
 
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-      console.log("addreeesss1")
     var query = ParetoContent.find({address : address}).sort({block : -1}).populate( 'createdBy' );
 
     query.exec(function(err, results){
