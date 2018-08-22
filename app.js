@@ -102,6 +102,7 @@ const ErrorHandler = require('./error-handler.js');
 
 
 app.get('/profile-image', function (req, res) {
+    0
     var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
    // var url = s3.getSignedUrl('getObject', params);
 
@@ -246,6 +247,10 @@ app.get('/v1/splash-auth', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/dashboard.html'));
 });
 
+app.get('/v1/signws', function (req, res){
+    res.status(200).json(ErrorHandler.getSuccess({token:  jwt.sign({user: req.user}, 'ParetoWs',  { expiresIn: "5y" })}));
+});
+
 /*
 * Unsign - clears cookie session for the client side, which cannot access secure httpOnly cookies
 */
@@ -291,6 +296,7 @@ app.get('/v1/summation', function (req, res) {
 
 app.post('/v1/content', function (req, res) {
 
+
     if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }
@@ -316,6 +322,17 @@ app.post('/v1/content', function (req, res) {
 app.get('/v1/content', function (req, res) {
 
     //this needs a session id, basically an authenticated address
+
+    var limit = parseInt(req.query.limit) || 15;
+    var page = parseInt(req.query.page) || 0;
+
+    //max limit
+    if (limit > 50) {
+        limit = 50;
+    }
+
+    req.query.limit = limit;
+    req.query.page = page;
 
     controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
@@ -501,11 +518,11 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 }));
 
 /**
- * This is a scheduled task that will update the calculation for the score every five minutes.
+ * This is a scheduled task that will update the calculation for the score every ten minutes.
  */
 cron.schedule("*/5 * * * *", function() {
     try{
-        controller.calculateAllScores(function(err, result){
+        controller.realAllScoreRanking(function(err, result){
             if(err){
                 console.log(err)
             }else{
@@ -514,6 +531,32 @@ cron.schedule("*/5 * * * *", function() {
                         console.log(err)
                     }else{
                         console.log('Sucessfully updated' )
+                    }
+
+                });
+            }
+
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+});
+
+/**
+ * This is a scheduled task that approximate score every minute.
+ */
+cron.schedule("* * * * *", function() {
+    try{
+        controller.aproxAllScoreRanking(function(err, result){
+            if(err){
+                console.log(err)
+            }else{
+                controller.getScoreAndSaveRedis(function(err, result){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        console.log('Sucessfully updated aprox' )
                     }
 
                 });
@@ -536,5 +579,92 @@ cron.schedule("*/5 * * * *", function() {
 
 
 }); */
+/*
+WEb socket in order to keep fronted updated
+ */
+var WebSocketServer = require('ws').Server,
+    wss = new WebSocketServer({
+        verifyClient: function (info, cb) {
+            var token = info.req.headers.token;
+            if (!token)
+                cb(false, 401, 'Unauthorized');
+            else {
+                jwt.verify(token, 'ParetoWs', function (err, decoded) {
+                    if (err) {
+                        cb(false, 401, 'Unauthorized')
+                    } else {
+                        info.req.user = decoded;
+                        cb(true)
+                    }
+                })
+
+            }
+        },
+        port: process.env.WS_PORT || constants.WS_PORT
+    });
+
+
+/**
+ * We need these functions in order to prevent issues with the sockets ‘alive’ status and improve performance.
+ */
+function noop() {}
+
+function heartbeat() {
+    this.isAlive = true;
+}
+
+/**
+ * Initialize connections
+ */
+wss.on('connection', function connection(ws, req) {
+    ws.isAlive = true;
+    ws.on('pong', heartbeat);
+    ws.user = req.user;
+    ws.on('message', function (message) {
+        ws.info = message;
+    });
+});
+
+/**
+ * Validates if the connection is alive and sends info each minute
+ */
+cron.schedule("* * * * *", function() {
+    try{
+        wss.clients.forEach(function each(client) {
+            if (client.isAlive === false) return client.terminate();
+
+            client.isAlive = false;
+            client.ping(noop);
+            if (client.readyState === WebSocket.OPEN ) {
+                // Validate if the user is subscribed a set of information
+                if(client.info && client.user){
+                    console.log(client.info);
+                    const rank = parseInt(client.info.rank) || 1;
+                    let limit = parseInt(client.info.limit) || 100;
+                    const page = parseInt(client.info.page) || 0;
+
+                    //max limit
+                    if (limit > 500) {
+                        limit = 500;
+                    }
+                    /**
+                     * Send ranking
+                     */
+                    controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                        if (!err) {
+                            client.send(ErrorHandler.getSuccess(result));
+                        }
+                    });
+
+                }
+            }
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+});
+
+
 
 module.exports = {app: app, controller: controller };

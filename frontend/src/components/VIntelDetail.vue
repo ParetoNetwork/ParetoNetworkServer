@@ -33,7 +33,18 @@
                             </div>
                             <div class="row mt-4">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" height="20px" alt="" class="mr-2">
-                                <span class="text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b> {{profile.rank}} </span>
+                                <span class="text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b>
+                                    <ICountUp
+                                        v-if="profile.rank"
+                                        :startVal="countUp.startVal"
+                                        :endVal="parseFloat(profile.rank)"
+                                        :decimals="decimalsLength(profile.rank)"
+                                        :duration="randomNumber(4,7)"
+                                        :options="countUp.options"
+                                        @ready="onReady"/>
+                                    <span v-else> 0 </span>
+                                </span>
+
                             </div>
 
                             <div v-if="false" class="row border-bottom mt-5 px-0 py-3">
@@ -74,7 +85,18 @@
                                     <div class="d-flex flex-column align-items-end ">
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
-                                        <span class="mb-2"> {{ intel.blockAgo }} Blocks Ago </span>
+                                        <span class="mb-2">
+                                            <ICountUp
+                                                    v-if="intel.blockAgo"
+                                                    :startVal="countUp.startVal"
+                                                    :endVal="parseFloat(intel.blockAgo)"
+                                                    :decimals="countUp.decimals"
+                                                    :duration="randomNumber(3,6)"
+                                                    :options="countUp.options"
+                                                    @ready="onReady"/>
+                                            <span v-else> 0 </span>
+                                            Blocks Ago
+                                        </span>
                                         <span v-if="false" class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span>
                                     </div>
                                 </div>
@@ -95,8 +117,13 @@
     import ProfileService from '../services/profileService';
     import environment from '../utils/environment';
 
+    import ICountUp from 'vue-countup-v2';
+    import {countUpMixin} from "../mixins/countUp";
+
     export default {
         name: 'VIntelDetail',
+        mixins: [countUpMixin],
+        components: {ICountUp},
         data: function () {
             return {
                 id: this.$route.params.id,
