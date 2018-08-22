@@ -259,7 +259,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
             return web3.eth.getPastLogs({
                 fromBlock: contractCreationBlockHeightHexString,
                 toBlock: 'latest',
-                address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+                address: paretoContractAddress,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
             }).then(function (txObjects){
                 //console.log(txObjects);
@@ -289,7 +289,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                 return web3.eth.getPastLogs({
                     fromBlock: contractCreationBlockHeightHexString,
                     toBlock: 'latest',
-                    address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+                    address: paretoContractAddress,
                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
                 }).then(function (txObjects){
                     //console.log(txObjects);
@@ -944,7 +944,7 @@ controller.realAllScoreRanking = async function(callback){
             return web3.eth.getPastLogs({
                 fromBlock: "0x" + ((blockHeight-7200).toString(16)),//'0x501331', //contractCreationBlockHeightHexString,
                 toBlock: 'latest',
-                address: '0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc',
+                address: paretoContractAddress,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
             }).then(function (txObjects){
 
