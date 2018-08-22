@@ -118,6 +118,11 @@
 
                 ContentService.uploadContent({block:this.block, title: this.title, body: x},res => {
                     this.body = x.slice(3,x.length -4);
+                    ContentService.createIntel({ID:res.content.Intel_ID}, (res) => {
+                        console.log(res);
+                    }, (err) => {
+                        console.log(err)
+                    })
                 }, error => {
 
                 });
@@ -128,10 +133,6 @@
 </script>
 
 <style scoped lang="scss">
-    .popover {
-        background-color: #6bc27a;
-    }
-
     textarea a {
         text-decoration: underline;
         color: blue;
