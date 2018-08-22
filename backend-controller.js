@@ -670,54 +670,21 @@ controller.getAllAvailableContent = function(req, callback) {
 
                 var blockHeightDelta = blockHeight - blockDelay;
 
-                var queryVeryFast = ParetoContent.find({block : { $lte : blockHeightDelta*1 }, speed : 1}).sort({block : -1}).populate( 'createdBy' );
-                var queryFast = ParetoContent.find({block : { $lte : blockHeightDelta*50 }, speed : 2}).sort({block : -1}).populate( 'createdBy' );
-                var queryNormal = ParetoContent.find({block : { $lte : blockHeightDelta*100 }, speed : 3}).sort({block : -1}).populate( 'createdBy' );
-                var querySlow = ParetoContent.find({block : { $lte : blockHeightDelta*150 }, speed : 4}).sort({block : -1}).populate( 'createdBy' );
-
                 //stop gap solution, more censored content can come down and be manipulated before posting client side
                 var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
 
                 try{
-                  let resultsVeryFast = await queryVeryFast.exec();
-                  let resultsFast = await queryFast.exec();
-                  let resultsNormal = await queryNormal.exec();
-                  let resultsSlow = await querySlow.exec();
 
-                  let allResults = [];
-
-                  resultsVeryFast.forEach(function(entry){
-                    allResults.push(entry);
-                  });
-
-                  resultsFast.forEach(function(entry){
-                    allResults.push(entry);
-                  });
-
-                  resultsNormal.forEach(function(entry){
-                    allResults.push(entry);
-                  });
-
-                  resultsSlow.forEach(function(entry){
-                    allResults.push(entry);
-                  });
-
-                  //inline function to sort results by newest block
-                  function compare(a, b) {
-                    const blockA = a.block;
-                    const blockB = b.block;
-
-                    let comparison = 0;
-                    if (blockB > blockA) {
-                      comparison = 1;
-                    } else if (blockB < blockA) {
-                      comparison = -1;
-                    }
-                    return comparison;
-                  }
-
-                  //sort results
-                  allResults = allResults.sort(compare);
+                    allResults =    await ParetoContent.find(
+                        { $or:[
+                                {block : { $lte : blockHeightDelta*1 }, speed : 1},
+                                {block : { $lte : blockHeightDelta*50 }, speed : 2},
+                                {block : { $lte : blockHeightDelta*100 }, speed : 3},
+                                {block : { $lte : blockHeightDelta*150 }, speed : 4},
+                                {address : req.user }
+                            ]
+                        }
+                    ).sort({block : -1}).populate( 'createdBy' ).exec();
                     let newResults = [];
                     let i = 0;
                     allResults.forEach(function(entry){
