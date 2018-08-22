@@ -115,7 +115,7 @@
             },
             upload: function () {
                 const x = document.getElementById('intel-body-input').value
-                ContentService.uploadContent({block:this.block, title: this.title, body: x}, res => {
+                ContentService.uploadContent({block:this.block, title: this.title, body: x, address: this.blockChainAddress}, res => {
                     this.body = x.slice(3,x.length -4);
                     console.log(res);
                     ContentService.createIntel({ID:res.content.Intel_ID}, (res) => {
