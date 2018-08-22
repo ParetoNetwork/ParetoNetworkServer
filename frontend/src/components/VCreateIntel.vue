@@ -104,7 +104,8 @@
                 ]
             });
             this.address();
-        }, methods: {
+        },
+        methods: {
             address: function () {
                 DashboardService.getAddress(res => {
                     this.block = res.block;

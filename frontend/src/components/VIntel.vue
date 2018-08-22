@@ -109,7 +109,7 @@
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
                                 <router-link tag="div" class="d-flex split" :to="'/intel/' + row._id" @click="showDetails(row)">
-                                    <div class="border p-1 mr-2">
+                                    <div class="border p-1 mr-2" style="height: 50px;">
                                         <div data-v-514e8c24="" class="thumb"
                                              v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
                                              style="width: 40px; height: 40px;"></div>
