@@ -712,7 +712,7 @@ controller.getAllAvailableContent = function(req, callback) {
                   //sort results
                   allResults = allResults.sort(compare);
                     let newResults = [];
-                    allResults.forEach(function(entry){                        
+                    allResults.forEach(function(entry){
                         let data = {
                             _id: entry._id,
                             blockAgo : blockHeight - entry.block,
@@ -734,6 +734,7 @@ controller.getAllAvailableContent = function(req, callback) {
                             }
 
                         } ;
+
                         newResults.push(data);
                     });
                   //console.log(allResults);
