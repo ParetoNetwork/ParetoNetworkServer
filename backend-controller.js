@@ -510,7 +510,7 @@ controller.postContent = function (req, callback) {
       } else {
 
     let Intel = new ParetoContent({
-        address: req.body.address,
+        address: req.body.address || req.user,
         title: req.body.title,
         body: req.body.body,
         text: req.bodytext,
