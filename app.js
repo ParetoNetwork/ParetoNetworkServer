@@ -346,9 +346,21 @@ app.get('/v1/content', function (req, res) {
 });
 
 
+app.get('/v1/content/me', function (req, res) {
+
+    controller.getContentByCurrentUser(req.user, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
 //get info about another address
 app.get('/v1/content/:content', function (req, res) {
-
+    req.query.limit = 1000;
+    req.query.page = 0;
     controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
@@ -366,16 +378,6 @@ app.get('/v1/content/:content', function (req, res) {
 
 });
 
-app.get('/v1/content/me/', function (req, res) {
-
-    controller.getContentByCurrentUser(req.user, function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
 
 app.get('/v1/ranking', function (req, res) {
 
