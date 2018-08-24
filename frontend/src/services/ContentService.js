@@ -9,6 +9,7 @@ let Intel;
 let ParetoTokenInstance;
 /* eslint-disable no-console */
 export default class ContentService {
+
   static uploadContent(content, onSuccess, onError) {
     http
       .post("/v1/content", content)
