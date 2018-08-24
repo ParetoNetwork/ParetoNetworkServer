@@ -248,14 +248,20 @@
                     this.busy = false;
                     this.page += 100;
                 }, error => {
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                 });
             }, authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
                         this.getAddress()
                     }, error => {
-                        alert(error);
+                        this.$toast.error(error, 'Error', {
+                            timeout: 10000,
+                            position: 'topCenter'
+                        });
                     });
                 } else {
                     this.loadingLogin();
@@ -275,7 +281,10 @@
 
 
                     }, error => {
-                        alert(error);
+                        this.$toast.error(error, 'Error', {
+                            timeout: 10000,
+                            position: 'topCenter'
+                        });
                         this.stopLogin();
                     });
                 }
@@ -312,7 +321,10 @@
                         this.busy = false;
                         this.leader = [... res,...this.leader];
                     }, error => {
-                        alert(error);
+                        this.$toast.error(error, 'Error', {
+                            timeout: 10000,
+                            position: 'topCenter'
+                        });
                     });
                 }
 

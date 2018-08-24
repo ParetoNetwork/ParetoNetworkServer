@@ -4,14 +4,18 @@ import App from './App.vue';
 import VueRouter from 'vue-router';
 import router from './utils/routes';
 import Vuex from 'vuex';
+import VueIziToast from 'vue-izitoast';
 
 const snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
 import BootstrapVue from 'bootstrap-vue'
+
+import 'izitoast/dist/css/iziToast.min.css';
 
 Vue.use(BootstrapVue);
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(Vuex);
+Vue.use(VueIziToast);
 
 const store = new Vuex.Store({
     state: {
