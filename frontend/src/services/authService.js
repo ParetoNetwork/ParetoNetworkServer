@@ -88,14 +88,14 @@ export default class authService {
 
     }
 
-    static  signWallet(onSuccess, onError) {
+    static  signWallet(path, onSuccess, onError) {
 
         const ProviderEngine = require('web3-provider-engine');
         const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
         var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
         const engine = new ProviderEngine();
         const provider = new Web3(engine);
-        var derivation_path = "44'/60'/0'/0/0";
+        var derivation_path = path || "44'/60'/0'/0/0";
 
         LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
             const isSupported = ledgerWalletSubProvider.isSupported;
@@ -119,7 +119,6 @@ export default class authService {
                                 if(accounts && accounts[0]){
 
                                     const addr = accounts[0];
-
 
                                     if (provider.utils.isAddress(addr)) {
                                         const from = addr.toLowerCase();
