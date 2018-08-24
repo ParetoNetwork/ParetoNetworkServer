@@ -284,7 +284,10 @@ export default {
           this.content = res;
         },
         error => {
-          alert(error);
+            this.$toast.error(error, 'Error', {
+                timeout: 10000,
+                position: 'topCenter'
+            });
         }
       );
     },
@@ -305,7 +308,10 @@ export default {
           this.myContent = res;
         },
         error => {
-          alert(error);
+            this.$toast.error(error, 'Error', {
+                timeout: 10000,
+                position: 'topCenter'
+            });
         }
       );
     },

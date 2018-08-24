@@ -83,7 +83,10 @@
                 }, error => {
                     $('#signModal').modal('hide');
                     this.stopLogin();
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                 });
             },
             modalcancel() {
