@@ -136,7 +136,6 @@
     import LoginOptions from "./Modals/VLoginOptions";
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
     import {countUpMixin} from '../mixins/countUp';
-    const WebSocket = require('ws');
 
     export default {
         name: 'VLeaderboards',
@@ -219,30 +218,26 @@
         },
         mounted: function () {
             this.getAddress();
-            let params = {rank: this.rank, limit: 100, page: this.page}
+            let params = {rank: this.rank, limit: 100, page: this.page};
 
             let token = '';
             Auth.getSocketToken( res =>{
-                console.log(this.ws);
                 if (!this.ws){
-                    debugger;
-                    this.ws = new WebSocket ('ws://localhost:8787',{
-                        headers : {
-                            token: res.data.data.token
+                    this.ws = new WebSocket ('ws://localhost:8787');
+                    let wss = this.ws;
+                    this.ws.onopen = function open() {
+                        wss.send(JSON.stringify(params));
+                    };
+
+                    this.ws.onmessage = function incoming(data) {
+                        try{
+                            const info =  JSON.parse(data.data)
+                            console.log(info)
+                        }catch (e) {
+                            console.log(e);
                         }
-                    });
 
-
-
-                    let jParams = JSON.stringify(params);
-                    this.ws.on('open', function open() {
-                        console.log('hola mundo');
-                        this.ws.send(params);
-                    });
-
-                    this.ws.on('message', function incoming(data) {
-                        console.log(data);
-                    });
+                    };
                 }
             });
         },
