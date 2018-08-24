@@ -24,12 +24,14 @@ export default class ContentService {
       });
   }
 
-  static async createIntel(content, onSuccess, onError) {
+  static async createIntel(content, tokenAmount,onSuccess, onError) {
     await this.Setup();
-    const tokenAmount = prompt(
-      "Please enter the number of Pareto Tokens to deposit for creating Intel",
-      "1"
-    );
+    console.log(tokenAmount);
+    if(tokenAmount === null) {
+      let error = 'No Pareto Amount. Transaction cancelled';
+      onError(error);
+      return;
+    }
 
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
