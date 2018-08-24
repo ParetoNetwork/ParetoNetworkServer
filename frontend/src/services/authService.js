@@ -10,6 +10,17 @@ export default class authService {
         this._isLogged = true;
     }
 
+    static getSocketToken(onSuccess){
+        http.get("/v1/signws")
+            .then(res => {
+                onSuccess(res);
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+
     static getIsLogged() {
         return logged;
     }
