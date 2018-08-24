@@ -188,6 +188,7 @@
 
                     ContentService.createIntel({ID:res.content.Intel_ID}, this.tokens, (res) => {
                         console.log(res);
+                        this.$toast.destroy()
                         this.$store.state.makingRequest = false;
                         this.intelState('created', 'Intel Created!');
                         this.$toast.success('The Intel was created', 'New Pareto', this.notificationSystem.options.success);
