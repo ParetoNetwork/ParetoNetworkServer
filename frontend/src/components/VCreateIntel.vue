@@ -1,66 +1,59 @@
 <template>
     <div class="pareto-bg-dark">
-        <div class="container main  wrapp"
+        <div class="container main  wrapp pb-5"
              style="min-height: 100vh;">
-            <div class="row">
-                <div class="col-md-4 font-body"
-                     style="color: #040f1e; margin-top: 30px; padding-top: 20px; text-align: left;">
-
+            <div class="row mt-5 p-1 text-left">
+                <div class="col-md-5 font-body">
                     <div class="flex-row">
-                        <!-- hidden by default unless metamask connect -->
                         <form id="intel"
-                              style="margin: 5px;">
+                              style="margin: 5px;"
+                              v-on:submit.prevent
+                              @submit="validateContent">
                             <div class="group">
-                                <label class="pareto-label">Authorized Contributor</label>
-
+                                <label class="pareto-label"><b>Authorized Contributor</b></label>
                                 <input class="lookup-input"
                                        type="text"
                                        name="address" readonly v-model="blockChainAddress">
                                 <span class="highlight"></span>
                                 <span class="bar"></span>
                             </div>
-                            <p>&nbsp;</p>
 
-                            <div class="group">
-                                <label class="pareto-label">Title</label>
-
+                            <div class="group my-4">
+                                <label class="pareto-label"><b>Title</b> <span style="color: red">*</span> </label>
                                 <input id="intel-title-input"
                                        type="text" class="lookup-input"
                                        name="intel-title" v-model="title">
                                 <span class="highlight"></span>
                                 <span class="bar"></span>
+                                <label v-if="formError.title === false" class="pareto-label" style="color: red"> Required Field </label>
                             </div>
-                            <p>&nbsp;</p>
 
-                            <!-- intel-body-input -->
                             <textarea id="intel-body-input"
                                       name="editordata" v-model="body"></textarea>
+                            <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required Field </label>
 
+                            <div class="d-flex justify-content-center">
+                                <input v-if="intel.state ==='empty'"
+                                        class="button bg-white pareto-text-blue mt-2"
+                                        style="width:100px; height: 35px; line-height: 32px;"
+                                        type="submit"
+                                        form="intel"
+                                        value="Submit">
+                                <label class="pareto-label"> {{intel.text}}
+                                    <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
+                                </label>
+                            </div>
                         </form>
                     </div>
-                    <div class="d-flex justify-content-center">
-                        <button
-                                class="button bg-white pareto-text-blue"
-                                style="width:100px; height: 35px; line-height: 32px;"
-                                type="button"
-                                form="intel"
-                                value="View"
-                                v-on:click="upload()"
-                        >Submit
-                        </button>
-                    </div>
-
-
                 </div>
-                <!-- end post new intel section -->
 
                 <div class="col-md-6 font-body text-left"
                      style="color: #fff; min-height: 80vh;">
-                    <b>Intel Content Preview</b>
+                    <label class="pareto-label"><b>Intel Content Preview</b></label>
 
                     <div id="preview"
-                         style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 100%; border: 1px solid #a9a9a9; border-radius: 5px;">
-                        {{body}}
+                         style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
+                        {{body.innerText}}
                     </div>
 
                 </div>
@@ -82,7 +75,62 @@
                 block: null,
                 body:'',
                 title:'',
-                blockChainAddress:''
+                blockChainAddress:'',
+                tokens: 1,
+                intel :{
+                    state: 'empty',
+                    text : '',
+                },
+                formError: {
+                    title :'',
+                    body : ''
+                },
+                notificationSystem: {
+                    options: {
+                        success: {
+                            position: 'bottomCenter'
+                        },
+                        info: {
+                            overlay: true,
+                            timeout: 50000,
+                            position: 'bottomRight'
+                        },
+                        error: {
+                            timeout: 20000,
+                            position: 'bottomRight'
+                        }
+                    }
+                },
+                question: {
+                    timeout: 200000,
+                    overlay: true,
+                    displayMode: 'once',
+                    id: 'inputs',
+                    zindex: 999,
+                    title: 'Inputs',
+                    message: 'Examples',
+                    position: 'center',
+                    drag: false,
+                    inputs: [
+                        ['<input type="number" value="1">', 'keyup', (instance, toast, input, e) => {
+                            this.tokens = input.value;
+                        }]
+                    ],
+                    buttons: [
+                        ['<button><b>Create</b></button>',  (instance, toast) => {
+                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                            this.upload();
+                        }, true],
+                        ['<button>Cancel</button>', (instance, toast) => {
+                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                            this.$toast.error('The Pareto transaction was cancelled', 'Cancelled', this.notificationSystem.options.error);
+                        }]
+                    ],
+                    onClosed: function(instance, toast, closedBy){
+                        console.info('Closed | closedBy: ' + closedBy);
+                    }
+                }
+
             };
         },
         mounted: function () {
@@ -101,10 +149,16 @@
                     ['insert', ['link', /*'picture',*/]],
                     //['view', ['fullscreen' /*, 'codeview'*/]],
                     //['help', ['help']]
-                ]
+                ],
+                popover: {
+                    image: [],
+                    link: [],
+                    air: []
+                }
             });
             this.address();
-        }, methods: {
+        },
+        methods: {
             address: function () {
                 DashboardService.getAddress(res => {
                     this.block = res.block;
@@ -113,14 +167,46 @@
 
                 });
             },
-            upload: function () {
-                const x = document.getElementById('intel-body-input').value
+            validateContent: function(e){
+                this.body = $('.note-editable')[0];
 
-                ContentService.uploadContent({block:this.block, title: this.title, body: x},res => {
-                    this.body = x.slice(3,x.length -4);
+                this.formError.title = !!this.title;
+                this.formError.body = this.body.innerText.length>3;
+
+                if(!this.formError.title || !this.formError.body) return;
+
+                this.$toast.question('Tokens to deposit for creating Intel', 'Pareto', this.question);
+            },
+            upload: function () {
+
+                this.intelState('creating', 'Creating Intel, please wait');
+                console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
+
+                ContentService.uploadContent({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress}, res => {
+                    this.$store.state.makingRequest = true;
+                    this.$toast.info('Please wait for both confirm dialogs', 'Loading', this.notificationSystem.options.info)
+
+                    ContentService.createIntel({ID:res.content.Intel_ID}, this.tokens, (res) => {
+                        console.log(res);
+                        this.$toast.destroy()
+                        this.$store.state.makingRequest = false;
+                        this.intelState('created', 'Intel Created!');
+                        this.$toast.success('The Intel was created', 'New Pareto', this.notificationSystem.options.success);
+                        this.$router.push('/intel');
+                    }, (err) => {
+                        console.log(err);
+                        this.$toast.destroy()
+                        this.intelState('empty', '');
+                        this.$toast.error('Error, could not create Intel', 'Cancelled', this.notificationSystem.options.error);
+                        this.$store.state.makingRequest = false;
+                    })
                 }, error => {
 
                 });
+            },
+            intelState : function (state, text) {
+                this.intel.state = state;
+                this.intel.text = text;
             }
         }
 
@@ -128,10 +214,6 @@
 </script>
 
 <style scoped lang="scss">
-    .popover {
-        background-color: #6bc27a;
-    }
-
     textarea a {
         text-decoration: underline;
         color: blue;
@@ -171,7 +253,7 @@
     .lookup-input {
         padding: 10px 10px 10px 5px;
         display: block;
-        width: 350px;
+        width: 100%;
         border: none;
         background-color: #040f1e;
         border-bottom: 1px solid #757575;

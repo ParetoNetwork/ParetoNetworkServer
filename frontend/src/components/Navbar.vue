@@ -146,7 +146,10 @@
                     this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                 });
             },
             login: function () {
@@ -166,7 +169,10 @@
 
                 }, error => {
                     this.stopLogin();
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                 });
             },
             logout: function () {
@@ -175,7 +181,10 @@
                     this.collapseContent();
                     this.$router.push('/');
                 }, error => {
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                 });
             },
             ledgerNanoLogin () {

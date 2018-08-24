@@ -169,7 +169,10 @@
                     });
 
                 }, error => {
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                     this.stopLogin();
                 });
             },
