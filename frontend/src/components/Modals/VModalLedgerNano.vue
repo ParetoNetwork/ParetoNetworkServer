@@ -22,11 +22,23 @@
                             <li> Enabled 'browser' support from the Ethereum app settings </li>
                         </ul>
                     </div>
+                    <br/>
+                    <p> Choose a HD path: </p>
+                    <b-form-group>
+                        <b-form-radio-group  v-model="selected">
+                            <b-row class="m-2 mt-4">
+                                <b-form-radio value="44'/60'/0'/0/0"> "44'/60'/0'/0/0" </b-form-radio>
+                            </b-row>
+                            <b-row class="m-2 mt-4">
+                                <b-form-radio value="44'/60'/0'/0"> "44'/60'/0'/0" </b-form-radio>
+                            </b-row>
+                        </b-form-radio-group>
+                    </b-form-group>
                 </div>
             </b-container>
             <b-row class="m-2 mt-4 float-right">
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
-                <b-btn size="sm" variant="success" @click="hardware(); onClosedModal();">Continue</b-btn>
+                <b-btn size="sm" variant="success" :disabled="!selected"  @click="hardware(selected); onClosedModal();">Continue</b-btn>
             </b-row>
         </b-modal>
     </div>
@@ -39,6 +51,11 @@
     export default {
         name: 'ModalLedgerNano',
         components: {},
+        data(){
+            return {
+                selected: "44'/60'/0'/0/0"
+            };
+        },
         mounted(){
             this.$refs.ledgerNano.show();
         },
@@ -51,9 +68,9 @@
                     $('#navbarSupportedContent').collapse('toggle');
                 }
             },
-            hardware: function () {
+            hardware: function (path) {
                 this.loadingLogin();
-                authService.signWallet(data => {
+                authService.signWallet( path, data => {
                     this.$store.dispatch({
                         type: 'login',
                         address: data,

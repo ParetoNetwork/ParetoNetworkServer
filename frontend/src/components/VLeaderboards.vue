@@ -95,20 +95,20 @@
                                 <table class="table table-responsive-lg position-relative">
                                     <div>
                                         <tbody>
-                                            <tr v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
-                                                <td>{{rank.rank}}</td>
-                                                <!--<td>{{rank.score}}</td>-->
-                                                <td>
-                                                    <ICountUp
-                                                            :startVal="countUp.startVal"
-                                                            :endVal="parseFloat(rank.score)"
-                                                            :decimals="decimalsLength(rank.score)"
-                                                            :duration="randomNumber(3,6)"
-                                                            :options="countUp.options"
-                                                            @ready="onReady"></ICountUp>
-                                                </td>
-                                                <td class="break-line">{{rank.address}}</td>
-                                            </tr>
+                                        <tr v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
+                                            <td style="width: 55px">{{rank.rank}}</td>
+                                            <!--<td>{{rank.score}}</td>-->
+                                            <td style="width: 123px">
+                                                <ICountUp
+                                                        :startVal="countUp.startVal"
+                                                        :endVal="parseFloat(rank.score)"
+                                                        :decimals="decimalsLength(rank.score)"
+                                                        :duration="randomNumber(3,6)"
+                                                        :options="countUp.options"
+                                                        @ready="onReady"></ICountUp>
+                                            </td>
+                                            <td class="break-line" style="width: 400px">{{rank.address}}</td>
+                                        </tr>
                                         </tbody>
                                     </div>
                                 </table>
