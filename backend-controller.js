@@ -702,6 +702,7 @@ controller.getAllAvailableContent = function(req, callback) {
                             let data = {
                                 _id: entry._id,
                                 blockAgo: blockHeight - entry.block,
+                                block: entry.block,
                                 title: entry.title,
                                 address: entry.address,
                                 body: entry.body,
