@@ -710,6 +710,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 txHash: entry.txHash,
                                 reward: entry.reward,
                                 speed: entry.speed,
+                                id:entry.id,
                                 _v: entry._v,
                                 createdBy: {
                                     address: entry.createdBy.address,
