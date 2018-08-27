@@ -229,7 +229,10 @@ export default {
           this.address = res;
         },
         () => {
-          // alert(error);
+            this.$toast.error(error, 'Error', {
+                timeout: 10000,
+                position: 'topCenter'
+            });
         }
       );
     },
