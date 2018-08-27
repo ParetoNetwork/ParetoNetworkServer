@@ -879,14 +879,17 @@ controller.aproxAllScoreRanking = async function(callback){
                             }
 
                         }
-                        ParetoAddress.bulkWrite(bulkop).then(
-                            function (r) {
+                        if (bulkop.length > 0){
+                            ParetoAddress.bulkWrite(bulkop).then(
+                                function (r) {
+                                    callback(null, {} );
+                                }
+                            ).catch(function (err) {
+                                console.log(err);
                                 callback(null, {} );
-                            }
-                        ).catch(function (err) {
-                            console.log(err);
-                            callback(null, {} );
-                        });
+                            });
+                        }
+
 
                     }
 
@@ -944,14 +947,17 @@ controller.realAllScoreRanking = async function(callback){
                         })
                     }
                     console.log("bulk count here: " + bulkop.length);
-                    ParetoAddress.bulkWrite(bulkop).then(
-                        function (r) {
+                    if (bulkop.length> 0){
+                        ParetoAddress.bulkWrite(bulkop).then(
+                            function (r) {
+                                callback(null, {} );
+                            }
+                        ).catch(function (err) {
+                            console.log(err);
                             callback(null, {} );
-                        }
-                    ).catch(function (err) {
-                        console.log(err);
-                        callback(null, {} );
-                    });
+                        });
+                    }
+
                 }
 
                 processData();
