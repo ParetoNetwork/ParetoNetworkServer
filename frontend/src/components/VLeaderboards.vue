@@ -178,7 +178,6 @@
                     active: false
                 },
                 ws : null
-
             };
         },
         watch: {
@@ -218,28 +217,6 @@
         },
         mounted: function () {
             this.getAddress();
-            let params = {rank: this.rank, limit: 100, page: this.page};
-
-            let token = '';
-            Auth.getSocketToken( res =>{
-                if (!this.ws){
-                    this.ws = new WebSocket ('ws://localhost:8787');
-                    let wss = this.ws;
-                    this.ws.onopen = function open() {
-                        wss.send(JSON.stringify(params));
-                    };
-
-                    this.ws.onmessage = function incoming(data) {
-                        try{
-                            const info =  JSON.parse(data.data)
-                            console.log(info)
-                        }catch (e) {
-                            console.log(e);
-                        }
-
-                    };
-                }
-            });
         },
         updated: function() {
             this.updated++;
@@ -364,11 +341,39 @@
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
             },
+            socketConnection () {
+                let params = {rank: this.rank, limit: 100, page: this.page};
+
+                let token = '';
+                Auth.getSocketToken( res =>{
+                    if (!this.ws){
+                        this.ws = new WebSocket ('ws://localhost:8787');
+                        let wss = this.ws;
+                        console.log(params);
+                        this.ws.onopen = function open() {
+                            wss.send(JSON.stringify(params));
+                        };
+
+                        let wsa = this.ws;
+                        this.ws.onmessage = function incoming(data) {
+                            wsa.send(JSON.stringify({rank: 300, limit: 100, page: this.page}));
+                            try{
+                                const info =  JSON.parse(data.data)
+                                console.log(info)
+                            }catch (e) {
+                                console.log(e);
+                            }
+                        };
+                    }
+                });
+            },
             init : function(profile){
                 this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
                 this.address = profile.address;
                 this.score = profile.score;
                 this.loading = false;
+
+                this.socketConnection();
                 // profile.score = Number(profile.score);
                 // this.score = Number(profile.score.toFixed(5));
                 this.changeFontSize(this.score);
