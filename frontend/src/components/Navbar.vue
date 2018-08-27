@@ -88,10 +88,14 @@
             loadingNav(value){
               if(value){
                   $('#gradient').removeClass("animateBar").removeClass("animationEnd");
-                  setTimeout("$('#gradient').addClass( 'animateBar');",1);
+                  setTimeout( () => {
+                      $('#gradient').addClass( 'animateBar');
+                  },1);
               }else{
                   $('#gradient').removeClass("animateBar");
-                  setTimeout("$('#gradient').addClass( 'animationEnd');",1);
+                  setTimeout( () => {
+                      $('#gradient').addClass( 'animationEnd');
+                  },1);
               }
             },
             logged(value){

@@ -77,7 +77,10 @@
                     this.address = res;
                     console.log(this.address)
                 }, () => {
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                 });
             }
         }
