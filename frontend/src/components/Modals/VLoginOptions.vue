@@ -86,7 +86,10 @@
                 }, error => {
                     console.log(error);
                     this.stopLogin();
-                    alert(error);
+                    this.$toast.error(error, 'Error', {
+                        timeout: 10000,
+                        position: 'topCenter'
+                    });
                 });
             },
             Manually: function() {

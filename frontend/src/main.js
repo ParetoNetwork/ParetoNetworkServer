@@ -7,7 +7,8 @@ import Vuex from 'vuex';
 import VueIziToast from 'vue-izitoast';
 
 const snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
-import BootstrapVue from 'bootstrap-vue'
+import BootstrapVue from 'bootstrap-vue';
+import 'bootstrap';
 
 import 'izitoast/dist/css/iziToast.min.css';
 
