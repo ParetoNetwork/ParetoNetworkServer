@@ -22,15 +22,15 @@
                             </button>
                         </div>
 
-                        <div class="media-body flex-column text-left mt-2">
+                        <div class="media-body flex-column text-left mt-2 ellipsis">
                             <span class="name-title"><b>{{user.first_name|| ''}}  {{user.last_name || ''}}</b></span>
-                            <p v-if="user.address"><b> {{ user.address.slice(0,15) + '...'}} </b></p>
+                            <p v-if="user.address" class="ellipsis"><b class="ellipsis"> {{user.address}} </b></p>
                             <div class="mt-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <span class="title"><b>{{(user.tokens || '') + 'PARETO'}}<sup></sup></b></span>
+                                <span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>
                             </div>
                             <p class="mb-2 mt-2">
-                                <b>Network Rank:</b>
+                                <b>Network Rank:&nbsp;</b>
                                 <ICountUp
                                         :startVal="countUp.startVal"
                                         :endVal="parseFloat(user.rank)"
@@ -40,7 +40,7 @@
                                         @ready="onReady"/>
                             </p>
                             <p class="mb-2 mt-2">
-                                <b>User Score:</b>
+                                <b>User Score:&nbsp;</b>
                                 <ICountUp
                                         v-if="user.score"
                                         :startVal="countUp.startVal"
@@ -108,7 +108,7 @@
                     <div class="">
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
-                                <router-link tag="div" class="d-flex split" :to="'/intel/' + row._id" @click="showDetails(row)">
+                                <router-link tag="div" class="d-flex split " :to="'/intel/' + row._id" @click="showDetails(row)">
                                     <div class="border p-1 mr-2" style="height: 50px;">
                                         <div data-v-514e8c24="" class="thumb"
                                              v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
@@ -124,10 +124,10 @@
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <span class="text-dashboard">Disclosed by: {{row.address}} at block
                                                 <ICountUp
-                                                        :startVal="countUp.startVal"
-                                                        :endVal="parseFloat(row.blockAgo)"
-                                                        :decimals="decimalsLength(row.blockAgo)"
-                                                        :duration="randomNumber(4,7)"
+                                                        :startVal="parseFloat(row.block)+parseFloat(row.blockAgo)"
+                                                        :endVal="parseFloat(row.block)"
+                                                        :decimals="decimalsLength(row.block)"
+                                                        :duration="randomNumber(1,3)"
                                                         :options="countUp.options"
                                                         @ready="onReady"/></span>
                                             </div>
@@ -428,27 +428,41 @@ li,
 }
 
 .subtitle-dashboard {
-  font-size: 9px;
-  font-weight: bold;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: normal;
-  letter-spacing: normal;
-  text-align: center;
+    font-size: 9px;
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
 }
 
 #wrapper {
-  position: relative;
+    position: relative;
 }
 
 #wrapper .text {
-  position: absolute;
-  bottom: 0;
-  display: none;
+    position: absolute;
+    bottom: 0;
+    display: none;
 }
+
+#wrapper:hover .text {
+    display: flex;
+    background: rgba(0,0,0,0.5);
+}
+
 
 #wrapper:hover .text {
   display: flex;
   background: rgba(0, 0, 0, 0.5);
 }
+
 </style>
