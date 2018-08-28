@@ -474,7 +474,7 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
                     if (result) {
                         var tokens = web3.utils.toBN(result).toString();
                         amount = web3.utils.fromWei(tokens, 'ether');
-                        console.log("amount: " + amount);
+                       // console.log("amount: " + amount);
                     }
 
                     if(amount > 0){
