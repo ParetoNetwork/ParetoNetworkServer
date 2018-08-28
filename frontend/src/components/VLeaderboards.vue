@@ -1,5 +1,6 @@
 <template>
     <div class="pareto-bg-dark main leaderView">
+        <notifications group="auth" position="bottom right"/>
         <div class="container">
             <div class="row">
                 <div class="col-md-6 font-body"
@@ -248,20 +249,22 @@
                     this.busy = false;
                     this.page += 100;
                 }, error => {
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             }, authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
                         this.getAddress()
                     }, error => {
-                        this.$toast.error(error, 'Error', {
-                            timeout: 10000,
-                            position: 'topCenter'
-                        });
+                        this.$notify({
+                            group: 'auth',
+                            type: 'error',
+                            duration: 10000,
+                            text: error });
                     });
                 } else {
                     this.loadingLogin();
@@ -281,10 +284,11 @@
 
 
                     }, error => {
-                        this.$toast.error(error, 'Error', {
-                            timeout: 10000,
-                            position: 'topCenter'
-                        });
+                        this.$notify({
+                            group: 'auth',
+                            type: 'error',
+                            duration: 10000,
+                            text: error });
                         this.stopLogin();
                     });
                 }
@@ -321,10 +325,11 @@
                         this.busy = false;
                         this.leader = [... res,...this.leader];
                     }, error => {
-                        this.$toast.error(error, 'Error', {
-                            timeout: 10000,
-                            position: 'topCenter'
-                        });
+                        this.$notify({
+                            group: 'auth',
+                            type: 'error',
+                            duration: 10000,
+                            text: error });
                     });
                 }
 

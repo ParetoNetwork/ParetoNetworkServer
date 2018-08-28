@@ -1,5 +1,6 @@
 <template>
     <div class="modal fade" id="signModal"  role="dialog">
+        <notifications group="auth" position="bottom right"/>
         <div class="modal-dialog" role="document">
             <div class="modal-content bg-dark text-light">
                 <div class="modal-header">
@@ -83,10 +84,11 @@
                 }, error => {
                     $('#signModal').modal('hide');
                     this.stopLogin();
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             modalcancel() {
