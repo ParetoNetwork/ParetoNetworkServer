@@ -1,5 +1,6 @@
 <template>
     <div class="main">
+        <notifications group="auth" position="bottom right"/>
         <header class="offer mb-5" style="height:100%;">
             <div class="content" style="height:100%; display: flex; align-items: flex-end;">
                 <div class="overlay"></div>
@@ -169,10 +170,11 @@
                     });
 
                 }, error => {
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                     this.stopLogin();
                 });
             },

@@ -1,5 +1,6 @@
 <template>
     <div class="container main  wrapp">
+        <notifications group="auth" position="bottom right"/>
         <div class="row pt-5">
             <div class="col-md-5 mb-5 mt-2 m-sm-0">
 
@@ -229,10 +230,11 @@ export default {
           this.address = res;
         },
         () => {
-            this.$toast.error(error, 'Error', {
-                timeout: 10000,
-                position: 'topCenter'
-            });
+            this.$notify({
+                group: 'auth',
+                type: 'error',
+                duration: 10000,
+                text: error });
         }
       );
     },
@@ -287,10 +289,11 @@ export default {
           this.content = res;
         },
         error => {
-            this.$toast.error(error, 'Error', {
-                timeout: 10000,
-                position: 'topCenter'
-            });
+            this.$notify({
+                group: 'auth',
+                type: 'error',
+                duration: 10000,
+                text: error });
         }
       );
     },
@@ -311,10 +314,11 @@ export default {
           this.myContent = res;
         },
         error => {
-            this.$toast.error(error, 'Error', {
-                timeout: 10000,
-                position: 'topCenter'
-            });
+            this.$notify({
+                group: 'auth',
+                type: 'error',
+                duration: 10000,
+                text: error });
         }
       );
     },

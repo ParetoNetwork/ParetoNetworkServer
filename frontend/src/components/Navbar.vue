@@ -1,6 +1,6 @@
 <template>
     <div class="head">
-
+        <notifications group="auth" position="bottom right"/>
         <div
                 id="gradient"
                 class="bar">&nbsp;
@@ -150,10 +150,11 @@
                     this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             login: function () {
@@ -173,10 +174,11 @@
 
                 }, error => {
                     this.stopLogin();
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             logout: function () {
@@ -185,10 +187,11 @@
                     this.collapseContent();
                     this.$router.push('/');
                 }, error => {
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             ledgerNanoLogin () {
