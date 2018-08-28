@@ -78,7 +78,7 @@
                                       type="number"
                                       placeholder="Pareto Amount"></b-form-input>
                         <b-row class="m-2 mt-4">
-                            <b-button class="ml-2" variant="danger" @click="hideModal()"> Cancel </b-button>
+                            <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
                             <b-button style="background-color: rgb(107, 194, 123)" variant="success" @click="upload()"> Confirm </b-button>
                         </b-row>
                     </b-container>
@@ -206,17 +206,17 @@
             },
             upload: function () {
                 this.hideModal();
-                console.log(this.tokens);
+                //console.log(this.tokens);
 
                 this.intelState('creating', 'Creating Intel, please wait');
-                console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
+                //console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
 
                 ContentService.uploadContent({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress}, res => {
                     this.$store.state.makingRequest = true;
                     this.modalWaiting = true;
 
                     ContentService.createIntel({ID:res.content.Intel_ID}, this.tokens, (res) => {
-                        console.log(res);
+                       // console.log(res);
                         this.$store.state.makingRequest = false;
                         this.intelState('created', 'Intel Created!');
 
