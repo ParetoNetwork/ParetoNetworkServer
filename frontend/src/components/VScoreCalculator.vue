@@ -1,5 +1,6 @@
 <template>
     <div class="main wrapp font-body-regular">
+        <notifications group="auth" position="bottom right"/>
         <div class="container pt-5">
             <div class="mt-2">
                 <div class="row">
@@ -77,10 +78,11 @@
                     this.address = res;
                     console.log(this.address)
                 }, () => {
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             }
         }

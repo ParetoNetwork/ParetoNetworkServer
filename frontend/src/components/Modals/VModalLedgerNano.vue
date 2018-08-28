@@ -1,5 +1,6 @@
 <template>
     <div>
+        <notifications group="auth" position="bottom right"/>
         <b-modal ref="ledgerNano"
                  centered
                  @hide="onClosedModal"
@@ -79,10 +80,11 @@
                     this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
-                    this.$toast.error(error, 'Error', {
-                        timeout: 10000,
-                        position: 'topCenter'
-                    });
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             }, ...mapMutations({
                 loginVuex: 'login',

@@ -1,5 +1,6 @@
 <template>
     <div class="pareto-bg-dark">
+        <notifications group="auth" position="bottom right"/>
         <div class="container main  wrapp pb-5"
              style="min-height: 100vh;">
             <div class="row mt-5 p-1 text-left">
@@ -39,6 +40,8 @@
                                         type="submit"
                                         form="intel"
                                         value="Submit">
+                            </div>
+                            <div class="d-flex justify-content-center">
                                 <label class="pareto-label"> {{intel.text}}
                                     <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
                                 </label>
@@ -57,6 +60,55 @@
                     </div>
 
                 </div>
+            </div>
+
+            <div>
+                <b-modal
+                        v-model="modalToken"
+                        centered
+                        hide-header
+                        hide-footer
+                        @hide="hideModal"
+                        :body-bg-variant="'dark'"
+                        :body-text-variant="'light'">
+
+                    <b-container fluid>
+                        <h2 class="font-body mb-2"> Insert the pareto amount </h2>
+                        <b-form-input v-model="tokens"
+                                      type="number"
+                                      placeholder="Pareto Amount"></b-form-input>
+                        <b-row class="m-2 mt-4">
+                            <b-button class="ml-2" variant="danger" @click="hideModal()"> Cancel </b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)" variant="success" @click="upload()"> Confirm </b-button>
+                        </b-row>
+                    </b-container>
+                </b-modal>
+            </div>
+            <div>
+                <b-modal
+                        no-close-on-backdrop
+                        v-model="modalWaiting"
+                        centered
+                        hide-header
+                        hide-footer
+                        @hide="hideModal"
+                        :body-bg-variant="'dark'"
+                        :body-text-variant="'light'">
+
+                    <b-container fluid>
+                        <h2 class="font-body"> Please wait </h2>
+                        <div class="text-left">
+                            <div class="m-2 ml-4">
+                                <ol>
+                                    <li> Confirm the pareto amount </li>
+                                    <li> Confirm the transaction </li>
+                                </ol>
+
+                                <p class="text-center"> This may take a while ... <i class="fa fa-spinner fa-spin fa-2x"></i></p>
+                            </div>
+                        </div>
+                    </b-container>
+                </b-modal>
             </div>
         </div>
     </div>
@@ -87,6 +139,8 @@
                     title :'',
                     body : ''
                 },
+                modalToken : false,
+                modalWaiting : false,
                 notificationSystem: {
                     options: {
                         success: {
@@ -102,37 +156,7 @@
                             position: 'bottomRight'
                         }
                     }
-                },
-                question: {
-                    timeout: 200000,
-                    overlay: true,
-                    displayMode: 'once',
-                    id: 'inputs',
-                    zindex: 999,
-                    title: 'Inputs',
-                    message: 'Examples',
-                    position: 'center',
-                    drag: false,
-                    inputs: [
-                        ['<input type="number" value="1">', 'keyup', (instance, toast, input, e) => {
-                            this.tokens = input.value;
-                        }]
-                    ],
-                    buttons: [
-                        ['<button><b>Create</b></button>',  (instance, toast) => {
-                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                            this.upload();
-                        }, true],
-                        ['<button>Cancel</button>', (instance, toast) => {
-                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                            this.$toast.error('The Pareto transaction was cancelled', 'Cancelled', this.notificationSystem.options.error);
-                        }]
-                    ],
-                    onClosed: function(instance, toast, closedBy){
-                        console.info('Closed | closedBy: ' + closedBy);
-                    }
                 }
-
             };
         },
         mounted: function () {
@@ -177,38 +201,64 @@
 
                 if(!this.formError.title || !this.formError.body) return;
 
-                this.$toast.question('Tokens to deposit for creating Intel', 'Pareto', this.question);
+                this.showModal();
+
             },
             upload: function () {
+                this.hideModal();
+                console.log(this.tokens);
 
                 this.intelState('creating', 'Creating Intel, please wait');
                 console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
 
                 ContentService.uploadContent({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress}, res => {
                     this.$store.state.makingRequest = true;
-                    this.$toast.info('Please wait for both confirm dialogs', 'Loading', this.notificationSystem.options.info)
+                    this.modalWaiting = true;
 
                     ContentService.createIntel({ID:res.content.Intel_ID}, this.tokens, (res) => {
                         console.log(res);
-                        this.$toast.destroy()
                         this.$store.state.makingRequest = false;
                         this.intelState('created', 'Intel Created!');
-                        this.$toast.success('The Intel was created', 'New Pareto', this.notificationSystem.options.success);
+
+                        this.$notify({
+                            group: 'foo',
+                            type: 'success',
+                            duration: 10000,
+                            text: 'The Intel was created' });
+
+                        this.modalWaiting = false;
+
                         this.$router.push('/intel');
                     }, (err) => {
-                        console.log(err);
-                        this.$toast.destroy()
                         this.intelState('empty', '');
-                        this.$toast.error('Error, could not create Intel', 'Cancelled', this.notificationSystem.options.error);
+
+                        this.modalWaiting = false;
+
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: 'Could not create Intel' });
                         this.$store.state.makingRequest = false;
                     })
                 }, error => {
-
+                    this.intelState('empty', 'Could not create Intel');
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: 'Could not create Intel' });
                 });
             },
             intelState : function (state, text) {
                 this.intel.state = state;
                 this.intel.text = text;
+            },
+            showModal () {
+                this.modalToken = true;
+            },
+            hideModal () {
+                this.modalToken = false;
             }
         }
 
