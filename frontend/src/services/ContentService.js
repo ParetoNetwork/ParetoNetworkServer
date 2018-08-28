@@ -25,11 +25,11 @@ export default class ContentService {
       });
   }
 
-  static async createIntel(content, tokenAmount,onSuccess, onError) {
+  static async createIntel(serverData, tokenAmount, onSuccess, onError) {
     await this.Setup();
     console.log(tokenAmount);
-    if(tokenAmount === null) {
-      let error = 'No Pareto Amount. Transaction cancelled';
+    if (tokenAmount === null) {
+      let error = "No Pareto Amount. Transaction cancelled";
       onError(error);
       return;
     }
@@ -39,6 +39,8 @@ export default class ContentService {
         onError("Err getting accounts");
         return;
       }
+
+      const gasPrice = await web3.eth.getGasPrice();
       const provider_address = accounts[0];
 
       const _ttl = Math.round(new Date().getTime() / 1000) + 240; // add five seconds to to allow the rewarder to reward pareto tokens
@@ -54,40 +56,48 @@ export default class ContentService {
         .send({
           from: provider_address,
           gas: gasApprove,
-          gasPrice: "10000000000"
+          gasPrice
         })
         .on("error", err => {
           onError(err);
         });
 
-      let gasCreateIntel = await Intel.methods
-        .create(
-          provider_address,
-          depositAmount,
-          web3.utils.toWei(desiredReward, "ether"),
-          content.ID,
-          _ttl
-        )
-        .estimateGas({ from: provider_address });
+      this.uploadContent(
+        serverData,
+        async res => {
+          let gasCreateIntel = await Intel.methods
+            .create(
+              provider_address,
+              depositAmount,
+              web3.utils.toWei(desiredReward, "ether"),
+              res.content.Intel_ID,
+              _ttl
+            )
+            .estimateGas({ from: provider_address });
 
-      await Intel.methods
-        .create(
-          provider_address,
-          depositAmount,
-          web3.utils.toWei(desiredReward, "ether"),
-          content.ID,
-          _ttl
-        )
-        .send({
-          from: provider_address,
-          gas: gasCreateIntel,
-          gasPrice: "10000000000"
-        })
-        .on("error", err => {
+          await Intel.methods
+            .create(
+              provider_address,
+              depositAmount,
+              web3.utils.toWei(desiredReward, "ether"),
+              res.content.Intel_ID,
+              _ttl
+            )
+            .send({
+              from: provider_address,
+              gas: gasCreateIntel,
+              gasPrice
+            })
+            .on("error", err => {
+              onError(err);
+            });
+
+          onSuccess("successfull");
+        },
+        err => {
           onError(err);
-        });
-
-      onSuccess("successfull");
+        }
+      );
     });
   }
 
