@@ -234,7 +234,7 @@ export default {
                 group: 'auth',
                 type: 'error',
                 duration: 10000,
-                text: error });
+                text: 'There was an error loading the address. Please refresh the page' });
         }
       );
     },
@@ -293,7 +293,7 @@ export default {
                 group: 'auth',
                 type: 'error',
                 duration: 10000,
-                text: error });
+                text: 'There was an error loading the address. Please refresh the page' });
         }
       );
     },
@@ -318,7 +318,7 @@ export default {
                 group: 'auth',
                 type: 'error',
                 duration: 10000,
-                text: error });
+                text: 'There was an error loading the address. Please refresh the page' });
         }
       );
     },
