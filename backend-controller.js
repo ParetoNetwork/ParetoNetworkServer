@@ -710,6 +710,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 txHash: entry.txHash,
                                 reward: entry.reward,
                                 speed: entry.speed,
+                                id:entry.id,
                                 _v: entry._v,
                                 createdBy: {
                                     address: entry.createdBy.address,
@@ -879,14 +880,17 @@ controller.aproxAllScoreRanking = async function(callback){
                             }
 
                         }
-                        ParetoAddress.bulkWrite(bulkop).then(
-                            function (r) {
+                        if (bulkop.length > 0){
+                            ParetoAddress.bulkWrite(bulkop).then(
+                                function (r) {
+                                    callback(null, {} );
+                                }
+                            ).catch(function (err) {
+                                console.log(err);
                                 callback(null, {} );
-                            }
-                        ).catch(function (err) {
-                            console.log(err);
-                            callback(null, {} );
-                        });
+                            });
+                        }
+
 
                     }
 
@@ -944,14 +948,17 @@ controller.realAllScoreRanking = async function(callback){
                         })
                     }
                     console.log("bulk count here: " + bulkop.length);
-                    ParetoAddress.bulkWrite(bulkop).then(
-                        function (r) {
+                    if (bulkop.length> 0){
+                        ParetoAddress.bulkWrite(bulkop).then(
+                            function (r) {
+                                callback(null, {} );
+                            }
+                        ).catch(function (err) {
+                            console.log(err);
                             callback(null, {} );
-                        }
-                    ).catch(function (err) {
-                        console.log(err);
-                        callback(null, {} );
-                    });
+                        });
+                    }
+
                 }
 
                 processData();
