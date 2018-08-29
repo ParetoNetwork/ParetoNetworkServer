@@ -211,11 +211,10 @@
                 this.intelState('creating', 'Creating Intel, please wait');
                 //console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
 
-                ContentService.uploadContent({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress}, res => {
                     this.$store.state.makingRequest = true;
                     this.modalWaiting = true;
 
-                    ContentService.createIntel({ID:res.content.Intel_ID}, this.tokens, (res) => {
+                    ContentService.createIntel({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress}, this.tokens, (res) => {
                        // console.log(res);
                         this.$store.state.makingRequest = false;
                         this.intelState('created', 'Intel Created!');
@@ -241,14 +240,7 @@
                             text: 'Could not create Intel' });
                         this.$store.state.makingRequest = false;
                     })
-                }, error => {
-                    this.intelState('empty', 'Could not create Intel');
-                    this.$notify({
-                        group: 'foo',
-                        type: 'error',
-                        duration: 10000,
-                        text: 'Could not create Intel' });
-                });
+                
             },
             intelState : function (state, text) {
                 this.intel.state = state;
