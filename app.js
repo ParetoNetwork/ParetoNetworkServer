@@ -549,8 +549,10 @@ cron.schedule("*/5 * * * *", function() {
 /**
  * This is a scheduled task that approximate score every minute.
  */
-cron.schedule("* * * * *", function() {
+
+setTimeout(function run() {
     try{
+        const time = (new Date().getTime());
         controller.aproxAllScoreRanking(function(err, result){
             if(err){
                 console.log(err)
@@ -561,6 +563,7 @@ cron.schedule("* * * * *", function() {
                     }else{
                         console.log('Sucessfully updated aprox' )
                     }
+                    setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
 
                 });
             }
@@ -570,7 +573,8 @@ cron.schedule("* * * * *", function() {
         console.log(e);
     }
 
-});
+}, 60000);
+
 
 
 /*app.get('/v1/content/social', function(req, res){
