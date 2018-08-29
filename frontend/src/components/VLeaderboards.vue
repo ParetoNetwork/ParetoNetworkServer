@@ -96,7 +96,12 @@
                                 <table class="table table-responsive-lg position-relative">
                                     <div>
                                         <tbody id="table-leaderboard">
-                                        <tr v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
+                                        <tr
+                                                v-for="rank in leader"
+                                                :key="rank.address"
+                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }"
+                                                v-bind:id="rank.rank"
+                                        >
                                             <td style="width: 55px">{{rank.rank}}</td>
                                             <!--<td>{{rank.score}}</td>-->
                                             <td style="width: 123px">
@@ -178,6 +183,11 @@
                     distance: 0,
                     active: false
                 },
+                socketParams : {
+                  rank: '',
+                  limit: '',
+                  page: ''
+                },
                 ws : null
             };
         },
@@ -243,11 +253,14 @@
                 });
             }, getLeaderboard: function () {
                 this.$store.state.makingRequest = true;
+
+                this.socketParams = { rank: this.rank, limit: 100, page: this.page};
                 LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += 100;
+
                 }, error => {
                     this.$notify({
                         group: 'foo',
@@ -306,8 +319,9 @@
                 if(!this.loading) this.getLeaderboard();
             },
             onScroll: function(){
+
                 let bottomReached = false;
-                console.log($('#table-leaderboard tr').length);
+
                 if(this.table){
                     this.scroll.distance = this.table.scrollTop;
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
@@ -319,6 +333,8 @@
                     this.busy = true;
                     let minimunLimit = 100;
                     if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
+
+                    this.socketParams = { rank: this.rank-this.lastRank, limit: 100, page: 0};
 
                     LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
                         this.$store.state.makingRequest = false;
@@ -350,22 +366,41 @@
             socketConnection () {
                 let params = {rank: this.rank, limit: 100, page: this.page};
 
-                let token = '';
                 Auth.getSocketToken( res =>{
                     if (!this.ws){
                         this.ws = new WebSocket ('ws://localhost:8787');
                         let wss = this.ws;
-                        console.log(params);
                         this.ws.onopen = function open() {
                             wss.send(JSON.stringify(params));
                         };
 
                         let wsa = this.ws;
-                        this.ws.onmessage = function incoming(data) {
-                            wsa.send(JSON.stringify({rank: 300, limit: 100, page: this.page}));
+                        this.ws.onmessage = (data) => {
+
+                            wsa.send(JSON.stringify(this.socketParams));
                             try{
-                                const info =  JSON.parse(data.data)
-                                console.log(info)
+                                const info =  JSON.parse(data.data);
+
+                                if (info.data.address){
+                                    this.score = info.data.score;
+                                }else{
+                                   let socketIndex = 0;
+                                   let socketRanking = info.data;
+                                   let firstRank = socketRanking[socketIndex].rank;
+
+                                   this.leader = this.leader.map( item => {
+
+                                       let rank = parseFloat(item.rank);
+                                       let socketRank = parseFloat(socketRanking[socketIndex].rank);
+
+                                       if( rank >= firstRank && rank < (firstRank + 99) && rank === socketRank){
+                                           item.score = socketRanking[socketIndex].score;
+                                           socketIndex++;
+                                       }
+                                       return item;
+                                   });
+                                }
+
                             }catch (e) {
                                 console.log(e);
                             }
