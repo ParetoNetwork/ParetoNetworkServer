@@ -19,14 +19,28 @@ describe('backend-controller /', function() {
     });
 
     it('No get content with wrong address',  function (done) {
-        serverApp.controller.getAllAvailableContent({user: "asdf"}, function(err, result){
+        const req = {
+            query: {
+                limit: 100,
+                page: 0
+            },
+            user: "asdf"
+        };
+        serverApp.controller.getAllAvailableContent(req, function(err, result){
             assert.exists(err, 'The controller should validate fake address');
             done();
         });
     });
 
     it('Current user get data Test',  function (done) {
-        serverApp.controller.getAllAvailableContent({user: data.owner}, function(err, result){
+        const req = {
+            query: {
+                limit: 100,
+                page: 0
+            },
+            user: data.owner
+        };
+        serverApp.controller.getAllAvailableContent(req, function(err, result){
             assert.notExists(err, 'The current data shouldnt get error');
             assert.exists(result, 'The content must be fetched');
             done();
@@ -73,18 +87,19 @@ describe('backend-controller /', function() {
         });
     });
 
-    it('Calculate score of specific address',  function (done) {
-        serverApp.controller.calculateScore(data.owner, 0,function(err, res){
-            if(!err){
-                assert.containsAllKeys(res,  [ 'address', 'score', 'block', 'rank', 'tokens' ]);
-                assert.isAtLeast(parseFloat(res.score),parseFloat(process.env.SPECTED_SCORE)-parseFloat(process.env.SPECTED_PRECISION), "The score is not equal to the spected");
-                assert.isAtMost(res.score,parseFloat(process.env.SPECTED_SCORE)+parseFloat(process.env.SPECTED_PRECISION), "The score is not equal to the spected");
-            }else{
-                assert(err.message.indexOf('Invalid JSON RPC') > -1, 'Only Ethereum servers error are allowed')
-            }
-            done();
-        });
-    });
+    // This test supposes the user doesn't change his Pareto through the time. Now the user can spend Pareto with rewards
+    // it('Calculate score of specific address',  function (done) {
+    //     serverApp.controller.calculateScore(data.owner, 0,function(err, res){
+    //         if(!err){
+    //             assert.containsAllKeys(res,  [ 'address', 'score', 'block', 'rank', 'tokens' ]);
+    //             assert.isAtLeast(parseFloat(res.score),parseFloat(process.env.SPECTED_SCORE)-parseFloat(process.env.SPECTED_PRECISION), "The score is not equal to the spected");
+    //             assert.isAtMost(res.score,parseFloat(process.env.SPECTED_SCORE)+parseFloat(process.env.SPECTED_PRECISION), "The score is not equal to the spected");
+    //         }else{
+    //             assert(err.message.indexOf('Invalid JSON RPC') > -1, 'Only Ethereum servers error are allowed')
+    //         }
+    //         done();
+    //     });
+    // });
 
 
 });
