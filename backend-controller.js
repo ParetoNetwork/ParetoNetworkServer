@@ -563,8 +563,8 @@ controller.postContent = function (req, callback) {
 
 controller.getAllAvailableContent = function(req, callback) {
 
-    var limit = parseInt(req.query.limit);
-    var page = parseInt(req.query.page);
+    var limit = parseInt(req.query.limit || 100);
+    var page = parseInt(req.query.page || 0);
 
   //check if user, then return what the user is privy to see
 
