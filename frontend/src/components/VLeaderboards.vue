@@ -95,7 +95,7 @@
                             <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
                                 <table class="table table-responsive-lg position-relative">
                                     <div>
-                                        <tbody>
+                                        <tbody id="table-leaderboard">
                                         <tr v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
                                             <td style="width: 55px">{{rank.rank}}</td>
                                             <!--<td>{{rank.score}}</td>-->
@@ -307,6 +307,7 @@
             },
             onScroll: function(){
                 let bottomReached = false;
+                console.log($('#table-leaderboard tr').length);
                 if(this.table){
                     this.scroll.distance = this.table.scrollTop;
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
