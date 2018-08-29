@@ -3,7 +3,7 @@
         <Navbar/>
         <router-view></router-view>
         <VFab/>
-        <notifications group="foo" position="bottom right"/>
+        <notifications group="foo" position="bottom left"/>
     </div>
 </template>
 

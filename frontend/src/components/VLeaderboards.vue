@@ -250,7 +250,7 @@
                     this.page += 100;
                 }, error => {
                     this.$notify({
-                        group: 'auth',
+                        group: 'foo',
                         type: 'error',
                         duration: 10000,
                         text: error });
@@ -261,7 +261,7 @@
                         this.getAddress()
                     }, error => {
                         this.$notify({
-                            group: 'auth',
+                            group: 'foo',
                             type: 'error',
                             duration: 10000,
                             text: error });
@@ -285,7 +285,7 @@
 
                     }, error => {
                         this.$notify({
-                            group: 'auth',
+                            group: 'foo',
                             type: 'error',
                             duration: 10000,
                             text: error });
@@ -327,7 +327,7 @@
                         this.leader = [... res,...this.leader];
                     }, error => {
                         this.$notify({
-                            group: 'auth',
+                            group: 'foo',
                             type: 'error',
                             duration: 10000,
                             text: error });

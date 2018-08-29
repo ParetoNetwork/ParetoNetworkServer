@@ -231,7 +231,7 @@ export default {
         },
         () => {
             this.$notify({
-                group: 'auth',
+                group: 'foo',
                 type: 'error',
                 duration: 10000,
                 text: 'There was an error loading the address. Please refresh the page' });
@@ -290,7 +290,7 @@ export default {
         },
         error => {
             this.$notify({
-                group: 'auth',
+                group: 'foo',
                 type: 'error',
                 duration: 10000,
                 text: 'There was an error loading the address. Please refresh the page' });
@@ -315,7 +315,7 @@ export default {
         },
         error => {
             this.$notify({
-                group: 'auth',
+                group: 'foo',
                 type: 'error',
                 duration: 10000,
                 text: 'There was an error loading the address. Please refresh the page' });
