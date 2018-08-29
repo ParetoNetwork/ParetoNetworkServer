@@ -391,7 +391,8 @@
                                    this.leader = this.leader.map( item => {
 
                                        let rank = parseFloat(item.rank);
-                                       let socketRank = parseFloat(socketRanking[socketIndex].rank);
+                                       let socketRank;
+                                       if(socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
 
                                        if( rank >= firstRank && rank < (firstRank + 99) && rank === socketRank){
                                            item.score = socketRanking[socketIndex].score;
