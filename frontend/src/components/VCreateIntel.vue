@@ -79,7 +79,7 @@
                                       placeholder="Pareto Amount"></b-form-input>
                         <b-row class="m-2 mt-4">
                             <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
-                            <b-button style="background-color: rgb(107, 194, 123)" variant="success" @click="upload()"> Confirm </b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
                         </b-row>
                     </b-container>
                 </b-modal>
@@ -129,6 +129,7 @@
                 block: null,
                 body:'',
                 title:'',
+                maxTokens: 1,
                 blockChainAddress:'',
                 tokens: 1,
                 intel :{
@@ -189,6 +190,7 @@
                 DashboardService.getAddress(res => {
                     this.block = res.block;
                     this.blockChainAddress = res.address
+                    this.maxTokens = res.tokens
                 }, () => {
 
                 });
@@ -232,12 +234,13 @@
                         this.intelState('empty', '');
 
                         this.modalWaiting = false;
-
+                        if (typeof err === 'string')
+                            err='Could not create Intel. ' +  err.split('\n')[0];
                         this.$notify({
                             group: 'foo',
                             type: 'error',
-                            duration: 10000,
-                            text: 'Could not create Intel' });
+                            duration: 20000,
+                            text: err || 'Could not create Intel' });
                         this.$store.state.makingRequest = false;
                     })
                 
