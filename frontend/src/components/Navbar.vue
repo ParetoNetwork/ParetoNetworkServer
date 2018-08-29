@@ -151,7 +151,7 @@
                 }, error => {
                     this.stopLogin();
                     this.$notify({
-                        group: 'auth',
+                        group: 'foo',
                         type: 'error',
                         duration: 10000,
                         text: error });
@@ -175,7 +175,7 @@
                 }, error => {
                     this.stopLogin();
                     this.$notify({
-                        group: 'auth',
+                        group: 'foo',
                         type: 'error',
                         duration: 10000,
                         text: error });
@@ -188,7 +188,7 @@
                     this.$router.push('/');
                 }, error => {
                     this.$notify({
-                        group: 'auth',
+                        group: 'foo',
                         type: 'error',
                         duration: 10000,
                         text: error });

@@ -81,7 +81,7 @@
                 }, error => {
                     this.stopLogin();
                     this.$notify({
-                        group: 'auth',
+                        group: 'foo',
                         type: 'error',
                         duration: 10000,
                         text: error });
