@@ -30,7 +30,8 @@
                             </div>
 
                             <textarea id="intel-body-input"
-                                      name="editordata" v-model="body"></textarea>
+                                      name="editordata" v-model="body" :onkeyup="app"></textarea>
+                            <h1 class="pareto-label"> toto {{title}} </h1>
                             <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required Field </label>
 
                             <div class="d-flex justify-content-center">
@@ -251,6 +252,9 @@
             },
             hideModal () {
                 this.modalToken = false;
+            },
+            app(){
+                console.log('hola');
             }
         }
 
