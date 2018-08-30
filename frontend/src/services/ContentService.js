@@ -26,7 +26,8 @@ export default class ContentService {
 
   static async createIntel(serverData, tokenAmount, onSuccess, onError) {
     await this.Setup();
-    console.log(tokenAmount);
+    //console.log(tokenAmount);
+
     if (tokenAmount === null) {
       let error = "No Pareto Amount. Transaction cancelled";
       onError(error);
@@ -97,6 +98,8 @@ export default class ContentService {
           onError(err);
         }
       );
+
+
     });
   }
 
