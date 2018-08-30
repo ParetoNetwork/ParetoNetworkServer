@@ -27,6 +27,7 @@ export default class ContentService {
   static async createIntel(serverData, tokenAmount, onSuccess, onError) {
     await this.Setup();
     //console.log(tokenAmount);
+
     if (tokenAmount === null) {
       let error = "No Pareto Amount. Transaction cancelled";
       onError(error);
@@ -48,53 +49,57 @@ export default class ContentService {
 
       let gasApprove = await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
-        .estimateGas({ from: provider_address })
-        await ParetoTokenInstance.methods
-              .approve(Intel.options.address, depositAmount)
-              .send({
-                  from: provider_address,
-                  gas: gasApprove,
-                  gasPrice
-              })
-              .on("error", err => {
-                  onError(err.message || err)
-              });
-          this.uploadContent(
-              serverData,
-              async res => {
-                  let gasCreateIntel = await Intel.methods
-                      .create(
-                          provider_address,
-                          depositAmount,
-                          web3.utils.toWei(desiredReward, "ether"),
-                          res.content.Intel_ID,
-                          _ttl
-                      )
-                      .estimateGas({from: provider_address})
+        .estimateGas({ from: provider_address });
 
-                  await Intel.methods
-                      .create(
-                          provider_address,
-                          depositAmount,
-                          web3.utils.toWei(desiredReward, "ether"),
-                          res.content.Intel_ID,
-                          _ttl
-                      )
-                      .send({
-                          from: provider_address,
-                          gas: gasCreateIntel,
-                          gasPrice
-                      })
-                      .on("error", err => {
-                          onError(err.message || err);
-                      });
+      await ParetoTokenInstance.methods
+        .approve(Intel.options.address, depositAmount)
+        .send({
+          from: provider_address,
+          gas: gasApprove,
+          gasPrice
+        })
+        .on("error", err => {
+          onError(err);
+        });
 
-                  onSuccess("successfull");
-              },
-              err => {
-                  onError(err.message || err);
-              }
-          );
+      this.uploadContent(
+        serverData,
+        async res => {
+          let gasCreateIntel = await Intel.methods
+            .create(
+              provider_address,
+              depositAmount,
+              web3.utils.toWei(desiredReward, "ether"),
+              res.content.Intel_ID,
+              _ttl
+            )
+            .estimateGas({ from: provider_address });
+
+          await Intel.methods
+            .create(
+              provider_address,
+              depositAmount,
+              web3.utils.toWei(desiredReward, "ether"),
+              res.content.Intel_ID,
+              _ttl
+            )
+            .send({
+              from: provider_address,
+              gas: gasCreateIntel,
+              gasPrice
+            })
+            .on("error", err => {
+              onError(err);
+            });
+
+          onSuccess("successfull");
+        },
+        err => {
+          onError(err);
+        }
+      );
+
+
     });
   }
 
