@@ -563,8 +563,8 @@ controller.postContent = function (req, callback) {
 
 controller.getAllAvailableContent = function(req, callback) {
 
-    var limit = parseInt(req.query.limit);
-    var page = parseInt(req.query.page);
+    var limit = parseInt(req.query.limit || 100);
+    var page = parseInt(req.query.page || 0);
 
   //check if user, then return what the user is privy to see
 
@@ -864,20 +864,20 @@ controller.aproxAllScoreRanking = async function(callback){
                 const blockHeight = res.number;
 
                 //Find all Address
-                ParetoAddress.find({}, 'address score tokens block', { }, function(err, results){
+                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: contractCreationBlockHeightInt}}, 'address score tokens block', { }, function(err, results){
                     if(err){
                         callback(err);
                     }
                     else {
                         const bulkop=[];
-                        for (const item of results) {
+                        let len = results.length;
+                        while (len--) {
+                            const item= results[len];
                             const w = item.block - (item.score / item.tokens - 1) * (item.block - contractCreationBlockHeightInt) / 100;
                             var dbValues = {
                                     score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - contractCreationBlockHeightInt)),
                                     block: blockHeight };
-                            if(!isNaN(dbValues.score)){
-                                bulkop.push({updateOne:{ filter: {address : item.address}, update: dbValues}});
-                            }
+                                bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
 
                         }
                         if (bulkop.length > 0){
