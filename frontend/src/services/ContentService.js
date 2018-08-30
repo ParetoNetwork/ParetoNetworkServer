@@ -59,7 +59,7 @@ export default class ContentService {
           gasPrice
         })
         .on("error", err => {
-          onError(err);
+          onError(err.message || err);
         });
 
       this.uploadContent(
@@ -89,13 +89,13 @@ export default class ContentService {
               gasPrice
             })
             .on("error", err => {
-              onError(err);
+              onError(err.message || err) ;
             });
 
           onSuccess("successfull");
         },
         err => {
-          onError(err);
+          onError(err.message || err);
         }
       );
 
