@@ -9,6 +9,7 @@ let Intel;
 let ParetoTokenInstance;
 /* eslint-disable no-console */
 export default class ContentService {
+
   static uploadContent(content, onSuccess, onError) {
     http
       .post("/v1/content", content)
@@ -23,6 +24,21 @@ export default class ContentService {
         return onError(error);
       });
   }
+
+    static findTransaction(id, onSuccess, onError) {
+        http
+            .post("/v1/updatecontent", {id: id})
+            .then(res => {
+                if (res.data.success) {
+                    return onSuccess(res.data.data);
+                } else {
+                    return onError(res.data.message);
+                }
+            })
+            .catch(error => {
+                return onError(error);
+            });
+    }
 
   static async createIntel(serverData, tokenAmount, onSuccess, onError) {
     await this.Setup();
