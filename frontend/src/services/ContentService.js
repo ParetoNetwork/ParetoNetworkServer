@@ -43,14 +43,20 @@ export default class ContentService {
       const gasPrice = await web3.eth.getGasPrice();
       const provider_address = accounts[0];
 
+      
       const _ttl = Math.round(new Date().getTime() / 1000) + 240; // add five seconds to to allow the rewarder to reward pareto tokens
-      const depositAmount = parseFloat(tokenAmount) * 10 ** 18;
+
+      const decimals = web3.utils.toBN(18);
+      const amount = web3.utils.toBN(parseFloat(tokenAmount));
+      const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
+
       const desiredReward = "100";
 
       let gasApprove = await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
         .estimateGas({ from: provider_address });
 
+      
       await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
         .send({
@@ -58,48 +64,54 @@ export default class ContentService {
           gas: gasApprove,
           gasPrice
         })
+        .once("transactionHash", function(hash) {
+          waitForReceipt(hash, receipt => {
+            console.log(receipt);
+
+            ContentService.uploadContent(
+              serverData,
+              async res => {
+                let gasCreateIntel = await Intel.methods
+                  .create(
+                    provider_address,
+                    depositAmount,
+                    web3.utils.toWei(desiredReward, "ether"),
+                    res.content.Intel_ID,
+                    _ttl
+                  )
+                  .estimateGas({ from: provider_address });
+
+                await Intel.methods
+                  .create(
+                    provider_address,
+                    depositAmount,
+                    web3.utils.toWei(desiredReward, "ether"),
+                    res.content.Intel_ID,
+                    _ttl
+                  )
+                  .send({
+                    from: provider_address,
+                    gas: gasCreateIntel,
+                    gasPrice
+                  })
+                  .on("transactionHash", hash => {
+                    waitForReceipt(hash, receipt => {
+                      onSuccess("successfull");
+                    });
+                  })
+                  .on("error", err => {
+                    onError(err.message || err);
+                  });
+              },
+              err => {
+                onError(err.message || err);
+              }
+            );
+          });
+        })
         .on("error", err => {
           onError(err.message || err);
         });
-
-      this.uploadContent(
-        serverData,
-        async res => {
-          let gasCreateIntel = await Intel.methods
-            .create(
-              provider_address,
-              depositAmount,
-              web3.utils.toWei(desiredReward, "ether"),
-              res.content.Intel_ID,
-              _ttl
-            )
-            .estimateGas({ from: provider_address });
-
-          await Intel.methods
-            .create(
-              provider_address,
-              depositAmount,
-              web3.utils.toWei(desiredReward, "ether"),
-              res.content.Intel_ID,
-              _ttl
-            )
-            .send({
-              from: provider_address,
-              gas: gasCreateIntel,
-              gasPrice
-            })
-            .on("error", err => {
-              onError(err.message || err) ;
-            });
-
-          onSuccess("successfull");
-        },
-        err => {
-          onError(err.message || err);
-        }
-      );
-
-
     });
   }
 
@@ -111,33 +123,48 @@ export default class ContentService {
         return;
       }
       const rewarder_address = accounts[0];
-
-      const depositAmount = parseFloat(content.tokenAmount) * 10 ** 18;
+      
+      const decimals = web3.utils.toBN(18);
+      const amount = web3.utils.toBN(parseFloat(content.tokenAmount));
+      const depositAmount =  amount.mul(web3.utils.toBN(10).pow(decimals));
 
       let gasApprove = await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
         .estimateGas({ from: rewarder_address });
 
+      const gasPrice = await web3.eth.getGasPrice();
       await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
         .send({
           from: rewarder_address,
           gas: gasApprove,
-          gasPrice: "10000000000"
+          gasPrice
+        })
+        .on("transactionHash", hash => {
+          waitForReceipt(hash, async receipt => {
+            const gasSendReward = await Intel.methods
+              .sendReward(content.ID, depositAmount)
+              .estimateGas({ from: rewarder_address });
+            await Intel.methods
+              .sendReward(content.ID, depositAmount)
+              .send({
+                from: rewarder_address,
+                gas: gasSendReward,
+                gasPrice
+              })
+              .on("transactionHash", hash => {
+                waitForReceipt(hash, receipt => {
+                  onSuccess("success");
+                });
+              })
+              .on("error", error => {
+                onError(error);
+              });
+          });
         })
         .on("error", err => {
           onError(err);
         });
-
-      const gasSendReward = await Intel.methods
-        .sendReward(content.ID, depositAmount)
-        .estimateGas({ from: rewarder_address });
-      await Intel.methods.sendReward(content.ID, depositAmount).send({
-        from: rewarder_address,
-        gas: gasSendReward,
-        gasPrice: "10000000000"
-      });
-      onSuccess("success");
     });
   }
 
@@ -155,12 +182,18 @@ export default class ContentService {
         .distributeReward(content.ID)
         .estimateGas({ from: distributor });
 
+      const gasPrice = await web3.eth.getGasPrice();
       await Intel.methods
         .distributeReward(content.ID)
         .send({
           from: distributor,
           gas: gasDistribute,
-          gasPrice: "10000000000"
+          gasPrice
+        })
+        .on("transactionHash", hash => {
+          waitForReceipt(hash, receipt => {
+            onSuccess("success");
+          });
         })
         .on("error", error => {
           onError(error);
@@ -200,4 +233,24 @@ export default class ContentService {
       return;
     }
   }
+}
+
+function waitForReceipt(hash, cb) {
+  web3.eth.getTransactionReceipt(hash, function(err, receipt) {
+    if (err) {
+      error(err);
+    }
+
+    if (receipt !== null) {
+      // Transaction went through
+      if (cb) {
+        cb(receipt);
+      }
+    } else {
+      // Try again in 1 second
+      window.setTimeout(function() {
+        waitForReceipt(hash, cb);
+      }, 1000);
+    }
+  });
 }
