@@ -30,7 +30,9 @@
                             </div>
 
                             <textarea id="intel-body-input"
-                                      name="editordata" v-model="body"></textarea>
+                                      name="editordata"
+                                      v-model="body"
+                            ></textarea>
                             <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required Field </label>
 
                             <div class="d-flex justify-content-center">
@@ -56,7 +58,7 @@
 
                     <div id="preview"
                          style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
-                        {{body.innerText}}
+                        <p v-html="body"> </p>
                     </div>
 
                 </div>
@@ -99,7 +101,7 @@
                         <h2 class="font-body"> Please wait </h2>
                         <div class="text-left">
                             <div class="m-2 ml-4">
-                                <h>This step has two confirmations:</h>
+                                <h3 class="font-body">This step has two confirmations:</h3>
                                 <ol>
                                     <li>Approve Pareto tokens</li>
                                     <li>Create an Intel </li>
@@ -128,7 +130,8 @@
             return {
                 logged: false,
                 block: null,
-                body:'',
+                body : '',
+                content : '',
                 title:'',
                 maxTokens: 1,
                 blockChainAddress:'',
@@ -160,6 +163,21 @@
                     }
                 }
             };
+        },
+        updated: function() {
+            this.$nextTick(function () {
+                let edit = $('.note-editable')[0];
+                if(edit){
+                    $(edit).keyup(() => {
+                        this.body = edit.innerHTML;
+                    });
+                }
+            });
+        },
+        computed : {
+            bodyFunction: function () {
+                return content;
+            }
         },
         mounted: function () {
             $('#intel-body-input').summernote({
@@ -197,10 +215,9 @@
                 });
             },
             validateContent: function(e){
-                this.body = $('.note-editable')[0];
 
                 this.formError.title = !!this.title;
-                this.formError.body = this.body.innerText.length>3;
+                this.formError.body = this.body.length>3;
 
                 if(!this.formError.title || !this.formError.body) return;
 
@@ -214,36 +231,36 @@
                 this.intelState('creating', 'Creating Intel, please wait');
                 //console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
 
-                    this.$store.state.makingRequest = true;
-                    this.modalWaiting = true;
+                this.$store.state.makingRequest = true;
+                this.modalWaiting = true;
 
-                    ContentService.createIntel({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress}, this.tokens, (res) => {
-                       // console.log(res);
-                        this.$store.state.makingRequest = false;
-                        this.intelState('created', 'Intel Created!');
+                ContentService.createIntel({block:this.block, title: this.title, body: this.body, address: this.blockChainAddress}, this.tokens, (res) => {
 
-                        this.$notify({
-                            group: 'foo',
-                            type: 'success',
-                            duration: 10000,
-                            text: 'The Intel was created' });
+                    this.$store.state.makingRequest = false;
+                    this.intelState('created', 'Intel Created!');
 
-                        this.modalWaiting = false;
+                    this.$notify({
+                        group: 'foo',
+                        type: 'success',
+                        duration: 10000,
+                        text: 'The Intel was created' });
 
-                        this.$router.push('/intel');
-                    }, (err) => {
-                        this.intelState('empty', '');
+                    this.modalWaiting = false;
 
-                        this.modalWaiting = false;
+                    this.$router.push('/intel');
+                }, (err) => {
+                    this.intelState('empty', '');
+
+                    this.modalWaiting = false;
                         if (typeof err === 'string')
                             err='Could not create Intel. ' +  err.split('\n')[0];
-                        this.$notify({
-                            group: 'foo',
-                            type: 'error',
-                            duration: 20000,
-                            text: err || 'Could not create Intel' });
-                        this.$store.state.makingRequest = false;
-                    })
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 20000,
+                        text: err || 'Could not create Intel' });
+                    this.$store.state.makingRequest = false;
+                })
                 
             },
             intelState : function (state, text) {
