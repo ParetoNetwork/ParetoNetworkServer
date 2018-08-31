@@ -533,28 +533,19 @@ controller.postContent = function (req, callback) {
 
 };
 
-controller.findTransaction = function(req, callback){
-    let savedIntel  = {
-        id: req.body.id
-    }
+controller.startwatch = function(){
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-    intel.events.NewIntel({
-        fromBlock: '0'
-    }, function (error, event) {
-        if (error) {
-            console.log(error);
-            return;
-        }
-        if (event.returnValues.intelID == savedIntel.id) {
+    intel.events.NewIntel({}, function (error, event) {
+    }).on('data',  event => {
+        try{
             const initialBalance = event.returnValues.depositAmount;
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.update({ id: savedIntel.id, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                if (err) {
-                    throw err;
-                }
-                callback(null, 'successfully')
+            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
             });
+        }catch (e) {
+            console.log(e);
         }
+
     })
 };
 

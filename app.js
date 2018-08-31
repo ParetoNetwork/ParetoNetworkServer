@@ -320,18 +320,6 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
-app.post('/v1/updatecontent', function (req, res) {
-
-    controller.findTransaction(req, function (err, obj) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
-        }
-
-    });
-
-});
 
 app.get('/v1/content', function (req, res) {
 
@@ -694,5 +682,5 @@ cron.schedule("* * * * *", function() {
 });
 
 
-
+controller.startwatch();
 module.exports = {app: app, controller: controller };
