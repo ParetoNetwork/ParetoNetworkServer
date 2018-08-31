@@ -508,56 +508,47 @@ controller.postContent = function (req, callback) {
       if(web3.utils.isAddress(req.user) == false){
         if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
       } else {
+          let Intel = new ParetoContent({
+              address: req.body.address || req.user,
+              title: req.body.title,
+              body: req.body.body,
+              text: req.bodytext,
+              dateCreated: Date.now(),
+              block: 0,
+              txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
+              speed: 3, //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
+              reward: req.body.reward || 1
 
-          web3.eth.getBlock('latest')
-              .then(function(res) {
-                  blockHeight = res.number;
-                  let Intel = new ParetoContent({
-                      address: req.body.address || req.user,
-                      title: req.body.title,
-                      body: req.body.body,
-                      text: req.bodytext,
-                      dateCreated: Date.now(),
-                      block: blockHeight,
-                      txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
-                      speed: 3, //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
-                      reward: req.body.reward || 1
-
-                  });
-                  Intel.save((err, savedIntel) => {
-                      if (err) {
-                          if (callback && typeof callback === "function") { callback(err); }
-                      } else {
-                          const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-                          intel.events.NewIntel({
-                              fromBlock: '0'
-                          }, function (error, event) {
-                              if (error) {
-                                  console.log(error);
-                                  return;
+          });
+          Intel.save((err, savedIntel) => {
+              if (err) {
+                  if (callback && typeof callback === "function") { callback(err); }
+              } else {
+                  const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+                  intel.events.NewIntel({
+                      fromBlock: '0'
+                  }, function (error, event) {
+                      if (error) {
+                          console.log(error);
+                          return;
+                      }
+                      if (event.returnValues.intelID == savedIntel.id) {
+                          const initialBalance = event.returnValues.depositAmount;
+                          const expiry_time = event.returnValues.ttl;
+                          ParetoContent.update({ _id: savedIntel._id, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                              if (err) {
+                                  throw err;
                               }
-                              if (event.returnValues.intelID == savedIntel.id) {
-                                  const initialBalance = event.returnValues.depositAmount;
-                                  const expiry_time = event.returnValues.ttl;
-                                  ParetoContent.update({ _id: savedIntel._id, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                                      if (err) {
-                                          throw err;
-                                      }
 
-                                  });
-                              }
-                          })
-
-
-                          if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
-
+                          });
                       }
                   })
-              }, function (error) {
-                  callback(error);
-              }).catch(function (err) {
-              callback(err);
-          });
+
+
+                  if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
+
+              }
+          })
 
       } // end else
 
