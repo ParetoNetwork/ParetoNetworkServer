@@ -75,13 +75,13 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h2 class="font-body mb-2"> Insert the pareto amount </h2>
+                        <h1 class="font-body mb-2"> You need to deposit Pareto tokens to create Intel. Please input the Pareto amount to deposit.</h1>
                         <b-form-input v-model="tokens"
                                       type="number"
                                       placeholder="Pareto Amount"></b-form-input>
                         <b-row class="m-2 mt-4">
                             <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
-                            <b-button style="background-color: rgb(107, 194, 123)" variant="success" @click="upload()"> Confirm </b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
                         </b-row>
                     </b-container>
                 </b-modal>
@@ -101,9 +101,10 @@
                         <h2 class="font-body"> Please wait </h2>
                         <div class="text-left">
                             <div class="m-2 ml-4">
+                                <h>This step has two confirmations:</h>
                                 <ol>
-                                    <li> Confirm the pareto amount </li>
-                                    <li> Confirm the transaction </li>
+                                    <li>Approve Pareto tokens</li>
+                                    <li>Create an Intel </li>
                                 </ol>
 
                                 <p class="text-center"> This may take a while ... <i class="fa fa-spinner fa-spin fa-2x"></i></p>
@@ -132,6 +133,7 @@
                 body : '',
                 content : '',
                 title:'',
+                maxTokens: 1,
                 blockChainAddress:'',
                 tokens: 1,
                 intel :{
@@ -207,6 +209,7 @@
                 DashboardService.getAddress(res => {
                     this.block = res.block;
                     this.blockChainAddress = res.address
+                    this.maxTokens = res.tokens
                 }, () => {
 
                 });
@@ -249,12 +252,13 @@
                     this.intelState('empty', '');
 
                     this.modalWaiting = false;
-
+                        if (typeof err === 'string')
+                            err='Could not create Intel. ' +  err.split('\n')[0];
                     this.$notify({
                         group: 'foo',
                         type: 'error',
-                        duration: 10000,
-                        text: 'Could not create Intel' });
+                        duration: 20000,
+                        text: err || 'Could not create Intel' });
                     this.$store.state.makingRequest = false;
                 })
                 
