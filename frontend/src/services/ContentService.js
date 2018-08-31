@@ -25,6 +25,21 @@ export default class ContentService {
       });
   }
 
+    static findTransaction(id, onSuccess, onError) {
+        http
+            .post("/v1/updatecontent", {id: id})
+            .then(res => {
+                if (res.data.success) {
+                    return onSuccess(res.data.data);
+                } else {
+                    return onError(res.data.message);
+                }
+            })
+            .catch(error => {
+                return onError(error);
+            });
+    }
+
   static async createIntel(serverData, tokenAmount, onSuccess, onError) {
     await this.Setup();
     //console.log(tokenAmount);
@@ -93,7 +108,7 @@ export default class ContentService {
               onError(err.message || err) ;
             });
 
-          onSuccess("successfull");
+            this.findTransaction(res.content.Intel_ID,onSuccess, onError)
         },
         err => {
           onError(err.message || err);

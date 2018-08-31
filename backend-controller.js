@@ -524,27 +524,6 @@ controller.postContent = function (req, callback) {
               if (err) {
                   if (callback && typeof callback === "function") { callback(err); }
               } else {
-                  const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-                  intel.events.NewIntel({
-                      fromBlock: '0'
-                  }, function (error, event) {
-                      if (error) {
-                          console.log(error);
-                          return;
-                      }
-                      if (event.returnValues.intelID == savedIntel.id) {
-                          const initialBalance = event.returnValues.depositAmount;
-                          const expiry_time = event.returnValues.ttl;
-                          ParetoContent.update({ _id: savedIntel._id, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                              if (err) {
-                                  throw err;
-                              }
-
-                          });
-                      }
-                  })
-
-
                   if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
 
               }
@@ -552,6 +531,31 @@ controller.postContent = function (req, callback) {
 
       } // end else
 
+};
+
+controller.findTransaction = function(req, callback){
+    let savedIntel  = {
+        id: req.body.id
+    }
+    const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    intel.events.NewIntel({
+        fromBlock: '0'
+    }, function (error, event) {
+        if (error) {
+            console.log(error);
+            return;
+        }
+        if (event.returnValues.intelID == savedIntel.id) {
+            const initialBalance = event.returnValues.depositAmount;
+            const expiry_time = event.returnValues.ttl;
+            ParetoContent.update({ id: savedIntel.id, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                if (err) {
+                    throw err;
+                }
+                callback(null, 'successfully')
+            });
+        }
+    })
 };
 
 controller.getAllAvailableContent = function(req, callback) {
