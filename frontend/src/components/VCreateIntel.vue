@@ -99,7 +99,7 @@
                         <h2 class="font-body"> Please wait </h2>
                         <div class="text-left">
                             <div class="m-2 ml-4">
-                                <h>This step has two confirmations:</h>
+                                <h3 class="font-body">This step has two confirmations:</h3>
                                 <ol>
                                     <li>Approve Pareto tokens</li>
                                     <li>Create an Intel </li>
