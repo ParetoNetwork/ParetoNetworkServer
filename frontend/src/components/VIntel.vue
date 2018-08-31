@@ -83,10 +83,10 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex flex-column text-left">
                                             <h5><b>{{post.title}}</b></h5>
-                                            <span>{{post.date | date}}</span>
+                                            <span>{{post.dateCreated | date}}</span>
                                         </div>
                                         <div class="d-flex ">
-                                            <span class="underline text-primary"><u><b>TXID:</b> {{post.trd}}</u></span>
+                                            <span class="underline text-primary"><u><b>TXID:</b> {{post.txHash}}</u></span>
                                         </div>
                                     </div>
                                 </router-link>
