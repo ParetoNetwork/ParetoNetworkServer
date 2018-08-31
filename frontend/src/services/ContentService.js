@@ -27,7 +27,8 @@ export default class ContentService {
 
   static async createIntel(serverData, tokenAmount, onSuccess, onError) {
     await this.Setup();
-    console.log(tokenAmount);
+    //console.log(tokenAmount);
+
     if (tokenAmount === null) {
       let error = "No Pareto Amount. Transaction cancelled";
       onError(error);
@@ -59,7 +60,7 @@ export default class ContentService {
           gasPrice
         })
         .on("error", err => {
-          onError(err);
+          onError(err.message || err);
         });
 
       this.uploadContent(
@@ -89,15 +90,17 @@ export default class ContentService {
               gasPrice
             })
             .on("error", err => {
-              onError(err);
+              onError(err.message || err) ;
             });
 
           onSuccess("successfull");
         },
         err => {
-          onError(err);
+          onError(err.message || err);
         }
       );
+
+
     });
   }
 
