@@ -120,8 +120,6 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import ContentService from '../services/ContentService';
-    require('summernote/dist/summernote.css');
-    require('summernote');
 
     export default {
         name: 'VCreateIntel',
