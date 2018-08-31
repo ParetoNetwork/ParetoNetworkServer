@@ -589,14 +589,17 @@ setTimeout(function run() {
 /*
 WEb socket in order to keep fronted updated
  */
-var WebSocketServer = require('ws').Server,
+
+const WebSocket = require('ws');
+var WebSocketServer = WebSocket.Server,
     wss = new WebSocketServer({
         verifyClient: function (info, cb) {
-            var token = info.req.headers.token;
+
+            var token = info.req.headers.cookie.split('authorization=')[1];
             if (!token)
                 cb(false, 401, 'Unauthorized');
             else {
-                jwt.verify(token, 'ParetoWs', function (err, decoded) {
+                jwt.verify(token, 'Pareto', function (err, decoded) {
                     if (err) {
                         cb(false, 401, 'Unauthorized')
                     } else {
@@ -628,7 +631,7 @@ wss.on('connection', function connection(ws, req) {
     ws.on('pong', heartbeat);
     ws.user = req.user;
     ws.on('message', function (message) {
-        ws.info = message;
+        ws.info = JSON.parse(message);
     });
 });
 
@@ -645,7 +648,6 @@ cron.schedule("* * * * *", function() {
             if (client.readyState === WebSocket.OPEN ) {
                 // Validate if the user is subscribed a set of information
                 if(client.info && client.user){
-                    console.log(client.info);
                     const rank = parseInt(client.info.rank) || 1;
                     let limit = parseInt(client.info.limit) || 100;
                     const page = parseInt(client.info.page) || 0;
@@ -659,7 +661,13 @@ cron.schedule("* * * * *", function() {
                      */
                     controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                         if (!err) {
-                            client.send(ErrorHandler.getSuccess(result));
+                            client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                        }
+                    });
+
+                    controller.getUserInfo(client.user.user, function (err, result) {
+                        if (!err) {
+                            client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                         }
                     });
 
