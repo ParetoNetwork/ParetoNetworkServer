@@ -7,7 +7,6 @@
                      style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
                     <div>
                         <div class="row" style="color: #ffffff; justify-content: center;">
-
                             <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
                                 Check
                                 your<b>PARETO</b> scores
