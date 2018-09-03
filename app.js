@@ -361,7 +361,7 @@ app.get('/v1/content', function (req, res) {
 
 app.get('/v1/content/me', function (req, res) {
 
-    controller.getContentByCurrentUser(req.user, function (err, result) {
+    controller.getContentByCurrentUser(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
