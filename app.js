@@ -320,6 +320,19 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
+app.post('/v1/updatecontent', function (req, res) {
+
+    controller.findTransaction(req, function (err, obj) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
+        }
+
+    });
+
+});
+
 app.get('/v1/content', function (req, res) {
 
     //this needs a session id, basically an authenticated address
@@ -348,7 +361,7 @@ app.get('/v1/content', function (req, res) {
 
 app.get('/v1/content/me', function (req, res) {
 
-    controller.getContentByCurrentUser(req.user, function (err, result) {
+    controller.getContentByCurrentUser(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
