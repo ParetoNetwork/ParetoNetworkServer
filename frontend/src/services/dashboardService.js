@@ -53,8 +53,10 @@ export default class dashboardService {
         });
     }
 
-    static getAllContent(onSuccess, onError) {
-        return http.get('/v1/content').then(res => {
+    static getAllContent(params, onSuccess, onError) {
+        const {limit, page} = params || {limit: 10, page: 0};
+        return http.get('/v1/content?' + 'limit=' + limit + '&page=' + page).then(res => {
+            console.log(res);
             if(res.data.success){
                 return onSuccess(res.data.data);
             }else{
