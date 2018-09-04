@@ -68,7 +68,6 @@
     import DashboardService from '../services/dashboardService';
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
-
     export default {
         name: 'Navbar',
         components: {ModalLedgerNano},
