@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 module.exports = {
     configureWebpack: {
         module: {
@@ -18,8 +19,18 @@ module.exports = {
                             }
                         ]
                     }
-
             ]
-        }
+        },
+        plugins: [
+            new webpack.ProvidePlugin({
+                $: 'jquery',
+                jquery: 'jquery',
+                'window.jQuery': 'jquery',
+                'window.$': 'jquery',
+                jQuery: 'jquery',
+                Popper: ['popper.js', 'default'],
+                summernote: 'summernote'
+            })
+        ]
     }
 }

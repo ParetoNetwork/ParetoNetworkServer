@@ -1,6 +1,6 @@
 <template>
     <div class="head">
-
+        <notifications group="auth" position="bottom right"/>
         <div
                 id="gradient"
                 class="bar">&nbsp;
@@ -88,10 +88,14 @@
             loadingNav(value){
               if(value){
                   $('#gradient').removeClass("animateBar").removeClass("animationEnd");
-                  setTimeout("$('#gradient').addClass( 'animateBar');",1);
+                  setTimeout( () => {
+                      $('#gradient').addClass( 'animateBar');
+                  },1);
               }else{
                   $('#gradient').removeClass("animateBar");
-                  setTimeout("$('#gradient').addClass( 'animationEnd');",1);
+                  setTimeout( () => {
+                      $('#gradient').addClass( 'animationEnd');
+                  },1);
               }
             },
             logged(value){
@@ -146,7 +150,11 @@
                     this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
-                    alert(error);
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             login: function () {
@@ -166,7 +174,11 @@
 
                 }, error => {
                     this.stopLogin();
-                    alert(error);
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             logout: function () {
@@ -175,7 +187,11 @@
                     this.collapseContent();
                     this.$router.push('/');
                 }, error => {
-                    alert(error);
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             ledgerNanoLogin () {

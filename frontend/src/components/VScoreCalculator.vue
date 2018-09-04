@@ -1,5 +1,6 @@
 <template>
     <div class="main wrapp font-body-regular">
+        <notifications group="auth" position="bottom right"/>
         <div class="container pt-5">
             <div class="mt-2">
                 <div class="row">
@@ -77,7 +78,11 @@
                     this.address = res;
                     console.log(this.address)
                 }, () => {
-                    alert(error);
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             }
         }

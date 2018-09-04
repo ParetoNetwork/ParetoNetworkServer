@@ -11,7 +11,8 @@ var requestp = require('request-promise');
 var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser');
 const multer = require("multer");
-var multerS3 = require('multer-s3')
+var multerS3 = require('multer-s3');
+const cron = require("node-cron");
 const AWS = require('aws-sdk');
 AWS.config.update({
     region: process.env.S3_REGION || constants.S3_REGION,
@@ -22,6 +23,7 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 var controller = require('./backend-controller.js');
+require("./ContractEventListeners/Intel");
 
 
 var app = express();
@@ -246,6 +248,10 @@ app.get('/v1/splash-auth', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/dashboard.html'));
 });
 
+app.get('/v1/signws', function (req, res){
+    res.status(200).json(ErrorHandler.getSuccess({token:  jwt.sign({user: req.user}, 'ParetoWs',  { expiresIn: "5y" })}));
+});
+
 /*
 * Unsign - clears cookie session for the client side, which cannot access secure httpOnly cookies
 */
@@ -314,6 +320,19 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
+app.post('/v1/updatecontent', function (req, res) {
+
+    controller.findTransaction(req, function (err, obj) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
+        }
+
+    });
+
+});
+
 app.get('/v1/content', function (req, res) {
 
     //this needs a session id, basically an authenticated address
@@ -340,9 +359,21 @@ app.get('/v1/content', function (req, res) {
 });
 
 
+app.get('/v1/content/me', function (req, res) {
+
+    controller.getContentByCurrentUser(req, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
 //get info about another address
 app.get('/v1/content/:content', function (req, res) {
-
+    req.query.limit = 1000;
+    req.query.page = 0;
     controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
@@ -360,16 +391,6 @@ app.get('/v1/content/:content', function (req, res) {
 
 });
 
-app.get('/v1/content/me/', function (req, res) {
-
-    controller.getContentByCurrentUser(req.user, function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
 
 app.get('/v1/ranking', function (req, res) {
 
@@ -417,29 +438,30 @@ app.get('/v1/address/:address', function (req, res) {
 
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
-    if(req.query.latest==='true'){
-        controller.updateScore(req.user, function (err, success) {
-            if (err) {
-                res.status(200).json(ErrorHandler.getError(err));
-            } else {
-                controller.getUserInfo(req.user,  function (err, result) {
-                    if (err) {
-                        res.status(200).json(ErrorHandler.getError(err));
-                    } else {
-                        res.status(200).json(ErrorHandler.getSuccess(result));
-                    }
-                });
-            }
-        });
-    }else{
-        controller.getUserInfo(req.user,  function (err, result) {
-            if (err) {
-                res.status(200).json(ErrorHandler.getError(err));
-            } else {
-                res.status(200).json(ErrorHandler.getSuccess(result));
-            }
-        });
-    }
+    //Get Info User
+     if (req.query.latest=='true'){
+         controller.updateScore(req.user, function (err, success) {
+             if (err) {
+                 res.status(200).json(ErrorHandler.getError(err));
+             } else {
+                 controller.getUserInfo(req.user,  function (err, result) {
+                     if (err) {
+                         res.status(200).json(ErrorHandler.getError(err));
+                     } else {
+                         res.status(200).json(ErrorHandler.getSuccess(result));
+                     }
+                 });
+             }
+         });
+     } else{
+         controller.getUserInfo(req.user,  function (err, result) {
+             if (err) {
+                 res.status(200).json(ErrorHandler.getError(err));
+             } else {
+                 res.status(200).json(ErrorHandler.getSuccess(result));
+             }
+         });
+     }
 
 });
 
@@ -511,6 +533,63 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
     }]
 }));
 
+/**
+ * This is a scheduled task that will update the calculation for the score every ten minutes.
+ */
+cron.schedule("*/5 * * * *", function() {
+    try{
+        controller.realAllScoreRanking(function(err, result){
+            if(err){
+                console.log(err)
+            }else{
+                controller.getScoreAndSaveRedis(function(err, result){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        console.log('Sucessfully updated' )
+                    }
+
+                });
+            }
+
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+});
+
+/**
+ * This is a scheduled task that approximate score every minute.
+ */
+
+setTimeout(function run() {
+    try{
+        const time = (new Date().getTime());
+        controller.aproxAllScoreRanking(function(err, result){
+            if(err){
+                console.log(err)
+            }else{
+                controller.getScoreAndSaveRedis(function(err, result){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        console.log('Sucessfully updated aprox' )
+                    }
+                    setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
+
+                });
+            }
+
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+}, 60000);
+
+
+
 /*app.get('/v1/content/social', function(req, res){
   //add solume API key to config + environment variable
   //use request promises and get solume result
@@ -520,5 +599,100 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 
 
 }); */
+/*
+WEb socket in order to keep fronted updated
+ */
+
+const WebSocket = require('ws');
+var WebSocketServer = WebSocket.Server,
+    wss = new WebSocketServer({
+        verifyClient: function (info, cb) {
+
+            var token = info.req.headers.cookie.split('authorization=')[1];
+            if (!token)
+                cb(false, 401, 'Unauthorized');
+            else {
+                jwt.verify(token, 'Pareto', function (err, decoded) {
+                    if (err) {
+                        cb(false, 401, 'Unauthorized')
+                    } else {
+                        info.req.user = decoded;
+                        cb(true)
+                    }
+                })
+
+            }
+        },
+        port: process.env.WS_PORT || constants.WS_PORT
+    });
+
+
+/**
+ * We need these functions in order to prevent issues with the sockets ‘alive’ status and improve performance.
+ */
+function noop() {}
+
+function heartbeat() {
+    this.isAlive = true;
+}
+
+/**
+ * Initialize connections
+ */
+wss.on('connection', function connection(ws, req) {
+    ws.isAlive = true;
+    ws.on('pong', heartbeat);
+    ws.user = req.user;
+    ws.on('message', function (message) {
+        ws.info = JSON.parse(message);
+    });
+});
+
+/**
+ * Validates if the connection is alive and sends info each minute
+ */
+cron.schedule("* * * * *", function() {
+    try{
+        wss.clients.forEach(function each(client) {
+            if (client.isAlive === false) return client.terminate();
+
+            client.isAlive = false;
+            client.ping(noop);
+            if (client.readyState === WebSocket.OPEN ) {
+                // Validate if the user is subscribed a set of information
+                if(client.info && client.user){
+                    const rank = parseInt(client.info.rank) || 1;
+                    let limit = parseInt(client.info.limit) || 100;
+                    const page = parseInt(client.info.page) || 0;
+
+                    //max limit
+                    if (limit > 500) {
+                        limit = 500;
+                    }
+                    /**
+                     * Send ranking
+                     */
+                    controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                        if (!err) {
+                            client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                        }
+                    });
+
+                    controller.retrieveAddress(client.user.user, function (err, result) {
+                        if (!err) {
+                            client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                        }
+                    });
+
+                }
+            }
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+});
+
+
 
 module.exports = {app: app, controller: controller };
