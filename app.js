@@ -678,7 +678,7 @@ cron.schedule("* * * * *", function() {
                         }
                     });
 
-                    controller.getUserInfo(client.user.user, function (err, result) {
+                    controller.retrieveAddress(client.user.user, function (err, result) {
                         if (!err) {
                             client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                         }
