@@ -141,7 +141,6 @@
     import LoginOptions from "./Modals/VLoginOptions";
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
     import {countUpMixin} from '../mixins/countUp';
-    import * as WebSocket from 'ws';
 
     export default {
         name: 'VLeaderboards',
@@ -187,8 +186,7 @@
                   rank: '',
                   limit: '',
                   page: ''
-                },
-                ws : null
+                }
             };
         },
         watch: {
@@ -224,7 +222,7 @@
         computed: {...mapState(['madeLogin',
                 'showModalSign',
                 'showModalLoginOptions',
-                'showModalLedgerNano'])
+                'showModalLedgerNano', 'ws'])
         },
         mounted: function () {
             this.getAddress();
@@ -368,7 +366,7 @@
 
                 Auth.getSocketToken( res =>{
                     if (!this.ws){
-                        this.ws = new WebSocket ('ws://localhost:8787');
+                        this.iniWs();
                         let wss = this.ws;
                         this.ws.onopen = function open() {
                             wss.send(JSON.stringify(params));
@@ -376,7 +374,6 @@
 
                         let wsa = this.ws;
                         this.ws.onmessage = (data) => {
-
                             wsa.send(JSON.stringify(this.socketParams));
                             try{
                                 const info =  JSON.parse(data.data);
@@ -422,7 +419,7 @@
                 this.infiniteScrollFunction();
             },
             ...mapMutations(
-                ['login', 'loadingLogin', 'stopLogin']
+                ['login', 'loadingLogin', 'stopLogin', 'iniWs']
             )
         }
     };

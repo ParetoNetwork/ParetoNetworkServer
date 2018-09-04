@@ -159,7 +159,7 @@
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                    console.log(data);
+               //     console.log(data);
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',

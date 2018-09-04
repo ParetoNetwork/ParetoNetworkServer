@@ -26,7 +26,8 @@ const store = new Vuex.Store({
         makingLogin: false,
         makingRequest: false,
         requestFinish: false,
-        madeLogin: JSON.parse(window.localStorage.getItem('logged'))
+        madeLogin: JSON.parse(window.localStorage.getItem('logged')),
+        ws: null
     },
     mutations: {
         login(state, data) {
@@ -55,6 +56,8 @@ const store = new Vuex.Store({
             state.showModalLoginOptions = false;
             state.showModalLedgerNano = false;
             state.makingLogin = false;
+        }, iniWs(state) {
+            state.ws =   new WebSocket ('ws://localhost:8787');
         }
     },
     actions: {

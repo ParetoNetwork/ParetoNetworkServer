@@ -253,7 +253,7 @@
                 ContentService.distributeRewards(
                     {ID},
                     res => {
-                        console.log(res);
+                      //  console.log(res);
                     },
                     error => {
                     }
@@ -344,7 +344,7 @@
                 });
             },
             rewardIntel: function (ID) {
-                console.log(ID, "ID");
+               // console.log(ID, "ID");
                 const tokenAmount = prompt(
                     "Please enter the number of Pareto Tokens to reward",
                     "1"
@@ -352,7 +352,7 @@
                 ContentService.rewardIntel(
                     {ID, tokenAmount},
                     res => {
-                        console.log(res);
+                      //  console.log(res);
                     },
                     err => {
                     }
@@ -364,7 +364,7 @@
                 if (list.scrollTop + list.offsetHeight >= list.scrollHeight
                     && this.myContent.length < this.allMyContent.length) {
                     this.myContent = this.allMyContent.slice(0, this.myContent.length + 10);
-                    console.log(this.myContent);
+                   // console.log(this.myContent);
                 }
             },
             scrollMyFeed: function () {
