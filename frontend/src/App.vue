@@ -123,4 +123,17 @@
         font-size: 12px;
     }
 
+    @media (max-width: 900px){
+        .hiden-navbar-bottom {
+            height: 25px;
+            font-size: 10px;
+        }
+    }
+
+    @media (max-width: 900px){
+        .show-navbar-bottom {
+            height: 40px;
+            font-size: 10px;
+        }
+    }
 </style>
