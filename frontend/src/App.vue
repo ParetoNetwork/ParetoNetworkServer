@@ -34,7 +34,7 @@
         },
         methods: {
             foo: function () {
-                console.log(document.body.scrollHeight)
+                //console.log(document.body.scrollHeight)
                 if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
                     this.bottomNav.addClass('show-navbar-bottom');
                 }else{
