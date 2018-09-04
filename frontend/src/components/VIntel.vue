@@ -52,7 +52,6 @@
                                         :options="countUp.options"
                                         @ready="onReady"/>
                                 <span v-else> 0 </span>
-
                             </p>
 
                             <!--<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">-->
@@ -111,7 +110,7 @@
                     </div>
                     <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
                         <ul class="list-unstyled list-group">
-                            <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of content">
+                            <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of myFeed.content">
                                 <router-link tag="div" class="d-flex split " :to="'/intel/' + row._id"
                                              @click="showDetails(row)">
                                     <div class="border p-1 mr-2" style="height: 50px;">
@@ -199,11 +198,14 @@
         data: function () {
             return {
                 address: null,
-                content: [],
-                allContent: [],
-                myContent: [],
-                allMyContent : [],
                 loading: true,
+                myFeed: {
+                    content: [],
+                    loading: false,
+                    page: 0,
+                },
+                myContent: [],
+                allMyContent: [],
                 moment: moment,
                 firstName: "",
                 lastName: "",
@@ -214,12 +216,12 @@
                     rank: 0,
                     score: 0
                 },
-                scrollPost : 0,
-                scrollFeed : 0
+                scrollPost: 0,
+                scrollFeed: 0
             };
         },
         directives: {
-            scroll : {
+            scroll: {
                 inserted: function (el, binding) {
                     let f = function (evt) {
                         if (binding.value(evt, el)) {
@@ -272,12 +274,13 @@
                     }
                 );
             },
-            loadContent: function () {
-                return dashboardService.getAllContent(
+            loadContent: function (params) {
+                return dashboardService.getAllContent(params,
                     res => {
                         this.loading = false;
-                        this.allContent = res;
-                        this.content = this.allContent.slice(0, 10);
+                        this.myFeed.page++;
+                        this.myFeed.loading = false;
+                        this.myFeed.content = [...this.myFeed.content, ...res];
                     },
                     error => {
                         this.$notify({
@@ -289,7 +292,7 @@
                     }
                 );
             },
-            loadMyContent: function() {
+            loadMyContent: function () {
                 return dashboardService.getContent(
                     res => {
                         this.allMyContent = res;
@@ -300,7 +303,8 @@
                             group: 'foo',
                             type: 'error',
                             duration: 10000,
-                            text: 'There was an error loading the address. Please refresh the page' });
+                            text: 'There was an error loading the address. Please refresh the page'
+                        });
                     }
                 );
             },
@@ -351,22 +355,23 @@
                     }
                 );
             },
-            scrollMyPost: function(){
+            scrollMyPost: function () {
                 let list = document.getElementById("mypost");
 
-                if(list.scrollTop + list.offsetHeight >= list.scrollHeight*0.9
-                    && this.myContent.length < this.allMyContent.length){
-                    this.myContent = this.allMyContent.slice(0, this.myContent.length+10);
+                if (list.scrollTop + list.offsetHeight >= list.scrollHeight
+                    && this.myContent.length < this.allMyContent.length) {
+                    this.myContent = this.allMyContent.slice(0, this.myContent.length + 10);
                     console.log(this.myContent);
                 }
             },
-            scrollMyFeed: function(){
+            scrollMyFeed: function () {
                 let list = document.getElementById("myfeed");
 
-                if(list.scrollTop + list.offsetHeight >= list.scrollHeight*0.9
-                    && this.content.length < this.allContent.length){
-                    this.content = this.allContent.slice(0, this.content.length+10);
-                    console.log(this.content);
+                if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
+                    && !this.myFeed.loading) {
+                    const params = { limit: 10, page:  this.myFeed.page };
+                    this.myFeed.loading = true;
+                    this.loadContent(params);
                 }
             },
             showDetails: function (row) {
@@ -477,7 +482,6 @@
     .scrollable {
         overflow: auto;
         scroll-behavior: smooth;
-        height: 600px;
     }
 
     .subtitle-dashboard {
@@ -500,6 +504,14 @@
     .wrapp {
         color: black;
         font-size: 12px;
+    }
+
+    #myfeed {
+        max-height: 860px;
+    }
+
+    #mypost {
+         max-height: 600px;
     }
 
     #wrapper {

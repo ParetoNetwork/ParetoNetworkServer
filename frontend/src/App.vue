@@ -4,8 +4,7 @@
         <router-view></router-view>
         <VFab/>
         <notifications group="foo" position="bottom left"/>
-        <!--<nav class="navbar fixed-bottom navbar-light bg-dark">-->
-        <!--</nav>-->
+
         <div class="hiden-navbar-bottom navbar d-flex justify-content-around font-body">
             <div class="d-flex flex-row">
                 <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
@@ -139,12 +138,12 @@
         position: fixed;
         transition: height 300ms;
         bottom: 0;
+        z-index: 10;
     }
 
     .show-navbar-bottom {
         height: 50px;
         font-size: 12px;
     }
-
 
 </style>
