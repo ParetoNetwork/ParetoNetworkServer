@@ -1,5 +1,6 @@
 <template>
     <div>|
+        <notifications group="auth" position="bottom right"/>
         <b-modal ref="loginOptions"
                  centered
                  hide-header
@@ -84,9 +85,14 @@
                     });
 
                 }, error => {
+
                     console.log(error);
                     this.stopLogin();
-                    alert(error);
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             Manually: function() {

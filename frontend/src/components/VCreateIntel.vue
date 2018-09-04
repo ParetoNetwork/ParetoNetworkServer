@@ -1,69 +1,117 @@
 <template>
     <div class="pareto-bg-dark">
-        <div class="container main  wrapp"
+        <notifications group="auth" position="bottom right"/>
+        <div class="container main  wrapp pb-5"
              style="min-height: 100vh;">
-            <div class="row">
-                <div class="col-md-4 font-body"
-                     style="color: #040f1e; margin-top: 30px; padding-top: 20px; text-align: left;">
-
+            <div class="row mt-5 p-1 text-left">
+                <div class="col-md-5 font-body">
                     <div class="flex-row">
-                        <!-- hidden by default unless metamask connect -->
                         <form id="intel"
-                              style="margin: 5px;">
+                              style="margin: 5px;"
+                              v-on:submit.prevent
+                              @submit="validateContent">
                             <div class="group">
-                                <label class="pareto-label">Authorized Contributor</label>
-
+                                <label class="pareto-label"><b>Authorized Contributor</b></label>
                                 <input class="lookup-input"
                                        type="text"
                                        name="address" readonly v-model="blockChainAddress">
                                 <span class="highlight"></span>
                                 <span class="bar"></span>
                             </div>
-                            <p>&nbsp;</p>
 
-                            <div class="group">
-                                <label class="pareto-label">Title</label>
-
+                            <div class="group my-4">
+                                <label class="pareto-label"><b>Title</b> <span style="color: red">*</span> </label>
                                 <input id="intel-title-input"
                                        type="text" class="lookup-input"
                                        name="intel-title" v-model="title">
                                 <span class="highlight"></span>
                                 <span class="bar"></span>
+                                <label v-if="formError.title === false" class="pareto-label" style="color: red"> Required Field </label>
                             </div>
-                            <p>&nbsp;</p>
 
-                            <!-- intel-body-input -->
                             <textarea id="intel-body-input"
-                                      name="editordata" v-model="body"></textarea>
+                                      name="editordata"
+                                      v-model="body"
+                            ></textarea>
+                            <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required Field </label>
 
+                            <div class="d-flex justify-content-center">
+                                <input v-if="intel.state ==='empty'"
+                                        class="button bg-white pareto-text-blue mt-2"
+                                        style="width:100px; height: 35px; line-height: 32px;"
+                                        type="submit"
+                                        form="intel"
+                                        value="Submit">
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <label class="pareto-label"> {{intel.text}}
+                                    <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
+                                </label>
+                            </div>
                         </form>
                     </div>
-                    <div class="d-flex justify-content-center">
-                        <button
-                                class="button bg-white pareto-text-blue"
-                                style="width:100px; height: 35px; line-height: 32px;"
-                                type="button"
-                                form="intel"
-                                value="View"
-                                v-on:click="upload()"
-                        >Submit
-                        </button>
-                    </div>
-
-
                 </div>
-                <!-- end post new intel section -->
 
                 <div class="col-md-6 font-body text-left"
                      style="color: #fff; min-height: 80vh;">
-                    <b>Intel Content Preview</b>
+                    <label class="pareto-label"><b>Intel Content Preview</b></label>
 
                     <div id="preview"
-                         style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 100%; border: 1px solid #a9a9a9; border-radius: 5px;">
-                        {{body}}
+                         style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
+                        <p v-html="body"> </p>
                     </div>
 
                 </div>
+            </div>
+
+            <div>
+                <b-modal
+                        v-model="modalToken"
+                        centered
+                        hide-header
+                        hide-footer
+                        @hide="hideModal"
+                        :body-bg-variant="'dark'"
+                        :body-text-variant="'light'">
+
+                    <b-container fluid>
+                        <h1 class="font-body mb-2"> You need to deposit Pareto tokens to create Intel. Please input the Pareto amount to deposit.</h1>
+                        <b-form-input v-model="tokens"
+                                      type="number"
+                                      placeholder="Pareto Amount"></b-form-input>
+                        <b-row class="m-2 mt-4">
+                            <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
+                        </b-row>
+                    </b-container>
+                </b-modal>
+            </div>
+            <div>
+                <b-modal
+                        no-close-on-backdrop
+                        v-model="modalWaiting"
+                        centered
+                        hide-header
+                        hide-footer
+                        @hide="hideModal"
+                        :body-bg-variant="'dark'"
+                        :body-text-variant="'light'">
+
+                    <b-container fluid>
+                        <h2 class="font-body"> Please wait </h2>
+                        <div class="text-left">
+                            <div class="m-2 ml-4">
+                                <h3 class="font-body">This step has two confirmations:</h3>
+                                <ol>
+                                    <li>Approve Pareto tokens</li>
+                                    <li>Create an Intel </li>
+                                </ol>
+
+                                <p class="text-center"> This may take a while ... <i class="fa fa-spinner fa-spin fa-2x"></i></p>
+                            </div>
+                        </div>
+                    </b-container>
+                </b-modal>
             </div>
         </div>
     </div>
@@ -73,6 +121,8 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import ContentService from '../services/ContentService';
+    require('summernote/dist/summernote.css');
+    require('summernote');
 
     export default {
         name: 'VCreateIntel',
@@ -80,10 +130,54 @@
             return {
                 logged: false,
                 block: null,
-                body:'',
+                body : '',
+                content : '',
                 title:'',
-                blockChainAddress:''
+                maxTokens: 1,
+                blockChainAddress:'',
+                tokens: 1,
+                intel :{
+                    state: 'empty',
+                    text : '',
+                },
+                formError: {
+                    title :'',
+                    body : ''
+                },
+                modalToken : false,
+                modalWaiting : false,
+                notificationSystem: {
+                    options: {
+                        success: {
+                            position: 'bottomCenter'
+                        },
+                        info: {
+                            overlay: true,
+                            timeout: 50000,
+                            position: 'bottomRight'
+                        },
+                        error: {
+                            timeout: 20000,
+                            position: 'bottomRight'
+                        }
+                    }
+                }
             };
+        },
+        updated: function() {
+            this.$nextTick(function () {
+                let edit = $('.note-editable')[0];
+                if(edit){
+                    $(edit).keyup(() => {
+                        this.body = edit.innerHTML;
+                    });
+                }
+            });
+        },
+        computed : {
+            bodyFunction: function () {
+                return content;
+            }
         },
         mounted: function () {
             $('#intel-body-input').summernote({
@@ -101,26 +195,83 @@
                     ['insert', ['link', /*'picture',*/]],
                     //['view', ['fullscreen' /*, 'codeview'*/]],
                     //['help', ['help']]
-                ]
+                ],
+                popover: {
+                    image: [],
+                    link: [],
+                    air: []
+                }
             });
             this.address();
-        }, methods: {
+        },
+        methods: {
             address: function () {
                 DashboardService.getAddress(res => {
                     this.block = res.block;
                     this.blockChainAddress = res.address
+                    this.maxTokens = res.tokens
                 }, () => {
 
                 });
             },
+            validateContent: function(e){
+
+                this.formError.title = !!this.title;
+                this.formError.body = this.body.length>3;
+
+                if(!this.formError.title || !this.formError.body) return;
+
+                this.showModal();
+
+            },
             upload: function () {
-                const x = document.getElementById('intel-body-input').value
+                this.hideModal();
+                //console.log(this.tokens);
 
-                ContentService.uploadContent({block:this.block, title: this.title, body: x},res => {
-                    this.body = x.slice(3,x.length -4);
-                }, error => {
+                this.intelState('creating', 'Creating Intel, please wait');
+                //console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
 
-                });
+                this.$store.state.makingRequest = true;
+                this.modalWaiting = true;
+
+                ContentService.createIntel({block:this.block, title: this.title, body: this.body, address: this.blockChainAddress}, this.tokens, (res) => {
+
+                    this.$store.state.makingRequest = false;
+                    this.intelState('created', 'Intel Created!');
+
+                    this.$notify({
+                        group: 'foo',
+                        type: 'success',
+                        duration: 10000,
+                        text: 'The Intel was created' });
+
+                    this.modalWaiting = false;
+
+                    this.$router.push('/intel');
+                }, (err) => {
+                    this.intelState('empty', '');
+
+                    this.modalWaiting = false;
+                        if (typeof err === 'string')
+                            err='Could not create Intel. ' +  err.split('\n')[0];
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 20000,
+                        text: err || 'Could not create Intel' });
+                    this.$store.state.makingRequest = false;
+                })
+                
+            },
+            intelState : function (state, text) {
+                this.intel.state = state;
+                this.intel.text = text;
+            },
+            showModal () {
+                this.modalToken = true;
+            },
+            hideModal () {
+                this.modalToken = false;
             }
         }
 
@@ -128,10 +279,6 @@
 </script>
 
 <style scoped lang="scss">
-    .popover {
-        background-color: #6bc27a;
-    }
-
     textarea a {
         text-decoration: underline;
         color: blue;
@@ -171,7 +318,7 @@
     .lookup-input {
         padding: 10px 10px 10px 5px;
         display: block;
-        width: 350px;
+        width: 100%;
         border: none;
         background-color: #040f1e;
         border-bottom: 1px solid #757575;
