@@ -5,21 +5,6 @@
         <VFab/>
         <notifications group="foo" position="bottom left"/>
 
-        <div class="hiden-navbar-bottom navbar d-flex justify-content-around font-body">
-            <div class="d-flex flex-row">
-                <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
-                <div class="mr-3"> STATUS: CONNECTED </div>
-                <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div>
-            </div>
-            <div class="d-flex flex-row">
-                <div class="mr-3"> API </div>
-                <div class="mr-3"> CONTACT </div>
-                <div class="mr-3"> TERMS OF USE </div>
-                <div class="mr-3"> PRIVACY POLICY </div>
-                <div class="mr-3"> CONTENT CONTRIBUTOR GUIDELINES </div>
-                <a class="mr-3" href="https://exchange.pareto.network/" target="_blank"> BUY PARETO </a>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -32,17 +17,15 @@
     export default {
         name: 'App',
         components: {
-            Navbar, VFab,
+            Navbar,
+            VFab,
             SplashDashboard
         },
         data: function(){
             return{
-                bottomNav : {}
             }
         },
         mounted: function () {
-            window.addEventListener('scroll', this.foo);
-            this.bottomNav = $('.hiden-navbar-bottom');
             // this.interceptRequest();
             // this.interceptResponses();
         },
@@ -66,13 +49,7 @@
             //         return Promise.reject(err);
             //     });
             // }
-            foo: function () {
-                if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
-                    this.bottomNav.addClass('show-navbar-bottom');
-                }else{
-                    this.bottomNav.removeClass('show-navbar-bottom');
-                }
-            }
+
         }
     };
 </script>
