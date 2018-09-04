@@ -72,7 +72,7 @@
             MetaMask: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                    console.log(data);
+                   // console.log(data);
                     dashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',

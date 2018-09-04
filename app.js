@@ -361,7 +361,7 @@ app.get('/v1/content', function (req, res) {
 
 app.get('/v1/content/me', function (req, res) {
 
-    controller.getContentByCurrentUser(req.user, function (err, result) {
+    controller.getContentByCurrentUser(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
@@ -678,7 +678,7 @@ cron.schedule("* * * * *", function() {
                         }
                     });
 
-                    controller.getUserInfo(client.user.user, function (err, result) {
+                    controller.retrieveAddress(client.user.user, function (err, result) {
                         if (!err) {
                             client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                         }
