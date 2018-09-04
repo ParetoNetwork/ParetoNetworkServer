@@ -1,5 +1,5 @@
 <template>
-    <div class="hiden-navbar-bottom navbar d-flex justify-content-around font-body">
+    <div class="navbar hiden-navbar-bottom d-flex justify-content-around font-body">
         <div class="d-flex flex-row">
             <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
             <div class="mr-3"> STATUS: CONNECTED </div>
@@ -22,21 +22,39 @@
         name: 'VBottomNav',
         data: function () {
             return{
-                bottomNav : {}
-            }
-        },
-        mounted: function () {
-            window.addEventListener('scroll', this.foo);
-            this.bottomNav = $('.hiden-navbar-bottom');
-        },
-        methods: {
-            foo: function () {
-                if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
-                    this.bottomNav.addClass('show-navbar-bottom');
-                }else{
-                    this.bottomNav.removeClass('show-navbar-bottom');
-                }
             }
         }
     }
 </script>
+
+<style>
+    .hiden-navbar-bottom {
+        font-size: 10px;
+        background: #040f1e;
+        height: 25px;
+        width: 100%;
+        position: fixed !important;
+        transition: height 300ms;
+        bottom: 0;
+        z-index: 10;
+    }
+
+    .show-navbar-bottom {
+        height: 50px;
+        font-size: 12px;
+    }
+
+    @media (max-width: 900px){
+        .hiden-navbar-bottom {
+            height: 25px;
+            font-size: 10px;
+        }
+    }
+
+    @media (max-width: 900px){
+        .show-navbar-bottom {
+            height: 40px;
+            font-size: 10px;
+        }
+    }
+</style>
