@@ -4,22 +4,7 @@
         <router-view></router-view>
         <VFab/>
         <notifications group="foo" position="bottom left"/>
-
-        <div class="hiden-navbar-bottom navbar d-flex justify-content-around font-body">
-            <div class="d-flex flex-row">
-                <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
-                <div class="mr-3"> STATUS: CONNECTED </div>
-                <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div>
-            </div>
-            <div class="d-flex flex-row">
-                <div class="mr-3"> API </div>
-                <div class="mr-3"> CONTACT </div>
-                <div class="mr-3"> TERMS OF USE </div>
-                <div class="mr-3"> PRIVACY POLICY </div>
-                <div class="mr-3"> CONTENT CONTRIBUTOR GUIDELINES </div>
-                <a class="mr-3" href="https://exchange.pareto.network/" target="_blank"> BUY PARETO </a>
-            </div>
-        </div>
+        <VBottomNav></VBottomNav>
     </div>
 </template>
 
@@ -27,13 +12,16 @@
     import Navbar from './components/Navbar.vue';
     import SplashDashboard from './components/Splash.vue';
     import VFab from './components/VFab.vue';
+    import VBottomNav from './components/VBottomNav';
     import http from './services/HttpService';
 
     export default {
         name: 'App',
         components: {
-            Navbar, VFab,
-            SplashDashboard
+            Navbar,
+            VFab,
+            SplashDashboard,
+            VBottomNav
         },
         data: function(){
             return{
@@ -43,30 +31,10 @@
         mounted: function () {
             window.addEventListener('scroll', this.foo);
             this.bottomNav = $('.hiden-navbar-bottom');
-            // this.interceptRequest();
-            // this.interceptResponses();
         },
         methods: {
-            // interceptRequest : function() {
-            //     http.interceptors.request.use( (config) => {
-            //         console.log('Request');
-            //         return config;
-            //     }, function(err) {
-            //         console.log(err);
-            //         return Promise.reject(err);
-            //     });
-            // },
-            // interceptResponses : function(){
-            //     http.interceptors.response.use( (config) => {
-            //         this.$store.state.makingRequest = false;
-            //         console.log('Response');
-            //         return config;
-            //     }, function(err) {
-            //         console.log(err);
-            //         return Promise.reject(err);
-            //     });
-            // }
             foo: function () {
+                console.log(document.body.scrollHeight)
                 if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
                     this.bottomNav.addClass('show-navbar-bottom');
                 }else{
@@ -130,33 +98,4 @@
         margin: 0;
     }
 
-    .hiden-navbar-bottom {
-        font-size: 10px;
-        background: #040f1e;
-        height: 10px;
-        width: 100%;
-        position: fixed;
-        transition: height 300ms;
-        bottom: 0;
-        z-index: 10;
-    }
-
-    .show-navbar-bottom {
-        height: 50px;
-        font-size: 12px;
-    }
-
-    @media (max-width: 900px){
-        .hiden-navbar-bottom {
-            height: 25px;
-            font-size: 10px;
-        }
-    }
-
-    @media (max-width: 900px){
-        .show-navbar-bottom {
-            height: 40px;
-            font-size: 10px;
-        }
-    }
 </style>
