@@ -4,7 +4,7 @@
         <router-view></router-view>
         <VFab/>
         <notifications group="foo" position="bottom left"/>
-
+        <VBottomNav></VBottomNav>
     </div>
 </template>
 
@@ -12,6 +12,7 @@
     import Navbar from './components/Navbar.vue';
     import SplashDashboard from './components/Splash.vue';
     import VFab from './components/VFab.vue';
+    import VBottomNav from './components/VBottomNav';
     import http from './services/HttpService';
 
     export default {
@@ -19,37 +20,27 @@
         components: {
             Navbar,
             VFab,
-            SplashDashboard
+            SplashDashboard,
+            VBottomNav
         },
         data: function(){
             return{
+                bottomNav : {}
             }
         },
         mounted: function () {
-            // this.interceptRequest();
-            // this.interceptResponses();
+            window.addEventListener('scroll', this.foo);
+            this.bottomNav = $('.hiden-navbar-bottom');
         },
         methods: {
-            // interceptRequest : function() {
-            //     http.interceptors.request.use( (config) => {
-            //         console.log('Request');
-            //         return config;
-            //     }, function(err) {
-            //         console.log(err);
-            //         return Promise.reject(err);
-            //     });
-            // },
-            // interceptResponses : function(){
-            //     http.interceptors.response.use( (config) => {
-            //         this.$store.state.makingRequest = false;
-            //         console.log('Response');
-            //         return config;
-            //     }, function(err) {
-            //         console.log(err);
-            //         return Promise.reject(err);
-            //     });
-            // }
-
+            foo: function () {
+                console.log(document.body.scrollHeight)
+                if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
+                    this.bottomNav.addClass('show-navbar-bottom');
+                }else{
+                    this.bottomNav.removeClass('show-navbar-bottom');
+                }
+            }
         }
     };
 </script>
@@ -107,33 +98,4 @@
         margin: 0;
     }
 
-    .hiden-navbar-bottom {
-        font-size: 10px;
-        background: #040f1e;
-        height: 10px;
-        width: 100%;
-        position: fixed;
-        transition: height 300ms;
-        bottom: 0;
-        z-index: 10;
-    }
-
-    .show-navbar-bottom {
-        height: 50px;
-        font-size: 12px;
-    }
-
-    @media (max-width: 900px){
-        .hiden-navbar-bottom {
-            height: 25px;
-            font-size: 10px;
-        }
-    }
-
-    @media (max-width: 900px){
-        .show-navbar-bottom {
-            height: 40px;
-            font-size: 10px;
-        }
-    }
 </style>
