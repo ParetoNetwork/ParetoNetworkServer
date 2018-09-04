@@ -141,6 +141,7 @@
     import LoginOptions from "./Modals/VLoginOptions";
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
     import {countUpMixin} from '../mixins/countUp';
+    import * as WebSocket from 'ws';
 
     export default {
         name: 'VLeaderboards',

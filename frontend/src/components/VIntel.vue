@@ -108,6 +108,9 @@
                         <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
                         </i>
                     </div>
+                    <div v-if="!myFeed.content">
+                        <span> No data to display </span>
+                    </div>
                     <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of myFeed.content">
