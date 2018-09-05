@@ -99,6 +99,70 @@ export default class authService {
 
     }
 
+    static  getAccounts(path, onSuccess, onError) {
+        const ProviderEngine = require('web3-provider-engine');
+        const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+        var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+        const engine = new ProviderEngine();
+        const provider = new Web3(engine);
+        var derivation_path = path || "44'/60'/0'/0/0";
+
+        LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
+            const isSupported = ledgerWalletSubProvider.isSupported;
+            ledgerWalletSubProvider.ledger.setDerivationPath(derivation_path);
+            if(isSupported){
+                engine.addProvider(ledgerWalletSubProvider);
+                engine.addProvider(new RpcSubprovider({rpcUrl: 'https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'})); // you need RPC endpoint
+                engine.start();
+
+                if (typeof provider !== 'undefined') {
+
+                    provider.eth.getAccounts((error, accounts) => {
+                        if (!error) {
+                            if(accounts && accounts[0]){
+
+                                 onSuccess(accounts);
+                            }//end if !error
+
+                        }//end if !error
+                    });
+                }//end if
+            }else{
+                onError('Your browser not support this feature')
+            }
+
+        });
+
+
+        return true;
+    }
+
+    static getTokens(addresses, onSuccess, onError){
+        const data = {
+            addresses:  addresses
+        };
+        http.post('/v1/addresses', data , {
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json; charset=UTF-8'
+            }
+        }).then(response => {
+            if(response.data.success){
+                return onSuccess(response.data);
+            }else{
+                return onError(response.data.message)
+            }
+
+        }).catch(error => {
+            if (error.response && error.response.data) {
+                return onError(error.response.data.message);
+            } else {
+                return onError(error);
+            }
+
+        });
+    }
+
     static  signWallet(path, onSuccess, onError) {
 
         const ProviderEngine = require('web3-provider-engine');

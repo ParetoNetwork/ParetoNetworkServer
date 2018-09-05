@@ -751,9 +751,19 @@ controller.retrieveAddress = function(address, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
-      controller.retrieveAddressRankWithRedis(address,true,callback);
+      controller.retrieveAddressRankWithRedis([address],true,function (error, results) {
+          if(error) {callback(error)}
+          else { callback(null, results[0])}
+      });
   }
 
+};
+
+controller.retrieveAddresses = function(addresses, callback){
+    controller.retrieveAddressRankWithRedis(addresses,true,function (error, results) {
+        if(error) {callback(error)}
+        else { callback(null, results)}
+    });
 };
 
 controller.updateUser = function(address, userinfo ,callback){
@@ -785,12 +795,13 @@ controller.getUserInfo = function(address ,callback){
     if(web3.utils.isAddress(fixaddress) == false){
         callback(new Error('Invalid Address'));
     } else {
-        controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
+        controller.retrieveAddressRankWithRedis([address],true,function (error, rankings) {
             if(error){
                 callback(error)
             }else{
-                controller.retrieveProfileWithRedis(address, function (error, profile) {
+                controller.retrieveProfileWithRedis([address], function (error, profile) {
                     if(error){ callback(error)}
+                    let ranking = rankings[0];
                     callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
                         'first_name': profile.firstName, "last_name": profile.lastName,
                         'biography': profile.biography, "profile_pic" : profile.profilePic } );
@@ -811,9 +822,10 @@ controller.getUserInfo = function(address ,callback){
  * @param callback
  */
 controller.getAproxScoreAddress = function(address, delta ,callback){
-    controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
+    controller.retrieveAddressRankWithRedis([address],true,function (error, rankings) {
         if(error){ callback(error)} else {
             //wieghtedBlock
+            let ranking = rankings[0];
             const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
             ranking.block = ranking.block + delta;
             const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
@@ -1282,35 +1294,46 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
  * @param address addressTobeGet
  *  @param attempts when is true, try with mongodb if results is zero
  */
-controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
+controller.retrieveAddressRankWithRedis = function(addressess, attempts, callback){
 
     const multi = redisClient.multi();
-    multi.hgetall("address"+address);
+    for (let i = 0; i<addressess.length; i=i+1){
+        multi.hgetall("address"+addressess[i]);
+    }
     multi.exec(function(err, results) {
         if(err){
             return callback(err);
         }
-        if((!results || results.length ===0 || !results[0]) && attempts){
+        if(addressess.length > 1){
+            console.log(addressess);
+            console.log(results);
+            console.log(err);
+        }
+        if((!results || results.length ===0 || (!results[0] && results.length ===1)) && attempts){
             controller.getScoreAndSaveRedis(function(err, result){
                 if(err){
                     return callback(err);
                 } else {
-                    controller.retrieveAddressRankWithRedis(address ,false,callback);
+                    controller.retrieveAddressRankWithRedis(addressess ,false,callback);
                 }
             });
         }else{
-          if((!results || results.length ===0 || !results[0])){
+          if((!results || results.length ===0 || (!results[0] && results.length ===1))){
               // hopefully, users without pareto shouldn't get here now.
               callback(ErrorHandler.addressNotFound)
           }else{
               const multi = redisClient.multi();
-              multi.hgetall(results[0].rank+ "");
+              for (let i = 0; i<results.length; i=i+1){
+                  if(results[i]){
+                      multi.hgetall(results[i].rank+ "");
+                  }
+              }
               multi.exec(function(err, results) {
                   if(err){
                       return callback(err);
                   }
                   // return the cached ranking
-                  return callback(null, results[0]);
+                  return callback(null, results);
               });
           }
 

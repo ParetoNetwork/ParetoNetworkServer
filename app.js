@@ -205,6 +205,18 @@ app.get('/v1/balance', function (req, res) {
 
 });
 
+//get info about your address
+app.post('/v1/addresses', function (req, res) {
+    controller.retrieveAddresses( req.body.addresses, function (err, results) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(results));
+        }
+    });
+
+});
+
 
 
 /********* AUTHENTICATED v1 APIs *********/
@@ -651,7 +663,7 @@ wss.on('connection', function connection(ws, req) {
 /**
  * Validates if the connection is alive and sends info each minute
  */
-cron.schedule("*/10 * * * * *", function() {
+cron.schedule("* * * * *", function() {
     try{
         wss.clients.forEach(function each(client) {
             if (client.isAlive === false) return client.terminate();
