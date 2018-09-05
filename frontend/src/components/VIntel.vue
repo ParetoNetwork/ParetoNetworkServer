@@ -245,21 +245,10 @@
             this.main();
         },
         computed: {
-            ...mapState([
-                'madeLogin',
-                'blockHeight',
-                'blockScore'])
-        },
-        watch : {
-            'blockScore' : function (data) {
-                console.log(data);
-            },
-            'blockHeight' : function (data) {
-                console.log(data);
-            }
+            ...mapState(["madeLogin", "ws"])
         },
         methods: {
-            ...mapMutations(["intelEnter"]),
+            ...mapMutations(["intelEnter", "iniWs"]),
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
                     {ID},
@@ -305,6 +294,37 @@
                         });
                     }
                 );
+            },
+            overrideOnMessage(){
+                let wsa = this.ws;
+                this.ws.onmessage = (data) => {
+                    try {
+                        const info = JSON.parse(data.data);
+                        if (info.data.address) {
+                            this.score = info.data.score;
+                            console.log(info.data);
+                        }
+
+                    } catch (e) {
+                        console.log(e);
+                    }
+                };
+            },
+            socketConnection () {
+                let params = {rank: this.rank, limit: 100, page: this.page};
+                if (!this.ws) {
+                    AuthService.getSocketToken(res => {
+
+                        this.iniWs();
+                        let wss = this.ws;
+                        this.ws.onopen = function open() {
+                            wss.send(JSON.stringify(params));
+                        };
+                        this.overrideOnMessage();
+                    });
+                }else{
+                    this.overrideOnMessage();
+                }
             },
             loadMyContent: function () {
                 return dashboardService.getContent(
