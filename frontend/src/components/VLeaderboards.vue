@@ -98,7 +98,7 @@
                                         <tr
                                                 v-for="rank in leader"
                                                 :key="rank.address"
-                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }"
+                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
                                                 v-bind:id="rank.rank"
                                         >
                                             <td style="width: 55px">{{rank.rank}}</td>
@@ -152,8 +152,8 @@
             ICountUp
         },
         directives: {
-          infiniteScroll,
-            scroll : {
+            infiniteScroll,
+            scroll: {
                 inserted: function (el, binding) {
                     let f = function (evt) {
                         if (binding.value(evt, el)) {
@@ -222,7 +222,9 @@
         computed: {...mapState(['madeLogin',
                 'showModalSign',
                 'showModalLoginOptions',
-                'showModalLedgerNano', 'ws'])
+                'showModalLedgerNano',
+                'ws'
+            ])
         },
         mounted: function () {
             this.getAddress();
@@ -367,6 +369,7 @@
                     wsa.send(JSON.stringify(this.socketParams));
                     try {
                         const info = JSON.parse(data.data);
+                        console.log(info);
                         if (info.data.address) {
                             this.score = info.data.score;
                         } else {
