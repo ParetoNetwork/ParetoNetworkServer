@@ -32,7 +32,6 @@
         mounted: function () {
             window.addEventListener('scroll', this.foo);
             this.bottomNav = $('.hiden-navbar-bottom');
-            this.socketConnection();
         },
         methods: {
             foo: function () {
