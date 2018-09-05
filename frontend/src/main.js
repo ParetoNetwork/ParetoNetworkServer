@@ -57,7 +57,7 @@ const store = new Vuex.Store({
             state.showModalLedgerNano = false;
             state.makingLogin = false;
         }, iniWs(state) {
-            state.ws =   new WebSocket ('ws://localhost:8787');
+            state.ws = new WebSocket ('ws://localhost:8787');
         }
     },
     actions: {
