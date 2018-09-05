@@ -126,11 +126,11 @@
                                             <h1 class="title">{{row.title || 'No title'}}</h1>
                                             <div class="d-flex justify-content-between">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block
+                                                <span class="text-dashboard">Disclosed by: {{row.address}} blocks ago
                                                 <ICountUp
-                                                        :startVal="parseFloat(row.block)+parseFloat(row.blockAgo)"
-                                                        :endVal="parseFloat(row.block)"
-                                                        :decimals="decimalsLength(row.block)"
+                                                        :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
+                                                        :endVal="parseFloat(row.blockAgo)"
+                                                        :decimals="decimalsLength(row.blockAgo)"
                                                         :duration="randomNumber(1,3)"
                                                         :options="countUp.options"
                                                         @ready="onReady"/></span>
@@ -217,7 +217,8 @@
                 baseURL: environment.baseURL,
                 user: {
                     rank: 0,
-                    score: 0
+                    score: 0,
+                    tokens: 0
                 },
                 scrollPost: 0,
                 scrollFeed: 0
@@ -295,13 +296,26 @@
                     }
                 );
             },
+            assignBlock(block){
+                console.log(this.myFeed.content);
+                this.myFeed.content = this.myFeed.content.map( item => {
+                    // console.log(item);
+                   item.blockAgo = block - item.block;
+                    return item;
+                });
+            },
             overrideOnMessage(){
                 let wsa = this.ws;
+                console.log(this.ws)
                 this.ws.onmessage = (data) => {
                     try {
                         const info = JSON.parse(data.data);
                         if (info.data.address) {
-                            this.score = info.data.score;
+                            this.user.score = info.data.score;
+                            this.user.rank = info.data.rank;
+                            this.user.tokens = info.data.tokens;
+                            // this.user.block = info.data.block;
+                            this.assignBlock(info.data.block);
                             console.log(info.data);
                         }
 
@@ -314,7 +328,6 @@
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     AuthService.getSocketToken(res => {
-
                         this.iniWs();
                         let wss = this.ws;
                         this.ws.onopen = function open() {
@@ -447,10 +460,12 @@
                             this.requestCall();
                         },
                         () => {
+                            this.socketConnection ();
                             this.requestCall();
                         }
                     );
                 } else {
+                    this.socketConnection ();
                     this.requestCall();
                 }
             }

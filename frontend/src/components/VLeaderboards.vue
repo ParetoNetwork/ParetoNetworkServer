@@ -369,6 +369,7 @@
                     wsa.send(JSON.stringify(this.socketParams));
                     try {
                         const info = JSON.parse(data.data);
+                        console.log(info);
                         if (info.data.address) {
                             this.score = info.data.score;
                         } else {

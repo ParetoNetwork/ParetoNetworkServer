@@ -118,12 +118,17 @@
     import environment from '../utils/environment';
 
     import ICountUp from 'vue-countup-v2';
+    import {mapMutations, mapState} from "vuex";
     import {countUpMixin} from "../mixins/countUp";
+    import AuthService from "../services/authService";
 
     export default {
         name: 'VIntelDetail',
         mixins: [countUpMixin],
         components: {ICountUp},
+        computed: {
+            ...mapState(["ws"])
+        },
         data: function () {
             return {
                 id: this.$route.params.id,
@@ -145,9 +150,11 @@
             this.requestCall()
         },
         methods: {
+            ...mapMutations(["iniWs"]),
             getIntel: function () {
                 return DashboardService.getIntel(res => {
                    this.getProfile(res.address);
+                   console.log(res);
                    this.intel = res;
                 }, error => {
                 }, this.id);
@@ -171,12 +178,42 @@
                     // alert(error);
                 });
             },
+            socketConnection () {
+                let params = {rank: this.rank, limit: 100, page: this.page};
+                if (!this.ws) {
+                    AuthService.getSocketToken(res => {
+                        this.iniWs();
+                        let wss = this.ws;
+                        this.ws.onopen = function open() {
+                            wss.send(JSON.stringify(params));
+                        };
+                        this.overrideOnMessage();
+                    });
+                }else{
+                    this.overrideOnMessage();
+                }
+            },
+            overrideOnMessage(){
+                this.ws.onmessage = (data) => {
+                    try {
+                        const info = JSON.parse(data.data);
+
+                        if (info.data.address) {
+                            this.profile.rank = info.data.rank;
+                            this.intel.blockAgo = info.data.block - this.intel.block;
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+                };
+            },
             requestCall : function(){
                 Promise.all([
                     this.getIntel(),
                     this.getAddress()
                 ]).then( values => {
                     this.$store.state.makingRequest = false;
+                    this.socketConnection();
                 });
             }
         }
