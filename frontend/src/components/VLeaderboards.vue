@@ -7,7 +7,6 @@
                      style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
                     <div>
                         <div class="row" style="color: #ffffff; justify-content: center;">
-
                             <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
                                 Check
                                 your<b>PARETO</b> scores
@@ -187,8 +186,7 @@
                   rank: '',
                   limit: '',
                   page: ''
-                },
-                ws : null
+                }
             };
         },
         watch: {
@@ -224,7 +222,7 @@
         computed: {...mapState(['madeLogin',
                 'showModalSign',
                 'showModalLoginOptions',
-                'showModalLedgerNano'])
+                'showModalLedgerNano', 'ws'])
         },
         mounted: function () {
             this.getAddress();
@@ -368,7 +366,7 @@
 
                 Auth.getSocketToken( res =>{
                     if (!this.ws){
-                        this.ws = new WebSocket ('ws://localhost:8787');
+                        this.iniWs();
                         let wss = this.ws;
                         this.ws.onopen = function open() {
                             wss.send(JSON.stringify(params));
@@ -376,11 +374,9 @@
 
                         let wsa = this.ws;
                         this.ws.onmessage = (data) => {
-
                             wsa.send(JSON.stringify(this.socketParams));
                             try{
                                 const info =  JSON.parse(data.data);
-
                                 if (info.data.address){
                                     this.score = info.data.score;
                                 }else{
@@ -422,7 +418,7 @@
                 this.infiniteScrollFunction();
             },
             ...mapMutations(
-                ['login', 'loadingLogin', 'stopLogin']
+                ['login', 'loadingLogin', 'stopLogin', 'iniWs']
             )
         }
     };

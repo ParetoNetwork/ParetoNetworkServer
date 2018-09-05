@@ -672,9 +672,8 @@ controller.getAllAvailableContent = function(req, callback) {
                                 {address : req.user, validated: true }
                             ]
                         }
-                    ).sort({block : -1}).populate( 'createdBy' ).exec();
+                    ).sort({block : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
                     let newResults = [];
-                    let i = 0;
                     allResults.forEach(function(entry){
                         /*
 
@@ -686,7 +685,6 @@ controller.getAllAvailableContent = function(req, callback) {
                          since it knows their latest scores and the current block height. therefore the full content response can be queried at once, perhaps, and pages can be done fictionally
 
                          */
-                        if(i < limit) {
                             let data = {
                                 _id: entry._id,
                                 blockAgo: blockHeight - entry.block,
@@ -712,8 +710,6 @@ controller.getAllAvailableContent = function(req, callback) {
                             };
 
                             newResults.push(data);
-                            i++;
-                        } // end if
                     });
                   //console.log(allResults);
 
@@ -973,12 +969,15 @@ controller.getContentById = function(){
 
 };
 
-controller.getContentByCurrentUser = function(address, callback){
+controller.getContentByCurrentUser = function(req, callback){
+    const address = req.user;
+    var limit = parseInt(req.query.limit || 100);
+    var page = parseInt(req.query.page || 0);
 
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address, validated: true}).sort({block : -1}).populate( 'createdBy' );
+    var query = ParetoContent.find({address : address, validated: true}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
