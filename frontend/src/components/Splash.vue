@@ -185,7 +185,7 @@
                 this.$refs.loginOptions.hide()
             },
             checkLoginOption (option){
-                console.log(option);
+              //  console.log(option);
             },
             supportsVideoType() {
                 let video;

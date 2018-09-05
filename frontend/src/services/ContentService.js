@@ -174,7 +174,7 @@ export default class ContentService {
       // Use Mist/MetaMask's provider
       provider = new Web3(window.web3.currentProvider);
     } else {
-      console.log("No web3? You should consider trying MetaMask!");
+      //console.log("No web3? You should consider trying MetaMask!");
       onError(
         "Please install MetaMask (or other web3 browser) in order to access the Pareto Network"
       );

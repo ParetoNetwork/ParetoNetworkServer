@@ -68,7 +68,6 @@
     import DashboardService from '../services/dashboardService';
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
-
     export default {
         name: 'Navbar',
         components: {ModalLedgerNano},
@@ -160,7 +159,7 @@
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                    console.log(data);
+               //     console.log(data);
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
