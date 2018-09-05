@@ -13,7 +13,8 @@
     import SplashDashboard from './components/Splash.vue';
     import VFab from './components/VFab.vue';
     import VBottomNav from './components/VBottomNav';
-    import http from './services/HttpService';
+    import Auth from "./services/authService";
+    import {mapMutations, mapState} from 'vuex';
 
     export default {
         name: 'App',
@@ -31,6 +32,7 @@
         mounted: function () {
             window.addEventListener('scroll', this.foo);
             this.bottomNav = $('.hiden-navbar-bottom');
+            this.socketConnection();
         },
         methods: {
             foo: function () {
