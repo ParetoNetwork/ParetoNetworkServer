@@ -522,10 +522,11 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 }));
 
 /**
- * This is a scheduled task that will update the calculation for the score every ten minutes.
+ * This is a scheduled task that will update the calculation for the score every ten minutes. Also update CreateEventIntel
  */
 cron.schedule("*/5 * * * *", function() {
     try{
+        controller.updateFromLastIntel();
         controller.realAllScoreRanking(function(err, result){
             if(err){
                 console.log(err)
@@ -637,7 +638,7 @@ wss.on('connection', function connection(ws, req) {
 });
 
 /**
- * Validates if the connection is alive and sends info each minute
+ * Validates if the connection is alive and sends info each minute,
  */
 cron.schedule("* * * * *", function() {
     try{
@@ -682,5 +683,4 @@ cron.schedule("* * * * *", function() {
 });
 
 
-controller.startwatch();
 module.exports = {app: app, controller: controller };
