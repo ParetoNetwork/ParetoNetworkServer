@@ -245,7 +245,18 @@
             this.main();
         },
         computed: {
-            ...mapState(["madeLogin"])
+            ...mapState([
+                'madeLogin',
+                'blockHeight',
+                'blockScore'])
+        },
+        watch : {
+            'blockScore' : function (data) {
+                console.log(data);
+            },
+            'blockHeight' : function (data) {
+                console.log(data);
+            }
         },
         methods: {
             ...mapMutations(["intelEnter"]),
