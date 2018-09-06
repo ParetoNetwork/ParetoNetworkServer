@@ -63,7 +63,6 @@
 
                 </div>
             </div>
-
             <div>
                 <b-modal
                         v-model="modalToken"
