@@ -15,6 +15,7 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(Notifications);
+Vue.use(require('vue-moment'));
 
 const store = new Vuex.Store({
     state: {

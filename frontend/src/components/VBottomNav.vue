@@ -30,7 +30,7 @@
 <style>
     .hiden-navbar-bottom {
         font-size: 10px;
-        background: #040f1e;
+        background: #000211;
         height: 25px;
         width: 100%;
         position: fixed !important;
