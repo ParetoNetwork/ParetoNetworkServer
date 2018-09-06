@@ -98,17 +98,16 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h2 class="font-body"> Please wait </h2>
-                        <div class="text-left">
+                        <h3 class="font-body mb-4">Creating an Intel has a two step confirmation </h3>
+                        <div >
                             <div class="m-2 ml-4">
-                                <h3 class="font-body">This step has two confirmations:</h3>
-                                <ol>
-                                    <li>Approve Pareto tokens</li>
-                                    <li>Create an Intel </li>
+                                <ol class="text-left">
+                                    <li>Confirm the amount of Pareto that you'd like to deposit</li>
+                                    <li>Create the Intel on the Ethereum Blockchain?</li>
                                 </ol>
-
-                                <p class="text-center"> This may take a while ... <i class="fa fa-spinner fa-spin fa-2x"></i></p>
-                            </div>
+                                <p class="text-center mt-4"> This operation may take a while as we communicate with the
+                                    Ethereum Blockchain </p>
+                                <i class="fa fa-spinner fa-spin fa-3x mt-4"></i></div>
                         </div>
                     </b-container>
                 </b-modal>
