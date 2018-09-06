@@ -74,11 +74,12 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h1 class="font-body mb-2"> You need to deposit Pareto tokens to create Intel. Please input the Pareto amount to deposit.</h1>
+                        <h4 class="font-body mb-3"> Pareto Amount</h4>
+                        <p class="text-dashboard mb-2" style="font-size: 16px">  You need to deposit Pareto tokens to create Intel. Please input the amount to deposit</p>
+
                         <b-form-input v-model="tokens"
-                                      type="number"
-                                      placeholder="Pareto Amount"></b-form-input>
-                        <b-row class="m-2 mt-4">
+                                      type="number"></b-form-input>
+                        <b-row class="m-2 mt-4 d-flex justify-content-center">
                             <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
                             <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
                         </b-row>
