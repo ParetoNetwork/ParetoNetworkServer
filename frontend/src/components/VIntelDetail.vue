@@ -154,7 +154,6 @@
             getIntel: function () {
                 return DashboardService.getIntel(res => {
                    this.getProfile(res.address);
-                   console.log(res);
                    this.intel = res;
                 }, error => {
                 }, this.id);
