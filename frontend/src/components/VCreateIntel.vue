@@ -184,6 +184,9 @@
                 minHeight: null, // set minimum height of editor
                 maxHeight: null, // set maximum height of editor
                 focus: true, // set focus to editable area after initializing summernote
+                link: [
+                    ['link', ['linkDialogShow', 'unlink']]
+                ],
                 toolbar: [
                     ['font', ['bold', 'italic', 'underline' /*, 'clear'*/]],
                     // ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
@@ -277,7 +280,7 @@
     };
 </script>
 
-<style scoped lang="scss">
+<style>
     textarea a {
         text-decoration: underline;
         color: blue;
