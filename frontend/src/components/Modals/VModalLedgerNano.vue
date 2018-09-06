@@ -28,10 +28,19 @@
                     <b-form-group>
                         <b-form-radio-group  v-model="selected">
                             <b-row class="m-2 mt-4">
-                                <b-form-radio value="44'/60'/0'/0/0"> "44'/60'/0'/0/0" </b-form-radio>
+                                <b-form-radio value="44'/60'/0'/0/0">
+                                    <div style="margin-top: -15px;">
+                                        <h1> Custom </h1> "44'/60'/0'/0/0"
+                                    </div>
+                                </b-form-radio>
+                                <b-form-select v-model="selected" :options="options" class="mb-3" />
                             </b-row>
                             <b-row class="m-2 mt-4">
-                                <b-form-radio value="44'/60'/0'/0"> "44'/60'/0'/0" </b-form-radio>
+                                <b-form-radio value="44'/60'/0'/0">
+                                    <div style="margin-top: -15px;">
+                                        <h1> Legacy </h1> "44'/60'/0'/0"
+                                    </div>
+                                </b-form-radio>
                             </b-row>
                         </b-form-radio-group>
                     </b-form-group>
@@ -54,7 +63,14 @@
         components: {},
         data(){
             return {
-                selected: "44'/60'/0'/0/0"
+                selected: "44'/60'/0'/0/0",
+                options: [
+                    { value: null, text: 'Please select an option' },
+                    { value: 'a', text: 'This is First option' },
+                    { value: 'b', text: 'Selected Option' },
+                    { value: {'C': '3PO'}, text: 'This is an option with object value' },
+                    { value: 'd', text: 'This one is disabled', disabled: true }
+                ]
             };
         },
         mounted(){

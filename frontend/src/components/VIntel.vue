@@ -154,7 +154,7 @@
                                             </div>
                                         </router-link>
 
-                                        <div class="col-10 col-lg-4 col-xl-3">
+                                        <div class="col-10 col-lg-3 mx-lg-auto">
                                             <div v-if="false" class="text-right font-weight-bold">
                                                 <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                                 <span class="text-right">{{row.pxt}}</span>
@@ -162,10 +162,11 @@
 
                                             <div v-if="user.address != row.address" class="row ml-5 ml-lg-0 mt-2 mt-lg-0 mr-1">
                                                 <div class="col-6 col-lg-12 p-1">
-                                                    <b-btn class="btn-block" v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
+                                                    <b-btn class="btn-block" style="width: 120px;"
+                                                           v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
                                                 </div>
                                                 <div class="col-6 col-lg-12 p-1">
-                                                    <button class="btn btn-primary-pareto btn-block" @click="distributeReward(row.id)">
+                                                    <button class="btn btn-primary-pareto btn-block" style="width: 120px;" @click="distributeReward(row.id)">
                                                         DISTRIBUTE
                                                     </button>
                                                 </div>
