@@ -61,8 +61,21 @@ var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
 var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
-var web3_events = new Web3(WEB3_WEBSOCKET_URL);
+var web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+var web3_events = new Web3(web3_events_provider);
+web3_events_provider.on('connect', function () {
+    controller.startwatchNewIntel()
+});
 
+web3_events_provider.on('end', e => {
+    console.log('WS closed');
+    console.log('Attempting to reconnect...');
+    web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+    web3_events = new Web3(web3_events_provider);
+    web3_events_provider.on('connect', function () {
+        controller.startwatchNewIntel()
+    });
+});
 
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
@@ -533,29 +546,55 @@ controller.postContent = function (req, callback) {
 
 };
 
-controller.findTransaction = function(req, callback){
-    let savedIntel  = {
-        id: req.body.id
-    }
+controller.startwatchNewIntel = function(){
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-    intel.events.NewIntel({
-        fromBlock: '0'
-    }, function (error, event) {
-        if (error) {
-            console.log(error);
-            return;
-        }
-        if (event.returnValues.intelID == savedIntel.id) {
-            const initialBalance = event.returnValues.depositAmount;
+    intel.events.NewIntel() .on('data',  event => {
+        try{
+            const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.update({ id: savedIntel.id, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                if (err) {
-                    throw err;
-                }
-                callback(null, 'successfully')
+            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
             });
+        }catch (e) {
+            console.log(e);
         }
-    })
+
+    });
+};
+
+controller.updateFromLastIntel = function(){
+    ParetoContent.aggregate([
+        {
+            $group: {
+                _id: null,
+                lastBlock: {$max: "$block"}
+            }
+        }
+    ]).exec(function(err, results) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            if(results.length > 0){
+                const lastBlock = results[0].lastBlock;
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+                intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+                    for (let i=0;i<events.length;i=i+1){
+                        try{
+                            const event = events[i];
+                            const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
+                            const expiry_time = event.returnValues.ttl;
+                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            });
+                        }catch (e) {
+                            console.log(e);
+                        }
+                    }
+
+                })
+            }
+           
+        }
+    });
 };
 
 controller.getAllAvailableContent = function(req, callback) {
