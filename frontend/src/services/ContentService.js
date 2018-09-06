@@ -126,6 +126,7 @@ export default class ContentService {
         onError("Err getting accounts");
         return;
       }
+      const gasPrice = await web3.eth.getGasPrice();
       const rewarder_address = accounts[0];
 
       const depositAmount = parseFloat(content.tokenAmount) * 10 ** 18;
@@ -139,7 +140,7 @@ export default class ContentService {
         .send({
           from: rewarder_address,
           gas: gasApprove,
-          gasPrice: "10000000000"
+          gasPrice
         })
         .on("error", err => {
           onError(err);
@@ -151,7 +152,7 @@ export default class ContentService {
       await Intel.methods.sendReward(content.ID, depositAmount).send({
         from: rewarder_address,
         gas: gasSendReward,
-        gasPrice: "10000000000"
+        gasPrice
       });
       onSuccess("success");
     });
