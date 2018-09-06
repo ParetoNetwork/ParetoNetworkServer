@@ -161,7 +161,7 @@
 
                                             <div class="row ml-5 ml-lg-0 mt-2 mt-lg-0 mr-1">
                                                 <div class="col-6 col-lg-12 p-1">
-                                                    <b-btn class="btn-block" v-b-modal.modalToken>REWARD</b-btn>
+                                                    <b-btn class="btn-block" v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
                                                 </div>
                                                 <div class="col-6 col-lg-12 p-1">
                                                     <button class="btn btn-primary-pareto btn-block" @click="distributeReward(row.id)">
@@ -212,12 +212,13 @@
                 :body-bg-variant="'dark'"
                 :body-text-variant="'light'">
             <b-container fluid>
-                <h4 class="font-body mb-3"> Please enter the number of Pareto Tokens to reward</h4>
-                <b-form-input v-model="tokensReward"
+                <h4 class="font-body mb-3"> Reward</h4>
+                <p class="text-dashboard mb-2" style="font-size: 16px">  Please enter the number of Pareto Tokens to reward</p>
+                <b-form-input v-model="tokenAmount"
                               type="number"></b-form-input>
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
                     <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
-                    <b-button style="background-color: rgb(107, 194, 123)" variant="success"> Confirm </b-button>
+                    <b-button style="background-color: rgb(107, 194, 123)" variant="success" @click="rewardIntel(rewardId, tokenAmount)"> Confirm </b-button>
                 </b-row>
             </b-container>
         </b-modal>
@@ -251,7 +252,8 @@
                     loading: false,
                     page: 0,
                 },
-                tokensReward : 1,
+                rewardId : '',
+                tokenAmount : 1,
                 myContent: [],
                 allMyContent: [],
                 moment: moment,
@@ -436,20 +438,18 @@
                     this.$store.state.makingRequest = false;
                 });
             },
-            rewardIntel: function (ID) {
-               // console.log(ID, "ID");
-               //  const tokenAmount = prompt(
-               //      "Please enter the number of Pareto Tokens to reward",
-               //      "1"
-               //  );
-               //  ContentService.rewardIntel(
-               //      {ID, tokenAmount},
-               //      res => {
-               //        //  console.log(res);
-               //      },
-               //      err => {
-               //      }
-               //  );
+            rewardIntel: function (ID, tokenAmount) {
+                this.hideModal();
+                console.log(ID, tokenAmount);
+                ContentService.rewardIntel(
+                    {ID, tokenAmount},
+                    res => {
+                      console.log(res);
+                    },
+                    err => {
+                        console.log(res);
+                    }
+                );
             },
             scrollMyPost: function () {
                 let list = document.getElementById("mypost");
