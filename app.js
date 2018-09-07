@@ -218,6 +218,38 @@ app.post('/v1/addresses', function (req, res) {
 });
 
 
+app.get("/getIntels", (req, res) => {
+    controller.getAllIntel((err, response) => {
+      if (err) {
+        res.status(502).json({ message: "Could not get Intels" });
+      } else {
+        res.status(200).json({ message: "success", data: response });
+      }
+    });
+  });
+  
+  app.get("/getIntel/:id", (req, res) => {
+    const { id } = req.params;
+    controller.getAnIntel(id, (err, response) => {
+      if (err) {
+        res.status(502).json({ message: "Could not get Intels" });
+      } else {
+        res.status(200).json({ message: "success", data: response });
+      }
+    });
+  });
+  
+  app.get("/getIntelsByProvider/:address", (req ,res) => {
+      const {address} = req.params;
+      controller.getIntelsByProvider(address, (err, response) => {
+          if (err) {
+            res.status(502).json({ message: "Could not get Intels" });
+          } else {
+            res.status(200).json({ message: "success", data: response });
+          }
+        });
+  })
+  
 
 /********* AUTHENTICATED v1 APIs *********/
 
