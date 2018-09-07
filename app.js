@@ -639,7 +639,25 @@ app.initializeWebSocket = function(server){
 
     const WebSocket = require('ws');
     var WebSocketServer = WebSocket.Server,
-        wss = new WebSocketServer({server: server});
+        wss = new WebSocketServer({
+            verifyClient: function (info, cb) {
+
+                var token = info.req.headers.cookie.split('authorization=')[1];
+                if (!token)
+                    cb(false, 401, 'Unauthorized');
+                else {
+                    jwt.verify(token, 'Pareto', function (err, decoded) {
+                        if (err) {
+                            cb(false, 401, 'Unauthorized')
+                        } else {
+                            info.req.user = decoded;
+                            cb(true)
+                        }
+                    })
+
+                }
+            },
+            server: server});
 
     /**
      * We need these functions in order to prevent issues with the sockets ‘alive’ status and improve performance.
@@ -658,9 +676,7 @@ app.initializeWebSocket = function(server){
         ws.isAlive = true;
         ws.on('pong', heartbeat);
         ws.user = req.user;
-        console.log( ws.user);
         ws.on('message', function (message) {
-            console.log(message);
             ws.info = JSON.parse(message);
         });
     });
@@ -676,7 +692,6 @@ app.initializeWebSocket = function(server){
                 client.isAlive = false;
                 client.ping(noop);
                 if (client.readyState === WebSocket.OPEN ) {
-                    console.log( ws.user);
                     // Validate if the user is subscribed a set of information
                     if(client.info && client.user){
                         const rank = parseInt(client.info.rank) || 1;

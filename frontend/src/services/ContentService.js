@@ -67,7 +67,7 @@ export default class ContentService {
         })
         .once("transactionHash", function(hash) {
           waitForReceipt(hash, receipt => {
-            console.log(receipt);
+           // console.log(receipt);
 
             ContentService.uploadContent(
               serverData,
