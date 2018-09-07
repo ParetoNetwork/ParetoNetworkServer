@@ -20,7 +20,6 @@
         name: 'App',
         components: {
             Navbar,
-            VFab,
             SplashDashboard,
             VBottomNav
         },
