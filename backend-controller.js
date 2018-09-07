@@ -1556,3 +1556,57 @@ controller.resetRanks = function(callback){
     }
   });
 };
+
+
+controller.getAllIntel = async function(callback){
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    try{
+        const result = await IntelInstance.methods.getAllIntel().call();
+        console.log(result)
+        response = [];
+        for(let i = 0; i< result.intelID.length; i++){
+            const obj = {};
+            obj.intelID = result.intelID[i];
+            obj.intelProvider = result.intelProvider[i];
+            obj.depositAmount = result.depositAmount[i];
+            obj.balance = result.balance[i];
+            obj.rewardAfter = result.rewardAfter[i];
+            obj.rewarded = result.rewarded[i];
+            response.push(obj);
+        }
+    callback(null, response)
+    } catch (err){
+        console.log(err,"errr");
+        callback(err, null)
+    }
+
+}
+controller.getIntelsByProvider = async function(providerAddress ,callback){
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    try{
+        const result = await IntelInstance.methods.getIntelsByProvider(providerAddress).call();
+        console.log(result)
+        response = [];
+        for(let i = 0; i< result.intelID.length; i++){
+            const obj = {};
+            obj.intelID = result.intelID[i];
+            obj.intelProvider = result.intelProvider[i];
+            obj.depositAmount = result.depositAmount[i];
+            obj.balance = result.balance[i];
+            obj.rewardAfter = result.rewardAfter[i];
+            obj.rewarded = result.rewarded[i];
+            response.push(obj);
+        }
+    callback(null, response)
+    } catch (err){
+        console.log(err,"errr");
+        callback(err, null)
+    }
+
+}
+controller.getAnIntel = async function(Id, callback){
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    const result = await IntelInstance.methods.getIntel(Id).call();
+    console.log(result);
+    callback(null, result);
+}
