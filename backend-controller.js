@@ -61,8 +61,21 @@ var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
 var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
-var web3_events = new Web3(WEB3_WEBSOCKET_URL);
+var web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+var web3_events = new Web3(web3_events_provider);
+web3_events_provider.on('connect', function () {
+    controller.startwatchNewIntel()
+});
 
+web3_events_provider.on('end', e => {
+    console.log('WS closed');
+    console.log('Attempting to reconnect...');
+    web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+    web3_events = new Web3(web3_events_provider);
+    web3_events_provider.on('connect', function () {
+        controller.startwatchNewIntel()
+    });
+});
 
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
@@ -561,29 +574,55 @@ controller.postContent = function (req, callback) {
 
 };
 
-controller.findTransaction = function(req, callback){
-    let savedIntel  = {
-        id: req.body.id
-    }
+controller.startwatchNewIntel = function(){
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-    intel.events.NewIntel({
-        fromBlock: '0'
-    }, function (error, event) {
-        if (error) {
-            console.log(error);
-            return;
-        }
-        if (event.returnValues.intelID == savedIntel.id) {
-            const initialBalance = event.returnValues.depositAmount;
+    intel.events.NewIntel() .on('data',  event => {
+        try{
+            const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.update({ id: savedIntel.id, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                if (err) {
-                    throw err;
-                }
-                callback(null, 'successfully')
+            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
             });
+        }catch (e) {
+            console.log(e);
         }
-    })
+
+    });
+};
+
+controller.updateFromLastIntel = function(){
+    ParetoContent.aggregate([
+        {
+            $group: {
+                _id: null,
+                lastBlock: {$max: "$block"}
+            }
+        }
+    ]).exec(function(err, results) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            if(results.length > 0){
+                const lastBlock = results[0].lastBlock;
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+                intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+                    for (let i=0;i<events.length;i=i+1){
+                        try{
+                            const event = events[i];
+                            const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
+                            const expiry_time = event.returnValues.ttl;
+                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            });
+                        }catch (e) {
+                            console.log(e);
+                        }
+                    }
+
+                })
+            }
+           
+        }
+    });
 };
 
 controller.getAllAvailableContent = function(req, callback) {
@@ -709,9 +748,8 @@ controller.getAllAvailableContent = function(req, callback) {
                                 {address : req.user, validated: true }
                             ]
                         }
-                    ).sort({block : -1}).populate( 'createdBy' ).exec();
+                    ).sort({block : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
                     let newResults = [];
-                    let i = 0;
                     allResults.forEach(function(entry){
                         /*
 
@@ -723,7 +761,6 @@ controller.getAllAvailableContent = function(req, callback) {
                          since it knows their latest scores and the current block height. therefore the full content response can be queried at once, perhaps, and pages can be done fictionally
 
                          */
-                        if(i < limit) {
                             let data = {
                                 _id: entry._id,
                                 blockAgo: blockHeight - entry.block,
@@ -749,8 +786,6 @@ controller.getAllAvailableContent = function(req, callback) {
                             };
 
                             newResults.push(data);
-                            i++;
-                        } // end if
                     });
                   //console.log(allResults);
 
@@ -783,9 +818,19 @@ controller.retrieveAddress = function(address, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
-      controller.retrieveAddressRankWithRedis(address,true,callback);
+      controller.retrieveAddressRankWithRedis([address],true,function (error, results) {
+          if(error) {callback(error)}
+          else { callback(null, results[0])}
+      });
   }
 
+};
+
+controller.retrieveAddresses = function(addresses, callback){
+    controller.retrieveAddressRankWithRedis(addresses,true,function (error, results) {
+        if(error) {callback(error)}
+        else { callback(null, results)}
+    });
 };
 
 controller.updateUser = function(address, userinfo ,callback){
@@ -817,12 +862,13 @@ controller.getUserInfo = function(address ,callback){
     if(web3.utils.isAddress(fixaddress) == false){
         callback(new Error('Invalid Address'));
     } else {
-        controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
+        controller.retrieveAddressRankWithRedis([address],true,function (error, rankings) {
             if(error){
                 callback(error)
             }else{
-                controller.retrieveProfileWithRedis(address, function (error, profile) {
+                controller.retrieveProfileWithRedis([address], function (error, profile) {
                     if(error){ callback(error)}
+                    let ranking = rankings[0];
                     callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
                         'first_name': profile.firstName, "last_name": profile.lastName,
                         'biography': profile.biography, "profile_pic" : profile.profilePic } );
@@ -843,9 +889,10 @@ controller.getUserInfo = function(address ,callback){
  * @param callback
  */
 controller.getAproxScoreAddress = function(address, delta ,callback){
-    controller.retrieveAddressRankWithRedis(address,true,function (error, ranking) {
+    controller.retrieveAddressRankWithRedis([address],true,function (error, rankings) {
         if(error){ callback(error)} else {
             //wieghtedBlock
+            let ranking = rankings[0];
             const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
             ranking.block = ranking.block + delta;
             const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
@@ -1010,12 +1057,15 @@ controller.getContentById = function(){
 
 };
 
-controller.getContentByCurrentUser = function(address, callback){
+controller.getContentByCurrentUser = function(req, callback){
+    const address = req.user;
+    var limit = parseInt(req.query.limit || 100);
+    var page = parseInt(req.query.page || 0);
 
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address, validated: true}).sort({block : -1}).populate( 'createdBy' );
+    var query = ParetoContent.find({address : address, validated: true}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
@@ -1311,35 +1361,46 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
  * @param address addressTobeGet
  *  @param attempts when is true, try with mongodb if results is zero
  */
-controller.retrieveAddressRankWithRedis = function(address, attempts, callback){
+controller.retrieveAddressRankWithRedis = function(addressess, attempts, callback){
 
     const multi = redisClient.multi();
-    multi.hgetall("address"+address);
+    for (let i = 0; i<addressess.length; i=i+1){
+        multi.hgetall("address"+addressess[i]);
+    }
     multi.exec(function(err, results) {
         if(err){
             return callback(err);
         }
-        if((!results || results.length ===0 || !results[0]) && attempts){
+        if(addressess.length > 1){
+            console.log(addressess);
+            console.log(results);
+            console.log(err);
+        }
+        if((!results || results.length ===0 || (!results[0] && results.length ===1)) && attempts){
             controller.getScoreAndSaveRedis(function(err, result){
                 if(err){
                     return callback(err);
                 } else {
-                    controller.retrieveAddressRankWithRedis(address ,false,callback);
+                    controller.retrieveAddressRankWithRedis(addressess ,false,callback);
                 }
             });
         }else{
-          if((!results || results.length ===0 || !results[0])){
+          if((!results || results.length ===0 || (!results[0] && results.length ===1))){
               // hopefully, users without pareto shouldn't get here now.
               callback(ErrorHandler.addressNotFound)
           }else{
               const multi = redisClient.multi();
-              multi.hgetall(results[0].rank+ "");
+              for (let i = 0; i<results.length; i=i+1){
+                  if(results[i]){
+                      multi.hgetall(results[i].rank+ "");
+                  }
+              }
               multi.exec(function(err, results) {
                   if(err){
                       return callback(err);
                   }
                   // return the cached ranking
-                  return callback(null, results[0]);
+                  return callback(null, results);
               });
           }
 

@@ -4,6 +4,7 @@
         <router-view></router-view>
         <VFab/>
         <notifications group="foo" position="bottom left"/>
+        <VBottomNav></VBottomNav>
     </div>
 </template>
 
@@ -11,44 +12,43 @@
     import Navbar from './components/Navbar.vue';
     import SplashDashboard from './components/Splash.vue';
     import VFab from './components/VFab.vue';
-    import http from './services/HttpService';
+    import VBottomNav from './components/VBottomNav';
+    import Auth from "./services/authService";
+    import {mapMutations, mapState} from 'vuex';
 
     export default {
         name: 'App',
         components: {
-            Navbar,VFab,
-            SplashDashboard
+            Navbar,
+            VFab,
+            SplashDashboard,
+            VBottomNav
         },
-        mounted : function () {
-            // this.interceptRequest();
-            // this.interceptResponses();
+        data: function(){
+            return{
+                bottomNav : {}
+            }
+        },
+        mounted: function () {
+            window.addEventListener('scroll', this.foo);
+            this.bottomNav = $('.hiden-navbar-bottom');
         },
         methods: {
-            // interceptRequest : function() {
-            //     http.interceptors.request.use( (config) => {
-            //         console.log('Request');
-            //         return config;
-            //     }, function(err) {
-            //         console.log(err);
-            //         return Promise.reject(err);
-            //     });
-            // },
-            // interceptResponses : function(){
-            //     http.interceptors.response.use( (config) => {
-            //         this.$store.state.makingRequest = false;
-            //         console.log('Response');
-            //         return config;
-            //     }, function(err) {
-            //         console.log(err);
-            //         return Promise.reject(err);
-            //     });
-            // }
+            foo: function () {
+                //console.log(document.body.scrollHeight)
+                if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
+                    this.bottomNav.addClass('show-navbar-bottom');
+                }else{
+                    this.bottomNav.removeClass('show-navbar-bottom');
+                }
+            }
         }
     };
 </script>
 
 <style lang="scss">
     @import './main';
+
     @font-face {
         font-family: 'FontAwesome';
         src: url('./assets/fonts/fontawesome-webfont.eot?v=4.7.0');
@@ -62,7 +62,7 @@
         src: url('./assets/fonts/font-header.eot'); /* IE9 Compat Modes */
         src: url('./assets/fonts/font-header.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
         url('./assets/fonts/font-header.woff') format('woff'), /* Pretty Modern Browsers */
-        url('./assets/fonts/font-header.ttf')  format('truetype'), /* Safari, Android, iOS */
+        url('./assets/fonts/font-header.ttf') format('truetype'), /* Safari, Android, iOS */
         url('./assets/fonts/font-header.svg#svgFontName') format('svg'); /* Legacy iOS */
     }
 
@@ -71,7 +71,7 @@
         src: url('./assets/fonts/font-body.eot'); /* IE9 Compat Modes */
         src: url('./assets/fonts/font-body.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
         url('./assets/fonts/font-body.woff') format('woff'), /* Pretty Modern Browsers */
-        url('./assets/fonts/font-body.ttf')  format('truetype'), /* Safari, Android, iOS */
+        url('./assets/fonts/font-body.ttf') format('truetype'), /* Safari, Android, iOS */
         url('./assets/fonts/font-body.svg#svgFontName') format('svg'); /* Legacy iOS */
     }
 
@@ -80,9 +80,14 @@
         src: url('./assets/fonts/font-body-regular.eot'); /* IE9 Compat Modes */
         src: url('./assets/fonts/font-body-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
         url('./assets/fonts/font-body-regular.woff') format('woff'), /* Pretty Modern Browsers */
-        url('./assets/fonts/font-body-regular.ttf')  format('truetype'), /* Safari, Android, iOS */
+        url('./assets/fonts/font-body-regular.ttf') format('truetype'), /* Safari, Android, iOS */
         url('./assets/fonts/font-body-regular.svg#svgFontName') format('svg'); /* Legacy iOS */
     }
+
+    a{
+        color: #ffffff;
+    }
+
     #app {
         font-family: 'Avenir', Helvetica, Arial, sans-serif, 'fontawesome';
         -webkit-font-smoothing: antialiased;
@@ -93,4 +98,5 @@
     body {
         margin: 0;
     }
+
 </style>
