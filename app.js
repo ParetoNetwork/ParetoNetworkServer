@@ -332,18 +332,6 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
-app.post('/v1/updatecontent', function (req, res) {
-
-    controller.findTransaction(req, function (err, obj) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
-        }
-
-    });
-
-});
 
 app.get('/v1/content', function (req, res) {
 
@@ -546,10 +534,11 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 }));
 
 /**
- * This is a scheduled task that will update the calculation for the score every ten minutes.
+ * This is a scheduled task that will update the calculation for the score every ten minutes. Also update CreateEventIntel
  */
 cron.schedule("*/5 * * * *", function() {
     try{
+        controller.updateFromLastIntel();
         controller.realAllScoreRanking(function(err, result){
             if(err){
                 console.log(err)
@@ -661,7 +650,7 @@ wss.on('connection', function connection(ws, req) {
 });
 
 /**
- * Validates if the connection is alive and sends info each minute
+ * Validates if the connection is alive and sends info each minute,
  */
 cron.schedule("* * * * *", function() {
     try{
@@ -704,7 +693,6 @@ cron.schedule("* * * * *", function() {
     }
 
 });
-
 
 
 module.exports = {app: app, controller: controller };

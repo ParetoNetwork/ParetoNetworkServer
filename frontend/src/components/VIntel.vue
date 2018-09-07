@@ -144,32 +144,35 @@
 
                                                     </div>
                                                     <div>
-                                                        <!--<span class="text-dashboard"> <b> Date: {{dateStringFormat(row.dateCreated)}} </b> </span>-->
-                                                        <span class="text-dashboard">{{ dateStringFormat(row.dateCreated)| moment("from", "now") }}</span>
+                                                        <span class="text-dashboard">
+                                                            <b>
+                                                                {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
+                                                            </b>
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </router-link>
 
-                                        <div class="col-10 col-lg-4 col-xl-3">
+                                        <div class="col-10 col-lg-3 mx-lg-auto">
                                             <div v-if="false" class="text-right font-weight-bold">
                                                 <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                                 <span class="text-right">{{row.pxt}}</span>
                                             </div>
-                                            <!--<button class="btn btn-primary-pareto" @click="rewardIntel(row.id)">REWARD-->
-                                            <!--</button>-->
 
-                                            <div class="row ml-5 ml-lg-0 mt-2 mt-lg-0 mr-1">
+                                            <div v-if="user.address != row.address" class="row ml-5 ml-lg-0 mt-2 mt-lg-0 mr-1">
                                                 <div class="col-6 col-lg-12 p-1">
-                                                    <b-btn class="btn-block" v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
+                                                    <b-btn class="btn-block" style="width: 120px;"
+                                                           v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
                                                 </div>
                                                 <div class="col-6 col-lg-12 p-1">
-                                                    <button class="btn btn-primary-pareto btn-block" @click="distributeReward(row.id)">
+                                                    <button class="btn btn-primary-pareto btn-block" style="width: 120px;" @click="distributeReward(row.id)">
                                                         DISTRIBUTE
                                                     </button>
                                                 </div>
                                             </div>
-
+                                            <div v-else style="width: 300px">
+                                            </div>
                                         </div>
 
                                     </div>
@@ -214,7 +217,7 @@
             <b-container fluid>
                 <h4 class="font-body mb-3"> Reward</h4>
                 <p class="text-dashboard mb-2" style="font-size: 16px">  Please enter the number of Pareto Tokens to reward</p>
-                <b-form-input v-model="tokenAmount"
+                <b-form-input v-model="tokenAmount" style="font-size: 25px"
                               type="number"></b-form-input>
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
                     <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
@@ -298,14 +301,14 @@
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
             distributeReward: function (ID) {
-                // ContentService.distributeRewards(
-                //     {ID},
-                //     res => {
-                //       //  console.log(res);
-                //     },
-                //     error => {
-                //     }
-                // );
+                ContentService.distributeRewards(
+                    {ID},
+                    res => {
+                      //  console.log(res);
+                    },
+                    error => {
+                    }
+                );
             },
             dateStringFormat(date){
                 return new Date(date);
@@ -440,6 +443,18 @@
             },
             rewardIntel: function (ID, tokenAmount) {
                 this.hideModal();
+
+                if (!tokenAmount){
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: 'No Token Amount'
+                    });
+                    this.tokenAmount = 1;
+                    return;
+                }
+
                 console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
                     {ID, tokenAmount},
