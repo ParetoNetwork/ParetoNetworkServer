@@ -99,18 +99,85 @@ export default class authService {
 
     }
 
-    static  signWallet(path, onSuccess, onError) {
+    static  isWalletSupported(path, page, limit, onSuccess, onError) {
+        var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+        LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
+            if(ledgerWalletSubProvider.isSupported){
+                onSuccess(true)
+            }else{
+                onError('Not Support')
+            }
+        });
+    }
+
+    static  getWalletAccounts(path, page, limit, onSuccess, onError) {
+        const ProviderEngine = require('web3-provider-engine');
+        const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+        var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+        const engine = new ProviderEngine();
+        const provider = new Web3(engine);
+        var derivation_path =  path ||  "44'/60'/0'/0/0";
+
+        LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
+            const isSupported = ledgerWalletSubProvider.isSupported;
+            ledgerWalletSubProvider.ledger.setDerivationPath(derivation_path);
+            if(isSupported){
+                engine.addProvider(ledgerWalletSubProvider);
+                engine.addProvider(new RpcSubprovider({rpcUrl: 'https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'})); // you need RPC endpoint
+                engine.start();
+
+                if (typeof provider !== 'undefined') {
+                    console.log(derivation_path);
+                    ledgerWalletSubProvider.ledger.getMultipleAccounts(derivation_path, page, limit)
+                        .then(res => onSuccess(res))
+                        .catch(err =>  { onError(err)});
+                }//end if
+            }else{
+                onError('Your browser not support this feature')
+            }
+
+        });
+
+
+        return true;
+    }
+
+    static getTokens(addresses, onSuccess, onError){
+        const data = {
+            addresses:  addresses
+        };
+        http.post('/v1/addresses', data , {
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json; charset=UTF-8'
+            }
+        }).then(response => {
+            if(response.data.success){
+                return onSuccess(response.data);
+            }else{
+                return onError(response.data.message)
+            }
+
+        }).catch(error => {
+            if (error.response && error.response.data) {
+                return onError(error.response.data.message);
+            } else {
+                return onError(error);
+            }
+
+        });
+    }
+
+    static  signWallet(pathId, addr, onSuccess, onError) {
 
         const ProviderEngine = require('web3-provider-engine');
         const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
         var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
         const engine = new ProviderEngine();
         const provider = new Web3(engine);
-        var derivation_path = path || "44'/60'/0'/0/0";
 
         LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
             const isSupported = ledgerWalletSubProvider.isSupported;
-            ledgerWalletSubProvider.ledger.setDerivationPath(derivation_path);
                 if(isSupported){
                     engine.addProvider(ledgerWalletSubProvider);
                     engine.addProvider(new RpcSubprovider({rpcUrl: 'https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'})); // you need RPC endpoint
@@ -125,48 +192,40 @@ export default class authService {
                             }
                         ];
 
-                        provider.eth.getAccounts((error, accounts) => {
-                            if (!error) {
-                                if(accounts && accounts[0]){
 
-                                    const addr = accounts[0];
+                    ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
+                        if (provider.utils.isAddress(addr)) {
+                            const from = addr.toLowerCase();
 
-                                    if (provider.utils.isAddress(addr)) {
-                                        const from = addr.toLowerCase();
+                            ledgerWalletSubProvider.ledger.signMessage({data:  provider.utils.toHex('Pareto')}, (err, result) => {
+                                if (err) return console.dir(err);
+                                if (result.error) {
+                                    return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
+                                }
+                                if (result.error) {
+                                    return console.error(result);
+                                }
 
-                                        provider.currentProvider._providers[0].signMessage({data:  provider.utils.toHex('Pareto')}, (err, result) => {
-                                            if (err) return console.dir(err);
-                                            if (result.error) {
-                                                return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
-                                            }
-                                            if (result.error) {
-                                                return console.error(result);
-                                            }
+                                const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
 
-                                            const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
+                                if (recovered === from) {
+                                    authService.signParetoServer(msgParams, from, result, onSuccess, onError)
 
-                                            if (recovered === from) {
-                                                authService.signParetoServer(msgParams, from, result, onSuccess, onError)
+                                } else {
+                                    console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                    // stopLoading();
+                                    return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                }
 
-                                            } else {
-                                                console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
-                                                // stopLoading();
-                                                return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
-                                            }
+                            });
 
-                                        });
+                        }//end if valid address
+                        else {
+                            console.log('address invalid!');
+                            return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
 
-                                    }//end if valid address
-                                    else {
-                                        console.log('address invalid!');
-                                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
-
-                                        //set error state on input field
-                                    }
-                                }//end if !error
-
-                            }//end if !error
-                        });
+                            //set error state on input field
+                        }
                     }//end if
                 }else{
                     onError('Your browser not support this feature')

@@ -15,6 +15,7 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(Notifications);
+Vue.use(require('vue-moment'));
 
 const store = new Vuex.Store({
     state: {
@@ -57,7 +58,7 @@ const store = new Vuex.Store({
             state.showModalLedgerNano = false;
             state.makingLogin = false;
         }, iniWs(state) {
-            state.ws =   new WebSocket ('ws://localhost:8787');
+            state.ws = new WebSocket ('ws://localhost:8787');
         }
     },
     actions: {

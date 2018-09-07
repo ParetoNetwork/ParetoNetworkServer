@@ -98,7 +98,7 @@
                                         <tr
                                                 v-for="rank in leader"
                                                 :key="rank.address"
-                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }"
+                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
                                                 v-bind:id="rank.rank"
                                         >
                                             <td style="width: 55px">{{rank.rank}}</td>
@@ -152,8 +152,8 @@
             ICountUp
         },
         directives: {
-          infiniteScroll,
-            scroll : {
+            infiniteScroll,
+            scroll: {
                 inserted: function (el, binding) {
                     let f = function (evt) {
                         if (binding.value(evt, el)) {
@@ -222,7 +222,9 @@
         computed: {...mapState(['madeLogin',
                 'showModalSign',
                 'showModalLoginOptions',
-                'showModalLedgerNano', 'ws'])
+                'showModalLedgerNano',
+                'ws'
+            ])
         },
         mounted: function () {
             this.getAddress();
@@ -361,49 +363,54 @@
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
             },
+            overrideOnMessage(){
+                let wsa = this.ws;
+                this.ws.onmessage = (data) => {
+                    wsa.send(JSON.stringify(this.socketParams));
+                    try {
+                        const info = JSON.parse(data.data);
+                        console.log(info);
+                        if (info.data.address) {
+                            this.score = info.data.score;
+                        } else {
+                            let socketIndex = 0;
+                            let socketRanking = info.data;
+                            let firstRank = socketRanking[socketIndex].rank;
+
+                            this.leader = this.leader.map(item => {
+
+                                let rank = parseFloat(item.rank);
+                                let socketRank;
+                                if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
+
+                                if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
+                                    item.score = socketRanking[socketIndex].score;
+                                    socketIndex++;
+                                }
+                                return item;
+                            });
+                        }
+
+                    } catch (e) {
+                        console.log(e);
+                    }
+                };
+            } ,
             socketConnection () {
                 let params = {rank: this.rank, limit: 100, page: this.page};
+                if (!this.ws) {
+                    Auth.getSocketToken(res => {
 
-                Auth.getSocketToken( res =>{
-                    if (!this.ws){
                         this.iniWs();
                         let wss = this.ws;
                         this.ws.onopen = function open() {
                             wss.send(JSON.stringify(params));
                         };
-
-                        let wsa = this.ws;
-                        this.ws.onmessage = (data) => {
-                            wsa.send(JSON.stringify(this.socketParams));
-                            try{
-                                const info =  JSON.parse(data.data);
-                                if (info.data.address){
-                                    this.score = info.data.score;
-                                }else{
-                                   let socketIndex = 0;
-                                   let socketRanking = info.data;
-                                   let firstRank = socketRanking[socketIndex].rank;
-
-                                   this.leader = this.leader.map( item => {
-
-                                       let rank = parseFloat(item.rank);
-                                       let socketRank;
-                                       if(socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
-
-                                       if( rank >= firstRank && rank < (firstRank + 99) && rank === socketRank){
-                                           item.score = socketRanking[socketIndex].score;
-                                           socketIndex++;
-                                       }
-                                       return item;
-                                   });
-                                }
-
-                            }catch (e) {
-                                console.log(e);
-                            }
-                        };
-                    }
-                });
+                        this.overrideOnMessage();
+                    });
+                }else{
+                    this.overrideOnMessage();
+                }
             },
             init : function(profile){
                 this.rank = profile.rank <= 0 ? 0.0 : profile.rank;

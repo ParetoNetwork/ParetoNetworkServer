@@ -205,6 +205,18 @@ app.get('/v1/balance', function (req, res) {
 
 });
 
+//get info about your address
+app.post('/v1/addresses', function (req, res) {
+    controller.retrieveAddresses( req.body.addresses, function (err, results) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(results));
+        }
+    });
+
+});
+
 
 
 /********* AUTHENTICATED v1 APIs *********/

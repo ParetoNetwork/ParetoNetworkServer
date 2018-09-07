@@ -114,42 +114,70 @@
                     <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of myFeed.content">
-                                <router-link tag="div" class="d-flex split " :to="'/intel/' + row._id"
+                                <div class="d-flex split "
                                              @click="showDetails(row)">
-                                    <div class="border p-1 mr-2" style="height: 50px;">
-                                        <div data-v-514e8c24="" class="thumb"
-                                             v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
-                                             style="width: 40px; height: 40px;"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between flex-grow-1">
-                                        <div class="d-flex flex-column flex-grow-1 pr-5">
-                                            <h1 class="title">{{row.title || 'No title'}}</h1>
-                                            <div class="d-flex justify-content-between">
-                                                <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                <span class="text-dashboard">Disclosed by: {{row.address}} at block
-                                                <ICountUp
-                                                        :startVal="parseFloat(row.block)+parseFloat(row.blockAgo)"
-                                                        :endVal="parseFloat(row.block)"
-                                                        :decimals="decimalsLength(row.block)"
-                                                        :duration="randomNumber(1,3)"
-                                                        :options="countUp.options"
-                                                        @ready="onReady"/></span>
+                                    <div class="row" >
+                                        <router-link tag="div" :to="'/intel/' + row._id" class="col-lg-8 col-xl-9 pr-0 d-flex justify-content-between">
+                                            <div class="border p-1 mr-2" style="height: 50px;">
+                                                <div data-v-514e8c24="" class="thumb"
+                                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
+                                                     style="width: 40px; height: 40px;"></div>
                                             </div>
-                                        </div>
-                                        <div class="d-flex flex-column justify- content-end">
+                                            <div class="d-flex flex-column flex-grow-1 pr-0">
+                                                <h1 class="title">{{row.title || 'No title'}}</h1>
+                                                <div class="">
+                                                    <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
+
+                                                    <div>
+                                                        <span class="text-dashboard">Disclosed by: {{row.address}}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        Blocks ago:
+                                                        <ICountUp
+                                                                :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
+                                                                :endVal="parseFloat(row.blockAgo)"
+                                                                :decimals="decimalsLength(row.blockAgo)"
+                                                                :duration="randomNumber(1,3)"
+                                                                :options="countUp.options"
+                                                                @ready="onReady"/>
+
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-dashboard">
+                                                            <b>
+                                                                {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
+                                                            </b>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </router-link>
+
+                                        <div class="col-10 col-lg-3 mx-lg-auto">
                                             <div v-if="false" class="text-right font-weight-bold">
                                                 <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                                 <span class="text-right">{{row.pxt}}</span>
                                             </div>
-                                            <button class="btn btn-primary-pareto" @click="rewardIntel(row.id)">REWARD
-                                            </button>
-                                            <button class="btn btn-primary-pareto" @click="distributeReward(row.id)">
-                                                DISTRIBUTE
-                                            </button>
+
+                                            <div v-if="user.address != row.address" class="row ml-5 ml-lg-0 mt-2 mt-lg-0 mr-1">
+                                                <div class="col-6 col-lg-12 p-1">
+                                                    <b-btn class="btn-block" style="width: 120px;"
+                                                           v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
+                                                </div>
+                                                <div class="col-6 col-lg-12 p-1">
+                                                    <button class="btn btn-primary-pareto btn-block" style="width: 120px;" @click="distributeReward(row.id)">
+                                                        DISTRIBUTE
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div v-else style="width: 300px">
+                                            </div>
                                         </div>
+
                                     </div>
 
-                                </router-link>
+                                </div>
                             </li>
                         </ul>
                     </div>
@@ -176,6 +204,26 @@
                     </div>
                 </form>
             </div>
+        </b-modal>
+
+        <b-modal
+                id="modalToken"
+                ref="modalToken"
+                centered
+                hide-header
+                hide-footer
+                :body-bg-variant="'dark'"
+                :body-text-variant="'light'">
+            <b-container fluid>
+                <h4 class="font-body mb-3"> Reward</h4>
+                <p class="text-dashboard mb-2" style="font-size: 16px">  Please enter the number of Pareto Tokens to reward</p>
+                <b-form-input v-model="tokenAmount" style="font-size: 25px"
+                              type="number"></b-form-input>
+                <b-row class="m-2 mt-4 d-flex justify-content-center">
+                    <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
+                    <b-button style="background-color: rgb(107, 194, 123)" variant="success" @click="rewardIntel(rewardId, tokenAmount)"> Confirm </b-button>
+                </b-row>
+            </b-container>
         </b-modal>
     </div>
 </template>
@@ -207,6 +255,8 @@
                     loading: false,
                     page: 0,
                 },
+                rewardId : '',
+                tokenAmount : 1,
                 myContent: [],
                 allMyContent: [],
                 moment: moment,
@@ -217,7 +267,8 @@
                 baseURL: environment.baseURL,
                 user: {
                     rank: 0,
-                    score: 0
+                    score: 0,
+                    tokens: 0
                 },
                 scrollPost: 0,
                 scrollFeed: 0
@@ -245,10 +296,10 @@
             this.main();
         },
         computed: {
-            ...mapState(["madeLogin"])
+            ...mapState(["madeLogin", "ws"])
         },
         methods: {
-            ...mapMutations(["intelEnter"]),
+            ...mapMutations(["intelEnter", "iniWs"]),
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
                     {ID},
@@ -258,6 +309,9 @@
                     error => {
                     }
                 );
+            },
+            dateStringFormat(date){
+                return new Date(date);
             },
             goToIntelPage: function () {
                 window.location = '/#/create';
@@ -294,6 +348,50 @@
                         });
                     }
                 );
+            },
+            hideModal () {
+                this.$refs.modalToken.hide()
+            },
+            assignBlock(block){
+                this.myFeed.content = this.myFeed.content.map( item => {
+                    // console.log(item);
+                   item.blockAgo = block - item.block;
+                    return item;
+                });
+            },
+            overrideOnMessage(){
+                let wsa = this.ws;
+                console.log(this.ws)
+                this.ws.onmessage = (data) => {
+                    try {
+                        const info = JSON.parse(data.data);
+                        if (info.data.address) {
+                            this.user.score = info.data.score;
+                            this.user.rank = info.data.rank;
+                            this.user.tokens = info.data.tokens;
+                            // this.user.block = info.data.block;
+                            this.assignBlock(info.data.block);
+                        }
+
+                    } catch (e) {
+                        console.log(e);
+                    }
+                };
+            },
+            socketConnection () {
+                let params = {rank: this.rank, limit: 100, page: this.page};
+                if (!this.ws) {
+                    AuthService.getSocketToken(res => {
+                        this.iniWs();
+                        let wss = this.ws;
+                        this.ws.onopen = function open() {
+                            wss.send(JSON.stringify(params));
+                        };
+                        this.overrideOnMessage();
+                    });
+                }else{
+                    this.overrideOnMessage();
+                }
             },
             loadMyContent: function () {
                 return dashboardService.getContent(
@@ -343,18 +441,28 @@
                     this.$store.state.makingRequest = false;
                 });
             },
-            rewardIntel: function (ID) {
-               // console.log(ID, "ID");
-                const tokenAmount = prompt(
-                    "Please enter the number of Pareto Tokens to reward",
-                    "1"
-                );
+            rewardIntel: function (ID, tokenAmount) {
+                this.hideModal();
+
+                if (!tokenAmount){
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: 'No Token Amount'
+                    });
+                    this.tokenAmount = 1;
+                    return;
+                }
+
+                console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
                     {ID, tokenAmount},
                     res => {
-                      //  console.log(res);
+                      console.log(res);
                     },
                     err => {
+                        console.log(res);
                     }
                 );
             },
@@ -416,10 +524,12 @@
                             this.requestCall();
                         },
                         () => {
+                            this.socketConnection ();
                             this.requestCall();
                         }
                     );
                 } else {
+                    this.socketConnection ();
                     this.requestCall();
                 }
             }
