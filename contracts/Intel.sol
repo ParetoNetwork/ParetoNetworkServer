@@ -85,6 +85,9 @@ contract Intel{
 
 
     mapping(uint => IntelState) intelDB;
+    mapping(address => IntelState[]) public IntelsByProvider;
+    uint[] intelIndexes;
+    
     uint public intelCount;
     
 
@@ -133,8 +136,9 @@ contract Intel{
 
         IntelState memory newIntel = IntelState(intelProvider, depositAmount, desiredReward, depositAmount, intelID, ttl, false);
         intelDB[intelID] = newIntel;
-        
+        IntelsByProvider[intelProvider].push(newIntel);
 
+        intelIndexes.push(intelID);
         intelCount++;
         
 
@@ -294,6 +298,53 @@ contract Intel{
 
     }
 
+    function getAllIntel() public view returns (uint[] intelID, address[] intelProvider, uint[] depositAmount, uint[] desiredReward, uint[] balance, uint[] rewardAfter, bool[] rewarded){
+        
+        uint length = intelIndexes.length;
+        intelID = new uint[](length);
+        intelProvider = new address[](length);
+        depositAmount = new uint[](length);
+        desiredReward = new uint[](length);
+        balance = new uint[](length);
+        rewardAfter = new uint[](length);
+        rewarded = new bool[](length);
+
+        for(uint i = 0; i < intelIndexes.length; i++){
+            intelID[i] = intelDB[intelIndexes[i]].intelID;
+            intelProvider[i] = intelDB[intelIndexes[i]].intelProvider;
+            depositAmount[i] = intelDB[intelIndexes[i]].depositAmount;
+            desiredReward[i] = intelDB[intelIndexes[i]].desiredReward;
+            balance[i] = intelDB[intelIndexes[i]].balance;
+            rewardAfter[i] = intelDB[intelIndexes[i]].rewardAfter;
+            rewarded[i] = intelDB[intelIndexes[i]].rewarded;
+        }
+    }
+
+
+      function getIntelsByProvider(address _provider) public view returns (uint[] intelID, address[] intelProvider, uint[] depositAmount, uint[] desiredReward, uint[] balance, uint[] rewardAfter, bool[] rewarded){
+        
+        uint length = IntelsByProvider[_provider].length;
+
+        intelID = new uint[](length);
+        intelProvider = new address[](length);
+        depositAmount = new uint[](length);
+        desiredReward = new uint[](length);
+        balance = new uint[](length);
+        rewardAfter = new uint[](length);
+        rewarded = new bool[](length);
+
+        IntelState[] memory intels = IntelsByProvider[_provider];
+
+        for(uint i = 0; i < length; i++){
+            intelID[i] = intels[i].intelID;
+            intelProvider[i] = intels[i].intelProvider;
+            depositAmount[i] = intels[i].depositAmount;
+            desiredReward[i] = intels[i].desiredReward;
+            balance[i] = intels[i].balance;
+            rewardAfter[i] = intels[i].rewardAfter;
+            rewarded[i] = intels[i].rewarded;
+        }
+    }
 }
 
 
