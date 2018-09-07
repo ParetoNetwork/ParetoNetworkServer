@@ -167,15 +167,6 @@ export default class ContentService {
           onError(err);
         });
 
-      const gasSendReward = await Intel.methods
-        .sendReward(content.ID, depositAmount)
-        .estimateGas({ from: rewarder_address });
-      await Intel.methods.sendReward(content.ID, depositAmount).send({
-        from: rewarder_address,
-        gas: gasSendReward,
-        gasPrice
-      });
-      onSuccess("success");
     });
   }
 
