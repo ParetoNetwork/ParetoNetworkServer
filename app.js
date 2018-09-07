@@ -206,34 +206,66 @@ app.get('/v1/balance', function (req, res) {
 });
 
 
+app.get("/getIntels", (req, res) => {
+    controller.getAllIntel((err, response) => {
+      if (err) {
+        res.status(502).json({ message: "Could not get Intels" });
+      } else {
+        res.status(200).json({ message: "success", data: response });
+      }
+    });
+  });
+  
+  app.get("/getIntel/:id", (req, res) => {
+    const { id } = req.params;
+    controller.getAnIntel(id, (err, response) => {
+      if (err) {
+        res.status(502).json({ message: "Could not get Intels" });
+      } else {
+        res.status(200).json({ message: "success", data: response });
+      }
+    });
+  });
+  
+  app.get("/getIntelsByProvider/:address", (req ,res) => {
+      const {address} = req.params;
+      controller.getIntelsByProvider(address, (err, response) => {
+          if (err) {
+            res.status(502).json({ message: "Could not get Intels" });
+          } else {
+            res.status(200).json({ message: "success", data: response });
+          }
+        });
+  })
+  
 
 /********* AUTHENTICATED v1 APIs *********/
 
-app.use(function (req, res, next) {
+// app.use(function (req, res, next) {
 
-    if (req.cookies === undefined || req.cookies.authorization === undefined) {
+//     if (req.cookies === undefined || req.cookies.authorization === undefined) {
 
-      res.status(200).json(ErrorHandler.tokenMissingError())
+//       res.status(200).json(ErrorHandler.tokenMissingError())
 
-    } else {
+//     } else {
 
-        let authorization = req.cookies.authorization;
-        if (authorization.includes('Bearer')) {
-            authorization = authorization.replace('Bearer', '');
-        }
-        authorization = authorization.trim();
+//         let authorization = req.cookies.authorization;
+//         if (authorization.includes('Bearer')) {
+//             authorization = authorization.replace('Bearer', '');
+//         }
+//         authorization = authorization.trim();
 
-        jwt.verify(authorization, 'Pareto', function (err, decoded) {
-            if (err) {
-                res.status(200).json(ErrorHandler.jwtFailedError())
-            } else {
-                req.user = decoded.user;
-                next();
-            }
-        });
-    }
+//         jwt.verify(authorization, 'Pareto', function (err, decoded) {
+//             if (err) {
+//                 res.status(200).json(ErrorHandler.jwtFailedError())
+//             } else {
+//                 req.user = decoded.user;
+//                 next();
+//             }
+//         });
+//     }
 
-});
+// });
 
 /*
 * Auth, simple authenticated method to determine if user is properly authenticated. Necessary because client side js
