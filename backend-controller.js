@@ -521,26 +521,54 @@ controller.postContent = function (req, callback) {
       if(web3.utils.isAddress(req.user) == false){
         if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
       } else {
-          let Intel = new ParetoContent({
-              address: req.body.address || req.user,
-              title: req.body.title,
-              body: req.body.body,
-              text: req.bodytext,
-              dateCreated: Date.now(),
-              block: 0,
-              txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
-              speed: 3, //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
-              reward: req.body.reward || 1
 
-          });
-          Intel.save((err, savedIntel) => {
-              if (err) {
-                  if (callback && typeof callback === "function") { callback(err); }
-              } else {
-                  if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
+    let Intel = new ParetoContent({
+        address: req.body.address || req.user,
+        title: req.body.title,
+        body: req.body.body,
+        text: req.bodytext,
+        dateCreated: Date.now(),
+        block: req.body.number || 0,
+        txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
+        speed: 3, //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
+        reward: req.body.reward || 1
 
-              }
-          })
+    });
+    Intel.save((err, savedIntel) => {
+
+        if (err) {
+            if (callback && typeof callback === "function") { callback(err); }
+        } else {
+
+
+            const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+            intel.events.NewIntel({
+                fromBlock: 'latest'
+            }, function (error, event) {
+                if (error) {
+                    console.log(error);
+                    return;
+                }
+
+                const initialBalance = event.returnValues.depositAmount;
+                const expiry_time = event.returnValues.ttl;
+
+                if (event.returnValues.intelID == savedIntel.id) {
+
+                    ParetoContent.update({ _id: savedIntel._id }, { validated: true, reward: initialBalance, expires: expiry_time }, { multi: false }, function (err, data) {
+                        if (err) {
+                            throw err;
+                        }
+
+                    });
+                }
+            })
+
+
+            if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
+
+        }
+    })
 
       } // end else
 
@@ -1589,3 +1617,57 @@ controller.resetRanks = function(callback){
     }
   });
 };
+
+
+controller.getAllIntel = async function(callback){
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    try{
+        const result = await IntelInstance.methods.getAllIntel().call();
+        console.log(result)
+        response = [];
+        for(let i = 0; i< result.intelID.length; i++){
+            const obj = {};
+            obj.intelID = result.intelID[i];
+            obj.intelProvider = result.intelProvider[i];
+            obj.depositAmount = result.depositAmount[i];
+            obj.balance = result.balance[i];
+            obj.rewardAfter = result.rewardAfter[i];
+            obj.rewarded = result.rewarded[i];
+            response.push(obj);
+        }
+    callback(null, response)
+    } catch (err){
+        console.log(err,"errr");
+        callback(err, null)
+    }
+
+}
+controller.getIntelsByProvider = async function(providerAddress ,callback){
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    try{
+        const result = await IntelInstance.methods.getIntelsByProvider(providerAddress).call();
+        console.log(result)
+        response = [];
+        for(let i = 0; i< result.intelID.length; i++){
+            const obj = {};
+            obj.intelID = result.intelID[i];
+            obj.intelProvider = result.intelProvider[i];
+            obj.depositAmount = result.depositAmount[i];
+            obj.balance = result.balance[i];
+            obj.rewardAfter = result.rewardAfter[i];
+            obj.rewarded = result.rewarded[i];
+            response.push(obj);
+        }
+    callback(null, response)
+    } catch (err){
+        console.log(err,"errr");
+        callback(err, null)
+    }
+
+}
+controller.getAnIntel = async function(Id, callback){
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    const result = await IntelInstance.methods.getIntel(Id).call();
+    console.log(result);
+    callback(null, result);
+}
