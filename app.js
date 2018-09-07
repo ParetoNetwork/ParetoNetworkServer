@@ -205,6 +205,18 @@ app.get('/v1/balance', function (req, res) {
 
 });
 
+//get info about your address
+app.post('/v1/addresses', function (req, res) {
+    controller.retrieveAddresses( req.body.addresses, function (err, results) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(results));
+        }
+    });
+
+});
+
 
 app.get("/getIntels", (req, res) => {
     controller.getAllIntel((err, response) => {
@@ -352,18 +364,6 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
-app.post('/v1/updatecontent', function (req, res) {
-
-    controller.findTransaction(req, function (err, obj) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
-        }
-
-    });
-
-});
 
 app.get('/v1/content', function (req, res) {
 
@@ -393,7 +393,7 @@ app.get('/v1/content', function (req, res) {
 
 app.get('/v1/content/me', function (req, res) {
 
-    controller.getContentByCurrentUser(req.user, function (err, result) {
+    controller.getContentByCurrentUser(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
@@ -566,10 +566,11 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 }));
 
 /**
- * This is a scheduled task that will update the calculation for the score every ten minutes.
+ * This is a scheduled task that will update the calculation for the score every ten minutes. Also update CreateEventIntel
  */
 cron.schedule("*/5 * * * *", function() {
     try{
+        controller.updateFromLastIntel();
         controller.realAllScoreRanking(function(err, result){
             if(err){
                 console.log(err)
@@ -681,7 +682,7 @@ wss.on('connection', function connection(ws, req) {
 });
 
 /**
- * Validates if the connection is alive and sends info each minute
+ * Validates if the connection is alive and sends info each minute,
  */
 cron.schedule("* * * * *", function() {
     try{
@@ -710,7 +711,7 @@ cron.schedule("* * * * *", function() {
                         }
                     });
 
-                    controller.getUserInfo(client.user.user, function (err, result) {
+                    controller.retrieveAddress(client.user.user, function (err, result) {
                         if (!err) {
                             client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                         }
@@ -724,7 +725,6 @@ cron.schedule("* * * * *", function() {
     }
 
 });
-
 
 
 module.exports = {app: app, controller: controller };

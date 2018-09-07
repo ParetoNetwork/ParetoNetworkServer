@@ -63,7 +63,6 @@
 
                 </div>
             </div>
-
             <div>
                 <b-modal
                         v-model="modalToken"
@@ -75,11 +74,12 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h1 class="font-body mb-2"> You need to deposit Pareto tokens to create Intel. Please input the Pareto amount to deposit.</h1>
+                        <h4 class="font-body mb-3"> Pareto Amount</h4>
+                        <p class="text-dashboard mb-2" style="font-size: 16px">  You need to deposit Pareto tokens to create Intel. Please input the amount to deposit</p>
+
                         <b-form-input v-model="tokens"
-                                      type="number"
-                                      placeholder="Pareto Amount"></b-form-input>
-                        <b-row class="m-2 mt-4">
+                                      type="number"></b-form-input>
+                        <b-row class="m-2 mt-4 d-flex justify-content-center">
                             <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
                             <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
                         </b-row>
@@ -98,17 +98,16 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h2 class="font-body"> Please wait </h2>
-                        <div class="text-left">
+                        <h3 class="font-body mb-4">Creating an Intel has a two step confirmation </h3>
+                        <div >
                             <div class="m-2 ml-4">
-                                <h3 class="font-body">This step has two confirmations:</h3>
-                                <ol>
-                                    <li>Approve Pareto tokens</li>
-                                    <li>Create an Intel </li>
+                                <ol class="text-left">
+                                    <li>Confirm the amount of Pareto that you'd like to deposit</li>
+                                    <li>Create the Intel on the Ethereum Blockchain?</li>
                                 </ol>
-
-                                <p class="text-center"> This may take a while ... <i class="fa fa-spinner fa-spin fa-2x"></i></p>
-                            </div>
+                                <p class="text-center mt-4"> This operation may take a while as we communicate with the
+                                    Ethereum Blockchain </p>
+                                <i class="fa fa-spinner fa-spin fa-3x mt-4"></i></div>
                         </div>
                     </b-container>
                 </b-modal>
@@ -185,6 +184,9 @@
                 minHeight: null, // set minimum height of editor
                 maxHeight: null, // set maximum height of editor
                 focus: true, // set focus to editable area after initializing summernote
+                link: [
+                    ['link', ['linkDialogShow', 'unlink']]
+                ],
                 toolbar: [
                     ['font', ['bold', 'italic', 'underline' /*, 'clear'*/]],
                     // ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
@@ -278,7 +280,7 @@
     };
 </script>
 
-<style scoped lang="scss">
+<style>
     textarea a {
         text-decoration: underline;
         color: blue;

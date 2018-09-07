@@ -25,21 +25,6 @@ export default class ContentService {
       });
   }
 
-    static findTransaction(id, onSuccess, onError) {
-        http
-            .post("/v1/updatecontent", {id: id})
-            .then(res => {
-                if (res.data.success) {
-                    return onSuccess(res.data.data);
-                } else {
-                    return onError(res.data.message);
-                }
-            })
-            .catch(error => {
-                return onError(error);
-            });
-    }
-
   static async createIntel(serverData, tokenAmount, onSuccess, onError) {
     await this.Setup();
     //console.log(tokenAmount);
@@ -222,7 +207,7 @@ export default class ContentService {
       // Use Mist/MetaMask's provider
       provider = new Web3(window.web3.currentProvider);
     } else {
-      console.log("No web3? You should consider trying MetaMask!");
+      //console.log("No web3? You should consider trying MetaMask!");
       onError(
         "Please install MetaMask (or other web3 browser) in order to access the Pareto Network"
       );
