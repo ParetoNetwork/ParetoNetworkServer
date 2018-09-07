@@ -361,7 +361,7 @@
             },
             overrideOnMessage(){
                 let wsa = this.ws;
-                console.log(this.ws)
+                //console.log(this.ws)
                 this.ws.onmessage = (data) => {
                     try {
                         const info = JSON.parse(data.data);
@@ -455,7 +455,7 @@
                     return;
                 }
 
-                console.log(ID, tokenAmount);
+               // console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
                     {ID, tokenAmount},
                     res => {
