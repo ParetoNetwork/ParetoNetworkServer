@@ -1,7 +1,7 @@
 <template>
     <div class="navbar hiden-navbar-bottom d-flex justify-content-around font-body">
-        <div class="d-flex flex-row">
-            <a href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
+        <div class="responsize-positioning d-flex flex-row">
+            <a class="mr-3" href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
             <!-- <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
             <div class="mr-3"> STATUS: CONNECTED </div>
             <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
@@ -15,7 +15,7 @@
             <div class="mr-3"> CONTENT CONTRIBUTOR GUIDELINES </div> -->
             <a class="mr-3 nav-link" href="/api-docs/"> API </a>
             <a class="mr-3 nav-link" href="https://exchange.pareto.network/" target="_blank"> BUY PARETO </a>
-            <a class="mr-3 nav-link" href="https://t.me/paretonetworkdiscussion"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 2px;"></i> TELEGRAM </a>
+            <a class="mr-3 nav-link border" style="font-weight: bold;" href="https://t.me/paretonetworkdiscussion"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 1px;"></i>TELEGRAM</a>
         </div>
     </div>
 </template>
@@ -40,7 +40,7 @@
     .hiden-navbar-bottom {
         font-size: 10px;
         background: #000211;
-        height: 25px;
+        height: 40px;
         width: 100%;
         position: fixed !important;
         transition: height 300ms;
@@ -55,7 +55,7 @@
 
     @media (max-width: 900px){
         .hiden-navbar-bottom {
-            height: 25px;
+            height: 45px;
             font-size: 10px;
         }
     }
@@ -65,5 +65,19 @@
             height: 40px;
             font-size: 10px;
         }
+
     }
+
+    @media (max-width: 767px){
+        .responsize-positioning {
+            height: 0px;
+            opacity: 0;
+        }
+    }
+
+    .border {
+        border-radius: 3px;
+    }
+
+
 </style>
