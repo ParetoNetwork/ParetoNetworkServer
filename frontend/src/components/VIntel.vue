@@ -117,7 +117,7 @@
                                 <div class="d-flex split "
                                              @click="showDetails(row)">
                                     <div class="row" >
-                                        <router-link tag="div" :to="'/intel/' + row._id" class="col-lg-8 col-xl-9 pr-0 d-flex justify-content-between">
+                                        <router-link tag="div" :to="'/intel/' + row._id" class="col-lg-10 col-xl-9 pr-0 d-flex justify-content-between">
                                             <div class="border p-1 mr-2" style="height: 50px;">
                                                 <div data-v-514e8c24="" class="thumb"
                                                      v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
@@ -154,7 +154,7 @@
                                             </div>
                                         </router-link>
 
-                                        <div class="col-10 col-lg-3 mx-lg-auto">
+                                        <div class="col-10 col-lg-2 mx-lg-auto">
                                             <div v-if="false" class="text-right font-weight-bold">
                                                 <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                                 <span class="text-right">{{row.pxt}}</span>
@@ -164,11 +164,6 @@
                                                 <div class="col-6 col-lg-12 p-1">
                                                     <b-btn class="btn-block" style="width: 120px;"
                                                            v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
-                                                </div>
-                                                <div class="col-6 col-lg-12 p-1">
-                                                    <button class="btn btn-primary-pareto btn-block" style="width: 120px;" @click="distributeReward(row.id)">
-                                                        DISTRIBUTE
-                                                    </button>
                                                 </div>
                                             </div>
                                             <div v-else style="width: 300px">
