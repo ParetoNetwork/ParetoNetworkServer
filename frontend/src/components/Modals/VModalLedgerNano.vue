@@ -35,7 +35,7 @@
                         <b-form-radio-group v-model="selectedPath">
                             <b-row class="m-2 mt-4">
                                 <div class="col-md-3 mb-2 p-0">
-                                    <b-form-radio :disabled="!supported" v-on:change="onPathSelected('44\'/60\'/0\'/0/0')" value="44'/60'/0'/0/0">
+                                    <b-form-radio :disabled="!supported" v-on:change="onPathSelected('s44\'/60\'/0\'/0/0')" value="s44'/60'/0'/0/0">
                                         <div class="modal-input-inline">
                                             <p> STANDARD </p> <p>"44'/60'/0'/0/0"</p>
                                         </div>
@@ -52,7 +52,7 @@
 
                             <b-row class="m-2 mt-4">
                                 <div class="col-md-3 mb-2 p-0">
-                                    <b-form-radio :disabled="!supported" v-on:change="onPathSelected('44\'/60\'/0\'/0')" value="44'/60'/0'/0">
+                                    <b-form-radio :disabled="!supported" v-on:change="onPathSelected('l44\'/60\'/0\'/0')" value="l44'/60'/0'/0">
                                         <div class="modal-input-inline">
                                             <p> LEGACY </p> <p>"44'/60'/0'/0"</p>
                                         </div>
@@ -69,11 +69,10 @@
 
                             <b-row class="m-2 mt-4">
                                 <div class="col-12 col-md-4 mb-2 p-0">
-                                    <b-form-radio :disabled="!supported" v-bind:value="customPath">
+                                    <b-form-radio :disabled="!supported" v-on:change="onPathSelected('custom')" v-bind:value="customPath">
                                         <b-form-input
                                                 :disabled="!supported"
                                                 v-model="customPath"
-                                                v-on:keyup="keymonitor"
                                                 id="form-custom-input"
                                                 class="p-1"
                                                 type="text"
@@ -88,6 +87,14 @@
                                     <p v-if="selectedPath === customPath && customPathError" class="text-danger"> The written path doesn't have any addresses: </p>
                                 </div>
                             </b-row>
+
+                            <b-row>
+                                <div class="col-12 col-md-4 mb-2 p-0">
+                                    <p> Preview  </p>
+                                    <p> Path: {{selectedPath}} Address: {{selectedAddress}} </p>
+                                </div>
+                            </b-row>
+
                         </b-form-radio-group>
                     </b-form-group>
                 </div>
@@ -95,7 +102,7 @@
 
             <b-row class="m-2 mt-4 float-right">
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
-                <b-btn size="sm" :disabled="!selectedAddress" variant="success" @click="hardware(); onClosedModal();">Continue</b-btn>
+                <b-btn size="sm" :disabled="!selectedAddress || (customPathError && selectedPath === customPath)" variant="success" @click="hardware(); onClosedModal();">Continue</b-btn>
             </b-row>
         </b-modal>
     </div>
@@ -111,7 +118,7 @@
         data(){
             return {
                 supported : true,
-                selectedPath: "",
+                selectedPath: null,
                 selectedAddress: '',
                 customPath: '',
                 customPathError : true,
@@ -119,50 +126,20 @@
                 paths: [
                     {
                         name: 'standard',
-                        id: "44'/60'/0'/0/0",
+                        id: "s44'/60'/0'/0/0",
                         address: {
-                            "1": "0X001",
-                            "2": "0X002",
-                            "3": "0X003",
-                            "4": "0X004",
-                            "5": "0X005",
-                            "6": "0X006",
-                            "7": "0X007",
-                            "8": "0X008",
-                            "9": "0X009",
-                            "0": "0X000"
                         }
                     },
                     {
                         name: 'legacy',
-                        id: "44'/60'/0'/0",
+                        id: "l44'/60'/0'/0",
                         address: {
-                            "1": "0X0010",
-                            "2": "0X0020",
-                            "3": "0X0030",
-                            "4": "0X0040",
-                            "5": "0X0050",
-                            "6": "0X0060",
-                            "7": "0X0070",
-                            "8": "0X0080",
-                            "9": "0X0090",
-                            "0": "0X0000"
                         }
                     },
                     {
                         name: 'custom',
                         id: "44'/60'/10'/0",
                         address: {
-                            "1": "1X0011",
-                            "2": "1X0021",
-                            "3": "1X0031",
-                            "4": "1X0041",
-                            "5": "1X0051",
-                            "6": "1X0061",
-                            "7": "1X0071",
-                            "8": "1X0081",
-                            "9": "1X0091",
-                            "0": "1X0001"
                         }
                     }
                 ]
@@ -170,34 +147,35 @@
         },
         watch: {
           'customPath' : function (cpath) {
+              this.selectedPath = this.customPath;
+
               this.customPathError = false;
               if (this.timer) {
                   clearTimeout(this.timer);
                   this.timer = null;
               }
               this.timer = setTimeout(() => {
-                  this.customPathError = true;
                   let page = 0, limit = 10;
-                  authService.getWalletAccounts(cpath, page, limit, data=>{
+                  authService.getWalletAccounts(cpath, page, limit, data =>{
                       console.log(data);
-                  }, error => {
+
                       const select = $('#custom');
                       select.find('option')
                           .remove()
                           .end();
 
-                      this.paths.forEach(path => {
-                          if (path.id === cpath) {
-                              this.customPathError = false;
-                              let list = Object.values(path.address);
+                      let list = Object.values(data);
+                      let option = '';
 
-                              let option = '';
-                              list.forEach(item => {
-                                  option += '<option value="' + item + '">' + item + '</option>';
-                              });
-                              select.append(option);
-                          }
+                      list.forEach(item => {
+                          option += '<option value="' + item + '">' + item + '</option>';
                       });
+                      select.append(option);
+
+                      this.customPathError = false;
+
+                  }, error => {
+                      this.customPathError = true;
                   });
               }, 800);
           }
@@ -209,19 +187,18 @@
             // this.supportedNav();
         },
         methods: {
-            keymonitor: function(){
-              console.log('something')
-            },
             fillPathAddress: function() {
                 let page = 0, limit = 10;
 
                 this.paths.forEach(path => {
 
                     if(path.name === 'custom') return;
+                    let myPath = path.id.substr(1);
 
-                    authService.getWalletAccounts(path.id, page, limit, data=>{
+                    authService.getWalletAccounts(myPath, page, limit, data=>{
                         console.log(data);
-                    }, error => {
+
+                        path.address = data;
 
                         this.selectedPath = path.id;
                         this.onPathSelected(this.selectedPath);
@@ -234,6 +211,13 @@
                             option += '<option value="'+ item + '">' + item + '</option>';
                         });
                         select.append(option);
+
+                    }, error => {
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: error });
                     });
                 });
             },
@@ -246,14 +230,17 @@
                 }
             },
             onPathSelected : function(path){
-
+                this.selectedAddress = '';
                 this.selectedPath = path;
+
+                if(path === 'custom') {
+                    this.selectedPath = this.customPath;
+                    return;
+                }
 
                 this.paths.forEach( path => {
                    if (path.id === this.selectedPath){
                        this.selectedAddress = path.address[0];
-                   }else{
-                       return;
                    }
                 });
             },
