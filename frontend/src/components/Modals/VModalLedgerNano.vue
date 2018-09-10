@@ -24,31 +24,73 @@
                         </ul>
                     </div>
                     <br/>
-                    <p> Choose a HD path: </p>
+
+                    <b-row>-------------------------------------------------
+                        <div class="ml-3 mb-2">
+                            <p v-if="!supported" class="text-danger"> Your browser does not support this feature </p>
+                            <p v-else class="text-primary"> Choose a HD path: </p>
+                        </div>
+                    </b-row>
                     <b-form-group>
-                        <b-form-radio-group  v-model="selected">
+                        <b-form-radio-group v-model="selectedPath">
                             <b-row class="m-2 mt-4">
-                                <b-form-radio value="44'/60'/0'/0/0">
-                                    <div style="margin-top: -15px;">
-                                        <h1> Custom </h1> "44'/60'/0'/0/0"
-                                    </div>
-                                </b-form-radio>
-                                <b-form-select v-model="selected" :options="options" class="mb-3" />
+                                <div class="col-md-3 mb-2 p-0">
+                                    <b-form-radio :disabled="!supported" v-on:change="onPathSelected('44\'/60\'/0\'/0/0', 'standard', standard)" value="44'/60'/0'/0/0">
+                                        <div class="modal-input-inline">
+                                            <p> STANDARD </p> <p>"44'/60'/0'/0/0"</p>
+                                        </div>
+                                    </b-form-radio>
+                                </div>
+                                <div class="offset-md-1 ml-md-5 col-md-7 p-0">
+                                    <b-form-select id="standard"
+                                                   v-model="selectedAddress"
+                                                   :disabled="!supported"
+                                                   class="mb-3">
+                                    </b-form-select>
+                                </div>
                             </b-row>
+
                             <b-row class="m-2 mt-4">
-                                <b-form-radio value="44'/60'/0'/0">
-                                    <div style="margin-top: -15px;">
-                                        <h1> Legacy </h1> "44'/60'/0'/0"
-                                    </div>
-                                </b-form-radio>
+                                <div class="col-md-3 mb-2 p-0">
+                                    <b-form-radio :disabled="!supported" v-on:change="onPathSelected('44\'/60\'/0\'/0', 'legacy', legacy)" value="44'/60'/0'/0">
+                                        <div class="modal-input-inline">
+                                            <p> LEGACY </p> <p>"44'/60'/0'/0"</p>
+                                        </div>
+                                    </b-form-radio>
+                                </div>
+                                <div class="offset-md-1 ml-md-5 col-md-7 p-0">
+                                    <b-form-select id="legacy"
+                                                   v-model="selectedAddress"
+                                                   :disabled="!supported"
+                                                   class="mb-3" >
+                                    </b-form-select>
+                                </div>
+                            </b-row>
+
+                            <b-row class="m-2 mt-4">
+                                <div class="col-12 col-md-4 mb-2 p-0">
+                                    <b-form-radio>
+                                        <b-form-input
+                                                :disabled="!supported"
+                                                v-model="customPath"
+                                                v-on:keyup="onPathSelected(customPath)"
+                                                id="form-custom-input"
+                                                class="p-1"
+                                                type="text"
+                                                placeholder="CUSTOM"></b-form-input></b-form-radio>
+                                </div>
+                                <div class="col-12 ml-md-3 col-md-7 p-0">
+                                    <b-form-select :disabled="!supported" class="mb-3"/>
+                                </div>
                             </b-row>
                         </b-form-radio-group>
                     </b-form-group>
                 </div>
             </b-container>
+
             <b-row class="m-2 mt-4 float-right">
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
-                <b-btn size="sm" variant="success" :disabled="!selected"  @click="hardware(selected); onClosedModal();">Continue</b-btn>
+                <b-btn size="sm" :disabled="!selectedAddress" variant="success" @click="hardware(); onClosedModal();">Continue</b-btn>
             </b-row>
         </b-modal>
     </div>
@@ -63,18 +105,47 @@
         components: {},
         data(){
             return {
-                selected: "44'/60'/0'/0/0",
-                options: [
-                    { value: null, text: 'Please select an option' },
-                    { value: 'a', text: 'This is First option' },
-                    { value: 'b', text: 'Selected Option' },
-                    { value: {'C': '3PO'}, text: 'This is an option with object value' },
-                    { value: 'd', text: 'This one is disabled', disabled: true }
-                ]
+                supported : true,
+                selectedPath: "44'/60'/0'/0/0",
+                selectedAddress :'',
+                customPath : '',
+                selectedInput : [
+                  '#standard',
+                  '#legacy'
+                ],
+                standard :
+                {
+                    "1": "0X001",
+                    "2": "0X002",
+                    "3": "0X003",
+                    "4": "0X004",
+                    "5": "0X005",
+                    "6": "0X006",
+                    "7": "0X007",
+                    "8": "0X008",
+                    "9": "0X009",
+                    "0": "0X000"
+                }
+                ,
+                legacy :
+                {
+                    "1": "0X0010",
+                    "2": "0X0020",
+                    "3": "0X0030",
+                    "4": "0X0040",
+                    "5": "0X0050",
+                    "6": "0X0060",
+                    "7": "0X0070",
+                    "8": "0X0080",
+                    "9": "0X0090",
+                    "0": "0X0000"
+                }
             };
         },
         mounted(){
             this.$refs.ledgerNano.show();
+            this.onPathSelected('44\'/60\'/0\'/0/0', 'standard', this.standard)
+            // this.supportedNav();
         },
         methods: {
             onClosedModal: function () {
@@ -85,7 +156,38 @@
                     $('#navbarSupportedContent').collapse('toggle');
                 }
             },
-            hardware: function (path) {
+            onPathSelected : function(path, selectInput, object){
+                this.selectedAddress = '';
+
+                console.log(path);
+
+                this.selectedInput.forEach(id => {
+                    $(id)
+                        .find('option')
+                        .remove()
+                        .end()
+                });
+
+                let page = 0, limit = 10;
+
+                authService.getWalletAccounts(path, page, limit, data=>{
+                    console.log(data);
+                }, error => {
+                    const select = $('#' + selectInput);
+                    const list = Object.values(object);
+                    this.selectedAddress = list[0];
+                    let option = '';
+                    list.forEach( item => {
+                        option += '<option value="'+ item + '">' + item + '</option>';
+                    });
+                    select.append(option);
+                });
+            },
+            hardware: function () {
+                console.log(this.selectedAddress);
+                console.log(this.selectedPath);
+
+                return;
                 this.loadingLogin();
                 authService.signWallet( path, data => {
                     this.$store.dispatch({
@@ -102,7 +204,17 @@
                         duration: 10000,
                         text: error });
                 });
-            }, ...mapMutations({
+            },
+            supportedNav : function () {
+                authService.isWalletSupported(data => {
+                    if(data){
+                        this.supported = true;
+                    }
+                }, error => {
+                    this.supported = false;
+                });
+            },
+            ...mapMutations({
                 loginVuex: 'login',
                 loadingLogin: 'loadingLogin',
                 stopLogin: 'stopLogin',
@@ -111,3 +223,29 @@
         }
     }
 </script>
+
+<style>
+    .modal-input-inline{
+        margin-top: -15px;
+    }
+
+    ::placeholder {
+        color: red;
+        opacity: 1; /* Firefox */
+    }
+
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: red;
+    }
+
+    ::-ms-input-placeholder { /* Microsoft Edge */
+        color: red;
+    }
+
+    input#form-custom-input {
+        color: white;
+        border: none;
+        background: transparent;
+        border-bottom: 1px solid #fff;
+    }
+</style>

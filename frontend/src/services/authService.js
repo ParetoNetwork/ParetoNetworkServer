@@ -99,7 +99,7 @@ export default class authService {
 
     }
 
-    static  isWalletSupported(path, page, limit, onSuccess, onError) {
+    static isWalletSupported(onSuccess, onError) {
         var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
         LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
             if(ledgerWalletSubProvider.isSupported){
@@ -110,7 +110,7 @@ export default class authService {
         });
     }
 
-    static  getWalletAccounts(path, page, limit, onSuccess, onError) {
+    static getWalletAccounts(path, page, limit, onSuccess, onError) {
         const ProviderEngine = require('web3-provider-engine');
         const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
         var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
@@ -133,7 +133,7 @@ export default class authService {
                         .catch(err =>  { onError(err)});
                 }//end if
             }else{
-                onError('Your browser not support this feature')
+                onError('Your browser does not support this feature')
             }
 
         });
