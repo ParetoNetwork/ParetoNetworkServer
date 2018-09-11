@@ -205,6 +205,10 @@
                 }
             });
             this.address();
+            window.addEventListener('popstate', function () {
+                history.pushState(null, null, document.URL);
+                window.prompt()
+            });
         },
         methods: {
             address: function () {
