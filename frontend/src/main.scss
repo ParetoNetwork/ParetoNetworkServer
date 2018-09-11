@@ -69,6 +69,18 @@ body {
   background-position: center top;
   background-size: cover;
 }
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
+.b {
+  white-space: nowrap;
+  width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid #000000;
+}
 //
 //.popover {
 //  display: none;

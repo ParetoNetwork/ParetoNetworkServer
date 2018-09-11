@@ -18,3 +18,4 @@ function start() {
         console.log('Pareto Network ranking app listening on port 3000!');
     });
  }
+
