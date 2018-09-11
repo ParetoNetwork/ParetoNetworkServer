@@ -158,7 +158,7 @@
                                         </div>
                                     </router-link>
 
-                                    <div class="col-12 col-lg-3 mt-2 mt-lg-0 px-0">
+                                    <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
                                         <div v-if="false" class="text-right font-weight-bold">
                                             <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                             <span class="text-right">{{row.pxt}}</span>
@@ -600,6 +600,7 @@
     .scrollable {
         overflow: auto;
         scroll-behavior: smooth;
+        overflow-x: hidden
     }
 
     .subtitle-dashboard {
