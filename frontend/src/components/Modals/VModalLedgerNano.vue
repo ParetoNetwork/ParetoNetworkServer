@@ -49,6 +49,8 @@
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
                 <b-btn size="sm" variant="success" :disabled="!selected"  @click="hardware(selected); onClosedModal();">Continue</b-btn>
             </b-row>
+
+
         </b-modal>
     </div>
 </template>
