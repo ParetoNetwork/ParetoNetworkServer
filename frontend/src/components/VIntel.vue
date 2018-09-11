@@ -158,17 +158,19 @@
                                         </div>
                                     </router-link>
 
-                                    <div class="col-12 col-lg-3 mt-2 mt-lg-0">
+                                    <div class="col-12 col-lg-3 mt-2 mt-lg-0 px-0">
                                         <div v-if="false" class="text-right font-weight-bold">
                                             <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                             <span class="text-right">{{row.pxt}}</span>
                                         </div>
                                         <div v-if="user.address != row.address" class="text-center">
-                                            <p class="mr-3 text-secondary"><b> 800PXT </b></p>
-                                            <b-btn class="btn-primary-pareto mx-auto"
-                                                   style="max-width: 120px;"
-                                                   v-b-modal.modalToken @click="rewardId = row.id">REWARD
-                                            </b-btn>
+                                            <div class="d-inline-block">
+                                                <p class="text-right text-secondary pl-lg-2"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> 8000PXT </b></p>
+                                                <b-btn class="btn-primary-pareto mx-auto px-4"
+                                                       style="max-width: 120px;"
+                                                       v-b-modal.modalToken @click="rewardId = row.id">REWARD
+                                                </b-btn>
+                                            </div>
                                         </div>
                                     </div>
 
