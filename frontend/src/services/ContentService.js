@@ -67,7 +67,7 @@ export default class ContentService {
         })
         .once("transactionHash", function(hash) {
           waitForReceipt(hash, receipt => {
-            console.log(receipt);
+           // console.log(receipt);
 
             ContentService.uploadContent(
               serverData,
@@ -123,6 +123,7 @@ export default class ContentService {
         onError("Err getting accounts");
         return;
       }
+      const gasPrice = await web3.eth.getGasPrice();
       const rewarder_address = accounts[0];
       
       const decimals = web3.utils.toBN(18);
@@ -133,7 +134,6 @@ export default class ContentService {
         .approve(Intel.options.address, depositAmount)
         .estimateGas({ from: rewarder_address });
 
-      const gasPrice = await web3.eth.getGasPrice();
       await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
         .send({
@@ -166,6 +166,7 @@ export default class ContentService {
         .on("error", err => {
           onError(err);
         });
+
     });
   }
 
