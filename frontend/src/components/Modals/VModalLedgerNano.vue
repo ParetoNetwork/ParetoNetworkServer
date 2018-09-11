@@ -33,7 +33,6 @@
                                         <h1> Custom </h1> "44'/60'/0'/0/0"
                                     </div>
                                 </b-form-radio>
-                                <b-form-select v-model="selected" :options="options" class="mb-3" />
                             </b-row>
                             <b-row class="m-2 mt-4">
                                 <b-form-radio value="44'/60'/0'/0">
@@ -50,6 +49,8 @@
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
                 <b-btn size="sm" variant="success" :disabled="!selected"  @click="hardware(selected); onClosedModal();">Continue</b-btn>
             </b-row>
+
+
         </b-modal>
     </div>
 </template>
