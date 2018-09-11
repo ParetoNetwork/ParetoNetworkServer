@@ -128,17 +128,21 @@
                         name: 'standard',
                         id: "s44'/60'/0'/0/0",
                         address: {
-                        }
+                        },
+                        addressTry: [1,2,3,4,5
+                        ]
                     },
                     {
                         name: 'legacy',
                         id: "l44'/60'/0'/0",
                         address: {
-                        }
+                        },
+                        addressTry: [6,7,8,9,0
+                        ]
                     },
                     {
                         name: 'custom',
-                        id: "44'/60'/10'/0",
+                        id: "",
                         address: {
                         }
                     }
@@ -191,35 +195,46 @@
                 let page = 0, limit = 10;
 
                 this.paths.forEach(path => {
-
-                    if(path.name === 'custom') return;
-                    let myPath = path.id.substr(1);
-
-                    authService.getWalletAccounts(myPath, page, limit, data=>{
-                        console.log(data);
-
-                        path.address = data;
-
-                        this.selectedPath = path.id;
-                        this.onPathSelected(this.selectedPath);
-
-                        const select = $('#' + path.name);
-                        const list = Object.values(path.address);
-
-                        let option = '';
-                        list.forEach( item => {
-                            option += '<option value="'+ item + '">' + item + '</option>';
-                        });
-                        select.append(option);
-
-                    }, error => {
-                        this.$notify({
-                            group: 'foo',
-                            type: 'error',
-                            duration: 10000,
-                            text: error });
+                    if (path.name === 'custom') return;
+                    const select = $('#' + path.name);
+                    const list = path.addressTry;
+                    let option = '';
+                    list.forEach(item => {
+                        option += '<option value="' + item + '">' + item + '</option>';
                     });
+                    select.append(option);
                 });
+
+                // this.paths.forEach(path => {
+                //
+                //     if(path.name === 'custom') return;
+                //     let myPath = path.id.substr(1);
+                //
+                //     authService.getWalletAccounts(myPath, page, limit, data=>{
+                //         console.log(data);
+                //
+                //         path.address = data;
+                //
+                //         this.selectedPath = path.id;
+                //         this.onPathSelected(this.selectedPath);
+                //
+                //         const select = $('#' + path.name);
+                //         const list = Object.values(path.address);
+                //
+                //         let option = '';
+                //         list.forEach( item => {
+                //             option += '<option value="'+ item + '">' + item + '</option>';
+                //         });
+                //         select.append(option);
+                //
+                //     }, error => {
+                //         this.$notify({
+                //             group: 'foo',
+                //             type: 'error',
+                //             duration: 10000,
+                //             text: error });
+                //     });
+                // });
             },
             onClosedModal: function () {
                 this.$store.state.showModalLedgerNano = false;
