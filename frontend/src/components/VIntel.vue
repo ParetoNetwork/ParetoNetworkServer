@@ -113,66 +113,69 @@
                     </div>
                     <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
                         <ul class="list-unstyled list-group">
-                            <li class="text-left list-group-item border-0 px-1" :key="row._id" v-for="row of myFeed.content">
-                                <div class="d-flex split "
-                                             @click="showDetails(row)">
-                                    <div class="row" >
-                                        <router-link tag="div" :to="'/intel/' + row._id" class="col-lg-10 col-xl-9 pr-0 d-flex justify-content-between">
-                                            <div class="border p-1 mr-2" style="height: 50px;">
-                                                <div data-v-514e8c24="" class="thumb"
-                                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
-                                                     style="width: 40px; height: 40px;"></div>
+                            <li class="text-left list-group-item border-0 px-1 py-2" :key="row._id"
+                                v-for="row of myFeed.content">
+                                <div class="row border-bottom pb-2">
+                                    <router-link tag="div" :to="'/intel/' + row._id" class="col-lg-9 pr-0">
+                                        <div class="row cursor-pointer">
+                                            <div class="col-2">
+                                                <div class="border p-1 mr-2" style="height: 50px; width: 50px;">
+                                                    <div data-v-514e8c24="" class="thumb"
+                                                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
+                                                         style="width: 40px; height: 40px;"></div>
+                                                </div>
                                             </div>
-                                            <div class="d-flex flex-column flex-grow-1 pr-0">
-                                                <h1 class="title">{{row.title || 'No title'}}</h1>
-                                                <div class="">
-                                                    <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-
-                                                    <div>
+                                            <div class="col-10 px-lg-1">
+                                                <div class="d-flex flex-column flex-grow-1 pr-3">
+                                                    <h1 class="title ellipsis">{{row.title|| 'No title'}}</h1>
+                                                    <div class="">
+                                                        <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
+                                                        <div>
                                                         <span class="text-dashboard">Disclosed by: {{row.address}}
                                                         </span>
-                                                    </div>
-                                                    <div>
-                                                        Blocks ago:
-                                                        <ICountUp
-                                                                :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
-                                                                :endVal="parseFloat(row.blockAgo)"
-                                                                :decimals="decimalsLength(row.blockAgo)"
-                                                                :duration="randomNumber(1,3)"
-                                                                :options="countUp.options"
-                                                                @ready="onReady"/>
+                                                        </div>
+                                                        <div>
+                                                            Blocks ago:
+                                                            <ICountUp
+                                                                    :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
+                                                                    :endVal="parseFloat(row.blockAgo)"
+                                                                    :decimals="decimalsLength(row.blockAgo)"
+                                                                    :duration="randomNumber(1,3)"
+                                                                    :options="countUp.options"
+                                                                    @ready="onReady"/>
 
-                                                    </div>
-                                                    <div>
+                                                        </div>
+                                                        <div>
                                                         <span class="text-dashboard">
                                                             <b>
                                                                 {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
                                                             </b>
                                                         </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </router-link>
+                                        </div>
+                                    </router-link>
 
-                                        <div class="col-10 col-lg-2 mx-lg-auto">
-                                            <div v-if="false" class="text-right font-weight-bold">
-                                                <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                                <span class="text-right">{{row.pxt}}</span>
-                                            </div>
-
-                                            <div v-if="user.address != row.address" class="row ml-5 ml-lg-0 mt-2 mt-lg-0 mr-1">
-                                                <div class="col-6 col-lg-12 p-1">
-                                                    <b-btn class="btn-block" style="width: 120px;"
-                                                           v-b-modal.modalToken @click="rewardId = row.id">REWARD</b-btn>
-                                                </div>
-                                            </div>
-                                            <div v-else style="width: 300px">
+                                    <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
+                                        <div v-if="false" class="text-right font-weight-bold">
+                                            <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
+                                            <span class="text-right">{{row.pxt}}</span>
+                                        </div>
+                                        <div v-if="user.address != row.address" class="text-center">
+                                            <div class="d-inline-block">
+                                                <p class="text-right text-secondary pl-lg-2"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> 8000PXT </b></p>
+                                                <b-btn class="btn-primary-pareto mx-auto px-4"
+                                                       style="max-width: 120px;"
+                                                       v-b-modal.modalToken @click="rewardId = row.id">REWARD
+                                                </b-btn>
                                             </div>
                                         </div>
-
                                     </div>
 
                                 </div>
+
                             </li>
                         </ul>
                     </div>
@@ -211,12 +214,15 @@
                 :body-text-variant="'light'">
             <b-container fluid>
                 <h4 class="font-body mb-3"> Reward</h4>
-                <p class="text-dashboard mb-2" style="font-size: 16px">  Please enter the number of Pareto Tokens to reward</p>
+                <p class="text-dashboard mb-2" style="font-size: 16px"> Please enter the number of Pareto Tokens to
+                    reward</p>
                 <b-form-input v-model="tokenAmount" style="font-size: 25px"
                               type="number"></b-form-input>
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
-                    <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
-                    <b-button style="background-color: rgb(107, 194, 123)" variant="success" @click="rewardIntel(rewardId, tokenAmount)"> Confirm </b-button>
+                    <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
+                    <b-button style="background-color: rgb(107, 194, 123)" variant="success"
+                              @click="rewardIntel(rewardId, tokenAmount)"> Confirm
+                    </b-button>
                 </b-row>
             </b-container>
         </b-modal>
@@ -250,8 +256,8 @@
                     loading: false,
                     page: 0,
                 },
-                rewardId : '',
-                tokenAmount : 1,
+                rewardId: '',
+                tokenAmount: 1,
                 myContent: [],
                 allMyContent: [],
                 moment: moment,
@@ -289,6 +295,7 @@
         },
         mounted: function () {
             this.main();
+            console.log(this.screenSize)
         },
         computed: {
             ...mapState(["madeLogin", "ws"])
@@ -299,13 +306,13 @@
                 ContentService.distributeRewards(
                     {ID},
                     res => {
-                      //  console.log(res);
+                        //  console.log(res);
                     },
                     error => {
                     }
                 );
             },
-            dateStringFormat(date){
+            dateStringFormat(date) {
                 return new Date(date);
             },
             goToIntelPage: function () {
@@ -344,17 +351,17 @@
                     }
                 );
             },
-            hideModal () {
+            hideModal() {
                 this.$refs.modalToken.hide()
             },
-            assignBlock(block){
-                this.myFeed.content = this.myFeed.content.map( item => {
+            assignBlock(block) {
+                this.myFeed.content = this.myFeed.content.map(item => {
                     // console.log(item);
-                   item.blockAgo = block - item.block;
+                    item.blockAgo = block - item.block;
                     return item;
                 });
             },
-            overrideOnMessage(){
+            overrideOnMessage() {
                 let wsa = this.ws;
                 //console.log(this.ws)
                 this.ws.onmessage = (data) => {
@@ -373,7 +380,7 @@
                     }
                 };
             },
-            socketConnection () {
+            socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     AuthService.getSocketToken(res => {
@@ -384,7 +391,7 @@
                         };
                         this.overrideOnMessage();
                     });
-                }else{
+                } else {
                     this.overrideOnMessage();
                 }
             },
@@ -439,7 +446,7 @@
             rewardIntel: function (ID, tokenAmount) {
                 this.hideModal();
 
-                if (!tokenAmount){
+                if (!tokenAmount) {
                     this.$notify({
                         group: 'foo',
                         type: 'error',
@@ -450,11 +457,11 @@
                     return;
                 }
 
-               // console.log(ID, tokenAmount);
+                // console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
                     {ID, tokenAmount},
                     res => {
-                      console.log(res);
+                        console.log(res);
                     },
                     err => {
                         console.log(res);
@@ -467,7 +474,7 @@
                 if (list.scrollTop + list.offsetHeight >= list.scrollHeight
                     && this.myContent.length < this.allMyContent.length) {
                     this.myContent = this.allMyContent.slice(0, this.myContent.length + 10);
-                   // console.log(this.myContent);
+                    // console.log(this.myContent);
                 }
             },
             scrollMyFeed: function () {
@@ -475,7 +482,7 @@
 
                 if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
                     && !this.myFeed.loading) {
-                    const params = { limit: 10, page:  this.myFeed.page };
+                    const params = {limit: 10, page: this.myFeed.page};
                     this.myFeed.loading = true;
                     this.loadContent(params);
                 }
@@ -486,6 +493,9 @@
             showModal() {
                 this.$refs.myModalRef.show();
             },
+            // substringTitle(title) {
+            //     return (title.length > 35) ? title.substring(0, 35) + ' ...' : title;
+            // },
             updatePicture: function () {
                 let file = this.$refs.file.files[0];
                 let formData = new FormData();
@@ -519,12 +529,12 @@
                             this.requestCall();
                         },
                         () => {
-                            this.socketConnection ();
+                            this.socketConnection();
                             this.requestCall();
                         }
                     );
                 } else {
-                    this.socketConnection ();
+                    this.socketConnection();
                     this.requestCall();
                 }
             }
@@ -590,6 +600,7 @@
     .scrollable {
         overflow: auto;
         scroll-behavior: smooth;
+        overflow-x: hidden
     }
 
     .subtitle-dashboard {
@@ -619,7 +630,7 @@
     }
 
     #mypost {
-         max-height: 600px;
+        max-height: 600px;
     }
 
     #wrapper {
