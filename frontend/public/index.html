@@ -31,7 +31,17 @@
 
           <!--crossorigin="anonymous"></script>-->
   <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>-->
-
+  <script>
+      window.onbeforeunload = function () {
+          if (document.location.href.indexOf('create') !== -1) {
+              return '';
+          } else {
+              return void (0);
+          }
+      };
+  </script>
 </body>
+
+
 
 </html>
