@@ -263,31 +263,31 @@ app.get("/getIntels", (req, res) => {
 
 /********* AUTHENTICATED v1 APIs *********/
 
-// app.use(function (req, res, next) {
+app.use(function (req, res, next) {
 
-//     if (req.cookies === undefined || req.cookies.authorization === undefined) {
+    if (req.cookies === undefined || req.cookies.authorization === undefined) {
 
-//       res.status(200).json(ErrorHandler.tokenMissingError())
+      res.status(200).json(ErrorHandler.tokenMissingError())
 
-//     } else {
+    } else {
 
-//         let authorization = req.cookies.authorization;
-//         if (authorization.includes('Bearer')) {
-//             authorization = authorization.replace('Bearer', '');
-//         }
-//         authorization = authorization.trim();
+        let authorization = req.cookies.authorization;
+        if (authorization.includes('Bearer')) {
+            authorization = authorization.replace('Bearer', '');
+        }
+        authorization = authorization.trim();
 
-//         jwt.verify(authorization, 'Pareto', function (err, decoded) {
-//             if (err) {
-//                 res.status(200).json(ErrorHandler.jwtFailedError())
-//             } else {
-//                 req.user = decoded.user;
-//                 next();
-//             }
-//         });
-//     }
+        jwt.verify(authorization, 'Pareto', function (err, decoded) {
+            if (err) {
+                res.status(200).json(ErrorHandler.jwtFailedError())
+            } else {
+                req.user = decoded.user;
+                next();
+            }
+        });
+    }
 
-// });
+});
 
 /*
 * Auth, simple authenticated method to determine if user is properly authenticated. Necessary because client side js
