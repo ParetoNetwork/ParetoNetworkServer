@@ -63,20 +63,22 @@ var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
 var web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
 var web3_events = new Web3(web3_events_provider);
-web3_events_provider.on('connect', function () {
-    controller.startwatchNewIntel()
-});
 
-web3_events_provider.on('end', e => {
-    console.log('WS closed');
-    console.log('Attempting to reconnect...');
-    web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
-    web3_events = new Web3(web3_events_provider);
+controller.startW3WebSocket = function () {
     web3_events_provider.on('connect', function () {
+        console.log('WS web3 connected');
         controller.startwatchNewIntel()
     });
-});
 
+    web3_events_provider.on('end', e => {
+        console.log('WS web3 closed');
+        console.log('Attempting to reconnect...');
+        web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+        web3_events = new Web3(web3_events_provider);
+        controller.startW3WebSocket()
+    });
+};
+controller.startW3WebSocket();
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
 
