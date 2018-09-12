@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "PARETO",
   "scripts": {
-    "start": "node backend.js",
+    "start": "WS_PORT=3333 CRED_PARETOCONTRACT=0xd2418eaaa479f07eba5407a2ae8685fffc375b17 WEB3_URL=https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq WEB3_WEBSOCKET_URL=wss://ropsten.infura.io:443/ws MONGODB_URI=mongodb://localhost:27018/pareto REDIS_HOST=localhost REDIS_PORT=27019 DEBUG=1 REDIS_URL=redis://localhost:27019 FRONTEND_SERVER=http://localhost:8080 ACCESS_KEY=AKIAJGMNENELH5BHAH3Q SECRET_KEY=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 S3_REGION=us-east-1 node backend.js",
     "test": "mocha test/*.js  --timeout 150000 --exit",
     "build": "npm run-script --prefix frontend build && rm -rf public && mv frontend/dist/ public && cp -R frontend/src/assets/download/ public/download",
     "serve": "npm run-script --prefix frontend serve",
