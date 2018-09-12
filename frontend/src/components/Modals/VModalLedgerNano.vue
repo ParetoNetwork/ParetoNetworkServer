@@ -44,14 +44,46 @@
                                         </div>
                                     </b-form-radio>
                                 </div>
-                                <div class="offset-md-1 ml-md-5 col-md-7 p-0">
-                                    <b-form-select id="standard"
-                                                   v-on:change="onAddresSelected('s44\'/60\'/0\'/0/0')"
-                                                   v-model="selectedAddress"
-                                                   :disabled="!supported"
-                                                   class="mb-3 ledger-select">
-                                    </b-form-select>
+
+                                <div class="btn-group offset-md-1 ml-md-5 col-md-7 p-1">
+                                    <b-dropdown variant="link" size="lg" no-caret>
+                                        <template slot="text">
+                                            <span> {{paths[0].selected}} </span>
+                                        </template>
+                                        <b-dropdown-item v-for="user in paths[0].addressTry" @click="" >
+                                            <div class="d-flex justify-content-between">
+                                                <span> {{user.address}} </span>
+                                                <span> {{user.tokens}} PARETO</span>
+                                            </div>
+                                        </b-dropdown-item>
+                                    </b-dropdown>
                                 </div>
+                                <!--<div class="btn-group offset-md-1 ml-md-5 col-md-7 p-0">-->
+                                    <!--&lt;!&ndash;<b-form-select id="standard"&ndash;&gt;-->
+                                                   <!--&lt;!&ndash;v-on:change="onAddresSelected('s44\'/60\'/0\'/0/0')"&ndash;&gt;-->
+                                                   <!--&lt;!&ndash;v-model="selectedAddress"&ndash;&gt;-->
+                                                   <!--&lt;!&ndash;:disabled="!supported"&ndash;&gt;-->
+                                                   <!--&lt;!&ndash;class="mb-3 ledger-select">&ndash;&gt;-->
+                                    <!--&lt;!&ndash;</b-form-select>&ndash;&gt;-->
+
+                                    <!--<button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+                                        <!--<span>algo</span>-->
+                                        <!--{{selectedAddress}}-->
+                                    <!--</button>-->
+                                    <!--<div class="dropdown-menu">-->
+                                        <!--<a class="dropdown-item" href="#">Action</a>-->
+                                        <!--<a class="dropdown-item" href="#">Another action</a>-->
+                                        <!--<a class="dropdown-item" href="#">Something else here</a>-->
+                                        <!--&lt;!&ndash;<button v-for="user in paths[0].addressTry" class="d-flex justify-content-between">&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<span> hay {{user.address}} </span> <span> {{user.tokens}} </span>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;</button>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<a class="dropdown-item" href="#">Action</a>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<a class="dropdown-item" href="#">Another action</a>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<a class="dropdown-item" href="#">Something else here</a>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<div class="dropdown-divider"></div>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<a class="dropdown-item" href="#">Separated link</a>&ndash;&gt;-->
+                                    <!--</div>-->
+                                <!--</div>-->
                             </b-row>
 
                             <b-row class="m-2 mt-4">
@@ -65,14 +97,29 @@
                                         </div>
                                     </b-form-radio>
                                 </div>
-                                <div class="offset-md-1 ml-md-5 col-md-7 p-0">
-                                    <b-form-select id="legacy"
-                                                   v-on:change="onAddresSelected('l44\'/60\'/0\'/0')"
-                                                   v-model="selectedAddress"
-                                                   :disabled="!supported"
-                                                   class="mb-3 ledger-select">
-                                    </b-form-select>
+
+                                <div class="btn-group offset-md-1 ml-md-5 col-md-7 p-1">
+                                    <b-dropdown variant="link" size="lg" no-caret>
+                                        <template slot="text">
+                                            <span> {{paths[1].selected}} </span>
+                                        </template>
+                                        <b-dropdown-item v-for="user in paths[1].addressTry" @click="" >
+                                            <div class="d-flex justify-content-between">
+                                                <span> {{user.address}} </span>
+                                                <span> {{user.tokens}} PARETO</span>
+                                            </div>
+                                        </b-dropdown-item>
+                                    </b-dropdown>
                                 </div>
+
+                                <!--<div class="offset-md-1 ml-md-5 col-md-7 p-0">-->
+                                    <!--<b-form-select id="legacy"-->
+                                                   <!--v-on:change="onAddresSelected('l44\'/60\'/0\'/0')"-->
+                                                   <!--v-model="selectedAddress"-->
+                                                   <!--:disabled="!supported"-->
+                                                   <!--class="mb-3 ledger-select">-->
+                                    <!--</b-form-select>-->
+                                <!--</div>-->
                             </b-row>
 
                             <b-row class="m-2 mt-4">
@@ -117,6 +164,7 @@
                        variant="success" @click="hardware(); onClosedModal();">Continue
                 </b-btn>
             </b-row>
+
         </b-modal>
     </div>
 </template>
@@ -130,6 +178,7 @@
         components: {},
         data() {
             return {
+                title: 'titulo nuevo',
                 supported: true,
                 selectedPath: null,
                 selectedAddress: '',
@@ -141,15 +190,19 @@
                     {
                         name: 'standard',
                         id: "s44'/60'/0'/0/0",
+                        selected: '',
                         address: {},
                         addressTry: ['0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
                             '0x22741e8ee26e83aacbf098a31de5af1b1231920e',
                             '0x2d0b45741132cb5a6f01ec870aed6a09b95a3210'
+                        ],
+                        options : [
                         ]
                     },
                     {
                         name: 'legacy',
                         id: "l44'/60'/0'/0",
+                        selected: '',
                         address: {},
                         addressTry: [
                             '0x1cd35769e5e5e03493dc532bddd0d94f5a8723b2',
@@ -158,6 +211,7 @@
                     },
                     {
                         name: 'custom',
+                        selected: '',
                         id: "44'60/1",
                         addressTry: ['0x208f456b28cf6d36d6fc4942a65f4a9089ad68e1',
                             '0x7fb7a2bfe7c29d4ce3a22f82df165c3eb8b6f6e4'
@@ -234,6 +288,9 @@
             // this.supportedNav();
         },
         methods: {
+            addTokenAmount: function(address){
+
+            },
             getAddressesTokens : function(){
                 authService.getTokens([,
                 ], data =>{
@@ -253,17 +310,28 @@
                     authService.getTokens( list , data =>{
                         let userList = data.data;
 
-                        userList = userList.map( user=> {
-                            return user.address + '  ' + user.tokens;
+                        path.addressTry = userList.map( user => {
+                            return {
+                                address : user.address,
+                                tokens : user.tokens
+                            }
                         });
 
-                        this.selectedPath = path.id;
-                        this.onPathSelected(this.selectedPath);
-                        let option = '';
-                        userList.forEach(item => {
-                            option += '<option value="' + item + '">' + item + '</option>';
-                        });
-                        select.append(option);
+                        console.log(this.paths);
+
+                        // userList = userList.map( user=> {
+                        //     return {
+                        //         value: user.address,
+                        //         text: user.address.substring(0,10) + '...' +user.address.substring(user.address.length-5, user.address.length) + '       ' + parseInt(user.tokens) + ' PARETO'}
+                        // });
+                        //
+                        // this.selectedPath = path.id;
+                        // this.onPathSelected(this.selectedPath);
+                        // let option = '';
+                        // userList.forEach(item => {
+                        //     option += '<option value="' + item.value + '">' + item.text + '</option>';
+                        // });
+                        // select.append(option);
 
                     }, error => {
                         console.log(error);
@@ -379,6 +447,25 @@
 </script>
 
 <style>
+    .b-dropdown{
+        width: 230px;
+    }
+
+    .btn-link{
+        width: 100%;
+        font-size: 12px !important;
+        padding: 2px !important;
+        background: white !important;
+        text-align: left !important;
+        color: gray !important;
+        border-radius: 5px !important;
+    }
+
+    .dropdown-item{
+        padding: 4px !important;
+        font-size: 12px;
+    }
+
     .modal-input-inline {
         margin-top: -15px;
     }
@@ -404,8 +491,7 @@
     }
 
     .ledger-select{
-        padding-left: 1px !important;
-        padding-right: 3px !important;
-        font-size: 12px;
+        padding-left: 5px !important;
+        font-size: 12px !important;
     }
 </style>
