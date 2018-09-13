@@ -24,39 +24,25 @@ fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);
 });
 
+
+/**
+ * Redis Initialization
+ */
 const redis = require("redis");
 redisClient = redis.createClient(
   process.env.REDIS_URL  || constants.REDIS_URL
 );
-
-
 redisClient.on("connect", function () {
   console.log("PARETO: Success connecting to Redis ")
 });
-
 redisClient.on("error", function (err) {
   console.log("PARETO: Problems connecting to Redis "+ err );
 });
 
 
-/*db initialization*/
-const mongoose = require('mongoose');
-//var models = require('./models/address');
-mongoose.connect(connectionUrl).then(tmp=>{
-  console.log("PARETO: Success connecting to Mongo ")
-}).catch(err=>{
-  console.log("PARETO: Problems connecting to Mongo: "+err)
-});
-
-
-
-
-
-/*db model initializations*/
-const ParetoAddress = mongoose.model('address');
-const ParetoContent = mongoose.model('content');
-const ParetoProfile = mongoose.model('profile');
-
+/**
+ * Web3 Initialization
+ */
 var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
@@ -78,7 +64,29 @@ controller.startW3WebSocket = function () {
         controller.startW3WebSocket()
     });
 };
-controller.startW3WebSocket();
+
+/**
+ *
+ * Db Initialization
+ */
+
+const mongoose = require('mongoose');
+//var models = require('./models/address');
+mongoose.connect(connectionUrl).then(tmp=>{
+    controller.startW3WebSocket();
+  console.log("PARETO: Success connecting to Mongo ")
+}).catch(err=>{
+  console.log("PARETO: Problems connecting to Mongo: "+err)
+});
+
+
+/*db model initializations*/
+const ParetoAddress = mongoose.model('address');
+const ParetoContent = mongoose.model('content');
+const ParetoProfile = mongoose.model('profile');
+
+
+
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
 
@@ -551,9 +559,12 @@ controller.postContent = function (req, callback) {
 
 };
 
+/**
+ * Watch Intel events. Support watch rewards for old Intel address
+ */
 controller.startwatchNewIntel = function(){
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-    intel.events.NewIntel() .on('data',  event => {
+    intel.events.NewIntel().on('data',  event => {
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
@@ -563,7 +574,50 @@ controller.startwatchNewIntel = function(){
             console.log(e);
         }
 
+    }).on('error', err=>{
+        console.log(err);
     });
+    ParetoContent.find({ 'expires':{ $gt : Math.round(new Date().getTime() / 1000)}, 'validated': true }).distinct('intelAddress').exec(function(err, results) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            let data = results.filter(item => item.intelAddress === Intel_Contract_Schema.networks["3"].address);
+            if(!data.length){
+                results = [{intelAddress: Intel_Contract_Schema.networks["3"].address}];
+            }
+            for (let i=0;i<results.length;i=i+1) {
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i].intelAddress);
+                intel.events.Reward({ fromBlock: 'latest' }).on('data',  event => {
+                    try{
+                        const rewardAmount = event.returnValues.rewardAmount;
+                        const intelIndex = event.returnValues.intelIndex;
+                        console.log("Reward event listener", rewardAmount, intelIndex)
+                        ParetoContent.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {if (err)console.log(err);});
+                    }catch (e) {
+                        console.log(e);
+                    }
+
+                }).on('error', err=>{
+                    console.log(err);
+                });
+
+                intel.events.RewardDistributed({ fromBlock: 'latest' }).on('data',  event => {
+                    try{
+                        const intelIndex = event.returnValues.intelIndex;
+                        ParetoContent.update({ id: intelIndex }, { distributed: true }, { multi: false }, function (err, response) { if (err)console.log(err);});
+                    }catch (e) {
+                        console.log(e);
+                    }
+
+                }).on('error', err=>{
+                    console.log(err);
+                });
+            }
+
+        }
+    });
+
 };
 
 controller.updateFromLastIntel = function(){
