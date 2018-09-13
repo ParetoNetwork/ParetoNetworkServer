@@ -542,31 +542,6 @@ controller.postContent = function (req, callback) {
             if (callback && typeof callback === "function") { callback(err); }
         } else {
 
-
-            const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-            intel.events.NewIntel({
-                fromBlock: 'latest'
-            }, function (error, event) {
-                if (error) {
-                    console.log(error);
-                    return;
-                }
-
-                const initialBalance = event.returnValues.depositAmount;
-                const expiry_time = event.returnValues.ttl;
-
-                if (event.returnValues.intelID == savedIntel.id) {
-
-                    ParetoContent.update({ _id: savedIntel._id }, { validated: true, reward: initialBalance, expires: expiry_time }, { multi: false }, function (err, data) {
-                        if (err) {
-                            throw err;
-                        }
-
-                    });
-                }
-            })
-
-
             if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
 
         }
@@ -582,7 +557,7 @@ controller.startwatchNewIntel = function(){
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
             });
         }catch (e) {
             console.log(e);
@@ -614,7 +589,7 @@ controller.updateFromLastIntel = function(){
                             const event = events[i];
                             const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                             const expiry_time = event.returnValues.ttl;
-                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                             });
                         }catch (e) {
                             console.log(e);
@@ -776,6 +751,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 reward: entry.reward,
                                 speed: entry.speed,
                                 id:entry.id,
+                                intelAddress: entry.intelAddress,
                                 _v: entry._v,
                                 createdBy: {
                                     address: entry.createdBy.address,
@@ -1093,6 +1069,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           txHash: entry.txHash,
                           reward: entry.reward,
                           speed: entry.speed,
+                          intelAddress: entry.intelAddress,
                           _v: entry._v,
                           createdBy: {
                               address: entry.createdBy.address,
