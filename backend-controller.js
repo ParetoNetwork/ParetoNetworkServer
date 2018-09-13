@@ -1674,3 +1674,27 @@ controller.getAnIntel = async function(Id, callback){
     console.log(result);
     callback(null, result);
 }
+
+controller.getContributorsByIntel = async function (Id, callback) {
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+   
+    try{
+        const result = await IntelInstance.methods.contributionsByIntel(Id).call();
+        console.log(result.addresses);
+        console.log(result.amounts);
+
+        response = [];
+        for(let i = 0; i< result.addresses.length; i++){
+            const obj = {};
+            obj.address = result.addresses[i];
+            obj.amount = result.amounts[i];
+
+            response.push(obj);
+        }
+        callback(null, response)
+    } catch (err){
+        console.log(err,"errr");
+        callback(err, null)
+    }
+
+}
