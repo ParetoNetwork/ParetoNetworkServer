@@ -249,6 +249,16 @@ app.get("/getIntels", (req, res) => {
         });
   })
   
+  app.get("/getContributors/:intelId", (req, res) => {
+    const {intelId} = req.params;
+    controller.getContributorsByIntel(intelId, (err, response) => {
+        if (err) {
+          res.status(502).json({ message: "Could not get Contributors" });
+        } else {
+          res.status(200).json({ message: "success", data: response });
+        }
+      });
+  })
 
 /********* AUTHENTICATED v1 APIs *********/
 

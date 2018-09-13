@@ -41,11 +41,12 @@ export default class ContentService {
         return;
       }
 
-      const gasPrice = await web3.eth.getGasPrice();
+      let gasPrice = await web3.eth.getGasPrice();
+      gasPrice = gasPrice * 10;
       const provider_address = accounts[0];
 
       
-      const _ttl = Math.round(new Date().getTime() / 1000) + 240; // add five seconds to to allow the rewarder to reward pareto tokens
+      const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add five seconds to to allow the rewarder to reward pareto tokens
 
       const decimals = web3.utils.toBN(18);
       const amount = web3.utils.toBN(parseFloat(tokenAmount));
@@ -123,7 +124,9 @@ export default class ContentService {
         onError("Err getting accounts");
         return;
       }
-      const gasPrice = await web3.eth.getGasPrice();
+      let gasPrice = await web3.eth.getGasPrice();
+      gasPrice = gasPrice * 10;
+
       const rewarder_address = accounts[0];
       
       const decimals = web3.utils.toBN(18);
@@ -184,7 +187,9 @@ export default class ContentService {
         .distributeReward(content.ID)
         .estimateGas({ from: distributor });
 
-      const gasPrice = await web3.eth.getGasPrice();
+      let gasPrice = await web3.eth.getGasPrice();
+      gasPrice = gasPrice * 10;
+
       await Intel.methods
         .distributeReward(content.ID)
         .send({
