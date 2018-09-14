@@ -606,6 +606,7 @@ controller.updateFromLastIntel = function(){
                 const lastBlock = results[0].lastBlock;
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
                 intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+                    if(err){ console.log(err); return;}
                     for (let i=0;i<events.length;i=i+1){
                         try{
                             const event = events[i];
