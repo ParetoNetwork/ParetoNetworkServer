@@ -592,6 +592,7 @@ controller.startwatchNewIntel = function(){
                     try{
                         const rewardAmount = event.returnValues.rewardAmount;
                         const intelIndex = event.returnValues.intelIndex;
+                        const sender = event.returnValues.sender;
                         console.log("Reward event listener", rewardAmount, intelIndex);
                         //Update rewardAmount on Content
                         ParetoContent.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {if (err)console.log(err);});
@@ -613,7 +614,7 @@ controller.startwatchNewIntel = function(){
                         })
                         //Update rewardGiven on Profile
                         ParetoProfile.findOne({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex}, (err, profile) => {
-                            console.log(err, profile);
+                            //console.log(err, profile);
                             if(profile == null){
                                 ParetoProfile.update({address:sender.toLowerCase()},{$push:{ rewardsGiven: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
                                     // console.log("saved");
