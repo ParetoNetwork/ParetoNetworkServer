@@ -1238,7 +1238,7 @@ controller.insertProfile = function(profile,callback){
                   console.error('unable to write to db because: ', err);
               } else {
                   const multi = redisClient.multi();
-                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic, rewardsGiven:[]};
                   multi.hmset("profile"+profile.address+ "", profile );
                   multi.exec(function(errors, results) {
                       if(errors){ console.log(errors); callback(errors)}
@@ -1270,7 +1270,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
                    return callback(null, profile );
                })
            } else{
-              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "" };
+              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "", rewardsGiven:[] };
                controller.insertProfile(profile, callback)
            }
        }
