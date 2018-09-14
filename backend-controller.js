@@ -592,8 +592,38 @@ controller.startwatchNewIntel = function(){
                     try{
                         const rewardAmount = event.returnValues.rewardAmount;
                         const intelIndex = event.returnValues.intelIndex;
-                        console.log("Reward event listener", rewardAmount, intelIndex)
+                        console.log("Reward event listener", rewardAmount, intelIndex);
+                        //Update rewardAmount on Content
                         ParetoContent.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {if (err)console.log(err);});
+                        //Update rewardReceived on Profile
+                        ParetoContent.findOne({id:intelIndex}, (err, intel) => {
+                            const {address} = intel;
+
+                            ParetoProfile.findOne({address,'rewardsReceived.IntelID':intelIndex}, (err, profile) => {
+                                if(profile == null){
+                                    ParetoProfile.update({address},{$push:{ rewardsReceived: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
+                                        // console.log("saved 1");
+                                    })
+                                    return;
+                                }
+                                ParetoProfile.update({address,'rewardsReceived.IntelID':intelIndex},{ $inc: {'rewardsReceived.$.reward': rewardAmount}}, (err, profle ) => {
+                                    // console.log("update 1");
+                                } )
+                            })
+                        })
+                        //Update rewardGiven on Profile
+                        ParetoProfile.findOne({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex}, (err, profile) => {
+                            console.log(err, profile);
+                            if(profile == null){
+                                ParetoProfile.update({address:sender.toLowerCase()},{$push:{ rewardsGiven: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
+                                    // console.log("saved");
+                                })
+                                return;
+                            }
+                            ParetoProfile.update({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex},{ $inc: {'rewardsGiven.$.reward': rewardAmount}}, (err, profle ) => {
+                                // console.log("update");
+                            } )
+                        })
                     }catch (e) {
                         console.log(e);
                     }
@@ -1272,7 +1302,7 @@ controller.insertProfile = function(profile,callback){
                   console.error('unable to write to db because: ', err);
               } else {
                   const multi = redisClient.multi();
-                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic, rewardsGiven:[]};
                   multi.hmset("profile"+profile.address+ "", profile );
                   multi.exec(function(errors, results) {
                       if(errors){ console.log(errors); callback(errors)}
@@ -1304,7 +1334,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
                    return callback(null, profile );
                })
            } else{
-              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "" };
+              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "", rewardsGiven:[] };
                controller.insertProfile(profile, callback)
            }
        }

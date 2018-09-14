@@ -8,6 +8,7 @@ var web3 = new Web3(WEB3_WEBSOCKET_URL);
 
 
 const ParetoIntel = mongoose.model('content');
+const ParetoProfile = mongoose.model('profile');
 
 
 // set up Pareto and Intel contracts instances
@@ -23,16 +24,45 @@ Intel.events.Reward({
     }
     const rewardAmount = event.returnValues.rewardAmount;
     const intelIndex = event.returnValues.intelIndex;
+    const sender = event.returnValues.sender;
+
     console.log("Reward event listener", rewardAmount, intelIndex)
     ParetoIntel.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {
         if (err) {
             throw err;
         }
     });
-})
 
+    ParetoIntel.findOne({id:intelIndex}, (err, intel) => {
+        const {address} = intel;
 
+        ParetoProfile.findOne({address,'rewardsReceived.IntelID':intelIndex}, (err, profile) => {
+            if(profile == null){
+                ParetoProfile.update({address},{$push:{ rewardsReceived: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
+                    // console.log("saved 1");
+                })
+                return;
+            }
+            ParetoProfile.update({address,'rewardsReceived.IntelID':intelIndex},{ $inc: {'rewardsReceived.$.reward': rewardAmount}}, (err, profle ) => {
+                // console.log("update 1");
+            } )
+        })
+    })
 
+    ParetoProfile.findOne({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex}, (err, profile) => {
+        console.log(err, profile);
+        if(profile == null){
+            ParetoProfile.update({address:sender.toLowerCase()},{$push:{ rewardsGiven: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
+                // console.log("saved");
+            })
+            return;
+        }
+        ParetoProfile.update({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex},{ $inc: {'rewardsGiven.$.reward': rewardAmount}}, (err, profle ) => {
+            // console.log("update");
+        } )
+    })
+
+});
 
 Intel.events.RewardDistributed({
     fromBlock: 'latest'
