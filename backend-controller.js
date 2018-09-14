@@ -1405,11 +1405,6 @@ controller.retrieveAddressRankWithRedis = function(addressess, attempts, callbac
         if(err){
             return callback(err);
         }
-        if(addressess.length > 1){
-            console.log(addressess);
-            console.log(results);
-            console.log(err);
-        }
         if((!results || results.length ===0 || (!results[0] && results.length ===1)) && attempts){
             controller.getScoreAndSaveRedis(function(err, result){
                 if(err){

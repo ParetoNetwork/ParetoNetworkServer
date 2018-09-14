@@ -141,15 +141,6 @@
                                 </div>
                             </b-row>
 
-                            <!--
-                            <b-row>
-                                <div class="col-12 col-md-4 mb-2 p-0">
-                                    <p> Preview </p>
-                                    <p> Path: {{selectedPath}} Address: {{selectedAddress}} </p>
-                                </div>
-                            </b-row>
-                            -->
-
                         </b-form-radio-group>
                     </b-form-group>
                 </div>
@@ -191,32 +182,6 @@
                         selected: {},
                         address: '',
                         scroll: {},
-                        addressTry: ['0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
-                            '0x22741e8ee26e83aacbf098a31de5af1b1231920e',
-                            '0x2d0b45741132cb5a6f01ec870aed6a09b95a3210',
-                            '0x817a3fbd26277a228fa346dbb99068c04bafe68e',
-                            '0x4ab26f50d75c6417ff7b747ff806cf8517e06ea4',
-                            '0x428922f0d4a8e9a281f6d895b476d35181652da0',
-                            '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
-                            '0x030259b644dbf3d91375f421710e4a6a552851ac',
-                            '0xbb71d27eb32a8b39fb26e9995728581f5c8ba9b8',
-                            '0x79ae49c1f7264caffd3459c7c500067e761d3df3',
-                        ],
-                        addressCatch: [
-                            '0x4c806f36b383c8d511b534fb9afcb546b176910b',
-                            '0xb9f62d73f3453763081898f67309cf9b31bd0694',
-                            '0x84a4f61d38226e821b0d9936769e947085f9d672',
-                            '0x00442b1a53d9162a283bda57be49dfd7e2354496',
-                            '0x13c92469719b73b325d4a2165c914cf1c4b873af',
-                            '0x288e55b2f3af18e051b3d4840c04b24c40867e32',
-                            '0x01eea8432499e9bb64fb842479bfd26efd06f47a',
-                            '0xc828c56df770599c1ab369967920065c70a02865',
-                            '0xbd8c1ba04da9e43de4f1db96b3e2cd52cfdf028f',
-                            '0x228ff85dcdd817171a9bf2b6c654d698a604066a',
-                            '0x473e03aa97a32b96c9c0ddd15116dc8fdde56b7a',
-                            '0xf04f681e1e5f128a758ffd8ed0d579d521cc1f20',
-                            '0xacd90d7206bf9f1fa5fee430d468c3461b6f1b27'
-                        ],
                         options: []
                     },
                     {
@@ -224,30 +189,6 @@
                         id: "l44'/60'/0'/0",
                         selected: {},
                         address: '',
-                        addressTry: [
-                            '0x1cd35769e5e5e03493dc532bddd0d94f5a8723b2',
-                            '0x439531e19d7cbe8999ef00bf2184cba1c19ccb13',
-                            '0x817a3fbd26277a228fa346dbb99068c04bafe68e',
-                            '0x4ab26f50d75c6417ff7b747ff806cf8517e06ea4',
-                            '0x428922f0d4a8e9a281f6d895b476d35181652da0',
-                            '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
-                            '0x030259b644dbf3d91375f421710e4a6a552851ac',
-                        ],
-                        addressCatch: [
-                            '0x4c806f36b383c8d511b534fb9afcb546b176910b',
-                            '0xb9f62d73f3453763081898f67309cf9b31bd0694',
-                            '0x84a4f61d38226e821b0d9936769e947085f9d672',
-                            '0x00442b1a53d9162a283bda57be49dfd7e2354496',
-                            '0x13c92469719b73b325d4a2165c914cf1c4b873af',
-                            '0x288e55b2f3af18e051b3d4840c04b24c40867e32',
-                            '0x01eea8432499e9bb64fb842479bfd26efd06f47a',
-                            '0xc828c56df770599c1ab369967920065c70a02865',
-                            '0xbd8c1ba04da9e43de4f1db96b3e2cd52cfdf028f',
-                            '0x228ff85dcdd817171a9bf2b6c654d698a604066a',
-                            '0x473e03aa97a32b96c9c0ddd15116dc8fdde56b7a',
-                            '0xf04f681e1e5f128a758ffd8ed0d579d521cc1f20',
-                            '0xacd90d7206bf9f1fa5fee430d468c3461b6f1b27'
-                        ],
                         scroll: {}
                     },
                     {
@@ -257,28 +198,6 @@
                         },
                         address: '',
                         id: "44'60/1",
-                        addressTry: ['0x208f456b28cf6d36d6fc4942a65f4a9089ad68e1',
-                            '0x7fb7a2bfe7c29d4ce3a22f82df165c3eb8b6f6e4',
-                            '0x228ff85dcdd817171a9bf2b6c654d698a604066a',
-                            '0x473e03aa97a32b96c9c0ddd15116dc8fdde56b7a',
-                            '0xf04f681e1e5f128a758ffd8ed0d579d521cc1f20',
-                            '0xacd90d7206bf9f1fa5fee430d468c3461b6f1b27'
-                        ],
-                        addressCatch: [
-                            '0x4c806f36b383c8d511b534fb9afcb546b176910b',
-                            '0xb9f62d73f3453763081898f67309cf9b31bd0694',
-                            '0x84a4f61d38226e821b0d9936769e947085f9d672',
-                            '0x00442b1a53d9162a283bda57be49dfd7e2354496',
-                            '0x13c92469719b73b325d4a2165c914cf1c4b873af',
-                            '0x288e55b2f3af18e051b3d4840c04b24c40867e32',
-                            '0x01eea8432499e9bb64fb842479bfd26efd06f47a',
-                            '0xc828c56df770599c1ab369967920065c70a02865',
-                            '0xbd8c1ba04da9e43de4f1db96b3e2cd52cfdf028f',
-                            '0x228ff85dcdd817171a9bf2b6c654d698a604066a',
-                            '0x473e03aa97a32b96c9c0ddd15116dc8fdde56b7a',
-                            '0xf04f681e1e5f128a758ffd8ed0d579d521cc1f20',
-                            '0xacd90d7206bf9f1fa5fee430d468c3461b6f1b27'
-                        ],
                         scroll: {}
                     }
                 ]
@@ -297,7 +216,6 @@
                 }
                 this.timer = setTimeout(() => {
                     let page = 0, limit = 10;
-
                     authService.getWalletAccounts(this.customPath, page, limit, data => {
 
                         foundAddress = true;
@@ -341,42 +259,6 @@
                     }
                     this.loadingCustomPath = false;
 
-                    // let foundAddress = false;
-                    // this.paths.forEach(path => {
-                    //     if (path.id === cpath) {
-                    //         foundAddress = true;
-                    //         const list = path.addressTry;
-                    //         this.selectedPath = path.id;
-                    //
-                    //         authService.getTokens( list , data =>{
-                    //
-                    //             let userList = data.data;
-                    //             this.paths[2].address = userList.map( user => {
-                    //                 return {
-                    //                     address : user.address,
-                    //                     tokens : user.tokens
-                    //                 }
-                    //             });
-                    //
-                    //             this.paths[2].selected = this.paths[2].address[0];
-                    //             this.selectedAddress = this.paths[2].selected.address;
-                    //
-                    //         }, error => {
-                    //             console.log(error);
-                    //         });
-                    //
-                    //         //this.onAddresSelected(this.customPath, user, 1)
-                    //         // this.onPathSelected(this.selectedPath);
-                    //     }
-                    // });
-                    //
-                    // if(!foundAddress){
-                    //     this.customPathError = true;
-                    //     this.paths[2].selected = '';
-                    //     this.paths[2].address = false;
-                    // }
-                    // this.loadingCustomPath = false;
-
                 }, 800);
             }
         },
@@ -385,6 +267,9 @@
             this.$nextTick(function () {
 
             });
+        },
+        beforeDestroy: function (){
+            authService.deleteWatchNano();
         },
         mounted() {
             this.$refs.ledgerNano.show();
@@ -411,50 +296,38 @@
                 }
             },
             fillPathAddress: function () {
-                let page = 0, limit = 10;
-                console.log('intento 17');
+                this.getAddress(0, 0, 10);
+            },
+            getAddress: function(path_id, page, limit){
+                let myPath = this.paths[path_id].id.substr(1);
+                authService.getWalletAccounts(myPath, page, limit, data => {
+                    if(path_id===0){
+                        this.getAddress(path_id+1, page, limit);
+                    }
+                    let addressList = Object.values(data);
+                    addressList = addressList.map(address => {
+                        return address.toLowerCase();
+                    });
 
-                this.paths.forEach(path => {
-                    console.log(path);
+                    authService.getTokens(addressList, listData => {
 
-                    if (path.name === 'custom') return;
-                    let myPath = path.id.substr(1);
+                        let userList = listData.data;
 
-                    authService.getWalletAccounts(myPath, page, limit, data => {
+                        this.paths[path_id].address = addressList.map((address) => {
+                            let newAddressToken = {
+                                address: address,
+                                tokens: 0
+                            };
 
-                        let addressList = Object.values(data);
-                        addressList = addressList.map(address => {
-                            return address.toLowerCase();
-                        });
-
-                        authService.getTokens(addressList, listData => {
-
-                            let userList = listData.data;
-
-                            path.address = addressList.map((address) => {
-                                let newAddressToken = {
-                                    address: address,
-                                    tokens: 0
-                                };
-
-                                userList.forEach(item => {
-                                    if (item.address == address) {
-                                        newAddressToken.tokens = item.tokens;
-                                    }
-                                });
-
-                                return newAddressToken;
+                            userList.forEach(item => {
+                                if (item.address == address) {
+                                    newAddressToken.tokens = item.tokens;
+                                }
                             });
-                            path.selected = path.address[0];
 
-                        }, error => {
-                            this.$notify({
-                                group: 'foo',
-                                type: 'error',
-                                duration: 10000,
-                                text: error
-                            });
+                            return newAddressToken;
                         });
+                        this.paths[path_id].selected = this.paths[path_id].address[0];
 
                     }, error => {
                         this.$notify({
@@ -464,34 +337,18 @@
                             text: error
                         });
                     });
+
+                }, error => {
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error
+                    });
                 });
-
-                // this.paths.forEach(path => {
-                //     if (path.name === 'custom') return;
-                //     const list = path.addressTry;
-                //
-                //     authService.getTokens( list , data =>{
-                //         let userList = data.data;
-                //
-                //         path.addressTry = userList.map( user => {
-                //             return {
-                //                 address : user.address,
-                //                 tokens : user.tokens
-                //             }
-                //         });
-                //
-                //         path.selected = path.addressTry[0];
-                //
-                //     }, error => {
-                //         console.log(error);
-                //     });
-                // });
-
             },
             hardware: function () {
                 let path = (isNaN(this.selectedPath.charAt(0)))? this.selectedPath.substring(1) : this.selectedPath;
-                console.log(this.selectedAddress);
-                console.log(path);
 
                 this.loadingLogin();
                 authService.signWallet(path, this.selectedAddress, data => {
@@ -513,6 +370,7 @@
             },
             onClosedModal: function () {
                 this.$store.state.showModalLedgerNano = false;
+                authService.deleteWatchNano();
             },
             onAddresSelected(path, user, pathsIndex) {
                 this.selectedPath = path;
@@ -520,44 +378,12 @@
                 this.paths[pathsIndex].selected = user;
             },
             scrollAddressList: function (index, path) {
-
-                // if(path.scrollTop + path.offsetHeight >= path.scrollHeight){
-                //
-                //     let page = this.paths[index].addressTry.length/10;
-                //     console.log(this.paths[index].addressTry.length);
-                //     console.log(page);
-                //
-                //     let newList = this.paths[index].addressCatch;
-                //     authService.getTokens(newList, data=> {
-                //
-                //         let userList = data.data;
-                //
-                //         newList = userList.map( user => {
-                //             return {
-                //                 address : user.address,
-                //                 tokens : user.tokens
-                //             }
-                //         });
-                //
-                //         if(index > 1)
-                //             this.paths[index].address = [...this.paths[index].address, ...newList]
-                //         else
-                //             this.paths[index].addressTry = [...this.paths[index].addressTry, ...newList]
-                //
-                //     }, error => {
-                //         console.log(error);
-                //     });
-                //
-                // }
-
-
                 if (path.scrollTop + path.offsetHeight >= path.scrollHeight && !this.loadingInfiniteScrollData) {
                     this.loadingInfiniteScrollData = true;
 
                     let page = this.paths[index].address.length / 10;
 
                     let path = (isNaN(this.selectedPath.charAt(0)))? this.selectedPath.substring(1) : this.selectedPath;
-
 
                     authService.getWalletAccounts(path, page, 10, data => {
 
@@ -614,8 +440,12 @@
             supportedNav: function () {
                 authService.isWalletSupported(data => {
                     if (data) {
-                        this.supported = true;
-                        this.fillPathAddress();
+                        authService.isLedgerWatched = true;
+                        authService.doWhenIsConnected( () => {
+                            authService.deleteWatchNano();
+                            setTimeout(()=>{this.supported = true;
+                            this.fillPathAddress();},500);
+                        });
                     }
                 }, error => {
                     this.supported = false;
