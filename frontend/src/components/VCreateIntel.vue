@@ -106,13 +106,15 @@
                                     <li>MetaMask will ask you to confirm the amount of Pareto that you'd like to deposit</li>
                                     <li>MetaMask will prompt you to create the intel on the Ethereum Blockchain</li>
                                 </ol>
-                                <p class="text-center mt-4"> This operation may take a while as we communicate with the Ethereum Blockchain.
+                                <p class="text-center mt-4" style="text-align: justify !important; text-justify: inter-word;">
+                                    This operation may take a while as we communicate with the Ethereum Blockchain.
                                     Please do not close your browser or navigate to a different page.
                                     Upon successful creation of Intel, Pareto will take you back to your Feed. </p>
-                                <i class="fa fa-spinner fa-spin fa-3x mt-4"></i></div>
-                                <p class="text-center mt-4" style="font-size: 10px"> This operation may take a while as we communicate with the Ethereum Blockchain.
-                                    Please do not close your browser or navigate to a different page.
-                                    Upon successful creation of Intel, Pareto will take you back to your Feed. </p>
+                                <i class="fa fa-spinner fa-spin fa-3x mt-4" ></i></div>
+                                <p class="text-center mt-4" style="font-size: 11px">
+                                    If MetaMask does not popup, please check your MetaMask extension icon for a new badge that signifies an operation should be taken on MetaMask
+                                    <img src="../assets/images/mmicon.png" alt="" class="icon-mini pl-2">
+                                </p>
                         </div>
                     </b-container>
                 </b-modal>
