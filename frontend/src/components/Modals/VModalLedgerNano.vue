@@ -646,10 +646,6 @@
         border-radius: 5px !important;
     }
 
-    .dropdown-menu {
-        width: 100%;
-    }
-
     .dropdown-item {
         padding: 4px !important;
         font-size: 11px;
@@ -710,6 +706,7 @@
         border-radius: 0px;
         padding: 0px;
         margin-top: 0px;
+        width: 100%;
     }
 
 </style>
