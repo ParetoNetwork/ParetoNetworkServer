@@ -168,7 +168,7 @@
                                                 <p class="text-right text-secondary pl-lg-2"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> 8000PXT </b></p>
                                                 <b-btn class="btn-primary-pareto mx-auto px-4"
                                                        style="max-width: 120px;"
-                                                       v-b-modal.modalToken @click="rewardId = row.id">REWARD
+                                                       v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress">REWARD
                                                 </b-btn>
                                             </div>
                                         </div>
@@ -221,7 +221,7 @@
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
                     <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
                     <b-button style="background-color: rgb(107, 194, 123)" variant="success"
-                              @click="rewardIntel(rewardId, tokenAmount)"> Confirm
+                              @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                     </b-button>
                 </b-row>
             </b-container>
@@ -257,6 +257,7 @@
                     page: 0,
                 },
                 rewardId: '',
+                intelAddress: '',
                 tokenAmount: 1,
                 myContent: [],
                 allMyContent: [],
@@ -443,7 +444,7 @@
                     this.$store.state.makingRequest = false;
                 });
             },
-            rewardIntel: function (ID, tokenAmount) {
+            rewardIntel: function (ID, tokenAmount, intelAddress) {
                 this.hideModal();
 
                 if (!tokenAmount) {
@@ -459,7 +460,7 @@
 
                 // console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
-                    {ID, tokenAmount},
+                    {ID, tokenAmount, intelAddress},
                     res => {
                         console.log(res);
                     },

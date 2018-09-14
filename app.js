@@ -23,7 +23,6 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 var controller = require('./backend-controller.js');
-require("./ContractEventListeners/Intel");
 
 
 var app = express();
@@ -249,6 +248,16 @@ app.get("/getIntels", (req, res) => {
         });
   })
   
+  app.get("/getContributors/:intelId", (req, res) => {
+    const {intelId} = req.params;
+    controller.getContributorsByIntel(intelId, (err, response) => {
+        if (err) {
+          res.status(502).json({ message: "Could not get Contributors" });
+        } else {
+          res.status(200).json({ message: "success", data: response });
+        }
+      });
+  })
 
 /********* AUTHENTICATED v1 APIs *********/
 
