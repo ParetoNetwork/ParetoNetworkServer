@@ -134,18 +134,20 @@ export default class authService {
     }
 
     static initLedgerNano(onSuccess, onError){
-        if(!this.ledgerNanoEngine || !this.ledgerNanoProvider || !this.ledgerWalletSubProvider){
-            const ProviderEngine = require('web3-provider-engine');
-            const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+        if( !this.ledgerNanoProvider || !this.ledgerWalletSubProvider){
+           // const ProviderEngine = require('web3-provider-engine');
+           // const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
             var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
-            this.ledgerNanoEngine = new ProviderEngine();
-            this.ledgerNanoProvider = new Web3(this.ledgerNanoEngine);
+           // this.ledgerNanoEngine = new ProviderEngine();
+          //  this.ledgerNanoProvider = new Web3(this.ledgerNanoEngine);
 
             LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
                 this.ledgerWalletSubProvider = ledgerWalletSubProvider;
-                this.ledgerNanoEngine.addProvider(ledgerWalletSubProvider);
-                this.ledgerNanoEngine.addProvider(new RpcSubprovider({rpcUrl: 'https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'})); // you need RPC endpoint
-                this.ledgerNanoEngine.start();
+
+                this.ledgerNanoProvider = new Web3(ledgerWalletSubProvider);
+         //       this.ledgerNanoEngine.addProvider(ledgerWalletSubProvider);
+         //       this.ledgerNanoEngine.addProvider(new RpcSubprovider({rpcUrl: 'https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'})); // you need RPC endpoint
+           //     this.ledgerNanoEngine.start();
                 const isSupported = ledgerWalletSubProvider.isSupported;
                 if(isSupported){
                      onSuccess();
