@@ -17,5 +17,4 @@ function start() {
         app.initializeWebSocket(server);
         console.log('Pareto Network ranking app listening on port 3000!');
     });
- }
-
+}
