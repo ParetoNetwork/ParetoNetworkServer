@@ -569,6 +569,9 @@ controller.startwatchNewIntel = function(){
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
             ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                    if(controller.wss){
+
+                    }
             });
         }catch (e) {
             console.log(e);
@@ -1129,7 +1132,7 @@ controller.getContentByCurrentUser = function(req, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address, validated: true}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
+    var query = ParetoContent.find({address : address}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
@@ -1154,6 +1157,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           txHash: entry.txHash,
                           reward: entry.reward,
                           speed: entry.speed,
+                          validated: entry.validated,
                           intelAddress: entry.intelAddress,
                           _v: entry._v,
                           createdBy: {

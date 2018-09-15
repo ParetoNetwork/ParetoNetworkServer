@@ -85,6 +85,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex flex-column text-left">
                                             <h5 class="title"><b>{{post.title}}</b></h5>
+                                            <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
                                             <span>{{post.dateCreated | date}}</span>
                                         </div>
                                         <div class="d-flex ">
