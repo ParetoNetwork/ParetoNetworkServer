@@ -590,7 +590,7 @@ controller.startwatchNewIntel = function(){
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i].intelAddress);
                 intel.events.Reward({ fromBlock: 'latest' }).on('data',  event => {
                     try{
-                        const rewardAmount = event.returnValues.rewardAmount;
+                        const rewardAmount = web3.utils.fromWei(event.returnValues.rewardAmount, 'ether');
                         const intelIndex = event.returnValues.intelIndex;
                         const sender = event.returnValues.sender;
                         console.log("Reward event listener", rewardAmount, intelIndex);
