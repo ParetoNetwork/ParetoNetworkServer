@@ -71,7 +71,7 @@
                                             <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
                                         </div>
                                         <div v-else>
-                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[2].selected.address"><i class="fa fa-external-link"></i></a>
+                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[0].selected.address" target="_blank"><i class="fa fa-external-link"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -111,7 +111,7 @@
                                             <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
                                         </div>
                                         <div v-else>
-                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[2].selected.address"><i class="fa fa-external-link"></i></a>
+                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[1].selected.address" target="_blank"><i class="fa fa-external-link"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -155,7 +155,7 @@
                                             <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
                                         </div>
                                         <div v-else>
-                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[2].selected.address"><i class="fa fa-external-link"></i></a>
+                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[2].selected.address" target="_blank"><i class="fa fa-external-link"></i></a>
                                         </div>
                                     </div>
                                 </div>
