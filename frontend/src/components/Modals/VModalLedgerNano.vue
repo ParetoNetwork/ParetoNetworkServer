@@ -43,7 +43,7 @@
                                                   value="s44'/60'/0'/0/0">
                                         <div class="modal-input-inline">
                                             <p> STANDARD </p>
-                                            <p class="ledger-path-text">"44'/60'/0'/0/0"</p>
+                                            <p class="ledger-path-text">44'/60'/0'/<b>0/0</b></p>
                                         </div>
                                     </b-form-radio>
                                 </div>
@@ -52,7 +52,7 @@
                                     <b-dropdown :disabled="!supported || !paths[0].address" variant="link" size="lg" no-caret>
                                         <template slot="text">
                                             <div class="d-flex justify-content-between">
-                                                <span class="span-ellipsis"> {{substringAddress(paths[0].selected.address)}} </span>
+                                                <span class="span-ellipsis"> {{paths[0].selected.address}} </span>
                                                 <span> {{ parseInt(paths[0].selected.tokens || '0')}} PARETO <i
                                                         class="fa fa-sort-down"></i> </span>
                                             </div>
@@ -60,11 +60,20 @@
                                         <b-dropdown-item v-for="user in paths[0].address"
                                                          @click="onAddresSelected('s44\'/60\'/0\'/0/0', user, 0)">
                                             <div class="d-flex justify-content-between">
-                                                <span class="span-ellipsis"> {{substringAddress(user.address)}} </span>
+                                                <span class="span-ellipsis"> {{user.address}} </span>
                                                 <span> {{parseInt(user.tokens || '0')}} PARETO</span>
                                             </div>
                                         </b-dropdown-item>
                                     </b-dropdown>
+
+                                    <div class="address-controls">
+                                        <div v-if="!paths[0].selected.address" class="address-disabled">
+                                            <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
+                                        </div>
+                                        <div v-else>
+                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a href={{"https://etherscan.io/address/"+paths[0].selected.address}}><i class="fa fa-external-link"></i></a>
+                                        </div>
+                                    </div>
                                 </div>
                             </b-row>
 
@@ -75,7 +84,7 @@
                                                   value="l44'/60'/0'/0">
                                         <div class="modal-input-inline">
                                             <p> LEGACY </p>
-                                            <p class="ledger-path-text">"44'/60'/0'/0"</p>
+                                            <p class="ledger-path-text">44'/60'/0'<b>/0</b></p>
                                         </div>
                                     </b-form-radio>
                                 </div>
@@ -84,7 +93,7 @@
                                     <b-dropdown :disabled="!supported || !paths[1].address" variant="link" size="lg" no-caret>
                                         <template slot="text">
                                             <div class="d-flex justify-content-between">
-                                                <span class="span-ellipsis"> {{substringAddress(paths[1].selected.address)}} </span>
+                                                <span class="span-ellipsis"> {{paths[1].selected.address}} </span>
                                                 <span> {{ parseInt(paths[1].selected.tokens || '0')}} PARETO <i
                                                         class="fa fa-sort-down"></i> </span>
                                             </div>
@@ -92,11 +101,19 @@
                                         <b-dropdown-item :disabled="!supported" v-for="user in paths[1].address"
                                                          @click="onAddresSelected('l44\'/60\'/0\'/0', user, 1)">
                                             <div class="d-flex justify-content-between">
-                                                <span class="span-ellipsis"> {{substringAddress(user.address)}} </span>
+                                                <span class="span-ellipsis"> {{user.address}} </span>
                                                 <span> {{parseInt(user.tokens || '0')}} PARETO</span>
                                             </div>
                                         </b-dropdown-item>
                                     </b-dropdown>
+                                    <div class="address-controls">
+                                        <div v-if="!paths[1].selected.address" class="address-disabled">
+                                            <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
+                                        </div>
+                                        <div v-else>
+                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a href={{"https://etherscan.io/address/"+paths[1].selected.address}}><i class="fa fa-external-link"></i></a>
+                                        </div>
+                                    </div>
                                 </div>
                             </b-row>
 
@@ -120,7 +137,7 @@
                                     <b-dropdown variant="link" size="lg" no-caret :disabled="!paths[2].address">
                                         <template slot="text">
                                             <div class="d-flex justify-content-between">
-                                                <span> {{substringAddress(paths[2].selected.address)}} </span>
+                                                <span> {{paths[2].selected.address}} </span>
                                                 <span> {{ parseInt(paths[2].selected.tokens || '0')}} PARETO <i
                                                         class="fa fa-sort-down"></i> </span>
                                             </div>
@@ -128,11 +145,19 @@
                                         <b-dropdown-item v-for="user in paths[2].address"
                                                          @click="onAddresSelected(customPath, user, 2)">
                                             <div class="d-flex justify-content-between">
-                                                <span class="span-ellipsis"> {{substringAddress(user.address)}} </span>
+                                                <span class="span-ellipsis"> {{user.address}} </span>
                                                 <span> {{parseInt(user.tokens || '0')}} PARETO</span>
                                             </div>
                                         </b-dropdown-item>
                                     </b-dropdown>
+                                    <div class="address-controls">
+                                        <div v-if="!paths[2].selected.address" class="address-disabled">
+                                            <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
+                                        </div>
+                                        <div v-else>
+                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a href={{"https://etherscan.io/address/"+paths[2].selected.address}}><i class="fa fa-external-link"></i></a>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-12">
                                     <p v-if="selectedPath === customPath && customPathError" class="text-danger"> The
@@ -528,6 +553,15 @@
 
     .ledger-path-text {
         font-size: 12px !important;
+    }
+
+    .address-controls {
+        font-size: 18px;
+        padding-left: 8px;
+    }
+
+    .address-disabled {
+        color: gray;
     }
 
     .custom-group .dropdown-menu.show {
