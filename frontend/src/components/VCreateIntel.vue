@@ -99,15 +99,38 @@
 
                     <b-container fluid>
                         <h3 class="font-body mb-4">Creating an Intel has a two step confirmation </h3>
-                        <div >
+                        <div>
                             <div class="m-2 ml-4">
                                 <ol class="text-left">
-                                    <li>Confirm the amount of Pareto that you'd like to deposit</li>
-                                    <li>Create the Intel on the Ethereum Blockchain?</li>
+                                    <li>MetaMask will ask you to confirm the amount of Pareto that you'd like to
+                                        deposit
+                                    </li>
+                                    <li>MetaMask will prompt you to create the intel on the Ethereum Blockchain</li>
                                 </ol>
-                                <p class="text-center mt-4"> This operation may take a while as we communicate with the
-                                    Ethereum Blockchain </p>
-                                <i class="fa fa-spinner fa-spin fa-3x mt-4"></i></div>
+                                <p class="text-center mt-4"
+                                   style="text-align: justify !important; text-justify: inter-word;">
+                                    This operation may take a while as we communicate with the Ethereum Blockchain.
+                                    Please do not close your browser or navigate to a different page.
+                                    Upon successful creation of Intel, Pareto will take you back to your Feed. </p>
+                                <i class="fa fa-spinner fa-spin fa-3x mt-4"></i>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4 mb-1">
+                                <p class="text-center" style="font-size: 11px">
+                                    If MetaMask does not popup, please check your MetaMask extension icon for a new
+                                    badge
+                                    that signifies an operation should be taken on MetaMask
+
+                                </p>
+                                <span class="mt-1 ml-2"
+                                      style="background: #505050;
+                                             border-radius: 3px;
+                                             padding-left: 2px;">
+                                <img src="../assets/images/mmicon.png" alt=""
+                                     class="icon-mini">
+                            </span>
+                            </div>
+
                         </div>
                     </b-container>
                 </b-modal>
