@@ -34,9 +34,16 @@
   <body>
   <div>
 
-    <!-- need to add top gradient bar here as well -->
+    <div id="gradient" class="flex-row" style="vertical-align: top;
+        height: 5px; 
+        background: #295087; /* Old browsers */
+      background: -moz-linear-gradient(left, #295087 0%, #3f7989 50%, #6aba82 77%, #85c568 100%); /* FF3.6-15 */
+      background: -webkit-linear-gradient(left, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(to right, #295087 0%,#3f7989 50%,#6aba82 77%,#85c568 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#295087', endColorstr='#85c568',GradientType=1 ); /* IE6-9 */
+            ">&nbsp;</div>
 
-    <nav style="background-color: #040f1e;  padding: 16px 32px;">
+    <nav style="background-color: #040f1e;  padding: 28px 65px; height: 12vh;">
       <a href="/"><img data-v-762b674a="" src="./LogoReverse.svg" width="150" alt="" ></a>
    </nav>
    <redoc spec-url="swagger.json"></redoc>
