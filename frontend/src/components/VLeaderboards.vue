@@ -112,7 +112,7 @@
                                                         :options="countUp.options"
                                                         @ready="onReady"></ICountUp>
                                             </td>
-                                            <td class="break-line" style="width: 400px">{{rank.address}}</td>
+                                            <td class="break-line" style="width: 400px">{{rank.address}} <a v-bind:href="'https://etherscan.io/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>
