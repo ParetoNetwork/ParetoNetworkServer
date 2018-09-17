@@ -101,9 +101,9 @@
                                                 v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
                                                 v-bind:id="rank.rank"
                                         >
-                                            <td style="width: 55px">{{rank.rank}}</td>
+                                            <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
                                             <!--<td>{{rank.score}}</td>-->
-                                            <td style="width: 123px">
+                                            <td style="width: 123px; text=align: left;">
                                                 <ICountUp
                                                         :startVal="countUp.startVal"
                                                         :endVal="parseFloat(rank.score)"
@@ -112,7 +112,8 @@
                                                         :options="countUp.options"
                                                         @ready="onReady"></ICountUp>
                                             </td>
-                                            <td class="break-line" style="width: 400px">{{rank.address}} <a v-bind:href="'https://etherscan.io/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
+                                            <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
+                                            <td><a v-bind:href="'https://etherscan.io/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>
