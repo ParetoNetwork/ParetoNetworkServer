@@ -375,22 +375,24 @@
                         if (info.data.address) {
                             this.score = info.data.score;
                         } else {
-                            let socketIndex = 0;
-                            let socketRanking = info.data;
-                            let firstRank = socketRanking[socketIndex].rank;
+                            if (!info.data.action){
+                                let socketIndex = 0;
+                                let socketRanking = info.data;
+                                let firstRank = socketRanking[socketIndex].rank;
 
-                            this.leader = this.leader.map(item => {
+                                this.leader = this.leader.map(item => {
 
-                                let rank = parseFloat(item.rank);
-                                let socketRank;
-                                if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
+                                    let rank = parseFloat(item.rank);
+                                    let socketRank;
+                                    if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
 
-                                if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
-                                    item.score = socketRanking[socketIndex].score;
-                                    socketIndex++;
-                                }
-                                return item;
-                            });
+                                    if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
+                                        item.score = socketRanking[socketIndex].score;
+                                        socketIndex++;
+                                    }
+                                    return item;
+                                });
+                            }
                         }
 
                     } catch (e) {

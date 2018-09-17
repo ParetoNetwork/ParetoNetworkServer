@@ -85,6 +85,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex flex-column text-left">
                                             <h5 class="title"><b>{{post.title}}</b></h5>
+                                            <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
                                             <span>{{post.dateCreated | date}}</span>
                                         </div>
                                         <div class="d-flex ">
@@ -296,7 +297,7 @@
         },
         mounted: function () {
             this.main();
-            console.log(this.screenSize)
+           // console.log(this.screenSize)
         },
         computed: {
             ...mapState(["madeLogin", "ws"])
@@ -374,6 +375,18 @@
                             this.user.tokens = info.data.tokens;
                             // this.user.block = info.data.block;
                             this.assignBlock(info.data.block);
+                        }
+                        if (info.data.action){
+                          //  console.log(info.data.action);
+                            switch (info.data.action){
+                                case 'updateContent':{
+                              //      console.log('load');
+                                    this.loadMyContent();
+                                    this.myFeed.page = 0;
+                                    const params = {limit: 10, page: this.myFeed.page};
+                                    this.loadContent(params);
+                                }
+                            }
                         }
 
                     } catch (e) {
