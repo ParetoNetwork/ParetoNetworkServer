@@ -40,8 +40,8 @@
                         <div class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
                             <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
-                                                            src="../assets/images/pareto-logo-mark-color.svg"
-                                                            alt="Pareto Logo for Ranking">
+                                                                         src="../assets/images/pareto-logo-mark-color.svg"
+                                                                         alt="Pareto Logo for Ranking">
                             </div>
                             <div id="score-counter" class="d-flex">
                                 <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
@@ -185,9 +185,9 @@
                     active: false
                 },
                 socketParams : {
-                  rank: '',
-                  limit: '',
-                  page: ''
+                    rank: '',
+                    limit: '',
+                    page: ''
                 }
             };
         },
@@ -371,7 +371,7 @@
                     wsa.send(JSON.stringify(this.socketParams));
                     try {
                         const info = JSON.parse(data.data);
-                       // console.log(info);
+                        // console.log(info);
                         if (info.data.address) {
                             this.score = info.data.score;
                         } else {
