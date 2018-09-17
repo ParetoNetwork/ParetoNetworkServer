@@ -5,6 +5,7 @@ var Schema = mongoose.Schema;
 
 var paretoContentSchema = new Schema({
 	address: String,
+	intelAddress: String,
 	title: String,
 	body: String,
 	text: String, //this is the plain text version of the html formatted body
