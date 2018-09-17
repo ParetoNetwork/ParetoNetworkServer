@@ -380,7 +380,7 @@
                           //  console.log(info.data.action);
                             switch (info.data.action){
                                 case 'updateContent':{
-                            //        console.log('load');
+                              //      console.log('load');
                                     this.loadMyContent();
                                     this.myFeed.page = 0;
                                     const params = {limit: 10, page: this.myFeed.page};
