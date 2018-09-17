@@ -297,7 +297,7 @@
         },
         mounted: function () {
             this.main();
-            console.log(this.screenSize)
+           // console.log(this.screenSize)
         },
         computed: {
             ...mapState(["madeLogin", "ws"])
@@ -375,6 +375,18 @@
                             this.user.tokens = info.data.tokens;
                             // this.user.block = info.data.block;
                             this.assignBlock(info.data.block);
+                        }
+                        if (info.data.action){
+                          //  console.log(info.data.action);
+                            switch (info.data.action){
+                                case 'updateContent':{
+                            //        console.log('load');
+                                    this.loadMyContent();
+                                    this.myFeed.page = 0;
+                                    const params = {limit: 10, page: this.myFeed.page};
+                                    this.loadContent(params);
+                                }
+                            }
                         }
 
                     } catch (e) {

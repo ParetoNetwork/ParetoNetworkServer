@@ -570,7 +570,22 @@ controller.startwatchNewIntel = function(){
             const expiry_time = event.returnValues.ttl;
             ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                     if(controller.wss){
+                        try{
+                            wss.clients.forEach(function each(client) {
+                                if (client.isAlive === false) return client.terminate();
 
+                                client.isAlive = false;
+                                client.ping(noop);
+                                if (client.readyState === WebSocket.OPEN ) {
+                                    // Validate if the user is subscribed a set of information
+                                    if(client.info && client.user){
+                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                    }
+                                }
+                            });
+                        }catch (e) {
+                            console.log(e);
+                        }
                     }
             });
         }catch (e) {
