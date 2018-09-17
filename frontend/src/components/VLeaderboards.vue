@@ -76,18 +76,19 @@
                         <div class="table-area">
 
                             <table class="table text-left position-relative">
-                                <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button>
+                                <!-- <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button> -->
                                 <thead>
                                 <tr>
-                                    <th width="55px">
+                                    <th width="55px" class="th-header">
                                         Rank
                                     </th>
-                                    <th width="123px">
+                                    <th width="123px" class="th-header">
                                         Score
                                     </th>
-                                    <th class="address-header" width="250px">
+                                    <th class="th-header address-header" width="250px">
                                         Address
                                     </th>
+                                    <th style="text-align: right;"><i class="fa fa-external-link-square"></i></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -535,6 +536,10 @@
         @media (max-width: 500px) {
             width: 150px;
         }
+    }
+
+    .th-header {
+        text-align: center;
     }
 
 </style>
