@@ -573,12 +573,9 @@ controller.startwatchNewIntel = function(){
                         try{
                             wss.clients.forEach(function each(client) {
                                 if (client.isAlive === false) return client.terminate();
-
-                                client.isAlive = false;
-                                client.ping(noop);
                                 if (client.readyState === WebSocket.OPEN ) {
                                     // Validate if the user is subscribed a set of information
-                                    if(client.info && client.user){
+                                    if(client.user){
                                         client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
                                     }
                                 }
