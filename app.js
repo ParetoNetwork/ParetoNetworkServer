@@ -689,7 +689,8 @@ app.initializeWebSocket = function(server){
             ws.info = JSON.parse(message);
         });
     });
-
+    controller.wss = wss;
+    controller.WebSocket = WebSocket;
     /**
      * Validates if the connection is alive and sends info each minute,
      */
