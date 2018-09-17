@@ -12,8 +12,8 @@ if (fs.existsSync(constantsPath)) {
 }
 console.log(constants);
 /*constants*/
-var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
-var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
+var CONNECTION_URL = process.env.MONGODB_URI || constants.MONGODB_URI;
+var PARETO_CONTRACT_ADDRESS = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
 var WEB3_URL = process.env.WEB3_URL;
 var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 
@@ -72,7 +72,7 @@ controller.startW3WebSocket = function () {
 
 const mongoose = require('mongoose');
 //var models = require('./models/address');
-mongoose.connect(connectionUrl).then(tmp=>{
+mongoose.connect(CONNECTION_URL).then(tmp=>{
     controller.startW3WebSocket();
   console.log("PARETO: Success connecting to Mongo ")
 }).catch(err=>{
@@ -268,7 +268,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
     var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
     //then re-tally total
     return web3.eth.call({
-        to: paretoContractAddress,
+        to: PARETO_CONTRACT_ADDRESS,
         data: contractData
     }).then(function(result) {
         var amount = 0;
@@ -282,7 +282,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
             return web3.eth.getPastLogs({
                 fromBlock: contractCreationBlockHeightHexString,
                 toBlock: 'latest',
-                address: paretoContractAddress,
+                address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
             }).then(function (txObjects){
                 //console.log(txObjects);
@@ -312,7 +312,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                 return web3.eth.getPastLogs({
                     fromBlock: contractCreationBlockHeightHexString,
                     toBlock: 'latest',
-                    address: paretoContractAddress,
+                    address: PARETO_CONTRACT_ADDRESS,
                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
                 }).then(function (txObjects){
                     //console.log(txObjects);
@@ -490,7 +490,7 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
 
                 //then re-tally total
                 return web3.eth.call({
-                    to: paretoContractAddress,
+                    to: PARETO_CONTRACT_ADDRESS,
                     data: contractData
                 }).then(function(result) {
                     var amount = 0;
@@ -1071,7 +1071,7 @@ controller.realAllScoreRanking = async function(callback){
             return web3.eth.getPastLogs({
                 fromBlock: "0x" + ((blockHeight-7200).toString(16)),//'0x501331', //contractCreationBlockHeightHexString,
                 toBlock: 'latest',
-                address: paretoContractAddress,
+                address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
             }).then(function (txObjects){
 
@@ -1515,7 +1515,7 @@ controller.seedLatestEvents = function(){
       return web3.eth.getPastLogs({
         fromBlock: contractCreationBlockHeightHexString,//'0x501331', //contractCreationBlockHeightHexString,
         toBlock: 'latest',
-        address: '0xbcce0c003b562f47a319dfca4bce30d322fa0f01',
+        address: PARETO_CONTRACT_ADDRESS,
         topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
       }).then(function (txObjects){
 
