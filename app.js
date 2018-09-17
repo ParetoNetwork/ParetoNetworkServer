@@ -23,7 +23,6 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 var controller = require('./backend-controller.js');
-require("./ContractEventListeners/Intel");
 
 
 var app = express();
@@ -103,7 +102,6 @@ const ErrorHandler = require('./error-handler.js');
 
 
 app.get('/profile-image', function (req, res) {
-    0
     var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
    // var url = s3.getSignedUrl('getObject', params);
 
@@ -250,6 +248,16 @@ app.get("/getIntels", (req, res) => {
         });
   })
   
+  app.get("/getContributors/:intelId", (req, res) => {
+    const {intelId} = req.params;
+    controller.getContributorsByIntel(intelId, (err, response) => {
+        if (err) {
+          res.status(502).json({ message: "Could not get Contributors" });
+        } else {
+          res.status(200).json({ message: "success", data: response });
+        }
+      });
+  })
 
 /********* AUTHENTICATED v1 APIs *********/
 
@@ -636,95 +644,97 @@ setTimeout(function run() {
 WEb socket in order to keep fronted updated
  */
 
-const WebSocket = require('ws');
-var WebSocketServer = WebSocket.Server,
-    wss = new WebSocketServer({
-        verifyClient: function (info, cb) {
+app.initializeWebSocket = function(server){
 
-            var token = info.req.headers.cookie.split('authorization=')[1];
-            if (!token)
-                cb(false, 401, 'Unauthorized');
-            else {
-                jwt.verify(token, 'Pareto', function (err, decoded) {
-                    if (err) {
-                        cb(false, 401, 'Unauthorized')
-                    } else {
-                        info.req.user = decoded;
-                        cb(true)
-                    }
-                })
+    const WebSocket = require('ws');
+    var WebSocketServer = WebSocket.Server,
+        wss = new WebSocketServer({
+            verifyClient: function (info, cb) {
 
-            }
-        },
-        port: process.env.WS_PORT || constants.WS_PORT
-    });
-
-
-/**
- * We need these functions in order to prevent issues with the sockets ‘alive’ status and improve performance.
- */
-function noop() {}
-
-function heartbeat() {
-    this.isAlive = true;
-}
-
-/**
- * Initialize connections
- */
-wss.on('connection', function connection(ws, req) {
-    ws.isAlive = true;
-    ws.on('pong', heartbeat);
-    ws.user = req.user;
-    ws.on('message', function (message) {
-        ws.info = JSON.parse(message);
-    });
-});
-
-/**
- * Validates if the connection is alive and sends info each minute,
- */
-cron.schedule("* * * * *", function() {
-    try{
-        wss.clients.forEach(function each(client) {
-            if (client.isAlive === false) return client.terminate();
-
-            client.isAlive = false;
-            client.ping(noop);
-            if (client.readyState === WebSocket.OPEN ) {
-                // Validate if the user is subscribed a set of information
-                if(client.info && client.user){
-                    const rank = parseInt(client.info.rank) || 1;
-                    let limit = parseInt(client.info.limit) || 100;
-                    const page = parseInt(client.info.page) || 0;
-
-                    //max limit
-                    if (limit > 500) {
-                        limit = 500;
-                    }
-                    /**
-                     * Send ranking
-                     */
-                    controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
-                        if (!err) {
-                            client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                var token = info.req.headers.cookie.split('authorization=')[1];
+                if (!token)
+                    cb(false, 401, 'Unauthorized');
+                else {
+                    jwt.verify(token, 'Pareto', function (err, decoded) {
+                        if (err) {
+                            cb(false, 401, 'Unauthorized')
+                        } else {
+                            info.req.user = decoded;
+                            cb(true)
                         }
-                    });
-
-                    controller.retrieveAddress(client.user.user, function (err, result) {
-                        if (!err) {
-                            client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                        }
-                    });
+                    })
 
                 }
-            }
-        });
-    }catch (e) {
-        console.log(e);
+            },
+            server: server});
+
+    /**
+     * We need these functions in order to prevent issues with the sockets ‘alive’ status and improve performance.
+     */
+    function noop() {}
+
+    function heartbeat() {
+        this.isAlive = true;
     }
 
-});
+    /**
+     * Initialize connections
+     */
+    wss.on('connection', function connection(ws, req) {
+        console.log('connection');
+        ws.isAlive = true;
+        ws.on('pong', heartbeat);
+        ws.user = req.user;
+        ws.on('message', function (message) {
+            ws.info = JSON.parse(message);
+        });
+    });
 
+    /**
+     * Validates if the connection is alive and sends info each minute,
+     */
+    cron.schedule("* * * * *", function() {
+        try{
+            wss.clients.forEach(function each(client) {
+                if (client.isAlive === false) return client.terminate();
+
+                client.isAlive = false;
+                client.ping(noop);
+                if (client.readyState === WebSocket.OPEN ) {
+                    // Validate if the user is subscribed a set of information
+                    if(client.info && client.user){
+                        const rank = parseInt(client.info.rank) || 1;
+                        let limit = parseInt(client.info.limit) || 100;
+                        const page = parseInt(client.info.page) || 0;
+
+                        //max limit
+                        if (limit > 500) {
+                            limit = 500;
+                        }
+                        /**
+                         * Send ranking
+                         */
+                        controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                            if (!err) {
+                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                            }
+                        });
+
+                        controller.retrieveAddress(client.user.user, function (err, result) {
+                            if (!err) {
+                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                            }
+                        });
+
+                    }
+                }
+            });
+        }catch (e) {
+            console.log(e);
+        }
+
+    });
+
+}
 
 module.exports = {app: app, controller: controller };

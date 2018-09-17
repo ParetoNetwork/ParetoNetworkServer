@@ -9,7 +9,6 @@ import Notifications from 'vue-notification'
 const snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
 import BootstrapVue from 'bootstrap-vue';
 import 'bootstrap';
-
 import Environment from './utils/environment';
 
 Vue.use(BootstrapVue);
@@ -60,7 +59,7 @@ const store = new Vuex.Store({
             state.showModalLedgerNano = false;
             state.makingLogin = false;
         }, iniWs(state) {
-            state.ws = new WebSocket (Environment.baseUrlSocket);
+            state.ws = new WebSocket (Environment.webSocketURL);
         }
     },
     actions: {
