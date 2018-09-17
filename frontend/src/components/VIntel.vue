@@ -162,11 +162,11 @@
                                     <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
                                         <div v-if="false" class="text-right font-weight-bold">
                                             <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                            <span class="text-right">{{row.pxt}}</span>
+                                            <span class="text-right">{{row.reward}}</span>
                                         </div>
                                         <div v-if="user.address != row.address" class="text-center">
                                             <div class="d-inline-block">
-                                                <p class="text-right text-secondary pl-lg-2"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> 8000PXT </b></p>
+                                                <p class="text-right text-secondary pl-lg-2 ellipsis"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> {{row.reward}} </b></p>
                                                 <b-btn class="btn-primary-pareto mx-auto px-4"
                                                        style="max-width: 120px;"
                                                        v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress">REWARD

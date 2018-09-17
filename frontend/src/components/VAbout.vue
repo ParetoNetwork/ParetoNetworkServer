@@ -76,26 +76,6 @@
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
-                                    <img src="../assets/images/team-chiara.jpg" alt="" class="rounded-circle"
-                                         width="85">
-                                </figure>
-                                <div class="d-flex flex-column">
-                                    <span class="name">Chiara Longo</span>
-                                    <span class="position">Chief Economist.</span>
-                                </div>
-                                <div class="mb-2">
-                                    <p>Univ. Milan, PhD in Economics., Bank of the West/BNP Paribas | 15 years in
-                                        econometric modeling of commodities and currencies</p>
-                                </div>
-                                <div class="team-member__socials">
-                                    <a href="https://www.linkedin.com/in/chiaralongo/" target="_blank"><i
-                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
-                                </div>
-                            </div> <!-- end team-member -->
-                        </div>
-                        <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="team-member text-center">
-                                <figure class="team-member__image">
                                     <img src="../assets/images/team-chrisg.jpg" alt="" class="rounded-circle" width="85">
                                 </figure>
                                 <div class="d-flex flex-column">
@@ -147,25 +127,6 @@
                                 </div>
                                 <div class="team-member__socials">
                                     <a href="https://www.linkedin.com/in/drannabecker/" target="_blank"><i
-                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
-                                </div>
-                            </div> <!-- end team-member -->
-                        </div>
-                        <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="team-member text-center">
-                                <figure class="team-member__image">
-                                    <img src="../assets/images/team-5.jpg" alt="" class="rounded-circle" width="85">
-                                </figure>
-                                <div class="d-flex flex-column">
-                                    <span class="name">Colin Mo</span>
-                                    <span class="position">Communications Strategy Lead.</span>
-                                </div>
-                                <div class="mb-2">
-                                    <p>Northwestern M.S. Journalism | Digital media innovation focused reporter and
-                                        technical writer</p>
-                                </div>
-                                <div class="team-member__socials">
-                                    <a href="https://www.linkedin.com/in/colin-mo-355b96ba/" target="_blank"><i
                                             class="fa fa-linkedin-square" aria-hidden="true"></i></a>
                                 </div>
                             </div> <!-- end team-member -->
