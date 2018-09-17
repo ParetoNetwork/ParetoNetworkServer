@@ -571,11 +571,12 @@ controller.startwatchNewIntel = function(){
             ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                     if(controller.wss){
                         try{
-                            wss.clients.forEach(function each(client) {
+                            controller.wss.clients.forEach(function each(client) {
                                 if (client.isAlive === false) return client.terminate();
-                                if (client.readyState === WebSocket.OPEN ) {
+                                if (client.readyState === controller.WebSocket.OPEN ) {
                                     // Validate if the user is subscribed a set of information
                                     if(client.user){
+                                        //console.log('updateContent');
                                         client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
                                     }
                                 }
@@ -583,6 +584,8 @@ controller.startwatchNewIntel = function(){
                         }catch (e) {
                             console.log(e);
                         }
+                    }else{
+                        console.log('no wss')
                     }
             });
         }catch (e) {
