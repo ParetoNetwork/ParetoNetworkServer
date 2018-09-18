@@ -211,17 +211,15 @@ export default class authService {
             ];
 
 
+            console.log(pathId);
             this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
             if (this.ledgerNanoProvider.utils.isAddress(addr)) {
                 const from = addr.toLowerCase();
 
                 this.ledgerWalletSubProvider.ledger.signMessage({data:  this.ledgerNanoProvider.utils.toHex('Pareto')}, (err, result) => {
-                    if (err) return console.dir(err);
+                    if (err) return onError(err.message);
                     if (result.error) {
                         return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
-                    }
-                    if (result.error) {
-                        return console.error(result);
                     }
 
                     const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});

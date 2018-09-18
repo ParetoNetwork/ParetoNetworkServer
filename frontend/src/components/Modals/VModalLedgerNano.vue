@@ -39,7 +39,7 @@
                             <b-row class="m-2 mt-4">
                                 <div class="col-md-3 mb-2 p-0">
                                     <b-form-radio :disabled="!supported || !paths[0].address"
-                                                  v-on:change="onAddresSelected('s44\'/60\'/0\'/0/0', paths[0].address[0], 0)"
+                                                  v-on:change="onAddresSelected('s44\'/60\'/0\'/0/0', paths[0].address[0], 0,0)"
                                                   value="s44'/60'/0'/0/0">
                                         <div class="modal-input-inline">
                                             <p> STANDARD </p>
@@ -57,8 +57,8 @@
                                                         class="fa fa-sort-down"></i> </span>
                                             </div>
                                         </template>
-                                        <b-dropdown-item v-for="user in paths[0].address"
-                                                         @click="onAddresSelected('s44\'/60\'/0\'/0/0', user, 0)">
+                                        <b-dropdown-item v-for="(user, index) in paths[0].address" :key="index"
+                                                         @click="onAddresSelected('s44\'/60\'/0\'/0/0', user, 0, index)">
                                             <div class="d-flex justify-content-between">
                                                 <span class="span-ellipsis"> {{user.address}} </span>
                                                 <span> {{parseInt(user.tokens || '0')}} PARETO</span>
@@ -80,7 +80,7 @@
                             <b-row class="m-2 mt-4">
                                 <div class="col-md-3 mb-2 p-0">
                                     <b-form-radio :disabled="!supported || !paths[1].address"
-                                                  v-on:change="onAddresSelected('l44\'/60\'/0\'/0', paths[1].address[0], 1)"
+                                                  v-on:change="onAddresSelected('l44\'/60\'/0\'/0', paths[1].address[0], 1,0)"
                                                   value="l44'/60'/0'/0">
                                         <div class="modal-input-inline">
                                             <p> LEGACY </p>
@@ -98,8 +98,8 @@
                                                         class="fa fa-sort-down"></i> </span>
                                             </div>
                                         </template>
-                                        <b-dropdown-item :disabled="!supported" v-for="user in paths[1].address"
-                                                         @click="onAddresSelected('l44\'/60\'/0\'/0', user, 1)">
+                                        <b-dropdown-item :disabled="!supported" v-for="(user, index) in paths[1].address" :key="index"
+                                                         @click="onAddresSelected('l44\'/60\'/0\'/0', user, 1, index)">
                                             <div class="d-flex justify-content-between">
                                                 <span class="span-ellipsis"> {{user.address}} </span>
                                                 <span> {{parseInt(user.tokens || '0')}} PARETO</span>
@@ -120,7 +120,7 @@
                             <b-row class="m-2 mt-4">
                                 <div class="col-12 col-md-3 mb-2 p-0">
                                     <b-form-radio :disabled="!supported || !paths[0].address"
-                                                  v-on:change="onAddresSelected(customPath, paths[2].address[0] || '', 2)"
+                                                  v-on:change="onAddresSelected(customPath, paths[2].address[0] || '', 2,0)"
                                                   v-bind:value="customPath">
                                         <b-form-input
                                                 :disabled="!supported"
@@ -142,8 +142,8 @@
                                                         class="fa fa-sort-down"></i> </span>
                                             </div>
                                         </template>
-                                        <b-dropdown-item v-for="user in paths[2].address"
-                                                         @click="onAddresSelected(customPath, user, 2)">
+                                        <b-dropdown-item v-for="(user, index) in paths[2].address" :key="index"
+                                                         @click="onAddresSelected(customPath, user, 2, index)">
                                             <div class="d-flex justify-content-between">
                                                 <span class="span-ellipsis"> {{user.address}} </span>
                                                 <span> {{parseInt(user.tokens || '0')}} PARETO</span>
@@ -172,9 +172,12 @@
             </b-container>
 
             <b-row class="m-2 mt-4 float-right">
+                <div v-if="loadingSign">
+                    <p class=" ">Sign message PARETO with selected address</p>
+                </div>
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
                 <b-btn size="sm" :disabled="!selectedAddress || (customPathError && selectedPath === customPath)"
-                       variant="success" @click="hardware(); onClosedModal();">Continue
+                       variant="success" @click="hardware()">Continue
                 </b-btn>
             </b-row>
 
@@ -192,6 +195,7 @@
         data() {
             return {
                 title: 'titulo nuevo',
+                loadingSign: false,
                 supported: true,
                 selectedPath: null,
                 selectedAddress: '',
@@ -205,6 +209,7 @@
                         name: 'standard',
                         id: "s44'/60'/0'/0/0",
                         selected: {},
+                        selectedindx: 0,
                         address: '',
                         scroll: {},
                         options: []
@@ -213,6 +218,7 @@
                         name: 'legacy',
                         id: "l44'/60'/0'/0",
                         selected: {},
+                        selectedindx: 0,
                         address: '',
                         scroll: {}
                     },
@@ -221,6 +227,7 @@
                         selected: {
                             address: ''
                         },
+                        selectedindx: 0,
                         address: '',
                         id: "44'60/1",
                         scroll: {}
@@ -242,7 +249,6 @@
                 this.timer = setTimeout(() => {
                     let page = 0, limit = 10;
                     authService.getWalletAccounts(this.customPath, page, limit, data => {
-
                         foundAddress = true;
                         let addressList = Object.values(data);
                         addressList = addressList.map(address => {
@@ -269,6 +275,7 @@
 
                             this.paths[2].selected = this.paths[2].address[0];
                             this.selectedAddress = this.paths[2].selected.address;
+                            this.selectedindx = this.paths[2].selectedindx;
 
                         }, error => {
                             console.log(error);
@@ -280,6 +287,7 @@
                     if (!foundAddress) {
                         this.customPathError = true;
                         this.paths[2].selected = '';
+                        this.paths[2].selectedindx = 0;
                         this.paths[2].address = false;
                     }
                     this.loadingCustomPath = false;
@@ -353,6 +361,8 @@
                             return newAddressToken;
                         });
                         this.paths[path_id].selected = this.paths[path_id].address[0];
+                        this.paths[path_id].selectedindx = 0;
+
 
                     }, error => {
                         this.$notify({
@@ -373,17 +383,20 @@
                 });
             },
             hardware: function () {
+                this.loadingSign = true;
                 let path = (isNaN(this.selectedPath.charAt(0)))? this.selectedPath.substring(1) : this.selectedPath;
-
                 this.loadingLogin();
-                authService.signWallet(path, this.selectedAddress, data => {
+                authService.signWallet(path.substring(0,path.length-1)+this.selectedindx, this.selectedAddress, data => {
+                    this.loadingSign = false;
                     this.$store.dispatch({
                         type: 'login',
                         address: data,
                     });
                     this.collapseContent();
                     this.$router.push('/intel');
+                    this.onClosedModal()
                 }, error => {
+                    this.loadingSign = false;
                     this.stopLogin();
                     this.$notify({
                         group: 'foo',
@@ -397,10 +410,12 @@
                 this.$store.state.showModalLedgerNano = false;
                 authService.deleteWatchNano();
             },
-            onAddresSelected(path, user, pathsIndex) {
+            onAddresSelected(path, user, pathsIndex, indx) {
                 this.selectedPath = path;
                 this.selectedAddress = user.address;
+                this.selectedindx = indx;
                 this.paths[pathsIndex].selected = user;
+                this.paths[pathsIndex].selectedindx = indx;
             },
             scrollAddressList: function (index, path) {
                 if (path.scrollTop + path.offsetHeight >= path.scrollHeight && !this.loadingInfiniteScrollData) {
@@ -409,9 +424,7 @@
                     let page = this.paths[index].address.length / 10;
 
                     let path = (isNaN(this.selectedPath.charAt(0)))? this.selectedPath.substring(1) : this.selectedPath;
-
                     authService.getWalletAccounts(path, page, 10, data => {
-
                         let addressList = Object.values(data);
                         addressList = addressList.map(address => {
                             return address.toLowerCase();
