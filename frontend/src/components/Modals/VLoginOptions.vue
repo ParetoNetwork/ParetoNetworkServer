@@ -81,11 +81,10 @@
                         this.collapseContent();
                         this.$router.go(this.redirectRoute || '/intel');
                     }, () => {
-
+                        console.log('Metamask Error');
                     });
 
                 }, error => {
-
                     console.log(error);
                     this.stopLogin();
                     this.$notify({
