@@ -105,7 +105,7 @@ export default class authService {
     }
 
     static isWalletSupported(onSuccess, onError) {
-        this.initLedgerNano(()=>{onSuccess(true)}, onSuccess(false));
+        this.initLedgerNano(()=>{onSuccess(true)}, onError);
     }
 
     static doWhenIsConnected(onSuccess) {

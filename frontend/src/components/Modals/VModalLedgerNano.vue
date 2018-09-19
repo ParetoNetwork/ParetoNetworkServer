@@ -65,13 +65,21 @@
                                             </div>
                                         </b-dropdown-item>
                                     </b-dropdown>
-
                                     <div class="address-controls">
-                                        <div v-if="!paths[0].selected.address" class="address-disabled">
-                                            <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
-                                        </div>
-                                        <div v-else>
-                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[0].selected.address" target="_blank"><i class="fa fa-external-link"></i></a>
+                                        <div :class="{ 'address-disabled': !paths[0].selected.address }">
+                                            <b-tooltip
+                                                    :delay="tooltipDelay"
+                                                    target="copyAddressLegacy"
+                                                    placement="top">
+                                                <span id="tooltipText1">Copy Address to clipboard</span>
+                                            </b-tooltip>
+                                            <i id="copyAddressLegacy"
+                                               @click="copyTextClipboard(paths[0].selected.address, 'tooltipText1')"
+                                               class="fa fa-copy cursor-pointer"></i>
+                                            <a v-if="!!paths[0].selected.address" v-bind:href="'https://etherscan.io/address/'+paths[0].selected.address" target="_blank">
+                                                <i class="fa fa-external-link"></i>
+                                            </a>
+                                            <i v-else class="fa fa-external-link"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -107,11 +115,20 @@
                                         </b-dropdown-item>
                                     </b-dropdown>
                                     <div class="address-controls">
-                                        <div v-if="!paths[1].selected.address" class="address-disabled">
-                                            <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
-                                        </div>
-                                        <div v-else>
-                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[1].selected.address" target="_blank"><i class="fa fa-external-link"></i></a>
+                                        <div :class="{ 'address-disabled': !paths[1].selected.address }">
+                                            <b-tooltip
+                                                    :delay="tooltipDelay"
+                                                    target="copyAddressStandard"
+                                                    placement="top">
+                                                <span id="tooltipText2">Copy Address to clipboard</span>
+                                            </b-tooltip>
+                                            <i id="copyAddressStandard"
+                                               @click="copyTextClipboard(paths[1].selected.address, 'tooltipText2')"
+                                               class="fa fa-copy cursor-pointer"></i>
+                                            <a v-if="!!paths[1].selected.address" v-bind:href="'https://etherscan.io/address/'+paths[1].selected.address" target="_blank">
+                                                <i class="fa fa-external-link"></i>
+                                            </a>
+                                            <i v-else class="fa fa-external-link"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -151,11 +168,20 @@
                                         </b-dropdown-item>
                                     </b-dropdown>
                                     <div class="address-controls">
-                                        <div v-if="!paths[2].selected.address" class="address-disabled">
-                                            <i class="fa fa-copy"></i> <i class="fa fa-external-link"></i>
-                                        </div>
-                                        <div v-else>
-                                            <!-- consider clipboard.js or normal js <i class="fa fa-copy"></i> --> <a v-bind:href="'https://etherscan.io/address/'+paths[2].selected.address" target="_blank"><i class="fa fa-external-link"></i></a>
+                                        <div :class="{ 'address-disabled': !paths[2].selected.address }">
+                                            <b-tooltip
+                                                    :delay="tooltipDelay"
+                                                    target="copyAddressCustom"
+                                                    placement="top">
+                                                <span id="tooltipText3">Copy Address to clipboard</span>
+                                            </b-tooltip>
+                                            <i id="copyAddressCustom"
+                                               @click="copyTextClipboard(paths[2].selected.address, 'tooltipText3')"
+                                               class="fa fa-copy cursor-pointer"></i>
+                                            <a v-if="!!paths[2].selected.address" v-bind:href="'https://etherscan.io/address/'+paths[2].selected.address" target="_blank">
+                                                <i class="fa fa-external-link"></i>
+                                            </a>
+                                            <i v-else class="fa fa-external-link"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -165,12 +191,11 @@
                                     <i v-if="loadingCustomPath || (!paths[0].address && supported) || loadingInfiniteScrollData" class="fa fa-spinner fa-spin ml-2"></i>
                                 </div>
                             </b-row>
-
                         </b-form-radio-group>
                     </b-form-group>
                 </div>
             </b-container>
-
+            <input id="copyClipboard" style="position: absolute; left: -9999px">
             <b-row class="m-2 mt-4 float-right">
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
                 <b-btn size="sm" :disabled="!selectedAddress || (customPathError && selectedPath === customPath)"
@@ -200,14 +225,14 @@
                 loadingCustomPath: false,
                 loadingInfiniteScrollData: false,
                 timer: {},
+                tooltipDelay : { show: 100, hide: 100 },
                 paths: [
                     {
                         name: 'standard',
                         id: "s44'/60'/0'/0/0",
                         selected: {},
                         address: '',
-                        scroll: {},
-                        options: []
+                        scroll: {}
                     },
                     {
                         name: 'legacy',
@@ -322,6 +347,30 @@
             },
             fillPathAddress: function () {
                 this.getAddress(0, 0, 10);
+            },
+            copyTextClipboard: function (address, tooltipId){
+
+                if(!address) return;
+                this.tooltipDelay.hide = 3000;
+                var copyText = document.getElementById("copyClipboard");
+                copyText.value = address;
+
+                copyText.select();
+                document.execCommand('copy');
+
+                var that = $('#' + tooltipId);
+                that.text('Copied address to clipboard');
+
+                that.toggleClass('visibleTooltip');
+
+                setTimeout( () => {
+                    this.tooltipDelay.hide = 100;
+                }, 1000);
+
+                setTimeout( () => {
+                    that.text('Copy address to clipboard');
+                    that.toggleClass('visibleTooltip');
+                }, 3000);
             },
             getAddress: function(path_id, page, limit){
                 let myPath = this.paths[path_id].id.substr(1);
@@ -474,6 +523,12 @@
                     }
                 }, error => {
                     this.supported = false;
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error
+                    });
                 });
             },
             ...mapMutations({
@@ -572,5 +627,41 @@
         margin-top: 0px;
         width: 100%;
     }
+    .customTooltip {
+        position: relative;
+        display: inline-block;
+    }
 
+    .customTooltip .tooltiptext {
+        visibility: hidden;
+        width: 140px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 150%;
+        left: 50%;
+        margin-left: -75px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .customTooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #555 transparent transparent transparent;
+    }
+
+    .customTooltip:hover .tooltiptext, .visibleTooltip {
+        visibility: visible;
+        opacity: 1;
+    }
 </style>
