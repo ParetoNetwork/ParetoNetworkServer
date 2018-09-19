@@ -93,7 +93,6 @@
                         centered
                         hide-header
                         hide-footer
-                        @hide="hideModal"
                         :body-bg-variant="'dark'"
                         :body-text-variant="'light'">
 
@@ -135,6 +134,28 @@
                     </b-container>
                 </b-modal>
             </div>
+            <div>
+                <b-modal
+                        no-close-on-backdrop
+                        v-model="modalCloseWarning"
+                        @hide="hideModalWarning"
+                        centered
+                        hide-header
+                        hide-footer
+                        :body-bg-variant="'dark'"
+                        :body-text-variant="'light'">
+                    <b-container fluid>
+                        <h4 class="font-body mb-3"> Warning! </h4>
+                        <p class="text-dashboard mb-2" style="font-size: 16px"> You are interrupting the process of creating an Intel and it may will not be created </p>
+                        <p class="text-dashboard mb-2" style="font-size: 16px"> Do you want to continue? </p>
+
+                        <b-row class="m-2 mt-4 d-flex justify-content-center">
+                            <b-button class="mr-2" variant="danger" @click="hideModalWarning"> Cancel </b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="routeLeaving()"> Confirm </b-button>
+                        </b-row>
+                    </b-container>
+                </b-modal>
+            </div>
         </div>
     </div>
 
@@ -150,6 +171,11 @@
         name: 'VCreateIntel',
         data: function () {
             return {
+                aviso: 'importante',
+                nextRoute: {
+                    canAsk: true,
+                    to: {}
+                },
                 logged: false,
                 block: null,
                 body : '',
@@ -159,7 +185,7 @@
                 blockChainAddress:'',
                 tokens: 1,
                 intel :{
-                    state: 'empty',
+                    state: 'empty',  // 'creating', 'created'
                     text : '',
                 },
                 formError: {
@@ -168,6 +194,7 @@
                 },
                 modalToken : false,
                 modalWaiting : false,
+                modalCloseWarning: false,
                 notificationSystem: {
                     options: {
                         success: {
@@ -228,6 +255,28 @@
                 }
             });
             this.address();
+
+            /*
+            window.addEventListener('popstate', function () {
+                console.log('new backbutton');
+                history.pushState(null, null, document.URL);
+                window.prompt()
+            });
+            */
+
+            this.routeRealod();
+
+
+        },
+        beforeRouteLeave(to, from, next){
+
+            if(this.nextRoute.canAsk && this.intel.state === 'creating'){
+                this.modalCloseWarning = true;
+                this.nextRoute.to = to;
+                next(false);
+            }else{
+                next();
+            }
         },
         methods: {
             address: function () {
@@ -247,7 +296,6 @@
                 if(!this.formError.title || !this.formError.body) return;
 
                 this.showModal();
-
             },
             upload: function () {
                 this.hideModal();
@@ -285,8 +333,21 @@
                         duration: 20000,
                         text: err || 'Could not create Intel' });
                     this.$store.state.makingRequest = false;
-                })
-                
+                });
+            },
+            routeLeaving: function(){
+                this.nextRoute.canAsk = false;
+                this.modalCloseWarning = false;
+                this.$router.push(this.nextRoute.to.path);
+            },
+            routeRealod : function(){
+                window.onbeforeunload = function () {
+                    if (document.location.href.indexOf('create') !== -1) {
+                        return '';
+                    } else {
+                        return void (0);
+                    }
+                };
             },
             intelState : function (state, text) {
                 this.intel.state = state;
@@ -294,6 +355,10 @@
             },
             showModal () {
                 this.modalToken = true;
+            },
+            hideModalWarning: function(){
+                this.modalCloseWarning = false;
+              this.modalWaiting = true;
             },
             hideModal () {
                 this.modalToken = false;
