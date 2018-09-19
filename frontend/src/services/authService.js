@@ -3,6 +3,8 @@ import Sig from 'eth-sig-util';
 import qs from 'qs';
 import http from './HttpService';
 
+import ledger from "ledgerco";
+
 /* eslint-disable no-console */
 let logged = false;
 export default class authService {
@@ -15,6 +17,7 @@ export default class authService {
     static ledgerWalletSubProvider = null;
     static ledgerNanoProvider = null;
     static ledgerNanoEngine = null;
+    static actualConnection = null;
     static getSocketToken(onSuccess){
         http.get("/v1/signws")
             .then(res => {
@@ -105,7 +108,7 @@ export default class authService {
     }
 
     static isWalletSupported(onSuccess, onError) {
-        this.initLedgerNano(()=>{onSuccess(true)}, onSuccess(false));
+        this.initLedgerNano(()=>{onSuccess(true)}, onError);
     }
 
     static doWhenIsConnected(onSuccess) {
@@ -130,6 +133,12 @@ export default class authService {
         if (this.timer) {
             clearTimeout(this.timer);
             this.timer = null;
+        }
+        if(this.ledgerWalletSubProvider && this.ledgerWalletSubProvider.ledger){
+            this.ledgerWalletSubProvider.ledger.connectionOpened =false
+            if(this.actualConnection){
+                this.ledgerWalletSubProvider.ledger.closeLedgerConnection(this.actualConnection);
+            }
         }
     }
 
@@ -209,19 +218,38 @@ export default class authService {
                     value: 'Pareto' //replace with TOS
                 }
             ];
-
-
             this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
             if (this.ledgerNanoProvider.utils.isAddress(addr)) {
                 const from = addr.toLowerCase();
-
+                this.ledgerWalletSubProvider.ledger.getLedgerConnection = async function() {
+                    if (this.connectionOpened) {
+                        throw new Error(
+                            "You can only have one ledger connection active at a time"
+                        );
+                    } else {
+                        this.connectionOpened = true;
+                        // eslint-disable-next-line new-cap
+                        authService.actualConnection = new ledger.eth(
+                            this.isNode
+                                ? await ledger.comm_node.create_async()
+                                : await ledger.comm_u2f.create_async(30)
+                        );
+                        return  authService.actualConnection;
+                    }
+                };
                 this.ledgerWalletSubProvider.ledger.signMessage({data:  this.ledgerNanoProvider.utils.toHex('Pareto')}, (err, result) => {
-                    if (err) return console.dir(err);
-                    if (result.error) {
-                        return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
+                    if (err) {
+                        if(err.metaData.code ===5){
+                           return  authService.signWallet(pathId, addr, onSuccess, onError)
+                        }else{
+                           return  onError(err.message);
+                        }
+                    }
+                    if(!result){
+                        return onError('Connection lost');
                     }
                     if (result.error) {
-                        return console.error(result);
+                        return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
                     }
 
                     const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
