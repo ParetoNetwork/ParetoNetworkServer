@@ -23,7 +23,6 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 var controller = require('./backend-controller.js');
-require("./ContractEventListeners/Intel");
 
 
 var app = express();
@@ -690,7 +689,8 @@ app.initializeWebSocket = function(server){
             ws.info = JSON.parse(message);
         });
     });
-
+    controller.wss = wss;
+    controller.WebSocket = WebSocket;
     /**
      * Validates if the connection is alive and sends info each minute,
      */

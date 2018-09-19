@@ -12,8 +12,8 @@ if (fs.existsSync(constantsPath)) {
 }
 console.log(constants);
 /*constants*/
-var connectionUrl = process.env.MONGODB_URI || constants.MONGODB_URI;
-var paretoContractAddress = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
+var CONNECTION_URL = process.env.MONGODB_URI || constants.MONGODB_URI;
+var PARETO_CONTRACT_ADDRESS = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
 var WEB3_URL = process.env.WEB3_URL;
 var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 
@@ -24,32 +24,60 @@ fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);
 });
 
+
+/**
+ * Redis Initialization
+ */
 const redis = require("redis");
 redisClient = redis.createClient(
   process.env.REDIS_URL  || constants.REDIS_URL
 );
-
-
 redisClient.on("connect", function () {
   console.log("PARETO: Success connecting to Redis ")
 });
-
 redisClient.on("error", function (err) {
   console.log("PARETO: Problems connecting to Redis "+ err );
 });
 
 
-/*db initialization*/
+/**
+ * Web3 Initialization
+ */
+var Web3 = require('web3');
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
+// var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
+var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
+var web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+var web3_events = new Web3(web3_events_provider);
+
+controller.startW3WebSocket = function () {
+    web3_events_provider.on('connect', function () {
+        console.log('WS web3 connected');
+        controller.startwatchNewIntel()
+    });
+
+    web3_events_provider.on('end', e => {
+        console.log('WS web3 closed');
+        console.log('Attempting to reconnect...');
+        web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+        web3_events = new Web3(web3_events_provider);
+        controller.startW3WebSocket()
+    });
+};
+
+/**
+ *
+ * Db Initialization
+ */
+
 const mongoose = require('mongoose');
 //var models = require('./models/address');
-mongoose.connect(connectionUrl).then(tmp=>{
+mongoose.connect(CONNECTION_URL).then(tmp=>{
+    controller.startW3WebSocket();
   console.log("PARETO: Success connecting to Mongo ")
 }).catch(err=>{
   console.log("PARETO: Problems connecting to Mongo: "+err)
 });
-
-
-
 
 
 /*db model initializations*/
@@ -57,25 +85,7 @@ const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 
-var Web3 = require('web3');
-//var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
-// var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
-var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
-var web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
-var web3_events = new Web3(web3_events_provider);
-web3_events_provider.on('connect', function () {
-    controller.startwatchNewIntel()
-});
 
-web3_events_provider.on('end', e => {
-    console.log('WS closed');
-    console.log('Attempting to reconnect...');
-    web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
-    web3_events = new Web3(web3_events_provider);
-    web3_events_provider.on('connect', function () {
-        controller.startwatchNewIntel()
-    });
-});
 
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
@@ -258,7 +268,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
     var contractData = ('0x70a08231000000000000000000000000' + tknAddress);
     //then re-tally total
     return web3.eth.call({
-        to: paretoContractAddress,
+        to: PARETO_CONTRACT_ADDRESS,
         data: contractData
     }).then(function(result) {
         var amount = 0;
@@ -272,7 +282,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
             return web3.eth.getPastLogs({
                 fromBlock: contractCreationBlockHeightHexString,
                 toBlock: 'latest',
-                address: paretoContractAddress,
+                address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
             }).then(function (txObjects){
                 //console.log(txObjects);
@@ -302,7 +312,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                 return web3.eth.getPastLogs({
                     fromBlock: contractCreationBlockHeightHexString,
                     toBlock: 'latest',
-                    address: paretoContractAddress,
+                    address: PARETO_CONTRACT_ADDRESS,
                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
                 }).then(function (txObjects){
                     //console.log(txObjects);
@@ -480,7 +490,7 @@ controller.getBalance = async function(address, blockHeightFixed, callback){
 
                 //then re-tally total
                 return web3.eth.call({
-                    to: paretoContractAddress,
+                    to: PARETO_CONTRACT_ADDRESS,
                     data: contractData
                 }).then(function(result) {
                     var amount = 0;
@@ -540,31 +550,6 @@ controller.postContent = function (req, callback) {
             if (callback && typeof callback === "function") { callback(err); }
         } else {
 
-
-            const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-            intel.events.NewIntel({
-                fromBlock: 'latest'
-            }, function (error, event) {
-                if (error) {
-                    console.log(error);
-                    return;
-                }
-
-                const initialBalance = event.returnValues.depositAmount;
-                const expiry_time = event.returnValues.ttl;
-
-                if (event.returnValues.intelID == savedIntel.id) {
-
-                    ParetoContent.update({ _id: savedIntel._id }, { validated: true, reward: initialBalance, expires: expiry_time }, { multi: false }, function (err, data) {
-                        if (err) {
-                            throw err;
-                        }
-
-                    });
-                }
-            })
-
-
             if (callback && typeof callback === "function") { callback(null, { Intel_ID: savedIntel.id }); }
 
         }
@@ -574,19 +559,114 @@ controller.postContent = function (req, callback) {
 
 };
 
+/**
+ * Watch Intel events. Support watch rewards for old Intel address
+ */
 controller.startwatchNewIntel = function(){
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
-    intel.events.NewIntel() .on('data',  event => {
+    intel.events.NewIntel().on('data',  event => {
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                    if(controller.wss){
+                        try{
+                            controller.wss.clients.forEach(function each(client) {
+                                if (client.isAlive === false) return client.terminate();
+                                if (client.readyState === controller.WebSocket.OPEN ) {
+                                    // Validate if the user is subscribed a set of information
+                                    if(client.user){
+                                        //console.log('updateContent');
+                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                    }
+                                }
+                            });
+                        }catch (e) {
+                            console.log(e);
+                        }
+                    }else{
+                        console.log('no wss')
+                    }
             });
         }catch (e) {
             console.log(e);
         }
 
+    }).on('error', err=>{
+        console.log(err);
     });
+    ParetoContent.find({ 'expires':{ $gt : Math.round(new Date().getTime() / 1000)}, 'validated': true }).distinct('intelAddress').exec(function(err, results) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            let data = results.filter(item => item.intelAddress === Intel_Contract_Schema.networks["3"].address);
+            if(!data.length){
+                results = [{intelAddress: Intel_Contract_Schema.networks["3"].address}];
+            }
+            for (let i=0;i<results.length;i=i+1) {
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i].intelAddress);
+                intel.events.Reward({ fromBlock: 'latest' }).on('data',  event => {
+                    try{
+                        const rewardAmount = web3.utils.fromWei(event.returnValues.rewardAmount, 'ether');
+                        const intelIndex = event.returnValues.intelIndex;
+                        const sender = event.returnValues.sender;
+                        console.log("Reward event listener", rewardAmount, intelIndex);
+                        //Update rewardAmount on Content
+                        ParetoContent.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {if (err)console.log(err);});
+                        //Update rewardReceived on Profile
+                        ParetoContent.findOne({id:intelIndex}, (err, intel) => {
+                            const {address} = intel;
+
+                            ParetoProfile.findOne({address,'rewardsReceived.IntelID':intelIndex}, (err, profile) => {
+                                if(profile == null){
+                                    ParetoProfile.update({address},{$push:{ rewardsReceived: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
+                                        // console.log("saved 1");
+                                    })
+                                    return;
+                                }
+                                ParetoProfile.update({address,'rewardsReceived.IntelID':intelIndex},{ $inc: {'rewardsReceived.$.reward': rewardAmount}}, (err, profle ) => {
+                                    // console.log("update 1");
+                                } )
+                            })
+                        })
+                        //Update rewardGiven on Profile
+                        ParetoProfile.findOne({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex}, (err, profile) => {
+                            //console.log(err, profile);
+                            if(profile == null){
+                                ParetoProfile.update({address:sender.toLowerCase()},{$push:{ rewardsGiven: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
+                                    // console.log("saved");
+                                })
+                                return;
+                            }
+                            ParetoProfile.update({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex},{ $inc: {'rewardsGiven.$.reward': rewardAmount}}, (err, profle ) => {
+                                // console.log("update");
+                            } )
+                        })
+                    }catch (e) {
+                        console.log(e);
+                    }
+
+                }).on('error', err=>{
+                    console.log(err);
+                });
+
+                intel.events.RewardDistributed({ fromBlock: 'latest' }).on('data',  event => {
+                    try{
+                        const intelIndex = event.returnValues.intelIndex;
+                        ParetoContent.update({ id: intelIndex }, { distributed: true }, { multi: false }, function (err, response) { if (err)console.log(err);});
+                    }catch (e) {
+                        console.log(e);
+                    }
+
+                }).on('error', err=>{
+                    console.log(err);
+                });
+            }
+
+        }
+    });
+
 };
 
 controller.updateFromLastIntel = function(){
@@ -612,7 +692,7 @@ controller.updateFromLastIntel = function(){
                             const event = events[i];
                             const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                             const expiry_time = event.returnValues.ttl;
-                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, { validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                             });
                         }catch (e) {
                             console.log(e);
@@ -774,6 +854,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 reward: entry.reward,
                                 speed: entry.speed,
                                 id:entry.id,
+                                intelAddress: entry.intelAddress,
                                 _v: entry._v,
                                 createdBy: {
                                     address: entry.createdBy.address,
@@ -990,7 +1071,7 @@ controller.realAllScoreRanking = async function(callback){
             return web3.eth.getPastLogs({
                 fromBlock: "0x" + ((blockHeight-7200).toString(16)),//'0x501331', //contractCreationBlockHeightHexString,
                 toBlock: 'latest',
-                address: paretoContractAddress,
+                address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
             }).then(function (txObjects){
 
@@ -1066,7 +1147,7 @@ controller.getContentByCurrentUser = function(req, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address, validated: true}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
+    var query = ParetoContent.find({address : address}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
@@ -1091,6 +1172,8 @@ controller.getContentByCurrentUser = function(req, callback){
                           txHash: entry.txHash,
                           reward: entry.reward,
                           speed: entry.speed,
+                          validated: entry.validated,
+                          intelAddress: entry.intelAddress,
                           _v: entry._v,
                           createdBy: {
                               address: entry.createdBy.address,
@@ -1372,11 +1455,6 @@ controller.retrieveAddressRankWithRedis = function(addressess, attempts, callbac
         if(err){
             return callback(err);
         }
-        if(addressess.length > 1){
-            console.log(addressess);
-            console.log(results);
-            console.log(err);
-        }
         if((!results || results.length ===0 || (!results[0] && results.length ===1)) && attempts){
             controller.getScoreAndSaveRedis(function(err, result){
                 if(err){
@@ -1437,7 +1515,7 @@ controller.seedLatestEvents = function(){
       return web3.eth.getPastLogs({
         fromBlock: contractCreationBlockHeightHexString,//'0x501331', //contractCreationBlockHeightHexString,
         toBlock: 'latest',
-        address: '0xbcce0c003b562f47a319dfca4bce30d322fa0f01',
+        address: PARETO_CONTRACT_ADDRESS,
         topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
       }).then(function (txObjects){
 

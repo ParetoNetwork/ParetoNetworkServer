@@ -40,8 +40,8 @@
                         <div class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
                             <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
-                                                            src="../assets/images/pareto-logo-mark-color.svg"
-                                                            alt="Pareto Logo for Ranking">
+                                                                         src="../assets/images/pareto-logo-mark-color.svg"
+                                                                         alt="Pareto Logo for Ranking">
                             </div>
                             <div id="score-counter" class="d-flex">
                                 <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
@@ -76,18 +76,19 @@
                         <div class="table-area">
 
                             <table class="table text-left position-relative">
-                                <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button>
+                                <!-- <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button> -->
                                 <thead>
                                 <tr>
-                                    <th width="55px">
+                                    <th width="55px" class="th-header">
                                         Rank
                                     </th>
-                                    <th width="123px">
+                                    <th width="123px" class="th-header">
                                         Score
                                     </th>
-                                    <th class="address-header" width="250px">
+                                    <th class="th-header address-header" width="250px">
                                         Address
                                     </th>
+                                    <th style="text-align: right;"><i class="fa fa-external-link-square"></i></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -101,9 +102,9 @@
                                                 v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
                                                 v-bind:id="rank.rank"
                                         >
-                                            <td style="width: 55px">{{rank.rank}}</td>
+                                            <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
                                             <!--<td>{{rank.score}}</td>-->
-                                            <td style="width: 123px">
+                                            <td style="width: 123px; text=align: left;">
                                                 <ICountUp
                                                         :startVal="countUp.startVal"
                                                         :endVal="parseFloat(rank.score)"
@@ -112,7 +113,8 @@
                                                         :options="countUp.options"
                                                         @ready="onReady"></ICountUp>
                                             </td>
-                                            <td class="break-line" style="width: 400px">{{rank.address}}</td>
+                                            <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
+                                            <td><a v-bind:href="'https://etherscan.io/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>
@@ -183,9 +185,9 @@
                     active: false
                 },
                 socketParams : {
-                  rank: '',
-                  limit: '',
-                  page: ''
+                    rank: '',
+                    limit: '',
+                    page: ''
                 }
             };
         },
@@ -369,26 +371,28 @@
                     wsa.send(JSON.stringify(this.socketParams));
                     try {
                         const info = JSON.parse(data.data);
-                       // console.log(info);
+                        // console.log(info);
                         if (info.data.address) {
                             this.score = info.data.score;
                         } else {
-                            let socketIndex = 0;
-                            let socketRanking = info.data;
-                            let firstRank = socketRanking[socketIndex].rank;
+                            if (!info.data.action){
+                                let socketIndex = 0;
+                                let socketRanking = info.data;
+                                let firstRank = socketRanking[socketIndex].rank;
 
-                            this.leader = this.leader.map(item => {
+                                this.leader = this.leader.map(item => {
 
-                                let rank = parseFloat(item.rank);
-                                let socketRank;
-                                if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
+                                    let rank = parseFloat(item.rank);
+                                    let socketRank;
+                                    if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
 
-                                if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
-                                    item.score = socketRanking[socketIndex].score;
-                                    socketIndex++;
-                                }
-                                return item;
-                            });
+                                    if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
+                                        item.score = socketRanking[socketIndex].score;
+                                        socketIndex++;
+                                    }
+                                    return item;
+                                });
+                            }
                         }
 
                     } catch (e) {
@@ -534,6 +538,10 @@
         @media (max-width: 500px) {
             width: 150px;
         }
+    }
+
+    .th-header {
+        text-align: center;
     }
 
 </style>
