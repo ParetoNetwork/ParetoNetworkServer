@@ -198,7 +198,6 @@
                         const info = JSON.parse(data.data);
 
                         if (info.data.address) {
-                            this.profile.rank = info.data.rank;
                             this.intel.blockAgo = info.data.block - this.intel.block;
                         }
                     } catch (e) {
