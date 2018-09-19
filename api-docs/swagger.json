@@ -12,14 +12,15 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   },
-  "servers": [{
-    "url": "https://api.pareto.network/v1"
-  }],
+  "servers": [
+    {
+      "url": "https://api.pareto.network/v1"
+    }
+  ],
   "paths": {
     "/sign": {
       "post": {
         "tags": [
-
           "Auth"
         ],
         "summary": "Cookie authentication",
@@ -62,7 +63,6 @@
     "/rank": {
       "get": {
         "tags": [
-
           "Rank"
         ],
         "summary": "Get the list of all addresses sorted by rank",
@@ -95,7 +95,6 @@
     "/auth": {
       "get": {
         "tags": [
-
           "Auth"
         ],
         "summary": "Test if user is properly authenticated",
@@ -123,15 +122,16 @@
             }
           }
         },
-        "security": [{
-          "cookieAuth": []
-        }]
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
     "/unsign": {
       "post": {
         "tags": [
-
           "Auth"
         ],
         "summary": "Unsign http client for the current user",
@@ -153,15 +153,16 @@
             "description": "Bad Request"
           }
         },
-        "security": [{
-          "cookieAuth": []
-        }]
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
     "/address": {
       "get": {
         "tags": [
-
           "Address"
         ],
         "summary": "Get the information of the current user",
@@ -189,29 +190,32 @@
             }
           }
         },
-        "security": [{
-          "cookieAuth": []
-        }]
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
     "/address/{address}": {
       "get": {
         "tags": [
-
           "Address"
         ],
         "summary": "Get the information of a specific user",
         "description": "Get the information of a specific user.",
         "operationId": "address",
-        "parameters": [{
-          "name": "address",
-          "in": "path",
-          "description": "address to use",
-          "required": true,
-          "schema": {
-            "type": "string"
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "address to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        }],
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -244,7 +248,6 @@
     "/content": {
       "get": {
         "tags": [
-
           "Content"
         ],
         "summary": "Get the content about the actionable investing intels",
@@ -282,7 +285,6 @@
     "/content/me": {
       "get": {
         "tags": [
-
           "Content"
         ],
         "summary": "Get the content available for current user",
@@ -320,21 +322,22 @@
     "/userinfo": {
       "get": {
         "tags": [
-
           "User Profile"
         ],
         "summary": "Get the information of the profile user",
         "description": "Get the information of the current user. The current user is fetched using the auth cookie.",
         "operationId": "userinfo",
-        "parameters": [{
-          "name": "latest",
-          "in": "query",
-          "description": "if true force update ranking. This must be call only after sign process",
-          "required": false,
-          "schema": {
-            "type": "boolean"
+        "parameters": [
+          {
+            "name": "latest",
+            "in": "query",
+            "description": "if true force update ranking. This must be call only after sign process",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
-        }],
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -367,21 +370,22 @@
     "/userinfo/{address}": {
       "get": {
         "tags": [
-
           "User Profile"
         ],
         "summary": "Get the profile of a specific user",
         "description": "Get the profile of a specific user.",
         "operationId": "userinfo",
-        "parameters": [{
-          "name": "address",
-          "in": "path",
-          "description": "address to use",
-          "required": true,
-          "schema": {
-            "type": "string"
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "address to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        }],
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -414,7 +418,6 @@
     "/updateuser": {
       "post": {
         "tags": [
-
           "User Profile"
         ],
         "summary": "Update the profile of the current user",
@@ -451,24 +454,177 @@
         ]
       }
     },
+    "/post": {
+      "post": {
+        "tags": [
+          "User Posts"
+        ],
+        "summary": "create/update a new Post with the current session",
+        "description": "create a new Post with the current session. if _id is sent, the post with id equals _id will be updated.",
+        "operationId": "post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/posts": {
+      "get": {
+        "tags": [
+          "User Posts"
+        ],
+        "summary": "Get the posts wich it owner is the current user",
+        "description": "Get the posts wich it owner is the current user",
+        "operationId": "posts",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Posts"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/category": {
+      "post": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "create a new Category",
+        "description": "create a new Category",
+        "operationId": "post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Get all the availables categories",
+        "description": "Get all the availables categories",
+        "operationId": "categories",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categories"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
     "/profile-image": {
       "get": {
         "tags": [
-
           "User Profile"
         ],
         "summary": "Get the image profile",
         "description": "Get the image profile",
         "operationId": "profile-image",
-        "parameters": [{
-          "name": "image",
-          "in": "query",
-          "description": "resource to be gotten",
-          "required": true,
-          "schema": {
-            "type": "string"
+        "parameters": [
+          {
+            "name": "image",
+            "in": "query",
+            "description": "resource to be gotten",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        }],
+        ],
         "responses": {
           "200": {
             "description": "successful operation"
@@ -490,7 +646,6 @@
     "/upload-profile": {
       "post": {
         "tags": [
-
           "User Profile"
         ],
         "summary": "Upload image",
@@ -663,6 +818,54 @@
           "$ref": "#/components/schemas/Address"
         }
       },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Optional"
+          },
+          "address": {
+            "type": "string",
+            "description": "User address token"
+          },
+          "title": {
+            "type": "string",
+            "description": "title"
+          },
+          "body": {
+            "type": "string",
+            "description": "the information in html string"
+          },
+          "category": {
+            "type": "string",
+            "description": "category object Id"
+          }
+        }
+      },
+      "Posts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Post"
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "Categories": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Category"
+        }
+      },
       "Content": {
         "type": "object",
         "properties": {
@@ -670,9 +873,9 @@
             "type": "string",
             "description": "User address token"
           },
-          "alias": {
+          "title": {
             "type": "string",
-            "description": "alias"
+            "description": "title"
           },
           "body": {
             "type": "string",
@@ -761,5 +964,4 @@
     "description": "Find out more in the white Paper",
     "url": "https://www.pareto.network/download/Pareto-Technical-White-Paper.pdf"
   }
-
 }

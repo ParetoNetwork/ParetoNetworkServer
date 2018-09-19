@@ -124,6 +124,10 @@ export default class ContentService {
         onError("Err getting accounts");
         return;
       }
+        Intel = new web3.eth.Contract(
+            Intel_Contract_Schema.abi,
+            content.intelAddress
+        );
       let gasPrice = await web3.eth.getGasPrice();
       gasPrice = gasPrice * 10;
 

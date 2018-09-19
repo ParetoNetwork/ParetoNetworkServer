@@ -85,6 +85,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex flex-column text-left">
                                             <h5 class="title"><b>{{post.title}}</b></h5>
+                                            <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
                                             <span>{{post.dateCreated | date}}</span>
                                         </div>
                                         <div class="d-flex ">
@@ -161,14 +162,14 @@
                                     <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
                                         <div v-if="false" class="text-right font-weight-bold">
                                             <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                            <span class="text-right">{{row.pxt}}</span>
+                                            <span class="text-right">{{row.reward}}</span>
                                         </div>
                                         <div v-if="user.address != row.address" class="text-center">
                                             <div class="d-inline-block">
-                                                <p class="text-right text-secondary pl-lg-2"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> 8000PXT </b></p>
+                                                <p class="text-right text-secondary pl-lg-2 ellipsis"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> {{row.reward}} </b></p>
                                                 <b-btn class="btn-primary-pareto mx-auto px-4"
                                                        style="max-width: 120px;"
-                                                       v-b-modal.modalToken @click="rewardId = row.id">REWARD
+                                                       v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress">REWARD
                                                 </b-btn>
                                             </div>
                                         </div>
@@ -221,7 +222,7 @@
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
                     <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
                     <b-button style="background-color: rgb(107, 194, 123)" variant="success"
-                              @click="rewardIntel(rewardId, tokenAmount)"> Confirm
+                              @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                     </b-button>
                 </b-row>
             </b-container>
@@ -257,6 +258,7 @@
                     page: 0,
                 },
                 rewardId: '',
+                intelAddress: '',
                 tokenAmount: 1,
                 myContent: [],
                 allMyContent: [],
@@ -295,7 +297,7 @@
         },
         mounted: function () {
             this.main();
-            console.log(this.screenSize)
+           // console.log(this.screenSize)
         },
         computed: {
             ...mapState(["madeLogin", "ws"])
@@ -374,6 +376,18 @@
                             // this.user.block = info.data.block;
                             this.assignBlock(info.data.block);
                         }
+                        if (info.data.action){
+                          //  console.log(info.data.action);
+                            switch (info.data.action){
+                                case 'updateContent':{
+                              //      console.log('load');
+                                    this.loadMyContent();
+                                    this.myFeed.page = 0;
+                                    const params = {limit: 10, page: this.myFeed.page};
+                                    this.loadContent(params);
+                                }
+                            }
+                        }
 
                     } catch (e) {
                         console.log(e);
@@ -443,7 +457,7 @@
                     this.$store.state.makingRequest = false;
                 });
             },
-            rewardIntel: function (ID, tokenAmount) {
+            rewardIntel: function (ID, tokenAmount, intelAddress) {
                 this.hideModal();
 
                 if (!tokenAmount) {
@@ -459,7 +473,7 @@
 
                 // console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
-                    {ID, tokenAmount},
+                    {ID, tokenAmount, intelAddress},
                     res => {
                         console.log(res);
                     },
