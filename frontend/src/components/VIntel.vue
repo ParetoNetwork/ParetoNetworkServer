@@ -166,7 +166,9 @@
                                         </div>
                                         <div v-if="user.address != row.address && row.intelAddress && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
                                             <div class="d-inline-block">
-                                                <p class="text-right text-secondary pl-lg-2 ellipsis"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt=""> <b> {{row.reward}} </b></p>
+                                                <p class="text-right text-secondary ellipsis reward-text"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                                    <b> {{ row.reward }} </b>
+                                                </p>
                                                 <b-btn class="btn-primary-pareto mx-auto px-4"
                                                        style="max-width: 120px;"
                                                        v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress">REWARD
@@ -362,6 +364,9 @@
                     item.blockAgo = block - item.block;
                     return item;
                 });
+            },
+            numberToScientificNotation(number){
+                return (number+"").length>12? number.toExponential(5) : number;
             },
             overrideOnMessage() {
                 let wsa = this.ws;
@@ -634,6 +639,8 @@
         -o-text-overflow: ellipsis;
     }
 
+
+
     .wrapp {
         color: black;
         font-size: 12px;
@@ -665,6 +672,12 @@
     #wrapper:hover .text {
         display: flex;
         background: rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-width: 992px){
+        .reward-text {
+            max-width: 110px;
+        }
     }
 
 </style>

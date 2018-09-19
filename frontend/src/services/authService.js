@@ -355,7 +355,10 @@ export default class authService {
 
                             //set error state on input field
                         }
-                    }//end if !error
+                    }else{
+                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+                    }
+                    //end if !error
 
                 }//end if !error
             });
