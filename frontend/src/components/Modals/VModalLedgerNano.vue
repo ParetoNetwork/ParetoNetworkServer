@@ -162,7 +162,7 @@
                                 <div class="col-12">
                                     <p v-if="selectedPath === customPath && customPathError" class="text-danger"> The
                                         written path doesn't have any addresses: </p>
-                                    <i v-if="loadingCustomPath || (!paths[0].address && supported) || loadingInfiniteScrollData" class="fa fa-spinner fa-spin ml-2"></i>
+                                    <i v-if="loadingCustomPath || (!paths[0].address && supported) || loadingInfiniteScrollData || loadingSign" class="fa fa-spinner fa-spin ml-2"></i>
                                 </div>
                             </b-row>
 
@@ -176,7 +176,7 @@
                     <p class=" ">Sign message PARETO with selected address</p>
                 </div>
                 <b-btn size="sm" class="mx-2" variant="danger" @click="onClosedModal">Cancel</b-btn>
-                <b-btn size="sm" :disabled="!selectedAddress || (customPathError && selectedPath === customPath)"
+                <b-btn size="sm" :disabled="!selectedAddress || (customPathError && selectedPath === customPath) || loadingSign"
                        variant="success" @click="hardware()">Continue
                 </b-btn>
             </b-row>
