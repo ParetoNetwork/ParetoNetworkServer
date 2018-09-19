@@ -822,11 +822,11 @@ controller.getAllAvailableContent = function(req, callback) {
 
                     allResults =    await ParetoContent.find(
                         { $or:[
-                                {block : { $lte : blockHeightDelta*1 }, speed : 1, validated: true},
-                                {block : { $lte : blockHeightDelta*50 }, speed : 2, validated: true},
-                                {block : { $lte : blockHeightDelta*100 }, speed : 3, validated: true},
-                                {block : { $lte : blockHeightDelta*150 }, speed : 4, validated: true},
-                                {address : req.user, validated: true }
+                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {intelAddress: { $exists: false }}]},
+                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
+                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
+                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
+                                {address : req.user, $or:[ {validated: true}, {intelAddress: { $exists: false }}] }
                             ]
                         }
                     ).sort({block : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
@@ -849,6 +849,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 title: entry.title,
                                 address: entry.address,
                                 body: entry.body,
+                                expires: entry.expires,
                                 dateCreated: entry.dateCreated,
                                 txHash: entry.txHash,
                                 reward: entry.reward,
@@ -1172,6 +1173,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           txHash: entry.txHash,
                           reward: entry.reward,
                           speed: entry.speed,
+                          expires: entry.expires,
                           validated: entry.validated,
                           intelAddress: entry.intelAddress,
                           _v: entry._v,
