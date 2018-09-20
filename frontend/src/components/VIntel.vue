@@ -3,12 +3,11 @@
         <notifications group="auth" position="bottom right"/>
         <div class="row pt-5">
             <div class="col-md-5 mb-5 mt-2 m-sm-0">
-
-                <template v-if="user">
+                <VShimmerUser v-if="!user.address"></VShimmerUser>
+                <template v-else>
                     <div class="media py-1 px-4 border mb-3 mb-md-5">
                         <div class="d-flex flex-column mr-2">
                             <div class="border p-2 mb-2" @click="openInput()">
-
                                 <div data-v-514e8c24="" class="thumb" id="wrapper"
                                      v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic)}"
                                      style="width: 100px; height: 100px;">
@@ -71,7 +70,8 @@
                     </div>
                 </template>
 
-                <div class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
+                <VShimmerMyPost v-if="!myContent.length"></VShimmerMyPost>
+                <div v-else class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="title"><b>MY POSTS</b></h5>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
@@ -101,7 +101,8 @@
 
             </div>
             <div class="col-md-7">
-                <div class="border p-2">
+                <VShimmerFeed v-if="!myFeed.content.length"></VShimmerFeed>
+                <div v-else class="border p-2">
                     <div class="p-3 border-bottom">
                         <h5 class="title"> MY INTEL FEED: </h5>
                     </div>
@@ -109,9 +110,11 @@
                         <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
                         </i>
                     </div>
-                    <div v-if="!myFeed.content">
+                    <!--
+                    <div >
                         <span> No data to display </span>
                     </div>
+                    -->
                     <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
                         <ul class="list-unstyled list-group">
                             <li class="text-left list-group-item border-0 px-1 py-2" :key="row._id"
@@ -244,11 +247,18 @@
     import environment from "../utils/environment";
     import {countUpMixin} from "../mixins/countUp";
 
+    import VShimmerUser from "./Shimmer/IntelView/VShimmerUser";
+    import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
+    import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
+
     export default {
         name: "VIntel",
         mixins: [countUpMixin],
         components: {
-            ICountUp
+            ICountUp,
+            VShimmerUser,
+            VShimmerMyPost,
+            VShimmerFeed
         },
         data: function () {
             return {
