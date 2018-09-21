@@ -3,7 +3,40 @@
         <Navbar/>
         <router-view></router-view>
         <VFab/>
-        <notifications group="foo" position="bottom left"/>
+
+        <notifications group="error" position="bottom left">
+            <template slot="body" slot-scope="props">
+                <div
+                        @click="props.close"
+                        style="background-color: indianred;"
+                        :class="props.type"
+                        class="notification p-2">
+
+                    <a class="close" @click="props.close">
+                        <i class="fa fa-fw fa-close"></i>
+                    </a>
+                    <div v-html="props.item.text">
+                    </div>
+                </div>
+            </template>
+        </notifications>
+        <notifications group="success" position="bottom left">
+            <template slot="body" slot-scope="props">
+                <div
+                        @click="props.close"
+                        style="background-color: indianred;"
+                        :class="props.type"
+                        class="notification p-2">
+
+                    <a class="close" @click="props.close">
+                        <i class="fa fa-fw fa-close"></i>
+                    </a>
+                    <div v-html="props.item.text">
+                    </div>
+                </div>
+            </template>
+        </notifications>
+
         <VBottomNav></VBottomNav>
     </div>
 </template>
@@ -98,4 +131,11 @@
         margin: 0;
     }
 
+    notification-error{
+        background-color: indianred;
+    }
+
+    notification-success{
+
+    }
 </style>

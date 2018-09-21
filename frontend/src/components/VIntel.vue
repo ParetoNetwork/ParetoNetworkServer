@@ -298,6 +298,12 @@
             }
         },
         mounted: function () {
+            this.$notify({
+                group: 'error',
+                type: 'error',
+                duration: 1000000,
+                text: 'Holi' });
+
             this.main();
            // console.log(this.screenSize)
         },
@@ -329,7 +335,7 @@
                     },
                     () => {
                         this.$notify({
-                            group: 'foo',
+                            group: 'error',
                             type: 'error',
                             duration: 10000,
                             text: 'There was an error loading the address. Please refresh the page'
@@ -347,7 +353,7 @@
                     },
                     error => {
                         this.$notify({
-                            group: 'foo',
+                            group: 'error',
                             type: 'error',
                             duration: 10000,
                             text: 'There was an error loading the address. Please refresh the page'
@@ -422,7 +428,7 @@
                     },
                     error => {
                         this.$notify({
-                            group: 'foo',
+                            group: 'error',
                             type: 'error',
                             duration: 10000,
                             text: 'There was an error loading the address. Please refresh the page'
@@ -467,7 +473,7 @@
 
                 if (!tokenAmount) {
                     this.$notify({
-                        group: 'foo',
+                        group: 'error',
                         type: 'error',
                         duration: 10000,
                         text: 'No Token Amount'

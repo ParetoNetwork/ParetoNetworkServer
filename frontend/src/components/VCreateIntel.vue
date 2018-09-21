@@ -313,7 +313,7 @@
                     this.intelState('created', 'Intel Created!');
 
                     this.$notify({
-                        group: 'foo',
+                        group: 'success',
                         type: 'success',
                         duration: 10000,
                         text: 'The Intel was created' });
@@ -328,7 +328,7 @@
                         if (typeof err === 'string')
                             err='Could not create Intel. ' +  err.split('\n')[0];
                     this.$notify({
-                        group: 'foo',
+                        group: 'error',
                         type: 'error',
                         duration: 20000,
                         text: err || 'Could not create Intel' });
