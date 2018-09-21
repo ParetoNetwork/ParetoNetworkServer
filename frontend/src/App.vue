@@ -3,7 +3,17 @@
         <Navbar/>
         <router-view></router-view>
         <VFab/>
-        <notifications group="foo" position="bottom left"/>
+        <notifications
+                group="foo"
+                position="bottom left">
+            <template slot="body" slot-scope="props">
+                <div>
+                    <a class="close" @click="props.close">
+                        <i class="fa fa-fw fa-close"></i>
+                    </a>
+                </div>
+            </template>
+        </notifications>
         <VBottomNav></VBottomNav>
     </div>
 </template>
