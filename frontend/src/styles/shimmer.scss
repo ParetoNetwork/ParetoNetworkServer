@@ -54,6 +54,20 @@
   -webkit-animation-timing-function: linear;
 }
 
+.dark-shine {
+  background: #040f1e;
+  background-image: linear-gradient(to right, #040f1e 0%, #999 20%, #040f1e 40%, #040f1e 100%);
+  background-repeat: no-repeat;
+  background-size: 1000px 1000px;
+  margin-bottom: 4px;
+
+  -webkit-animation-duration: 1s;
+  -webkit-animation-fill-mode: forwards;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-name: placeholderShimmer;
+  -webkit-animation-timing-function: linear;
+}
+
 @-webkit-keyframes placeholderShimmer {
   0% {
     background-position: -468px 0;
