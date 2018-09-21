@@ -88,7 +88,7 @@
                     console.log(error);
                     this.stopLogin();
                     this.$notify({
-                        group: 'foo',
+                        group: 'error',
                         type: 'error',
                         duration: 10000,
                         text: error });

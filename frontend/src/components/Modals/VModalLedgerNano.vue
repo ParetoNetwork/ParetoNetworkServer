@@ -416,7 +416,7 @@
 
                     }, error => {
                         this.$notify({
-                            group: 'foo',
+                            group: 'error',
                             type: 'error',
                             duration: 10000,
                             text: error
@@ -425,7 +425,7 @@
 
                 }, error => {
                     this.$notify({
-                        group: 'foo',
+                        group: 'error',
                         type: 'error',
                         duration: 10000,
                         text: error
@@ -449,7 +449,7 @@
                     this.loadingSign = false;
                     this.stopLogin();
                     this.$notify({
-                        group: 'foo',
+                        group: 'error',
                         type: 'error',
                         duration: 10000,
                         text: error
@@ -503,7 +503,7 @@
                             this.loadingInfiniteScrollData = false;
                         }, error => {
                             this.$notify({
-                                group: 'foo',
+                                group: 'error',
                                 type: 'error',
                                 duration: 10000,
                                 text: error
@@ -513,7 +513,7 @@
 
                     }, error => {
                         this.$notify({
-                            group: 'foo',
+                            group: 'error',
                             type: 'error',
                             duration: 10000,
                             text: error
@@ -538,7 +538,7 @@
                 }, error => {
                     this.supported = false;
                     this.$notify({
-                        group: 'foo',
+                        group: 'error',
                         type: 'error',
                         duration: 10000,
                         text: error
