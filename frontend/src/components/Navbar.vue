@@ -76,7 +76,7 @@
             DashboardService.getAddress(res => {
                 this.$store.dispatch({
                     type: 'login',
-                    address: res,
+                    address: {address: res},
                 });
                 this.collapseContent();
             }, () => {
@@ -102,7 +102,7 @@
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res},
                         });
                     }, () => {
 
@@ -138,37 +138,18 @@
                     $('#navbarSupportedContent').collapse('toggle');
                 }
             },
-            hardware: function () {
-                this.loadingLogin();
-                authService.signWallet(data => {
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: data,
-                    });
-                    this.collapseContent();
-                    this.$router.push('/intel');
-                }, error => {
-                    this.stopLogin();
-                    this.$notify({
-                        group: 'foo',
-                        type: 'error',
-                        duration: 10000,
-                        text: error });
-                });
-            },
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-               //     console.log(data);
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
                         });
                         this.collapseContent();
                         this.$router.push('/intel');
-                    }, () => {
-
+                    }, (err) => {
+                        console.log(err);
                     });
 
                 }, error => {

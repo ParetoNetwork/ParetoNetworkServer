@@ -78,7 +78,7 @@
                     //console.log(data);
                     this.$store.dispatch({
                         type: 'login',
-                        address: data,
+                        address: {address: res, dataSign: {signType: 'Manual', pathId: ''}},
                     });
                     this.$router.push('/intel');
                 }, error => {

@@ -290,7 +290,7 @@
                             this.init(res);
                             this.$store.dispatch({
                                 type: 'login',
-                                address: res
+                                address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
                             });
                         }, () => {
                             this.loading = false;
