@@ -164,7 +164,7 @@
                                             <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                             <span class="text-right">{{row.reward}}</span>
                                         </div>
-                                        <div v-if="user.address != row.address && row.intelAddress && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
+                                        <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
                                             <div class="d-inline-block">
                                                 <p class="text-right text-secondary ellipsis reward-text"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
                                                     <b> {{ row.reward }} </b>
@@ -302,13 +302,13 @@
            // console.log(this.screenSize)
         },
         computed: {
-            ...mapState(["madeLogin", "ws"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId"])
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
-                    {ID},
+                    {ID},{signType: this.signType, pathId: this.pathId},
                     res => {
                         //  console.log(res);
                     },
@@ -478,12 +478,22 @@
 
                 // console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
-                    {ID, tokenAmount, intelAddress},
+                    {ID, tokenAmount, intelAddress}, {signType: this.signType, pathId: this.pathId} ,
                     res => {
-                        console.log(res);
+                        this.$notify({
+                            group: 'foo',
+                            type: 'success',
+                            duration: 10000,
+                            text: 'Success'
+                        });
                     },
                     err => {
-                        console.log(res);
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: err.message?err.message:err
+                        });
                     }
                 );
             },

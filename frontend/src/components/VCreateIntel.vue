@@ -164,6 +164,7 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import ContentService from '../services/ContentService';
+    import { mapState} from "vuex";
     require('summernote/dist/summernote.css');
     require('summernote');
 
@@ -226,7 +227,8 @@
         computed : {
             bodyFunction: function () {
                 return content;
-            }
+            },
+            ...mapState(["madeLogin", "ws", "signType", "pathId"])
         },
         mounted: function () {
             $('#intel-body-input').summernote({
@@ -282,8 +284,8 @@
             address: function () {
                 DashboardService.getAddress(res => {
                     this.block = res.block;
-                    this.blockChainAddress = res.address
-                    this.maxTokens = res.tokens
+                    this.blockChainAddress = res.address;
+                    this.maxTokens = res.tokens;
                 }, () => {
 
                 });
@@ -307,7 +309,7 @@
                 this.$store.state.makingRequest = true;
                 this.modalWaiting = true;
 
-                ContentService.createIntel({block:this.block, title: this.title, body: this.body, address: this.blockChainAddress}, this.tokens, (res) => {
+                ContentService.createIntel({block:this.block, title: this.title, body: this.body, address: this.blockChainAddress}, this.tokens, {signType: this.signType, pathId: this.pathId},(res) => {
 
                     this.$store.state.makingRequest = false;
                     this.intelState('created', 'Intel Created!');

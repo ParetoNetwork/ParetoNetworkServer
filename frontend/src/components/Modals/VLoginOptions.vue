@@ -72,20 +72,19 @@
             MetaMask: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                   // console.log(data);
                     dashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
+
                         });
                         this.collapseContent();
                         this.$router.go(this.redirectRoute || '/intel');
-                    }, () => {
+                    }, (err) => {
                         console.log('Metamask Error');
                     });
 
                 }, error => {
-                    console.log(error);
                     this.stopLogin();
                     this.$notify({
                         group: 'foo',

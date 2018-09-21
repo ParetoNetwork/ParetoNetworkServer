@@ -436,11 +436,12 @@
                 this.loadingSign = true;
                 let path = (isNaN(this.selectedPath.charAt(0)))? this.selectedPath.substring(1) : this.selectedPath;
                 this.loadingLogin();
-                authService.signWallet(path.substring(0,path.length-1)+this.selectedindx, this.selectedAddress, data => {
+                const pathId = path.substring(0,path.length-1)+this.selectedindx;
+                authService.signWallet(pathId, this.selectedAddress, data => {
                     this.loadingSign = false;
                     this.$store.dispatch({
                         type: 'login',
-                        address: data,
+                        address: {address: this.selectedAddress, dataSign: {signType: 'LedgerNano', pathId: pathId}},
                     });
                     this.collapseContent();
                     this.$router.push('/intel');
