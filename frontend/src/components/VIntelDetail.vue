@@ -68,12 +68,12 @@
                 <div class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
                     <div class="row text-group">
                         <VShimmerIntelInformation v-if="!intel.blockAgo"></VShimmerIntelInformation>
-                        <div v-else class="col-12 border p-4">
+                        <div v-else class="col-12 border p-3">
                             <div class="row py-4 border-bottom m-0">
-                                <div class="col-md-10 p-0">
+                                <div class="col-md-10 p-0 pr-1">
                                     <span class="name-title"> {{intel.title}} </span>
                                 </div>
-                                <div class="col-md-2 p-0">
+                                <div class="col-md-2 p-0 pl-1">
                                     <div class="d-flex flex-column align-items-end">
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>

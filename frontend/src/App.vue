@@ -128,4 +128,8 @@
         background-color: rgb(107, 194, 123) !important;
     }
 
+    .warning{
+        background-color: #ffae42 !important;
+    }
+
 </style>

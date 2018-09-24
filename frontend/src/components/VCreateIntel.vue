@@ -322,20 +322,29 @@
 
                     this.$router.push('/intel');
                 }, (err) => {
-                    this.intelState('empty', '');
 
-                    this.modalWaiting = false;
+                    console.log(err);
+                    if ( err.includes('Transaction was not mined within')){
+                        this.$notify({
+                            group: 'notification',
+                            type: 'warning',
+                            duration: 20000,
+                            title: 'Warning!',
+                            text: err});
+                    }else{
+                        this.intelState('empty', '');
+                        this.modalWaiting = false;
+
                         if (typeof err === 'string')
                             err='Could not create Intel. ' +  err.split('\n')[0];
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 20000,
+                            text: err || 'Could not create Intel' });
 
-
-                    this.$notify({
-                        group: 'notification',
-                        type: 'error',
-                        duration: 20000,
-                        text: err || 'Could not create Intel' });
-
-                    this.$store.state.makingRequest = false;
+                        this.$store.state.makingRequest = false;
+                    }
                 });
             },
             routeLeaving: function(){
