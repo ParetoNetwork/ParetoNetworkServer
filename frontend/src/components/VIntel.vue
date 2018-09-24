@@ -171,7 +171,7 @@
                                                 </p>
                                                 <b-btn class="btn-primary-pareto mx-auto px-4"
                                                        style="max-width: 120px;"
-                                                       v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress">REWARD
+                                                       v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress; isAvailable();">REWARD
                                                 </b-btn>
                                             </div>
                                         </div>
@@ -217,18 +217,62 @@
                 :body-text-variant="'light'">
             <b-container fluid>
                 <h4 class="font-body mb-3"> Reward</h4>
+                <div v-if="this.signType==='LedgerNano'" class="text-left">
+                    <p> Before use Ledger Nano S, verify the next items: </p>
+                    <div class="m-2 ml-4">
+                        <ul>
+                            <li> The Browser must be Google Chrome</li>
+                            <li> Plugged-in their Ledger Wallet Nano S</li>
+                            <li> Input digits pin</li>
+                            <li> Navigated to the Ethereum app on their device</li>
+                            <li> Enabled 'browser' support from the Ethereum app settings</li>
+                        </ul>
+                    </div>
+                    <br/>
+                </div>
                 <p class="text-dashboard mb-2" style="font-size: 16px"> Please enter the number of Pareto Tokens to
                     reward</p>
                 <b-form-input v-model="tokenAmount" style="font-size: 25px"
                               type="number"></b-form-input>
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
                     <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                    <b-button style="background-color: rgb(107, 194, 123)" variant="success"
+                    <b-button :disabled="!hardwareAvailable || tokens<=0 || tokens > maxTokens" style="background-color: rgb(107, 194, 123)" variant="success"
                               @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                     </b-button>
                 </b-row>
             </b-container>
         </b-modal>
+        <div>
+            <b-modal
+                    no-close-on-backdrop
+                    v-model="modalWaiting"
+                    centered
+                    hide-header
+                    hide-footer
+                    :body-bg-variant="'dark'"
+                    :body-text-variant="'light'">
+
+                <b-container fluid>
+                    <h3 class="font-body mb-4">Reward has a two step confirmation </h3>
+                    <div>
+                        <div class="m-2 ml-4">
+                            <ol class="text-left">
+                                <li>First, confirm the amount of Pareto that you'd like to
+                                    deposit
+                                </li>
+                                <li>Last, reward on the Ethereum Blockchain</li>
+                            </ol>
+                            <p class="text-center mt-4"
+                               style="text-align: justify !important; text-justify: inter-word;">
+                                This operation may take a while as we communicate with the Ethereum Blockchain.
+                                Please do not close your browser or navigate to a different page. </p>
+                            <i class="fa fa-spinner fa-spin fa-3x mt-4"></i>
+                        </div>
+
+                    </div>
+                </b-container>
+            </b-modal>
+        </div>
     </div>
 </template>
 
@@ -259,6 +303,8 @@
                     loading: false,
                     page: 0,
                 },
+                modalWaiting: false,
+                hardwareAvailable: false,
                 rewardId: '',
                 intelAddress: '',
                 tokenAmount: 1,
@@ -316,6 +362,18 @@
                     }
                 );
             },
+            isAvailable(){
+                if(this.signType === 'LedgerNano'){
+                    this.hardwareAvailable = false;
+                    AuthService.doWhenIsConnected(()=>{
+                        this.hardwareAvailable = true;
+                        AuthService.deleteWatchNano();
+                    })
+                }else{
+                    this.hardwareAvailable = true;
+                }
+            }
+            ,
             dateStringFormat(date) {
                 return new Date(date);
             },
@@ -356,6 +414,10 @@
                 );
             },
             hideModal() {
+                if(this.signType === 'LedgerNano'){
+                    AuthService.deleteWatchNano();
+                    this.hardwareAvailable = false;
+                }
                 this.$refs.modalToken.hide()
             },
             assignBlock(block) {
@@ -464,7 +526,7 @@
             },
             rewardIntel: function (ID, tokenAmount, intelAddress) {
                 this.hideModal();
-
+                this.modalWaiting =true;
                 if (!tokenAmount) {
                     this.$notify({
                         group: 'foo',
@@ -480,6 +542,7 @@
                 ContentService.rewardIntel(
                     {ID, tokenAmount, intelAddress}, {signType: this.signType, pathId: this.pathId} ,
                     res => {
+                        this.modalWaiting =false;
                         this.$notify({
                             group: 'foo',
                             type: 'success',
@@ -488,6 +551,7 @@
                         });
                     },
                     err => {
+                        this.modalWaiting =false;
                         this.$notify({
                             group: 'foo',
                             type: 'error',
