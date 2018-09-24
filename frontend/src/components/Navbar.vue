@@ -78,7 +78,7 @@
                     type: 'login',
                     address: res,
                 });
-                this.collapseContent();
+                //this.collapseContent();
             }, () => {
 
             });
