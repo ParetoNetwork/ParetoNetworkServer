@@ -3,7 +3,6 @@
         <Navbar/>
         <router-view></router-view>
         <VFab/>
-
         <notifications group="notification" position="bottom left">
             <template slot="body" slot-scope="props">
                 <div
@@ -121,11 +120,4 @@
         margin: 0;
     }
 
-    .error{
-        background-color: #dc3545 !important;
-    }
-
-    .success{
-        background-color: rgb(107, 194, 123) !important;
-    }
 </style>
