@@ -110,8 +110,9 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h3 class="font-body mb-4">Creating an Intel has a two step confirmation </h3>
+
                         <div v-if="this.signType!='LedgerNano'">
+                            <h3 class="font-body mb-4">Creating an Intel has a Two Step MetaMask Confirmation </h3>
                             <div class="m-2 ml-4">
                                 <ol class="text-left">
                                     <li>MetaMask will ask you to confirm the amount of Pareto that you'd like to
@@ -145,6 +146,7 @@
 
                         </div>
                         <div v-if="this.signType==='LedgerNano'">
+                            <h3 class="font-body mb-4">Creating an Intel has a Two Step Confirmation </h3>
                             <div class="m-2 ml-4">
                                 <ol class="text-left">
                                     <li>First, confirm the amount of Pareto that you'd like to
@@ -358,7 +360,7 @@
                     this.intelState('created', 'Intel Created!');
 
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'success',
                         duration: 10000,
                         text: 'The Intel was created' });
@@ -367,17 +369,29 @@
 
                     this.$router.push('/intel');
                 }, (err) => {
-                    this.intelState('empty', '');
 
-                    this.modalWaiting = false;
+                    console.log(err);
+                    if ( err.includes('Transaction was not mined within')){
+                        this.$notify({
+                            group: 'notification',
+                            type: 'warning',
+                            duration: 20000,
+                            title: 'Warning!',
+                            text: err});
+                    }else{
+                        this.intelState('empty', '');
+                        this.modalWaiting = false;
+
                         if (typeof err === 'string')
                             err='Could not create Intel. ' +  err.split('\n')[0];
-                    this.$notify({
-                        group: 'foo',
-                        type: 'error',
-                        duration: 20000,
-                        text: err || 'Could not create Intel' });
-                    this.$store.state.makingRequest = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 20000,
+                            text: err || 'Could not create Intel' });
+
+                        this.$store.state.makingRequest = false;
+                    }
                 });
             },
             routeLeaving: function(){

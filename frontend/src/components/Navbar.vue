@@ -78,7 +78,7 @@
                     type: 'login',
                     address: {address: res},
                 });
-                this.collapseContent();
+                //this.collapseContent();
             }, () => {
 
             });
@@ -138,6 +138,28 @@
                     $('#navbarSupportedContent').collapse('toggle');
                 }
             },
+            hardware: function () {
+                this.loadingLogin();
+                authService.signWallet(data => {
+                    this.$store.dispatch({
+                        type: 'login',
+                        address: data,
+                    });
+                    this.collapseContent();
+                    this.$router.push('/intel');
+                }, error => {
+                    this.stopLogin();
+
+                    let errorText= error.message? error.message : error;
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Ledger Nano',
+                        text: errorText
+                    });
+                });
+            },
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
@@ -154,11 +176,13 @@
 
                 }, error => {
                     this.stopLogin();
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Login',
+                        text: errorText });
                 });
             },
             logout: function () {
@@ -167,11 +191,13 @@
                     this.collapseContent();
                     this.$router.push('/');
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Logout',
+                        text: errorText });
                 });
             },
             ledgerNanoLogin () {
