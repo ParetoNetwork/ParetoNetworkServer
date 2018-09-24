@@ -120,4 +120,12 @@
         margin: 0;
     }
 
+    .error{
+        background-color: #dc3545 !important;
+    }
+
+    .success{
+        background-color: rgb(107, 194, 123) !important;
+    }
+
 </style>
