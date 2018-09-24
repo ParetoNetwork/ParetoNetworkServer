@@ -93,7 +93,8 @@
                                 </thead>
                             </table>
                             <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
-                                <table class="table table-responsive-lg position-relative">
+                                <VShimmerLeaderboard v-if="!leader.length"></VShimmerLeaderboard>
+                                <table v-else class="table table-responsive-lg position-relative">
                                     <div>
                                         <tbody id="table-leaderboard">
                                         <tr
@@ -142,6 +143,8 @@
     import infiniteScroll from 'vue-infinite-scroll';
     import LoginOptions from "./Modals/VLoginOptions";
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
+    import VShimmerLeaderboard from "./Shimmer/LeaderboardView/VShimmerLeaderboard";
+
     import {countUpMixin} from '../mixins/countUp';
 
     export default {
@@ -151,6 +154,7 @@
             ModalLedgerNano,
             LoginOptions,
             ModalSignIn,
+            VShimmerLeaderboard,
             ICountUp
         },
         directives: {
@@ -262,24 +266,27 @@
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += 100;
-
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Leaderboard',
+                        text: errorText });
                 });
             }, authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
                         this.getAddress()
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'foo',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error });
+                            title: 'Content',
+                            text: errorText });
                     });
                 } else {
                     this.loadingLogin();
@@ -299,11 +306,13 @@
 
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'foo',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error });
+                            title: 'Leaderboard',
+                            text: errorText });
                         this.stopLogin();
                     });
                 }
@@ -344,11 +353,13 @@
                         this.busy = false;
                         this.leader = [... res,...this.leader];
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'foo',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error });
+                            title: 'Leaderboard',
+                            text: errorText });
                     });
                 }
 

@@ -84,11 +84,12 @@
                 }, error => {
                     $('#signModal').modal('hide');
                     this.stopLogin();
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        text: errorText });
                 });
             },
             modalcancel() {
