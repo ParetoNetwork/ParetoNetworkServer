@@ -170,11 +170,13 @@
                     });
 
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Authentication Error',
+                        text: errorText });
                     this.stopLogin();
                 });
             },

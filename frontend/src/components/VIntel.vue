@@ -298,12 +298,6 @@
             }
         },
         mounted: function () {
-            this.$notify({
-                group: 'error',
-                type: 'error',
-                duration: 1000000,
-                text: 'Holi' });
-
             this.main();
            // console.log(this.screenSize)
         },
@@ -333,13 +327,14 @@
                     res => {
                         this.address = res;
                     },
-                    () => {
+                    error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: 'There was an error loading the address. Please refresh the page'
-                        });
+                            title: 'Login',
+                            text: errorText });
                     }
                 );
             },
@@ -352,12 +347,13 @@
                         this.myFeed.content = [...this.myFeed.content, ...res];
                     },
                     error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: 'There was an error loading the address. Please refresh the page'
-                        });
+                            title: 'Content',
+                            text: errorText });
                     }
                 );
             },
@@ -427,11 +423,13 @@
                         this.myContent = this.allMyContent.slice(0, 10);
                     },
                     error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
-                            type: 'error',
+                            group: 'notification',
+                            type: 'Content',
                             duration: 10000,
-                            text: 'There was an error loading the address. Please refresh the page'
+                            title: 'Content',
+                            text: errorText
                         });
                     }
                 );
@@ -473,11 +471,11 @@
 
                 if (!tokenAmount) {
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: 'No Token Amount'
-                    });
+                        text: 'No Token Amount' });
+
                     this.tokenAmount = 1;
                     return;
                 }
