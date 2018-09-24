@@ -149,11 +149,15 @@
                     this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
+
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Ledger Nano',
+                        text: errorText
+                    });
                 });
             },
             login: function () {
@@ -173,11 +177,13 @@
 
                 }, error => {
                     this.stopLogin();
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Login',
+                        text: errorText });
                 });
             },
             logout: function () {
@@ -186,11 +192,13 @@
                     this.collapseContent();
                     this.$router.push('/');
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Logout',
+                        text: errorText });
                 });
             },
             ledgerNanoLogin () {

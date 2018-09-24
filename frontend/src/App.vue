@@ -4,33 +4,23 @@
         <router-view></router-view>
         <VFab/>
 
-        <notifications group="error" position="bottom left">
+        <notifications group="notification" position="bottom left">
             <template slot="body" slot-scope="props">
                 <div
                         @click="props.close"
-                        style="background-color: indianred;"
-                        :class="props.type"
-                        class="notification p-2">
-
-                    <a class="close" @click="props.close">
-                        <i class="fa fa-fw fa-close"></i>
-                    </a>
-                    <div v-html="props.item.text">
+                        :class="{[props.item.type]: true}"
+                        class="notification p-2 mb-1">
+                    <div class="row">
+                        <div class="col-9">
+                            <b v-if="!props.item.title"> Notification </b>
+                            <b><div v-html="props.item.title"></div></b>
+                        </div>
+                        <div class="offset-1 col-2">
+                            <a class="close" @click="props.close">
+                                <i class="fa fa-fw fa-close"></i>
+                            </a>
+                        </div>
                     </div>
-                </div>
-            </template>
-        </notifications>
-        <notifications group="success" position="bottom left">
-            <template slot="body" slot-scope="props">
-                <div
-                        @click="props.close"
-                        style="background-color: indianred;"
-                        :class="props.type"
-                        class="notification p-2">
-
-                    <a class="close" @click="props.close">
-                        <i class="fa fa-fw fa-close"></i>
-                    </a>
                     <div v-html="props.item.text">
                     </div>
                 </div>
@@ -131,11 +121,11 @@
         margin: 0;
     }
 
-    notification-error{
-        background-color: indianred;
+    .error{
+        background-color: #dc3545 !important;
     }
 
-    notification-success{
-
+    .success{
+        background-color: rgb(107, 194, 123) !important;
     }
 </style>

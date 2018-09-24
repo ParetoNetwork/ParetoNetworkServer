@@ -415,21 +415,21 @@
                         this.selectedPath = this.paths[path_id].id;
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error
-                        });
+                            text: errorText });
                     });
 
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        text: errorText });
                 });
             },
             hardware: function () {
@@ -448,12 +448,14 @@
                 }, error => {
                     this.loadingSign = false;
                     this.stopLogin();
+
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        title: 'Logout',
+                        text: errorText });
                 });
             },
             onClosedModal: function () {
@@ -502,22 +504,23 @@
                             this.paths[index].address = [...this.paths[index].address, ...newList];
                             this.loadingInfiniteScrollData = false;
                         }, error => {
+                            let errorText= error.message? error.message : error;
                             this.$notify({
-                                group: 'error',
+                                group: 'notification',
                                 type: 'error',
                                 duration: 10000,
-                                text: error
-                            });
+                                text: errorText });
+
                             this.loadingInfiniteScrollData = false;
                         });
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error
-                        });
+                            text: errorText });
                     });
                 }
             },
@@ -537,12 +540,13 @@
                     }
                 }, error => {
                     this.supported = false;
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        title: 'Ledger Nano',
+                        text: errorText });
                 });
             },
             ...mapMutations({

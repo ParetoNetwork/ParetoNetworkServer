@@ -263,22 +263,26 @@
                     this.busy = false;
                     this.page += 100;
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Leaderboard',
+                        text: errorText });
                 });
             }, authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
                         this.getAddress()
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error });
+                            title: 'Content',
+                            text: errorText });
                     });
                 } else {
                     this.loadingLogin();
@@ -298,11 +302,13 @@
 
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error });
+                            title: 'Leaderboard',
+                            text: errorText });
                         this.stopLogin();
                     });
                 }
@@ -343,11 +349,13 @@
                         this.busy = false;
                         this.leader = [... res,...this.leader];
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'error',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error });
+                            title: 'Leaderboard',
+                            text: errorText });
                     });
                 }
 

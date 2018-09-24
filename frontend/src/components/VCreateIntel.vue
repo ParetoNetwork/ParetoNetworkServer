@@ -97,7 +97,7 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h3 class="font-body mb-4">Creating an Intel has a two step confirmation </h3>
+                        <h3 class="font-body mb-4">Creating an Intel has a Two Step MetaMask Confirmation </h3>
                         <div>
                             <div class="m-2 ml-4">
                                 <ol class="text-left">
@@ -313,7 +313,7 @@
                     this.intelState('created', 'Intel Created!');
 
                     this.$notify({
-                        group: 'success',
+                        group: 'notification',
                         type: 'success',
                         duration: 10000,
                         text: 'The Intel was created' });
@@ -327,11 +327,14 @@
                     this.modalWaiting = false;
                         if (typeof err === 'string')
                             err='Could not create Intel. ' +  err.split('\n')[0];
+
+
                     this.$notify({
-                        group: 'error',
+                        group: 'notification',
                         type: 'error',
                         duration: 20000,
                         text: err || 'Could not create Intel' });
+
                     this.$store.state.makingRequest = false;
                 });
             },
