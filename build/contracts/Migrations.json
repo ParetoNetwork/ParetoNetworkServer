@@ -1375,7 +1375,7 @@
     "version": "0.4.25+commit.59dbf8f1.Emscripten.clang"
   },
   "networks": {
-    "3": {
+    "ropsten": {
       "events": {},
       "links": {},
       "address": "0xa1da236213e5acdcd9ab56b788ef47077bc74799",
