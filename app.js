@@ -16,8 +16,8 @@ const cron = require("node-cron");
 const AWS = require('aws-sdk');
 AWS.config.update({
     region: process.env.S3_REGION || constants.S3_REGION,
-    accessKeyId: process.env.ACCESS_KEY || constants.ACCESS_KEY,
-    secretAccessKey: process.env.SECRET_KEY || constants.SECRET_KEY
+    accessKeyId: process.env.S3_ACCESS_KEY || constants.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_KEY || constants.S3_SECRET_KEY
 });
 
 const s3 = new AWS.S3();
