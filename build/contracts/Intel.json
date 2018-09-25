@@ -30048,11 +30048,17 @@
     "version": "0.4.25+commit.59dbf8f1.Emscripten.clang"
   },
   "networks": {
-    "1": {
+    "mainnet": {
       "events": {},
       "links": {},
       "address": "0x9c17c17053c3c2d945cf9246719d19e638622689",
       "transactionHash": "0xd84f8ef224c8eb897e04bf4bb19d5196cf7bc7be1e5cd43a9caaf4615146ec53"
+    },
+    "ropsten": {
+      "events": {},
+      "links": {},
+      "address": "0x9c17c17053c3c2d945cf9246719d19e638622689",
+      "transactionHash": "0x9880c09c7e31dac3abf79c5b74220dd29ebcf220f4066c735e034eca705f02ef"
     }
   },
   "schemaVersion": "2.0.1",
