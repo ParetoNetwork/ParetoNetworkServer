@@ -1375,7 +1375,13 @@
     "version": "0.4.25+commit.59dbf8f1.Emscripten.clang"
   },
   "networks": {
-    "ropsten": {
+     "mainnet": {
+      "events": {},
+      "links": {},
+      "address": "0xa1da236213e5acdcd9ab56b788ef47077bc74799",
+      "transactionHash": "0xf098cdee2e4420971612e61c229b843ab9a0a86efa118fc0b9dca60398ab0729"
+     },
+     "ropsten": {
       "events": {},
       "links": {},
       "address": "0xa1da236213e5acdcd9ab56b788ef47077bc74799",
@@ -1383,5 +1389,5 @@
     }
   },
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-25T00:00:17.188Z"
+  "updatedAt": "2018-09-25T01:29:32.740Z"
 }
