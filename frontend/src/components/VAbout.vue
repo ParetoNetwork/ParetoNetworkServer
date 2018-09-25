@@ -54,7 +54,7 @@
                             </div> <!-- end team-member -->
                         </div>
                         <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="d-flex flex-column">
+                            <div class="team-member text-center">
                                 <figure class="team-member__image">
                                     <img src="../assets/images/team-2.jpg" alt="" class="rounded-circle" width="85">
                                 </figure>
@@ -74,21 +74,19 @@
                             </div> <!-- end team-member -->
                         </div>
                         <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="d-flex flex-column">
+                            <div class="team-member text-center">
                                 <figure class="team-member__image">
-                                    <img src="../assets/images/team-chiara.jpg" alt="" class="rounded-circle"
-                                         width="85">
+                                    <img src="../assets/images/team-chrisg.jpg" alt="" class="rounded-circle" width="85">
                                 </figure>
                                 <div class="d-flex flex-column">
-                                    <span class="name">Chiara Longo</span>
-                                    <span class="position">Chief Economist.</span>
+                                    <span class="name">Chris Gardner</span>
+                                    <span class="position">Product Manager.</span>
                                 </div>
                                 <div class="mb-2">
-                                    <p>Univ. Milan, PhD in Economics., Bank of the West/BNP Paribas | 15 years in
-                                        econometric modeling of commodities and currencies</p>
+                                    <p>UC Berkeley Economics BA | Startup CEO | Marcus & Millichap Financial Analyst | Enthusiast of Decentralized Economic Models. At Pareto, Leading Content Operations, Building Partnerships and Conducting Asset Valuation Research</p>
                                 </div>
                                 <div class="team-member__socials">
-                                    <a href="https://www.linkedin.com/in/chiaralongo/" target="_blank"><i
+                                    <a href="https://www.linkedin.com/in/christopherwgardner/" target="_blank"><i
                                             class="fa fa-linkedin-square" aria-hidden="true"></i></a>
                                 </div>
                             </div> <!-- end team-member -->
@@ -129,25 +127,6 @@
                                 </div>
                                 <div class="team-member__socials">
                                     <a href="https://www.linkedin.com/in/drannabecker/" target="_blank"><i
-                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
-                                </div>
-                            </div> <!-- end team-member -->
-                        </div>
-                        <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="team-member text-center">
-                                <figure class="team-member__image">
-                                    <img src="../assets/images/team-5.jpg" alt="" class="rounded-circle" width="85">
-                                </figure>
-                                <div class="d-flex flex-column">
-                                    <span class="name">Colin Mo</span>
-                                    <span class="position">Communications Strategy Lead.</span>
-                                </div>
-                                <div class="mb-2">
-                                    <p>Northwestern M.S. Journalism | Digital media innovation focused reporter and
-                                        technical writer</p>
-                                </div>
-                                <div class="team-member__socials">
-                                    <a href="https://www.linkedin.com/in/colin-mo-355b96ba/" target="_blank"><i
                                             class="fa fa-linkedin-square" aria-hidden="true"></i></a>
                                 </div>
                             </div> <!-- end team-member -->
@@ -700,7 +679,7 @@
                             <a href="https://cointelegraph.com/press-releases/pareto-network-the-peer-to-peer-financial-content-marketplace-announces-their-token-sale"
                                target="_blank">
                                 <img src="../assets/images/cointelegraph.png" alt=""></a>
-                            <a href="http://www.newsbtc.com/2017/10/18/pareto-p2p-financial-content-marketplace/"
+                            <a href="https://www.newsbtc.com/2017/10/18/pareto-p2p-financial-content-marketplace/"
                                target="_blank">
                                 <img src="../assets/images/newsbtc.png" alt=""></a>
                             <a href="https://ccinews.net/pareto-network-poised-disrupt-16-billion-dollar-financial-research-industry/"

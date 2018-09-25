@@ -1,180 +1,683 @@
 <template>
-    <div class="pareto-bg-dark">
-        <div class="container main  wrapp"
-             style="min-height: 100vh;">
-            <div class="row">
-                <div class="col-md-4 font-body"
-                     style="color: #040f1e; margin-top: 30px; padding-top: 20px; text-align: left;">
+    <div class="container main  wrapp">
+        <notifications group="auth" position="bottom right"/>
+        <div class="row pt-5">
+            <div class="col-md-5 mb-5 mt-2 m-sm-0">
 
-                    <div class="flex-row">
-                        <!-- hidden by default unless metamask connect -->
-                        <form id="intel"
-                              style="margin: 5px;">
-                            <div class="group">
-                                <label class="pareto-label">Authorized Contributor</label>
+                <template v-if="user">
+                    <div class="media py-1 px-4 border mb-3 mb-md-5">
+                        <div class="d-flex flex-column mr-2">
+                            <div class="border p-2 mb-2" @click="openInput()">
 
-                                <input class="lookup-input"
-                                       type="text"
-                                       name="address" readonly v-model="blockChainAddress">
-                                <span class="highlight"></span>
-                                <span class="bar"></span>
+                                <div data-v-514e8c24="" class="thumb" id="wrapper"
+                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic)}"
+                                     style="width: 100px; height: 100px;">
+                                    <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i
+                                            class="fa fa-pencil"
+                                            aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                                <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
                             </div>
-                            <p>&nbsp;</p>
+                            <button class="btn btn-primary-pareto" @click="showModal">
+                                EDIT PROFILE
+                            </button>
+                        </div>
 
-                            <div class="group">
-                                <label class="pareto-label">Title</label>
-
-                                <input id="intel-title-input"
-                                       type="text" class="lookup-input"
-                                       name="intel-title" v-model="title">
-                                <span class="highlight"></span>
-                                <span class="bar"></span>
+                        <div class="media-body flex-column text-left mt-2 ellipsis">
+                            <span class="name-title"><b>{{user.first_name|| ''}}  {{user.last_name || ''}}</b></span>
+                            <p v-if="user.address" class="ellipsis"><b class="ellipsis"> {{user.address}} </b></p>
+                            <div class="mt-2">
+                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
+                                <span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>
                             </div>
-                            <p>&nbsp;</p>
+                            <p class="mb-2 mt-2">
+                                <b>Network Rank:&nbsp;</b>
+                                <ICountUp
+                                        :startVal="countUp.startVal"
+                                        :endVal="parseFloat(user.rank)"
+                                        :decimals="decimalsLength(user.rank)"
+                                        :duration="randomNumber(3,6)"
+                                        :options="countUp.options"
+                                        @ready="onReady"/>
+                            </p>
+                            <p class="mb-2 mt-2">
+                                <b>User Score:&nbsp;</b>
+                                <ICountUp
+                                        v-if="user.score"
+                                        :startVal="countUp.startVal"
+                                        :endVal="parseFloat(user.score)"
+                                        :decimals="decimalsLength(user.score)"
+                                        :duration="randomNumber(3,6)"
+                                        :options="countUp.options"
+                                        @ready="onReady"/>
+                                <span v-else> 0 </span>
+                            </p>
 
-                            <!-- intel-body-input -->
-                            <textarea id="intel-body-input"
-                                      name="editordata" v-model="body"></textarea>
+                            <!--<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">-->
+                            <!--Calculate-->
+                            <!--</router-link>-->
+                            <!--<div class="d-flex flex-column" style="padding-left: 1.8rem;">-->
 
-                        </form>
+                            <!---->
+                            <!--<div class="">-->
+                            <!--<span class="subtitle-dashboard"><b>BIO:</b></span>-->
+                            <!--<p class="text-dashboard text-pareto-gray">-->
+                            <!--{{user.biography || 'No biography provided'}}-->
+                            <!--</p>-->
+                            <!--</div>-->
+                            <!--</div>-->
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-center">
-                        <button
-                                class="button bg-white pareto-text-blue"
-                                style="width:100px; height: 35px; line-height: 32px;"
-                                type="button"
-                                form="intel"
-                                value="View"
-                                v-on:click="upload()"
-                        >Submit
+                </template>
+
+                <div class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="title"><b>MY POSTS</b></h5>
+                        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
                         </button>
                     </div>
-
-
-                </div>
-                <!-- end post new intel section -->
-
-                <div class="col-md-6 font-body text-left"
-                     style="color: #fff; min-height: 80vh;">
-                    <b>Intel Content Preview</b>
-
-                    <div id="preview"
-                         style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 100%; border: 1px solid #a9a9a9; border-radius: 5px;">
-                        {{body}}
+                    <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
+                        <ul v-if="myContent.length" class="list-group list-unstyled">
+                            <li class="list-group-item border-0 p-3" v-for="post in myContent" :key="post.id">
+                                <router-link tag="div" class="split" :to="'/intel/' + post._id"
+                                             @click="showDetails(post)">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex flex-column text-left">
+                                            <h5 class="title"><b>{{post.title}}</b></h5>
+                                            <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
+                                            <span>{{post.dateCreated | date}}</span>
+                                        </div>
+                                        <div class="d-flex ">
+                                            <span class="underline text-primary ellipsis"><u><b>TXID:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
+                                        </div>
+                                    </div>
+                                </router-link>
+                            </li>
+                        </ul>
+                        <span v-else> No data to display </span>
                     </div>
+                </div>
 
+            </div>
+            <div class="col-md-7">
+                <div class="border p-2">
+                    <div class="p-3 border-bottom">
+                        <h5 class="title"> MY INTEL FEED: </h5>
+                    </div>
+                    <div v-if="loading" class="d-flex split">
+                        <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
+                        </i>
+                    </div>
+                    <div v-if="!myFeed.content">
+                        <span> No data to display </span>
+                    </div>
+                    <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
+                        <ul class="list-unstyled list-group">
+                            <li class="text-left list-group-item border-0 px-1 py-2" :key="row._id"
+                                v-for="row of myFeed.content">
+                                <div class="row border-bottom pb-2">
+                                    <router-link tag="div" :to="'/intel/' + row._id" class="col-lg-9 pr-0">
+                                        <div class="row cursor-pointer">
+                                            <div class="col-2">
+                                                <div class="border p-1 mr-2" style="height: 50px; width: 50px;">
+                                                    <div data-v-514e8c24="" class="thumb"
+                                                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
+                                                         style="width: 40px; height: 40px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-10 px-lg-1">
+                                                <div class="d-flex flex-column flex-grow-1 pr-3">
+                                                    <h1 class="title ellipsis">{{row.title|| 'No title'}}</h1>
+                                                    <div class="">
+                                                        <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
+                                                        <div>
+                                                        <span class="text-dashboard">Disclosed by: {{row.address}}
+                                                        </span>
+                                                        </div>
+                                                        <div>
+                                                            Blocks ago:
+                                                            <ICountUp
+                                                                    :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
+                                                                    :endVal="parseFloat(row.blockAgo)"
+                                                                    :decimals="decimalsLength(row.blockAgo)"
+                                                                    :duration="randomNumber(1,3)"
+                                                                    :options="countUp.options"
+                                                                    @ready="onReady"/>
+
+                                                        </div>
+                                                        <div>
+                                                        <span class="text-dashboard">
+                                                            <b>
+                                                                {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
+                                                            </b>
+                                                        </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </router-link>
+
+                                    <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
+                                        <div v-if="false" class="text-right font-weight-bold">
+                                            <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
+                                            <span class="text-right">{{row.reward}}</span>
+                                        </div>
+                                        <div v-if="user.address != row.address && row.intelAddress && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
+                                            <div class="d-inline-block">
+                                                <p class="text-right text-secondary ellipsis reward-text"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                                    <b> {{ row.reward }} </b>
+                                                </p>
+                                                <b-btn class="btn-primary-pareto mx-auto px-4"
+                                                       style="max-width: 120px;"
+                                                       v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress">REWARD
+                                                </b-btn>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
+            <div class="d-block text-center">
+                <form action="">
+                    <label for="first_name">First Name</label>
+                    <div class="input-group mb-3">
+                        <input v-model="firstName" type="text" class="form-control" id="first_name"
+                               aria-describedby="basic-addon3">
+                    </div>
+                    <label for="last_name">Last Name</label>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="last_name" v-model="lastName"
+                               aria-describedby="basic-addon3">
+                    </div>
+                    <label for="bio">Biography</label>
+                    <div class="input-group mb-3">
+                        <textarea v-model="bio" class="form-control" id="bio"
+                                  aria-describedby="basic-addon3"> </textarea>
+                    </div>
+                </form>
+            </div>
+        </b-modal>
 
+        <b-modal
+                id="modalToken"
+                ref="modalToken"
+                centered
+                hide-header
+                hide-footer
+                :body-bg-variant="'dark'"
+                :body-text-variant="'light'">
+            <b-container fluid>
+                <h4 class="font-body mb-3"> Reward</h4>
+                <p class="text-dashboard mb-2" style="font-size: 16px"> Please enter the number of Pareto Tokens to
+                    reward</p>
+                <b-form-input v-model="tokenAmount" style="font-size: 25px"
+                              type="number"></b-form-input>
+                <b-row class="m-2 mt-4 d-flex justify-content-center">
+                    <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
+                    <b-button style="background-color: rgb(107, 194, 123)" variant="success"
+                              @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
+                    </b-button>
+                </b-row>
+            </b-container>
+        </b-modal>
+    </div>
 </template>
 
 <script>
-    import DashboardService from '../services/dashboardService';
-    import ContentService from '../services/ContentService';
+    import dashboardService from "../services/dashboardService";
+    import profileService from "../services/profileService";
+    import moment from "moment";
+    import AuthService from "../services/authService";
+    import ContentService from "../services/ContentService";
+    import ICountUp from "vue-countup-v2";
+
+    import {mapMutations, mapState} from "vuex";
+    import environment from "../utils/environment";
+    import {countUpMixin} from "../mixins/countUp";
 
     export default {
-        name: 'VIntel',
+        name: "VIntel",
+        mixins: [countUpMixin],
+        components: {
+            ICountUp
+        },
         data: function () {
             return {
-                logged: false,
-                block: null,
-                body:'',
-                title:'',
-                blockChainAddress:''
+                address: null,
+                loading: true,
+                myFeed: {
+                    content: [],
+                    loading: false,
+                    page: 0,
+                },
+                rewardId: '',
+                intelAddress: '',
+                tokenAmount: 1,
+                myContent: [],
+                allMyContent: [],
+                moment: moment,
+                firstName: "",
+                lastName: "",
+                bio: "",
+                picture: "",
+                baseURL: environment.baseURL,
+                user: {
+                    rank: 0,
+                    score: 0,
+                    tokens: 0
+                },
+                scrollPost: 0,
+                scrollFeed: 0
             };
         },
+        directives: {
+            scroll: {
+                inserted: function (el, binding) {
+                    let f = function (evt) {
+                        if (binding.value(evt, el)) {
+                            window.removeEventListener('scroll', f)
+                        }
+                    };
+                    window.addEventListener('scroll', f)
+                }
+            }
+        },
+        filters: {
+            date: function formatDate(date) {
+                const temp = moment(date);
+                return temp.format("MMMM Do, YYYY");
+            }
+        },
         mounted: function () {
-            $('#intel-body-input').summernote({
-                height: 300, // set editor height
-                minHeight: null, // set minimum height of editor
-                maxHeight: null, // set maximum height of editor
-                focus: true, // set focus to editable area after initializing summernote
-                toolbar: [
-                    ['font', ['bold', 'italic', 'underline' /*, 'clear'*/]],
-                    // ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-                    //['color', ['color']],
-                    ['para', [/*'ul', 'ol', */ 'paragraph']],
-                    //['height', ['height']],
-                    //['table', ['table']],
-                    ['insert', ['link', /*'picture',*/]],
-                    //['view', ['fullscreen' /*, 'codeview'*/]],
-                    //['help', ['help']]
-                ]
-            });
-            this.address();
-        }, methods: {
-            address: function () {
-                DashboardService.getAddress(res => {
-                    this.block = res.block;
-                    this.blockChainAddress = res.address
-                }, () => {
-
+            this.main();
+           // console.log(this.screenSize)
+        },
+        computed: {
+            ...mapState(["madeLogin", "ws"])
+        },
+        methods: {
+            ...mapMutations(["intelEnter", "iniWs"]),
+            distributeReward: function (ID) {
+                ContentService.distributeRewards(
+                    {ID},
+                    res => {
+                        //  console.log(res);
+                    },
+                    error => {
+                    }
+                );
+            },
+            dateStringFormat(date) {
+                return new Date(date);
+            },
+            goToIntelPage: function () {
+                window.location = '/#/create';
+            },
+            loadAddress: function () {
+                return dashboardService.getAddress(
+                    res => {
+                        this.address = res;
+                    },
+                    () => {
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: 'There was an error loading the address. Please refresh the page'
+                        });
+                    }
+                );
+            },
+            loadContent: function (params) {
+                return dashboardService.getAllContent(params,
+                    res => {
+                        this.loading = false;
+                        this.myFeed.page++;
+                        this.myFeed.loading = false;
+                        this.myFeed.content = [...this.myFeed.content, ...res];
+                    },
+                    error => {
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: 'There was an error loading the address. Please refresh the page'
+                        });
+                    }
+                );
+            },
+            hideModal() {
+                this.$refs.modalToken.hide()
+            },
+            assignBlock(block) {
+                this.myFeed.content = this.myFeed.content.map(item => {
+                    // console.log(item);
+                    item.blockAgo = block - item.block;
+                    return item;
                 });
             },
-            upload: function () {
-                const x = document.getElementById('intel-body-input').value
+            numberToScientificNotation(number){
+                return (number+"").length>12? number.toExponential(5) : number;
+            },
+            overrideOnMessage() {
+                let wsa = this.ws;
+                //console.log(this.ws)
+                this.ws.onmessage = (data) => {
+                    try {
+                        const info = JSON.parse(data.data);
+                        if (info.data.address) {
+                            this.user.score = info.data.score;
+                            this.user.rank = info.data.rank;
+                            this.user.tokens = info.data.tokens;
+                            // this.user.block = info.data.block;
+                            this.assignBlock(info.data.block);
+                        }
+                        if (info.data.action){
+                          //  console.log(info.data.action);
+                            switch (info.data.action){
+                                case 'updateContent':{
+                              //      console.log('load');
+                                    this.loadMyContent();
+                                    this.myFeed.page = 0;
+                                    const params = {limit: 10, page: this.myFeed.page};
+                                    this.loadContent(params);
+                                }
+                            }
+                        }
 
-                ContentService.uploadContent({block:this.block, title: this.title, body: x},res => {
-                    this.body = x.slice(3,x.length -4);
-                }, error => {
-
+                    } catch (e) {
+                        console.log(e);
+                    }
+                };
+            },
+            socketConnection() {
+                let params = {rank: this.rank, limit: 100, page: this.page};
+                if (!this.ws) {
+                    AuthService.getSocketToken(res => {
+                        this.iniWs();
+                        let wss = this.ws;
+                        this.ws.onopen = function open() {
+                            wss.send(JSON.stringify(params));
+                        };
+                        this.overrideOnMessage();
+                    });
+                } else {
+                    this.overrideOnMessage();
+                }
+            },
+            loadMyContent: function () {
+                return dashboardService.getContent(
+                    res => {
+                        this.allMyContent = res;
+                        this.myContent = this.allMyContent.slice(0, 10);
+                    },
+                    error => {
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: 'There was an error loading the address. Please refresh the page'
+                        });
+                    }
+                );
+            },
+            loadProfile: function () {
+                return profileService.getProfile(
+                    res => {
+                        this.user = res;
+                        this.firstName = res.first_name;
+                        this.lastName = res.last_name;
+                        this.bio = res.biography;
+                    },
+                    () => {
+                    }
+                );
+            },
+            loadProfileImage: function (pic) {
+                let path = this.baseURL + "/profile-image?image=";
+                return profileService.getProfileImage(path, pic);
+            },
+            openInput: function () {
+                document.getElementById("file").click();
+            },
+            randomNumber: function (min = 1, max = 3) {
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            },
+            requestCall: function () {
+                Promise.all([
+                    this.loadProfile(),
+                    this.loadMyContent(),
+                    this.loadAddress(),
+                    this.loadContent()
+                ]).then(values => {
+                    this.$store.state.makingRequest = false;
                 });
+            },
+            rewardIntel: function (ID, tokenAmount, intelAddress) {
+                this.hideModal();
+
+                if (!tokenAmount) {
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: 'No Token Amount'
+                    });
+                    this.tokenAmount = 1;
+                    return;
+                }
+
+                // console.log(ID, tokenAmount);
+                ContentService.rewardIntel(
+                    {ID, tokenAmount, intelAddress},
+                    res => {
+                        console.log(res);
+                    },
+                    err => {
+                        console.log(res);
+                    }
+                );
+            },
+            scrollMyPost: function () {
+                let list = document.getElementById("mypost");
+
+                if (list.scrollTop + list.offsetHeight >= list.scrollHeight
+                    && this.myContent.length < this.allMyContent.length) {
+                    this.myContent = this.allMyContent.slice(0, this.myContent.length + 10);
+                    // console.log(this.myContent);
+                }
+            },
+            scrollMyFeed: function () {
+                let list = document.getElementById("myfeed");
+
+                if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
+                    && !this.myFeed.loading) {
+                    const params = {limit: 10, page: this.myFeed.page};
+                    this.myFeed.loading = true;
+                    this.loadContent(params);
+                }
+            },
+            showDetails: function (row) {
+                // console.log(row);
+            },
+            showModal() {
+                this.$refs.myModalRef.show();
+            },
+            // substringTitle(title) {
+            //     return (title.length > 35) ? title.substring(0, 35) + ' ...' : title;
+            // },
+            updatePicture: function () {
+                let file = this.$refs.file.files[0];
+                let formData = new FormData();
+                formData.append("file", file);
+                profileService.uploadProfilePic(formData, res => {
+                    this.user.profile_pic = res;
+                });
+            },
+            updateProfile() {
+                const profile = {
+                    first_name: this.firstName,
+                    last_name: this.lastName,
+                    biography: this.bio
+                };
+                profileService.updateProfile(
+                    profile,
+                    res => {
+                        this.$refs.myModalRef.hide();
+                        this.loadProfile();
+                    },
+                    error => {
+                    }
+                );
+            },
+            main: function () {
+                this.$store.state.makingRequest = true;
+                if (!this.madeLogin) {
+                    this.intelEnter();
+                    AuthService.postSign(
+                        () => {
+                            this.requestCall();
+                        },
+                        () => {
+                            this.socketConnection();
+                            this.requestCall();
+                        }
+                    );
+                } else {
+                    this.socketConnection();
+                    this.requestCall();
+                }
             }
         }
-
     };
 </script>
 
 <style scoped lang="scss">
-    .popover {
-        background-color: #6bc27a;
+    .container {
+        font-family: "Body";
     }
 
-    textarea a {
-        text-decoration: underline;
-        color: blue;
+    li > .split {
+        cursor: pointer;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        padding-bottom: 0.5rem;
     }
 
-    .note-editable a {
-        text-decoration: underline;
-        color: blue;
+    li,
+    .list-group-item:last-child > .split {
+        border-bottom: 0;
     }
 
-    #preview a {
-        text-decoration: underline;
-        color: blue;
+    .name-title {
+        font-size: 21px;
+        font-weight: bold;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: center;
+        color: #020f1f;
     }
 
-    @media all and (max-width: 768px) {
-        .header-img {
-            width: 100px;
-        }
+    .button-margin {
+        margin-left: 15px;
     }
 
-    @media all and (max-width: 575px) {
-        .header-img {
-            width: 90px;
-        }
+    .icon-mini {
+        object-fit: contain;
+        height: auto;
+        margin-right: 5px;
     }
 
-    .pareto-label {
-        color: #ffffff;
+    .title {
         font-size: 18px;
+        font-weight: bold;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+    }
+
+    .text-dashboard {
+        font-size: 11px;
         font-weight: normal;
-        pointer-events: none;
-        transition: 0.2s ease all;
-        -moz-transition: 0.2s ease all;
-        -webkit-transition: 0.2s ease all;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
     }
-    .lookup-input {
-        padding: 10px 10px 10px 5px;
-        display: block;
-        width: 350px;
-        border: none;
-        background-color: #040f1e;
-        border-bottom: 1px solid #757575;
-        color: white;
+
+    .scrollable {
+        overflow: auto;
+        scroll-behavior: smooth;
+        overflow-x: hidden
     }
+
+    .subtitle-dashboard {
+        font-size: 9px;
+        font-weight: bold;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: center;
+    }
+
+    .ellipsis {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+    }
+
+
+
+    .wrapp {
+        color: black;
+        font-size: 12px;
+    }
+
+    #myfeed {
+        max-height: 860px;
+    }
+
+    #mypost {
+        max-height: 600px;
+    }
+
+    #wrapper {
+        position: relative;
+    }
+
+    #wrapper .text {
+        position: absolute;
+        bottom: 0;
+        display: none;
+    }
+
+    #wrapper:hover .text {
+        display: flex;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    #wrapper:hover .text {
+        display: flex;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-width: 992px){
+        .reward-text {
+            max-width: 110px;
+        }
+    }
+
 </style>

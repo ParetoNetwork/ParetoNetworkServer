@@ -11,7 +11,8 @@ var requestp = require('request-promise');
 var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser');
 const multer = require("multer");
-var multerS3 = require('multer-s3')
+var multerS3 = require('multer-s3');
+const cron = require("node-cron");
 const AWS = require('aws-sdk');
 AWS.config.update({
     region: process.env.S3_REGION || constants.S3_REGION,
@@ -103,10 +104,16 @@ const ErrorHandler = require('./error-handler.js');
 app.get('/profile-image', function (req, res) {
     var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
    // var url = s3.getSignedUrl('getObject', params);
+
     s3.getObject(params, function(err, data) {
         //res.writeHead(200, {'Content-Type': 'image/jpeg'});
-        res.write(data.Body, 'binary');
-        res.end(null, 'binary');
+        if(!err){
+            res.write(data.Body, 'binary');
+            res.end(null, 'binary');
+        }else{
+            res.sendFile(path.join(__dirname + '/default-avatar.png'));
+        }
+
     });
 });
 
@@ -184,6 +191,74 @@ app.get('/v1/rank', function (req, res) {
 
 });
 
+app.get('/v1/balance', function (req, res) {
+
+    controller.getBalance(req.query.address,0, function(err, count){
+        if(!err){
+            res.status(200).json(ErrorHandler.getSuccess(count));
+        }else{
+            res.status(200).json(ErrorHandler.getError(err));
+        }
+    });
+
+});
+
+//get info about your address
+app.post('/v1/addresses', function (req, res) {
+    controller.retrieveAddresses( req.body.addresses, function (err, results) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(results));
+        }
+    });
+
+});
+
+
+app.get("/getIntels", (req, res) => {
+    controller.getAllIntel((err, response) => {
+      if (err) {
+        res.status(502).json({ message: "Could not get Intels" });
+      } else {
+        res.status(200).json({ message: "success", data: response });
+      }
+    });
+  });
+  
+  app.get("/getIntel/:id", (req, res) => {
+    const { id } = req.params;
+    controller.getAnIntel(id, (err, response) => {
+      if (err) {
+        res.status(502).json({ message: "Could not get Intels" });
+      } else {
+        res.status(200).json({ message: "success", data: response });
+      }
+    });
+  });
+  
+  app.get("/getIntelsByProvider/:address", (req ,res) => {
+      const {address} = req.params;
+      controller.getIntelsByProvider(address, (err, response) => {
+          if (err) {
+            res.status(502).json({ message: "Could not get Intels" });
+          } else {
+            res.status(200).json({ message: "success", data: response });
+          }
+        });
+  })
+  
+  app.get("/getContributors/:intelId", (req, res) => {
+    const {intelId} = req.params;
+    controller.getContributorsByIntel(intelId, (err, response) => {
+        if (err) {
+          res.status(502).json({ message: "Could not get Contributors" });
+        } else {
+          res.status(200).json({ message: "success", data: response });
+        }
+      });
+  })
+
 /********* AUTHENTICATED v1 APIs *********/
 
 app.use(function (req, res, next) {
@@ -223,6 +298,10 @@ app.get('/v1/auth', function (req, res) {
 
 app.get('/v1/splash-auth', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/dashboard.html'));
+});
+
+app.get('/v1/signws', function (req, res){
+    res.status(200).json(ErrorHandler.getSuccess({token:  jwt.sign({user: req.user}, 'ParetoWs',  { expiresIn: "5y" })}));
 });
 
 /*
@@ -270,6 +349,7 @@ app.get('/v1/summation', function (req, res) {
 
 app.post('/v1/content', function (req, res) {
 
+
     if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }
@@ -292,9 +372,21 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
+
 app.get('/v1/content', function (req, res) {
 
     //this needs a session id, basically an authenticated address
+
+    var limit = parseInt(req.query.limit) || 15;
+    var page = parseInt(req.query.page) || 0;
+
+    //max limit
+    if (limit > 50) {
+        limit = 50;
+    }
+
+    req.query.limit = limit;
+    req.query.page = page;
 
     controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
@@ -307,9 +399,21 @@ app.get('/v1/content', function (req, res) {
 });
 
 
+app.get('/v1/content/me', function (req, res) {
+
+    controller.getContentByCurrentUser(req, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
 //get info about another address
 app.get('/v1/content/:content', function (req, res) {
-
+    req.query.limit = 1000;
+    req.query.page = 0;
     controller.getAllAvailableContent(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
@@ -327,16 +431,6 @@ app.get('/v1/content/:content', function (req, res) {
 
 });
 
-app.get('/v1/content/me/', function (req, res) {
-
-    controller.getContentByCurrentUser(req.user, function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
 
 app.get('/v1/ranking', function (req, res) {
 
@@ -384,29 +478,30 @@ app.get('/v1/address/:address', function (req, res) {
 
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
-    if(req.query.latest==='true'){
-        controller.updateScore(req.user, function (err, success) {
-            if (err) {
-                res.status(200).json(ErrorHandler.getError(err));
-            } else {
-                controller.getUserInfo(req.user,  function (err, result) {
-                    if (err) {
-                        res.status(200).json(ErrorHandler.getError(err));
-                    } else {
-                        res.status(200).json(ErrorHandler.getSuccess(result));
-                    }
-                });
-            }
-        });
-    }else{
-        controller.getUserInfo(req.user,  function (err, result) {
-            if (err) {
-                res.status(200).json(ErrorHandler.getError(err));
-            } else {
-                res.status(200).json(ErrorHandler.getSuccess(result));
-            }
-        });
-    }
+    //Get Info User
+     if (req.query.latest=='true'){
+         controller.updateScore(req.user, function (err, success) {
+             if (err) {
+                 res.status(200).json(ErrorHandler.getError(err));
+             } else {
+                 controller.getUserInfo(req.user,  function (err, result) {
+                     if (err) {
+                         res.status(200).json(ErrorHandler.getError(err));
+                     } else {
+                         res.status(200).json(ErrorHandler.getSuccess(result));
+                     }
+                 });
+             }
+         });
+     } else{
+         controller.getUserInfo(req.user,  function (err, result) {
+             if (err) {
+                 res.status(200).json(ErrorHandler.getError(err));
+             } else {
+                 res.status(200).json(ErrorHandler.getSuccess(result));
+             }
+         });
+     }
 
 });
 
@@ -478,6 +573,64 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
     }]
 }));
 
+/**
+ * This is a scheduled task that will update the calculation for the score every ten minutes. Also update CreateEventIntel
+ */
+cron.schedule("*/5 * * * *", function() {
+    try{
+        controller.updateFromLastIntel();
+        controller.realAllScoreRanking(function(err, result){
+            if(err){
+                console.log(err)
+            }else{
+                controller.getScoreAndSaveRedis(function(err, result){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        console.log('Sucessfully updated' )
+                    }
+
+                });
+            }
+
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+});
+
+/**
+ * This is a scheduled task that approximate score every minute.
+ */
+
+setTimeout(function run() {
+    try{
+        const time = (new Date().getTime());
+        controller.aproxAllScoreRanking(function(err, result){
+            if(err){
+                console.log(err)
+            }else{
+                controller.getScoreAndSaveRedis(function(err, result){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        console.log('Sucessfully updated aprox' )
+                    }
+                    setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
+
+                });
+            }
+
+        });
+    }catch (e) {
+        console.log(e);
+    }
+
+}, 60000);
+
+
+
 /*app.get('/v1/content/social', function(req, res){
   //add solume API key to config + environment variable
   //use request promises and get solume result
@@ -487,5 +640,102 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 
 
 }); */
+/*
+WEb socket in order to keep fronted updated
+ */
+
+app.initializeWebSocket = function(server){
+
+    const WebSocket = require('ws');
+    var WebSocketServer = WebSocket.Server,
+        wss = new WebSocketServer({
+            verifyClient: function (info, cb) {
+
+                var token = info.req.headers.cookie.split('authorization=')[1];
+                if (!token)
+                    cb(false, 401, 'Unauthorized');
+                else {
+                    jwt.verify(token, 'Pareto', function (err, decoded) {
+                        if (err) {
+                            cb(false, 401, 'Unauthorized')
+                        } else {
+                            info.req.user = decoded;
+                            cb(true)
+                        }
+                    })
+
+                }
+            },
+            server: server});
+
+    /**
+     * We need these functions in order to prevent issues with the sockets ‘alive’ status and improve performance.
+     */
+    function noop() {}
+
+    function heartbeat() {
+        this.isAlive = true;
+    }
+
+    /**
+     * Initialize connections
+     */
+    wss.on('connection', function connection(ws, req) {
+        console.log('connection');
+        ws.isAlive = true;
+        ws.on('pong', heartbeat);
+        ws.user = req.user;
+        ws.on('message', function (message) {
+            ws.info = JSON.parse(message);
+        });
+    });
+    controller.wss = wss;
+    controller.WebSocket = WebSocket;
+    /**
+     * Validates if the connection is alive and sends info each minute,
+     */
+    cron.schedule("* * * * *", function() {
+        try{
+            wss.clients.forEach(function each(client) {
+                if (client.isAlive === false) return client.terminate();
+
+                client.isAlive = false;
+                client.ping(noop);
+                if (client.readyState === WebSocket.OPEN ) {
+                    // Validate if the user is subscribed a set of information
+                    if(client.info && client.user){
+                        const rank = parseInt(client.info.rank) || 1;
+                        let limit = parseInt(client.info.limit) || 100;
+                        const page = parseInt(client.info.page) || 0;
+
+                        //max limit
+                        if (limit > 500) {
+                            limit = 500;
+                        }
+                        /**
+                         * Send ranking
+                         */
+                        controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                            if (!err) {
+                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                            }
+                        });
+
+                        controller.retrieveAddress(client.user.user, function (err, result) {
+                            if (!err) {
+                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                            }
+                        });
+
+                    }
+                }
+            });
+        }catch (e) {
+            console.log(e);
+        }
+
+    });
+
+}
 
 module.exports = {app: app, controller: controller };

@@ -93,7 +93,7 @@ $(document).ready(function () {
         console.log(loginSrv);
         loginSrv.signSplash(function (res) {
             console.log(res);
-            window.location.replace('/dashboard');
+            window.location.replace('/intel');
             stopLoading(id, text);
         }, function (error) {
             alert(error);
