@@ -2,7 +2,7 @@ import http from './HttpService';
 
 export default class dashboardService {
     static getAddress(onSuccess, onError) {
-        http.get('/v1/address', {
+        return http.get('/v1/address', {
             withCredentials: true
         }).then(res => {
             if(res.data.success){
@@ -30,7 +30,7 @@ export default class dashboardService {
     // }
 
     static getIntel(onSuccess, onError, intel) {
-        http.get('/v1/content/' + intel).then(res => {
+        return http.get('/v1/content/' + intel).then(res => {
             if(res.data.success){
                 return onSuccess(res.data.data);
             }else{
@@ -42,7 +42,7 @@ export default class dashboardService {
     }
 
     static getContent(onSuccess, onError) {
-        http.get('/v1/content/me').then(res => {
+        return http.get('/v1/content/me').then(res => {
             if(res.data.success){
                 return onSuccess(res.data.data);
             }else{
@@ -53,8 +53,10 @@ export default class dashboardService {
         });
     }
 
-    static getAllContent(onSuccess, onError) {
-        http.get('/v1/content').then(res => {
+    static getAllContent(params, onSuccess, onError) {
+        const {limit, page} = params || {limit: 10, page: 0};
+        return http.get('/v1/content?' + 'limit=' + limit + '&page=' + page).then(res => {
+            //console.log(res);
             if(res.data.success){
                 return onSuccess(res.data.data);
             }else{

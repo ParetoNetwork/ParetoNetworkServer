@@ -1,15 +1,15 @@
 <template>
     <div class="pareto-bg-dark main leaderView">
+        <notifications group="auth" position="bottom right"/>
         <div class="container">
             <div class="row">
                 <div class="col-md-6 font-body"
                      style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
                     <div>
                         <div class="row" style="color: #ffffff; justify-content: center;">
-
                             <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
                                 Check
-                                your<b>PARETO</b> scores
+                                your <b>PARETO</b> scores
                                 easily by signing your wallet address using Metamask or a web3-enabled browser.
                                 Otherwise, sign manually.</p>
                             <br/>
@@ -40,19 +40,23 @@
                         <div class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
                             <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
-                                                            src="../assets/images/pareto-logo-mark-color.svg"
-                                                            alt="Pareto Logo for Ranking">
+                                                                         src="../assets/images/pareto-logo-mark-color.svg"
+                                                                         alt="Pareto Logo for Ranking">
                             </div>
                             <div id="score-counter" class="d-flex">
                                 <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
                                     <ICountUp
+                                            v-if="score"
                                             :startVal="countUp.startVal"
-                                            :endVal="score"
-                                            :decimals="countUp.decimals"
-                                            :duration="countUp.duration"
+                                            :endVal="parseFloat(score)"
+                                            :decimals="decimalsLength(score + '')"
+                                            :duration="randomNumber(3,6)"
                                             :options="countUp.options"
                                             @ready="onReady"
                                     />
+                                    <span v-else>
+                                        0
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -72,31 +76,46 @@
                         <div class="table-area">
 
                             <table class="table text-left position-relative">
-                                <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button>
+                                <!-- <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button> -->
                                 <thead>
                                 <tr>
-                                    <th width="55px">
+                                    <th width="55px" class="th-header">
                                         Rank
                                     </th>
-                                    <th width="123px">
+                                    <th width="123px" class="th-header">
                                         Score
                                     </th>
-                                    <th class="address-header" width="250px">
+                                    <th class="th-header address-header" width="250px">
                                         Address
                                     </th>
+                                    <th style="text-align: right;"><i class="fa fa-external-link-square"></i></th>
                                 </tr>
                                 </thead>
                             </table>
                             <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
-                                <table class="table table-responsive-lg position-relative"  v-scroll="onScroll">
-
-                                    <div >
-                                        <tbody v-scroll="onScroll" >
-                                            <tr v-scroll="onScroll" v-for="rank in leader" :key="rank.address" v-bind:class="{ 'table-row-highlight': (rank.address === address || rank.rank == 1) }">
-                                                <td>{{rank.rank}}</td>
-                                                <td>{{rank.score}}</td>
-                                                <td class="break-line">{{rank.address}}</td>
-                                            </tr>
+                                <table class="table table-responsive-lg position-relative">
+                                    <div>
+                                        <tbody id="table-leaderboard">
+                                        <tr
+                                                v-for="rank in leader"
+                                                :key="rank.address"
+                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
+                                                v-bind:id="rank.rank"
+                                        >
+                                            <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
+                                            <!--<td>{{rank.score}}</td>-->
+                                            <td style="width: 123px; text=align: left;">
+                                                <ICountUp
+                                                        :startVal="countUp.startVal"
+                                                        :endVal="parseFloat(rank.score)"
+                                                        :decimals="decimalsLength(rank.score)"
+                                                        :duration="randomNumber(3,6)"
+                                                        :options="countUp.options"
+                                                        @ready="onReady"></ICountUp>
+                                            </td>
+                                            <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
+                                            <td><a v-bind:href="'https://etherscan.io/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
+                                        </tr>
                                         </tbody>
                                     </div>
                                 </table>
@@ -123,9 +142,11 @@
     import infiniteScroll from 'vue-infinite-scroll';
     import LoginOptions from "./Modals/VLoginOptions";
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
+    import {countUpMixin} from '../mixins/countUp';
 
     export default {
         name: 'VLeaderboards',
+        mixins: [countUpMixin],
         components: {
             ModalLedgerNano,
             LoginOptions,
@@ -133,14 +154,14 @@
             ICountUp
         },
         directives: {
-          infiniteScroll,
-            scroll : {
+            infiniteScroll,
+            scroll: {
                 inserted: function (el, binding) {
                     let f = function (evt) {
                         if (binding.value(evt, el)) {
                             window.removeEventListener('scroll', f)
                         }
-                    }
+                    };
                     window.addEventListener('scroll', f)
                 }
             }
@@ -163,18 +184,10 @@
                     distance: 0,
                     active: false
                 },
-                countUp : {
-                    startVal: 0,
-                    decimals: 0,
-                    duration: 2.5,
-                    options: {
-                        useEasing: true,
-                        useGrouping: true,
-                        separator: ',',
-                        decimal: '.',
-                        prefix: '',
-                        suffix: ''
-                    }
+                socketParams : {
+                    rank: '',
+                    limit: '',
+                    page: ''
                 }
             };
         },
@@ -211,7 +224,9 @@
         computed: {...mapState(['madeLogin',
                 'showModalSign',
                 'showModalLoginOptions',
-                'showModalLedgerNano'])
+                'showModalLedgerNano',
+                'ws'
+            ])
         },
         mounted: function () {
             this.getAddress();
@@ -226,7 +241,6 @@
                 if(row) this.row = row;
 
                 if(this.updated == 2 && this.address){
-                    console.log('o de aquí?')
                     this.scrollBack();
                 }
             })
@@ -240,20 +254,32 @@
                     this.infiniteScrollFunction();
                 });
             }, getLeaderboard: function () {
+                this.$store.state.makingRequest = true;
+
+                this.socketParams = { rank: this.rank, limit: 100, page: this.page};
                 LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
+                    this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += 100;
-                    console.log('es aqui si');
+
                 }, error => {
-                    alert(error);
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             }, authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
                         this.getAddress()
                     }, error => {
-                        alert(error);
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: error });
                     });
                 } else {
                     this.loadingLogin();
@@ -273,44 +299,56 @@
 
 
                     }, error => {
-                        alert(error);
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: error });
                         this.stopLogin();
                     });
                 }
-
-            },
-            onReady: function(instance, CountUp) {
-                const that = this;
-                instance.update(that.endVal + 100);
             },
             changeFontSize : function ( score ) {
-                let textLength = score.toString().length;
 
-                this.textSize = 100 - textLength*4;
+                let textLength = score.toString().length;
+                if (score < 1)
+                    this.textSize = 100 - (score.length - 4)*4;
+                else
+                    this.textSize = 100 - textLength*4;
             },
             infiniteScrollFunction: function(){
                 this.busy = true;
                 if(!this.loading) this.getLeaderboard();
             },
             onScroll: function(){
+
                 let bottomReached = false;
+
                 if(this.table){
                     this.scroll.distance = this.table.scrollTop;
-
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
+
+                    this.$store.state.makingRequest = true;
                     this.table.scrollTop += 2;
                     this.busy = true;
                     let minimunLimit = 100;
                     if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
 
+                    this.socketParams = { rank: this.rank-this.lastRank, limit: 100, page: 0};
+
                     LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
+                        this.$store.state.makingRequest = false;
                         this.lastRank += 100;
                         this.busy = false;
                         this.leader = [... res,...this.leader];
                     }, error => {
-                        alert(error);
+                        this.$notify({
+                            group: 'foo',
+                            type: 'error',
+                            duration: 10000,
+                            text: error });
                     });
                 }
 
@@ -327,19 +365,71 @@
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
             },
+            overrideOnMessage(){
+                let wsa = this.ws;
+                this.ws.onmessage = (data) => {
+                    wsa.send(JSON.stringify(this.socketParams));
+                    try {
+                        const info = JSON.parse(data.data);
+                        // console.log(info);
+                        if (info.data.address) {
+                            this.score = info.data.score;
+                        } else {
+                            if (!info.data.action){
+                                let socketIndex = 0;
+                                let socketRanking = info.data;
+                                let firstRank = socketRanking[socketIndex].rank;
+
+                                this.leader = this.leader.map(item => {
+
+                                    let rank = parseFloat(item.rank);
+                                    let socketRank;
+                                    if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
+
+                                    if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
+                                        item.score = socketRanking[socketIndex].score;
+                                        socketIndex++;
+                                    }
+                                    return item;
+                                });
+                            }
+                        }
+
+                    } catch (e) {
+                        console.log(e);
+                    }
+                };
+            } ,
+            socketConnection () {
+                let params = {rank: this.rank, limit: 100, page: this.page};
+                if (!this.ws) {
+                    Auth.getSocketToken(res => {
+
+                        this.iniWs();
+                        let wss = this.ws;
+                        this.ws.onopen = function open() {
+                            wss.send(JSON.stringify(params));
+                        };
+                        this.overrideOnMessage();
+                    });
+                }else{
+                    this.overrideOnMessage();
+                }
+            },
             init : function(profile){
                 this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
                 this.address = profile.address;
-
+                this.score = profile.score;
                 this.loading = false;
-                profile.score = Number(profile.score);
-                this.score = Number(profile.score.toFixed(5));
 
+                this.socketConnection();
+                // profile.score = Number(profile.score);
+                // this.score = Number(profile.score.toFixed(5));
                 this.changeFontSize(this.score);
                 this.infiniteScrollFunction();
             },
             ...mapMutations(
-                ['login', 'loadingLogin', 'stopLogin']
+                ['login', 'loadingLogin', 'stopLogin', 'iniWs']
             )
         }
     };
@@ -448,6 +538,10 @@
         @media (max-width: 500px) {
             width: 150px;
         }
+    }
+
+    .th-header {
+        text-align: center;
     }
 
 </style>

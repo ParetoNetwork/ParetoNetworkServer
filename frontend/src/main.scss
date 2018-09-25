@@ -49,8 +49,8 @@ body {
 .visual-debugger *{
   outline: 1px solid red;
 }.main{
-  padding-top: 12vh;
-
+   padding-top: 12vh;
+   padding-bottom: 80px;
   @media (max-width: 768px) {
     padding-top: 8vh;
   }
@@ -59,4 +59,30 @@ body {
 .pareto-text-blue{
   color: $blue-light;
 }
+
+.image-fit{
+  object-fit: scale-down;
+}
+
+.thumb{
+  display: inline-block;
+  background-position: center top;
+  background-size: cover;
+}
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
+.b {
+  white-space: nowrap;
+  width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid #000000;
+}
+//
+//.popover {
+//  display: none;
+//}
 
