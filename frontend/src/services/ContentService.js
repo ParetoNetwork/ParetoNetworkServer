@@ -233,12 +233,12 @@ export default class ContentService {
     web3 = new Web3(provider);
     Intel = new web3.eth.Contract(
       Intel_Contract_Schema.abi,
-      Intel_Contract_Schema.networks["3"].address
+      Intel_Contract_Schema.networks["1"].address
     );
 
     ParetoTokenInstance = new web3.eth.Contract(
       Pareto_Token_Schema.abi,
-      Pareto_Token_Schema.networks["3"].address
+      "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc"
     );
     if (typeof provider !== "undefined") {
       return;
