@@ -830,7 +830,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 {address : req.user, $or:[ {validated: true}, {intelAddress: { $exists: false }}] }
                             ]
                         }
-                    ).sort({block : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
+                    ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
                     let newResults = [];
                     allResults.forEach(function(entry){
                         /*
@@ -1149,7 +1149,7 @@ controller.getContentByCurrentUser = function(req, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
+    var query = ParetoContent.find({address : address}).sort({dateCreated : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
