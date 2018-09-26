@@ -163,6 +163,7 @@
 
 <script>
     import DashboardService from '../services/dashboardService';
+    import ProfileService from '../services/profileService';
     import ContentService from '../services/ContentService';
     require('summernote/dist/summernote.css');
     require('summernote');
@@ -255,7 +256,7 @@
                 }
             });
             this.address();
-
+            ProfileService.updateConfig();
             /*
             window.addEventListener('popstate', function () {
                 console.log('new backbutton');
