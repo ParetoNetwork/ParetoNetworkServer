@@ -1,12 +1,12 @@
 import http from "./HttpService";
 import Web3 from "web3";
-import Intel_Contract_Schema from "../build/contracts/Intel.json";
-import Pareto_Token_Schema from "../build/contracts/ParetoNetworkToken.json";
 let web3;
 let provider;
 let accounts;
 let Intel;
 let ParetoTokenInstance;
+let Intel_Contract_Schema;
+let Pareto_Token_Schema;
 /* eslint-disable no-console */
 export default class ContentService {
 
@@ -213,6 +213,8 @@ export default class ContentService {
   }
 
   static async Setup() {
+      Intel_Contract_Schema = JSON.parse(window.localStorage.getItem('intelc')) ;
+      Pareto_Token_Schema = JSON.parse(window.localStorage.getItem('paretoc'));
     if (typeof window.web3 !== "undefined") {
       // Use Mist/MetaMask's provider
       provider = new Web3(window.web3.currentProvider);
@@ -233,12 +235,12 @@ export default class ContentService {
     web3 = new Web3(provider);
     Intel = new web3.eth.Contract(
         Intel_Contract_Schema.abi,
-        Intel_Contract_Schema.networks["3"].address
+        window.localStorage.getItem('intelAddress')
     );
 
     ParetoTokenInstance = new web3.eth.Contract(
         Pareto_Token_Schema.abi,
-        Pareto_Token_Schema.networks["3"].address
+        window.localStorage.getItem('paretoAddress')
     );
     if (typeof provider !== "undefined") {
       return;
