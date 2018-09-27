@@ -476,31 +476,36 @@ app.get('/v1/address/:address', function (req, res) {
 
 });
 
+
+function responseUserInfo(req, res) {
+    controller.getUserInfo(req.user,  function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+}
+
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
     //Get Info User
      if (req.query.latest=='true'){
-         controller.updateScore(req.user, function (err, success) {
-             if (err) {
-                 res.status(200).json(ErrorHandler.getError(err));
-             } else {
-                 controller.getUserInfo(req.user,  function (err, result) {
+         controller.isNew(req.user, function (err, success) {
+             if(success){
+                 controller.updateScore(req.user, function (err, success) {
                      if (err) {
                          res.status(200).json(ErrorHandler.getError(err));
                      } else {
-                         res.status(200).json(ErrorHandler.getSuccess(result));
+                         responseUserInfo(req, res);
                      }
                  });
+             }else{
+                 responseUserInfo(req, res);
              }
          });
      } else{
-         controller.getUserInfo(req.user,  function (err, result) {
-             if (err) {
-                 res.status(200).json(ErrorHandler.getError(err));
-             } else {
-                 res.status(200).json(ErrorHandler.getSuccess(result));
-             }
-         });
+         responseUserInfo(req, res);
      }
 
 });
