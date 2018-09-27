@@ -1338,6 +1338,21 @@ controller.insertProfile = function(profile,callback){
 
 };
 
+/**
+ * Validate if the user already exists in the database
+ * @param callback Response when the process is finished
+ */
+
+controller.isNew = function(address, callback){
+    ParetoAddress.find({address: address}, function(err, r){
+            if (r && r.length>0){
+                callback(null, false);
+            }else{
+                callback(null, true);
+            }
+        });
+};
+
 
 /**
  * Get Profile in MongoDB. The result data is saved in Redis. If no Profile exist for the address, a new register is created,
