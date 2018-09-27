@@ -1339,7 +1339,7 @@ controller.insertProfile = function(profile,callback){
 };
 
 /**
- * validate is an user already exist in database
+ * Validate if the user already exists in the database
  * @param callback Response when the process is finished
  */
 
