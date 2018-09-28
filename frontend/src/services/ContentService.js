@@ -125,7 +125,7 @@ export default class ContentService {
         return;
       }
         Intel = new web3.eth.Contract(
-            Intel_Contract_Schema.abi,
+            Intel_Contract_Schema,
             content.intelAddress
         );
       let gasPrice = await web3.eth.getGasPrice();
@@ -234,12 +234,12 @@ export default class ContentService {
     }
     web3 = new Web3(provider);
     Intel = new web3.eth.Contract(
-        Intel_Contract_Schema.abi,
+        Intel_Contract_Schema,
         window.localStorage.getItem('intelAddress')
     );
 
     ParetoTokenInstance = new web3.eth.Contract(
-        Pareto_Token_Schema.abi,
+        Pareto_Token_Schema,
         window.localStorage.getItem('paretoAddress')
     );
     if (typeof provider !== "undefined") {
