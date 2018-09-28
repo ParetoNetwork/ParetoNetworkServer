@@ -302,7 +302,7 @@ app.post('/v1/config', function (req, res) {
     const pareto = require("./build/contracts/ParetoNetworkToken.json");
     const netWorkId = process.env.ETH_NETWORK;
     const pcontract = process.env.CRED_PARETOCONTRACT;
-    res.status(200).json(ErrorHandler.getSuccess({intel, pareto, netWorkId: netWorkId , intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract}));
+    res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId , intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract}));
 });
 
 app.post('/v1/config_basic', function (req, res) {
