@@ -16,6 +16,7 @@ var CONNECTION_URL = process.env.MONGODB_URI || constants.MONGODB_URI;
 var PARETO_CONTRACT_ADDRESS = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
 var WEB3_URL = process.env.WEB3_URL;
 var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
+var ETH_NETWORK = process.env.ETH_NETWORK;
 
 
 
@@ -563,12 +564,12 @@ controller.postContent = function (req, callback) {
  * Watch Intel events. Support watch rewards for old Intel address
  */
 controller.startwatchNewIntel = function(){
-    const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     intel.events.NewIntel().on('data',  event => {
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                     if(controller.wss){
                         try{
                             controller.wss.clients.forEach(function each(client) {
@@ -600,9 +601,9 @@ controller.startwatchNewIntel = function(){
             callback(err);
         }
         else {
-            let data = results.filter(item => item.intelAddress === Intel_Contract_Schema.networks["3"].address);
+            let data = results.filter(item => item.intelAddress === Intel_Contract_Schema.networks[ETH_NETWORK].address);
             if(!data.length){
-                results = [{intelAddress: Intel_Contract_Schema.networks["3"].address}];
+                results = [{intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}];
             }
             for (let i=0;i<results.length;i=i+1) {
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i].intelAddress);
@@ -684,7 +685,7 @@ controller.updateFromLastIntel = function(){
         else {
             if(results.length > 0){
                 const lastBlock = results[0].lastBlock;
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
                 intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
                     if(err){ console.log(err); return;}
                     for (let i=0;i<events.length;i=i+1){
@@ -692,7 +693,7 @@ controller.updateFromLastIntel = function(){
                             const event = events[i];
                             const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                             const expiry_time = event.returnValues.ttl;
-                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks["3"].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                             });
                         }catch (e) {
                             console.log(e);
@@ -829,7 +830,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 {address : req.user, $or:[ {validated: true}, {intelAddress: { $exists: false }}] }
                             ]
                         }
-                    ).sort({block : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
+                    ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
                     let newResults = [];
                     allResults.forEach(function(entry){
                         /*
@@ -1148,7 +1149,7 @@ controller.getContentByCurrentUser = function(req, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address}).sort({block : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
+    var query = ParetoContent.find({address : address}).sort({dateCreated : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
@@ -1335,6 +1336,21 @@ controller.insertProfile = function(profile,callback){
       );
 
 
+};
+
+/**
+ * Validate if the user already exists in the database
+ * @param callback Response when the process is finished
+ */
+
+controller.isNew = function(address, callback){
+    ParetoAddress.find({address: address}, function(err, r){
+            if (r && r.length>0){
+                callback(null, false);
+            }else{
+                callback(null, true);
+            }
+        });
 };
 
 
@@ -1701,7 +1717,7 @@ controller.resetRanks = function(callback){
 
 
 controller.getAllIntel = async function(callback){
-    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     try{
         const result = await IntelInstance.methods.getAllIntel().call();
         console.log(result)
@@ -1724,7 +1740,7 @@ controller.getAllIntel = async function(callback){
 
 }
 controller.getIntelsByProvider = async function(providerAddress ,callback){
-    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     try{
         const result = await IntelInstance.methods.getIntelsByProvider(providerAddress).call();
         console.log(result)
@@ -1747,14 +1763,14 @@ controller.getIntelsByProvider = async function(providerAddress ,callback){
 
 }
 controller.getAnIntel = async function(Id, callback){
-    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     const result = await IntelInstance.methods.getIntel(Id).call();
     console.log(result);
     callback(null, result);
 }
 
 controller.getContributorsByIntel = async function (Id, callback) {
-    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks["3"].address);
+    const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
    
     try{
         const result = await IntelInstance.methods.contributionsByIntel(Id).call();
