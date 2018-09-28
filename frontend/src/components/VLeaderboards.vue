@@ -9,7 +9,7 @@
                         <div class="row" style="color: #ffffff; justify-content: center;">
                             <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
                                 Check
-                                your<b>PARETO</b> scores
+                                your <b>PARETO</b> scores
                                 easily by signing your wallet address using Metamask or a web3-enabled browser.
                                 Otherwise, sign manually.</p>
                             <br/>

@@ -29,8 +29,8 @@ const store = new Vuex.Store({
         makingRequest: false,
         requestFinish: false,
         madeLogin: JSON.parse(window.localStorage.getItem('logged')),
-        signType: (window.localStorage.getItem('signType')),
-        pathId: (window.localStorage.getItem('pathId')),
+        signType: (window.localStorage.getItem('signType')) || 'Metamask',
+        pathId: (window.localStorage.getItem('pathId')) || '',
         ws: null
     },
     mutations: {

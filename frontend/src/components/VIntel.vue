@@ -272,6 +272,22 @@
                             <i class="fa fa-spinner fa-spin fa-3x mt-4"></i>
                         </div>
 
+                        <div  v-if="this.signType!=='LedgerNano'" class="d-flex justify-content-between mt-4 mb-1">
+                            <p class="text-center" style="font-size: 11px">
+                                If MetaMask does not popup, please check your MetaMask extension icon for a new
+                                badge
+                                that signifies an operation should be taken on MetaMask
+
+                            </p>
+                            <span class="mt-1 ml-2"
+                                  style="background: #505050;
+                                             border-radius: 3px;
+                                             padding-left: 2px;">
+                                <img src="../assets/images/mmicon.png" alt=""
+                                     class="icon-mini">
+                            </span>
+                        </div>
+
                     </div>
                 </b-container>
             </b-modal>

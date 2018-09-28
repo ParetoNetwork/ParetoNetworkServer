@@ -16,8 +16,8 @@ const cron = require("node-cron");
 const AWS = require('aws-sdk');
 AWS.config.update({
     region: process.env.S3_REGION || constants.S3_REGION,
-    accessKeyId: process.env.ACCESS_KEY || constants.ACCESS_KEY,
-    secretAccessKey: process.env.SECRET_KEY || constants.SECRET_KEY
+    accessKeyId: process.env.S3_ACCESS_KEY || constants.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_KEY || constants.S3_SECRET_KEY
 });
 
 const s3 = new AWS.S3();
@@ -476,31 +476,36 @@ app.get('/v1/address/:address', function (req, res) {
 
 });
 
+
+function responseUserInfo(req, res) {
+    controller.getUserInfo(req.user,  function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+}
+
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
     //Get Info User
      if (req.query.latest=='true'){
-         controller.updateScore(req.user, function (err, success) {
-             if (err) {
-                 res.status(200).json(ErrorHandler.getError(err));
-             } else {
-                 controller.getUserInfo(req.user,  function (err, result) {
+         controller.isNew(req.user, function (err, success) {
+             if(success){
+                 controller.updateScore(req.user, function (err, success) {
                      if (err) {
                          res.status(200).json(ErrorHandler.getError(err));
                      } else {
-                         res.status(200).json(ErrorHandler.getSuccess(result));
+                         responseUserInfo(req, res);
                      }
                  });
+             }else{
+                 responseUserInfo(req, res);
              }
          });
      } else{
-         controller.getUserInfo(req.user,  function (err, result) {
-             if (err) {
-                 res.status(200).json(ErrorHandler.getError(err));
-             } else {
-                 res.status(200).json(ErrorHandler.getSuccess(result));
-             }
-         });
+         responseUserInfo(req, res);
      }
 
 });
