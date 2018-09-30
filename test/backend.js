@@ -142,7 +142,7 @@ describe('Server application /', function() {
         getAuthenticatedCookie(data,  function(cookie) {
             request(serverApp.app).post("/v1/updateuser")
                 .send({ 'first_name': "Test Name", "last_name": "Test Last Name",
-                        'biography': "Lorem ipsum ...", "profile_pic" : "https://www.ienglishstatus.com/wp-content/uploads/2018/04/Anonymous-Whatsapp-profile-picture.jpg"
+                        'biography': "Lorem ipsum ..."
                 })
                 .set('cookie', cookie)
                 .expect(200)

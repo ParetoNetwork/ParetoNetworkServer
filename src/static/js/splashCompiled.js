@@ -52098,12 +52098,12 @@ module.exports = {
 
             searchLookup();
             // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-            web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
+            web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
         }
 
         if (typeof web3 !== 'undefined') {
 
-            var contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
+            var contractAddr = ('0xea5f88E54d982Cbb0c441cde4E79bC305e5b43Bc');
             var rankCalculation = 0;
             var tokenTotal = 0;
             if (!web3.currentProvider.isMetaMask) {
@@ -52450,7 +52450,7 @@ $(document).ready(function () {
         console.log(loginSrv);
         loginSrv.signSplash(function (res) {
             console.log(res);
-            window.location.replace('/dashboard');
+            window.location.replace('/intel');
             stopLoading(id, text);
         }, function (error) {
             alert(error);

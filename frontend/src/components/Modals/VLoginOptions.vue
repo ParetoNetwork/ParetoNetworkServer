@@ -1,5 +1,6 @@
 <template>
     <div>|
+        <notifications group="auth" position="bottom right"/>
         <b-modal ref="loginOptions"
                  centered
                  hide-header
@@ -37,7 +38,7 @@
     import 'jquery';
     import { mapMutations } from 'vuex';
     import authService from "../../services/authService";
-    import DashboardService from "../../services/dashboardService";
+    import dashboardService from "../../services/dashboardService";
     import ModalLedgerNano from "./VModalLedgerNano";
 
     export default {
@@ -71,23 +72,26 @@
             MetaMask: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                    console.log(data);
-                    DashboardService.getAddress(res => {
+                   // console.log(data);
+                    dashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
                             address: res,
                         });
                         this.collapseContent();
-                        console.log(this.redirectRoute);
-                        this.$router.go(this.redirectRoute || '/dashboard');
+                        this.$router.go(this.redirectRoute || '/intel');
                     }, () => {
-
+                        console.log('Metamask Error');
                     });
 
                 }, error => {
                     console.log(error);
                     this.stopLogin();
-                    alert(error);
+                    this.$notify({
+                        group: 'foo',
+                        type: 'error',
+                        duration: 10000,
+                        text: error });
                 });
             },
             Manually: function() {
