@@ -1,16 +1,9 @@
 import axios from 'axios';
+import Vue from 'vue';
 
-export default axios.create({
+Vue.http = axios.create({
     withCredentials: true,
-    baseURL: document.domain === 'localhost' ? 'http://localhost:3000' : ''
+    baseURL: document.domain === 'localhost' ? 'http://localhost:3000' : '',
 });
 
-// export default class HttpService {
-//     static get(url, data) {
-//         return http.get(url, data);
-//     }
-//
-//     static post(url, data, config) {
-//         return axios.post(url, data, config);
-//     }
-// }
+export default Vue.http;

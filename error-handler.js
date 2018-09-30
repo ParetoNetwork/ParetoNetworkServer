@@ -10,6 +10,7 @@ errorHandler.contentMissingMessage = 'POST body missing, needs address, title an
 errorHandler.bodyMissingMessage = 'POST body missing';
 errorHandler.appkeyMissingMessage = 'POST body missing, needs keys';
 errorHandler.nullResponseMessage = 'null response';
+errorHandler.addressNotFound = 'Address not found in DataBase';
 
 
 //Custom Response

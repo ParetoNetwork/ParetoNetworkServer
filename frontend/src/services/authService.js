@@ -3,12 +3,31 @@ import Sig from 'eth-sig-util';
 import qs from 'qs';
 import http from './HttpService';
 
+import ledger from "ledgerco";
+
 /* eslint-disable no-console */
 let logged = false;
 export default class authService {
     constructor() {
         this._isLogged = true;
     }
+
+    static timer = null;
+    static isLedgerWatched = false;
+    static ledgerWalletSubProvider = null;
+    static ledgerNanoProvider = null;
+    static ledgerNanoEngine = null;
+    static actualConnection = null;
+    static getSocketToken(onSuccess){
+        http.get("/v1/signws")
+            .then(res => {
+                onSuccess(res);
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
 
     static getIsLogged() {
         return logged;
@@ -88,81 +107,172 @@ export default class authService {
 
     }
 
-    static  signWallet(onSuccess, onError) {
+    static isWalletSupported(onSuccess, onError) {
+        this.initLedgerNano(()=>{onSuccess(true)}, onError);
+    }
 
-        const ProviderEngine = require('web3-provider-engine');
-        const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
-        var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
-        const engine = new ProviderEngine();
-        const provider = new Web3(engine);
-        var derivation_path = "44'/60'/0'/0/0";
+    static doWhenIsConnected(onSuccess) {
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+        this.timer = setTimeout(() => {
+            this.getWalletAccounts("44'/60'/0'/0/0", 0, 1, data => {
+                onSuccess();
+            }, error => {
+                if(this.isLedgerWatched){
+                    this.doWhenIsConnected(onSuccess)
+                }
+            });
 
-        LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
-            const isSupported = ledgerWalletSubProvider.isSupported;
-            ledgerWalletSubProvider.ledger.setDerivationPath(derivation_path);
+        }, 1000);
+    }
+
+    static deleteWatchNano() {
+        this.isLedgerWatched = false;
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+        if(this.ledgerWalletSubProvider && this.ledgerWalletSubProvider.ledger){
+            this.ledgerWalletSubProvider.ledger.connectionOpened =false
+            if(this.actualConnection){
+                this.ledgerWalletSubProvider.ledger.closeLedgerConnection(this.actualConnection);
+            }
+        }
+    }
+
+    static initLedgerNano(onSuccess, onError){
+        if( !this.ledgerNanoProvider || !this.ledgerWalletSubProvider){
+           // const ProviderEngine = require('web3-provider-engine');
+           // const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+            var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+           // this.ledgerNanoEngine = new ProviderEngine();
+          //  this.ledgerNanoProvider = new Web3(this.ledgerNanoEngine);
+
+            LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
+                this.ledgerWalletSubProvider = ledgerWalletSubProvider;
+
+                this.ledgerNanoProvider = new Web3(ledgerWalletSubProvider);
+         //       this.ledgerNanoEngine.addProvider(ledgerWalletSubProvider);
+         //       this.ledgerNanoEngine.addProvider(new RpcSubprovider({rpcUrl: 'https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'})); // you need RPC endpoint
+           //     this.ledgerNanoEngine.start();
+                const isSupported = ledgerWalletSubProvider.isSupported;
                 if(isSupported){
-                    engine.addProvider(ledgerWalletSubProvider);
-                    engine.addProvider(new RpcSubprovider({rpcUrl: 'https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'})); // you need RPC endpoint
-                    engine.start();
-
-                    if (typeof provider !== 'undefined') {
-                        const msgParams = [
-                            {
-                                type: 'string',
-                                name: 'Message',
-                                value: 'Pareto' //replace with TOS
-                            }
-                        ];
-
-                        provider.eth.getAccounts((error, accounts) => {
-                            if (!error) {
-                                if(accounts && accounts[0]){
-
-                                    const addr = accounts[0];
-
-
-                                    if (provider.utils.isAddress(addr)) {
-                                        const from = addr.toLowerCase();
-
-                                        provider.currentProvider._providers[0].signMessage({data:  provider.utils.toHex('Pareto')}, (err, result) => {
-                                            if (err) return console.dir(err);
-                                            if (result.error) {
-                                                return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
-                                            }
-                                            if (result.error) {
-                                                return console.error(result);
-                                            }
-
-                                            const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
-
-                                            if (recovered === from) {
-                                                authService.signParetoServer(msgParams, from, result, onSuccess, onError)
-
-                                            } else {
-                                                console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
-                                                // stopLoading();
-                                                return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
-                                            }
-
-                                        });
-
-                                    }//end if valid address
-                                    else {
-                                        console.log('address invalid!');
-                                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
-
-                                        //set error state on input field
-                                    }
-                                }//end if !error
-
-                            }//end if !error
-                        });
-                    }//end if
+                     onSuccess();
                 }else{
-                    onError('Your browser not support this feature')
+                    onError('Your browser does not support this feature');
                 }
 
+            });
+
+
+        }else{
+            onSuccess()
+        }
+    }
+
+    static getWalletAccounts(path, page, limit, onSuccess, onError) {
+        this.initLedgerNano(()=>{
+            this.ledgerWalletSubProvider.ledger.getMultipleAccounts(path, page, limit)
+                .then(res => onSuccess(res))
+                .catch(err =>  { onError(err)});
+        }, onError);
+
+        return true;
+    }
+
+    static getTokens(addresses, onSuccess, onError){
+        const data = {
+            addresses:  addresses
+        };
+        http.post('/v1/addresses', data , {
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json; charset=UTF-8'
+            }
+        }).then(response => {
+            if(response.data.success){
+                return onSuccess(response.data);
+            }else{
+                return onError(response.data.message)
+            }
+
+        }).catch(error => {
+            if (error.response && error.response.data) {
+                return onError(error.response.data.message);
+            } else {
+                return onError(error);
+            }
+
         });
+    }
+
+    static  signWallet(pathId, addr, onSuccess, onError) {
+
+        this.initLedgerNano(()=>{
+            const msgParams = [
+                {
+                    type: 'string',
+                    name: 'Message',
+                    value: 'Pareto' //replace with TOS
+                }
+            ];
+            this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
+            if (this.ledgerNanoProvider.utils.isAddress(addr)) {
+                const from = addr.toLowerCase();
+                this.ledgerWalletSubProvider.ledger.getLedgerConnection = async function() {
+                    if (this.connectionOpened) {
+                        throw new Error(
+                            "You can only have one ledger connection active at a time"
+                        );
+                    } else {
+                        this.connectionOpened = true;
+                        // eslint-disable-next-line new-cap
+                        authService.actualConnection = new ledger.eth(
+                            this.isNode
+                                ? await ledger.comm_node.create_async()
+                                : await ledger.comm_u2f.create_async(30)
+                        );
+                        return  authService.actualConnection;
+                    }
+                };
+                this.ledgerWalletSubProvider.ledger.signMessage({data:  this.ledgerNanoProvider.utils.toHex('Pareto')}, (err, result) => {
+                    if (err) {
+                        if(err.metaData.code ===5){
+                           return  authService.signWallet(pathId, addr, onSuccess, onError)
+                        }else{
+                           return  onError(err.message);
+                        }
+                    }
+                    if(!result){
+                        return onError('Connection lost');
+                    }
+                    if (result.error) {
+                        return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
+                    }
+
+                    const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
+
+                    if (recovered === from) {
+                        authService.signParetoServer(msgParams, from, result, onSuccess, onError)
+
+                    } else {
+                        console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
+                        // stopLoading();
+                        return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
+                    }
+
+                });
+
+            }//end if valid address
+            else {
+                console.log('address invalid!');
+                return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+
+                //set error state on input field
+            }
+        },onError);
 
 
         return true;
@@ -181,7 +291,7 @@ export default class authService {
 
             // searchLookup();
             // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-            provider = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/TnsZa0wRB5XryiozFV0i'));
+            provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
         }
         if (typeof provider !== 'undefined') {
             const msgParams = [
@@ -191,7 +301,7 @@ export default class authService {
                     value: 'Pareto' //replace with TOS
                 }
             ];
-            // const contractAddr = ('0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc');
+            // const contractAddr = ('0xea5f88E54d982Cbb0c441cde4E79bC305e5b43Bc');
             // const rankCalculation = 0;
             // const tokenTotal = 0;
             /*if (!metaMask.currentProvider.isMetaMask) { //no mobile users use Metamask, this is too strict
@@ -202,7 +312,7 @@ export default class authService {
             provider.eth.getAccounts((error, accounts) => {
                 if (!error) {
                     if(accounts && accounts[0]){
-                        console.log(accounts);
+                        //console.log(accounts);
 
                         const addr = accounts[0];
 
@@ -210,13 +320,13 @@ export default class authService {
                         if (provider.utils.isAddress(addr)) {
                             const from = addr.toLowerCase();
 
-                            const params = [msgParams, from];
+                           // const params = [provider.utils.toHex('Pareto'), from];
+                          //  const method = 'personal_sign';
+                            const params = [msgParams,from];
                             const method = 'eth_signTypedData';
-
                             // debugger;
-                            // console.log(provider.currentProvider)
 
-                            provider.currentProvider.sendAsync({method, params, from}, (err, result) => {
+                            provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
                                 if (err) return console.dir(err);
                                 if (result.error) {
                                     return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
@@ -224,11 +334,12 @@ export default class authService {
                                 if (result.error) {
                                     return console.error(result);
                                 }
-
-                                const recovered = Sig.recoverTypedSignature({data: msgParams, sig: result.result});
+                                result = result.result;
+                                const recovered = Sig.recoverTypedSignature({ data: msgParams, sig: result });
 
                                 if (recovered === from) {
-                                    authService.signParetoServer(msgParams, from, result.result, onSuccess, onError)
+                                    authService.signParetoServer(msgParams, from, result, onSuccess, onError)
+
                                 } else {
                                     console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
                                     // stopLoading();
@@ -244,7 +355,10 @@ export default class authService {
 
                             //set error state on input field
                         }
-                    }//end if !error
+                    }else{
+                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+                    }
+                    //end if !error
 
                 }//end if !error
             });

@@ -4,14 +4,20 @@ import App from './App.vue';
 import VueRouter from 'vue-router';
 import router from './utils/routes';
 import Vuex from 'vuex';
+import Notifications from 'vue-notification'
 
 const snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
-import BootstrapVue from 'bootstrap-vue'
+import BootstrapVue from 'bootstrap-vue';
+import 'bootstrap';
+import Environment from './utils/environment';
 
 Vue.use(BootstrapVue);
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(Vuex);
+Vue.use(Notifications);
+Vue.use(require('vue-moment'));
+
 const store = new Vuex.Store({
     state: {
         isLogged: false,
@@ -20,7 +26,10 @@ const store = new Vuex.Store({
         showModalLoginOptions : false,
         showModalLedgerNano: false,
         makingLogin: false,
-        madeLogin: JSON.parse(window.localStorage.getItem('logged'))
+        makingRequest: false,
+        requestFinish: false,
+        madeLogin: JSON.parse(window.localStorage.getItem('logged')),
+        ws: null
     },
     mutations: {
         login(state, data) {
@@ -39,7 +48,6 @@ const store = new Vuex.Store({
             state.showModalLedgerNano = false;
             state.madeLogin = 0;
             window.localStorage.setItem('logged', false);
-
         }, intelEnter(state) {
             state.madeLogin = true;
             window.localStorage.setItem('logged', true);
@@ -50,6 +58,8 @@ const store = new Vuex.Store({
             state.showModalLoginOptions = false;
             state.showModalLedgerNano = false;
             state.makingLogin = false;
+        }, iniWs(state) {
+            state.ws = new WebSocket (Environment.webSocketURL);
         }
     },
     actions: {
