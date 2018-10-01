@@ -1220,7 +1220,12 @@ controller.sign = function(params, callback){
 
   const owner = params.owner;
     const recovered2 = sigUtil.recoverPersonalSignature({ data: params.data[0].value, sig: params.result });
-  const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
+    let  recovered = '';
+    try {
+        recovered = sigUtil.recoverTypedSignature({data: params.data, sig: params.result});
+    }catch (e) {
+        recovered = sigUtil.recoverTypedSignatureLegacy({data: params.data, sig: params.result})
+    }
 
   if (recovered === owner || recovered2 === owner ) {
     // If the signature matches the owner supplied, create a

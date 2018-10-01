@@ -335,7 +335,12 @@ export default class authService {
                                     return console.error(result);
                                 }
                                 result = result.result;
-                                const recovered = Sig.recoverTypedSignature({ data: msgParams, sig: result });
+                                let  recovered = '';
+                                try {
+                                    recovered = Sig.recoverTypedSignature({data: msgParams, sig: result});
+                                }catch (e) {
+                                    recovered = Sig.recoverTypedSignatureLegacy({data: msgParams, sig: result})
+                                }
 
                                 if (recovered === from) {
                                     authService.signParetoServer(msgParams, from, result, onSuccess, onError)
