@@ -72,23 +72,24 @@
         methods: {
             manualLogin: function () {
                 this.loadingLogin();
-                Auth.manualLogin( this.addresstemp, this.message, this.signed, data => {
+                Auth.manualLogin( this.addresstemp, this.message, this.signed, res => {
                     this.$store.state.showModalSign = false;
                     $('#signModal').modal('hide');
                     //console.log(data);
                     this.$store.dispatch({
                         type: 'login',
-                        address: data,
+                        address: {address: res, dataSign: {signType: 'Manual', pathId: ''}},
                     });
                     this.$router.push('/intel');
                 }, error => {
                     $('#signModal').modal('hide');
                     this.stopLogin();
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        text: errorText });
                 });
             },
             modalcancel() {

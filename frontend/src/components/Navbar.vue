@@ -76,9 +76,9 @@
             DashboardService.getAddress(res => {
                 this.$store.dispatch({
                     type: 'login',
-                    address: res,
+                    address: {address: res},
                 });
-                this.collapseContent();
+                //this.collapseContent();
             }, () => {
 
             });
@@ -102,7 +102,7 @@
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res},
                         });
                     }, () => {
 
@@ -149,35 +149,40 @@
                     this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
+
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Ledger Nano',
+                        text: errorText
+                    });
                 });
             },
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-               //     console.log(data);
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
                         });
                         this.collapseContent();
                         this.$router.push('/intel');
-                    }, () => {
-
+                    }, (err) => {
+                        console.log(err);
                     });
 
                 }, error => {
                     this.stopLogin();
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Login',
+                        text: errorText });
                 });
             },
             logout: function () {
@@ -186,11 +191,13 @@
                     this.collapseContent();
                     this.$router.push('/');
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Logout',
+                        text: errorText });
                 });
             },
             ledgerNanoLogin () {
