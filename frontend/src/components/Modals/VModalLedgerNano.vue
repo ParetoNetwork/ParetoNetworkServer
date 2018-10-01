@@ -415,32 +415,33 @@
                         this.selectedPath = this.paths[path_id].id;
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'foo',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error
-                        });
+                            text: errorText });
                     });
 
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        text: errorText });
                 });
             },
             hardware: function () {
                 this.loadingSign = true;
                 let path = (isNaN(this.selectedPath.charAt(0)))? this.selectedPath.substring(1) : this.selectedPath;
                 this.loadingLogin();
-                authService.signWallet(path.substring(0,path.length-1)+this.selectedindx, this.selectedAddress, data => {
+                const pathId = path.substring(0,path.length-1)+this.selectedindx;
+                authService.signWallet(pathId, this.selectedAddress, data => {
                     this.loadingSign = false;
                     this.$store.dispatch({
                         type: 'login',
-                        address: data,
+                        address: {address: this.selectedAddress, dataSign: {signType: 'LedgerNano', pathId: pathId}},
                     });
                     this.collapseContent();
                     this.$router.push('/intel');
@@ -448,12 +449,14 @@
                 }, error => {
                     this.loadingSign = false;
                     this.stopLogin();
+
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        title: 'Logout',
+                        text: errorText });
                 });
             },
             onClosedModal: function () {
@@ -502,22 +505,23 @@
                             this.paths[index].address = [...this.paths[index].address, ...newList];
                             this.loadingInfiniteScrollData = false;
                         }, error => {
+                            let errorText= error.message? error.message : error;
                             this.$notify({
-                                group: 'foo',
+                                group: 'notification',
                                 type: 'error',
                                 duration: 10000,
-                                text: error
-                            });
+                                text: errorText });
+
                             this.loadingInfiniteScrollData = false;
                         });
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'foo',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error
-                        });
+                            text: errorText });
                     });
                 }
             },
@@ -537,12 +541,13 @@
                     }
                 }, error => {
                     this.supported = false;
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        title: 'Ledger Nano',
+                        text: errorText });
                 });
             },
             ...mapMutations({

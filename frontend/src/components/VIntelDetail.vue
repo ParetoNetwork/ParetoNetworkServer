@@ -3,23 +3,12 @@
         <div class="container">
             <div class="row mx-2 pt-5">
                 <div class="col-12 order-last order-lg-first col-lg-4 mb-4 p-0">
-                    <div class="row">
+                    <VShimmerUserProfile v-if="!profile.address"></VShimmerUserProfile>
+                    <div v-else class="row">
                         <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
-
                             <div data-v-514e8c24="" class="thumb profile-pic"
                                  v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage( profile.profile_pic)}"
                                  ></div>
-                            <!--<div class="media mb-3 w-100">-->
-                                <!--&lt;!&ndash;<div class="d-flex flex-column m-auto">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;&lt;!&ndash;<span  style="font-size: 320px; color: gray; background: #b2b2b2"&ndash;&gt;&ndash;&gt;-->
-                                    <!--&lt;!&ndash;&lt;!&ndash;class="fa fa-user p-2"></span>&ndash;&gt;&ndash;&gt;-->
-                                    <!--&lt;!&ndash;&lt;!&ndash;<img v-if="profile.profile_pic" v-bind:src="baseURL+ '/profile-image?image=' + profile.profile_pic" width="100%" height="200px" alt="" class="mr-2 image-fit">&ndash;&gt;&ndash;&gt;-->
-                                    <!--&lt;!&ndash;&lt;!&ndash;<img v-else src="../assets/images/user_placeholder.png"  width="100%" height="200px"  alt="" class="mr-2 image-fit">&ndash;&gt;&ndash;&gt;-->
-
-                                <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-                                <!---->
-                            <!--</div>-->
                         </div>
 
                         <div class="col-12 col-sm-7 col-md-12 border p-5">
@@ -66,23 +55,26 @@
                     </div>
                 </div>
 
-                <div v-if="loading" class="col-12 col-lg-7 p-0">
+
+
+                <!--<div v-if="loading" class="col-12 col-lg-7 p-0">
                     <div class="row">
                         <div class="d-flex split mt-4 mx-auto">
                             <i class="fa fa-spinner fa-spin fa-5x">
                             </i>
                         </div>
                     </div>
-                </div>
-                <div v-else class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
+                </div>-->
+                <div class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
                     <div class="row text-group">
-                        <div class="col-12 border p-4">
+                        <VShimmerIntelInformation v-if="!intel.blockAgo"></VShimmerIntelInformation>
+                        <div v-else class="col-12 border p-3">
                             <div class="row py-4 border-bottom m-0">
-                                <div class="col-md-10 p-0">
+                                <div class="col-md-10 p-0 pr-1">
                                     <span class="name-title"> {{intel.title}} </span>
                                 </div>
-                                <div class="col-md-2 p-0">
-                                    <div class="d-flex flex-column align-items-end ">
+                                <div class="col-md-2 p-0 pl-1">
+                                    <div class="d-flex flex-column align-items-end">
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
                                         <span class="mb-2">
@@ -122,10 +114,17 @@
     import {countUpMixin} from "../mixins/countUp";
     import AuthService from "../services/authService";
 
+    import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
+    import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
+
     export default {
         name: 'VIntelDetail',
         mixins: [countUpMixin],
-        components: {ICountUp},
+        components: {
+            ICountUp,
+            VShimmerUserProfile,
+            VShimmerIntelInformation
+        },
         computed: {
             ...mapState(["ws"])
         },
@@ -301,19 +300,5 @@
     #wrapper:hover .text {
         display: flex;
         background: rgba(0,0,0,0.5);
-    }
-
-    @media (max-width: 992px){
-        .profile-pic {
-            width: 200px;
-            height: 200px;
-        }
-    }
-
-    @media (min-width: 992px){
-        .profile-pic {
-            width: 300px;
-            height: 300px;
-        }
     }
 </style>

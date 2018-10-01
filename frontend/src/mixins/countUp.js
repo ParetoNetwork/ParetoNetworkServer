@@ -26,7 +26,7 @@ export const countUpMixin = {
             const decimals = score.length - 4;
             if (score<1)
                 return decimals;
-            else if (score > 1 && score < 100)
+            else if (score > 1 && score < 100 && (score % 1 != 0))
                 return 2;
             else
                 return 0;
