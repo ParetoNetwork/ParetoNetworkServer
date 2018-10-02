@@ -54,7 +54,7 @@ export default class ContentService {
       let gasPriceWei = await provider.eth.getGasPrice();
       gasPriceWei = gasPriceWei * 10;
 
-      let gasPrice = await provider.utils.fromWei(gasPriceWei+"", 'ether');
+      let gasPrice = await provider.utils.fromWei(gasPriceWei+"", 'gwei');
 
       gasPrice? OnSuccess(gasPrice) : OnError('There was a problem fetching the current recommended gas price');
   }
