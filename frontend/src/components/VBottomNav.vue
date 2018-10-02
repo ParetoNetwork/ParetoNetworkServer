@@ -21,12 +21,26 @@
 </template>
 
 <script>
+    import ContentService from '../services/ContentService';
 
     export default {
         name: 'VBottomNav',
         data: function () {
             return{
             }
+        },
+        mounted(){
+            ContentService.getParetoInfo( res=> {
+                console.log(res)
+            },
+            err => {
+                this.$notify({
+                    group: 'notification',
+                    type: 'error',
+                    duration: 10000,
+                    title: 'Content',
+                    text: err });
+            });
         }
     }
 </script>
