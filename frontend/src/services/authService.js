@@ -324,9 +324,10 @@ export default class authService {
                           //  const method = 'personal_sign';
                             const params = [msgParams,from];
                             const method = 'eth_signTypedData';
+                            const method2 = 'eth_signTypedData_v3';
                             // debugger;
 
-                            provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                            const resultfunction = function(err, result){
                                 if (err) return console.dir(err);
                                 if (result.error) {
                                     return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
@@ -350,8 +351,27 @@ export default class authService {
                                     // stopLoading();
                                     return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
                                 }
+                            }
+                            try{
+                                provider.currentProvider.sendAsync({method2,params, from}, (err, result) => {
+                                    if(err || result.error){
+                                        provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                            resultfunction(err, result)
+                                        });
+                                    }else{
+                                        resultfunction(null, result);
+                                    }
+                                }).catch(function (){
+                                    provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                        resultfunction(err, result)
+                                    });
+                                });
+                            }catch (e) {
+                                provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                    resultfunction(err, result)
+                                });
+                            }
 
-                            });
 
                         }//end if valid address
                         else {
