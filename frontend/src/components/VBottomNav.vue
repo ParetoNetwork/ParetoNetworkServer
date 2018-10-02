@@ -24,13 +24,9 @@
 
 <script>
     import ContentService from '../services/ContentService';
-    import { mapState} from "vuex";
 
     export default {
         name: 'VBottomNav',
-        computed : {
-            ...mapState(["signType", "pathId"])
-        },
         data: function () {
             return{
                 paretoUSD: '',
