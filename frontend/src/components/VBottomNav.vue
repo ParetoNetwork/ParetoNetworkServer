@@ -2,6 +2,8 @@
     <div class="navbar hiden-navbar-bottom d-flex justify-content-around font-body">
         <div class="responsize-positioning d-flex flex-row">
             <a class="mr-3" href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
+            <div class="mr-3"> PARETO PRICE: {{paretoUSD}} </div>
+            <div class="mr-3"> RECOMMENDED ETHEREUM GAS PRICE: {{recommendedGasPrice}} ETHER </div>
             <!-- <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
             <div class="mr-3"> STATUS: CONNECTED </div>
             <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
@@ -22,25 +24,55 @@
 
 <script>
     import ContentService from '../services/ContentService';
+    import { mapState} from "vuex";
 
     export default {
         name: 'VBottomNav',
+        computed : {
+            ...mapState(["signType", "pathId"])
+        },
         data: function () {
             return{
+                paretoUSD: '',
+                recommendedGasPrice: ''
             }
         },
         mounted(){
-            ContentService.getParetoInfo( res=> {
-                console.log(res)
+            this.getCoinMarketPrice();
+            this.getRecommendedGas();
+        },
+        methods: {
+            getCoinMarketPrice: function () {
+                ContentService.getParetoInfo(res => {
+                        this.paretoUSD = this.numberToCurrency(res.quote.USD.price);
+                        console.log(this.paretoUSD);
+                    },
+                    err => {
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Content',
+                            text: err
+                        });
+                    });
             },
-            err => {
-                this.$notify({
-                    group: 'notification',
-                    type: 'error',
-                    duration: 10000,
-                    title: 'Content',
-                    text: err });
-            });
+            getRecommendedGas: function(){
+                ContentService.getStimatedGasPrice(res => {
+                    this.recommendedGasPrice = res;
+                }, error => {
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Content',
+                        text: err
+                    });
+                });
+            },
+            numberToCurrency: function (number) {
+                return number.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 5});
+            }
         }
     }
 </script>

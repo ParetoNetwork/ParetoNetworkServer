@@ -15,6 +15,7 @@ export default class ContentService {
 
   static ledgerNanoEngine = null;
   static ledgerWalletSubProvider = null;
+
   static uploadContent(content, onSuccess, onError) {
     http
       .post("/v1/content", content)
@@ -40,6 +41,22 @@ export default class ContentService {
                   return onError('Could not retrieve data from server');
               }
           })
+  }
+
+  static async getStimatedGasPrice(OnSuccess, OnError){
+      let provider;
+      if (typeof web3 !== 'undefined') {
+          provider = new Web3(web3.currentProvider);
+      } else {
+          provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
+      }
+
+      let gasPriceWei = await provider.eth.getGasPrice();
+      gasPriceWei = gasPriceWei * 10;
+
+      let gasPrice = await provider.utils.fromWei(gasPriceWei+"", 'ether');
+
+      gasPrice? OnSuccess(gasPrice) : OnError('There was a problem fetching the current recommended gas price');
   }
 
   static async createIntel(serverData, tokenAmount, signData,onSuccess, onError) {

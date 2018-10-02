@@ -20,8 +20,7 @@ var PARETO_CONTRACT_ADDRESS = process.env.CRED_PARETOCONTRACT || constants.CRED_
 var WEB3_URL = process.env.WEB3_URL;
 var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 var ETH_NETWORK = process.env.ETH_NETWORK;
-
-
+var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
 
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
@@ -247,8 +246,9 @@ controller.getParetoCoinMarket = function(callback){
     let url = 'https://pro-api.coinmarketcap.com/v1';
 
     request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
-        {headers: {'x-cmc_pro_api_key': '7b92a2e9-4ed0-4c7e-8582-3aee03002a01' }},
+        {headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }},
         (error, res, body) => {
+            console.log(COIN_MARKET_API_KEY);
             callback(error, JSON.parse(body));
         });
 };
