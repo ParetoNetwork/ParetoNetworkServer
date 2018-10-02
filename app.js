@@ -457,10 +457,18 @@ app.get('/v1/address', function (req, res) {
 
 });
 
+app.get('/v1/coinmarket-pareto', function (req, res) {
+    controller.getParetoCoinMarket(function(err, result){
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
 //force update inforamtion
 app.post('/v1/update', function (req, res) {
-
-
 });
 
 //get info about another address

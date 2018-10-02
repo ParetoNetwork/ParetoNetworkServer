@@ -1,3 +1,6 @@
+const https = require('https');
+const request = require('request');
+
 var controller = module.exports = {};
 
 const fs = require('fs');
@@ -238,6 +241,16 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
         callback(e);
     }
 
+};
+
+controller.getParetoCoinMarket = function(callback){
+    let url = 'https://pro-api.coinmarketcap.com/v1';
+
+    request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
+        {headers: {'x-cmc_pro_api_key': '7b92a2e9-4ed0-4c7e-8582-3aee03002a01' }},
+        (error, res, body) => {
+            callback(error, JSON.parse(body));
+        });
 };
 
 /**

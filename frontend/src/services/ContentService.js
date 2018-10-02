@@ -1,7 +1,10 @@
+import axios from 'axios';
 import http from "./HttpService";
 import Web3 from "web3";
 import Intel_Contract_Schema from "../build/contracts/Intel.json";
 import Pareto_Token_Schema from "../build/contracts/ParetoNetworkToken.json";
+import environment from '../utils/environment';
+
 let web3;
 let provider;
 let accounts;
@@ -25,6 +28,18 @@ export default class ContentService {
       .catch(error => {
         return onError(error);
       });
+  }
+
+  static getParetoInfo(onSuccess, onError){
+      http.get("/v1/coinmarket-pareto")
+          .then(res => {
+              if(res.data.success){
+                  return onSuccess(res.data.data.data.PARETO);
+              }else{
+                  console.log(res);
+                  return onError('Could not retrieve data from server');
+              }
+          })
   }
 
   static async createIntel(serverData, tokenAmount, signData,onSuccess, onError) {
@@ -177,7 +192,6 @@ export default class ContentService {
         .on("error", err => {
           onError(err);
         });
-
     });
   }
 
