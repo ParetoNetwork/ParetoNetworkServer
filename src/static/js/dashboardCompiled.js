@@ -52157,7 +52157,7 @@ module.exports = {
 
         if (typeof web3 !== 'undefined') {
 
-            var contractAddr = ('0xbcce0c003b562f47a319dfca4bce30d322fa0f01');
+            var contractAddr = ('0xea5f88E54d982Cbb0c441cde4E79bC305e5b43Bc');
             var rankCalculation = 0;
             var tokenTotal = 0;
             if (!web3.currentProvider.isMetaMask) {
