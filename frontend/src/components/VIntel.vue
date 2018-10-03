@@ -74,7 +74,7 @@
                 <div v-else class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="title"><b>MY POSTS</b></h5>
-                        <button class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
+                        <button v-if=false class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
                         </button>
                     </div>
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
