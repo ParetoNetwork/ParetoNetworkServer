@@ -100,10 +100,10 @@
                 </div>
 
             </div>
-            <div class="col-md-7">
+            <div class="col-md-7 mb-3">
                 <VShimmerFeed v-if="!myFeed.content.length"></VShimmerFeed>
                 <div v-else class="border p-2">
-                    <div class="p-3 border-bottom">
+                    <div class="border-bottom p-2 p-md-3">
                         <h5 class="title"> MY INTEL FEED: </h5>
                     </div>
                     <div v-if="loading" class="d-flex split">
@@ -672,7 +672,7 @@
 
     li > .split {
         cursor: pointer;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.125);
         padding-bottom: 0.5rem;
     }
 
@@ -781,6 +781,12 @@
     @media (min-width: 992px){
         .reward-text {
             max-width: 110px;
+        }
+    }
+
+    @media (max-width: 426px){
+        #myfeed {
+            max-height: 465px;
         }
     }
 

@@ -1,6 +1,6 @@
 <template>
-    <div class="navbar hiden-navbar-bottom d-flex justify-content-around font-body">
-        <div class="responsize-positioning d-flex flex-row">
+    <div class="navbar hiden-navbar-bottom d-flex justify-content-around font-body py-0">
+        <div class="d-flex flex-row mt-1 p-1">
             <a class="mr-3" href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
             <div class="mr-3"> PARETO PRICE: {{paretoUSD}} </div>
             <div class="mr-3"> RECOMMENDED ETHEREUM GAS PRICE: {{recommendedGasPrice}} gwei </div>
@@ -8,7 +8,7 @@
             <div class="mr-3"> STATUS: CONNECTED </div>
             <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
         </div>
-        <div class="d-flex flex-row">
+        <div class="d-flex flex-row py-1">
             <!--
             <div class="mr-3"> CONTACT </div>
             <div class="mr-3"> TERMS OF USE </div>
@@ -103,17 +103,10 @@
 
     @media (max-width: 900px){
         .show-navbar-bottom {
-            height: 40px;
+            height: 90px;
             font-size: 10px;
         }
 
-    }
-
-    @media (max-width: 767px){
-        .responsize-positioning {
-            height: 0px;
-            opacity: 0;
-        }
     }
 
     .border {
