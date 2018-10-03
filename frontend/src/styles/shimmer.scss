@@ -1,0 +1,79 @@
+.box {
+  height: 104px;
+  width: 100px;
+}
+
+.lines {
+  height: 15px;
+  width: 100%;
+  display: block;
+}
+
+.medium-lines {
+  height: 15px;
+  width: 50%;
+  display: block;
+}
+
+.short-lines{
+  height: 15px;
+  width: 25%;
+}
+
+.thick-medium-lines {
+  height: 30px;
+  width: 50%;
+}
+
+.thick-lines {
+  height: 30px;
+  width: 100%;
+}
+
+.thick-short-lines {
+   height: 30px;
+   width: 25%;
+ }
+
+.photo {
+  display: block!important;
+  margin-top: 15px;
+}
+
+.shine {
+  background: #f6f7f8;
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-repeat: no-repeat;
+  background-size: 1000px 1000px;
+  margin-bottom: 4px;
+
+  -webkit-animation-duration: 1s;
+  -webkit-animation-fill-mode: forwards;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-name: placeholderShimmer;
+  -webkit-animation-timing-function: linear;
+}
+
+.dark-shine {
+  background: #040f1e;
+  background-image: linear-gradient(to right, #040f1e 0%, #999 20%, #040f1e 40%, #040f1e 100%);
+  background-repeat: no-repeat;
+  background-size: 1000px 1000px;
+  margin-bottom: 4px;
+
+  -webkit-animation-duration: 1s;
+  -webkit-animation-fill-mode: forwards;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-name: placeholderShimmer;
+  -webkit-animation-timing-function: linear;
+}
+
+@-webkit-keyframes placeholderShimmer {
+  0% {
+    background-position: -468px 0;
+  }
+
+  100% {
+    background-position: 468px 0;
+  }
+}

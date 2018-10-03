@@ -1220,7 +1220,12 @@ controller.sign = function(params, callback){
 
   const owner = params.owner;
     const recovered2 = sigUtil.recoverPersonalSignature({ data: params.data[0].value, sig: params.result });
-  const recovered = sigUtil.recoverTypedSignature({ data: params.data, sig: params.result });
+    let  recovered = '';
+    try {
+        recovered = sigUtil.recoverTypedSignature({data: params.data, sig: params.result});
+    }catch (e) {
+        recovered = sigUtil.recoverTypedSignatureLegacy({data: params.data, sig: params.result})
+    }
 
   if (recovered === owner || recovered2 === owner ) {
     // If the signature matches the owner supplied, create a
@@ -1345,13 +1350,14 @@ controller.insertProfile = function(profile,callback){
 
 controller.isNew = function(address, callback){
     ParetoAddress.find({address: address}, function(err, r){
-        if (r && r.length>0){
-            callback(null, false);
-        }else{
-            callback(null, true);
-        }
-    });
+            if (r && r.length>0){
+                callback(null, false);
+            }else{
+                callback(null, true);
+            }
+        });
 };
+
 
 /**
  * Get Profile in MongoDB. The result data is saved in Redis. If no Profile exist for the address, a new register is created,

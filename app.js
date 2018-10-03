@@ -476,6 +476,7 @@ app.get('/v1/address/:address', function (req, res) {
 
 });
 
+
 function responseUserInfo(req, res) {
     controller.getUserInfo(req.user,  function (err, result) {
         if (err) {
@@ -489,23 +490,23 @@ function responseUserInfo(req, res) {
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
     //Get Info User
-    if (req.query.latest=='true'){
-        controller.isNew(req.user, function (err, success) {
-            if(success){
-                controller.updateScore(req.user, function (err, success) {
-                    if (err) {
-                        res.status(200).json(ErrorHandler.getError(err));
-                    } else {
-                        responseUserInfo(req, res);
-                    }
-                });
-            }else{
-                responseUserInfo(req, res);
-            }
-        });
-    } else{
-        responseUserInfo(req, res);
-    }
+     if (req.query.latest=='true'){
+         controller.isNew(req.user, function (err, success) {
+             if(success){
+                 controller.updateScore(req.user, function (err, success) {
+                     if (err) {
+                         res.status(200).json(ErrorHandler.getError(err));
+                     } else {
+                         responseUserInfo(req, res);
+                     }
+                 });
+             }else{
+                 responseUserInfo(req, res);
+             }
+         });
+     } else{
+         responseUserInfo(req, res);
+     }
 
 });
 
