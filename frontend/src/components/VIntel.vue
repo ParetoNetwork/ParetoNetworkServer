@@ -70,7 +70,7 @@
                     </div>
                 </template>
 
-                <VShimmerMyPost v-if="!myContent.length"></VShimmerMyPost>
+                <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
                 <div v-else class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="title"><b>MY POSTS</b></h5>
@@ -334,6 +334,7 @@
                 rewardId: '',
                 intelAddress: '',
                 tokenAmount: 1,
+                loadedMyContent: false,
                 myContent: [],
                 allMyContent: [],
                 moment: moment,
@@ -508,6 +509,7 @@
                 return dashboardService.getContent(
                     res => {
                         this.allMyContent = res;
+                        this.loadedMyContent = true;
                         this.myContent = this.allMyContent.slice(0, 10);
                     },
                     error => {
