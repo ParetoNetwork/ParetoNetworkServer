@@ -323,8 +323,7 @@ export default class authService {
                            // const params = [provider.utils.toHex('Pareto'), from];
                           //  const method = 'personal_sign';
                             const params = [msgParams,from];
-                            const method = 'eth_signTypedData';
-                            const method2 = 'eth_signTypedData_v3';
+                            let method = 'eth_signTypedData_v3';
                             // debugger;
 
                             const resultfunction = function(err, result){
@@ -353,8 +352,9 @@ export default class authService {
                                 }
                             }
                             try{
-                                provider.currentProvider.sendAsync({method2,params, from}, (err, result) => {
+                                provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
                                     if(err || result.error){
+                                        method = 'eth_signTypedData';
                                         provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
                                             resultfunction(err, result)
                                         });
@@ -362,11 +362,13 @@ export default class authService {
                                         resultfunction(null, result);
                                     }
                                 }).catch(function (){
+                                    method = 'eth_signTypedData';
                                     provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
                                         resultfunction(err, result)
                                     });
                                 });
                             }catch (e) {
+                                method = 'eth_signTypedData';
                                 provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
                                     resultfunction(err, result)
                                 });
