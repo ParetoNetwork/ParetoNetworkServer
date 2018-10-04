@@ -294,13 +294,7 @@ export default class authService {
             provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
         }
         if (typeof provider !== 'undefined') {
-            const msgParams = [
-                {
-                    type: 'string',
-                    name: 'Message',
-                    value: 'Pareto' //replace with TOS
-                }
-            ];
+
             // const contractAddr = ('0xea5f88E54d982Cbb0c441cde4E79bC305e5b43Bc');
             // const rankCalculation = 0;
             // const tokenTotal = 0;
@@ -322,11 +316,32 @@ export default class authService {
 
                            // const params = [provider.utils.toHex('Pareto'), from];
                           //  const method = 'personal_sign';
-                            const params = [msgParams,from];
+                            let msgParams = {
+                                types: {
+                                    EIP712Domain: [
+                                        { name: "Pareto",    type: "string"  },
+                                        { name: "version", type: "string"  },
+                                        { name: "chainId", type: "uint256" },
+                                    ],
+                                    CustomType: [
+                                        { name: "message",   type: "string" }
+                                    ],
+                                },
+                                primaryType: "CustomType",
+                                domain: {
+                                    name:    "Pareto",
+                                    version: "0.0.1",
+                                    chainId: 3,
+                                },
+                                message: {
+                                    message: 'Pareto'
+                                },
+                            };
+                            let params = [ from, JSON.stringify(msgParams)];
                             let method = 'eth_signTypedData_v3';
                             // debugger;
 
-                            const resultfunction = function(err, result){
+                            const resultfunction = function(method, msgParams, err, result){
                                 if (err) return console.dir(err);
                                 if (result.error) {
                                     return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
@@ -336,13 +351,23 @@ export default class authService {
                                 }
                                 result = result.result;
                                 let  recovered = '';
-                                try {
+                                if(method === 'eth_signTypedData_v3') {
                                     recovered = Sig.recoverTypedSignature({data: msgParams, sig: result});
-                                }catch (e) {
-                                    recovered = Sig.recoverTypedSignatureLegacy({data: msgParams, sig: result})
+                                }else{
+                                    recovered = Sig.recoverTypedSignatureLegacy({data: msgParams, sig: result});
                                 }
 
                                 if (recovered === from) {
+                                    if(method === 'eth_signTypedData_v3'){
+                                        msgParams = [
+                                            {
+                                                type: 'string',
+                                                name: 'Message',
+                                                value: 'Pareto' //replace with TOS
+                                            }
+                                        ];
+                                    }
+
                                     authService.signParetoServer(msgParams, from, result, onSuccess, onError)
 
                                 } else {
@@ -355,17 +380,33 @@ export default class authService {
                                 provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
                                     if(err || result.error){
                                         method = 'eth_signTypedData';
+                                        const msgParams = [
+                                            {
+                                                type: 'string',
+                                                name: 'Message',
+                                                value: 'Pareto' //replace with TOS
+                                            }
+                                        ];
+                                        const params = [msgParams,from];
                                         provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                            resultfunction(err, result)
+                                            resultfunction(method, msgParams,err, result)
                                         });
                                     }else{
-                                        resultfunction(null, result);
+                                        resultfunction(method, msgParams,null, result);
                                     }
                                 })
                             }catch (e) {
                                 method = 'eth_signTypedData';
+                                 msgParams = [
+                                    {
+                                        type: 'string',
+                                        name: 'Message',
+                                        value: 'Pareto' //replace with TOS
+                                    }
+                                ];
+                                 params = [msgParams,from];
                                 provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                    resultfunction(err, result)
+                                    resultfunction(method, msgParams,err, result)
                                 });
                             }
 
