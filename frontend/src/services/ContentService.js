@@ -302,11 +302,7 @@ export default class ContentService {
       if (typeof provider !== "undefined") {
           return;
       }
-
   }
-
-
-
 }
 
 function waitForReceipt(hash, cb) {
