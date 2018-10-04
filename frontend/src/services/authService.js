@@ -361,12 +361,7 @@ export default class authService {
                                     }else{
                                         resultfunction(null, result);
                                     }
-                                }).catch(function (){
-                                    method = 'eth_signTypedData';
-                                    provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                        resultfunction(err, result)
-                                    });
-                                });
+                                })
                             }catch (e) {
                                 method = 'eth_signTypedData';
                                 provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
