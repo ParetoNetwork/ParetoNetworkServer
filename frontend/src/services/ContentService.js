@@ -1,15 +1,14 @@
 import axios from 'axios';
 import http from "./HttpService";
 import Web3 from "web3";
-import Intel_Contract_Schema from "../build/contracts/Intel.json";
-import Pareto_Token_Schema from "../build/contracts/ParetoNetworkToken.json";
-import environment from '../utils/environment';
 
 let web3;
 let provider;
 let accounts;
 let Intel;
 let ParetoTokenInstance;
+let Intel_Contract_Schema;
+let Pareto_Token_Schema;
 /* eslint-disable no-console */
 export default class ContentService {
 
@@ -161,7 +160,7 @@ export default class ContentService {
         return;
       }
         Intel = new web3.eth.Contract(
-            Intel_Contract_Schema.abi,
+            Intel_Contract_Schema,
             content.intelAddress
         );
       let gasPrice = await web3.eth.getGasPrice();
@@ -247,7 +246,10 @@ export default class ContentService {
     });
   }
 
+
   static async Setup(signData) {
+      Intel_Contract_Schema = JSON.parse(window.localStorage.getItem('intelc')) ;
+      Pareto_Token_Schema = JSON.parse(window.localStorage.getItem('paretoc'));
       const signType = signData.signType;
       const pathId = signData.pathId;
       if(ContentService.ledgerNanoEngine){ContentService.ledgerNanoEngine.stop();}
@@ -288,20 +290,20 @@ export default class ContentService {
           }
       }
 
+    web3 = new Web3(provider);
+    Intel = new web3.eth.Contract(
+        Intel_Contract_Schema,
+        window.localStorage.getItem('intelAddress')
+    );
 
-      web3 = new Web3(provider);
-      Intel = new web3.eth.Contract(
-          Intel_Contract_Schema.abi,
-          Intel_Contract_Schema.networks["3"].address
-      );
+    ParetoTokenInstance = new web3.eth.Contract(
+        Pareto_Token_Schema,
+        window.localStorage.getItem('paretoAddress')
+    );
+    if (typeof provider !== "undefined") {
+      return;
+    }
 
-      ParetoTokenInstance = new web3.eth.Contract(
-          Pareto_Token_Schema.abi,
-          Pareto_Token_Schema.networks["3"].address
-      );
-      if (typeof provider !== "undefined") {
-          return;
-      }
   }
 }
 
