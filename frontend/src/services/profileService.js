@@ -25,13 +25,15 @@ export default class profileService {
             res= res.data;
             if(res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
             || res.data.paretoAddress !== window.localStorage.getItem('paretoAddress')
-                || res.data.netWorkId !== window.localStorage.getItem('netWorkId'))){
+                || res.data.netWorkId !== window.localStorage.getItem('netWorkId')
+                || res.data.psignversion !== window.localStorage.getItem('psignversion'))){
                 http.post('/v1/config', {}).then(res => {
                     res= res.data;
                     if(res.success ){
                         window.localStorage.setItem('intelAddress',res.data.intelAddress);
                         window.localStorage.setItem('paretoAddress',res.data.paretoAddress);
                         window.localStorage.setItem('netWorkId',res.data.netWorkId);
+                        window.localStorage.setItem('psignversion',res.data.psignversion);
                         window.localStorage.setItem('intelc',JSON.stringify(res.data.intel));
                         window.localStorage.setItem('paretoc',JSON.stringify(res.data.pareto));
                     }

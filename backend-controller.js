@@ -20,6 +20,7 @@ var PARETO_CONTRACT_ADDRESS = process.env.CRED_PARETOCONTRACT || constants.CRED_
 var WEB3_URL = process.env.WEB3_URL;
 var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 var ETH_NETWORK = process.env.ETH_NETWORK;
+var PARETO_SIGN_VERSION = process.env.PARETO_SIGN_VERSION;
 var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
 
 const modelsPath = path.resolve(__dirname, 'models');
@@ -1250,7 +1251,7 @@ controller.sign = function(params, callback){
             primaryType: "CustomType",
             domain: {
                 name:    "Pareto",
-                version: "0.0.1",
+                version: PARETO_SIGN_VERSION,
                 chainId: ETH_NETWORK,
             },
             message: {

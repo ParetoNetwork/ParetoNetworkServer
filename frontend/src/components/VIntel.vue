@@ -239,7 +239,7 @@
                               type="number"></b-form-input>
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
                     <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                    <b-button :disabled="!hardwareAvailable || tokens<=0 || tokens > maxTokens" style="background-color: rgb(107, 194, 123)" variant="success"
+                    <b-button :disabled="!hardwareAvailable || tokenAmount<=0 || tokenAmount > user.tokens" style="background-color: rgb(107, 194, 123)" variant="success"
                               @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                     </b-button>
                 </b-row>
