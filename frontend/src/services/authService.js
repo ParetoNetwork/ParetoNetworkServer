@@ -2,7 +2,7 @@ import Web3 from 'web3';
 import Sig from 'eth-sig-util';
 import qs from 'qs';
 import http from './HttpService';
-
+import profileService from './profileService'
 import ledger from "ledgerco";
 
 /* eslint-disable no-console */
@@ -59,6 +59,11 @@ export default class authService {
             return onError(error);
 
         });
+        try {
+            profileService.updateConfig();
+        }catch (e) {
+            console.log(e)
+        }
     }
 
     static signParetoServer(msgParams, from, result, onSuccess, onError){
@@ -209,7 +214,6 @@ export default class authService {
     }
 
     static  signWallet(pathId, addr, onSuccess, onError) {
-
         this.initLedgerNano(()=>{
             const msgParams = [
                 {
@@ -281,6 +285,8 @@ export default class authService {
 
     static signSplash(onSuccess, onError) {
         let provider;
+        const version = window.localStorage.getItem('psignversion');
+        const network = window.localStorage.getItem('netWorkId');
         if (typeof web3 !== 'undefined') {
             // Use Mist/MetaMask's provider
             provider = new Web3(web3.currentProvider);
@@ -330,8 +336,8 @@ export default class authService {
                                 primaryType: "CustomType",
                                 domain: {
                                     name:    "Pareto",
-                                    version: "0.0.1",
-                                    chainId: 3,
+                                    version: version.toString(),
+                                    chainId: parseInt(network),
                                 },
                                 message: {
                                     message: 'Pareto'

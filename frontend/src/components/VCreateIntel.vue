@@ -196,6 +196,7 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import AuthService from '../services/authService';
+    import ProfileService from '../services/profileService';
     import ContentService from '../services/ContentService';
     import { mapState} from "vuex";
     require('summernote/dist/summernote.css');
@@ -291,7 +292,7 @@
                 }
             });
             this.address();
-
+            ProfileService.updateConfig();
             /*
             window.addEventListener('popstate', function () {
                 console.log('new backbutton');
