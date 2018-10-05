@@ -290,6 +290,7 @@ export default class ContentService {
           }
       }
 
+
     web3 = new Web3(provider);
     Intel = new web3.eth.Contract(
         Intel_Contract_Schema,
@@ -303,6 +304,7 @@ export default class ContentService {
     if (typeof provider !== "undefined") {
       return;
     }
+
 
   }
 }
