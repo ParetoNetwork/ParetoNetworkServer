@@ -12,11 +12,32 @@ export default class profileService {
     }
 
     static getProfile(onSuccess, onError, profile = null) {
+        profileService.updateConfig();
         return http.get('/v1/userinfo', profile).then(res => {
             return onSuccess(res.data.data);
         }).catch(error => {
             return onError(error);
         });
+    }
+
+    static updateConfig(){
+        http.post('/v1/config_basic', {}).then(res => {
+            res= res.data;
+            if(res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
+            || res.data.paretoAddress !== window.localStorage.getItem('paretoAddress')
+                || res.data.netWorkId !== window.localStorage.getItem('netWorkId'))){
+                http.post('/v1/config', {}).then(res => {
+                    res= res.data;
+                    if(res.success ){
+                        window.localStorage.setItem('intelAddress',res.data.intelAddress);
+                        window.localStorage.setItem('paretoAddress',res.data.paretoAddress);
+                        window.localStorage.setItem('netWorkId',res.data.netWorkId);
+                        window.localStorage.setItem('intelc',JSON.stringify(res.data.intel));
+                        window.localStorage.setItem('paretoc',JSON.stringify(res.data.pareto));
+                    }
+                }).catch(error => { });
+            }
+        }).catch(error => { });
     }
 
     static getSpecificProfile(onSuccess, onError, address){
