@@ -259,6 +259,23 @@ app.get("/getIntels", (req, res) => {
       });
   })
 
+    app.post('/v1/config_basic', function (req, res) {
+        const intel = require("./build/contracts/Intel.json");
+        const netWorkId = process.env.ETH_NETWORK;
+        const pcontract = process.env.CRED_PARETOCONTRACT;
+        const psignversion = process.env.PARETO_SIGN_VERSION;
+        res.status(200).json(ErrorHandler.getSuccess({ netWorkId: netWorkId , intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
+    });
+
+    app.post('/v1/config', function (req, res) {
+        const intel = require("./build/contracts/Intel.json");
+        const pareto = require("./build/contracts/ParetoNetworkToken.json");
+        const netWorkId = process.env.ETH_NETWORK;
+        const pcontract = process.env.CRED_PARETOCONTRACT;
+        const psignversion = process.env.PARETO_SIGN_VERSION;
+        res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId , intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
+    });
+
 /********* AUTHENTICATED v1 APIs *********/
 
 app.use(function (req, res, next) {
@@ -295,6 +312,7 @@ app.get('/v1/auth', function (req, res) {
 
     res.status(200).json(ErrorHandler.getSuccess({auth: req.user}));
 });
+
 
 app.get('/v1/splash-auth', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/dashboard.html'));
@@ -457,10 +475,18 @@ app.get('/v1/address', function (req, res) {
 
 });
 
+app.get('/v1/coinmarket-pareto', function (req, res) {
+    controller.getParetoCoinMarket(function(err, result){
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
 //force update inforamtion
 app.post('/v1/update', function (req, res) {
-
-
 });
 
 //get info about another address
