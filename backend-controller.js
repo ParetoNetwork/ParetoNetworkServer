@@ -1,3 +1,6 @@
+const https = require('https');
+const request = require('request');
+
 var controller = module.exports = {};
 
 const fs = require('fs');
@@ -17,8 +20,8 @@ var PARETO_CONTRACT_ADDRESS = process.env.CRED_PARETOCONTRACT || constants.CRED_
 var WEB3_URL = process.env.WEB3_URL;
 var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 var ETH_NETWORK = process.env.ETH_NETWORK;
-
-
+var PARETO_SIGN_VERSION = process.env.PARETO_SIGN_VERSION;
+var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
 
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
@@ -238,6 +241,17 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
         callback(e);
     }
 
+};
+
+controller.getParetoCoinMarket = function(callback){
+    let url = 'https://pro-api.coinmarketcap.com/v1';
+
+    request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
+        {headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }},
+        (error, res, body) => {
+            console.log(COIN_MARKET_API_KEY);
+            callback(error, JSON.parse(body));
+        });
 };
 
 /**
@@ -1218,30 +1232,65 @@ controller.updateScore = function(address, callback){
 
 controller.sign = function(params, callback){
 
-  const owner = params.owner;
-    const recovered2 = sigUtil.recoverPersonalSignature({ data: params.data[0].value, sig: params.result });
-    let  recovered = '';
-    try {
-        recovered = sigUtil.recoverTypedSignature({data: params.data, sig: params.result});
-    }catch (e) {
-        recovered = sigUtil.recoverTypedSignatureLegacy({data: params.data, sig: params.result})
+    if(!params.data || !params.data.length  || !params.data[0].value ){
+        return callback(ErrorHandler.signatureFailedMessage)
+    } else{
+
+
+        let msgParams = {
+            types: {
+                EIP712Domain: [
+                    { name: "Pareto",    type: "string"  },
+                    { name: "version", type: "string"  },
+                    { name: "chainId", type: "uint256" },
+                ],
+                CustomType: [
+                    { name: "message",   type: "string" }
+                ],
+            },
+            primaryType: "CustomType",
+            domain: {
+                name:    "Pareto",
+                version: PARETO_SIGN_VERSION,
+                chainId: ETH_NETWORK,
+            },
+            message: {
+                message: params.data[0].value
+            },
+        };
+        const owner = params.owner;
+        let recovered2  = '';
+        let  recovered = '';
+        let  recovered3 = '';
+        try {
+            recovered2 = sigUtil.recoverPersonalSignature({ data: params.data[0].value, sig: params.result });
+        }catch (e) { console.log(e) }
+        try {
+            recovered = sigUtil.recoverTypedSignature({data: msgParams, sig: params.result});
+        }catch (e) {console.log(e) }
+        try {
+            recovered3= sigUtil.recoverTypedSignatureLegacy({data: params.data, sig: params.result});
+        }catch (e) {console.log(e) }
+
+        if (recovered === owner || recovered2 === owner || recovered3 === owner) {
+            // If the signature matches the owner supplied, create a
+            // JSON web token for the owner that expires in 24 hours.
+            controller.getBalance(owner,0, function(err, count){
+                if(!err){
+                    callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
+                }else{
+                    callback(err);
+                }
+            });
+
+
+        } else {
+            if(callback && typeof callback === "function") { callback(ErrorHandler.signatureFailedMessage); }
+        }
     }
 
-  if (recovered === owner || recovered2 === owner ) {
-    // If the signature matches the owner supplied, create a
-    // JSON web token for the owner that expires in 24 hours.
-      controller.getBalance(owner,0, function(err, count){
-        if(!err){
-            callback(null,  {token:  jwt.sign({user: owner}, 'Pareto',  { expiresIn: "5y" })});
-        }else{
-          callback(err);
-        }
-      });
 
 
-  } else {
-    if(callback && typeof callback === "function") { callback(ErrorHandler.signatureFailedMessage); }
-  }
 };
 
 controller.unsign = function(callback){

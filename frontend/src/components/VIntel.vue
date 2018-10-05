@@ -70,11 +70,11 @@
                     </div>
                 </template>
 
-                <VShimmerMyPost v-if="!myContent.length"></VShimmerMyPost>
+                <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
                 <div v-else class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="title"><b>MY POSTS</b></h5>
-                        <button v-if=false class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
+                        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
                         </button>
                     </div>
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
@@ -100,10 +100,10 @@
                 </div>
 
             </div>
-            <div class="col-md-7">
+            <div class="col-md-7 mb-3">
                 <VShimmerFeed v-if="!myFeed.content.length"></VShimmerFeed>
                 <div v-else class="border p-2">
-                    <div class="p-3 border-bottom">
+                    <div class="border-bottom p-2 p-md-3">
                         <h5 class="title"> MY INTEL FEED: </h5>
                     </div>
                     <div v-if="loading" class="d-flex split">
@@ -239,7 +239,7 @@
                               type="number"></b-form-input>
                 <b-row class="m-2 mt-4 d-flex justify-content-center">
                     <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                    <b-button :disabled="!hardwareAvailable || tokens<=0 || tokens > maxTokens" style="background-color: rgb(107, 194, 123)" variant="success"
+                    <b-button :disabled="!hardwareAvailable || tokenAmount<=0 || tokenAmount > user.tokens" style="background-color: rgb(107, 194, 123)" variant="success"
                               @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                     </b-button>
                 </b-row>
@@ -334,6 +334,7 @@
                 rewardId: '',
                 intelAddress: '',
                 tokenAmount: 1,
+                loadedMyContent: false,
                 myContent: [],
                 allMyContent: [],
                 moment: moment,
@@ -508,6 +509,7 @@
                 return dashboardService.getContent(
                     res => {
                         this.allMyContent = res;
+                        this.loadedMyContent = true;
                         this.myContent = this.allMyContent.slice(0, 10);
                     },
                     error => {
@@ -672,7 +674,7 @@
 
     li > .split {
         cursor: pointer;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.125);
         padding-bottom: 0.5rem;
     }
 
@@ -781,6 +783,12 @@
     @media (min-width: 992px){
         .reward-text {
             max-width: 110px;
+        }
+    }
+
+    @media (max-width: 426px){
+        #myfeed {
+            max-height: 465px;
         }
     }
 
