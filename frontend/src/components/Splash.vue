@@ -162,7 +162,7 @@
                         this.loading = false;
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
                         });
                         this.$router.push('/intel');
                     }, () => {
@@ -170,11 +170,13 @@
                     });
 
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Authentication Error',
+                        text: errorText });
                     this.stopLogin();
                 });
             },

@@ -75,13 +75,26 @@
 
                     <b-container fluid>
                         <h4 class="font-body mb-3"> Pareto Amount</h4>
+                        <div v-if="this.signType==='LedgerNano'" class="text-left">
+                            <p> Before use Ledger Nano S, verify the next items: </p>
+                            <div class="m-2 ml-4">
+                                <ul>
+                                    <li> The Browser must be Google Chrome</li>
+                                    <li> Plugged-in their Ledger Wallet Nano S</li>
+                                    <li> Input digits pin</li>
+                                    <li> Navigated to the Ethereum app on their device</li>
+                                    <li> Enabled 'browser' support from the Ethereum app settings</li>
+                                </ul>
+                            </div>
+                            <br/>
+                        </div>
                         <p class="text-dashboard mb-2" style="font-size: 16px">  You need to deposit Pareto tokens to create Intel. Please input the amount to deposit</p>
 
                         <b-form-input v-model="tokens"
                                       type="number"></b-form-input>
                         <b-row class="m-2 mt-4 d-flex justify-content-center">
                             <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
-                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="!hardwareAvailable || tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
                         </b-row>
                     </b-container>
                 </b-modal>
@@ -97,8 +110,9 @@
                         :body-text-variant="'light'">
 
                     <b-container fluid>
-                        <h3 class="font-body mb-4">Creating an Intel has a two step confirmation </h3>
-                        <div>
+
+                        <div v-if="this.signType!='LedgerNano'">
+                            <h3 class="font-body mb-4">Creating an Intel has a Two Step MetaMask Confirmation </h3>
                             <div class="m-2 ml-4">
                                 <ol class="text-left">
                                     <li>MetaMask will ask you to confirm the amount of Pareto that you'd like to
@@ -128,6 +142,24 @@
                                 <img src="../assets/images/mmicon.png" alt=""
                                      class="icon-mini">
                             </span>
+                            </div>
+
+                        </div>
+                        <div v-if="this.signType==='LedgerNano'">
+                            <h3 class="font-body mb-4">Creating an Intel has a Two Step Confirmation </h3>
+                            <div class="m-2 ml-4">
+                                <ol class="text-left">
+                                    <li>First, confirm the amount of Pareto that you'd like to
+                                        deposit
+                                    </li>
+                                    <li>Last, create the intel on the Ethereum Blockchain</li>
+                                </ol>
+                                <p class="text-center mt-4"
+                                   style="text-align: justify !important; text-justify: inter-word;">
+                                    This operation may take a while as we communicate with the Ethereum Blockchain.
+                                    Please do not close your browser or navigate to a different page.
+                                    Upon successful creation of Intel, Pareto will take you back to your Feed. </p>
+                                <i class="fa fa-spinner fa-spin fa-3x mt-4"></i>
                             </div>
 
                         </div>
@@ -163,7 +195,10 @@
 
 <script>
     import DashboardService from '../services/dashboardService';
+    import AuthService from '../services/authService';
+    import ProfileService from '../services/profileService';
     import ContentService from '../services/ContentService';
+    import { mapState} from "vuex";
     require('summernote/dist/summernote.css');
     require('summernote');
 
@@ -179,6 +214,7 @@
                 logged: false,
                 block: null,
                 body : '',
+                hardwareAvailable: false,
                 content : '',
                 title:'',
                 maxTokens: 1,
@@ -226,7 +262,8 @@
         computed : {
             bodyFunction: function () {
                 return content;
-            }
+            },
+            ...mapState(["madeLogin", "ws", "signType", "pathId"])
         },
         mounted: function () {
             $('#intel-body-input').summernote({
@@ -255,7 +292,7 @@
                 }
             });
             this.address();
-
+            ProfileService.updateConfig();
             /*
             window.addEventListener('popstate', function () {
                 console.log('new backbutton');
@@ -279,11 +316,22 @@
             }
         },
         methods: {
+            isAvailable(){
+                if(this.signType === 'LedgerNano'){
+                    this.hardwareAvailable = false;
+                    AuthService.doWhenIsConnected(()=>{
+                        this.hardwareAvailable = true;
+                        AuthService.deleteWatchNano();
+                    })
+                }else{
+                    this.hardwareAvailable = true;
+                }
+            },
             address: function () {
                 DashboardService.getAddress(res => {
                     this.block = res.block;
-                    this.blockChainAddress = res.address
-                    this.maxTokens = res.tokens
+                    this.blockChainAddress = res.address;
+                    this.maxTokens = res.tokens;
                 }, () => {
 
                 });
@@ -307,13 +355,13 @@
                 this.$store.state.makingRequest = true;
                 this.modalWaiting = true;
 
-                ContentService.createIntel({block:this.block, title: this.title, body: this.body, address: this.blockChainAddress}, this.tokens, (res) => {
+                ContentService.createIntel({block:this.block, title: this.title, body: this.body, address: this.blockChainAddress}, this.tokens, {signType: this.signType, pathId: this.pathId},(res) => {
 
                     this.$store.state.makingRequest = false;
                     this.intelState('created', 'Intel Created!');
 
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'success',
                         duration: 10000,
                         text: 'The Intel was created' });
@@ -322,17 +370,29 @@
 
                     this.$router.push('/intel');
                 }, (err) => {
-                    this.intelState('empty', '');
 
-                    this.modalWaiting = false;
+                    console.log(err);
+                    if ( err.includes('Transaction was not mined within')){
+                        this.$notify({
+                            group: 'notification',
+                            type: 'warning',
+                            duration: 20000,
+                            title: 'Warning!',
+                            text: err});
+                    }else{
+                        this.intelState('empty', '');
+                        this.modalWaiting = false;
+
                         if (typeof err === 'string')
                             err='Could not create Intel. ' +  err.split('\n')[0];
-                    this.$notify({
-                        group: 'foo',
-                        type: 'error',
-                        duration: 20000,
-                        text: err || 'Could not create Intel' });
-                    this.$store.state.makingRequest = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 20000,
+                            text: err || 'Could not create Intel' });
+
+                        this.$store.state.makingRequest = false;
+                    }
                 });
             },
             routeLeaving: function(){
@@ -355,13 +415,18 @@
             },
             showModal () {
                 this.modalToken = true;
+                this.isAvailable()
             },
             hideModalWarning: function(){
                 this.modalCloseWarning = false;
-              this.modalWaiting = true;
+                this.modalWaiting = true;
             },
             hideModal () {
                 this.modalToken = false;
+                if(this.signType === 'LedgerNano'){
+                    AuthService.deleteWatchNano();
+                    this.hardwareAvailable = false;
+                }
             }
         }
 
