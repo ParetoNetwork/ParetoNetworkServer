@@ -237,6 +237,7 @@
                         selected: {},
                         selectedindx: 0,
                         address: '',
+                        addressPlaceholder : [],
                         scroll: {}
                     },
                     {
@@ -245,6 +246,7 @@
                         selected: {},
                         selectedindx: 0,
                         address: '',
+                        addressPlaceholder : [],
                         scroll: {}
                     },
                     {
@@ -395,7 +397,7 @@
 
                         let userList = listData.data;
 
-                        this.paths[path_id].address = addressList.map((address) => {
+                        this.paths[path_id].addressPlaceholder = addressList.map((address) => {
                             let newAddressToken = {
                                 address: address,
                                 tokens: 0
@@ -409,10 +411,19 @@
                             return newAddressToken;
                         });
 
-                        this.paths[path_id].selected = this.paths[path_id].address[0];
-                        this.paths[path_id].selectedindx = 0;
+                        if(path_id === 1){
+                            this.paths[0].address = this.paths[0].addressPlaceholder;
+                            this.paths[0].selected = this.paths[0].address[0];
+                            this.paths[0].selectedindx = 0;
+                            
+                            this.paths[1].address = this.paths[1].addressPlaceholder;
+                            this.paths[1].selected = this.paths[1].address[0];
+                            this.paths[1].selectedindx = 0;
+                            this.selectedAddress = this.paths[1].selected.address
+                            this.selectedindx = this.paths[1].selectedindx;
+                            this.selectedPath = this.paths[path_id].id;
+                        }
 
-                        this.selectedPath = this.paths[path_id].id;
 
                     }, error => {
                         let errorText= error.message? error.message : error;

@@ -80,8 +80,15 @@
                         });
                         this.collapseContent();
                         this.$router.go(this.redirectRoute || '/intel');
-                    }, (err) => {
-                        console.log('Metamask Error');
+                    }, (error) => {
+                        this.stopLogin();
+                        let errorText= error.message? error.message : error;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Login',
+                            text: errorText });
                     });
 
                 }, error => {
