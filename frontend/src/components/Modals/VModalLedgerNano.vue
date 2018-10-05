@@ -417,10 +417,13 @@
                             this.paths[0].selectedindx = 0;
                             
                             this.paths[1].address = this.paths[1].addressPlaceholder;
-                            this.selectedAddress = this.paths[1].selected = this.paths[1].address[1];
+                            this.paths[1].selected = this.paths[1].address[0];
                             this.paths[1].selectedindx = 0;
+                            this.selectedAddress = this.paths[1].selected.address
+                            this.selectedindx = this.paths[1].selectedindx;
+                            this.selectedPath = this.paths[path_id].id;
                         }
-                        this.selectedPath = this.paths[path_id].id;
+
 
                     }, error => {
                         let errorText= error.message? error.message : error;
