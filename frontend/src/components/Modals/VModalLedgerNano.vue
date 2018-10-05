@@ -237,6 +237,7 @@
                         selected: {},
                         selectedindx: 0,
                         address: '',
+                        addressPlaceholder : [],
                         scroll: {}
                     },
                     {
@@ -245,6 +246,7 @@
                         selected: {},
                         selectedindx: 0,
                         address: '',
+                        addressPlaceholder : [],
                         scroll: {}
                     },
                     {
@@ -395,7 +397,7 @@
 
                         let userList = listData.data;
 
-                        this.paths[path_id].address = addressList.map((address) => {
+                        this.paths[path_id].addressPlaceholder = addressList.map((address) => {
                             let newAddressToken = {
                                 address: address,
                                 tokens: 0
@@ -409,38 +411,48 @@
                             return newAddressToken;
                         });
 
-                        this.paths[path_id].selected = this.paths[path_id].address[0];
-                        this.paths[path_id].selectedindx = 0;
+                        if(path_id === 1){
+                            this.paths[0].address = this.paths[0].addressPlaceholder;
+                            this.paths[0].selected = this.paths[0].address[0];
+                            this.paths[0].selectedindx = 0;
+                            
+                            this.paths[1].address = this.paths[1].addressPlaceholder;
+                            this.paths[1].selected = this.paths[1].address[0];
+                            this.paths[1].selectedindx = 0;
+                            this.selectedAddress = this.paths[1].selected.address
+                            this.selectedindx = this.paths[1].selectedindx;
+                            this.selectedPath = this.paths[path_id].id;
+                        }
 
-                        this.selectedPath = this.paths[path_id].id;
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'foo',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error
-                        });
+                            text: errorText });
                     });
 
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        text: errorText });
                 });
             },
             hardware: function () {
                 this.loadingSign = true;
                 let path = (isNaN(this.selectedPath.charAt(0)))? this.selectedPath.substring(1) : this.selectedPath;
                 this.loadingLogin();
-                authService.signWallet(path.substring(0,path.length-1)+this.selectedindx, this.selectedAddress, data => {
+                const pathId = path.substring(0,path.length-1)+this.selectedindx;
+                authService.signWallet(pathId, this.selectedAddress, data => {
                     this.loadingSign = false;
                     this.$store.dispatch({
                         type: 'login',
-                        address: data,
+                        address: {address: this.selectedAddress, dataSign: {signType: 'LedgerNano', pathId: pathId}},
                     });
                     this.collapseContent();
                     this.$router.push('/intel');
@@ -448,12 +460,14 @@
                 }, error => {
                     this.loadingSign = false;
                     this.stopLogin();
+
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        title: 'Logout',
+                        text: errorText });
                 });
             },
             onClosedModal: function () {
@@ -502,22 +516,23 @@
                             this.paths[index].address = [...this.paths[index].address, ...newList];
                             this.loadingInfiniteScrollData = false;
                         }, error => {
+                            let errorText= error.message? error.message : error;
                             this.$notify({
-                                group: 'foo',
+                                group: 'notification',
                                 type: 'error',
                                 duration: 10000,
-                                text: error
-                            });
+                                text: errorText });
+
                             this.loadingInfiniteScrollData = false;
                         });
 
                     }, error => {
+                        let errorText= error.message? error.message : error;
                         this.$notify({
-                            group: 'foo',
+                            group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: error
-                        });
+                            text: errorText });
                     });
                 }
             },
@@ -537,12 +552,13 @@
                     }
                 }, error => {
                     this.supported = false;
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error
-                    });
+                        title: 'Ledger Nano',
+                        text: errorText });
                 });
             },
             ...mapMutations({

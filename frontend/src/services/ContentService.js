@@ -1,14 +1,19 @@
+import axios from 'axios';
 import http from "./HttpService";
 import Web3 from "web3";
-import Intel_Contract_Schema from "../build/contracts/Intel.json";
-import Pareto_Token_Schema from "../build/contracts/ParetoNetworkToken.json";
+
 let web3;
 let provider;
 let accounts;
 let Intel;
 let ParetoTokenInstance;
+let Intel_Contract_Schema;
+let Pareto_Token_Schema;
 /* eslint-disable no-console */
 export default class ContentService {
+
+  static ledgerNanoEngine = null;
+  static ledgerWalletSubProvider = null;
 
   static uploadContent(content, onSuccess, onError) {
     http
@@ -25,8 +30,36 @@ export default class ContentService {
       });
   }
 
-  static async createIntel(serverData, tokenAmount, onSuccess, onError) {
-    await this.Setup();
+  static getParetoInfo(onSuccess, onError){
+      http.get("/v1/coinmarket-pareto")
+          .then(res => {
+              if(res.data.success){
+                  return onSuccess(res.data.data.data.PARETO);
+              }else{
+                  console.log(res);
+                  return onError('Could not retrieve data from server');
+              }
+          })
+  }
+
+  static async getStimatedGasPrice(OnSuccess, OnError){
+      let provider;
+      if (typeof web3 !== 'undefined') {
+          provider = new Web3(web3.currentProvider);
+      } else {
+          provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
+      }
+
+      let gasPriceWei = await provider.eth.getGasPrice();
+      gasPriceWei = gasPriceWei * 10;
+
+      let gasPrice = await provider.utils.fromWei(gasPriceWei+"", 'gwei');
+
+      gasPrice? OnSuccess(gasPrice) : OnError('There was a problem fetching the current recommended gas price');
+  }
+
+  static async createIntel(serverData, tokenAmount, signData,onSuccess, onError) {
+    await this.Setup(signData);
     //console.log(tokenAmount);
 
     if (tokenAmount === null) {
@@ -98,10 +131,12 @@ export default class ContentService {
                   })
                   .on("transactionHash", hash => {
                     waitForReceipt(hash, receipt => {
+                        if(ContentService.ledgerNanoEngine){ContentService.ledgerNanoEngine.stop();}
                       onSuccess("successfull");
                     });
                   })
                   .on("error", err => {
+                      if(ContentService.ledgerNanoEngine){ContentService.ledgerNanoEngine.stop();}
                     onError(err.message || err);
                   });
               },
@@ -117,26 +152,24 @@ export default class ContentService {
     });
   }
 
-  static async rewardIntel(content, onSuccess, onError) {
-    await this.Setup();
+  static async rewardIntel(content,signData, onSuccess, onError) {
+    await this.Setup(signData);
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
         onError("Err getting accounts");
         return;
       }
         Intel = new web3.eth.Contract(
-            Intel_Contract_Schema.abi,
+            Intel_Contract_Schema,
             content.intelAddress
         );
       let gasPrice = await web3.eth.getGasPrice();
       gasPrice = gasPrice * 10;
 
       const rewarder_address = accounts[0];
-      
       const decimals = web3.utils.toBN(18);
       const amount = web3.utils.toBN(parseFloat(content.tokenAmount));
       const depositAmount =  amount.mul(web3.utils.toBN(10).pow(decimals));
-
       let gasApprove = await ParetoTokenInstance.methods
         .approve(Intel.options.address, depositAmount)
         .estimateGas({ from: rewarder_address });
@@ -162,10 +195,12 @@ export default class ContentService {
               })
               .on("transactionHash", hash => {
                 waitForReceipt(hash, receipt => {
+                    if(ContentService.ledgerNanoEngine){ContentService.ledgerNanoEngine.stop();}
                   onSuccess("success");
                 });
               })
               .on("error", error => {
+                  if(ContentService.ledgerNanoEngine){ContentService.ledgerNanoEngine.stop();}
                 onError(error);
               });
           });
@@ -173,12 +208,11 @@ export default class ContentService {
         .on("error", err => {
           onError(err);
         });
-
     });
   }
 
-  static async distributeRewards(content, onSuccess, onError) {
-    await this.Setup();
+  static async distributeRewards(content, signData,onSuccess, onError) {
+    await this.Setup(signData);
 
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
@@ -212,37 +246,66 @@ export default class ContentService {
     });
   }
 
-  static async Setup() {
-    if (typeof window.web3 !== "undefined") {
-      // Use Mist/MetaMask's provider
-      provider = new Web3(window.web3.currentProvider);
-    } else {
-      //console.log("No web3? You should consider trying MetaMask!");
-      onError(
-        "Please install MetaMask (or other web3 browser) in order to access the Pareto Network"
-      );
 
-      // searchLookup();
-      // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-      provider = new Web3(
-        new Web3.providers.HttpProvider(
-          "https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"
-        )
-      );
-    }
+  static async Setup(signData) {
+      Intel_Contract_Schema = JSON.parse(window.localStorage.getItem('intelc')) ;
+      Pareto_Token_Schema = JSON.parse(window.localStorage.getItem('paretoc'));
+      const signType = signData.signType;
+      const pathId = signData.pathId;
+      if(ContentService.ledgerNanoEngine){ContentService.ledgerNanoEngine.stop();}
+      switch (signType){
+          case  'LedgerNano':{
+              const ProviderEngine = require('web3-provider-engine');
+              const WsSubprovider = require('web3-provider-engine/subproviders/websocket');
+              var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+              this.ledgerNanoEngine = new ProviderEngine();
+              const networkId = 3;
+              this.ledgerWalletSubProvider  = await LedgerWalletSubproviderFactory(() => networkId, pathId) ;
+              this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
+              this.ledgerNanoEngine.addProvider(this.ledgerWalletSubProvider);
+              this.ledgerNanoEngine.addProvider(new WsSubprovider({rpcUrl: "wss://ropsten.infura.io/ws"})); // you need RPC endpoint
+              this.ledgerNanoEngine.start();
+              provider = this.ledgerNanoEngine;
+              break;
+          }
+          default: {
+              if (typeof window.web3 !== "undefined") {
+                  // Use Mist/MetaMask's provider
+                  provider = new Web3(window.web3.currentProvider);
+              } else {
+                  //console.log("No web3? You should consider trying MetaMask!");
+                  onError(
+                      "Please install MetaMask (or other web3 browser) in order to access the Pareto Network"
+                  );
+
+                  // searchLookup();
+                  // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+                  provider = new Web3(
+                      new Web3.providers.HttpProvider(
+                          "https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"
+                      )
+                  );
+              }
+              break;
+          }
+      }
+
+
     web3 = new Web3(provider);
     Intel = new web3.eth.Contract(
-      Intel_Contract_Schema.abi,
-      Intel_Contract_Schema.networks["1"].address
+        Intel_Contract_Schema,
+        window.localStorage.getItem('intelAddress')
     );
 
     ParetoTokenInstance = new web3.eth.Contract(
-      Pareto_Token_Schema.abi,
-      "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc"
+        Pareto_Token_Schema,
+        window.localStorage.getItem('paretoAddress')
     );
     if (typeof provider !== "undefined") {
       return;
     }
+
+
   }
 }
 

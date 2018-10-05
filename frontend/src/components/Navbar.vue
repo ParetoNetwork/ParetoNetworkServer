@@ -41,7 +41,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" style="font-size: 11px"
                              aria-labelledby="navbarDropdown">
-                            <a v-if="address" class="dropdown-item" href="#">{{address}} <a style="color: black;" v-bind:href="'https://etherscan.io/address/'+address" target="_blank"><i class="fa fa-external-link"></i></a></a>
+                            <a v-if="address" class="dropdown-item" href="#"><a style="color: black;" v-bind:href="'https://etherscan.io/address/'+address" target="_blank">{{address}} <i class="fa fa-external-link"></i></a></a>
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
@@ -76,9 +76,9 @@
             DashboardService.getAddress(res => {
                 this.$store.dispatch({
                     type: 'login',
-                    address: res,
+                    address: {address: res},
                 });
-                this.collapseContent();
+                //this.collapseContent();
             }, () => {
 
             });
@@ -102,7 +102,7 @@
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res},
                         });
                     }, () => {
 
@@ -149,35 +149,40 @@
                     this.$router.push('/intel');
                 }, error => {
                     this.stopLogin();
+
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Ledger Nano',
+                        text: errorText
+                    });
                 });
             },
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-               //     console.log(data);
                     DashboardService.getAddress(res => {
                         this.$store.dispatch({
                             type: 'login',
-                            address: res,
+                            address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
                         });
                         this.collapseContent();
                         this.$router.push('/intel');
-                    }, () => {
-
+                    }, (err) => {
+                        console.log(err);
                     });
 
                 }, error => {
                     this.stopLogin();
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Login',
+                        text: errorText });
                 });
             },
             logout: function () {
@@ -186,11 +191,13 @@
                     this.collapseContent();
                     this.$router.push('/');
                 }, error => {
+                    let errorText= error.message? error.message : error;
                     this.$notify({
-                        group: 'foo',
+                        group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: error });
+                        title: 'Logout',
+                        text: errorText });
                 });
             },
             ledgerNanoLogin () {

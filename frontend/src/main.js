@@ -29,17 +29,33 @@ const store = new Vuex.Store({
         makingRequest: false,
         requestFinish: false,
         madeLogin: JSON.parse(window.localStorage.getItem('logged')),
+        signType: (window.localStorage.getItem('signType')) || 'Metamask',
+        pathId: (window.localStorage.getItem('pathId')) || '',
         ws: null
     },
     mutations: {
         login(state, data) {
             state.isLogged = true;
-            state.address = data.address;
-            state.user = data;
+            state.address = data.address.address;
+            state.user = data.address;
             state.showModalSign = false;
             state.showModalLoginOptions = false;
             state.showModalLedgerNano = false;
             state.makingLogin = false;
+            const dataSign = data.dataSign;
+            let signType = '';
+            let pathId = '';
+            if(dataSign){
+                signType = dataSign.signType;
+                pathId = dataSign.pathId;
+                window.localStorage.setItem('signType',  dataSign.signType);
+                window.localStorage.setItem('pathId', dataSign.pathId);
+            }else{
+                signType=  (window.localStorage.getItem('signType'));
+                pathId = (window.localStorage.getItem('pathId'));
+            }
+            state.signType =signType;
+            state.pathId = pathId;
         }, logout(state) {
             state.isLogged = false;
             state.address = null;
@@ -48,6 +64,8 @@ const store = new Vuex.Store({
             state.showModalLedgerNano = false;
             state.madeLogin = 0;
             window.localStorage.setItem('logged', false);
+            window.localStorage.removeItem("signType");
+            window.localStorage.removeItem("pathId");
         }, intelEnter(state) {
             state.madeLogin = true;
             window.localStorage.setItem('logged', true);
