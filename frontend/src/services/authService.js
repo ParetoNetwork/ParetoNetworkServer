@@ -327,17 +327,19 @@ export default class authService {
                                     EIP712Domain: [
                                         { name: "name",    type: "string"  },
                                         { name: "version", type: "string"  },
-                                        { name: "chainId", type: "uint256" }
+                                        { name: "chainId", type: "uint256" },
+                                        { name: 'verifyingContract', type: 'address' }
                                     ],
-                                    Signing: [
+                                    CustomType: [
                                         { name: "message",   type: "string" }
                                     ],
                                 },
-                                primaryType: "Signing",
+                                primaryType: "CustomType",
                                 domain: {
                                     name:    "Pareto",
                                     version: version.toString(),
                                     chainId: parseInt(network),
+                                    verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
                                 },
                                 message: {
                                     message: 'Pareto'
@@ -383,7 +385,7 @@ export default class authService {
                                 }
                             }
                             try{
-                                provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                provider.currentProvider.sendAsync({method,params,from}, (err, result) => {
                                     if(err || result.error){
                                         method = 'eth_signTypedData';
                                         const msgParams = [
