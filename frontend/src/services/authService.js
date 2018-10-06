@@ -325,15 +325,15 @@ export default class authService {
                             let msgParams = {
                                 types: {
                                     EIP712Domain: [
-                                        { name: "Pareto",    type: "string"  },
+                                        { name: "name",    type: "string"  },
                                         { name: "version", type: "string"  },
-                                        { name: "chainId", type: "uint256" },
+                                        { name: "chainId", type: "uint256" }
                                     ],
-                                    CustomType: [
+                                    Signing: [
                                         { name: "message",   type: "string" }
                                     ],
                                 },
-                                primaryType: "CustomType",
+                                primaryType: "Signing",
                                 domain: {
                                     name:    "Pareto",
                                     version: version.toString(),
