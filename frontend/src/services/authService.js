@@ -346,7 +346,7 @@ export default class authService {
                                 }
                             };
                             let params = [JSON.stringify(msgParams), from];
-                            let method = 'eth_signTypedData';
+                            let method = 'eth_signTypedData_v3';
                             // debugger;
 
                             const resultfunction = function(method, msgParams, err, result){
