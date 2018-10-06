@@ -325,18 +325,18 @@ export default class authService {
                             let msgParams = {
                                 types: {
                                     EIP712Domain: [
-                                        { name: "name",    type: "string"  },
-                                        { name: "version", type: "string"  },
-                                        { name: "chainId", type: "uint256" },
+                                        { name: 'name',    type: 'string'  },
+                                        { name: 'version', type: 'string' },
+                                        { name: 'chainId', type: 'uint256' },
                                         { name: 'verifyingContract', type: 'address' }
                                     ],
                                     CustomType: [
-                                        { name: "message",   type: "string" }
+                                        { name: 'message',   type: 'string' }
                                     ],
                                 },
-                                primaryType: "CustomType",
+                                primaryType: 'CustomType',
                                 domain: {
-                                    name:    "Pareto",
+                                    name:    'Pareto',
                                     version: version.toString(),
                                     chainId: parseInt(network),
                                     verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
@@ -345,8 +345,8 @@ export default class authService {
                                     message: 'Pareto'
                                 }
                             };
-                            let params = [ from, JSON.stringify(msgParams)];
-                            let method = 'eth_signTypedData_v3';
+                            let params = [JSON.stringify(msgParams), from];
+                            let method = 'eth_signTypedData';
                             // debugger;
 
                             const resultfunction = function(method, msgParams, err, result){
