@@ -879,8 +879,6 @@ controller.getAllAvailableContent = function(req, callback) {
                                     biography: entry.createdBy.biography,
                                     profilePic: entry.createdBy.profilePic
                                 }
-
-
                             };
 
                             newResults.push(data);
