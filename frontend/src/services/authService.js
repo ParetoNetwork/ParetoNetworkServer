@@ -347,7 +347,7 @@ export default class authService {
                                 }
                             };
                             let params = [JSON.stringify(msgParams), from];
-                            let method = 'eth_signTypedData';
+                            let method = 'eth_signTypedData_v3';
                             let versionMethod = 'v3';
                             // debugger;
 
@@ -389,6 +389,7 @@ export default class authService {
                             try{
                                 provider.currentProvider.sendAsync({method,params,from}, (err, result) => {
                                     if(err || result.error){
+                                        method = 'eth_signTypedData';
                                         versionMethod = 'v1';
                                         const msgParams = [
                                             {
@@ -406,6 +407,7 @@ export default class authService {
                                     }
                                 })
                             }catch (e) {
+                                method = 'eth_signTypedData';
                                 versionMethod = 'v1';
                                  msgParams = [
                                     {
