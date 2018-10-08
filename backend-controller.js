@@ -1240,9 +1240,10 @@ controller.sign = function(params, callback){
         let msgParams = {
             types: {
                 EIP712Domain: [
-                    { name: "Pareto",    type: "string"  },
+                    { name: "name",    type: "string"  },
                     { name: "version", type: "string"  },
                     { name: "chainId", type: "uint256" },
+                    { name: 'verifyingContract', type: 'address' }
                 ],
                 CustomType: [
                     { name: "message",   type: "string" }
@@ -1253,6 +1254,7 @@ controller.sign = function(params, callback){
                 name:    "Pareto",
                 version: PARETO_SIGN_VERSION,
                 chainId: ETH_NETWORK,
+                verifyingContract: PARETO_CONTRACT_ADDRESS
             },
             message: {
                 message: params.data[0].value
