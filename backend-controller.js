@@ -615,23 +615,23 @@ controller.startwatchNewIntel = function(){
             callback(err);
         }
         else {
-            let data = results.filter(item => item.intelAddress === Intel_Contract_Schema.networks[ETH_NETWORK].address);
+            let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
             if(!data.length){
-                results = [{intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}];
+                results = [ Intel_Contract_Schema.networks[ETH_NETWORK].address];
             }
             for (let i=0;i<results.length;i=i+1) {
-                const intelAddress =results[i].intelAddres;
+                const intelAddress =results[i];
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
-                intel.events.Reward({ fromBlock: from }).on('data',  event => {
+                intel.events.Reward().on('data',  event => {
                     try{
-                        const intelIndex = event.returnValues.intelIndex;
+                        const intelIndex = parseInt(event.returnValues.intelIndex);
                         const rewardData = {
                             sender: event.returnValues.sender,
                             receiver: '',
                             intelAddress: intelAddress,
                             intelId: intelIndex,
                             txHash: event.transactionHash,
-                            dateCreated: { type: Date, default: Date.now },
+                            dateCreated:  Date.now() ,
                             block: event.blockNumber,
                             amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
                         };
@@ -643,7 +643,7 @@ controller.startwatchNewIntel = function(){
                                 } else {
                                     ParetoContent.findOne({id:intelIndex}, (err, intel) => {
                                         const {address} = intel;
-                                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {upsert: true, new: true},
+                                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {},
                                             function(err, r){ }
                                         );
                                     });
@@ -668,7 +668,7 @@ controller.startwatchNewIntel = function(){
 };
 
 controller.updateIntelReward=function(intelIndex){
-    ParetoReward.aggregate(  [ {$match: { intelId: intelIndex } },
+    let agg =  [ {$match: { 'intelId': intelIndex } },
         { $group: { _id: null,
                 rewards : {
                     "$addToSet" : {
@@ -680,10 +680,33 @@ controller.updateIntelReward=function(intelIndex){
         { $group: { _id: null,
                 reward: {$sum: "$rewards.amount"}}}
 
-    ]).exec(function (err, r) {
-        if(results.length > 0) {
-            const reward = results[0].reward;
-            ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward}, { }, (err, intel) => {  });
+    ];
+    ParetoReward.aggregate( agg).exec(function (err, r) {
+        if(r.length > 0) {
+            const reward = r[0].reward;
+            ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward}, { }, (err, intel) => {
+                if(!err){
+                    if(controller.wss){
+                        try{
+                            controller.wss.clients.forEach(function each(client) {
+                                if (client.isAlive === false) return client.terminate();
+                                if (client.readyState === controller.WebSocket.OPEN ) {
+                                    // Validate if the user is subscribed a set of information
+                                    if(client.user){
+                                        //console.log('updateContent');
+                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                    }
+                                }
+                            });
+                        }catch (e) {
+                            console.log(e);
+                        }
+                    }else{
+                        console.log('no wss')
+                    }
+                }
+
+            });
         }
     })
 }
