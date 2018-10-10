@@ -23,14 +23,14 @@ var paretoProfileSchema = new Schema(
   },
   { collection: "profile" , toObject : {virtuals:true},toJSON: { virtuals: true } }
 );
-paretoContentSchema.virtual('rewardsSent', {
+paretoProfileSchema.virtual('rewardsSent', {
     ref: 'reward', // The model to use
     localField: 'address', // Find post where `localField`
     foreignField: 'sender', // is equal to `foreignField`
     justOne: false
 });
 
-paretoContentSchema.virtual('rewardsEarned', {
+paretoProfileSchema.virtual('rewardsEarned', {
     ref: 'reward', // The model to use
     localField: 'address', // Find post where `localField`
     foreignField: 'receiver', // is equal to `foreignField`
