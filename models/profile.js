@@ -21,9 +21,21 @@ var paretoProfileSchema = new Schema(
       }
     ]
   },
-  { collection: "profile" }
+  { collection: "profile" , toObject : {virtuals:true},toJSON: { virtuals: true } }
 );
+paretoContentSchema.virtual('rewardsSent', {
+    ref: 'reward', // The model to use
+    localField: 'address', // Find post where `localField`
+    foreignField: 'sender', // is equal to `foreignField`
+    justOne: false
+});
 
+paretoContentSchema.virtual('rewardsEarned', {
+    ref: 'reward', // The model to use
+    localField: 'address', // Find post where `localField`
+    foreignField: 'receiver', // is equal to `foreignField`
+    justOne: false
+});
 const ParetoProfile = mongoose.model("profile", paretoProfileSchema);
 
 module.exports = ParetoProfile;

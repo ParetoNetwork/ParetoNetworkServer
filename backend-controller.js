@@ -88,7 +88,7 @@ mongoose.connect(CONNECTION_URL).then(tmp=>{
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
-
+const ParetoReward = mongoose.model('reward');
 
 
 // set up Pareto and Intel contracts instances
@@ -620,44 +620,38 @@ controller.startwatchNewIntel = function(){
                 results = [{intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}];
             }
             for (let i=0;i<results.length;i=i+1) {
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i].intelAddress);
-                intel.events.Reward({ fromBlock: 'latest' }).on('data',  event => {
+                const intelAddress =results[i].intelAddres;
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
+                intel.events.Reward({ fromBlock: from }).on('data',  event => {
                     try{
-                        const rewardAmount = web3.utils.fromWei(event.returnValues.rewardAmount, 'ether');
                         const intelIndex = event.returnValues.intelIndex;
-                        const sender = event.returnValues.sender;
-                        console.log("Reward event listener", rewardAmount, intelIndex);
-                        //Update rewardAmount on Content
-                        ParetoContent.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {if (err)console.log(err);});
-                        //Update rewardReceived on Profile
-                        ParetoContent.findOne({id:intelIndex}, (err, intel) => {
-                            const {address} = intel;
+                        const rewardData = {
+                            sender: event.returnValues.sender,
+                            receiver: '',
+                            intelAddress: intelAddress,
+                            intelId: intelIndex,
+                            txHash: event.transactionHash,
+                            dateCreated: { type: Date, default: Date.now },
+                            block: event.blockNumber,
+                            amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
+                        };
 
-                            ParetoProfile.findOne({address,'rewardsReceived.IntelID':intelIndex}, (err, profile) => {
-                                if(profile == null){
-                                    ParetoProfile.update({address},{$push:{ rewardsReceived: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
-                                        // console.log("saved 1");
-                                    })
-                                    return;
+                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},rewardData, {upsert: true, new: true},
+                            function(err, r){
+                                if(err){
+                                    console.error('unable to write to db because: ', err);
+                                } else {
+                                    ParetoContent.findOne({id:intelIndex}, (err, intel) => {
+                                        const {address} = intel;
+                                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {upsert: true, new: true},
+                                            function(err, r){ }
+                                        );
+                                    });
+                                    controller.updateIntelReward(intelIndex);
                                 }
-                                ParetoProfile.update({address,'rewardsReceived.IntelID':intelIndex},{ $inc: {'rewardsReceived.$.reward': rewardAmount}}, (err, profle ) => {
-                                    // console.log("update 1");
-                                } )
-                            })
-                        })
-                        //Update rewardGiven on Profile
-                        ParetoProfile.findOne({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex}, (err, profile) => {
-                            //console.log(err, profile);
-                            if(profile == null){
-                                ParetoProfile.update({address:sender.toLowerCase()},{$push:{ rewardsGiven: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
-                                    // console.log("saved");
-                                })
-                                return;
                             }
-                            ParetoProfile.update({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex},{ $inc: {'rewardsGiven.$.reward': rewardAmount}}, (err, profle ) => {
-                                // console.log("update");
-                            } )
-                        })
+                        );
+
                     }catch (e) {
                         console.log(e);
                     }
@@ -666,23 +660,33 @@ controller.startwatchNewIntel = function(){
                     console.log(err);
                 });
 
-                intel.events.RewardDistributed({ fromBlock: 'latest' }).on('data',  event => {
-                    try{
-                        const intelIndex = event.returnValues.intelIndex;
-                        ParetoContent.update({ id: intelIndex }, { distributed: true }, { multi: false }, function (err, response) { if (err)console.log(err);});
-                    }catch (e) {
-                        console.log(e);
-                    }
-
-                }).on('error', err=>{
-                    console.log(err);
-                });
             }
 
         }
     });
 
 };
+
+controller.updateIntelReward=function(intelIndex){
+    ParetoReward.aggregate(  [ {$match: { intelId: intelIndex } },
+        { $group: { _id: null,
+                rewards : {
+                    "$addToSet" : {
+                        "txHash" : "$txHash",
+                        "amount" : "$amount"
+                    }
+                } } },
+        {  $unwind : "$rewards" },
+        { $group: { _id: null,
+                reward: {$sum: "$rewards.amount"}}}
+
+    ]).exec(function (err, r) {
+        if(results.length > 0) {
+            const reward = results[0].reward;
+            ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward}, { }, (err, intel) => {  });
+        }
+    })
+}
 
 controller.updateFromLastIntel = function(){
     ParetoContent.aggregate([
