@@ -864,11 +864,11 @@ controller.getAllAvailableContent = function(req, callback) {
 
                     allResults =    await ParetoContent.find(
                         { $or:[
-                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {address : req.user, $or:[ {validated: true}, {intelAddress: { $exists: false }}] }
+                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}] }
                             ]
                         }
                     ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
@@ -894,7 +894,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 expires: entry.expires,
                                 dateCreated: entry.dateCreated,
                                 txHash: entry.txHash,
-                                reward: entry.reward,
+                                reward: entry.reward + (entry.totalReward || 0),
                                 speed: entry.speed,
                                 id:entry.id,
                                 intelAddress: entry.intelAddress,
@@ -1213,7 +1213,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           body: entry.body,
                           dateCreated: entry.dateCreated,
                           txHash: entry.txHash,
-                          reward: entry.reward,
+                          reward: entry.reward + (entry.totalReward || 0),
                           speed: entry.speed,
                           expires: entry.expires,
                           validated: entry.validated,
