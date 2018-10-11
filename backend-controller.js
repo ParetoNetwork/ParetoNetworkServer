@@ -362,7 +362,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                     var blockNumber = web3.utils.toBN(blockHex, 16).toString();
                     var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                     //can be float
-                    quantityEth = web3.utils.toBN(parseFloat(quantityEth));
+                    quantityEth = Big(quantityEth);
 
                     //basically pushes
                     if(blockNumber in incoming)
@@ -408,7 +408,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                     }//end for
 
                     var transactions = Object.entries(incoming)
-                        .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])))
+                        .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, val.mul(Big(-1))])))
                         .map(([ts, val]) => ([Big(ts), val]));
                     try {
                         //sort by default sort string data, in string 10 < 20
@@ -1129,13 +1129,13 @@ controller.aproxAllScoreRanking = async function(callback){
                                 tokens:  Big(results[len].tokens),
                             } ;
 
-                            const w = item.block.sub((item.score.div(item.tokens).sub(oneBn)).mul(item.block.sub(contractBn)).div(hBn)) ;
+                            const w = item.block.sub(((item.score.div(item.tokens)).sub(oneBn)).mul(item.block.sub(contractBn)).div(hBn)) ;
                              const w2 = item.block - (item.score / item.tokens - 1) * (item.block - CONTRACT_CREATION_BLOCK_INT) / 100;
                             console.log('W')
-                            console.log(w)
-                             console.log(w2)
+                            console.log(parseFloat(w))
+                             console.log(parseFloat(w2))
                             var dbValues = {
-                                    score : parseFloat(item.tokens.mul(oneBn.add((blockHeightBn.sub(w)).mul(hBn)).div(blockHeightBn.sub(contractBn)))),
+                                    score : parseFloat(item.tokens.mul(oneBn.add((blockHeightBn.sub(w)).mul(hBn).div(blockHeightBn.sub(contractBn))))),
                                     // score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - CONTRACT_CREATION_BLOCK_INT)),
                                     block: blockHeight };
                             var dbValues2 = {
