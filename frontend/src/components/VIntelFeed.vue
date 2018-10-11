@@ -19,8 +19,8 @@
                                     <div class="">
                                         <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                         <div>
-                                                        <span class="text-dashboard">Disclosed by: {{row.address}}
-                                                        </span>
+                                            <span class="text-dashboard">Disclosed by: {{row.address}}
+                                            </span>
                                         </div>
                                         <div>
                                             Blocks ago:
@@ -34,11 +34,11 @@
 
                                         </div>
                                         <div>
-                                                        <span class="text-dashboard">
-                                                            <b>
-                                                                {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
-                                                            </b>
-                                                        </span>
+                                            <span class="text-dashboard">
+                                                <b>
+                                                    {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
+                                                </b>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
