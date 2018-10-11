@@ -2,7 +2,7 @@ const https = require('https');
 const request = require('request');
 
 var controller = module.exports = {};
-
+var Big = require('big.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -94,7 +94,7 @@ mongoose.connect(CONNECTION_URL).then(tmp=>{
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
-
+const ParetoReward = mongoose.model('reward');
 
 
 // set up Pareto and Intel contracts instances
@@ -257,7 +257,7 @@ controller.getParetoCoinMarket = function(callback){
 };
 
 
-controlller.addExponent = function(addresses, scores, blockHeight,callback){
+controller.addExponent = function(addresses, scores, blockHeight,callback){
 
     let promises =[];
 
@@ -394,7 +394,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
                         var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                         //can be float
-                        quantityEth = web3.utils.toBN(parseFloat(quantityEth));
+                        quantityEth = Big(quantityEth);
 
                         //basically pushes
                         if(blockNumber in outgoing)
@@ -409,24 +409,24 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
                     var transactions = Object.entries(incoming)
                         .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])))
-                        .map(([ts, val]) => ([web3.utils.toBN(ts), val]));
+                        .map(([ts, val]) => ([Big(ts), val]));
                     try {
                         //sort by default sort string data, in string 10 < 20
                         transactions = transactions.sort(function (a, b) {
-                            return b[0].sub(a[0]).toNumber() === 0 ? b[1].sub( a[1]).toNumber() : b[0].sub(a[0]).toNumber();
+                            return parseFloat(b[0].sub(a[0]))  === 0 ?  parseFloat(b[1].sub( a[1]))  :  parseFloat(b[0].sub(a[0]));
                         });
 
                         try {
                             var i = 0;
                             var removableIndex = 0;
                             //sorts down to remaining transactions, since we already know the total and the system block height
-                            const amountBn = web3.utils.toBN(amount);
+                            const amountBn = Big(amount);
                             while(i < transactions.length){
                                 // Should allow zero too
-                                if(transactions[i][1].toNumber() <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
+                                if(parseFloat(transactions[i][1] ) <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
                                     transactions[i+1][1] = transactions[i+1][1].add(transactions[i][1]);
                                     //console.log("current transaction[i][1] value: " + transactions[i][1]);
-                                    if(transactions[0][1].toNumber() <= 0){
+                                    if(parseFloat(transactions[0][1] ) <= 0){
                                         transactions.shift(); //or remove index 0
                                     } else {
                                         //remove first negative index after processing
@@ -458,7 +458,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
                             //now find weighted average block number
                             var weightAverageBlockHeight = transactions[transactions.length-1][4];
-                            var blockHeightDifference = blockHeight - weightAverageBlockHeight.toNumber();
+                            var blockHeightDifference = blockHeight - parseFloat(weightAverageBlockHeight);
                             //console.log("weighted avg block height: " + weightAverageBlockHeight);
                             //console.log("weighted avg block height difference: " + blockHeightDifference);
 
@@ -671,44 +671,38 @@ controller.startwatchNewIntel = function(){
                 results = [ Intel_Contract_Schema.networks[ETH_NETWORK].address];
             }
             for (let i=0;i<results.length;i=i+1) {
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i]);
-                intel.events.Reward({ fromBlock: 'latest' }).on('data',  event => {
+                const intelAddress =results[i];
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
+                intel.events.Reward().on('data',  event => {
                     try{
-                        const rewardAmount = web3.utils.fromWei(event.returnValues.rewardAmount, 'ether');
-                        const intelIndex = event.returnValues.intelIndex;
-                        const sender = event.returnValues.sender;
-                        console.log("Reward event listener", rewardAmount, intelIndex);
-                        //Update rewardAmount on Content
-                        ParetoContent.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {if (err)console.log(err);});
-                        //Update rewardReceived on Profile
-                        ParetoContent.findOne({id:intelIndex}, (err, intel) => {
-                            const {address} = intel;
+                        const intelIndex = parseInt(event.returnValues.intelIndex);
+                        const rewardData = {
+                            sender: event.returnValues.sender,
+                            receiver: '',
+                            intelAddress: intelAddress,
+                            intelId: intelIndex,
+                            txHash: event.transactionHash,
+                            dateCreated:  Date.now() ,
+                            block: event.blockNumber,
+                            amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
+                        };
 
-                            ParetoProfile.findOne({address,'rewardsReceived.IntelID':intelIndex}, (err, profile) => {
-                                if(profile == null){
-                                    ParetoProfile.update({address},{$push:{ rewardsReceived: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
-                                        // console.log("saved 1");
-                                    })
-                                    return;
+                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},rewardData, {upsert: true, new: true},
+                            function(err, r){
+                                if(err){
+                                    console.error('unable to write to db because: ', err);
+                                } else {
+                                    ParetoContent.findOne({id:intelIndex}, (err, intel) => {
+                                        const {address} = intel;
+                                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {},
+                                            function(err, r){ }
+                                        );
+                                    });
+                                    controller.updateIntelReward(intelIndex);
                                 }
-                                ParetoProfile.update({address,'rewardsReceived.IntelID':intelIndex},{ $inc: {'rewardsReceived.$.reward': rewardAmount}}, (err, profle ) => {
-                                    // console.log("update 1");
-                                } )
-                            })
-                        })
-                        //Update rewardGiven on Profile
-                        ParetoProfile.findOne({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex}, (err, profile) => {
-                            //console.log(err, profile);
-                            if(profile == null){
-                                ParetoProfile.update({address:sender.toLowerCase()},{$push:{ rewardsGiven: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
-                                    // console.log("saved");
-                                })
-                                return;
                             }
-                            ParetoProfile.update({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex},{ $inc: {'rewardsGiven.$.reward': rewardAmount}}, (err, profle ) => {
-                                // console.log("update");
-                            } )
-                        })
+                        );
+
                     }catch (e) {
                         console.log(e);
                     }
@@ -717,23 +711,56 @@ controller.startwatchNewIntel = function(){
                     console.log(err);
                 });
 
-                intel.events.RewardDistributed({ fromBlock: 'latest' }).on('data',  event => {
-                    try{
-                        const intelIndex = event.returnValues.intelIndex;
-                        ParetoContent.update({ id: intelIndex }, { distributed: true }, { multi: false }, function (err, response) { if (err)console.log(err);});
-                    }catch (e) {
-                        console.log(e);
-                    }
-
-                }).on('error', err=>{
-                    console.log(err);
-                });
             }
 
         }
     });
 
 };
+
+controller.updateIntelReward=function(intelIndex){
+    let agg =  [ {$match: { 'intelId': intelIndex } },
+        { $group: { _id: null,
+                rewards : {
+                    "$addToSet" : {
+                        "txHash" : "$txHash",
+                        "amount" : "$amount"
+                    }
+                } } },
+        {  $unwind : "$rewards" },
+        { $group: { _id: null,
+                reward: {$sum: "$rewards.amount"}}}
+
+    ];
+    ParetoReward.aggregate( agg).exec(function (err, r) {
+        if(r.length > 0) {
+            const reward = r[0].reward;
+            ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward}, { }, (err, intel) => {
+                if(!err){
+                    if(controller.wss){
+                        try{
+                            controller.wss.clients.forEach(function each(client) {
+                                if (client.isAlive === false) return client.terminate();
+                                if (client.readyState === controller.WebSocket.OPEN ) {
+                                    // Validate if the user is subscribed a set of information
+                                    if(client.user){
+                                        //console.log('updateContent');
+                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                    }
+                                }
+                            });
+                        }catch (e) {
+                            console.log(e);
+                        }
+                    }else{
+                        console.log('no wss')
+                    }
+                }
+
+            });
+        }
+    })
+}
 
 controller.updateFromLastIntel = function(){
     ParetoContent.aggregate([
@@ -888,11 +915,11 @@ controller.getAllAvailableContent = function(req, callback) {
 
                     allResults =    await ParetoContent.find(
                         { $or:[
-                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {address : req.user, $or:[ {validated: true}, {intelAddress: { $exists: false }}] }
+                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}] }
                             ]
                         }
                     ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
@@ -918,7 +945,8 @@ controller.getAllAvailableContent = function(req, callback) {
                                 expires: entry.expires,
                                 dateCreated: entry.dateCreated,
                                 txHash: entry.txHash,
-                                reward: entry.reward,
+                                totalReward:  entry.totalReward || 0,
+                                reward:  entry.reward,
                                 speed: entry.speed,
                                 id:entry.id,
                                 intelAddress: entry.intelAddress,
@@ -930,8 +958,6 @@ controller.getAllAvailableContent = function(req, callback) {
                                     biography: entry.createdBy.biography,
                                     profilePic: entry.createdBy.profilePic
                                 }
-
-
                             };
 
                             newResults.push(data);
@@ -1092,17 +1118,32 @@ controller.aproxAllScoreRanking = async function(callback){
                     else {
                         const bulkop=[];
                         let len = results.length;
+                        const contractBn = Big(CONTRACT_CREATION_BLOCK_INT);
+                        const hBn = Big(100);
+                        const oneBn = Big(1);
+                        const blockHeightBn = Big(blockHeight);
                         while (len--) {
                             const item=  {
-                                block:  web3.utils.toBN(esults[len]).block,
-                                score:  web3.utils.toBN(esults[len]).score,
-                                tokens:  web3.utils.toBN(esults[len]).tokens,
+                                block:  Big(results[len].block),
+                                score:  Big(results[len].score),
+                                tokens:  Big(results[len].tokens),
                             } ;
 
-                            const w = item.block - (item.score / item.tokens - 1) * (item.block - CONTRACT_CREATION_BLOCK_INT) / 100;
+                            const w = item.block.sub((item.score.div(item.tokens).sub(oneBn)).mul(item.block.sub(contractBn)).div(hBn)) ;
+                             const w2 = item.block - (item.score / item.tokens - 1) * (item.block - CONTRACT_CREATION_BLOCK_INT) / 100;
+                            console.log('W')
+                            console.log(w)
+                             console.log(w2)
                             var dbValues = {
-                                    score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - CONTRACT_CREATION_BLOCK_INT)),
+                                    score : parseFloat(item.tokens.mul(oneBn.add((blockHeightBn.sub(w)).mul(hBn)).div(blockHeightBn.sub(contractBn)))),
+                                    // score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - CONTRACT_CREATION_BLOCK_INT)),
                                     block: blockHeight };
+                            var dbValues2 = {
+                                score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - CONTRACT_CREATION_BLOCK_INT)),
+                                block: blockHeight };
+                            console.log('DBVaules')
+                            console.log(dbValues)
+                            console.log(dbValues2)
                                 bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
 
                         }
@@ -1242,7 +1283,8 @@ controller.getContentByCurrentUser = function(req, callback){
                           body: entry.body,
                           dateCreated: entry.dateCreated,
                           txHash: entry.txHash,
-                          reward: entry.reward,
+                          totalReward:  entry.totalReward || 0,
+                          reward:  entry.reward,
                           speed: entry.speed,
                           expires: entry.expires,
                           validated: entry.validated,
