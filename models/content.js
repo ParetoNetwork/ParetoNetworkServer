@@ -10,7 +10,8 @@ var paretoContentSchema = new Schema({
 	body: String,
 	text: String, //this is the plain text version of the html formatted body
 	reward: { type: Number, default: 0 }, //set required { type: Number, required: true }
-	txHash: String, //set required { type: String, required: true }
+    totalReward: { type: Number, default: 0 },
+    txHash: String, //set required { type: String, required: true }
 	speed: Number,
 	dateCreated: { type: Date, default: Date.now },
 	block: Number,
@@ -28,6 +29,13 @@ paretoContentSchema.virtual('createdBy', {
     localField: 'address', // Find post where `localField`
     foreignField: 'address', // is equal to `foreignField`
     justOne: true
+});
+
+paretoContentSchema.virtual('rewardsTransactions', {
+    ref: 'reward', // The model to use
+    localField: 'id', // Find post where `localField`
+    foreignField: 'intelId', // is equal to `foreignField`
+    justOne: false
 });
 const ParetoContent = mongoose.model('content', paretoContentSchema);
 
