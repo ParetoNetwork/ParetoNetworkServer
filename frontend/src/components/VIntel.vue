@@ -165,12 +165,12 @@
                                     <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
                                         <div v-if="false" class="text-right font-weight-bold">
                                             <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                            <span class="text-right">{{row.reward}}</span>
+                                            <span class="text-right">{{row.totalReward}}</span>
                                         </div>
                                         <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
                                             <div class="d-inline-block">
                                                 <p class="text-right text-secondary ellipsis reward-text"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                                    <b> {{ row.reward }} </b>
+                                                    <b> {{ row.totalReward }} </b>
                                                 </p>
                                                 <b-btn class="btn-primary-pareto mx-auto px-4"
                                                        style="max-width: 120px;"
