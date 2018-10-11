@@ -147,17 +147,17 @@
         beforeMount: function () {
             this.$store.state.makingRequest = true;
             this.requestCall()
+            console.log(this.$route.params);
         },
         methods: {
             ...mapMutations(["iniWs"]),
             getIntel: function () {
-                return DashboardService.getIntel(res => {
+                return DashboardService.getIntel(this.id, res => {
                    this.getProfile(res.address);
                    this.intel = res;
                 }, error => {
-                }, this.id);
+                });
             },
-
             getProfile: function (address) {
                 ProfileService.getSpecificProfile( res => {
                     this.profile = res;
@@ -171,9 +171,10 @@
             },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
+                    console.log(res)
                     this.address = res;
                 }, () => {
-                    // alert(error);
+                    alert(error);
                 });
             },
             socketConnection () {

@@ -80,7 +80,7 @@
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
                             <li class="list-group-item border-0 p-3" v-for="post in myContent" :key="post.id">
-                                <router-link tag="div" class="split" :to="'/intel/' + post._id"
+                                <router-link tag="div" class="split" :to="intelRoute(post)"
                                              @click="showDetails(post)">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex flex-column text-left">
@@ -120,7 +120,7 @@
                             <li class="text-left list-group-item border-0 px-1 py-2" :key="row._id"
                                 v-for="row of myFeed.content">
                                 <div class="row border-bottom pb-2">
-                                    <router-link tag="div" :to="'/intel/' + row._id" class="col-lg-9 pr-0">
+                                    <router-link tag="div" :to="intelRoute(row)" class="col-lg-9 pr-0">
                                         <div class="row cursor-pointer">
                                             <div class="col-2">
                                                 <div class="border p-1 mr-2" style="height: 50px; width: 50px;">
@@ -389,6 +389,10 @@
                     }
                 );
             },
+            intelRoute(intel){
+                let param = (intel.txHash === '0x0')? intel._id : intel.txHash;
+                return '/intel/' + intel.address + '/' + param;
+            },
             isAvailable(){
                 if(this.signType === 'LedgerNano'){
                     this.hardwareAvailable = false;
@@ -609,7 +613,13 @@
                     && !this.myFeed.loading) {
                     const params = {limit: 10, page: this.myFeed.page};
                     this.myFeed.loading = true;
-                    this.loadContent(params);
+
+                    this.$store.state.makingRequest = true;
+
+                    let myFeedContentReady = this.loadContent(params);
+                    myFeedContentReady.then(()=>{
+                        this.$store.state.makingRequest = false;
+                    });
                 }
             },
             showDetails: function (row) {
