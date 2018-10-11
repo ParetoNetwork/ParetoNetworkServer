@@ -372,7 +372,6 @@
         },
         mounted: function () {
             this.main();
-           // console.log(this.screenSize)
         },
         computed: {
             ...mapState(["madeLogin", "ws", "signType", "pathId"])
