@@ -22,6 +22,12 @@ var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 var ETH_NETWORK = process.env.ETH_NETWORK;
 var PARETO_SIGN_VERSION = process.env.PARETO_SIGN_VERSION;
 var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
+/*ways of writing contract creation block height*/
+//const CONTRACT_CREATION_BLOCK_HEX = '0x4B9696'; //need this in hex
+const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
+//const CONTRACT_CREATION_BLOCK_INT = 4953750;
+const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
+const EXPONTENT_BLOCK_AGO = process.env.EXPONTENT_BLOCK_AGO;
 
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
@@ -108,11 +114,7 @@ controller.endConnections= function(){
     redisClient.end(true);
 }
 
-/*ways of writing contract creation block height*/
-//const contractCreationBlockHeightHexString = '0x4B9696'; //need this in hex
-const contractCreationBlockHeightHexString = '0x39CA84'; //need this in hex
-//const contractCreationBlockHeightInt = 4953750;
-const contractCreationBlockHeightInt = 3787396;
+
 
 const dbName = 'pareto';
 
@@ -254,6 +256,54 @@ controller.getParetoCoinMarket = function(callback){
         });
 };
 
+
+controlller.addExponent = function(addresses, scores, blockHeight,callback){
+
+    let promises =[];
+
+    ParetoContent.find({'validated': true }).distinct('intelAddress').exec(function(err, results) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
+            if (!data.length) {
+                results = [ Intel_Contract_Schema.networks[ETH_NETWORK].address];
+            }
+            for (let i = 0; i < results.length; i = i + 1) {
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i]);
+                promises.push(intel.getPastEvents('Reward', {
+                    fromBlock: "0x" + ((blockHeight-EXPONTENT_BLOCK_AGO).toString(16)) ,
+                    toBlock: 'latest'
+                }))
+            }
+            Promise.all(promises).then(values => {
+                let rewards={};
+                let total=0;
+                for (let i = 0; i < values.length; i = i + 1) {
+                    total=total+values[i].length;
+                    for (let j = 0; j < values[i].length; j = j + 1) {
+                        const sender = values[i][j].returnValues.sender;
+                        if(!rewards[sender]){
+                            rewards[sender] = 0;
+                        }
+                        rewards[sender]=rewards[sender]+1;
+                    }
+                }
+                const M = total/2;
+                for (let i = 0; i < addresses.length; i = i + 1) {
+                    scores[i].score =  web3.utils.toBN(parseFloat(scores[i].score)).pow(web3.utils.toBN(1 + (rewards[addresses[i]]/M)/2) );
+                }
+                callback(null, scores);
+
+            }).catch(e=>{
+                console.log(e);
+                callback(null, scores)
+            });
+        }
+    })
+}
+
 /**
  * This function will calculate the score based in the address and the current block height. Will be used by realAllScoreRank and by calculateScore
  */
@@ -295,7 +345,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
         if(amount > 0){
             return web3.eth.getPastLogs({
-                fromBlock: contractCreationBlockHeightHexString,
+                fromBlock: CONTRACT_CREATION_BLOCK_HEX,
                 toBlock: 'latest',
                 address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, addressPadded]
@@ -312,20 +362,20 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                     var blockNumber = web3.utils.toBN(blockHex, 16).toString();
                     var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                     //can be float
-                    quantityEth = parseFloat(quantityEth);
+                    quantityEth = web3.utils.toBN(parseFloat(quantityEth));
 
                     //basically pushes
                     if(blockNumber in incoming)
                     {
-                        incoming[blockNumber] = incoming[blockNumber] + quantityEth;
+                        incoming[blockNumber] = incoming[blockNumber].add(quantityEth);
                     }
                     else {
-                        incoming[blockNumber] = quantityEth;
+                        incoming[blockNumber] =  quantityEth;
                     }
                 }
 
                 return web3.eth.getPastLogs({
-                    fromBlock: contractCreationBlockHeightHexString,
+                    fromBlock: CONTRACT_CREATION_BLOCK_HEX,
                     toBlock: 'latest',
                     address: PARETO_CONTRACT_ADDRESS,
                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
@@ -344,12 +394,12 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
                         var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                         //can be float
-                        quantityEth = parseFloat(quantityEth);
+                        quantityEth = web3.utils.toBN(parseFloat(quantityEth));
 
                         //basically pushes
                         if(blockNumber in outgoing)
                         {
-                            outgoing[blockNumber] = outgoing[blockNumber] + quantityEth;
+                            outgoing[blockNumber] = outgoing[blockNumber].add(quantityEth);
                         }
                         else {
                             outgoing[blockNumber] = quantityEth;
@@ -359,23 +409,24 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
                     var transactions = Object.entries(incoming)
                         .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, -val])))
-                        .map(([ts, val]) => ([parseInt(ts), val]));
+                        .map(([ts, val]) => ([web3.utils.toBN(ts), val]));
                     try {
                         //sort by default sort string data, in string 10 < 20
                         transactions = transactions.sort(function (a, b) {
-                            return b[0]- a[0] === 0 ? b[1]- a[1] : b[0] - a[0];
+                            return b[0].sub(a[0]).toNumber() === 0 ? b[1].sub( a[1]).toNumber() : b[0].sub(a[0]).toNumber();
                         });
 
                         try {
                             var i = 0;
                             var removableIndex = 0;
                             //sorts down to remaining transactions, since we already know the total and the system block height
+                            const amountBn = web3.utils.toBN(amount);
                             while(i < transactions.length){
                                 // Should allow zero too
-                                if(transactions[i][1] <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
-                                    transactions[i+1][1] = transactions[i+1][1] + transactions[i][1];
+                                if(transactions[i][1].toNumber() <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
+                                    transactions[i+1][1] = transactions[i+1][1].add(transactions[i][1]);
                                     //console.log("current transaction[i][1] value: " + transactions[i][1]);
-                                    if(transactions[0][1] <= 0){
+                                    if(transactions[0][1].toNumber() <= 0){
                                         transactions.shift(); //or remove index 0
                                     } else {
                                         //remove first negative index after processing
@@ -384,12 +435,12 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                                     //console.log("after shift current transaction[i][1] value: " + transactions[i][1]);
                                 } else {
                                     //console.log(transactions[i][1]);
-                                    transactions[i][2] = transactions[i][1]/amount; //adds decimal to the tuple
-                                    transactions[i][3] = parseInt(transactions[i][0]) * transactions[i][2]; //weight of block
+                                    transactions[i][2] = transactions[i][1].div(amountBn); //adds decimal to the tuple
+                                    transactions[i][3] = transactions[i][0].mul(transactions[i][2]); //weight of block
                                     if(i == 0){ //cumulative weight of block, so last index already has the value instead of needing to loop through again
                                         transactions[i][4] = transactions[i][3];
                                     } else {
-                                        transactions[i][4] = transactions[i][3] + transactions[i-1][4];
+                                        transactions[i][4] = transactions[i][3].add(transactions[i-1][4]) ;
                                     }
                                     i++;
                                     removableIndex = i;
@@ -407,7 +458,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
                             //now find weighted average block number
                             var weightAverageBlockHeight = transactions[transactions.length-1][4];
-                            var blockHeightDifference = blockHeight - weightAverageBlockHeight;
+                            var blockHeightDifference = blockHeight - weightAverageBlockHeight.toNumber();
                             //console.log("weighted avg block height: " + weightAverageBlockHeight);
                             //console.log("weighted avg block height difference: " + blockHeightDifference);
 
@@ -417,7 +468,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                             //which is okay if the decimal is added to the total as well, but for everyone
 
                             //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
-                            var divisor =  Math.max((blockHeight - contractCreationBlockHeightInt),1)/100;
+                            var divisor =  Math.max((blockHeight - CONTRACT_CREATION_BLOCK_INT),1)/100;
 
                             //console.log("divisor: " + divisor);
 
@@ -615,12 +666,12 @@ controller.startwatchNewIntel = function(){
             callback(err);
         }
         else {
-            let data = results.filter(item => item.intelAddress === Intel_Contract_Schema.networks[ETH_NETWORK].address);
+            let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
             if(!data.length){
-                results = [{intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}];
+                results = [ Intel_Contract_Schema.networks[ETH_NETWORK].address];
             }
             for (let i=0;i<results.length;i=i+1) {
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i].intelAddress);
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i]);
                 intel.events.Reward({ fromBlock: 'latest' }).on('data',  event => {
                     try{
                         const rewardAmount = web3.utils.fromWei(event.returnValues.rewardAmount, 'ether');
@@ -991,9 +1042,9 @@ controller.getAproxScoreAddress = function(address, delta ,callback){
         if(error){ callback(error)} else {
             //wieghtedBlock
             let ranking = rankings[0];
-            const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
+            const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - CONTRACT_CREATION_BLOCK_INT)/100;
             ranking.block = ranking.block + delta;
-            const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
+            const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-CONTRACT_CREATION_BLOCK_INT));
             ranking.score = newScore;
             callback(ranking);
 
@@ -1012,9 +1063,9 @@ controller.getAproxScoreRanking = function(rank, limit, page, delta ,callback){
         }  else {
             result = result.map( ranking => {
                 //wieghtedBlock
-                const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - contractCreationBlockHeightInt)/100;
+                const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - CONTRACT_CREATION_BLOCK_INT)/100;
                 ranking.block = ranking.block + delta;
-                const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-contractCreationBlockHeightInt));
+                const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-CONTRACT_CREATION_BLOCK_INT));
                 ranking.score = newScore;
                 return ranking;
             });
@@ -1034,7 +1085,7 @@ controller.aproxAllScoreRanking = async function(callback){
                 const blockHeight = res.number;
 
                 //Find all Address
-                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: contractCreationBlockHeightInt}}, 'address score tokens block', { }, function(err, results){
+                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block', { }, function(err, results){
                     if(err){
                         callback(err);
                     }
@@ -1042,10 +1093,15 @@ controller.aproxAllScoreRanking = async function(callback){
                         const bulkop=[];
                         let len = results.length;
                         while (len--) {
-                            const item= results[len];
-                            const w = item.block - (item.score / item.tokens - 1) * (item.block - contractCreationBlockHeightInt) / 100;
+                            const item=  {
+                                block:  web3.utils.toBN(esults[len]).block,
+                                score:  web3.utils.toBN(esults[len]).score,
+                                tokens:  web3.utils.toBN(esults[len]).tokens,
+                            } ;
+
+                            const w = item.block - (item.score / item.tokens - 1) * (item.block - CONTRACT_CREATION_BLOCK_INT) / 100;
                             var dbValues = {
-                                    score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - contractCreationBlockHeightInt)),
+                                    score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - CONTRACT_CREATION_BLOCK_INT)),
                                     block: blockHeight };
                                 bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
 
@@ -1085,7 +1141,7 @@ controller.realAllScoreRanking = async function(callback){
             const blockHeight = res.number;
 
             return web3.eth.getPastLogs({
-                fromBlock: "0x" + ((blockHeight-7200).toString(16)),//'0x501331', //contractCreationBlockHeightHexString,
+                fromBlock: "0x" + ((blockHeight-7200).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
                 toBlock: 'latest',
                 address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
@@ -1587,7 +1643,7 @@ controller.seedLatestEvents = function(){
       blockHeight = res.number;
       console.log("blockheight: " + blockHeight);
       return web3.eth.getPastLogs({
-        fromBlock: contractCreationBlockHeightHexString,//'0x501331', //contractCreationBlockHeightHexString,
+        fromBlock: CONTRACT_CREATION_BLOCK_HEX,//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
         toBlock: 'latest',
         address: PARETO_CONTRACT_ADDRESS,
         topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
