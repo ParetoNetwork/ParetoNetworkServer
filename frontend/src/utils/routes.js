@@ -34,7 +34,7 @@ const routes = [
         }
     },
     {
-        path: '/intel/:id', component: VIntelDetail, name: 'VIntelDetail'
+        path: '/intel/:address/:id', component: VIntelDetail, name: 'VIntelDetail'
     },
     {
         path: '/calculator', component: VScoreCalculator, name: 'VScoreCalculator'
