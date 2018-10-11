@@ -424,7 +424,6 @@
                             this.selectedPath = this.paths[path_id].id;
                         }
 
-
                     }, error => {
                         let errorText= error.message? error.message : error;
                         this.$notify({
