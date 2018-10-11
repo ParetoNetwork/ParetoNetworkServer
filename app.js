@@ -438,7 +438,8 @@ app.get('/v1/content/:content', function (req, res) {
         } else {
             let mycontent = {};
             for (let i = 0; i < result.length; i = i+1){
-                if(result[i]._id.toString() === req.params.content){
+                if(result[i]._id.toString() === req.params.content ||
+                    result[i].txHash.toString() === req.params.content){
                     mycontent = result[i];
                     break;
                 }

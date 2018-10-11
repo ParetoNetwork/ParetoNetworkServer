@@ -88,7 +88,7 @@ mongoose.connect(CONNECTION_URL).then(tmp=>{
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
-
+const ParetoReward = mongoose.model('reward');
 
 
 // set up Pareto and Intel contracts instances
@@ -615,49 +615,43 @@ controller.startwatchNewIntel = function(){
             callback(err);
         }
         else {
-            let data = results.filter(item => item.intelAddress === Intel_Contract_Schema.networks[ETH_NETWORK].address);
+            let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
             if(!data.length){
-                results = [{intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}];
+                results = [ Intel_Contract_Schema.networks[ETH_NETWORK].address];
             }
             for (let i=0;i<results.length;i=i+1) {
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i].intelAddress);
-                intel.events.Reward({ fromBlock: 'latest' }).on('data',  event => {
+                const intelAddress =results[i];
+                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
+                intel.events.Reward().on('data',  event => {
                     try{
-                        const rewardAmount = web3.utils.fromWei(event.returnValues.rewardAmount, 'ether');
-                        const intelIndex = event.returnValues.intelIndex;
-                        const sender = event.returnValues.sender;
-                        console.log("Reward event listener", rewardAmount, intelIndex);
-                        //Update rewardAmount on Content
-                        ParetoContent.findOneAndUpdate({ id: intelIndex }, { $inc: { reward: rewardAmount } }, function (err, response) {if (err)console.log(err);});
-                        //Update rewardReceived on Profile
-                        ParetoContent.findOne({id:intelIndex}, (err, intel) => {
-                            const {address} = intel;
+                        const intelIndex = parseInt(event.returnValues.intelIndex);
+                        const rewardData = {
+                            sender: event.returnValues.sender,
+                            receiver: '',
+                            intelAddress: intelAddress,
+                            intelId: intelIndex,
+                            txHash: event.transactionHash,
+                            dateCreated:  Date.now() ,
+                            block: event.blockNumber,
+                            amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
+                        };
 
-                            ParetoProfile.findOne({address,'rewardsReceived.IntelID':intelIndex}, (err, profile) => {
-                                if(profile == null){
-                                    ParetoProfile.update({address},{$push:{ rewardsReceived: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
-                                        // console.log("saved 1");
-                                    })
-                                    return;
+                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},rewardData, {upsert: true, new: true},
+                            function(err, r){
+                                if(err){
+                                    console.error('unable to write to db because: ', err);
+                                } else {
+                                    ParetoContent.findOne({id:intelIndex}, (err, intel) => {
+                                        const {address} = intel;
+                                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {},
+                                            function(err, r){ }
+                                        );
+                                    });
+                                    controller.updateIntelReward(intelIndex);
                                 }
-                                ParetoProfile.update({address,'rewardsReceived.IntelID':intelIndex},{ $inc: {'rewardsReceived.$.reward': rewardAmount}}, (err, profle ) => {
-                                    // console.log("update 1");
-                                } )
-                            })
-                        })
-                        //Update rewardGiven on Profile
-                        ParetoProfile.findOne({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex}, (err, profile) => {
-                            //console.log(err, profile);
-                            if(profile == null){
-                                ParetoProfile.update({address:sender.toLowerCase()},{$push:{ rewardsGiven: { IntelID:intelIndex, reward:rewardAmount }}}, (err, profile) => {
-                                    // console.log("saved");
-                                })
-                                return;
                             }
-                            ParetoProfile.update({address:sender.toLowerCase(),'rewardsGiven.IntelID':intelIndex},{ $inc: {'rewardsGiven.$.reward': rewardAmount}}, (err, profle ) => {
-                                // console.log("update");
-                            } )
-                        })
+                        );
+
                     }catch (e) {
                         console.log(e);
                     }
@@ -666,23 +660,56 @@ controller.startwatchNewIntel = function(){
                     console.log(err);
                 });
 
-                intel.events.RewardDistributed({ fromBlock: 'latest' }).on('data',  event => {
-                    try{
-                        const intelIndex = event.returnValues.intelIndex;
-                        ParetoContent.update({ id: intelIndex }, { distributed: true }, { multi: false }, function (err, response) { if (err)console.log(err);});
-                    }catch (e) {
-                        console.log(e);
-                    }
-
-                }).on('error', err=>{
-                    console.log(err);
-                });
             }
 
         }
     });
 
 };
+
+controller.updateIntelReward=function(intelIndex){
+    let agg =  [ {$match: { 'intelId': intelIndex } },
+        { $group: { _id: null,
+                rewards : {
+                    "$addToSet" : {
+                        "txHash" : "$txHash",
+                        "amount" : "$amount"
+                    }
+                } } },
+        {  $unwind : "$rewards" },
+        { $group: { _id: null,
+                reward: {$sum: "$rewards.amount"}}}
+
+    ];
+    ParetoReward.aggregate( agg).exec(function (err, r) {
+        if(r.length > 0) {
+            const reward = r[0].reward;
+            ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward}, { }, (err, intel) => {
+                if(!err){
+                    if(controller.wss){
+                        try{
+                            controller.wss.clients.forEach(function each(client) {
+                                if (client.isAlive === false) return client.terminate();
+                                if (client.readyState === controller.WebSocket.OPEN ) {
+                                    // Validate if the user is subscribed a set of information
+                                    if(client.user){
+                                        //console.log('updateContent');
+                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                    }
+                                }
+                            });
+                        }catch (e) {
+                            console.log(e);
+                        }
+                    }else{
+                        console.log('no wss')
+                    }
+                }
+
+            });
+        }
+    })
+}
 
 controller.updateFromLastIntel = function(){
     ParetoContent.aggregate([
@@ -837,11 +864,11 @@ controller.getAllAvailableContent = function(req, callback) {
 
                     allResults =    await ParetoContent.find(
                         { $or:[
-                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {intelAddress: { $exists: false }}]},
-                                {address : req.user, $or:[ {validated: true}, {intelAddress: { $exists: false }}] }
+                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}] }
                             ]
                         }
                     ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
@@ -867,7 +894,8 @@ controller.getAllAvailableContent = function(req, callback) {
                                 expires: entry.expires,
                                 dateCreated: entry.dateCreated,
                                 txHash: entry.txHash,
-                                reward: entry.reward,
+                                totalReward:  entry.totalReward || 0,
+                                reward:  entry.reward,
                                 speed: entry.speed,
                                 id:entry.id,
                                 intelAddress: entry.intelAddress,
@@ -879,8 +907,6 @@ controller.getAllAvailableContent = function(req, callback) {
                                     biography: entry.createdBy.biography,
                                     profilePic: entry.createdBy.profilePic
                                 }
-
-
                             };
 
                             newResults.push(data);
@@ -1186,7 +1212,8 @@ controller.getContentByCurrentUser = function(req, callback){
                           body: entry.body,
                           dateCreated: entry.dateCreated,
                           txHash: entry.txHash,
-                          reward: entry.reward,
+                          totalReward:  entry.totalReward || 0,
+                          reward:  entry.reward,
                           speed: entry.speed,
                           expires: entry.expires,
                           validated: entry.validated,
