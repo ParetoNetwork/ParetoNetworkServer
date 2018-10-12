@@ -64,12 +64,12 @@
                             <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
                                 <div v-if="false" class="text-right font-weight-bold">
                                     <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                    <span class="text-right">{{row.reward}}</span>
+                                    <span class="text-right">{{row.totalReward}}</span>
                                 </div>
                                 <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
                                     <div class="d-inline-block">
                                         <p class="text-right text-secondary ellipsis reward-text"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                            <b> {{ row.reward }} </b>
+                                            <b> {{ row.totalReward }} </b>
                                         </p>
                                         <b-btn class="btn-primary-pareto mx-auto px-4"
                                                style="max-width: 120px;"
@@ -193,7 +193,7 @@
             VShimmerFeed
         },
         props : [
-         'updateContent', 'block'
+         'updateContent', 'block', 'user', 'fetchAddress'
         ],
         mixins: [countUpMixin],
         data: function(){
@@ -210,12 +210,7 @@
                     page: 0,
                 },
                 rewardId: '',
-                tokenAmount: 1,
-                user: {
-                    rank: 0,
-                    score: 0,
-                    tokens: 0
-                }
+                tokenAmount: 1
             }
         },
         computed: {
@@ -267,6 +262,9 @@
                 }
             },
             loadContent: function (params) {
+                params = params || {};
+                if(this.fetchAddress) params.fetchAddress = this.fetchAddress;
+
                 return dashboardService.getAllContent(params,
                     res => {
                         this.loading = false;
@@ -377,127 +375,4 @@
 </script>
 
 <style scoped>
-    .container {
-        font-family: "Body";
-    }
-
-    li > .split {
-        cursor: pointer;
-        border-bottom: 2px solid rgba(0, 0, 0, 0.125);
-        padding-bottom: 0.5rem;
-    }
-
-    li,
-    .list-group-item:last-child > .split {
-        border-bottom: 0;
-    }
-
-    .name-title {
-        font-size: 21px;
-        font-weight: bold;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        text-align: center;
-        color: #020f1f;
-    }
-
-    .button-margin {
-        margin-left: 15px;
-    }
-
-    .icon-mini {
-        object-fit: contain;
-        height: auto;
-        margin-right: 5px;
-    }
-
-    .title {
-        font-size: 18px;
-        font-weight: bold;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-    }
-
-    .text-dashboard {
-        font-size: 11px;
-        font-weight: normal;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-    }
-
-    .scrollable {
-        overflow: auto;
-        scroll-behavior: smooth;
-        overflow-x: hidden
-    }
-
-    .subtitle-dashboard {
-        font-size: 9px;
-        font-weight: bold;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        text-align: center;
-    }
-
-    .ellipsis {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        -o-text-overflow: ellipsis;
-    }
-
-
-
-    .wrapp {
-        color: black;
-        font-size: 12px;
-    }
-
-    #myfeed {
-        max-height: 860px;
-    }
-
-    #mypost {
-        max-height: 600px;
-    }
-
-    #wrapper {
-        position: relative;
-    }
-
-    #wrapper .text {
-        position: absolute;
-        bottom: 0;
-        display: none;
-    }
-
-    #wrapper:hover .text {
-        display: flex;
-        background: rgba(0, 0, 0, 0.5);
-    }
-
-    #wrapper:hover .text {
-        display: flex;
-        background: rgba(0, 0, 0, 0.5);
-    }
-
-    @media (min-width: 992px){
-        .reward-text {
-            max-width: 110px;
-        }
-    }
-
-    @media (max-width: 426px){
-        #myfeed {
-            max-height: 465px;
-        }
-    }
 </style>

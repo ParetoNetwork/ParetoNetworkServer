@@ -5,6 +5,7 @@ import VLeaderboards from '../components/VLeaderboards';
 import VCreateIntel from '../components/VCreateIntel';
 import VueRouter from 'vue-router';
 import AuthService from '../services/authService';
+import VAuthorPage from '../components/VAuthorPage';
 import VIntelDetail from '../components/VIntelDetail';
 import VScoreCalculator from '../components/VScoreCalculator';
 
@@ -22,6 +23,9 @@ const routes = [
     {
         path: '*',
         redirect: '/intel'
+    },
+    {
+        path: '/intel/:address', component: VAuthorPage, name: 'VAuthorPage'
     },
     {
         path: '/intel', component: Vintel, beforeEnter: (to, from, next) => {

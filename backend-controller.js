@@ -752,7 +752,7 @@ controller.getAllAvailableContent = function(req, callback) {
 
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
-
+    var fetchAddress = req.query.fetchAddress;
   //check if user, then return what the user is privy to see
 
   //check block number or block age, then retrieve all content after that block. add more limitations/filters later
@@ -909,7 +909,16 @@ controller.getAllAvailableContent = function(req, callback) {
                                 }
                             };
 
-                            newResults.push(data);
+                            console.log(fetchAddress);
+
+                            if(fetchAddress){
+                                if(fetchAddress === entry.address){
+                                    newResults.push(data);
+                                }
+                            }else{
+                                newResults.push(data);
+                            }
+
                     });
                   //console.log(allResults);
 

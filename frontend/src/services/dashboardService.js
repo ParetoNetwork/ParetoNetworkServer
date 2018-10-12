@@ -54,9 +54,11 @@ export default class dashboardService {
     }
 
     static getAllContent(params, onSuccess, onError) {
-        const {limit, page} = params || {limit: 10, page: 0};
+        const {limit, page, fetchAddress} = params || {limit: 10, page: 0, fetchAddress: ''};
 
-        return http.get('/v1/content?limit=' + limit + '&page=' + page).then(res => {
+        let fetchAdd = fetchAddress? '&fetchAddress=' + params.fetchAddress : fetchAddress;
+
+        return http.get('/v1/content?limit=' + limit + '&page=' + page + fetchAdd).then(res => {
             //console.log(res);
             if(res.data.success){
                 return onSuccess(res.data.data);
