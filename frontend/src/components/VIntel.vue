@@ -277,7 +277,6 @@
                 //console.log(this.ws)
                 this.ws.onmessage = (data) => {
                     try {
-                        console.log(data);
                         const info = JSON.parse(data.data);
                         if (info.data.address) {
                             this.user.score = info.data.score;
@@ -287,9 +286,9 @@
                             this.block = info.data.block;
                         }
                         if (info.data.action){
-                            //  console.log(info.data.action);
                             switch (info.data.action){
                                 case 'updateContent':{
+                                    this.loadMyContent();
                                     this.updateContentVar++;
                                 }
                             }

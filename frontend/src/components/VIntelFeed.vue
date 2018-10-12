@@ -288,13 +288,11 @@
             updateFeedContent: function(){
                 return dashboardService.getAllContent(null, res => {
                         res.forEach(intel=> {
-                            debugger;
                             let found = false;
                             this.myFeed.content = this.myFeed.content.map(myFeedintel=>{
                                 if(intel._id === myFeedintel._id){
                                     myFeedintel = intel
                                     found = true;
-                                    console.log('found');
                                 }
                                 return myFeedintel;
                             });

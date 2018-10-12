@@ -287,6 +287,7 @@ export default class authService {
         let provider;
         const version = window.localStorage.getItem('psignversion');
         const network = window.localStorage.getItem('netWorkId');
+        const contractAddress = window.localStorage.getItem('paretoAddress');
         if (typeof web3 !== 'undefined') {
             // Use Mist/MetaMask's provider
             provider = new Web3(web3.currentProvider);
@@ -339,17 +340,18 @@ export default class authService {
                                     name:    'Pareto',
                                     version: version.toString(),
                                     chainId: parseInt(network),
-                                    verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
+                                    verifyingContract: contractAddress
                                 },
                                 message: {
                                     message: 'Pareto'
                                 }
                             };
                             let params = [JSON.stringify(msgParams), from];
-                            let method = 'eth_signTypedData';
+                            let method = 'eth_signTypedData_v3';
+                            let versionMethod = 'v3';
                             // debugger;
 
-                            const resultfunction = function(method, msgParams, err, result){
+                            const resultfunction = function(versionMethod, msgParams, err, result){
                                 if (err) return console.dir(err);
                                 if (result.error) {
                                     return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
@@ -359,14 +361,14 @@ export default class authService {
                                 }
                                 result = result.result;
                                 let  recovered = '';
-                                if(method === 'eth_signTypedData_v3') {
+                                if(versionMethod === 'v3') {
                                     recovered = Sig.recoverTypedSignature({data: msgParams, sig: result});
                                 }else{
                                     recovered = Sig.recoverTypedSignatureLegacy({data: msgParams, sig: result});
                                 }
 
                                 if (recovered === from) {
-                                    if(method === 'eth_signTypedData_v3'){
+                                    if(versionMethod === 'v3'){
                                         msgParams = [
                                             {
                                                 type: 'string',
@@ -388,6 +390,7 @@ export default class authService {
                                 provider.currentProvider.sendAsync({method,params,from}, (err, result) => {
                                     if(err || result.error){
                                         method = 'eth_signTypedData';
+                                        versionMethod = 'v1';
                                         const msgParams = [
                                             {
                                                 type: 'string',
@@ -397,14 +400,15 @@ export default class authService {
                                         ];
                                         const params = [msgParams,from];
                                         provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                            resultfunction(method, msgParams,err, result)
+                                            resultfunction( versionMethod, msgParams,err, result)
                                         });
                                     }else{
-                                        resultfunction(method, msgParams,null, result);
+                                        resultfunction( versionMethod, msgParams,null, result);
                                     }
                                 })
                             }catch (e) {
                                 method = 'eth_signTypedData';
+                                versionMethod = 'v1';
                                  msgParams = [
                                     {
                                         type: 'string',
@@ -414,7 +418,7 @@ export default class authService {
                                 ];
                                  params = [msgParams,from];
                                 provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                    resultfunction(method, msgParams,err, result)
+                                    resultfunction( versionMethod, msgParams,err, result)
                                 });
                             }
 
