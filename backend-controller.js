@@ -2,10 +2,15 @@ const https = require('https');
 const request = require('request');
 
 var controller = module.exports = {};
-var Big = require('big.js');
+const Decimal = require('decimal.js-light');
 const fs = require('fs');
 const path = require('path');
-
+Decimal.set({
+    precision: 20,
+    rounding: Decimal.ROUND_HALF_UP,
+    toExpNeg: -7,
+    toExpPos: 21
+});
 
 let constants = {};
 const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
@@ -13,7 +18,7 @@ const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
 if (fs.existsSync(constantsPath)) {
   constants = require(constantsPath);
 }
-console.log(constants);
+
 /*constants*/
 var CONNECTION_URL = process.env.MONGODB_URI || constants.MONGODB_URI;
 var PARETO_CONTRACT_ADDRESS = process.env.CRED_PARETOCONTRACT || constants.CRED_PARETOCONTRACT;
@@ -149,58 +154,73 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                 else{
 
                     if(result.tokens!==0){
-                        //write to db as well
+                        controller.addExponent([address],[result],blockHeight, function (err, results){
 
-                        var dbQuery = {
-                            address : address
-                        };
-                        var dbValues = {
-                            $set: {
-                                score : result.score,
-                                block: result.block,
-                                tokens : result.tokens
-                            }
-                        };
-                        var dbOptions = {
-                            upsert : true,
-                            new: true //mongo uses returnNewDocument, mongo uses new
-                        };
-                        // console.log({
-                        //     addrees: dbQuery.address,
-                        //     dbValues: dbValues
-                        // });
-                        //should queue for writing later
-                        var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
-                        //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
+                            if(err){return callback(err)}
+                            else {
+                                const result = results[0];
+                                //write to db as well
 
-                        updateQuery.exec().then(function(r){
-                            ParetoAddress.count({ score : { $gt : 0 } }, function(err, count){
-                                if(err){
-                                    console.error('unable to finish db operation because: ', err);
-                                    if(callback && typeof callback === "function") { callback(err); }
-                                }
-                                else {
-                                    if(r == null){
-                                        if(callback && typeof callback === "function") { callback(ErrorHandler.nullResponseMessage); }
-                                    } else {
-                                        var resultJson = {
-                                            'address' : r.address,
-                                            'score' : r.score,
-                                            'block' : result.block,
-                                            'bonus' : result.bonus,
-                                            'rank'  : r.rank,
-                                            'totalRanks' : count,
-                                            'tokens': r.tokens,
-                                        };
-                                        //console.log("here is db writing response : " + JSON.stringify(resultJson));
-
-                                        if(callback && typeof callback === "function") { callback(null,resultJson); }
+                                var dbQuery = {
+                                    address: address
+                                };
+                                var dbValues = {
+                                    $set: {
+                                        score: result.score,
+                                        block: result.block,
+                                        tokens: result.tokens
                                     }
-                                }
-                            }); //end count
-                        }).catch(function(err){
-                            console.error('unable to finish db operation because: ', err);
-                            if(callback && typeof callback === "function") { callback(err); }
+                                };
+                                var dbOptions = {
+                                    upsert: true,
+                                    new: true //mongo uses returnNewDocument, mongo uses new
+                                };
+                                // console.log({
+                                //     addrees: dbQuery.address,
+                                //     dbValues: dbValues
+                                // });
+                                //should queue for writing later
+                                var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
+                                //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
+
+                                updateQuery.exec().then(function (r) {
+                                    ParetoAddress.count({score: {$gt: 0}}, function (err, count) {
+                                        if (err) {
+                                            console.error('unable to finish db operation because: ', err);
+                                            if (callback && typeof callback === "function") {
+                                                callback(err);
+                                            }
+                                        }
+                                        else {
+                                            if (r == null) {
+                                                if (callback && typeof callback === "function") {
+                                                    callback(ErrorHandler.nullResponseMessage);
+                                                }
+                                            } else {
+                                                var resultJson = {
+                                                    'address': r.address,
+                                                    'score': r.score,
+                                                    'block': result.block,
+                                                    'bonus': result.bonus,
+                                                    'rank': r.rank,
+                                                    'totalRanks': count,
+                                                    'tokens': r.tokens,
+                                                };
+                                                //console.log("here is db writing response : " + JSON.stringify(resultJson));
+
+                                                if (callback && typeof callback === "function") {
+                                                    callback(null, resultJson);
+                                                }
+                                            }
+                                        }
+                                    }); //end count
+                                }).catch(function (err) {
+                                    console.error('unable to finish db operation because: ', err);
+                                    if (callback && typeof callback === "function") {
+                                        callback(err);
+                                    }
+                                });
+                            }
                         });
                     }else{
                         //update entry in database if it exists, do not put additional entry invar
@@ -257,11 +277,11 @@ controller.getParetoCoinMarket = function(callback){
 };
 
 
-controller.addExponent = function(addresses, scores, blockHeight,callback){
+controller.addExponent = async function(addresses, scores, blockHeight,callback){
 
     let promises =[];
 
-    ParetoContent.find({'validated': true }).distinct('intelAddress').exec(function(err, results) {
+    return ParetoContent.find({'validated': true }).distinct('intelAddress').exec(function(err, results) {
         if (err) {
             callback(err);
         }
@@ -271,38 +291,49 @@ controller.addExponent = function(addresses, scores, blockHeight,callback){
                 results = [ Intel_Contract_Schema.networks[ETH_NETWORK].address];
             }
             for (let i = 0; i < results.length; i = i + 1) {
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i]);
-                promises.push(intel.getPastEvents('Reward', {
-                    fromBlock: "0x" + ((blockHeight-EXPONTENT_BLOCK_AGO).toString(16)) ,
-                    toBlock: 'latest'
-                }))
+                try{
+                    const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i]);
+                    promises.push(intel.getPastEvents('Reward', {
+                        fromBlock: "0x" + ((blockHeight-EXPONTENT_BLOCK_AGO).toString(16)) ,
+                        toBlock: 'latest'
+                    }))
+                }catch (e) { console.log(e) }
             }
-            Promise.all(promises).then(values => {
+            return Promise.all(promises).then(values => {
                 let rewards={};
                 let total=0;
                 for (let i = 0; i < values.length; i = i + 1) {
                     total=total+values[i].length;
                     for (let j = 0; j < values[i].length; j = j + 1) {
-                        const sender = values[i][j].returnValues.sender;
-                        if(!rewards[sender]){
-                            rewards[sender] = 0;
-                        }
-                        rewards[sender]=rewards[sender]+1;
+                        try{
+                            const sender = values[i][j].returnValues.sender.toLowerCase();
+                            if(!rewards[sender]){
+                                rewards[sender] = 0;
+                            }
+                            rewards[sender]=rewards[sender]+1;
+                        }catch (e) { console.log(e) }
                     }
                 }
                 const M = total/2;
                 for (let i = 0; i < addresses.length; i = i + 1) {
-                    scores[i].score =  web3.utils.toBN(parseFloat(scores[i].score)).pow(web3.utils.toBN(1 + (rewards[addresses[i]]/M)/2) );
+                    try{
+                        const address = addresses[i].toLowerCase();
+                        if (rewards[address]) {
+                            const V = (1 + (rewards[address] / M) / 2);
+                            scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
+                        }
+                    }catch (e) { console.log(e) }
+
                 }
-                callback(null, scores);
+                return callback(null, scores);
 
             }).catch(e=>{
-                console.log(e);
-                callback(null, scores)
+                callback(e, null)
             });
         }
     })
-}
+};
+
 
 /**
  * This function will calculate the score based in the address and the current block height. Will be used by realAllScoreRank and by calculateScore
@@ -362,7 +393,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                     var blockNumber = web3.utils.toBN(blockHex, 16).toString();
                     var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                     //can be float
-                    quantityEth = Big(quantityEth);
+                    quantityEth = Decimal(quantityEth);
 
                     //basically pushes
                     if(blockNumber in incoming)
@@ -394,7 +425,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
 
                         var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                         //can be float
-                        quantityEth = Big(quantityEth);
+                        quantityEth = Decimal(quantityEth);
 
                         //basically pushes
                         if(blockNumber in outgoing)
@@ -408,8 +439,8 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                     }//end for
 
                     var transactions = Object.entries(incoming)
-                        .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, val.mul(Big(-1))])))
-                        .map(([ts, val]) => ([Big(ts), val]));
+                        .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, val.mul(Decimal(-1))])))
+                        .map(([ts, val]) => ([Decimal(ts), val]));
                     try {
                         //sort by default sort string data, in string 10 < 20
                         transactions = transactions.sort(function (a, b) {
@@ -420,7 +451,7 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                             var i = 0;
                             var removableIndex = 0;
                             //sorts down to remaining transactions, since we already know the total and the system block height
-                            const amountBn = Big(amount);
+                            const amountBn = Decimal(amount);
                             while(i < transactions.length){
                                 // Should allow zero too
                                 if(parseFloat(transactions[i][1] ) <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
@@ -452,13 +483,17 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                                 blockHeight = blockHeightFixed;
                             }
 
+                            const blockHeightBn = Decimal(blockHeight);
+                            const hBn = Decimal(100);
+                            const oneBn = Decimal(1);
+                            const contractBn = Decimal(CONTRACT_CREATION_BLOCK_INT);
                             //the transactions array generates: [block, remaining eligible amount, weight of block, cumulative weight of block, and cumulative weight + preior cumulative weight?
 
                             //console.log(transactions); //final transactions array state
 
                             //now find weighted average block number
                             var weightAverageBlockHeight = transactions[transactions.length-1][4];
-                            var blockHeightDifference = blockHeight - parseFloat(weightAverageBlockHeight);
+                            var blockHeightDifference = blockHeightBn.sub(weightAverageBlockHeight);
                             //console.log("weighted avg block height: " + weightAverageBlockHeight);
                             //console.log("weighted avg block height difference: " + blockHeightDifference);
 
@@ -468,13 +503,13 @@ controller.generateScore = async function (blockHeight, address, blockHeightFixe
                             //which is okay if the decimal is added to the total as well, but for everyone
 
                             //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
-                            var divisor =  Math.max((blockHeight - CONTRACT_CREATION_BLOCK_INT),1)/100;
+                            var divisor = Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
 
                             //console.log("divisor: " + divisor);
 
-                            var multiple = 1 + (blockHeightDifference / divisor);
-                            var score = amount * multiple;
-                            var bonus = blockHeightDifference / divisor;
+                            var multiple =  (blockHeightDifference.div(divisor) );
+                            var score = parseFloat(amountBn.mul(multiple));
+                            var bonus = parseFloat(blockHeightDifference.div(divisor)) ;
 
 
                          return  callback(null,{
@@ -677,7 +712,7 @@ controller.startwatchNewIntel = function(){
                     try{
                         const intelIndex = parseInt(event.returnValues.intelIndex);
                         const rewardData = {
-                            sender: event.returnValues.sender,
+                            sender: event.returnValues.sender.toLowerCase(),
                             receiver: '',
                             intelAddress: intelAddress,
                             intelId: intelIndex,
@@ -1068,12 +1103,33 @@ controller.getAproxScoreAddress = function(address, delta ,callback){
         if(error){ callback(error)} else {
             //wieghtedBlock
             let ranking = rankings[0];
-            const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - CONTRACT_CREATION_BLOCK_INT)/100;
-            ranking.block = ranking.block + delta;
-            const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-CONTRACT_CREATION_BLOCK_INT));
-            ranking.score = newScore;
-            callback(ranking);
+            try{
+                const contractBn = Decimal(CONTRACT_CREATION_BLOCK_INT);
+                const hBn = Decimal(100);
+                const oneBn = Decimal(1);
+                const blockHeightBn = Decimal(ranking.block + delta);
+                if(ranking.tokens > 0){
+                    const item=  {
+                        block:  Decimal(ranking.block),
+                        score:  Decimal(ranking.score),
+                        bonus:  Decimal(ranking.bonus),
+                        tokens:  Decimal(ranking.tokens),
+                    } ;
 
+                    var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
+
+                    const w = item.block.sub(item.bonus.mul(divisor));
+                    const new_numerator =   (blockHeightBn.sub(w));
+                    const new_divisor =    Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
+                    let new_V =  1;
+                    item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
+                    ranking.score  = parseFloat(item.tokens.mul( (new_numerator.div(new_divisor)).pow(new_V) ));
+                    ranking.block = blockHeight ;
+                }
+            }catch (e) {
+                console.log(e);
+            }
+            callback(null, ranking)
         }
     });
 }
@@ -1088,11 +1144,33 @@ controller.getAproxScoreRanking = function(rank, limit, page, delta ,callback){
             callback(err)
         }  else {
             result = result.map( ranking => {
-                //wieghtedBlock
-                const w = ranking.block - (ranking.score/ranking.tokens -1)*(ranking.block - CONTRACT_CREATION_BLOCK_INT)/100;
-                ranking.block = ranking.block + delta;
-                const newScore = ranking.tokens*(1+((ranking.block - w)*100)/(ranking.block-CONTRACT_CREATION_BLOCK_INT));
-                ranking.score = newScore;
+                try{
+                    const contractBn = Decimal(CONTRACT_CREATION_BLOCK_INT);
+                    const hBn = Decimal(100);
+                    const oneBn = Decimal(1);
+                    const blockHeightBn = Decimal(ranking.block + delta);
+                    if(ranking.tokens > 0){
+                        const item=  {
+                            block:  Decimal(ranking.block),
+                            score:  Decimal(ranking.score),
+                            bonus:  Decimal(ranking.bonus),
+                            tokens:  Decimal(ranking.tokens),
+                        } ;
+
+                        var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
+
+                        const w = item.block.sub(item.bonus.mul(divisor));
+                        const new_numerator =   (blockHeightBn.sub(w));
+                        const new_divisor =    Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
+                        let new_V =  1;
+                        item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
+                        ranking.score  = parseFloat(item.tokens.mul( (new_numerator.div(new_divisor)).pow(new_V) ));
+                        ranking.block = blockHeight ;
+                    }
+                }catch (e) {
+                    console.log(e);
+                }
+
                 return ranking;
             });
             callback(result);
@@ -1118,33 +1196,28 @@ controller.aproxAllScoreRanking = async function(callback){
                     else {
                         const bulkop=[];
                         let len = results.length;
-                        const contractBn = Big(CONTRACT_CREATION_BLOCK_INT);
-                        const hBn = Big(100);
-                        const oneBn = Big(1);
-                        const blockHeightBn = Big(blockHeight);
+                        const contractBn = Decimal(CONTRACT_CREATION_BLOCK_INT);
+                        const hBn = Decimal(100);
+                        const oneBn = Decimal(1);
+                        const blockHeightBn = Decimal(blockHeight);
                         while (len--) {
                             const item=  {
-                                block:  Big(results[len].block),
-                                score:  Big(results[len].score),
-                                tokens:  Big(results[len].tokens),
+                                block:  Decimal(results[len].block),
+                                score:  Decimal(results[len].score),
+                                bonus:  Decimal(results[len].bonus),
+                                tokens:  Decimal(results[len].tokens),
                             } ;
 
-                            const w = item.block.sub(((item.score.div(item.tokens)).sub(oneBn)).mul(item.block.sub(contractBn)).div(hBn)) ;
-                             const w2 = item.block - (item.score / item.tokens - 1) * (item.block - CONTRACT_CREATION_BLOCK_INT) / 100;
-                            console.log('W')
-                            console.log(parseFloat(w))
-                             console.log(parseFloat(w2))
+                            var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
+
+                            const w = item.block.sub(item.bonus.mul(divisor));
+                            const new_numerator =   (blockHeightBn.sub(w));
+                            const new_divisor =    Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
+                            const new_V = item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
                             var dbValues = {
-                                    score : parseFloat(item.tokens.mul(oneBn.add((blockHeightBn.sub(w)).mul(hBn).div(blockHeightBn.sub(contractBn))))),
-                                    // score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - CONTRACT_CREATION_BLOCK_INT)),
+                                    score : parseFloat(item.tokens.mul( (new_numerator.div(new_divisor)).pow(new_V) )),
                                     block: blockHeight };
-                            var dbValues2 = {
-                                score : item.tokens * (1 + ((blockHeight - w) * 100) / (blockHeight - CONTRACT_CREATION_BLOCK_INT)),
-                                block: blockHeight };
-                            console.log('DBVaules')
-                            console.log(dbValues)
-                            console.log(dbValues2)
-                                bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
+                            bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
 
                         }
                         if (bulkop.length > 0){
@@ -1197,36 +1270,50 @@ controller.realAllScoreRanking = async function(callback){
                         addresses["0x" + txObjects[i].topics[2].substring(26)]=1;
                     }
                     const bulkop=[];
+                    const scores=[];
+                    const addressesExponent=[];
                     const arrayAddress = Object.keys(addresses);
                     console.log("address count here: " + arrayAddress.length);
                     for (let i=0; i< arrayAddress.length; i++){
                         const address = arrayAddress[i];
                         await controller.generateScore(blockHeight,address,0,function (err, result) {
-                            if(!err && result.tokens > 0){
+                            if(!err && result.tokens > 0 && !isNaN(result.score)){
+                                scores.push(result);
+                                addressesExponent.push(address);
+                            }
+                        })
+                    }
+                    await controller.addExponent(addressesExponent, scores, blockHeight, function (err, results) {
+                        if(!err ){
+
+                            for (let t=1; t<results.length; t=t+1){
+                                let result = results[i];
                                 var dbValues = {
                                     bonus : result.bonus,
                                     tokens : result.tokens,
                                     score : result.score,
                                     block: result.block };
                                 if(!isNaN(dbValues.score)){
-                                    bulkop.push({updateOne:{ filter: {address : address}, update: dbValues}});
+                                    bulkop.push({updateOne:{ filter: {address : addressesExponent[t]}, update: dbValues}});
                                 }
                             }
-                        })
-                    }
-                    console.log("bulk count here: " + bulkop.length);
-                    if (bulkop.length> 0){
-                        ParetoAddress.bulkWrite(bulkop).then(
-                            function (r) {
-                                callback(null, {} );
+                            console.log("bulk count here: " + bulkop.length);
+                            if (bulkop.length> 0){
+                                ParetoAddress.bulkWrite(bulkop).then(
+                                    function (r) {
+                                        callback(null, {} );
+                                    }
+                                ).catch(function (err) {
+                                    console.log(err);
+                                    callback(null, {} );
+                                });
                             }
-                        ).catch(function (err) {
-                            console.log(err);
-                            callback(null, {} );
-                        });
-                    }
+                        }
 
-                }
+                    });
+
+
+                };
 
                 processData();
 
