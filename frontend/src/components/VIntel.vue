@@ -101,91 +101,7 @@
 
             </div>
             <div class="col-md-7 mb-3">
-                <VShimmerFeed v-if="!myFeed.content.length"></VShimmerFeed>
-                <div v-else class="border p-2">
-                    <div class="border-bottom p-2 p-md-3">
-                        <h5 class="title"> MY INTEL FEED: </h5>
-                    </div>
-                    <div v-if="loading" class="d-flex split">
-                        <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
-                        </i>
-                    </div>
-                    <!--
-                    <div >
-                        <span> No data to display </span>
-                    </div>
-                    -->
-                    <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
-                        <ul class="list-unstyled list-group">
-                            <li class="text-left list-group-item border-0 px-1 py-2" :key="row._id"
-                                v-for="row of myFeed.content">
-                                <div class="row border-bottom pb-2">
-                                    <router-link tag="div" :to="intelRoute(row)" class="col-lg-9 pr-0">
-                                        <div class="row cursor-pointer">
-                                            <div class="col-2">
-                                                <div class="border p-1 mr-2" style="height: 50px; width: 50px;">
-                                                    <div data-v-514e8c24="" class="thumb"
-                                                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(row.createdBy.profilePic)}"
-                                                         style="width: 40px; height: 40px;"></div>
-                                                </div>
-                                            </div>
-                                            <div class="col-10 px-lg-1">
-                                                <div class="d-flex flex-column flex-grow-1 pr-3">
-                                                    <h1 class="title ellipsis">{{row.title|| 'No title'}}</h1>
-                                                    <div class="">
-                                                        <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
-                                                        <div>
-                                                        <span class="text-dashboard">Disclosed by: {{row.address}}
-                                                        </span>
-                                                        </div>
-                                                        <div>
-                                                            Blocks ago:
-                                                            <ICountUp
-                                                                    :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
-                                                                    :endVal="parseFloat(row.blockAgo)"
-                                                                    :decimals="decimalsLength(row.blockAgo)"
-                                                                    :duration="randomNumber(1,3)"
-                                                                    :options="countUp.options"
-                                                                    @ready="onReady"/>
-
-                                                        </div>
-                                                        <div>
-                                                        <span class="text-dashboard">
-                                                            <b>
-                                                                {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
-                                                            </b>
-                                                        </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </router-link>
-
-                                    <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
-                                        <div v-if="false" class="text-right font-weight-bold">
-                                            <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                            <span class="text-right">{{row.reward}}</span>
-                                        </div>
-                                        <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
-                                            <div class="d-inline-block">
-                                                <p class="text-right text-secondary ellipsis reward-text"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                                    <b> {{ row.reward }} </b>
-                                                </p>
-                                                <b-btn class="btn-primary-pareto mx-auto px-4"
-                                                       style="max-width: 120px;"
-                                                       v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress; isAvailable();">REWARD
-                                                </b-btn>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block"></VIntelFeed>
             </div>
         </div>
         <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
@@ -209,89 +125,6 @@
                 </form>
             </div>
         </b-modal>
-
-        <b-modal
-                id="modalToken"
-                ref="modalToken"
-                centered
-                hide-header
-                hide-footer
-                :body-bg-variant="'dark'"
-                :body-text-variant="'light'">
-            <b-container fluid>
-                <h4 class="font-body mb-3"> Reward</h4>
-                <div v-if="this.signType==='LedgerNano'" class="text-left">
-                    <p> Before use Ledger Nano S, verify the next items: </p>
-                    <div class="m-2 ml-4">
-                        <ul>
-                            <li> The Browser must be Google Chrome</li>
-                            <li> Plugged-in their Ledger Wallet Nano S</li>
-                            <li> Input digits pin</li>
-                            <li> Navigated to the Ethereum app on their device</li>
-                            <li> Enabled 'browser' support from the Ethereum app settings</li>
-                        </ul>
-                    </div>
-                    <br/>
-                </div>
-                <p class="text-dashboard mb-2" style="font-size: 16px"> Please enter the number of Pareto Tokens to
-                    reward</p>
-                <b-form-input v-model="tokenAmount" style="font-size: 25px"
-                              type="number"></b-form-input>
-                <b-row class="m-2 mt-4 d-flex justify-content-center">
-                    <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                    <b-button :disabled="!hardwareAvailable || tokenAmount<=0 || tokenAmount > user.tokens" style="background-color: rgb(107, 194, 123)" variant="success"
-                              @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
-                    </b-button>
-                </b-row>
-            </b-container>
-        </b-modal>
-        <div>
-            <b-modal
-                    no-close-on-backdrop
-                    v-model="modalWaiting"
-                    centered
-                    hide-header
-                    hide-footer
-                    :body-bg-variant="'dark'"
-                    :body-text-variant="'light'">
-
-                <b-container fluid>
-                    <h3 class="font-body mb-4">Reward has a two step confirmation </h3>
-                    <div>
-                        <div class="m-2 ml-4">
-                            <ol class="text-left">
-                                <li>First, confirm the amount of Pareto that you'd like to
-                                    deposit
-                                </li>
-                                <li>Last, reward on the Ethereum Blockchain</li>
-                            </ol>
-                            <p class="text-center mt-4"
-                               style="text-align: justify !important; text-justify: inter-word;">
-                                This operation may take a while as we communicate with the Ethereum Blockchain.
-                                Please do not close your browser or navigate to a different page. </p>
-                            <i class="fa fa-spinner fa-spin fa-3x mt-4"></i>
-                        </div>
-
-                        <div  v-if="this.signType!=='LedgerNano'" class="d-flex justify-content-between mt-4 mb-1">
-                            <p class="text-center" style="font-size: 11px">
-                                If MetaMask does not popup, please check your MetaMask extension icon for a new
-                                badge
-                                that signifies an operation should be taken on MetaMask
-
-                            </p>
-                            <span class="mt-1 ml-2"
-                                  style="background: #505050;
-                                             border-radius: 3px;
-                                             padding-left: 2px;">
-                                <img src="../assets/images/mmicon.png" alt=""
-                                     class="icon-mini">
-                            </span>
-                        </div>
-
-                    </div>
-                </b-container>
-            </b-modal>
-        </div>
     </div>
 </template>
 
@@ -303,6 +136,7 @@
     import ContentService from "../services/ContentService";
     import ICountUp from "vue-countup-v2";
 
+    import VIntelFeed from "./VIntelFeed.vue";
     import {mapMutations, mapState} from "vuex";
     import environment from "../utils/environment";
     import {countUpMixin} from "../mixins/countUp";
@@ -318,17 +152,14 @@
             ICountUp,
             VShimmerUser,
             VShimmerMyPost,
-            VShimmerFeed
+            VShimmerFeed,
+            VIntelFeed
         },
         data: function () {
             return {
                 address: null,
                 loading: true,
-                myFeed: {
-                    content: [],
-                    loading: false,
-                    page: 0,
-                },
+                block : 0,
                 modalWaiting: false,
                 hardwareAvailable: false,
                 rewardId: '',
@@ -348,8 +179,7 @@
                     score: 0,
                     tokens: 0
                 },
-                scrollPost: 0,
-                scrollFeed: 0
+                updateContentVar : 0
             };
         },
         directives: {
@@ -392,21 +222,6 @@
                 let param = (intel.txHash === '0x0')? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
             },
-            isAvailable(){
-                if(this.signType === 'LedgerNano'){
-                    this.hardwareAvailable = false;
-                    AuthService.doWhenIsConnected(()=>{
-                        this.hardwareAvailable = true;
-                        AuthService.deleteWatchNano();
-                    })
-                }else{
-                    this.hardwareAvailable = true;
-                }
-            }
-            ,
-            dateStringFormat(date) {
-                return new Date(date);
-            },
             goToIntelPage: function () {
                 window.location = '/#/create';
             },
@@ -426,7 +241,15 @@
                     }
                 );
             },
-            loadContent: function (params) {
+            loadContent: function () {
+                return dashboardService.getAllContent(null,
+                    res => {
+                    },
+                    error => {
+                    }
+                );
+            },
+            updateContent: function(){
                 return dashboardService.getAllContent(params,
                     res => {
                         this.loading = false;
@@ -445,49 +268,32 @@
                     }
                 );
             },
-            hideModal() {
-                if(this.signType === 'LedgerNano'){
-                    AuthService.deleteWatchNano();
-                    this.hardwareAvailable = false;
-                }
-                this.$refs.modalToken.hide()
-            },
-            assignBlock(block) {
-                this.myFeed.content = this.myFeed.content.map(item => {
-                    // console.log(item);
-                    item.blockAgo = block - item.block;
-                    return item;
-                });
-            },
             numberToScientificNotation(number){
                 return (number+"").length>12? number.toExponential(5) : number;
             },
             overrideOnMessage() {
                 let wsa = this.ws;
                 //console.log(this.ws)
+                //console.log(this.ws)
                 this.ws.onmessage = (data) => {
                     try {
+                        console.log(data);
                         const info = JSON.parse(data.data);
                         if (info.data.address) {
                             this.user.score = info.data.score;
                             this.user.rank = info.data.rank;
                             this.user.tokens = info.data.tokens;
                             // this.user.block = info.data.block;
-                            this.assignBlock(info.data.block);
+                            this.block = info.data.block;
                         }
                         if (info.data.action){
-                          //  console.log(info.data.action);
+                            //  console.log(info.data.action);
                             switch (info.data.action){
                                 case 'updateContent':{
-                              //      console.log('load');
-                                    this.loadMyContent();
-                                    this.myFeed.page = 0;
-                                    const params = {limit: 10, page: this.myFeed.page};
-                                    this.loadContent(params);
+                                    this.updateContentVar++;
                                 }
                             }
                         }
-
                     } catch (e) {
                         console.log(e);
                     }
@@ -559,43 +365,6 @@
                     this.$store.state.makingRequest = false;
                 });
             },
-            rewardIntel: function (ID, tokenAmount, intelAddress) {
-                this.hideModal();
-                this.modalWaiting =true;
-                if (!tokenAmount) {
-                    this.$notify({
-                        group: 'notification',
-                        type: 'error',
-                        duration: 10000,
-                        text: 'No Token Amount' });
-
-                    this.tokenAmount = 1;
-                    return;
-                }
-
-                // console.log(ID, tokenAmount);
-                ContentService.rewardIntel(
-                    {ID, tokenAmount, intelAddress}, {signType: this.signType, pathId: this.pathId} ,
-                    res => {
-                        this.modalWaiting =false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'success',
-                            duration: 10000,
-                            text: 'Success'
-                        });
-                    },
-                    err => {
-                        this.modalWaiting =false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            text: err.message?err.message:err
-                        });
-                    }
-                );
-            },
             scrollMyPost: function () {
                 let list = document.getElementById("mypost");
 
@@ -604,25 +373,6 @@
                     this.myContent = this.allMyContent.slice(0, this.myContent.length + 10);
                     // console.log(this.myContent);
                 }
-            },
-            scrollMyFeed: function () {
-                let list = document.getElementById("myfeed");
-
-                if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
-                    && !this.myFeed.loading) {
-                    const params = {limit: 10, page: this.myFeed.page};
-                    this.myFeed.loading = true;
-
-                    this.$store.state.makingRequest = true;
-
-                    let myFeedContentReady = this.loadContent(params);
-                    myFeedContentReady.then(()=>{
-                        this.$store.state.makingRequest = false;
-                    });
-                }
-            },
-            showDetails: function (row) {
-                // console.log(row);
             },
             showModal() {
                 this.$refs.myModalRef.show();
