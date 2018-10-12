@@ -168,6 +168,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                     $set: {
                                         score: result.score,
                                         block: result.block,
+                                        bonus: result.bonus,
                                         tokens: result.tokens
                                     }
                                 };
@@ -231,6 +232,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                             $set: {
                                 score : 0.0,
                                 rank : -1,
+                                bonus: 0,
                                 block: result.block,
                                 tokens: result.tokens
                             }
@@ -318,7 +320,7 @@ controller.addExponent = async function(addresses, scores, blockHeight,callback)
                 for (let i = 0; i < addresses.length; i = i + 1) {
                     try{
                         const address = addresses[i].toLowerCase();
-                        if (rewards[address]) {
+                        if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
                             const V = (1 + (rewards[address] / M) / 2);
                             scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
                         }
@@ -669,7 +671,7 @@ controller.startwatchNewIntel = function(){
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+            ParetoContent.updateMany({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                     if(controller.wss){
                         try{
                             controller.wss.clients.forEach(function each(client) {
@@ -728,10 +730,13 @@ controller.startwatchNewIntel = function(){
                                     console.error('unable to write to db because: ', err);
                                 } else {
                                     ParetoContent.findOne({id:intelIndex}, (err, intel) => {
-                                        const {address} = intel;
-                                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {},
-                                            function(err, r){ }
-                                        );
+                                        if(intel){
+                                            const {address} = intel;
+                                            ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {},
+                                                function(err, r){ }
+                                            );
+                                        }
+
                                     });
                                     controller.updateIntelReward(intelIndex);
                                 }
@@ -1111,20 +1116,23 @@ controller.getAproxScoreAddress = function(address, delta ,callback){
                 if(ranking.tokens > 0){
                     const item=  {
                         block:  Decimal(ranking.block),
-                        score:  Decimal(ranking.score),
-                        bonus:  Decimal(ranking.bonus),
-                        tokens:  Decimal(ranking.tokens),
+                        score:  Decimal(ranking.score || 0),
+                        bonus:  Decimal(ranking.bonus || (ranking.tokens === 0)? 0:ranking.score/ranking.tokens),
+                        tokens:  Decimal(ranking.tokens || 0),
                     } ;
 
-                    var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
+                    if(parseFloat(item.bonus > 0)) {
+                        var divisor = Decimal(Math.max(parseFloat(item.block.sub(contractBn)), 1)).div(hBn);
 
-                    const w = item.block.sub(item.bonus.mul(divisor));
-                    const new_numerator =   (blockHeightBn.sub(w));
-                    const new_divisor =    Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
-                    let new_V =  1;
-                    item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
-                    ranking.score  = parseFloat(item.tokens.mul( (new_numerator.div(new_divisor)).pow(new_V) ));
-                    ranking.block = blockHeight ;
+                        const w = item.block.sub(item.bonus.mul(divisor));
+                        const new_numerator = (blockHeightBn.sub(w));
+                        const new_divisor = Decimal(Math.max(parseFloat(blockHeightBn.sub(contractBn)), 1)).div(hBn);
+                        let new_V = item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
+
+                        ranking.bonus = parseFloat(new_numerator.div(new_divisor))
+                        ranking.score = parseFloat(item.tokens.mul((new_numerator.div(new_divisor)).pow(new_V)));
+                        ranking.block = blockHeight;
+                    }
                 }
             }catch (e) {
                 console.log(e);
@@ -1152,20 +1160,22 @@ controller.getAproxScoreRanking = function(rank, limit, page, delta ,callback){
                     if(ranking.tokens > 0){
                         const item=  {
                             block:  Decimal(ranking.block),
-                            score:  Decimal(ranking.score),
-                            bonus:  Decimal(ranking.bonus),
-                            tokens:  Decimal(ranking.tokens),
+                            score:  Decimal(ranking.score || 0),
+                            bonus:  Decimal(ranking.bonus || (ranking.tokens === 0)? 0:ranking.score/ranking.tokens),
+                            tokens:  Decimal(ranking.tokens || 0),
                         } ;
+                        if(parseFloat(item.bonus > 0)) {
+                            var divisor = Decimal(Math.max(parseFloat(item.block.sub(contractBn)), 1)).div(hBn);
 
-                        var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
+                            const w = item.block.sub(item.bonus.mul(divisor));
+                            const new_numerator = (blockHeightBn.sub(w));
+                            const new_divisor = Decimal(Math.max(parseFloat(blockHeightBn.sub(contractBn)), 1)).div(hBn);
+                            let new_V = item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
 
-                        const w = item.block.sub(item.bonus.mul(divisor));
-                        const new_numerator =   (blockHeightBn.sub(w));
-                        const new_divisor =    Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
-                        let new_V =  1;
-                        item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
-                        ranking.score  = parseFloat(item.tokens.mul( (new_numerator.div(new_divisor)).pow(new_V) ));
-                        ranking.block = blockHeight ;
+                            ranking.bonus = parseFloat(new_numerator.div(new_divisor)),
+                            ranking.score = parseFloat(item.tokens.mul((new_numerator.div(new_divisor)).pow(new_V)));
+                            ranking.block = blockHeight;
+                        }
                     }
                 }catch (e) {
                     console.log(e);
@@ -1183,7 +1193,6 @@ controller.getAproxScoreRanking = function(rank, limit, page, delta ,callback){
  * @param callback
  */
 controller.aproxAllScoreRanking = async function(callback){
-
         web3.eth.getBlock('latest')
             .then(function(res) {
                 const blockHeight = res.number;
@@ -1203,22 +1212,23 @@ controller.aproxAllScoreRanking = async function(callback){
                         while (len--) {
                             const item=  {
                                 block:  Decimal(results[len].block),
-                                score:  Decimal(results[len].score),
-                                bonus:  Decimal(results[len].bonus),
-                                tokens:  Decimal(results[len].tokens),
+                                score:  Decimal(results[len].score|| 0),
+                                bonus:  Decimal(results[len].bonus || (results[len].tokens === 0)? 0:results[len].score/results[len].tokens ),
+                                tokens:  Decimal(results[len].tokens || 0),
                             } ;
+                            if(parseFloat(item.tokens > 0)){
+                                var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
 
-                            var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
-
-                            const w = item.block.sub(item.bonus.mul(divisor));
-                            const new_numerator =   (blockHeightBn.sub(w));
-                            const new_divisor =    Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
-                            const new_V = item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
-                            var dbValues = {
+                                const w = item.block.sub(item.bonus.mul(divisor));
+                                const new_numerator =   (blockHeightBn.sub(w));
+                                const new_divisor =    Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
+                                const new_V = item.score.div(item.tokens).logarithm().div(item.bonus.logarithm());
+                                var dbValues = {
+                                    bonus: parseFloat(new_numerator.div(new_divisor)),
                                     score : parseFloat(item.tokens.mul( (new_numerator.div(new_divisor)).pow(new_V) )),
                                     block: blockHeight };
-                            bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
-
+                                bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
+                            }
                         }
                         if (bulkop.length > 0){
                             ParetoAddress.bulkWrite(bulkop).then(
@@ -1286,8 +1296,8 @@ controller.realAllScoreRanking = async function(callback){
                     await controller.addExponent(addressesExponent, scores, blockHeight, function (err, results) {
                         if(!err ){
 
-                            for (let t=1; t<results.length; t=t+1){
-                                let result = results[i];
+                            for (let t=0; t<results.length; t=t+1){
+                                let result = results[t];
                                 var dbValues = {
                                     bonus : result.bonus,
                                     tokens : result.tokens,
