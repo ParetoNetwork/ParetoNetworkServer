@@ -158,16 +158,12 @@
             authLogin() {
                 this.loadingLogin();
                 Auth.signSplash(data => {
-                    DashboardService.getAddress(res => {
-                        this.loading = false;
-                        this.$store.dispatch({
-                            type: 'login',
-                            address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
-                        });
-                        this.$router.push('/intel');
-                    }, () => {
-
+                    this.loading = false;
+                    this.$store.dispatch({
+                        type: 'login',
+                        address: {address: data, dataSign: {signType: 'Metamask', pathId: ''}},
                     });
+                    this.$router.push('/intel');
 
                 }, error => {
                     let errorText= error.message? error.message : error;
