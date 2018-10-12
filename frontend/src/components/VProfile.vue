@@ -74,6 +74,9 @@
             VShimmerUserProfile
         },
         beforeMount: function () {
+            if(this.addressProfile){
+                this.getProfile(this.addressProfile);
+            }
         },
         data: function () {
             return {
@@ -84,7 +87,7 @@
                     biography: '',
                     rank: 1000
                 },
-                baseURL : environment.baseURL
+                baseURL : environment.baseURL,
             }
         },
         methods: {
@@ -103,6 +106,7 @@
         },
         watch: {
             addressProfile: function (newVal) {
+                console.log(newVal);
                 this.getProfile(newVal);
             }
         }
