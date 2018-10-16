@@ -2,10 +2,10 @@
     <div>
         <div class="container main wrapp">
             <div class="row pt-5">
-                <div class="col-md-5 mb-5 mt-2 m-sm-0">
+                <div class="col-lg-4 mb-1 mt-2">
                     <VProfile :addressProfile="address"></VProfile>
                 </div>
-                <div class="col-md-7 mb-3">
+                <div class="col-lg-7 offset-lg-1 mb-3 px-0 mt-2">
                     <VIntelFeed :user="user" :fetchAddress="address" :title="title"></VIntelFeed>
                 </div>
             </div>
