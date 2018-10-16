@@ -752,7 +752,6 @@ controller.getAllAvailableContent = function(req, callback) {
 
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
-    var fetchAddress = req.query.fetchAddress;
   //check if user, then return what the user is privy to see
 
   //check block number or block age, then retrieve all content after that block. add more limitations/filters later
@@ -861,14 +860,13 @@ controller.getAllAvailableContent = function(req, callback) {
                 var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
 
                 try{
-
-                    allResults =    await ParetoContent.find(
+                    allResults = await ParetoContent.find(
                         { $or:[
                                 {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
                                 {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
                                 {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
                                 {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}] }
+                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}]}
                             ]
                         }
                     ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
@@ -909,16 +907,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 }
                             };
 
-                            console.log(fetchAddress);
-
-                            if(fetchAddress){
-                                if(fetchAddress === entry.address){
-                                    newResults.push(data);
-                                }
-                            }else{
-                                newResults.push(data);
-                            }
-
+                            newResults.push(data);
                     });
                   //console.log(allResults);
 
@@ -1191,7 +1180,7 @@ controller.getContentById = function(){
 };
 
 controller.getContentByCurrentUser = function(req, callback){
-    const address = req.user;
+    const address = req.query.user || req.user;
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
 

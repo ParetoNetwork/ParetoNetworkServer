@@ -314,7 +314,7 @@
                 }
             },
             loadMyContent: function () {
-                return dashboardService.getContent(
+                return dashboardService.getContent('',
                     res => {
                         this.allMyContent = res;
                         this.loadedMyContent = true;
