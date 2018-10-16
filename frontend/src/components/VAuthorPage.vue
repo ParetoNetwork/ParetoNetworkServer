@@ -6,7 +6,7 @@
                     <VProfile :addressProfile="address"></VProfile>
                 </div>
                 <div class="col-md-7 mb-3">
-                    <VIntelFeed :user="user" :fetchAddress="address"></VIntelFeed>
+                    <VIntelFeed :user="user" :fetchAddress="address" :title="title"></VIntelFeed>
                 </div>
             </div>
         </div>
@@ -26,6 +26,7 @@
         },
         data: function () {
             return{
+                title : 'AUTHOR FEED',
                 address: this.$route.params.address,
                 user: {
                     rank: 0,

@@ -413,7 +413,6 @@ app.get('/v1/content', function (req, res) {
             res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
-
 });
 
 

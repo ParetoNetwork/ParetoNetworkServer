@@ -1,12 +1,8 @@
 <template>
     <div>
-        <div v-if="myFeed.content.length" class="border p-2">
+        <div v-if="!loading" class="border p-2">
             <div class="border-bottom p-2 p-md-3">
-                <h5 class="title"> MY INTEL FEED: </h5>
-            </div>
-            <div v-if="loading" class="d-flex split">
-                <i class="fa fa-spinner fa-spin fa-5x mt-2 mx-auto">
-                </i>
+                <h5 class="title"> {{title || 'MY INTEL FEED:'}}  </h5>
             </div>
             <!--
             <div >
@@ -193,7 +189,7 @@
             VShimmerFeed
         },
         props : [
-         'updateContent', 'block', 'user', 'fetchAddress'
+         'updateContent', 'block', 'user', 'fetchAddress', 'title'
         ],
         mixins: [countUpMixin],
         data: function(){
@@ -210,7 +206,8 @@
                     page: 0,
                 },
                 rewardId: '',
-                tokenAmount: 1
+                tokenAmount: 1,
+                loading: true
             }
         },
         computed: {
@@ -220,6 +217,7 @@
             this.loadContent();
         },
         watch: {
+            //Updates when parent view, which has the webSocket, receives new information and refreshes
             updateContent: function (uC) {
                 this.updateFeedContent();
             },
@@ -262,26 +260,43 @@
                 }
             },
             loadContent: function (params) {
-                params = params || {};
-                if(this.fetchAddress) params.fetchAddress = this.fetchAddress;
+                params = params || null;
 
-                return dashboardService.getAllContent(params,
-                    res => {
-                        this.loading = false;
-                        this.myFeed.page++;
-                        this.myFeed.loading = false;
-                        this.myFeed.content = [...this.myFeed.content, ...res];
-                    },
-                    error => {
-                        let errorText= error.message? error.message : error;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Content',
-                            text: errorText });
-                    }
-                );
+                let onSuccess = (res) => {
+                    this.loading = false;
+                    this.myFeed.page++;
+                    this.myFeed.loading = false;
+                    this.myFeed.content = [...this.myFeed.content, ...res];
+                };
+
+                let onError = (error) => {
+                    this.loading = false;
+                    let errorText= error.message? error.message : error;
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Content',
+                        text: errorText
+                    });
+                };
+
+                if (this.fetchAddress) {
+                    let params = {
+                        page: this.myFeed.page,
+                        limit: 10,
+                        user: this.fetchAddress
+                    };
+                    return dashboardService.getContent(params,
+                        onSuccess,
+                        onError
+                    );
+                }else{
+                    return dashboardService.getAllContent(params,
+                        onSuccess,
+                        onError
+                    );
+                }
             },
             updateFeedContent: function(){
                 return dashboardService.getAllContent(null, res => {
