@@ -666,8 +666,12 @@ controller.postContent = function (req, callback) {
  * Watch Intel events. Support watch rewards for old Intel address
  */
 controller.startwatchNewIntel = function(){
+    console.log(Intel_Contract_Schema.networks[ETH_NETWORK].address);
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
+    console.log('startWatch');
+    intel.events.allEvents({fromBlock: 0}).on('data',  event => {console.log(event);});
     intel.events.NewIntel().on('data',  event => {
+        console.log(event);
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
@@ -711,6 +715,8 @@ controller.startwatchNewIntel = function(){
                 const intelAddress =results[i];
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
                 intel.events.Reward().on('data',  event => {
+                    console.log(event);
+                    console.log(intelAddress);
                     try{
                         const intelIndex = parseInt(event.returnValues.intelIndex);
                         const rewardData = {
@@ -738,7 +744,10 @@ controller.startwatchNewIntel = function(){
                                         }
 
                                     });
+                                    controller.updateAddressReward(event);
                                     controller.updateIntelReward(intelIndex);
+
+
                                 }
                             }
                         );
@@ -758,6 +767,98 @@ controller.startwatchNewIntel = function(){
 
 };
 
+
+/**
+ * update Address score when reward an intel
+ * @param event
+ */
+controller.updateAddressReward = function(event){
+    let addressToUpdate = event.returnValues.sender.toLowerCase();
+    ParetoAddress.findOne({address: addressToUpdate}, (err, data)=>{
+        let dbValues= {
+            bonus: data.bonus,
+            tokens: data.tokens,
+            score: data.score,
+            block: data.block
+        };
+        controller.addExponent([addressToUpdate],[dbValues],event.blockNumber,function (err, res){
+            var dbQuery = {
+                address: addressToUpdate
+            };
+            var dbValues = {
+                $set: {
+                    score: res[0].score,
+                    block: res[0].block,
+                    bonus: res[0].bonus,
+                    tokens: res[0].tokens
+                }
+            };
+            var dbOptions = {
+                upsert: true,
+                new: true //mongo uses returnNewDocument, mongo uses new
+            };
+            // console.log({
+            //     addrees: dbQuery.address,
+            //     dbValues: dbValues
+            // });
+            //should queue for writing later
+            var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
+            //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
+
+            updateQuery.exec().then(function (r) {
+                controller.getScoreAndSaveRedis( function (err, result) {
+                    if(!err){
+                        if(controller.wss){
+                            try{
+                                controller.wss.clients.forEach(function each(client) {
+                                    if (client.isAlive === false) return client.terminate();
+                                    if (client.readyState === controller.WebSocket.OPEN ) {
+                                        // Validate if the user is subscribed a set of information
+                                        if(client.user && client.user.user==addressToUpdate){
+                                            //console.log('updateContent');
+                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                            const rank = parseInt(client.info.rank) || 1;
+                                            let limit = parseInt(client.info.limit) || 100;
+                                            const page = parseInt(client.info.page) || 0;
+
+                                            //max limit
+                                            if (limit > 500) {
+                                                limit = 500;
+                                            }
+                                            /**
+                                             * Send ranking
+                                             */
+                                            controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                                                if (!err) {
+                                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                                                }
+                                            });
+
+                                            controller.retrieveAddress(client.user.user, function (err, result) {
+                                                if (!err) {
+                                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }catch (e) {
+                                console.log(e);
+                            }
+                        }else{
+                            console.log('no wss')
+                        }
+                    }
+                })
+            })
+        });
+    })
+}
+
+/**
+ * Update totalreward count in Intel document
+ * @param intelIndex
+ */
 controller.updateIntelReward=function(intelIndex){
     let agg =  [ {$match: { 'intelId': intelIndex } },
         { $group: { _id: null,
@@ -784,7 +885,7 @@ controller.updateIntelReward=function(intelIndex){
                                 if (client.readyState === controller.WebSocket.OPEN ) {
                                     // Validate if the user is subscribed a set of information
                                     if(client.user){
-                                        //console.log('updateContent');
+                                        console.log('updateContent');
                                         client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
                                     }
                                 }
@@ -819,6 +920,7 @@ controller.updateFromLastIntel = function(){
                 const lastBlock = results[0].lastBlock;
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
                 intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+                    console.log(events);
                     if(err){ console.log(err); return;}
                     for (let i=0;i<events.length;i=i+1){
                         try{
