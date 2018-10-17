@@ -163,6 +163,7 @@ export default class ContentService {
             Intel_Contract_Schema,
             content.intelAddress
         );
+      console.log(content.intelAddress)
       let gasPrice = await web3.eth.getGasPrice();
       gasPrice = gasPrice * 10;
 
@@ -296,6 +297,7 @@ export default class ContentService {
         Intel_Contract_Schema,
         window.localStorage.getItem('intelAddress')
     );
+      console.log(window.localStorage.getItem('intelAddress'))
 
     ParetoTokenInstance = new web3.eth.Contract(
         Pareto_Token_Schema,
