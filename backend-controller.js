@@ -62,8 +62,8 @@ var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
 var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
-var web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
-var web3_events = new Web3(web3_events_provider);
+var web3_events_provider = null
+var web3_events = null;
 
 controller.startW3WebSocket = function () {
     web3_events_provider.on('connect', function () {
@@ -88,6 +88,8 @@ controller.startW3WebSocket = function () {
 const mongoose = require('mongoose');
 //var models = require('./models/address');
 mongoose.connect(CONNECTION_URL).then(tmp=>{
+    web3_events_provider =  new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+    web3_events  = new Web3(web3_events_provider);
     controller.startW3WebSocket();
   console.log("PARETO: Success connecting to Mongo ")
 }).catch(err=>{
@@ -666,12 +668,9 @@ controller.postContent = function (req, callback) {
  * Watch Intel events. Support watch rewards for old Intel address
  */
 controller.startwatchNewIntel = function(){
-    console.log(Intel_Contract_Schema.networks[ETH_NETWORK].address);
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     console.log('startWatch');
-    intel.events.allEvents({fromBlock: 0}).on('data',  event => {console.log(event);});
     intel.events.NewIntel().on('data',  event => {
-        console.log(event);
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
@@ -715,8 +714,6 @@ controller.startwatchNewIntel = function(){
                 const intelAddress =results[i];
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
                 intel.events.Reward().on('data',  event => {
-                    console.log(event);
-                    console.log(intelAddress);
                     try{
                         const intelIndex = parseInt(event.returnValues.intelIndex);
                         const rewardData = {
@@ -775,7 +772,7 @@ controller.startwatchNewIntel = function(){
 controller.updateAddressReward = function(event){
     let addressToUpdate = event.returnValues.sender.toLowerCase();
     ParetoAddress.findOne({address: addressToUpdate}, (err, data)=>{
-        let dbValues= {
+        let dbValues =  {
             bonus: data.bonus,
             tokens: data.tokens,
             score: data.score,
@@ -848,6 +845,8 @@ controller.updateAddressReward = function(event){
                         }else{
                             console.log('no wss')
                         }
+                    }else{
+                        console.log(err);
                     }
                 })
             })
@@ -885,7 +884,6 @@ controller.updateIntelReward=function(intelIndex){
                                 if (client.readyState === controller.WebSocket.OPEN ) {
                                     // Validate if the user is subscribed a set of information
                                     if(client.user){
-                                        console.log('updateContent');
                                         client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
                                     }
                                 }
@@ -920,7 +918,7 @@ controller.updateFromLastIntel = function(){
                 const lastBlock = results[0].lastBlock;
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
                 intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
-                    console.log(events);
+                   // console.log(events);
                     if(err){ console.log(err); return;}
                     for (let i=0;i<events.length;i=i+1){
                         try{

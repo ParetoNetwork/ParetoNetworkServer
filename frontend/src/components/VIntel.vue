@@ -446,6 +446,33 @@
                     }
                 );
             },
+            updateFeedContent: function(){
+                return dashboardService.getAllContent(null, res => {
+                        res.forEach(intel=> {
+                            let found = false;
+                            this.myFeed.content = this.myFeed.content.map(myFeedintel=>{
+                                if(intel._id === myFeedintel._id){
+                                    myFeedintel = intel
+                                    found = true;
+                                }
+                                return myFeedintel;
+                            });
+                            if(!found){
+                                this.myFeed.content.unshift(intel);
+                            }
+                        });
+                    },
+                    error => {
+                        let errorText= error.message? error.message : error;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Content',
+                            text: errorText });
+                    }
+                );
+            },
             hideModal() {
                 if(this.signType === 'LedgerNano'){
                     AuthService.deleteWatchNano();
@@ -473,7 +500,7 @@
                             this.user.score = info.data.score;
                             this.user.rank = info.data.rank;
                             this.user.tokens = info.data.tokens;
-                            // this.user.block = info.data.block;
+                            this.user.block = info.data.block;
                             this.assignBlock(info.data.block);
                         }
                         if (info.data.action){
@@ -482,9 +509,7 @@
                                 case 'updateContent':{
                               //      console.log('load');
                                     this.loadMyContent();
-                                    this.myFeed.page = 0;
-                                    const params = {limit: 10, page: this.myFeed.page};
-                                    this.loadContent(params);
+                                    this.updateFeedContent();
                                 }
                             }
                         }
