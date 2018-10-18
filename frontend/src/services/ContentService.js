@@ -15,6 +15,17 @@ export default class ContentService {
   static ledgerNanoEngine = null;
   static ledgerWalletSubProvider = null;
 
+  static networks = {
+      1: {
+          https: "https://mainnet.infura.io/QWMgExFuGzhpu2jUr6Pq",
+          wss: "wss://mainnet.infura.io:443/ws"
+      },
+      3: {
+          https: "https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq",
+          wss: "wss://ropsten.infura.io/ws"
+      }
+  };
+
   static uploadContent(content, onSuccess, onError) {
     http
       .post("/v1/content", content)
@@ -36,7 +47,6 @@ export default class ContentService {
               if(res.data.success){
                   return onSuccess(res.data.data.data.PARETO);
               }else{
-                  console.log(res);
                   return onError('Could not retrieve data from server');
               }
           })
@@ -47,7 +57,7 @@ export default class ContentService {
       if (typeof web3 !== 'undefined') {
           provider = new Web3(web3.currentProvider);
       } else {
-          provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
+          provider = new Web3(new Web3.providers.HttpProvider(ContentService.networks[window.localStorage.getItem('netWorkId')].https));
       }
 
       let gasPriceWei = await provider.eth.getGasPrice();
@@ -163,7 +173,6 @@ export default class ContentService {
             Intel_Contract_Schema,
             content.intelAddress
         );
-      console.log(content.intelAddress)
       let gasPrice = await web3.eth.getGasPrice();
       gasPrice = gasPrice * 10;
 
@@ -264,7 +273,7 @@ export default class ContentService {
               this.ledgerWalletSubProvider  = await LedgerWalletSubproviderFactory(() => networkId, pathId) ;
               this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
               this.ledgerNanoEngine.addProvider(this.ledgerWalletSubProvider);
-              this.ledgerNanoEngine.addProvider(new WsSubprovider({rpcUrl: "wss://ropsten.infura.io/ws"})); // you need RPC endpoint
+              this.ledgerNanoEngine.addProvider(new WsSubprovider({rpcUrl: ContentService.networks[window.localStorage.getItem('netWorkId')].wss})); // you need RPC endpoint
               this.ledgerNanoEngine.start();
               provider = this.ledgerNanoEngine;
               break;
@@ -283,7 +292,7 @@ export default class ContentService {
                   // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
                   provider = new Web3(
                       new Web3.providers.HttpProvider(
-                          "https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"
+                          ContentService.networks[window.localStorage.getItem('netWorkId')].https
                       )
                   );
               }
@@ -297,7 +306,6 @@ export default class ContentService {
         Intel_Contract_Schema,
         window.localStorage.getItem('intelAddress')
     );
-      console.log(window.localStorage.getItem('intelAddress'))
 
     ParetoTokenInstance = new web3.eth.Contract(
         Pareto_Token_Schema,
