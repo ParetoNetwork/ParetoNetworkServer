@@ -62,7 +62,7 @@ var Web3 = require('web3');
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://sealer.giveth.io:40404/"));
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
 var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
-var web3_events_provider = null
+var web3_events_provider = null;
 var web3_events = null;
 
 controller.startW3WebSocket = function () {
@@ -943,7 +943,6 @@ controller.getAllAvailableContent = function(req, callback) {
 
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
-
   //check if user, then return what the user is privy to see
 
   //check block number or block age, then retrieve all content after that block. add more limitations/filters later
@@ -1052,14 +1051,13 @@ controller.getAllAvailableContent = function(req, callback) {
                 var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
 
                 try{
-
-                    allResults =    await ParetoContent.find(
+                    allResults = await ParetoContent.find(
                         { $or:[
                                 {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
                                 {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
                                 {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
                                 {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}] }
+                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}]}
                             ]
                         }
                     ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
@@ -1296,9 +1294,8 @@ controller.aproxAllScoreRanking = async function(callback){
         web3.eth.getBlock('latest')
             .then(function(res) {
                 const blockHeight = res.number;
-
                 //Find all Address
-                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block', { }, function(err, results){
+                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block bonus', { }, function(err, results){
                     if(err){
                         callback(err);
                     }
@@ -1312,11 +1309,11 @@ controller.aproxAllScoreRanking = async function(callback){
                         while (len--) {
                             const item=  {
                                 block:  Decimal(results[len].block),
-                                score:  Decimal(results[len].score|| 0),
-                                bonus:  Decimal(results[len].bonus || (results[len].tokens === 0)? 0:results[len].score/results[len].tokens ),
+                                score:  Decimal(Math.abs(results[len].score) || 0),
+                                bonus:  Decimal(Math.abs(results[len].bonus) || ((results[len].tokens === 0)? 0:(Math.abs(results[len].score)/results[len].tokens)) ),
                                 tokens:  Decimal(results[len].tokens || 0),
                             } ;
-                            if(parseFloat(item.tokens > 0)){
+                            if(parseFloat(item.tokens)>0){
                                 var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
 
                                 const w = item.block.sub(item.bonus.mul(divisor));
@@ -1327,7 +1324,7 @@ controller.aproxAllScoreRanking = async function(callback){
                                     bonus: parseFloat(new_numerator.div(new_divisor)),
                                     score : parseFloat(item.tokens.mul( (new_numerator.div(new_divisor)).pow(new_V) )),
                                     block: blockHeight };
-                                bulkop.push({updateOne:{ filter: {_id : item._id}, update: dbValues}});
+                                bulkop.push({updateOne:{ filter: {_id : results[len]._id}, update: dbValues}});
                             }
                         }
                         if (bulkop.length > 0){
@@ -1450,7 +1447,7 @@ controller.getContentById = function(){
 };
 
 controller.getContentByCurrentUser = function(req, callback){
-    const address = req.user;
+    const address = req.query.user || req.user;
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
 
