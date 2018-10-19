@@ -68,8 +68,10 @@
                                             <b> {{ row.totalReward }} </b>
                                         </p>
                                         <b-btn class="btn-primary-pareto mx-auto px-4"
-                                               style="max-width: 120px;"
-                                               v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress; isAvailable();">REWARD
+                                               style="width: 120px;"
+                                               v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress; tokenAmount= row.reward; isAvailable();">
+                                            <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
+                                            <b> {{ row.reward }} </b>
                                         </b-btn>
                                     </div>
                                 </div>
@@ -229,7 +231,7 @@
             assignBlock(block) {
                 this.myFeed.content = this.myFeed.content.map(item => {
                     // console.log(item);
-                    item.blockAgo = block - item.block;
+                    item.blockAgo = Math.max(block - item.block, 0);
                     return item;
                 });
             },
@@ -298,12 +300,17 @@
                 }
             },
             updateFeedContent: function(){
-                return dashboardService.getAllContent(null, res => {
+                let params = {
+                    page: 0,
+                    limit: this.myFeed.content.length,
+                    user: this.fetchAddress
+                }
+                return dashboardService.getAllContent(params, res => {
                         res.forEach(intel=> {
                             let found = false;
                             this.myFeed.content = this.myFeed.content.map(myFeedintel=>{
                                 if(intel._id === myFeedintel._id){
-                                    myFeedintel = intel
+                                    myFeedintel = intel;
                                     found = true;
                                 }
                                 return myFeedintel;

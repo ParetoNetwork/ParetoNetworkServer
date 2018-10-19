@@ -280,6 +280,46 @@ controller.getParetoCoinMarket = function(callback){
         });
 };
 
+/**
+ *  addExponent using db instead of Ethereum network
+ */
+controller.addExponentAprox =  function(addresses, scores, tokensFixes, blockHeight,callback){
+    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONTENT_BLOCK_AGO)} }).exec(function(err, values) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            let total=values.length;
+            let rewards={};
+            for (let j = 0; j < values.length; j = j + 1) {
+                try{
+                    const sender = values[j].sender.toLowerCase();
+                    if(!rewards[sender]){
+                        rewards[sender] = 0;
+                    }
+                    rewards[sender]=rewards[sender]+1;
+                }catch (e) { console.log(e) }
+            }
+            const M = total/2;
+            for (let i = 0; i < addresses.length; i = i + 1) {
+                try{
+                    const address = addresses[i].toLowerCase();
+                    const tokenfix = parseFloat(tokensFixes[i]);
+                    scores[i].tokens = Math.max(scores[i].tokens-tokenfix,0);
+                    if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+                        const V = (1 + (rewards[address] / M) / 2);
+                        scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
+
+                    }else{
+                        scores[i].score = 0;
+                    }
+                }catch (e) { console.log(e) }
+
+            }
+            return callback(null, scores);
+        }
+    })
+};
 
 controller.addExponent = async function(addresses, scores, blockHeight,callback){
 
@@ -674,25 +714,45 @@ controller.startwatchNewIntel = function(){
         try{
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
-            ParetoContent.updateMany({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                    if(controller.wss){
-                        try{
-                            controller.wss.clients.forEach(function each(client) {
-                                if (client.isAlive === false) return client.terminate();
-                                if (client.readyState === controller.WebSocket.OPEN ) {
-                                    // Validate if the user is subscribed a set of information
-                                    if(client.user){
-                                        //console.log('updateContent');
-                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                    }
-                                }
-                            });
-                        }catch (e) {
-                            console.log(e);
-                        }
-                    }else{
-                        console.log('no wss')
-                    }
+            ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                   if(!err){
+                       try{
+                           controller.retrieveAddress(data.address,function (err, result) {
+                                ParetoAddress.findOneAndUpdate({address: data.address}, {tokens : Math.max(result.tokens-initialBalance,0)}, (e, result)=>{
+                                    controller.getScoreAndSaveRedis((err, result)=>{
+                                        if(controller.wss){
+                                            try{
+                                                controller.wss.clients.forEach(function each(client) {
+                                                    if (client.isAlive === false) return client.terminate();
+                                                    if (client.readyState === controller.WebSocket.OPEN ) {
+                                                        // Validate if the user is subscribed a set of information
+                                                        if(client.user){
+                                                            //console.log('updateContent');
+                                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                                            if(client.user.user== data.address){
+                                                                controller.retrieveAddress(client.user.user, function (err, result) {
+                                                                    if (!err) {
+                                                                        client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                                                    }
+                                                                });
+                                                            }
+                                                        }
+                                                    }
+                                                });
+                                            }catch (e) {
+                                                console.log(e);
+                                            }
+                                        }else{
+                                            console.log('no wss')
+                                        }
+                                    })
+                                })
+
+                           })
+                       }catch (e) {
+                           console.log(e);
+                       }
+                   }
             });
         }catch (e) {
             console.log(e);
@@ -778,7 +838,7 @@ controller.updateAddressReward = function(event){
             score: data.score,
             block: data.block
         };
-        controller.addExponent([addressToUpdate],[dbValues],event.blockNumber,function (err, res){
+        controller.addExponentAprox([addressToUpdate],[dbValues],[web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')],event.blockNumber,function (err, res){
             var dbQuery = {
                 address: addressToUpdate
             };
@@ -1075,7 +1135,7 @@ controller.getAllAvailableContent = function(req, callback) {
                          */
                             let data = {
                                 _id: entry._id,
-                                blockAgo: blockHeight - entry.block,
+                                blockAgo: Math.max(blockHeight - entry.block, 0),
                                 block: entry.block,
                                 title: entry.title,
                                 address: entry.address,
@@ -1470,7 +1530,7 @@ controller.getContentByCurrentUser = function(req, callback){
                   results.forEach(function(entry){
                       let data = {
                           _id: entry._id,
-                          blockAgo : blockHeight - entry.block,
+                          blockAgo : Math.max(blockHeight - entry.block),
                           block : entry.block,
                           address: entry.address,
                           title: entry.title,
