@@ -3,60 +3,8 @@
         <div class="container">
             <div class="row mx-2 pt-5">
                 <div class="col-12 order-last order-lg-first col-lg-4 mb-4 p-0">
-                    <VShimmerUserProfile v-if="!profile.address"></VShimmerUserProfile>
-                    <div v-else class="row">
-                        <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
-                            <div data-v-514e8c24="" class="thumb profile-pic"
-                                 v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage( profile.profile_pic)}"
-                                 ></div>
-                        </div>
-
-                        <div class="col-12 col-sm-7 col-md-12 border p-5">
-                            <div class="row text-group">
-                                <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> About {{profile.first_name}} {{profile.last_name}} :</b></h6>
-                                <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address}}:</b></h6>
-                            </div>
-                            <div class="row text-group">
-                                <p v-if="profile.biography"> {{profile.biography}} </p>
-                                <p v-else> No Bio to show </p>
-                            </div>
-                            <div class="row mt-4">
-                                <img src="../assets/images/LogoMarkColor.svg" width="20px" height="20px" alt="" class="mr-2">
-                                <span class="text-dashboard text-pareto-gray"><b>NETWORK RANKING:</b>
-                                    <ICountUp
-                                        v-if="profile.rank"
-                                        :startVal="countUp.startVal"
-                                        :endVal="parseFloat(profile.rank)"
-                                        :decimals="decimalsLength(profile.rank)"
-                                        :duration="randomNumber(4,7)"
-                                        :options="countUp.options"
-                                        @ready="onReady"/>
-                                    <span v-else> 0 </span>
-                                </span>
-
-                            </div>
-
-                            <div v-if="false" class="row border-bottom mt-5 px-0 py-3">
-                                <i class="fa fa-search"></i>
-                                <div class="m-auto">
-                                    <span class="text-pareto-gray ml-3"> View Author Profile </span>
-                                </div>
-                            </div>
-                            <div v-if="false" class="row border-bottom mt-3 px-0 py-3">
-                                <i class="fa fa-book"></i>
-                                <div class="m-auto">
-                                    <span class="text-pareto-gray ml-3"> View Author's Articles </span>
-                                </div>
-                            </div>
-                        </div>
-                        <!--<button class="btn btn-success-pareto mt-5">-->
-                            <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
-                        <!--</button>-->
-                    </div>
+                    <VProfile :addressProfile="intel.address"></VProfile>
                 </div>
-
-
-
                 <!--<div v-if="loading" class="col-12 col-lg-7 p-0">
                     <div class="row">
                         <div class="d-flex split mt-4 mx-auto">
@@ -77,7 +25,7 @@
                                     <div class="d-flex flex-column align-items-end">
                                         <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
-                                        <span class="mb-2">
+                                        <span class="mb-2" style="font-size: 10px;">
                                             <ICountUp
                                                     v-if="intel.blockAgo"
                                                     :startVal="countUp.startVal"
@@ -107,12 +55,14 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import ProfileService from '../services/profileService';
-    import environment from '../utils/environment';
 
     import ICountUp from 'vue-countup-v2';
     import {mapMutations, mapState} from "vuex";
     import {countUpMixin} from "../mixins/countUp";
     import AuthService from "../services/authService";
+    import environment from '../utils/environment';
+
+    import VProfile from "./VProfile.vue";
 
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
     import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
@@ -123,7 +73,8 @@
         components: {
             ICountUp,
             VShimmerUserProfile,
-            VShimmerIntelInformation
+            VShimmerIntelInformation,
+            VProfile
         },
         computed: {
             ...mapState(["ws"])
@@ -144,7 +95,7 @@
                 baseURL : environment.baseURL
             };
         },
-        beforeMount: function () {
+        beforeMount: function(){
             this.$store.state.makingRequest = true;
             this.requestCall()
             console.log(this.$route.params);
@@ -219,87 +170,4 @@
 </script>
 
 <style scoped lang="scss">
-    .wrapp {
-        color: black;
-        font-size: 12px;
-    }
-
-    li > .split {
-        cursor: pointer;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-        padding-bottom: 0.5rem;
-
-    }
-
-    li, .list-group-item:last-child > .split {
-        border-bottom: 0;
-
-    }
-
-    .text-group{
-        text-align: left;
-    }
-
-    .text-group-right{
-        text-align: right;
-    }
-
-    .name-title {
-        font-size: 25px;
-        font-weight: bold;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        text-align: center;
-        color: #020f1f;
-    }
-
-    .icon-mini {
-        object-fit: contain;
-        height: auto;
-        margin-right: 5px;
-    }
-
-    .title {
-        font-size: 18px;
-        font-weight: bold;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-    }
-
-    .text-dashboard {
-        font-size: 11px;
-        font-weight: normal;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-    }
-
-    .subtitle-dashboard {
-        font-size: 10px;
-        font-weight: bold;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-    }
-
-    #wrapper {
-        position: relative;
-    }
-
-    #wrapper .text {
-        position: absolute;
-        bottom: 0;
-        display: none;
-    }
-
-    #wrapper:hover .text {
-        display: flex;
-        background: rgba(0,0,0,0.5);
-    }
 </style>

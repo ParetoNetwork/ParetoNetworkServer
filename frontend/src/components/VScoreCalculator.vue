@@ -89,8 +89,4 @@
     }
 </script>
 <style>
-    .wrapp {
-        color: black;
-        font-size: 14px;
-    }
 </style>
