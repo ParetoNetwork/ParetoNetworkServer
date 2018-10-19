@@ -227,7 +227,6 @@
         },
         methods: {
             assignBlock(block) {
-                console.log(block);
                 this.myFeed.content = this.myFeed.content.map(item => {
                     // console.log(item);
                     item.blockAgo = block - item.block;
