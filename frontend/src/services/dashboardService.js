@@ -41,8 +41,13 @@ export default class dashboardService {
         });
     }
 
-    static getContent(onSuccess, onError) {
-        return http.get('/v1/content/me').then(res => {
+    static getContent(params, onSuccess, onError) {
+        let query = '';
+        if(params){
+            query = '?limit=' + params.limit + '&page=' + params.page + '&user=' + params.user;
+        }
+
+        return http.get('/v1/content/me' + query).then(res => {
             if(res.data.success){
                 return onSuccess(res.data.data);
             }else{
@@ -55,7 +60,8 @@ export default class dashboardService {
 
     static getAllContent(params, onSuccess, onError) {
         const {limit, page} = params || {limit: 10, page: 0};
-        return http.get('/v1/content?' + 'limit=' + limit + '&page=' + page).then(res => {
+
+        return http.get('/v1/content?limit=' + limit + '&page=' + page ).then(res => {
             //console.log(res);
             if(res.data.success){
                 return onSuccess(res.data.data);
