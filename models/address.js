@@ -6,6 +6,7 @@ var paretoAddressSchema = new Schema({
 	rank 	: Number,
 	score 	: Number,
 	block 	: Number,
+    bonus 	: Number,
 	tokens	: Number,
 }, { collection : 'address' });
 
