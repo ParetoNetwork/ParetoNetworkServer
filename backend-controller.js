@@ -98,6 +98,8 @@ mongoose.connect(CONNECTION_URL).then(tmp=>{
 
 
 /*db model initializations*/
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
@@ -187,7 +189,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                 //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
 
                                 updateQuery.exec().then(function (r) {
-                                    ParetoAddress.count({score: {$gt: 0}}, function (err, count) {
+                                    ParetoAddress.estimatedDocumentCount({score: {$gt: 0}}, function (err, count) {
                                         if (err) {
                                             console.error('unable to finish db operation because: ', err);
                                             if (callback && typeof callback === "function") {
@@ -992,7 +994,7 @@ controller.updateFromLastIntel = function(){
                             const event = events[i];
                             const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                             const expiry_time = event.returnValues.ttl;
-                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                             });
                         }catch (e) {
                             console.log(e);
@@ -1040,7 +1042,7 @@ controller.getAllAvailableContent = function(req, callback) {
               //2. get percentile
 
               //2a. get total rank where score > 0
-              ParetoAddress.count({ score : { $gte : 0 }}, async(count) => {
+              ParetoAddress.estimatedDocumentCount({ score : { $gte : 0 }}, async(err, count) => {
                 var count = count;
 
                 //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
@@ -1115,7 +1117,7 @@ controller.getAllAvailableContent = function(req, callback) {
                 var blockHeightDelta = blockHeight - blockDelay;
 
                 //stop gap solution, more censored content can come down and be manipulated before posting client side
-                var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
+                var queryAboveCount = ParetoContent.estimatedDocumentCount({block : { $gt : blockHeightDelta}});
 
                 try{
                     allResults = await ParetoContent.find(
@@ -1362,7 +1364,7 @@ controller.aproxAllScoreRanking = async function(callback){
             .then(function(res) {
                 const blockHeight = res.number;
                 //Find all Address
-                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block bonus', { }, function(err, results){
+                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block bonus', function(err, results){
                     if(err){
                         callback(err);
                     }
@@ -1704,19 +1706,42 @@ controller.getScoreAndSaveRedis = function(callback){
     }
     else {
       // Put the data in  Redis hashing by rank
-      const multi = redisClient.multi();
-      results.forEach(function(result){
-        result.addresses.rank = result.rank + 1;
-        multi.hmset(result.addresses.rank+ "",  result.addresses);
-        const rank = { rank: result.addresses.rank + ""};
-        multi.hmset("address"+result.addresses.address+ "", rank );
 
+      let COUNT = 20.0;
+      const avr = parseFloat(results.length)/COUNT;
+      let ini = 0.0;
+      let promises = [];
+      while (ini < results.length-1){
+          const multi = redisClient.multi();
+            for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
+               let result = results[j];
+                result.addresses.rank = result.rank + 1;
+                multi.hmset(result.addresses.rank+ "",  result.addresses);
+                const rank = { rank: result.addresses.rank + ""};
+                multi.hmset("address"+result.addresses.address+ "", rank );
+            }
+
+            promises.push(new Promise( (resolve, reject)=>{
+                multi.exec(function(errors, results) {
+                    if(errors){
+                        return reject(err)
+                    }else{
+                        return resolve(results)
+                    }
+                })
+            } ));
+
+          ini = ini + avr;
+      }
+
+      Promise.all(promises).then(values => {
+          if(callback && typeof callback === "function") { callback(null, {} ); }
+      }).catch(err=>{
+          console.log(err);
+          if(callback && typeof callback === "function") { callback(null, {} ); }
       });
 
-      multi.exec(function(errors, results) {
-          if(errors){ console.log(errors)}
-        if(callback && typeof callback === "function") { callback(null, {} ); }
-      })
+
 
 
 
@@ -2018,7 +2043,7 @@ controller.calculateAllScores = function(callback){
     web3.eth.getBlock('latest')
         .then(function(res) {
             blockHeight = res.number;
-              ParetoAddress.find({ score : {$eq: 0} }, 'address score', { /*limit : 10000*/ }, function(err, results){
+              ParetoAddress.find({ score : {$eq: 0} }, 'address score' , function(err, results){
 
             //Find all Address
              // ParetoAddress.find({}, 'address score', { /*limit : 10000*/ }, function(err, results){
