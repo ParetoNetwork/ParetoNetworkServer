@@ -69,7 +69,7 @@
                                         </p>
                                         <b-btn class="btn-primary-pareto mx-auto px-4"
                                                style="width: 120px;"
-                                               v-b-modal.modalToken @click="rewardId = row.id;  intelAddress = row.intelAddress; tokenAmount= row.reward; isAvailable();">
+                                               v-b-modal.modalToken @click="openRewardModal(row)">
                                             <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                                             <b> {{ row.reward }} </b>
                                         </b-btn>
@@ -107,11 +107,15 @@
                     </div>
                     <p class="text-dashboard mb-2" style="font-size: 16px"> Please enter the number of Pareto Tokens to
                         reward</p>
-                    <b-form-input v-model="tokenAmount" style="font-size: 25px"
-                                  type="number"></b-form-input>
+                    <b-form-input
+                            v-model="tokenAmount"
+                            style="font-size: 25px"
+                            :formatter="formatAmountNumber"
+                            type="number">
+                    </b-form-input>
                     <b-row class="m-2 mt-4 d-flex justify-content-center">
                         <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                        <b-button :disabled="!hardwareAvailable || tokenAmount<=0 || tokenAmount > user.tokens" style="background-color: rgb(107, 194, 123)" variant="success"
+                        <b-button :disabled="!hardwareAvailable || tokenAmount<=0 ||  user.tokens < tokenAmount" style="background-color: rgb(107, 194, 123)" variant="success"
                                   @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                         </b-button>
                     </b-row>
@@ -174,6 +178,7 @@
     import {countUpMixin} from "../mixins/countUp";
     import moment from "moment";
     import environment from "../utils/environment";
+    import fromExponential from 'from-exponential';
 
     import {mapState} from "vuex";
 
@@ -208,7 +213,7 @@
                     page: 0,
                 },
                 rewardId: '',
-                tokenAmount: 1,
+                tokenAmount: 3,
                 loading: true
             }
         },
@@ -230,8 +235,7 @@
         methods: {
             assignBlock(block) {
                 this.myFeed.content = this.myFeed.content.map(item => {
-                    // console.log(item);
-                    item.blockAgo = Math.max(block - item.block, 0);
+                    item.blockAgo = block - item.block > 0? block - item.block : 0;
                     return item;
                 });
             },
@@ -299,12 +303,18 @@
                     );
                 }
             },
+            openRewardModal: function(row){
+                this.rewardId = row.id;
+                this.intelAddress = row.intelAddress;
+                this.tokenAmount = Math.min(this.user.tokens, row.reward);
+                this.isAvailable();
+            },
             updateFeedContent: function(){
                 let params = {
                     page: 0,
                     limit: this.myFeed.content.length,
                     user: this.fetchAddress
-                }
+                };
                 return dashboardService.getAllContent(params, res => {
                         res.forEach(intel=> {
                             let found = false;
@@ -335,10 +345,16 @@
                 let path = this.baseURL + "/profile-image?image=";
                 return profileService.getProfileImage(path, pic);
             },
+            formatAmountNumber: function (value, event){
+                return fromExponential(value);
+            },
             randomNumber: function (min = 1, max = 3) {
                 return Math.floor(Math.random() * (max - min + 1) + min);
             },
             rewardIntel: function (ID, tokenAmount, intelAddress) {
+                console.log(this.tokenAmount);
+                return;
+
                 this.hideModal();
                 this.modalWaiting =true;
                 if (!tokenAmount) {
@@ -348,7 +364,7 @@
                         duration: 10000,
                         text: 'No Token Amount' });
 
-                    this.tokenAmount = 1;
+                    //this.tokenAmount = 1;
                     return;
                 }
 
