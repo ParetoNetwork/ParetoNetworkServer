@@ -213,7 +213,7 @@
                     page: 0,
                 },
                 rewardId: '',
-                tokenAmount: 3,
+                tokenAmount: 1,
                 loading: true
             }
         },
@@ -352,9 +352,6 @@
                 return Math.floor(Math.random() * (max - min + 1) + min);
             },
             rewardIntel: function (ID, tokenAmount, intelAddress) {
-                console.log(this.tokenAmount);
-                return;
-
                 this.hideModal();
                 this.modalWaiting =true;
                 if (!tokenAmount) {
@@ -364,11 +361,10 @@
                         duration: 10000,
                         text: 'No Token Amount' });
 
-                    //this.tokenAmount = 1;
+                    this.tokenAmount = 1;
                     return;
                 }
 
-                // console.log(ID, tokenAmount);
                 ContentService.rewardIntel(
                     {ID, tokenAmount, intelAddress}, {signType: this.signType, pathId: this.pathId} ,
                     res => {
