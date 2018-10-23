@@ -1,6 +1,7 @@
 import axios from 'axios';
 import http from "./HttpService";
 import Web3 from "web3";
+import authService from "./authService"
 
 let web3;
 let provider;
@@ -69,8 +70,12 @@ export default class ContentService {
   }
 
   static async createIntel(serverData, tokenAmount, signData,onSuccess, onError) {
-    await this.Setup(signData);
-    //console.log(tokenAmount);
+      try{
+          await this.Setup(signData);
+      }catch (e) {
+          return onError(e)
+      }
+      //console.log(tokenAmount);
 
     if (tokenAmount === null) {
       let error = "No Pareto Amount. Transaction cancelled";
@@ -163,8 +168,12 @@ export default class ContentService {
   }
 
   static async rewardIntel(content,signData, onSuccess, onError) {
-    await this.Setup(signData);
-    web3.eth.getAccounts(async (err, accounts) => {
+      try{
+          await this.Setup(signData);
+      }catch (e) {
+          return onError(e)
+      }
+      web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
         onError("Err getting accounts");
         return;
@@ -222,7 +231,11 @@ export default class ContentService {
   }
 
   static async distributeRewards(content, signData,onSuccess, onError) {
-    await this.Setup(signData);
+      try{
+          await this.Setup(signData);
+      }catch (e) {
+          return onError(e)
+      }
 
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
@@ -279,14 +292,11 @@ export default class ContentService {
               break;
           }
           default: {
+              window.web3 =  await authService.onMetamaskAccess();
               if (typeof window.web3 !== "undefined") {
                   // Use Mist/MetaMask's provider
                   provider = new Web3(window.web3.currentProvider);
               } else {
-                  //console.log("No web3? You should consider trying MetaMask!");
-                  onError(
-                      "Please install MetaMask (or other web3 browser) in order to access the Pareto Network"
-                  );
 
                   // searchLookup();
                   // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
