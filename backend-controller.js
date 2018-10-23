@@ -1042,7 +1042,7 @@ controller.getAllAvailableContent = function(req, callback) {
               //2. get percentile
 
               //2a. get total rank where score > 0
-              ParetoAddress.estimatedDocumentCount({ score : { $gte : 0 }}, async(count) => {
+              ParetoAddress.estimatedDocumentCount({ score : { $gte : 0 }}, async(err, count) => {
                 var count = count;
 
                 //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
