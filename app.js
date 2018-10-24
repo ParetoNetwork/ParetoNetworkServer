@@ -604,61 +604,7 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
     }]
 }));
 
-/**
- * This is a scheduled task that will update the calculation for the score every ten minutes. Also update CreateEventIntel
- */
-cron.schedule("*/5 * * * *", function() {
-    try{
-        controller.updateFromLastIntel();
-        controller.realAllScoreRanking(function(err, result){
-            if(err){
-                console.log(err)
-            }else{
-                controller.getScoreAndSaveRedis(function(err, result){
-                    if(err){
-                        console.log(err)
-                    }else{
-                        console.log('Sucessfully updated' )
-                    }
 
-                });
-            }
-
-        });
-    }catch (e) {
-        console.log(e);
-    }
-
-});
-
-/**
- * This is a scheduled task that approximate score every minute.
- */
-
-setTimeout(function run() {
-    try{
-        const time = (new Date().getTime());
-        controller.aproxAllScoreRanking(function(err, result){
-            if(err){
-                console.log(err)
-            }else{
-                controller.getScoreAndSaveRedis(function(err, result){
-                    if(err){
-                        console.log(err)
-                    }else{
-                        console.log('Sucessfully updated aprox' )
-                    }
-                    setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
-
-                });
-            }
-
-        });
-    }catch (e) {
-        console.log(e);
-    }
-
-}, 60000);
 
 
 
