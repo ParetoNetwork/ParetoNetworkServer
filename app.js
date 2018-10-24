@@ -13,6 +13,12 @@ var cookieParser = require('cookie-parser');
 const multer = require("multer");
 var multerS3 = require('multer-s3');
 const cron = require("node-cron");
+let constants = {};
+const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
+
+if (fs.existsSync(constantsPath)) {
+    constants = require(constantsPath);
+}
 const AWS = require('aws-sdk');
 AWS.config.update({
     region: process.env.S3_REGION || constants.S3_REGION,
@@ -33,12 +39,7 @@ const debug = require('debug')('pareto-ranking');
 const appName = 'Pareto Ranking Backend';
 debug('booting %s', appName);
 
-let constants = {};
-const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
 
-if (fs.existsSync(constantsPath)) {
-  constants = require(constantsPath);
-}
 /*constants*/
 var sessionDebug = process.env.DEBUG || constants.DEBUG;
 
