@@ -98,6 +98,8 @@ mongoose.connect(CONNECTION_URL).then(tmp=>{
 
 
 /*db model initializations*/
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
@@ -187,7 +189,7 @@ controller.calculateScore = async function(address, blockHeightFixed, callback){
                                 //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
 
                                 updateQuery.exec().then(function (r) {
-                                    ParetoAddress.count({score: {$gt: 0}}, function (err, count) {
+                                    ParetoAddress.estimatedDocumentCount({score: {$gt: 0}}, function (err, count) {
                                         if (err) {
                                             console.error('unable to finish db operation because: ', err);
                                             if (callback && typeof callback === "function") {
@@ -283,7 +285,7 @@ controller.getParetoCoinMarket = function(callback){
 /**
  *  addExponent using db instead of Ethereum network
  */
-controller.addExponentAprox =  function(addresses, scores, tokensFixes, blockHeight,callback){
+controller.addExponentAprox =  function(addresses, scores,  blockHeight,callback){
     return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONTENT_BLOCK_AGO)} }).exec(function(err, values) {
         if (err) {
             callback(err);
@@ -304,8 +306,6 @@ controller.addExponentAprox =  function(addresses, scores, tokensFixes, blockHei
             for (let i = 0; i < addresses.length; i = i + 1) {
                 try{
                     const address = addresses[i].toLowerCase();
-                    const tokenfix = parseFloat(tokensFixes[i]);
-                    scores[i].tokens = Math.max(scores[i].tokens-tokenfix,0);
                     if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
                         const V = (1 + (rewards[address] / M) / 2);
                         scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
@@ -717,38 +717,40 @@ controller.startwatchNewIntel = function(){
             ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                    if(!err){
                        try{
-                           controller.retrieveAddress(data.address,function (err, result) {
-                                ParetoAddress.findOneAndUpdate({address: data.address}, {tokens : Math.max(result.tokens-initialBalance,0)}, (e, result)=>{
-                                    controller.getScoreAndSaveRedis((err, result)=>{
-                                        if(controller.wss){
-                                            try{
-                                                controller.wss.clients.forEach(function each(client) {
-                                                    if (client.isAlive === false) return client.terminate();
-                                                    if (client.readyState === controller.WebSocket.OPEN ) {
-                                                        // Validate if the user is subscribed a set of information
-                                                        if(client.user){
-                                                            //console.log('updateContent');
-                                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                                            if(client.user.user== data.address){
-                                                                controller.retrieveAddress(client.user.user, function (err, result) {
-                                                                    if (!err) {
-                                                                        client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    }
-                                                });
-                                            }catch (e) {
-                                                console.log(e);
-                                            }
-                                        }else{
-                                            console.log('no wss')
-                                        }
-                                    })
-                                })
+                           controller.getBalance(data.address,0, function(err, count){
+                               if(!err){
+                                   ParetoAddress.findOneAndUpdate({address: data.address}, {tokens : count}, (e, result)=>{
+                                       controller.getScoreAndSaveRedis((err, result)=>{
+                                           if(controller.wss){
+                                               try{
+                                                   controller.wss.clients.forEach(function each(client) {
+                                                       if (client.isAlive === false) return client.terminate();
+                                                       if (client.readyState === controller.WebSocket.OPEN ) {
+                                                           // Validate if the user is subscribed a set of information
+                                                           if(client.user){
+                                                               //console.log('updateContent');
+                                                               client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                                               if(client.user.user== data.address){
+                                                                   controller.retrieveAddress(client.user.user, function (err, result) {
+                                                                       if (!err) {
+                                                                           client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                                                       }
+                                                                   });
+                                                               }
+                                                           }
+                                                       }
+                                                   });
+                                               }catch (e) {
+                                                   console.log(e);
+                                               }
+                                           }else{
+                                               console.log('no wss')
+                                           }
+                                       })
+                                   })
+                               }
+                           });
 
-                           })
                        }catch (e) {
                            console.log(e);
                        }
@@ -801,7 +803,14 @@ controller.startwatchNewIntel = function(){
                                         }
 
                                     });
-                                    controller.updateAddressReward(event);
+
+                                    controller.getBalance(event.returnValues.sender.toLowerCase(),0, function(err, count){
+                                        if(!err){
+                                            controller.updateAddressReward(event, count);
+                                        }else{
+                                            callback(err);
+                                        }
+                                    });
                                     controller.updateIntelReward(intelIndex);
 
 
@@ -829,16 +838,16 @@ controller.startwatchNewIntel = function(){
  * update Address score when reward an intel
  * @param event
  */
-controller.updateAddressReward = function(event){
+controller.updateAddressReward = function(event, token){
     let addressToUpdate = event.returnValues.sender.toLowerCase();
-    ParetoAddress.findOne({address: addressToUpdate}, (err, data)=>{
+    ParetoAddress.findOneAndUpdate({address: addressToUpdate}, {tokens: token},{  new: true  },(err, data)=>{
         let dbValues =  {
             bonus: data.bonus,
             tokens: data.tokens,
             score: data.score,
             block: data.block
         };
-        controller.addExponentAprox([addressToUpdate],[dbValues],[web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')],event.blockNumber,function (err, res){
+        controller.addExponentAprox([addressToUpdate],[dbValues],event.blockNumber,function (err, res){
             var dbQuery = {
                 address: addressToUpdate
             };
@@ -985,7 +994,7 @@ controller.updateFromLastIntel = function(){
                             const event = events[i];
                             const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                             const expiry_time = event.returnValues.ttl;
-                            ParetoContent.update({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                             });
                         }catch (e) {
                             console.log(e);
@@ -1033,7 +1042,7 @@ controller.getAllAvailableContent = function(req, callback) {
               //2. get percentile
 
               //2a. get total rank where score > 0
-              ParetoAddress.count({ score : { $gte : 0 }}, async(count) => {
+              ParetoAddress.estimatedDocumentCount({ score : { $gte : 0 }}, async(err, count) => {
                 var count = count;
 
                 //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
@@ -1108,7 +1117,7 @@ controller.getAllAvailableContent = function(req, callback) {
                 var blockHeightDelta = blockHeight - blockDelay;
 
                 //stop gap solution, more censored content can come down and be manipulated before posting client side
-                var queryAboveCount = ParetoContent.count({block : { $gt : blockHeightDelta}});
+                var queryAboveCount = ParetoContent.estimatedDocumentCount({block : { $gt : blockHeightDelta}});
 
                 try{
                     allResults = await ParetoContent.find(
@@ -1355,7 +1364,7 @@ controller.aproxAllScoreRanking = async function(callback){
             .then(function(res) {
                 const blockHeight = res.number;
                 //Find all Address
-                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block bonus', { }, function(err, results){
+                ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block bonus', function(err, results){
                     if(err){
                         callback(err);
                     }
@@ -1697,19 +1706,42 @@ controller.getScoreAndSaveRedis = function(callback){
     }
     else {
       // Put the data in  Redis hashing by rank
-      const multi = redisClient.multi();
-      results.forEach(function(result){
-        result.addresses.rank = result.rank + 1;
-        multi.hmset(result.addresses.rank+ "",  result.addresses);
-        const rank = { rank: result.addresses.rank + ""};
-        multi.hmset("address"+result.addresses.address+ "", rank );
 
+      let COUNT = 20.0;
+      const avr = parseFloat(results.length)/COUNT;
+      let ini = 0.0;
+      let promises = [];
+      while (ini < results.length-1){
+          const multi = redisClient.multi();
+            for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
+               let result = results[j];
+                result.addresses.rank = result.rank + 1;
+                multi.hmset(result.addresses.rank+ "",  result.addresses);
+                const rank = { rank: result.addresses.rank + ""};
+                multi.hmset("address"+result.addresses.address+ "", rank );
+            }
+
+            promises.push(new Promise( (resolve, reject)=>{
+                multi.exec(function(errors, results) {
+                    if(errors){
+                        return reject(err)
+                    }else{
+                        return resolve(results)
+                    }
+                })
+            } ));
+
+          ini = ini + avr;
+      }
+
+      Promise.all(promises).then(values => {
+          if(callback && typeof callback === "function") { callback(null, {} ); }
+      }).catch(err=>{
+          console.log(err);
+          if(callback && typeof callback === "function") { callback(null, {} ); }
       });
 
-      multi.exec(function(errors, results) {
-          if(errors){ console.log(errors)}
-        if(callback && typeof callback === "function") { callback(null, {} ); }
-      })
+
 
 
 
@@ -1733,7 +1765,7 @@ controller.insertProfile = function(profile,callback){
                   console.error('unable to write to db because: ', err);
               } else {
                   const multi = redisClient.multi();
-                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic, rewardsGiven:[]};
+                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
                   multi.hmset("profile"+profile.address+ "", profile );
                   multi.exec(function(errors, results) {
                       if(errors){ console.log(errors); callback(errors)}
@@ -1780,7 +1812,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
                    return callback(null, profile );
                })
            } else{
-              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "", rewardsGiven:[] };
+              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "" };
                controller.insertProfile(profile, callback)
            }
        }
@@ -2011,7 +2043,7 @@ controller.calculateAllScores = function(callback){
     web3.eth.getBlock('latest')
         .then(function(res) {
             blockHeight = res.number;
-              ParetoAddress.find({ score : {$eq: 0} }, 'address score', { /*limit : 10000*/ }, function(err, results){
+              ParetoAddress.find({ score : {$eq: 0} }, 'address score' , function(err, results){
 
             //Find all Address
              // ParetoAddress.find({}, 'address score', { /*limit : 10000*/ }, function(err, results){
