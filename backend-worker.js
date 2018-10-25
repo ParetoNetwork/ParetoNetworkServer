@@ -2,8 +2,7 @@
 
 const throng = require('throng');
 
-const WORKERS = process.env.WEB_CONCURRENCY || 1;
-const PORT = process.env.PORT || 3000;
+const WORKERS = process.env.WORKER_CONCURRENCY || 1;
 
 throng({
   workers: WORKERS,
@@ -11,7 +10,5 @@ throng({
 }, start);
 
 function start() {
-
-	
-
+    const worker = require('./worker-controller.js');
 }

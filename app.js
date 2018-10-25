@@ -13,6 +13,12 @@ var cookieParser = require('cookie-parser');
 const multer = require("multer");
 var multerS3 = require('multer-s3');
 const cron = require("node-cron");
+let constants = {};
+const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
+
+if (fs.existsSync(constantsPath)) {
+    constants = require(constantsPath);
+}
 const AWS = require('aws-sdk');
 AWS.config.update({
     region: process.env.S3_REGION || constants.S3_REGION,
@@ -33,12 +39,7 @@ const debug = require('debug')('pareto-ranking');
 const appName = 'Pareto Ranking Backend';
 debug('booting %s', appName);
 
-let constants = {};
-const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
 
-if (fs.existsSync(constantsPath)) {
-  constants = require(constantsPath);
-}
 /*constants*/
 var sessionDebug = process.env.DEBUG || constants.DEBUG;
 
@@ -604,61 +605,7 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
     }]
 }));
 
-/**
- * This is a scheduled task that will update the calculation for the score every ten minutes. Also update CreateEventIntel
- */
-cron.schedule("*/5 * * * *", function() {
-    try{
-        controller.updateFromLastIntel();
-        controller.realAllScoreRanking(function(err, result){
-            if(err){
-                console.log(err)
-            }else{
-                controller.getScoreAndSaveRedis(function(err, result){
-                    if(err){
-                        console.log(err)
-                    }else{
-                        console.log('Sucessfully updated' )
-                    }
 
-                });
-            }
-
-        });
-    }catch (e) {
-        console.log(e);
-    }
-
-});
-
-/**
- * This is a scheduled task that approximate score every minute.
- */
-
-setTimeout(function run() {
-    try{
-        const time = (new Date().getTime());
-        controller.aproxAllScoreRanking(function(err, result){
-            if(err){
-                console.log(err)
-            }else{
-                controller.getScoreAndSaveRedis(function(err, result){
-                    if(err){
-                        console.log(err)
-                    }else{
-                        console.log('Sucessfully updated aprox' )
-                    }
-                    setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
-
-                });
-            }
-
-        });
-    }catch (e) {
-        console.log(e);
-    }
-
-}, 60000);
 
 
 
