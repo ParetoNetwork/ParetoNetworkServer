@@ -1080,65 +1080,80 @@ const start = async () => {
         const queue = kue.createQueue({
             redis: REDIS_URL,
         });
-        queue.process('clock-job-1', (job, done) => {
-            workerController.aproxAllScoreRanking(function(err, result){
-                if(err){
-                    done(err );
-                }else{
-                    workerController.getScoreAndSaveRedis(function(err, result){
-                        if(err){
-                            done(err);
-                        }else{
-                            done(null, 'Sucessfully updated aprox');
-                        }
-
-                    });
-                }
-
-            });
-
-        });
-        queue.process('clock-job-5', (job, done) => {
-            workerController.updateFromLastIntel();
-            workerController.realAllScoreRanking(function(err, result){
-                if(err){
-                    done(err );
-                }else{
-                    workerController.getScoreAndSaveRedis(function(err, result){
+        queue.process('clock-job', (job, done) => {
+            switch (job.data.minutes){
+                case 1: {
+                    workerController.aproxAllScoreRanking(function(err, result){
                         if(err){
                             done(err );
                         }else{
-                            done(null, 'Sucessfully updated');
+                            workerController.getScoreAndSaveRedis(function(err, result){
+                                if(err){
+                                    done(err);
+                                }else{
+                                    done(null, 'Sucessfully updated aprox');
+                                }
+
+                            });
+                        }
+
+                    });
+                    break;
+
+                }
+                case 5:{
+                    workerController.updateFromLastIntel();
+                    workerController.realAllScoreRanking(function(err, result){
+                        if(err){
+                            done(err );
+                        }else{
+                            workerController.getScoreAndSaveRedis(function(err, result){
+                                if(err){
+                                    done(err );
+                                }else{
+                                    done(null, 'Sucessfully updated');
+                                }
+
+                            });
                         }
 
                     });
                 }
-
-            });
-
+            }
         });
-        queue.process('controller-job-update', (job, done) => {
-            workerController.updateScore(job.data.address, function(err, result){
-                if(err){
-                    done(err );
-                }else{
-                     done(null, result);
+
+        queue.process('controller-job', 2, (job, done) => {
+            switch (job.data.type) {
+                case 'update': {
+                    workerController.updateScore(job.data.address, function (err, result) {
+                        if (err) {
+                            done(err);
+                        } else {
+                            done(null, result);
+                        }
+
+                    });
+                    break;
                 }
+                case 'save-redis':{
+                    workerController.getScoreAndSaveRedis (function(err, result){
+                        if(err){
+                            done(err );
+                        }else{
+                            done(null, result);
+                        }
 
-            });
-
-        });
-        queue.process('controller-job-save-redis', (job, done) => {
-            workerController.getScoreAndSaveRedis (function(err, result){
-                if(err){
-                    done(err );
-                }else{
-                    done(null, result);
+                    });
+                    break;
                 }
+            }
 
-            });
+
 
         });
+
+        const clock = require('./clock.js');
+        clock.start(queue);
     } catch (error) {
         console.log(error);
     }
