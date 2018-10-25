@@ -20,7 +20,7 @@ clock.start= function(wqueue){
     cron.schedule("*/5 * * * *", function() {
         try{
             const job = queue
-                .create('clock-job-5' )
+                .create('clock-job',{minutes: 5} )
                 .removeOnComplete(true)
                 .save((error) => {
                     if (error) {
@@ -49,7 +49,7 @@ clock.start= function(wqueue){
         try{
             const time = (new Date().getTime());
             const job = queue
-                .create('clock-job-1' )
+                .create('clock-job',{minutes: 1} )
                 .removeOnComplete(true)
                 .save((error) => {
                     if (error) {
