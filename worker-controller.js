@@ -1139,6 +1139,8 @@ const start = async () => {
             });
 
         });
+        const clock = require('./clock.js');
+        clock.start(queue);
     } catch (error) {
         console.log(error);
     }
