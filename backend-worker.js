@@ -11,5 +11,4 @@ throng({
 
 function start() {
     const worker = require('./worker-controller.js');
-    const clock = require('./clock.js');
 }
