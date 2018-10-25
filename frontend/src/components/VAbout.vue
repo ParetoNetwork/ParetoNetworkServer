@@ -5,8 +5,7 @@
                 <div class="col-12 col-lg-6 mb-lg-0 mb-4">
                     <img style="width: 400px; max-width: 100%;" src="../assets/images/LogoReverse.svg" alt="">
                     <h1 class="font-body padding-main text-left text-white mb-5">Current, reputable &
-                        actionable intel for digital currency traders and
-                        investors.</h1>
+                        actionable intel for traders and investors. <br/><br/> <h6>Event driven, alternative data source for capturing alpha.</h6></h1>
                     <a href="download/Pareto-Brochure.pdf" class="mr-2 btn btn-primary" target="_blank">Brochure</a>
                     <a href="download/Pareto-Technical-White-Paper.pdf" class="mr-2 btn btn-primary" target="_blank">Whitepaper</a>
                     <a href="https://github.com/ParetoNetwork/Pareto-Network-Roadmap/projects/1?fullscreen=true"
@@ -27,12 +26,16 @@
             <div class="wrapper">
 
                 <div class="section-title">
-                    <h3 class="pre-title font-header">Pareto Network</h3>
-                    <h2 class="title font-header">Team</h2>
+                    <h3 class="pre-title font-header">Team</h3>
                 </div>
 
                 <div class="team-members font-body-regular">
-                    <div class="row">
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Board of Trustees</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center">
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
@@ -40,7 +43,7 @@
                                 </figure>
                                 <div class="d-flex flex-column">
                                     <span class="name"> Eric Lamison-White</span>
-                                    <span class="position">Co-Founder & CEO.</span>
+                                    <span class="position">Board of Trustees, Founding Member</span>
                                 </div>
                                 <div class="mb-2">
                                     <p>UMBC, Bowie State BS | Cryptocurrency developer since 2013, Manager of Blockchain
@@ -60,7 +63,7 @@
                                 </figure>
                                 <div class="d-flex flex-column">
                                     <span class="name">Ted Lanpher</span>
-                                    <span class="position">Co-Founder & CSOO.</span>
+                                    <span class="position">Board of Trustees, Founding Member</span>
                                 </div>
                                 <div class="mb-2">
                                     <p>Yale BA, UVA MBA | IBM Satellite Business Systems | Experienced startup CEO and
@@ -73,6 +76,13 @@
                                 </div>
                             </div> <!-- end team-member -->
                         </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Organization</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center"> <!-- internal parnters/employees -->
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
@@ -111,6 +121,34 @@
                                 </div>
                             </div> <!-- end team-member -->
                         </div>
+                        <!-- need will here -->
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-chris.png" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Christopher Aguilar</span>
+                                    <span class="position">General Counsel.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Univ. of California Hasting JD, St. Mary's BA | 25 yrs as director, general
+                                        counsel and compliance officer in broker-dealer, asset management, and financial
+                                        services firms</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/christopheraguilar/" target="_blank"><i
+                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Partners</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center"> <!-- external partners -->
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
@@ -152,6 +190,13 @@
                                 </div>
                             </div> <!-- end team-member -->
                         </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Advisors</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center"> <!-- advisors -->
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
@@ -230,26 +275,7 @@
                                 </div>
                             </div> <!-- end team-member -->
                         </div>
-                        <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="team-member text-center">
-                                <figure class="team-member__image">
-                                    <img src="../assets/images/team-chris.png" alt="" class="rounded-circle" width="85">
-                                </figure>
-                                <div class="d-flex flex-column">
-                                    <span class="name">Christopher Aguilar</span>
-                                    <span class="position">General Counsel.</span>
-                                </div>
-                                <div class="mb-2">
-                                    <p>Univ. of California Hasting JD, St. Mary's BA | 25 yrs as director, general
-                                        counsel and compliance officer in broker-dealer, asset management, and financial
-                                        services firms</p>
-                                </div>
-                                <div class="team-member__socials">
-                                    <a href="https://www.linkedin.com/in/christopheraguilar/" target="_blank"><i
-                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
-                                </div>
-                            </div> <!-- end team-member -->
-                        </div>
+                    </div>
                         <!--<div class="col-xs-12 col-sm-6 col-md-3">
                                 <div class="team-member text-center">
                                     <figure class="team-member__image">
@@ -266,7 +292,6 @@
                                     </div>
                                 </div>
                             </div>-->
-                    </div>
                 </div>
             </div>
         </section>
