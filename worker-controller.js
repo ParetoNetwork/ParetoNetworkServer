@@ -692,7 +692,7 @@ workerController.aproxAllScoreRanking = async function(callback){
             //Find all Address
             ParetoAddress.find({tokens: {$gt: 0}, block: {$gt: CONTRACT_CREATION_BLOCK_INT}}, 'address score tokens block bonus', function(err, results){
                 if(err){
-                    callback(err);
+                    callback(null, {} );
                 }
                 else {
                     const bulkop=[];
@@ -731,6 +731,8 @@ workerController.aproxAllScoreRanking = async function(callback){
                             console.log(err);
                             callback(null, {} );
                         });
+                    }else{
+                        callback(null, {} );
                     }
 
 
@@ -738,9 +740,11 @@ workerController.aproxAllScoreRanking = async function(callback){
 
             });
         }, function (error) {
-            console.log(error)
+            console.log(error);
+            callback(null, {} );
         }).catch(function (err) {
-        console.log(err)
+        console.log(err);
+        callback(null, {} );
     });
 
 }
@@ -809,7 +813,11 @@ workerController.realAllScoreRanking = async function(callback){
                                     console.log(err);
                                     callback(null, {} );
                                 });
+                            }else{
+                                callback(null, {} );
                             }
+                        }else{
+                            callback(null, {} );
                         }
 
                     });
@@ -820,15 +828,19 @@ workerController.realAllScoreRanking = async function(callback){
                 processData();
 
             }, function (error) {
-                console.log(error)
+                console.log(error);
+                callback(null, {} );
             }).catch(function (err) {
-                console.log(err)
+                console.log(err);
+                callback(null, {} );
             });
 
         }, function (error) {
-            console.log(error)
+            console.log(error);
+            callback(null, {} );
         }).catch(function (err) {
-        console.log(err)
+        console.log(err);
+        callback(null, {} );
     });
 
 }
