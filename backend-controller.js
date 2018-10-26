@@ -255,7 +255,7 @@ controller.startwatchNewIntel = function(){
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
             ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                   if(!err){
+                   if(!err && data){
                        try{
                            controller.getBalance(data.address,0, function(err, count){
                                if(!err){

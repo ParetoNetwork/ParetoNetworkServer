@@ -5,14 +5,6 @@
                 <div class="col-12 order-last order-lg-first col-lg-4 mb-4 p-0">
                     <VProfile :addressProfile="intel.address"></VProfile>
                 </div>
-                <!--<div v-if="loading" class="col-12 col-lg-7 p-0">
-                    <div class="row">
-                        <div class="d-flex split mt-4 mx-auto">
-                            <i class="fa fa-spinner fa-spin fa-5x">
-                            </i>
-                        </div>
-                    </div>
-                </div>-->
                 <div class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
                     <div class="row text-group">
                         <VShimmerIntelInformation v-if="!intel.blockAgo"></VShimmerIntelInformation>
