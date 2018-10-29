@@ -62,7 +62,6 @@ export default class ContentService {
       }
 
       let gasPriceWei = await provider.eth.getGasPrice();
-      gasPriceWei = gasPriceWei * 10;
 
       let gasPrice = await provider.utils.fromWei(gasPriceWei+"", 'gwei');
 
@@ -90,7 +89,6 @@ export default class ContentService {
       }
 
       let gasPrice = await web3.eth.getGasPrice();
-      gasPrice = gasPrice * 10;
       const provider_address = accounts[0];
 
       
@@ -183,7 +181,6 @@ export default class ContentService {
             content.intelAddress
         );
       let gasPrice = await web3.eth.getGasPrice();
-      gasPrice = gasPrice * 10;
 
       const rewarder_address = accounts[0];
       const decimals = web3.utils.toBN(18);
@@ -249,7 +246,6 @@ export default class ContentService {
         .estimateGas({ from: distributor });
 
       let gasPrice = await web3.eth.getGasPrice();
-      gasPrice = gasPrice * 10;
 
       await Intel.methods
         .distributeReward(content.ID)

@@ -5,7 +5,7 @@ var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq"));
 var web3 = new Web3(WEB3_WEBSOCKET_URL);
 // var web3 = new Web3("ws://localhost:8545");
-
+console.log('NO DEBER´IA ENTRAR QUI')
 
 const ParetoIntel = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');

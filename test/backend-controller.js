@@ -1,5 +1,6 @@
 const request = require('supertest');
 const serverApp =  require('./../app.js');
+const worker =  require('./../worker-controller.js');
 const assert = require('chai').assert;
 
 describe('backend-controller /', function() {
@@ -12,7 +13,7 @@ describe('backend-controller /', function() {
     });
 
     it('calculate current score',  function (done) {
-        serverApp.controller.calculateScore("alsdkfjouasdf", 0, function(err, result){
+        worker.calculateScore("alsdkfjouasdf", 0, function(err, result){
             assert.exists(err, 'The controller should validate fake address');
             done();
         });
