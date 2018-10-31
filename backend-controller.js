@@ -107,6 +107,7 @@ const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 const ParetoReward = mongoose.model('reward');
+const ParetoTransaction = mongoose.model('transaction');
 
 
 // set up Pareto and Intel contracts instances
@@ -244,6 +245,32 @@ controller.postContent = function (req, callback) {
 
 };
 
+
+controller.getPendingTransaction = function (address, callback){
+    ParetoTransaction.find({address: address, state: 0}, callback);
+}
+
+controller.watchTransaction =  function (data, callback){
+    var dbQuery = {
+        txHash: data.txHash
+    };
+    var dbValues = {
+        $set: data
+    };
+    var dbOptions = {
+        upsert: true,
+        new: true
+    };
+
+    var updateQuery = ParetoTransaction.findOneAndUpdate(dbQuery, dbValues, dbOptions);
+    updateQuery.exec().then(function (r) {
+         callback(null, r);
+    }).catch(function(e){
+        callback(e)
+    });
+}
+
+
 /**
  * Watch Intel events. Support watch rewards for old Intel address
  */
@@ -351,7 +378,7 @@ controller.startwatchNewIntel = function(){
                                             callback(err);
                                         }
                                     });
-                                    controller.updateIntelReward(intelIndex);
+                                    controller.updateIntelReward(intelIndex, event.returnValues.sender.toLowerCase(), event.transactionHash);
 
 
                                 }
@@ -368,6 +395,43 @@ controller.startwatchNewIntel = function(){
 
             }
 
+        }
+    });
+
+
+    web3_events.eth.subscribe( 'logs',
+        {
+            fromBlock: 'latest',
+            address: PARETO_CONTRACT_ADDRESS,
+            topics: ['0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925', null, null]
+        }).on('data', function (log) {
+        const txHash = log.transactionHash;
+        const blockNumber = log.blockNumber;
+        if(blockNumber!=null){
+        ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { state: 1, block: blockNumber }, function (err, r) {
+            if(!err && r){
+                if(controller.wss){
+                    try{
+                        controller.wss.clients.forEach(function each(client) {
+                            if (client.isAlive === false) return client.terminate();
+                            if (client.readyState === controller.WebSocket.OPEN ) {
+                                if(client.user && client.user.user== data.address){
+                                   client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
+
+                                }
+                            }
+                        });
+                    }catch (e) {
+                        console.log(e);
+                    }
+                }else{
+                    console.log('no wss');
+                }
+            }else{
+               if(err){console.log(err);}
+            }
+
+            })
         }
     });
 
@@ -415,8 +479,8 @@ controller.updateAddressReward = function(event, token){
                 controller.getScoreAndSaveRedis( function (err, result) {
                     if(!err){
                         if(controller.wss){
-                            try{
-                                controller.wss.clients.forEach(function each(client) {
+                            controller.wss.clients.forEach(function each(client) {
+                                try{
                                     if (client.isAlive === false) return client.terminate();
                                     if (client.readyState === controller.WebSocket.OPEN ) {
                                         // Validate if the user is subscribed a set of information
@@ -447,10 +511,11 @@ controller.updateAddressReward = function(event, token){
                                             });
                                         }
                                     }
-                                });
-                            }catch (e) {
-                                console.log(e);
-                            }
+                                }catch (e) {
+                                    console.log(e);
+                                }
+                            });
+
                         }else{
                             console.log('no wss')
                         }
@@ -467,7 +532,7 @@ controller.updateAddressReward = function(event, token){
  * Update totalreward count in Intel document
  * @param intelIndex
  */
-controller.updateIntelReward=function(intelIndex){
+controller.updateIntelReward=function(intelIndex, sender, txHash){
     let agg =  [ {$match: { 'intelId': intelIndex } },
         { $group: { _id: null,
                 rewards : {
@@ -494,6 +559,9 @@ controller.updateIntelReward=function(intelIndex){
                                     // Validate if the user is subscribed a set of information
                                     if(client.user){
                                         client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                        if( client.user.user==sender){
+                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateReward', data: {intel: intelIndex, txHash: txHash}})) );
+                                        }
                                     }
                                 }
                             });
@@ -790,7 +858,7 @@ controller.getUserInfo = function(address ,callback){
             if(error){
                 callback(error)
             }else{
-                controller.retrieveProfileWithRedis([address], function (error, profile) {
+                controller.retrieveProfileWithRedis(address, function (error, profile) {
                     if(error){ callback(error)}
                     let ranking = rankings[0];
                     callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,

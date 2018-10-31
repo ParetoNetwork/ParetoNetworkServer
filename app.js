@@ -392,6 +392,41 @@ app.post('/v1/content', function (req, res) {
 }); //end content post
 
 
+app.get('/v1/transaction', function (req, res) {
+
+    controller.getPendingTransaction(req.user, function (err, obj) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(obj));
+        }
+
+    });
+
+}); //end content post
+
+
+app.post('/v1/transaction', function (req, res) {
+    if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
+    || !req.body.address || !req.body.txHash || !req.body.intel || !req.body.amount || !req.body.event) {
+        res.status(200).json(ErrorHandler.bodyMissingError());
+    }  else {
+
+        //needs to check address whitelist against the authorized address, if people figure out the post body format.
+
+        controller.watchTransaction(req.body, function (err, obj) {
+            if (err) {
+                res.status(200).json(ErrorHandler.getError(err));
+            } else {
+                res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
+            }
+
+        });
+    }
+
+}); //end content post
+
+
 app.get('/v1/content', function (req, res) {
 
     //this needs a session id, basically an authenticated address
