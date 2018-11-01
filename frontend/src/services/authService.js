@@ -283,162 +283,182 @@ export default class authService {
     }
 
 
+    static  onMetamaskAccess() {
+        return  new Promise( async (resolve, reject)=>{
+            if (window.ethereum) {
+                window.web3 = new Web3(ethereum);
+                try {
+                    await ethereum.enable();
+                    resolve(window.web3)
+                } catch (error) {
+                    reject(error)
+                }
+            } else {
+                resolve(window.web3)
+            }
+        })
+    }
+
     static signSplash(onSuccess, onError) {
-        let provider;
-        const version = window.localStorage.getItem('psignversion');
-        const network = window.localStorage.getItem('netWorkId');
-        const contractAddress = window.localStorage.getItem('paretoAddress');
-        if (typeof web3 !== 'undefined') {
-            // Use Mist/MetaMask's provider
-            provider = new Web3(web3.currentProvider);
-        } else {
-            console.log('No web3? You should consider trying MetaMask!');
-            onError('Please install MetaMask (or other web3 browser) in order to access the Pareto Network');
+       authService.onMetamaskAccess().then( function (web3){
+           let provider;
+           const version = window.localStorage.getItem('psignversion');
+           const network = window.localStorage.getItem('netWorkId');
+           const contractAddress = window.localStorage.getItem('paretoAddress');
+
+           if (typeof web3 !== 'undefined') {
+               // Use Mist/MetaMask's provider
+               provider = new Web3(web3.currentProvider);
+           } else {
+               console.log('No web3? You should consider trying MetaMask!');
+               onError('Please install MetaMask (or other web3 browser) in order to access the Pareto Network');
 
 
-            // searchLookup();
-            // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-            provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
-        }
-        if (typeof provider !== 'undefined') {
+               // searchLookup();
+               // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+               provider = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq'));
+           }
+           if (typeof provider !== 'undefined') {
 
-            // const contractAddr = ('0xea5f88E54d982Cbb0c441cde4E79bC305e5b43Bc');
-            // const rankCalculation = 0;
-            // const tokenTotal = 0;
-            /*if (!metaMask.currentProvider.isMetaMask) { //no mobile users use Metamask, this is too strict
+               // const contractAddr = ('0xea5f88E54d982Cbb0c441cde4E79bC305e5b43Bc');
+               // const rankCalculation = 0;
+               // const tokenTotal = 0;
+               /*if (!metaMask.currentProvider.isMetaMask) { //no mobile users use Metamask, this is too strict
 
-                return onError('Please install MetaMask in order to access the Pareto Network');
-            }*/
+                   return onError('Please install MetaMask in order to access the Pareto Network');
+               }*/
 
-            provider.eth.getAccounts((error, accounts) => {
-                if (!error) {
-                    if(accounts && accounts[0]){
-                        //console.log(accounts);
+               provider.eth.getAccounts((error, accounts) => {
+                   if (!error) {
+                       if(accounts && accounts[0]){
+                           //console.log(accounts);
 
-                        const addr = accounts[0];
-
-
-                        if (provider.utils.isAddress(addr)) {
-                            const from = addr.toLowerCase();
-
-                           // const params = [provider.utils.toHex('Pareto'), from];
-                          //  const method = 'personal_sign';
-                            let msgParams = {
-                                types: {
-                                    EIP712Domain: [
-                                        { name: 'name',    type: 'string'  },
-                                        { name: 'version', type: 'string' },
-                                        { name: 'chainId', type: 'uint256' },
-                                        { name: 'verifyingContract', type: 'address' }
-                                    ],
-                                    CustomType: [
-                                        { name: 'message',   type: 'string' }
-                                    ],
-                                },
-                                primaryType: 'CustomType',
-                                domain: {
-                                    name:    'Pareto',
-                                    version: version.toString(),
-                                    chainId: parseInt(network),
-                                    verifyingContract: contractAddress
-                                },
-                                message: {
-                                    message: 'Pareto'
-                                }
-                            };
-                            let params = [JSON.stringify(msgParams), from];
-                            let method = 'eth_signTypedData_v3';
-                            let versionMethod = 'v3';
-                            // debugger;
-
-                            const resultfunction = function(versionMethod, msgParams, err, result){
-                                if (err) return console.dir(err);
-                                if (result.error) {
-                                    return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
-                                }
-                                if (result.error) {
-                                    return console.error(result);
-                                }
-                                result = result.result;
-                                let  recovered = '';
-                                if(versionMethod === 'v3') {
-                                    recovered = Sig.recoverTypedSignature({data: msgParams, sig: result});
-                                }else{
-                                    recovered = Sig.recoverTypedSignatureLegacy({data: msgParams, sig: result});
-                                }
-
-                                if (recovered === from) {
-                                    if(versionMethod === 'v3'){
-                                        msgParams = [
-                                            {
-                                                type: 'string',
-                                                name: 'Message',
-                                                value: 'Pareto' //replace with TOS
-                                            }
-                                        ];
-                                    }
-
-                                    authService.signParetoServer(msgParams, from, result, onSuccess, onError)
-
-                                } else {
-                                    console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
-                                    // stopLoading();
-                                    return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
-                                }
-                            }
-                            try{
-                                provider.currentProvider.sendAsync({method,params,from}, (err, result) => {
-                                    if(err || result.error){
-                                        method = 'eth_signTypedData';
-                                        versionMethod = 'v1';
-                                        const msgParams = [
-                                            {
-                                                type: 'string',
-                                                name: 'Message',
-                                                value: 'Pareto' //replace with TOS
-                                            }
-                                        ];
-                                        const params = [msgParams,from];
-                                        provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                            resultfunction( versionMethod, msgParams,err, result)
-                                        });
-                                    }else{
-                                        resultfunction( versionMethod, msgParams,null, result);
-                                    }
-                                })
-                            }catch (e) {
-                                method = 'eth_signTypedData';
-                                versionMethod = 'v1';
-                                 msgParams = [
-                                    {
-                                        type: 'string',
-                                        name: 'Message',
-                                        value: 'Pareto' //replace with TOS
-                                    }
-                                ];
-                                 params = [msgParams,from];
-                                provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
-                                    resultfunction( versionMethod, msgParams,err, result)
-                                });
-                            }
+                           const addr = accounts[0];
 
 
-                        }//end if valid address
-                        else {
-                            console.log('address invalid!');
-                            return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+                           if (provider.utils.isAddress(addr)) {
+                               const from = addr.toLowerCase();
 
-                            //set error state on input field
-                        }
-                    }else{
-                        return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
-                    }
-                    //end if !error
+                               // const params = [provider.utils.toHex('Pareto'), from];
+                               //  const method = 'personal_sign';
+                               let msgParams = {
+                                   types: {
+                                       EIP712Domain: [
+                                           { name: 'name',    type: 'string'  },
+                                           { name: 'version', type: 'string' },
+                                           { name: 'chainId', type: 'uint256' },
+                                           { name: 'verifyingContract', type: 'address' }
+                                       ],
+                                       CustomType: [
+                                           { name: 'message',   type: 'string' }
+                                       ],
+                                   },
+                                   primaryType: 'CustomType',
+                                   domain: {
+                                       name:    'Pareto',
+                                       version: version.toString(),
+                                       chainId: parseInt(network),
+                                       verifyingContract: contractAddress
+                                   },
+                                   message: {
+                                       message: 'Pareto'
+                                   }
+                               };
+                               let params = [ from, JSON.stringify(msgParams)];
+                               let method = 'eth_signTypedData_v3';
+                               let versionMethod = 'v3';
+                               // debugger;
 
-                }//end if !error
-            });
-        }//end if
-        return true;
+                               const resultfunction = function(versionMethod, msgParams, err, result){
+                                   if (err) return console.dir(err);
+                                   if (result.error) {
+                                       return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
+                                   }
+                                   if (result.error) {
+                                       return console.error(result);
+                                   }
+                                   result = result.result;
+                                   let  recovered = '';
+                                   if(versionMethod === 'v3') {
+                                       recovered = Sig.recoverTypedSignature({data: msgParams, sig: result});
+                                   }else{
+                                       recovered = Sig.recoverTypedSignatureLegacy({data: msgParams, sig: result});
+                                   }
+
+                                   if (recovered === from) {
+                                       if(versionMethod === 'v3'){
+                                           msgParams = [
+                                               {
+                                                   type: 'string',
+                                                   name: 'Message',
+                                                   value: 'Pareto' //replace with TOS
+                                               }
+                                           ];
+                                       }
+
+                                       authService.signParetoServer(msgParams, from, result, onSuccess, onError)
+
+                                   } else {
+                                       console.log('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                       // stopLoading();
+                                       return onError('Failed to verify signer when comparing ' + result + ' to ' + from);
+                                   }
+                               }
+                               try{
+                                   provider.currentProvider.sendAsync({method,params,from}, (err, result) => {
+                                       if(err || result.error){
+                                           method = 'eth_signTypedData';
+                                           versionMethod = 'v1';
+                                           const msgParams = [
+                                               {
+                                                   type: 'string',
+                                                   name: 'Message',
+                                                   value: 'Pareto' //replace with TOS
+                                               }
+                                           ];
+                                           const params = [msgParams,from];
+                                           provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                               resultfunction( versionMethod, msgParams,err, result)
+                                           });
+                                       }else{
+                                           resultfunction( versionMethod, msgParams,null, result);
+                                       }
+                                   })
+                               }catch (e) {
+                                   method = 'eth_signTypedData';
+                                   versionMethod = 'v1';
+                                   msgParams = [
+                                       {
+                                           type: 'string',
+                                           name: 'Message',
+                                           value: 'Pareto' //replace with TOS
+                                       }
+                                   ];
+                                   params = [msgParams,from];
+                                   provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                       resultfunction( versionMethod, msgParams,err, result)
+                                   });
+                               }
+
+
+                           }//end if valid address
+                           else {
+                               console.log('address invalid!');
+                               return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+
+                               //set error state on input field
+                           }
+                       }else{
+                           return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
+                       }
+                       //end if !error
+
+                   }//end if !error
+               });
+           }//end if
+       }).catch(err=>{
+           return onError(err);
+       })
     }
 
     static postSign(onSuccess, onError) {
