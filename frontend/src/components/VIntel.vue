@@ -76,10 +76,7 @@
                         <h5 class="title"><b>EVENTS</b></h5>
                         <ul>
                             <div>
-                                <p>Event 1</p>
-                                <p>Event 2</p>
-                                <p>Event 3</p>
-                                <p>Event 4</p>
+                                <p v-for="tx in pendingTransactions">{{tx.intel}} </p>
                             </div>
                         </ul>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
@@ -213,7 +210,7 @@
             ContentService.getTransactions();
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
