@@ -82,6 +82,7 @@ const store = new Vuex.Store({
         }, addTransaction(state, item){
             console.log(item);
             state.pendingTransactions.push(item);
+            console.log(state.pendingTransactions);
         }
     },
     actions: {
