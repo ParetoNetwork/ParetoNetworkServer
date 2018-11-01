@@ -90,7 +90,7 @@ controller.startW3WebSocket = function () {
 
 const mongoose = require('mongoose');
 //var models = require('./models/address');
-mongoose.connect(CONNECTION_URL).then(tmp=>{
+mongoose.connect(CONNECTION_URL, { useNewUrlParser: true }).then(tmp=>{
     web3_events_provider =  new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
     web3_events  = new Web3(web3_events_provider);
     controller.startW3WebSocket();
