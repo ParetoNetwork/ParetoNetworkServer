@@ -790,7 +790,7 @@ controller.getUserInfo = function(address ,callback){
             if(error){
                 callback(error)
             }else{
-                controller.retrieveProfileWithRedis([address], function (error, profile) {
+                controller.retrieveProfileWithRedis(address, function (error, profile) {
                     if(error){ callback(error)}
                     let ranking = rankings[0];
                     callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
