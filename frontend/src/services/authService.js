@@ -364,7 +364,7 @@ export default class authService {
                                        message: 'Pareto'
                                    }
                                };
-                               let params = [JSON.stringify(msgParams), from];
+                               let params = [ from, JSON.stringify(msgParams)];
                                let method = 'eth_signTypedData_v3';
                                let versionMethod = 'v3';
                                // debugger;
