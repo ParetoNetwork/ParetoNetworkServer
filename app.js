@@ -407,6 +407,7 @@ app.get('/v1/transaction', function (req, res) {
 
 
 app.post('/v1/transaction', function (req, res) {
+    console.log(req.body);
     if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
     || !req.body.address || !req.body.txHash || !req.body.intel || !req.body.amount || !req.body.event) {
         res.status(200).json(ErrorHandler.bodyMissingError());

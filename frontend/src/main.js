@@ -31,7 +31,8 @@ const store = new Vuex.Store({
         madeLogin: JSON.parse(window.localStorage.getItem('logged')),
         signType: (window.localStorage.getItem('signType')) || 'Metamask',
         pathId: (window.localStorage.getItem('pathId')) || '',
-        ws: null
+        ws: null,
+        pendingTransactions: []
     },
     mutations: {
         login(state, data) {
@@ -78,11 +79,17 @@ const store = new Vuex.Store({
             state.makingLogin = false;
         }, iniWs(state) {
             state.ws = new WebSocket (Environment.webSocketURL);
+        }, addTransaction(state, item){
+            console.log(item);
+            state.pendingTransactions.push(item);
         }
     },
     actions: {
         login(context, address) {
             context.commit('login', address.address);
+        },
+        addTransaction(context, item){
+            context.commit('addTransaction', item);
         }
     }
 });
