@@ -12,9 +12,6 @@ clock.start= function(wqueue){
         });
     }
 
-
-
-
     /**
      * This is a scheduled task that approximate score every minute.
      */
@@ -22,6 +19,7 @@ clock.start= function(wqueue){
     setTimeout(function run() {
         try{
             const time = (new Date().getTime());
+
             const job = queue
                 .create('clock-job',{minutes: (clock.time === 0)? 5: 1} )
                 .removeOnComplete(true)
@@ -31,7 +29,8 @@ clock.start= function(wqueue){
                         return;
                     }
                     job.on('complete', result => {
-                        console.log('Sucessfully updated aprox' )
+                        console.log('Sucessfully updated aprox' );
+
                         clock.time=(clock.time === 4)? 0: clock.time+1;
                         setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
                     });
@@ -40,6 +39,8 @@ clock.start= function(wqueue){
                         setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
                     });
                 });
+
+
 
         }catch (e) {
             console.log(e);
