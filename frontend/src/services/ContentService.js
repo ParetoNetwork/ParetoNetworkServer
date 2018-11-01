@@ -55,7 +55,7 @@ export default class ContentService {
     static getTransactions(onSucess, onError) {
         http.get("/v1/transaction")
             .then(res => {
-                console.log(res);
+                console.log(res.data.data);
                 return;
                 if (res.data.success) {
                     return onSuccess(res.data.data.data.PARETO);
@@ -184,7 +184,7 @@ export default class ContentService {
         });
     }
 
-    static async rewardIntel(content, signData, onSuccess, onError) {
+    static async rewardIntel(content, signData, addTransaction, onSuccess, onError) {
         await this.Setup(signData);
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
@@ -214,8 +214,9 @@ export default class ContentService {
                 })
                 .on("transactionHash", hash => {
                     console.log('First Transaction Confirmation');
-                    let params = {address: rewarder_address, txhash: hash, intel: content.intelAddress, amount: content.tokenAmount, event: 'reward'};
-                    console.log(params);
+                    let params = {address: rewarder_address, txHash: hash, intel: content.intelAddress, amount: content.tokenAmount, event: 'reward'};
+
+                    addTransaction(params);
                     this.postTransactions(params);
 
                     waitForReceipt(hash, async receipt => {

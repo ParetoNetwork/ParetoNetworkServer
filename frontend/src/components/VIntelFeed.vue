@@ -183,7 +183,7 @@
     import environment from "../utils/environment";
     import fromExponential from 'from-exponential';
 
-    import {mapState} from "vuex";
+    import {mapState, mapActions} from "vuex";
 
     import ContentService from "../services/ContentService";
     import AuthService from "../services/authService";
@@ -236,6 +236,7 @@
             }
         },
         methods: {
+            ...mapActions(["addTransaction"]),
             assignBlock(block) {
                 this.myFeed.content = this.myFeed.content.map(item => {
                     item.blockAgo = block - item.block > 0 ? block - item.block : 0;
@@ -371,7 +372,11 @@
                 }
 
                 ContentService.rewardIntel(
-                    {ID, tokenAmount, intelAddress}, {signType: this.signType, pathId: this.pathId},
+                    {ID, tokenAmount, intelAddress},
+                    {signType: this.signType, pathId: this.pathId},
+                    (transaction)=>{
+                        this.addTransaction(transaction);
+                    },
                     res => {
                         this.modalWaiting = false;
                         this.$notify({
