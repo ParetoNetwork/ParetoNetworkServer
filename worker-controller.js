@@ -31,6 +31,7 @@ const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //
 //const CONTRACT_CREATION_BLOCK_INT = 4953750;
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
 const EXPONTENT_BLOCK_AGO = process.env.EXPONTENT_BLOCK_AGO;
+const START_CLOCK = process.env.START_CLOCK || 1;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 
 const modelsPath = path.resolve(__dirname, 'models');
@@ -85,7 +86,7 @@ workerController.startW3WebSocket = function () {
 
 const mongoose = require('mongoose');
 //var models = require('./models/address');
-mongoose.connect(CONNECTION_URL).then(tmp=>{
+mongoose.connect(CONNECTION_URL, { useNewUrlParser: true }).then(tmp=>{
     web3_events_provider =  new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
     web3_events  = new Web3(web3_events_provider);
     workerController.startW3WebSocket();
@@ -1164,8 +1165,10 @@ const start = async () => {
 
         });
 
-        const clock = require('./clock.js');
-        clock.start(queue);
+        if(START_CLOCK==1){
+            const clock = require('./clock.js');
+            clock.start(queue);
+        }
     } catch (error) {
         console.log(error);
     }
