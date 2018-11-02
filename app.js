@@ -407,8 +407,10 @@ app.get('/v1/transaction', function (req, res) {
 
 
 app.post('/v1/transaction', function (req, res) {
+
+    const noParams = (!req.body.address  || !req.body.intel || !req.body.amount || !req.body.event);
     if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
-    || !req.body.address || !req.body.txHash || !req.body.intel || !req.body.amount || !req.body.event) {
+    || !req.body.txHash ||  (noParams && !req.txRewardHash) ) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }  else {
 
