@@ -784,7 +784,10 @@ workerController.realAllScoreRanking = async function(callback){
                     for (let i=0; i< arrayAddress.length; i++){
                         const address = arrayAddress[i];
                         await workerController.generateScore(blockHeight,address,0,function (err, result) {
-                            if(!err && result.tokens > 0 && !isNaN(result.score)){
+                            if(!err ){
+                                if (result.tokens == 0) {
+                                    result.score = 0;
+                                }
                                 scores.push(result);
                                 addressesExponent.push(address);
                             }
