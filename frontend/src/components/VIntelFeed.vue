@@ -236,7 +236,7 @@
             }
         },
         methods: {
-            ...mapActions(["addTransaction"]),
+            ...mapActions(["addTransaction", "transactionComplete"]),
             assignBlock(block) {
                 this.myFeed.content = this.myFeed.content.map(item => {
                     item.blockAgo = block - item.block > 0 ? block - item.block : 0;
@@ -374,9 +374,11 @@
                 ContentService.rewardIntel(
                     {ID, tokenAmount, intelAddress},
                     {signType: this.signType, pathId: this.pathId},
-                    (transaction)=>{
-                        this.addTransaction(transaction);
-                    },
+                    {
+                        addTransaction : this.addTransaction,
+                        transactionComplete: this.transactionComplete
+                    }
+                    ,
                     res => {
                         this.modalWaiting = false;
                         this.$notify({

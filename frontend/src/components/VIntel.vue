@@ -76,10 +76,11 @@
                         <h5 class="title"><b>EVENTS</b></h5>
                         <ul>
                             <div>
-                                <p v-for="tx in pendingTransactions">{{tx.intel}} </p>
+                                <p v-for="tx in pendingTransactions"> {{tx.txHash}} </p>
                             </div>
                         </ul>
-                        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
+                        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
+                            NEW INTEL
                         </button>
                     </div>
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
@@ -164,7 +165,7 @@
             return {
                 address: null,
                 loading: true,
-                block : 0,
+                block: 0,
                 modalWaiting: false,
                 hardwareAvailable: false,
                 rewardId: '',
@@ -184,7 +185,7 @@
                     score: 0,
                     tokens: 0
                 },
-                updateContentVar : 0
+                updateContentVar: 0
             };
         },
         directives: {
@@ -207,7 +208,6 @@
         },
         mounted: function () {
             this.main();
-            ContentService.getTransactions();
         },
         computed: {
             ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
@@ -216,7 +216,7 @@
             ...mapMutations(["intelEnter", "iniWs"]),
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
-                    {ID},{signType: this.signType, pathId: this.pathId},
+                    {ID}, {signType: this.signType, pathId: this.pathId},
                     res => {
                         //  console.log(res);
                     },
@@ -224,12 +224,27 @@
                     }
                 );
             },
-            intelRoute(intel){
-                let param = (intel.txHash === '0x0')? intel._id : intel.txHash;
+            intelRoute(intel) {
+                let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
             },
             goToIntelPage: function () {
                 window.location = '/#/create';
+            },
+            getTransactions: function () {
+                return ContentService.getTransactions(
+                    data => {
+                        console.log(data);
+                    }, error => {
+                        let errorText = error.message ? error.message : error;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Login',
+                            text: errorText
+                        });
+                    });
             },
             loadAddress: function () {
                 return dashboardService.getAddress(
@@ -237,13 +252,14 @@
                         this.address = res;
                     },
                     error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Login',
-                            text: errorText });
+                            text: errorText
+                        });
                     }
                 );
             },
@@ -255,7 +271,7 @@
                     }
                 );
             },
-            updateContent: function(){
+            updateContent: function () {
                 return dashboardService.getAllContent(params,
                     res => {
                         this.loading = false;
@@ -264,18 +280,19 @@
                         this.myFeed.content = [...this.myFeed.content, ...res];
                     },
                     error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Content',
-                            text: errorText });
+                            text: errorText
+                        });
                     }
                 );
             },
-            numberToScientificNotation(number){
-                return (number+"").length>12? number.toExponential(5) : number;
+            numberToScientificNotation(number) {
+                return (number + "").length > 12 ? number.toExponential(5) : number;
             },
             overrideOnMessage() {
                 let wsa = this.ws;
@@ -290,9 +307,9 @@
                             // this.user.block = info.data.block;
                             this.block = info.data.block;
                         }
-                        if (info.data.action){
-                            switch (info.data.action){
-                                case 'updateContent':{
+                        if (info.data.action) {
+                            switch (info.data.action) {
+                                case 'updateContent': {
                                     this.loadMyContent();
                                     this.updateContentVar++;
                                 }
@@ -326,7 +343,7 @@
                         this.myContent = this.allMyContent.slice(0, 10);
                     },
                     error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'Content',
@@ -364,7 +381,8 @@
                     this.loadProfile(),
                     this.loadMyContent(),
                     this.loadAddress(),
-                    this.loadContent()
+                    this.loadContent(),
+                    this.getTransactions()
                 ]).then(values => {
                     this.$store.state.makingRequest = false;
                 });

@@ -80,9 +80,10 @@ const store = new Vuex.Store({
         }, iniWs(state) {
             state.ws = new WebSocket (Environment.webSocketURL);
         }, addTransaction(state, item){
-            console.log(item);
             state.pendingTransactions.push(item);
             console.log(state.pendingTransactions);
+        }, deleteTransaction(state, txHash){
+            state.pendingTransactions = state.pendingTransactions.filter(item =>  item.txHash !== txHash);
         }
     },
     actions: {
@@ -91,6 +92,9 @@ const store = new Vuex.Store({
         },
         addTransaction(context, item){
             context.commit('addTransaction', item);
+        },
+        transactionComplete(context, txHash){
+            context.commit('deleteTransaction', txHash);
         }
     }
 });
