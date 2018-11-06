@@ -52,13 +52,11 @@ export default class ContentService {
             })
     }
 
-    static getTransactions(onSucess, onError) {
-        http.get("/v1/transaction")
+    static getTransactions(onSuccess, onError) {
+        return http.get("/v1/transaction")
             .then(res => {
-                console.log(res.data.data);
-                return;
                 if (res.data.success) {
-                    return onSuccess(res.data.data.data.PARETO);
+                    return onSuccess(res.data.data);
                 } else {
                     return onError('Could not retrieve data from server');
                 }
@@ -184,7 +182,7 @@ export default class ContentService {
         });
     }
 
-    static async rewardIntel(content, signData, addTransaction, onSuccess, onError) {
+    static async rewardIntel(content, signData, events, onSuccess, onError) {
         await this.Setup(signData);
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
@@ -213,14 +211,14 @@ export default class ContentService {
                     gasPrice
                 })
                 .on("transactionHash", hash => {
-                    console.log('First Transaction Confirmation');
                     let params = {address: rewarder_address, txHash: hash, intel: content.intelAddress, amount: content.tokenAmount, event: 'reward'};
-
-                    addTransaction(params);
                     this.postTransactions(params);
 
+                    var txHash = hash;
+                    events.addTransaction(params);
+
                     waitForReceipt(hash, async receipt => {
-                        console.log('Second Transaction Confirmation');
+
                         const gasSendReward = await Intel.methods
                             .sendReward(content.ID, depositAmount)
                             .estimateGas({from: rewarder_address});
@@ -236,6 +234,7 @@ export default class ContentService {
                                     if (ContentService.ledgerNanoEngine) {
                                         ContentService.ledgerNanoEngine.stop();
                                     }
+                                    events.transactionComplete(txHash);
                                     onSuccess("success");
                                 });
                             })
