@@ -581,7 +581,7 @@ controller.validateQuery = function(query){
     if( query.address ) {
         try {
             data = query.address.split(',')
-                .filter( address =>{ return web3.utils.isAddress(address) } );
+                .filter( address =>{ return web3.utils.isAddress(address) } ).map(address => {return address.toLowerCase()});
             if( data.length > 0 ) {
                 array.push({ address: { $in: data} })
             }
@@ -593,7 +593,7 @@ controller.validateQuery = function(query){
         if( query.exclude ) {
             try {
                 data = query.exclude.split(',')
-                    .filter( address =>{ return web3.utils.isAddress(address) } )
+                    .filter( address =>{ return web3.utils.isAddress(address) } ).map(address => {return address.toLowerCase()});
                 if( data.length > 0 ) {
                     array.push({ address: { $nin: data} })
                 }
