@@ -236,7 +236,7 @@
             }
         },
         methods: {
-            ...mapActions(["addTransaction", "transactionComplete"]),
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             assignBlock(block) {
                 this.myFeed.content = this.myFeed.content.map(item => {
                     item.blockAgo = block - item.block > 0 ? block - item.block : 0;
@@ -375,10 +375,11 @@
                     {ID, tokenAmount, intelAddress},
                     {signType: this.signType, pathId: this.pathId},
                     {
-                        addTransaction : this.addTransaction,
-                        transactionComplete: this.transactionComplete
-                    }
-                    ,
+                        addTransaction: this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
                     res => {
                         this.modalWaiting = false;
                         this.$notify({
