@@ -1,6 +1,7 @@
 import axios from 'axios';
 import http from "./HttpService";
 import Web3 from "web3";
+import authService from "./authService"
 
 let web3;
 let provider;
@@ -86,7 +87,11 @@ export default class ContentService {
     }
 
     static async createIntel(serverData, tokenAmount, signData, onSuccess, onError) {
-        await this.Setup(signData);
+        try {
+            await this.Setup(signData);
+        } catch (e) {
+            return onError(e)
+        }
         //console.log(tokenAmount);
 
         if (tokenAmount === null) {
@@ -182,8 +187,85 @@ export default class ContentService {
         });
     }
 
+    static async pendingTransactionApproval(content, signData, events, onSuccess, onError) {
+        try {
+            await this.Setup(signData);
+        } catch (e) {
+            return onError(e)
+        }
+
+        if(content.status < 2 ){
+            web3.eth.getAccounts(async (err, accounts) => {
+                if (err) {
+                    onError("Err getting accounts");
+                    return;
+                }
+                Intel = new web3.eth.Contract(
+                    Intel_Contract_Schema,
+                    content.intelAddress
+                );
+                let gasPrice = await web3.eth.getGasPrice();
+                const rewarder_address = accounts[0];
+                const decimals = web3.utils.toBN(18);
+                const amount = web3.utils.toBN(parseFloat(content.amount));
+                const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
+                console.log(content);
+
+                waitForReceipt(content.txHash, async receipt => {
+                    const gasSendReward = await Intel.methods
+                        .sendReward(content.intel, depositAmount)
+                        .estimateGas({from: rewarder_address});
+                    await Intel.methods
+                        .sendReward(content.intel, depositAmount)
+                        .send({
+                            from: rewarder_address,
+                            gas: gasSendReward,
+                            gasPrice
+                        })
+                        .on("transactionHash", hash => {
+                            let params = {
+                                txHash: content.txHash,
+                                txRewardHash: hash
+                            };
+                            this.postTransactions(params);
+
+                            waitForReceipt(hash, receipt => {
+
+                                if (ContentService.ledgerNanoEngine) {
+                                    ContentService.ledgerNanoEngine.stop();
+                                }
+                                events.transactionComplete(content.txHash);
+                                onSuccess("success");
+                            });
+                        })
+                        .on("error", error => {
+                            if (ContentService.ledgerNanoEngine) {
+                                ContentService.ledgerNanoEngine.stop();
+                            }
+                            events.transactionComplete(content.txHash);
+                            onError(error);
+                        });
+                });
+            });
+        }
+
+        if(content.status >= 2){
+            waitForReceipt(hash, receipt => {
+                if (ContentService.ledgerNanoEngine) {
+                    ContentService.ledgerNanoEngine.stop();
+                }
+                events.transactionComplete(content.txHash);
+                onSuccess("success");
+            });
+        }
+    }
+
     static async rewardIntel(content, signData, events, onSuccess, onError) {
-        await this.Setup(signData);
+        try {
+            await this.Setup(signData);
+        } catch (e) {
+            return onError(e)
+        }
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
                 onError("Err getting accounts");
@@ -211,14 +293,20 @@ export default class ContentService {
                     gasPrice
                 })
                 .on("transactionHash", hash => {
-                    let params = {address: rewarder_address, txHash: hash, intel: content.intelAddress, amount: content.tokenAmount, event: 'reward'};
-                    this.postTransactions(params);
+                    let params = {
+                        address: rewarder_address,
+                        txHash: hash,
+                        intel: content.ID,
+                        amount: content.tokenAmount,
+                        event: 'reward',
+                        intelAddress: content.intelAddress
+                    };
 
                     var txHash = hash;
                     events.addTransaction(params);
+                    this.postTransactions(params);
 
                     waitForReceipt(hash, async receipt => {
-
                         const gasSendReward = await Intel.methods
                             .sendReward(content.ID, depositAmount)
                             .estimateGas({from: rewarder_address});
@@ -230,6 +318,7 @@ export default class ContentService {
                                 gasPrice
                             })
                             .on("transactionHash", hash => {
+                                console.log(hash, receipt);
                                 waitForReceipt(hash, receipt => {
                                     if (ContentService.ledgerNanoEngine) {
                                         ContentService.ledgerNanoEngine.stop();
@@ -242,6 +331,7 @@ export default class ContentService {
                                 if (ContentService.ledgerNanoEngine) {
                                     ContentService.ledgerNanoEngine.stop();
                                 }
+                                events.transactionComplete(txHash);
                                 onError(error);
                             });
                     });
@@ -253,7 +343,11 @@ export default class ContentService {
     }
 
     static async distributeRewards(content, signData, onSuccess, onError) {
-        await this.Setup(signData);
+        try {
+            await this.Setup(signData);
+        } catch (e) {
+            return onError(e)
+        }
 
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
@@ -311,14 +405,12 @@ export default class ContentService {
                 break;
             }
             default: {
+                window.web3 = await authService.onMetamaskAccess();
                 if (typeof window.web3 !== "undefined") {
                     // Use Mist/MetaMask's provider
                     provider = new Web3(window.web3.currentProvider);
                 } else {
-                    //console.log("No web3? You should consider trying MetaMask!");
-                    onError(
-                        "Please install MetaMask (or other web3 browser) in order to access the Pareto Network"
-                    );
+
 
                     // searchLookup();
                     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)

@@ -400,21 +400,17 @@ app.get('/v1/transaction', function (req, res) {
         } else {
             res.status(200).json(ErrorHandler.getSuccess(obj));
         }
-
     });
 
 }); //end content post
 
 
 app.post('/v1/transaction', function (req, res) {
-    console.log(req.body);
     if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
     || !req.body.address || !req.body.txHash || !req.body.intel || !req.body.amount || !req.body.event) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }  else {
-
         //needs to check address whitelist against the authorized address, if people figure out the post body format.
-
         controller.watchTransaction(req.body, function (err, obj) {
             if (err) {
                 res.status(200).json(ErrorHandler.getError(err));

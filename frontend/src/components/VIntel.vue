@@ -72,13 +72,15 @@
 
                 <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
                 <div v-else class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h5 class="title"><b>EVENTS</b></h5>
-                        <ul>
-                            <div>
-                                <p v-for="tx in pendingTransactions"> {{tx.txHash}} </p>
+                    <div class="p-3">
+                        <h5 class="title text-left border-bottom p-2"><b>EVENTS</b></h5>
+                        <div v-for="tx in pendingTransactions" class="mt-1">
+                            <div class="d-flex justify-content-between">
+                                <div> Reward: {{tx.amount}}</div>
+                                <div> Reward: {{tx.amount}}</div>
+                                <div> Hash: {{tx.txHash.substring(0,10)}}</div>
                             </div>
-                        </ul>
+                        </div>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
                             NEW INTEL
                         </button>
@@ -143,7 +145,7 @@
     import ICountUp from "vue-countup-v2";
 
     import VIntelFeed from "./VIntelFeed.vue";
-    import {mapMutations, mapState} from "vuex";
+    import {mapMutations, mapState, mapActions} from "vuex";
     import environment from "../utils/environment";
     import {countUpMixin} from "../mixins/countUp";
 
@@ -214,6 +216,7 @@
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
+            ...mapActions(["addTransaction", "transactionComplete", "assignTransactions"]),
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
                     {ID}, {signType: this.signType, pathId: this.pathId},
@@ -232,19 +235,45 @@
                 window.location = '/#/create';
             },
             getTransactions: function () {
-                return ContentService.getTransactions(
-                    data => {
-                        console.log(data);
-                    }, error => {
-                        let errorText = error.message ? error.message : error;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Login',
-                            text: errorText
-                        });
+                return ContentService.getTransactions(data => {
+                    this.assignTransactions(data);
+                    data.forEach(transaction => {
+                        ContentService.pendingTransactionApproval(
+                            transaction,
+                            {signType: this.signType, pathId: this.pathId},
+                            {
+                                addTransaction : this.addTransaction,
+                                transactionComplete: this.transactionComplete
+                            },
+                            res => {
+                                this.modalWaiting = false;
+                                this.$notify({
+                                    group: 'notification',
+                                    type: 'success',
+                                    duration: 10000,
+                                    text: 'Success'
+                                });
+                            },
+                            err => {
+                                this.modalWaiting = false;
+                                this.$notify({
+                                    group: 'notification',
+                                    type: 'error',
+                                    duration: 10000,
+                                    text: err.message ? err.message : err
+                                });
+                            });
+                    })
+                }, error => {
+                    let errorText = error.message ? error.message : error;
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Login',
+                        text: errorText
                     });
+                });
             },
             loadAddress: function () {
                 return dashboardService.getAddress(
@@ -409,6 +438,16 @@
                 profileService.uploadProfilePic(formData, res => {
                     this.user.profile_pic = res;
                 });
+            },
+            transactionStatus: function(status) {
+                switch (status){
+                    case 0:
+                        return 'Approval'
+                    case 1:
+                        return 'Pending Confirmation'
+                    case 2:
+                        return 'Pending Transaction'
+                }
             },
             updateProfile() {
                 const profile = {
