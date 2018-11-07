@@ -60,8 +60,13 @@ export default class dashboardService {
 
     static getAllContent(params, onSuccess, onError) {
         const {limit, page} = params || {limit: 10, page: 0};
-
-        return http.get('/v1/content?limit=' + limit + '&page=' + page ).then(res => {
+        let query_params = window.location.hash.split('?');
+        console.log(window.location.hash)
+        let total_query = ""
+        if(query_params.length>0){
+            total_query = "&" +query_params[1];
+        }
+        return http.get('/v1/content?limit=' + limit + '&page=' + page +total_query).then(res => {
             //console.log(res);
             if(res.data.success){
                 return onSuccess(res.data.data);
