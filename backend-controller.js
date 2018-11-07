@@ -90,7 +90,7 @@ controller.startW3WebSocket = function () {
 
 const mongoose = require('mongoose');
 //var models = require('./models/address');
-mongoose.connect(CONNECTION_URL).then(tmp=>{
+mongoose.connect(CONNECTION_URL, { useNewUrlParser: true }).then(tmp=>{
     web3_events_provider =  new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
     web3_events  = new Web3(web3_events_provider);
     controller.startW3WebSocket();
@@ -247,19 +247,27 @@ controller.postContent = function (req, callback) {
 
 
 controller.getPendingTransaction = function (address, callback){
-    ParetoTransaction.find({address: address, state: 0}, callback);
+    ParetoTransaction.find({address: address, status: {$lt: 3}}, callback);
 }
 
 controller.watchTransaction =  function (data, callback){
+    if(data.address){
+        data.address = data.address.toLowerCase();
+    }
+
     var dbQuery = {
         txHash: data.txHash
     };
+    if (data.txRewardHash){
+        data.status = 2;
+    }
     var dbValues = {
         $set: data
     };
     var dbOptions = {
         upsert: true,
-        new: true
+        new: true,
+        setDefaultsOnInsert: true
     };
 
     var updateQuery = ParetoTransaction.findOneAndUpdate(dbQuery, dbValues, dbOptions);
@@ -378,7 +386,7 @@ controller.startwatchNewIntel = function(){
                                             callback(err);
                                         }
                                     });
-                                    controller.updateIntelReward(intelIndex, event.returnValues.sender.toLowerCase(), event.transactionHash);
+                                    controller.updateIntelReward(intelIndex, event.transactionHash);
 
 
                                 }
@@ -408,7 +416,7 @@ controller.startwatchNewIntel = function(){
         const txHash = log.transactionHash;
         const blockNumber = log.blockNumber;
         if(blockNumber!=null){
-        ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { state: 1, block: blockNumber }, function (err, r) {
+        ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { status: 1, block: blockNumber }, function (err, r) {
             if(!err && r){
                 if(controller.wss){
                     try{
@@ -531,8 +539,9 @@ controller.updateAddressReward = function(event, token){
 /**
  * Update totalreward count in Intel document
  * @param intelIndex
+ * @param txHash
  */
-controller.updateIntelReward=function(intelIndex, sender, txHash){
+controller.updateIntelReward=function(intelIndex, txHash){
     let agg =  [ {$match: { 'intelId': intelIndex } },
         { $group: { _id: null,
                 rewards : {
@@ -549,34 +558,37 @@ controller.updateIntelReward=function(intelIndex, sender, txHash){
     ParetoReward.aggregate( agg).exec(function (err, r) {
         if(r.length > 0) {
             const reward = r[0].reward;
-            ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward}, { }, (err, intel) => {
-                if(!err){
-                    if(controller.wss){
-                        try{
-                            controller.wss.clients.forEach(function each(client) {
+            let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
+            ,  ParetoTransaction.findOneAndUpdate({ txRewardHash: txHash }, { status: 3  })];
+            Promise.all(promises).then( values =>{
+                    if(values.length > 0 && controller.wss){
+                        controller.wss.clients.forEach(function each(client) {
+                            try{
                                 if (client.isAlive === false) return client.terminate();
                                 if (client.readyState === controller.WebSocket.OPEN ) {
                                     // Validate if the user is subscribed a set of information
                                     if(client.user){
                                         client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                        if( client.user.user==sender){
-                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateReward', data: {intel: intelIndex, txHash: txHash}})) );
+                                        if(values.length > 1 && values[1]){
+                                            if(client.user && client.user.user== values[1].address) {
+                                                client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: values[1]})) );
+
+                                            }
                                         }
                                     }
                                 }
-                            });
-                        }catch (e) {
-                            console.log(e);
-                        }
-                    }else{
-                        console.log('no wss')
+                            }catch (e) {
+                                console.log(e);
+                            }
+                        });
                     }
-                }
-
-            });
+                })
+                .catch(e=>{
+                    console.log(e);
+                });
         }
     })
-}
+};
 
 
 /**
