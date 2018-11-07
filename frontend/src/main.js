@@ -84,6 +84,14 @@ const store = new Vuex.Store({
             console.log(state.pendingTransactions);
         }, assignTransactions(state, transactions) {
             state.pendingTransactions = transactions;
+        }, editTransaction(state, {hash, status}){
+            state.pendingTransactions = state.pendingTransactions.map(item => {
+                  if(item.txHash === hash){
+                      console.log(status);
+                      item.status = status;
+                  }
+                  return item;
+            });
         }, deleteTransaction(state, txHash) {
             state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
         }
@@ -97,6 +105,10 @@ const store = new Vuex.Store({
         },
         assignTransactions(context, transactions) {
             context.commit('assignTransactions', transactions);
+        },
+        editTransaction(context, params) {
+            console.log(params);
+            context.commit('editTransaction', params);
         },
         transactionComplete(context, txHash) {
             context.commit('deleteTransaction', txHash);

@@ -75,10 +75,10 @@
                     <div class="p-3">
                         <h5 class="title text-left border-bottom p-2"><b>EVENTS</b></h5>
                         <div v-for="tx in pendingTransactions" class="mt-1">
-                            <div class="d-flex justify-content-between">
-                                <div> Reward: {{tx.amount}}</div>
-                                <div> Reward: {{tx.amount}}</div>
-                                <div> Hash: {{tx.txHash.substring(0,10)}}</div>
+                            <div class="d-flex justify-content-between cursor-pointer">
+                                <div @click="clickTransaction(tx)"> Reward: {{tx.amount}}</div>
+                                <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
+                                <a class="text-primary" :href="etherscanUrl + '/' + (tx.txRewardHash || tx.txHash)" target="_blank"> Hash: {{tx.txHash.substring(0,10)}} </a>
                             </div>
                         </div>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
@@ -182,6 +182,7 @@
                 bio: "",
                 picture: "",
                 baseURL: environment.baseURL,
+                etherscanUrl: environment.etherscanDomain,
                 user: {
                     rank: 0,
                     score: 0,
@@ -216,7 +217,37 @@
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
-            ...mapActions(["addTransaction", "transactionComplete", "assignTransactions"]),
+            ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+            clickTransaction: function(transaction){
+                ContentService.pendingTransactionApproval(
+                    transaction,
+                    {signType: this.signType, pathId: this.pathId},
+                    {
+
+                        addTransaction : this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
+                    res => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            text: 'Success'
+                        });
+                    },
+                    err => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            text: err.message ? err.message : err
+                        });
+                    });
+            },
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
                     {ID}, {signType: this.signType, pathId: this.pathId},
@@ -237,33 +268,6 @@
             getTransactions: function () {
                 return ContentService.getTransactions(data => {
                     this.assignTransactions(data);
-                    data.forEach(transaction => {
-                        ContentService.pendingTransactionApproval(
-                            transaction,
-                            {signType: this.signType, pathId: this.pathId},
-                            {
-                                addTransaction : this.addTransaction,
-                                transactionComplete: this.transactionComplete
-                            },
-                            res => {
-                                this.modalWaiting = false;
-                                this.$notify({
-                                    group: 'notification',
-                                    type: 'success',
-                                    duration: 10000,
-                                    text: 'Success'
-                                });
-                            },
-                            err => {
-                                this.modalWaiting = false;
-                                this.$notify({
-                                    group: 'notification',
-                                    type: 'error',
-                                    duration: 10000,
-                                    text: err.message ? err.message : err
-                                });
-                            });
-                    })
                 }, error => {
                     let errorText = error.message ? error.message : error;
                     this.$notify({
@@ -442,11 +446,11 @@
             transactionStatus: function(status) {
                 switch (status){
                     case 0:
-                        return 'Approval'
+                        return 'Approval Pending';
                     case 1:
-                        return 'Pending Confirmation'
+                        return 'Pending Confirmation';
                     case 2:
-                        return 'Pending Transaction'
+                        return 'Pending Transaction';
                 }
             },
             updateProfile() {

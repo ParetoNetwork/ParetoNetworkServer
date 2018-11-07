@@ -406,11 +406,15 @@ app.get('/v1/transaction', function (req, res) {
 
 
 app.post('/v1/transaction', function (req, res) {
+
+    const noParams = (!req.body.address  || !req.body.intel || !req.body.amount || !req.body.event || !req.body.intelAddress);
     if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
-    || !req.body.address || !req.body.txHash || !req.body.intel || !req.body.amount || !req.body.event) {
+        || !req.body.txHash ||  (noParams && !req.body.txRewardHash) ) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }  else {
+
         //needs to check address whitelist against the authorized address, if people figure out the post body format.
+
         controller.watchTransaction(req.body, function (err, obj) {
             if (err) {
                 res.status(200).json(ErrorHandler.getError(err));

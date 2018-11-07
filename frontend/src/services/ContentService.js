@@ -194,7 +194,8 @@ export default class ContentService {
             return onError(e)
         }
 
-        if(content.status < 2 ){
+        console.log(content);
+        if (content.status < 2) {
             web3.eth.getAccounts(async (err, accounts) => {
                 if (err) {
                     onError("Err getting accounts");
@@ -209,9 +210,16 @@ export default class ContentService {
                 const decimals = web3.utils.toBN(18);
                 const amount = web3.utils.toBN(parseFloat(content.amount));
                 const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
-                console.log(content);
 
                 waitForReceipt(content.txHash, async receipt => {
+                    events.toastTransaction({
+                        group: 'notification',
+                        title: 'Event Ready',
+                        type: 'warning',
+                        duration: 10000,
+                        text: 'Second transaction ready, complete it'
+                    });
+                    events.editTransaction({hash: content.txHash, status: 1});
                     const gasSendReward = await Intel.methods
                         .sendReward(content.intel, depositAmount)
                         .estimateGas({from: rewarder_address});
@@ -223,6 +231,7 @@ export default class ContentService {
                             gasPrice
                         })
                         .on("transactionHash", hash => {
+                            events.editTransaction({hash: content.txHash, status: 2});
                             let params = {
                                 txHash: content.txHash,
                                 txRewardHash: hash
@@ -230,12 +239,11 @@ export default class ContentService {
                             this.postTransactions(params);
 
                             waitForReceipt(hash, receipt => {
-
                                 if (ContentService.ledgerNanoEngine) {
                                     ContentService.ledgerNanoEngine.stop();
                                 }
                                 events.transactionComplete(content.txHash);
-                                onSuccess("success");
+                                onSuccess("Transaction Completed");
                             });
                         })
                         .on("error", error => {
@@ -249,8 +257,13 @@ export default class ContentService {
             });
         }
 
-        if(content.status >= 2){
-            waitForReceipt(hash, receipt => {
+        if (content.status >= 2) {
+            let params = {
+                txHash: content.txHash,
+                txRewardHash: content.txRewardHash
+            };
+            this.postTransactions(params);
+            waitForReceipt(content.txRewardHash, receipt => {
                 if (ContentService.ledgerNanoEngine) {
                     ContentService.ledgerNanoEngine.stop();
                 }
@@ -299,7 +312,8 @@ export default class ContentService {
                         intel: content.ID,
                         amount: content.tokenAmount,
                         event: 'reward',
-                        intelAddress: content.intelAddress
+                        intelAddress: content.intelAddress,
+                        status: 0
                     };
 
                     var txHash = hash;
@@ -307,6 +321,14 @@ export default class ContentService {
                     this.postTransactions(params);
 
                     waitForReceipt(hash, async receipt => {
+                        events.toastTransaction({
+                            group: 'notification',
+                            title: 'Event Ready',
+                            type: 'warning',
+                            duration: 10000,
+                            text: 'Second transaction ready, complete it'
+                        });
+                        events.editTransaction({hash: txHash, status: 1});
                         const gasSendReward = await Intel.methods
                             .sendReward(content.ID, depositAmount)
                             .estimateGas({from: rewarder_address});
@@ -318,13 +340,18 @@ export default class ContentService {
                                 gasPrice
                             })
                             .on("transactionHash", hash => {
-                                console.log(hash, receipt);
+                                let params = {
+                                    txHash: txHash,
+                                    txRewardHash: hash
+                                };
+                                this.postTransactions(params);
+                                events.editTransaction({hash: txHash, status: 2});
                                 waitForReceipt(hash, receipt => {
                                     if (ContentService.ledgerNanoEngine) {
                                         ContentService.ledgerNanoEngine.stop();
                                     }
                                     events.transactionComplete(txHash);
-                                    onSuccess("success");
+                                    onSuccess("Transaction Completed");
                                 });
                             })
                             .on("error", error => {
