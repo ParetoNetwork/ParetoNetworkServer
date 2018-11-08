@@ -252,39 +252,57 @@ export default class ContentService {
     }
 
     static async sendReward(Intel, content, events, onSuccess, onError){
-        const gasSendReward = await Intel.methods
-            .sendReward(content.intel, content.depositAmount)
-            .estimateGas({from: content.rewarder_address});
-        await Intel.methods
-            .sendReward(content.intel, content.depositAmount)
-            .send({
-                from: content.rewarder_address,
-                gas: gasSendReward,
-                gasPrice: content.gasPrice
-            })
-            .on("transactionHash", hash => {
-                events.editTransaction({hash: content.txHash, status: 2});
-                let params = {
-                    txHash: content.txHash,
-                    txRewardHash: hash
-                };
-                this.postTransactions(params);
+        try{
+            const gasSendReward = await Intel.methods
+                .sendReward(content.intel, content.depositAmount)
+                .estimateGas({from: content.rewarder_address});
+            await Intel.methods
+                .sendReward(content.intel, content.depositAmount)
+                .send({
+                    from: content.rewarder_address,
+                    gas: gasSendReward,
+                    gasPrice: content.gasPrice
+                })
+                .on("transactionHash", hash => {
+                    events.editTransaction({hash: content.txHash, status: 2});
+                    let params = {
+                        txHash: content.txHash,
+                        txRewardHash: hash
+                    };
+                    this.postTransactions(params);
 
-                waitForReceipt(hash, receipt => {
+                    waitForReceipt(hash, receipt => {
+                        if (ContentService.ledgerNanoEngine) {
+                            ContentService.ledgerNanoEngine.stop();
+                        }
+                        events.transactionComplete(content.txHash);
+                        onSuccess("Transaction Completed");
+                    });
+                })
+                .on("error", error => {
                     if (ContentService.ledgerNanoEngine) {
                         ContentService.ledgerNanoEngine.stop();
                     }
                     events.transactionComplete(content.txHash);
-                    onSuccess("Transaction Completed");
+                    onError(error);
                 });
-            })
-            .on("error", error => {
-                if (ContentService.ledgerNanoEngine) {
-                    ContentService.ledgerNanoEngine.stop();
-                }
-                events.transactionComplete(content.txHash);
-                onError(error);
+        }catch (e) {
+            let params = {
+                txHash: content.txHash,
+                status: 4
+            };
+            this.postTransactions(params);
+
+            events.transactionComplete(content.txHash);
+            events.toastTransaction({
+                group: 'notification',
+                title: 'Error:',
+                type: 'error',
+                duration: 10000,
+                text: 'Transaction Failed'
             });
+        }
+
     }
 
     static async rewardIntel(content, signData, events, onSuccess, onError) {

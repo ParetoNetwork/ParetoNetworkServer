@@ -358,7 +358,6 @@
                 let transactionPending = false;
                 this.pendingTransactions.forEach(transaction => {
                     if(intel.id === transaction.intel){
-                        console.log(intel.id, transaction.intel, intel.intelAddress, transaction.intelAddress);
                         transactionPending = true;
                     }
                 });
