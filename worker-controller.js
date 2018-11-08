@@ -741,23 +741,30 @@ workerController.aproxAllScoreRanking = async function(callback){
                 }
 
             });
-            const lastBlock = blockHeight;
-            const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
-            intel.getPastEvents('Reward',{fromBlock: lastBlock-1200, toBlock: 'latest'}, function (err, events) {
-                // console.log(events);
-                if(err){ console.log(err); return;}
-                for (let i=0;i<events.length;i=i+1){
-                    try{
-                        const event = events[i];
-                        ParetoTransaction.findOneAndUpdate({ txRewardHash: event.transactionHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
+            ParetoTransaction.find({ $or: [ {status: 0}, {status: 2} ]}, function (err, results) {
+                results.forEach( data =>{
+                    if(data.status == 0){
+                        web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
+                            if(receipt){
+                                ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txHash}, {status: 1}, { multi: false }, function (err, data) {
+                                });
+                            }
                         });
-                    }catch (e) {
-                        console.log(e);
+                    } else{
+                        if (data.txRewardHash && data.status ==2){
+                            web3.eth.getTransactionReceipt(data.txRewardHash, function (err, receipt) {
+                                if(receipt){
+                                    ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txRewardHash}, {status: 3}, { multi: false }, function (err, data) {
+                                    });
+                                }
+
+                            });
+                        }
                     }
-                }
+                })
+
 
             })
-
 
         }, function (error) {
             console.log(error);
