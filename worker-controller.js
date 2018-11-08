@@ -741,6 +741,24 @@ workerController.aproxAllScoreRanking = async function(callback){
                 }
 
             });
+            const lastBlock = blockHeight;
+            const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
+            intel.getPastEvents('Reward',{fromBlock: lastBlock-1200, toBlock: 'latest'}, function (err, events) {
+                // console.log(events);
+                if(err){ console.log(err); return;}
+                for (let i=0;i<events.length;i=i+1){
+                    try{
+                        const event = events[i];
+                        ParetoTransaction.findOneAndUpdate({ txRewardHash: event.transactionHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
+                        });
+                    }catch (e) {
+                        console.log(e);
+                    }
+                }
+
+            })
+
+
         }, function (error) {
             console.log(error);
             callback(null, {} );
@@ -1085,55 +1103,6 @@ workerController.updateFromLastIntel =  function(){
                     }
 
                 });
-            }
-
-        }
-    });
-
-    ParetoTransaction.aggregate([
-        {
-            $group: {
-                _id: null,
-                lastBlock: {$max: "$block"}
-            }
-        }
-    ]).exec(function(err, results) {
-        if (err) {
-            callback(err);
-        }
-        else {
-            if(results.length > 0){
-                const lastBlock = results[0].lastBlock;
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
-                intel.getPastEvents('Reward',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
-                    // console.log(events);
-                    if(err){ console.log(err); return;}
-                    for (let i=0;i<events.length;i=i+1){
-                        try{
-                            const event = events[i];
-                            try{
-                                const intelIndex = parseInt(event.returnValues.intelIndex);
-                                const rewardData = {
-                                    sender: event.returnValues.sender.toLowerCase(),
-                                    intelId: intelIndex,
-                                    txHash: event.transactionHash,
-                                    block: event.blockNumber,
-                                    amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
-                                };
-
-                                ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},rewardData, {upsert: true, new: true}, function(err, r){  }
-                                );
-                            }catch (e) {
-                                console.log(e);
-                            }
-                            ParetoTransaction.findOneAndUpdate({ txRewardHash: event.transactionHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
-                            });
-                        }catch (e) {
-                            console.log(e);
-                        }
-                    }
-
-                })
             }
 
         }
