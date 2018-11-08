@@ -235,17 +235,11 @@ export default class ContentService {
                         break;
                     }
                 }
-
-
-
             }
 
         } catch (e) {
             return onError(e)
         }
-
-
-
     }
 
     static async sendReward(Intel, content, events, onSuccess, onError){
