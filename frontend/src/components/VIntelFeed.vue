@@ -71,6 +71,7 @@
                                         </p>
                                         <b-btn class="btn-primary-pareto mx-auto px-4"
                                                style="width: 120px;"
+                                               :disabled="pendingRowTransactions(row)"
                                                v-b-modal.modalToken @click="openRewardModal(row)">
                                             <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                                             <b> {{ row.reward }} </b>
@@ -221,7 +222,7 @@
             }
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
         },
         beforeMount: function () {
             this.loadContent();
@@ -352,6 +353,15 @@
             },
             formatAmountNumber: function (value, event) {
                 return fromExponential(value);
+            },
+            pendingRowTransactions: function(intel){
+                let transactionPending = false;
+                this.pendingTransactions.forEach(transaction => {
+                    if(intel.id === transaction.intel || intel.intelAddress === transaction.intelAddress){
+                        transactionPending = true;
+                    }
+                });
+                return transactionPending;
             },
             randomNumber: function (min = 1, max = 3) {
                 return Math.floor(Math.random() * (max - min + 1) + min);
