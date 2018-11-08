@@ -81,7 +81,6 @@ const store = new Vuex.Store({
             state.ws = new WebSocket(Environment.webSocketURL);
         }, addTransaction(state, item) {
             state.pendingTransactions.unshift(item);
-            console.log(state.pendingTransactions);
         }, assignTransactions(state, transactions) {
             state.pendingTransactions = transactions;
         }, editTransaction(state, {hash, status}){
