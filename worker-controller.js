@@ -102,6 +102,7 @@ mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoReward = mongoose.model('reward');
+const ParetoTransaction = mongoose.model('transaction');
 
 
 // set up Pareto and Intel contracts instances
@@ -1077,6 +1078,8 @@ workerController.updateFromLastIntel = function(){
                             const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                             const expiry_time = event.returnValues.ttl;
                             ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                            });
+                            ParetoTransaction.findOneAndUpdate({ txRewardHash: event.transactionHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
                             });
                         }catch (e) {
                             console.log(e);

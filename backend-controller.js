@@ -386,7 +386,7 @@ controller.startwatchNewIntel = function(){
                                             callback(err);
                                         }
                                     });
-                                    controller.updateIntelReward(intelIndex, event.transactionHash);
+                                    controller.updateIntelReward(intelIndex, event.transactionHash,event.returnValues.sender.toLowerCase());
 
 
                                 }
@@ -541,7 +541,7 @@ controller.updateAddressReward = function(event, token){
  * @param intelIndex
  * @param txHash
  */
-controller.updateIntelReward=function(intelIndex, txHash){
+controller.updateIntelReward=function(intelIndex, txHash, sender){
     let agg =  [ {$match: { 'intelId': intelIndex } },
         { $group: { _id: null,
                 rewards : {
@@ -559,7 +559,8 @@ controller.updateIntelReward=function(intelIndex, txHash){
         if(r.length > 0) {
             const reward = r[0].reward;
             let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
-            ,  ParetoTransaction.findOneAndUpdate({ txRewardHash: txHash }, { status: 3  })];
+            ,  ParetoTransaction.findOneAndUpdate({ $or: [{ txRewardHash: txHash },
+                    {txRewardHash: null, address: sender, intel: intelIndex}]}, { status: 3  })];
             Promise.all(promises).then( values =>{
                     if(values.length > 0 && controller.wss){
                         controller.wss.clients.forEach(function each(client) {
