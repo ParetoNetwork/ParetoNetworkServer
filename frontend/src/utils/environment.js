@@ -7,5 +7,5 @@ export default {
         paretoID : '2495',
         symbol : 'PARETO'
     },
-    etherscanDomain : document.domain === 'localhost' ? 'https://ropsten.etherscan.io/tx/' : 'https://etherscan.io/tx/'
+    etherscanDomain : document.domain === 'localhost' ? 'https://ropsten.etherscan.io/tx' : 'https://etherscan.io/tx'
 }
