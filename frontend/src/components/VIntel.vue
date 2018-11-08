@@ -446,11 +446,11 @@
             transactionStatus: function(status) {
                 switch (status){
                     case 0:
-                        return 'Approval Pending';
+                        return 'Pending Approval';
                     case 1:
-                        return 'Pending Confirmation';
+                        return 'Approved';
                     case 2:
-                        return 'Pending Transaction';
+                        return 'Pending Reward';
                 }
             },
             updateProfile() {

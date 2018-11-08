@@ -204,6 +204,15 @@ export default class ContentService {
                 switch (content.status){
                     case 0: {
                         waitForReceipt(content.txHash, async receipt => {
+                            events.toastTransaction({
+                                group: 'notification',
+                                title: 'Event Ready',
+                                type: 'warning',
+                                duration: 10000,
+                                text: 'Second transaction ready, complete it'
+                            });
+                            events.editTransaction({hash: content.txHash, status: 1});
+
                             ContentService.sendReward(Intel, {
                                 intel: content.intel,
                                 depositAmount: depositAmount,
@@ -243,14 +252,6 @@ export default class ContentService {
     }
 
     static async sendReward(Intel, content, events, onSuccess, onError){
-        events.toastTransaction({
-            group: 'notification',
-            title: 'Event Ready',
-            type: 'warning',
-            duration: 10000,
-            text: 'Second transaction ready, complete it'
-        });
-        events.editTransaction({hash: content.txHash, status: 1});
         const gasSendReward = await Intel.methods
             .sendReward(content.intel, content.depositAmount)
             .estimateGas({from: content.rewarder_address});
@@ -308,7 +309,7 @@ export default class ContentService {
             const amount = web3.utils.toBN(parseFloat(content.tokenAmount));
             const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
             let gasApprove = await ParetoTokenInstance.methods
-                .approve(Intel.options.address, depositAmount)
+                .increaseApproval(Intel.options.address, depositAmount)
                 .estimateGas({from: rewarder_address});
 
             await ParetoTokenInstance.methods
@@ -334,6 +335,15 @@ export default class ContentService {
                     this.postTransactions(params);
 
                     waitForReceipt(hash, async receipt => {
+                        events.toastTransaction({
+                            group: 'notification',
+                            title: 'Event Ready',
+                            type: 'warning',
+                            duration: 10000,
+                            text: 'Second transaction ready, complete it'
+                        });
+                        events.editTransaction({hash: hash, status: 1});
+
                         ContentService.sendReward(Intel, {
                             intel: content.ID,
                             depositAmount: depositAmount,
