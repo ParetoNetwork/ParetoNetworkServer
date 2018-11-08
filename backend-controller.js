@@ -247,7 +247,7 @@ controller.postContent = function (req, callback) {
 
 
 controller.getPendingTransaction = function (address, callback){
-    ParetoTransaction.find({address: address, status: {$lt: 3}}, callback);
+    ParetoTransaction.find({address: address, status: {$lt: 3}}).sort({dateCreated : -1}).exec( callback);
 }
 
 controller.watchTransaction =  function (data, callback){

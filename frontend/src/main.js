@@ -80,14 +80,14 @@ const store = new Vuex.Store({
         }, iniWs(state) {
             state.ws = new WebSocket(Environment.webSocketURL);
         }, addTransaction(state, item) {
-            state.pendingTransactions.push(item);
+            state.pendingTransactions.unshift(item);
             console.log(state.pendingTransactions);
         }, assignTransactions(state, transactions) {
             state.pendingTransactions = transactions;
         }, editTransaction(state, {hash, status}){
             state.pendingTransactions = state.pendingTransactions.map(item => {
                   if(item.txHash === hash){
-                      console.log(status);
+                     // console.log(status);
                       item.status = status;
                   }
                   return item;
@@ -107,7 +107,7 @@ const store = new Vuex.Store({
             context.commit('assignTransactions', transactions);
         },
         editTransaction(context, params) {
-            console.log(params);
+            //console.log(params);
             context.commit('editTransaction', params);
         },
         transactionComplete(context, txHash) {
