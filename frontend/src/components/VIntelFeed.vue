@@ -357,7 +357,8 @@
             pendingRowTransactions: function(intel){
                 let transactionPending = false;
                 this.pendingTransactions.forEach(transaction => {
-                    if(intel.id === transaction.intel || intel.intelAddress === transaction.intelAddress){
+                    if(intel.id === transaction.intel){
+                        console.log(intel.id, transaction.intel, intel.intelAddress, transaction.intelAddress);
                         transactionPending = true;
                     }
                 });
@@ -396,7 +397,8 @@
                             group: 'notification',
                             type: 'success',
                             duration: 10000,
-                            text: 'Success'
+                            title: 'Event: Reward',
+                            text: 'Confirmed Reward'
                         });
                     },
                     err => {
