@@ -717,7 +717,7 @@
                         <h4 class="font-body">Join the Pareto Network</h4>
 
                         <div class="footer-apps__row">
-                            <a href="https://t.me/paretonetworkdiscussion" class="app-icon telegram" target="_blank"><i
+                            <a href="https://t.me/paretonetworkofficial" class="app-icon telegram" target="_blank"><i
                                     class="fa fa-paper-plane" aria-hidden="true"></i></a>
                             <a href="https://fb.me/paretonetworkofficial" class="app-icon facebook" target="_blank"><i
                                     class="fa fa-facebook" aria-hidden="true"></i></a>

@@ -23,7 +23,7 @@ const store = new Vuex.Store({
         isLogged: false,
         address: null,
         showModalSign: false,
-        showModalLoginOptions : false,
+        showModalLoginOptions: false,
         showModalLedgerNano: false,
         makingLogin: false,
         makingRequest: false,
@@ -31,7 +31,8 @@ const store = new Vuex.Store({
         madeLogin: JSON.parse(window.localStorage.getItem('logged')),
         signType: (window.localStorage.getItem('signType')) || 'Metamask',
         pathId: (window.localStorage.getItem('pathId')) || '',
-        ws: null
+        ws: null,
+        pendingTransactions: []
     },
     mutations: {
         login(state, data) {
@@ -45,16 +46,16 @@ const store = new Vuex.Store({
             const dataSign = data.dataSign;
             let signType = '';
             let pathId = '';
-            if(dataSign){
+            if (dataSign) {
                 signType = dataSign.signType;
                 pathId = dataSign.pathId;
-                window.localStorage.setItem('signType',  dataSign.signType);
+                window.localStorage.setItem('signType', dataSign.signType);
                 window.localStorage.setItem('pathId', dataSign.pathId);
-            }else{
-                signType=  (window.localStorage.getItem('signType'));
+            } else {
+                signType = (window.localStorage.getItem('signType'));
                 pathId = (window.localStorage.getItem('pathId'));
             }
-            state.signType =signType;
+            state.signType = signType;
             state.pathId = pathId;
         }, logout(state) {
             state.isLogged = false;
@@ -77,12 +78,39 @@ const store = new Vuex.Store({
             state.showModalLedgerNano = false;
             state.makingLogin = false;
         }, iniWs(state) {
-            state.ws = new WebSocket (Environment.webSocketURL);
+            state.ws = new WebSocket(Environment.webSocketURL);
+        }, addTransaction(state, item) {
+            state.pendingTransactions.unshift(item);
+        }, assignTransactions(state, transactions) {
+            state.pendingTransactions = transactions;
+        }, editTransaction(state, {hash, status}){
+            state.pendingTransactions = state.pendingTransactions.map(item => {
+                  if(item.txHash === hash){
+                     // console.log(status);
+                      item.status = status;
+                  }
+                  return item;
+            });
+        }, deleteTransaction(state, txHash) {
+            state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
         }
     },
     actions: {
         login(context, address) {
             context.commit('login', address.address);
+        },
+        addTransaction(context, item) {
+            context.commit('addTransaction', item);
+        },
+        assignTransactions(context, transactions) {
+            context.commit('assignTransactions', transactions);
+        },
+        editTransaction(context, params) {
+            //console.log(params);
+            context.commit('editTransaction', params);
+        },
+        transactionComplete(context, txHash) {
+            context.commit('deleteTransaction', txHash);
         }
     }
 });

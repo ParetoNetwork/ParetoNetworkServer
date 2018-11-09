@@ -6,5 +6,6 @@ export default {
         apiKey : '7b92a2e9-4ed0-4c7e-8582-3aee03002a01',
         paretoID : '2495',
         symbol : 'PARETO'
-    }
+    },
+    etherscanDomain : document.domain === 'localhost' ? 'https://ropsten.etherscan.io/tx' : 'https://etherscan.io/tx'
 }
