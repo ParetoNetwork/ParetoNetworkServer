@@ -23,16 +23,24 @@ export default class profileService {
     static updateConfig(onFinish){
         http.post('/v1/config_basic', {}).then(res => {
             res= res.data;
+
+            let etherscan = "https://etherscan.io/";
+            switch (res.data.netWorkId) {
+                case '3':{ etherscan="https://ropsten.etherscan.io/"; break;}
+                case '4':{ etherscan="https://rinkeby.etherscan.io/";break;}
+                case '42':{ etherscan="https://kovan.etherscan.io/";break;}
+
+            }
+            window.localStorage.setItem('etherscan', etherscan);
+
             if(res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
             || res.data.paretoAddress !== window.localStorage.getItem('paretoAddress')
                 || res.data.netWorkId !== window.localStorage.getItem('netWorkId')
-                || res.data.etherscan !== window.localStorage.getItem('etherscan')
                 || res.data.psignversion !== window.localStorage.getItem('psignversion'))){
                 http.post('/v1/config', {}).then(res => {
                     res= res.data;
                     if(res.success ){
                         window.localStorage.setItem('intelAddress',res.data.intelAddress);
-                        window.localStorage.setItem('etherscan',res.data.etherscan);
                         window.localStorage.setItem('paretoAddress',res.data.paretoAddress);
                         window.localStorage.setItem('netWorkId',res.data.netWorkId);
                         window.localStorage.setItem('psignversion',res.data.psignversion);
