@@ -102,6 +102,7 @@ mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoReward = mongoose.model('reward');
+const ParetoTransaction = mongoose.model('transaction');
 
 
 // set up Pareto and Intel contracts instances
@@ -740,6 +741,31 @@ workerController.aproxAllScoreRanking = async function(callback){
                 }
 
             });
+            ParetoTransaction.find({ $or: [ {status: 0}, {status: 2} ]}, function (err, results) {
+                results.forEach( data =>{
+                    if(data.status == 0){
+                        web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
+                            if(receipt){
+                                ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txHash}, {status: 1}, { multi: false }, function (err, data) {
+                                });
+                            }
+                        });
+                    } else{
+                        if (data.txRewardHash && data.status ==2){
+                            web3.eth.getTransactionReceipt(data.txRewardHash, function (err, receipt) {
+                                if(receipt){
+                                    ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txRewardHash}, {status: 3}, { multi: false }, function (err, data) {
+                                    });
+                                }
+
+                            });
+                        }
+                    }
+                })
+
+
+            })
+
         }, function (error) {
             console.log(error);
             callback(null, {} );
@@ -1052,7 +1078,7 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 };
 
 
-workerController.updateFromLastIntel = function(){
+workerController.updateFromLastIntel =  function(){
     ParetoContent.aggregate([
         {
             $group: {
@@ -1083,7 +1109,7 @@ workerController.updateFromLastIntel = function(){
                         }
                     }
 
-                })
+                });
             }
 
         }

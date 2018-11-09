@@ -2,7 +2,7 @@
     <div>
         <div v-if="!loading" class="border p-2">
             <div class="border-bottom p-2 p-md-3">
-                <h5 class="title"> {{title || 'MY INTEL FEED:'}}  </h5>
+                <h5 class="title"> {{title || 'MY INTEL FEED:'}} </h5>
             </div>
             <!--
             <div >
@@ -30,8 +30,8 @@
                                             <div class="">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <div>
-                                        <span class="text-dashboard">Disclosed by: {{row.address}}
-                                        </span>
+                                                    <span class="text-dashboard">Disclosed by: {{row.address}}
+                                                    </span>
                                                 </div>
                                                 <div>
                                                     Blocks ago:
@@ -45,11 +45,11 @@
 
                                                 </div>
                                                 <div>
-                                        <span class="text-dashboard">
-                                            <b>
-                                                {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
-                                            </b>
-                                        </span>
+                                                    <span class="text-dashboard">
+                                                        <b>
+                                                            {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
+                                                        </b>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -62,13 +62,16 @@
                                     <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                     <span class="text-right">{{row.totalReward}}</span>
                                 </div>
-                                <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)" class="text-center">
+                                <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
+                                     class="text-center">
                                     <div class="d-inline-block">
-                                        <p class="text-right text-secondary ellipsis reward-text"> <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                        <p class="text-right text-secondary ellipsis reward-text"><img
+                                                src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
                                             <b> {{ row.totalReward }} </b>
                                         </p>
                                         <b-btn class="btn-primary-pareto mx-auto px-4"
                                                style="width: 120px;"
+                                               :disabled="pendingRowTransactions(row)"
                                                v-b-modal.modalToken @click="openRewardModal(row)">
                                             <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                                             <b> {{ row.reward }} </b>
@@ -115,7 +118,8 @@
                     </b-form-input>
                     <b-row class="m-2 mt-4 d-flex justify-content-center">
                         <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                        <b-button :disabled="!hardwareAvailable || tokenAmount<=0 ||  user.tokens < tokenAmount" style="background-color: rgb(107, 194, 123)" variant="success"
+                        <b-button :disabled="!hardwareAvailable || tokenAmount<=0 ||  user.tokens < tokenAmount"
+                                  style="background-color: rgb(107, 194, 123)" variant="success"
                                   @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                         </b-button>
                     </b-row>
@@ -148,7 +152,7 @@
                                 <i class="fa fa-spinner fa-spin fa-3x mt-4"></i>
                             </div>
 
-                            <div  v-if="this.signType!=='LedgerNano'" class="d-flex justify-content-between mt-4 mb-1">
+                            <div v-if="this.signType!=='LedgerNano'" class="d-flex justify-content-between mt-4 mb-1">
                                 <p class="text-center" style="font-size: 11px">
                                     If MetaMask does not popup, please check your MetaMask extension icon for a new
                                     badge
@@ -180,7 +184,7 @@
     import environment from "../utils/environment";
     import fromExponential from 'from-exponential';
 
-    import {mapState} from "vuex";
+    import {mapState, mapActions} from "vuex";
 
     import ContentService from "../services/ContentService";
     import AuthService from "../services/authService";
@@ -195,12 +199,12 @@
             ICountUp,
             VShimmerFeed
         },
-        props : [
-         'updateContent', 'block', 'user', 'fetchAddress', 'title'
+        props: [
+            'updateContent', 'block', 'user', 'fetchAddress', 'title'
         ],
         mixins: [countUpMixin],
-        data: function(){
-            return{
+        data: function () {
+            return {
                 allMyContent: [],
                 baseURL: environment.baseURL,
                 intelAddress: '',
@@ -218,9 +222,9 @@
             }
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
         },
-        beforeMount: function(){
+        beforeMount: function () {
             this.loadContent();
         },
         watch: {
@@ -233,34 +237,35 @@
             }
         },
         methods: {
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             assignBlock(block) {
                 this.myFeed.content = this.myFeed.content.map(item => {
-                    item.blockAgo = block - item.block > 0? block - item.block : 0;
+                    item.blockAgo = block - item.block > 0 ? block - item.block : 0;
                     return item;
                 });
             },
             dateStringFormat(date) {
                 return new Date(date);
             },
-            intelRoute(intel){
-                let param = (intel.txHash === '0x0')? intel._id : intel.txHash;
+            intelRoute(intel) {
+                let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
             },
             hideModal() {
-                if(this.signType === 'LedgerNano'){
+                if (this.signType === 'LedgerNano') {
                     AuthService.deleteWatchNano();
                     this.hardwareAvailable = false;
                 }
                 this.$refs.modalToken.hide()
             },
-            isAvailable(){
-                if(this.signType === 'LedgerNano'){
+            isAvailable() {
+                if (this.signType === 'LedgerNano') {
                     this.hardwareAvailable = false;
-                    AuthService.doWhenIsConnected(()=>{
+                    AuthService.doWhenIsConnected(() => {
                         this.hardwareAvailable = true;
                         AuthService.deleteWatchNano();
                     })
-                }else{
+                } else {
                     this.hardwareAvailable = true;
                 }
             },
@@ -276,7 +281,7 @@
 
                 let onError = (error) => {
                     this.loading = false;
-                    let errorText= error.message? error.message : error;
+                    let errorText = error.message ? error.message : error;
                     this.$notify({
                         group: 'notification',
                         type: 'error',
@@ -296,48 +301,49 @@
                         onSuccess,
                         onError
                     );
-                }else{
+                } else {
                     return dashboardService.getAllContent(params,
                         onSuccess,
                         onError
                     );
                 }
             },
-            openRewardModal: function(row){
+            openRewardModal: function (row) {
                 this.rewardId = row.id;
                 this.intelAddress = row.intelAddress;
                 this.tokenAmount = Math.min(this.user.tokens, row.reward);
                 this.isAvailable();
             },
-            updateFeedContent: function(){
+            updateFeedContent: function () {
                 let params = {
                     page: 0,
                     limit: this.myFeed.content.length,
                     user: this.fetchAddress
                 };
                 return dashboardService.getAllContent(params, res => {
-                        res.forEach(intel=> {
+                        res.forEach(intel => {
                             let found = false;
-                            this.myFeed.content = this.myFeed.content.map(myFeedintel=>{
-                                if(intel._id === myFeedintel._id){
+                            this.myFeed.content = this.myFeed.content.map(myFeedintel => {
+                                if (intel._id === myFeedintel._id) {
                                     myFeedintel = intel;
                                     found = true;
                                 }
                                 return myFeedintel;
                             });
-                            if(!found){
+                            if (!found) {
                                 this.myFeed.content.unshift(intel);
                             }
                         });
                     },
                     error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Content',
-                            text: errorText });
+                            text: errorText
+                        });
                     }
                 );
             },
@@ -345,44 +351,62 @@
                 let path = this.baseURL + "/profile-image?image=";
                 return profileService.getProfileImage(path, pic);
             },
-            formatAmountNumber: function (value, event){
+            formatAmountNumber: function (value, event) {
                 return fromExponential(value);
+            },
+            pendingRowTransactions: function(intel){
+                let transactionPending = false;
+                this.pendingTransactions.forEach(transaction => {
+                    if(intel.id === transaction.intel){
+                        transactionPending = true;
+                    }
+                });
+                return transactionPending;
             },
             randomNumber: function (min = 1, max = 3) {
                 return Math.floor(Math.random() * (max - min + 1) + min);
             },
             rewardIntel: function (ID, tokenAmount, intelAddress) {
                 this.hideModal();
-                this.modalWaiting =true;
+                //this.modalWaiting = true;
                 if (!tokenAmount) {
                     this.$notify({
                         group: 'notification',
                         type: 'error',
                         duration: 10000,
-                        text: 'No Token Amount' });
+                        text: 'No Token Amount'
+                    });
 
                     this.tokenAmount = 1;
                     return;
                 }
 
                 ContentService.rewardIntel(
-                    {ID, tokenAmount, intelAddress}, {signType: this.signType, pathId: this.pathId} ,
+                    {ID, tokenAmount, intelAddress},
+                    {signType: this.signType, pathId: this.pathId},
+                    {
+                        addTransaction: this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
                     res => {
-                        this.modalWaiting =false;
+                        this.modalWaiting = false;
                         this.$notify({
                             group: 'notification',
                             type: 'success',
                             duration: 10000,
-                            text: 'Success'
+                            title: 'Event: Reward',
+                            text: 'Confirmed Reward'
                         });
                     },
                     err => {
-                        this.modalWaiting =false;
+                        this.modalWaiting = false;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
-                            text: err.message?err.message:err
+                            text: err.message ? err.message : err
                         });
                     }
                 );
@@ -398,7 +422,7 @@
                     this.$store.state.makingRequest = true;
 
                     let myFeedContentReady = this.loadContent(params);
-                    myFeedContentReady.then(()=>{
+                    myFeedContentReady.then(() => {
                         this.$store.state.makingRequest = false;
                     });
                 }
