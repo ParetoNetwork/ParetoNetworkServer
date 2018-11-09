@@ -746,7 +746,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                     if(data.status == 0){
                         web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
                             if(receipt){
-                                ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txHash}, {status: 1}, { multi: false }, function (err, data) {
+                                ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: 1}, { multi: false }, function (err, data) {
                                 });
                             }
                         });
@@ -754,7 +754,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                         if (data.txRewardHash && data.status ==2){
                             web3.eth.getTransactionReceipt(data.txRewardHash, function (err, receipt) {
                                 if(receipt){
-                                    ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txRewardHash}, {status: 3}, { multi: false }, function (err, data) {
+                                    ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txRewardHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
                                     });
                                 }
 
