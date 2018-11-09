@@ -182,7 +182,7 @@
                 bio: "",
                 picture: "",
                 baseURL: environment.baseURL,
-                etherscanUrl: (window.localStorage.getItem('netWorkId') == 3)? 'https://ropsten.etherscan.io': 'https://etherscan.io',
+                etherscanUrl: window.localStorage.getItem('etherscan') ,
                 user: {
                     rank: 0,
                     score: 0,
@@ -470,6 +470,7 @@
                 );
             },
             main: function () {
+                profileService.updateConfig( res => {this.etherscanUrl = window.localStorage.getItem('etherscan')});
                 this.$store.state.makingRequest = true;
                 if (!this.madeLogin) {
                     this.intelEnter();

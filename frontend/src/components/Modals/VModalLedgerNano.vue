@@ -225,7 +225,7 @@
                 selectedPath: null,
                 selectedAddress: '',
                 customPath: '',
-                etherscan: (window.localStorage.getItem('netWorkId') == 3)? 'https://ropsten.etherscan.io': 'https://etherscan.io',
+                etherscan: window.localStorage.getItem('etherscan') ,
                 customPathError: true,
                 loadingCustomPath: false,
                 loadingInfiniteScrollData: false,
