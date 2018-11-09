@@ -631,6 +631,63 @@ controller.addExponentAprox =  function(addresses, scores,  blockHeight,callback
     })
 };
 
+
+controller.validateQuery = function(query){
+    const array = [];
+    if( query.created && !isNaN(Date.parse(query.created))) {
+        try {
+            const date =new Date(query.created);
+            const date2 =new Date(date.getTime() + 86400000);
+            array.push({
+                $and: [
+                    {dateCreated: {$gte: date}},
+                    {dateCreated: {$lte: date2}}
+                ]
+
+            }) 
+        } catch (e) {
+            console.log(e)
+        }
+    }
+    if( query.title ) {
+        try {
+            array.push({
+                title: {$regex : ".*"+query.title+".*"}
+            })
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    if( query.address ) {
+        try {
+            data = query.address.split(',')
+                .filter( address =>{ return web3.utils.isAddress(address) } ).map(address => {return address.toLowerCase()});
+            if( data.length > 0 ) {
+                array.push({ address: { $in: data} })
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+    } else{
+        if( query.exclude ) {
+            try {
+                data = query.exclude.split(',')
+                    .filter( address =>{ return web3.utils.isAddress(address) } ).map(address => {return address.toLowerCase()});
+                if( data.length > 0 ) {
+                    array.push({ address: { $nin: data} })
+                }
+
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }
+    return array;
+
+}
+
 controller.getAllAvailableContent = function(req, callback) {
 
     var limit = parseInt(req.query.limit || 100);
@@ -642,6 +699,9 @@ controller.getAllAvailableContent = function(req, callback) {
   if(web3.utils.isAddress(req.user) == false){
     if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
+
+
+      //address exclude created title
     //1. get score from address, then get standard deviation of score
     controller.retrieveAddress(req.user, function(err,result) {
 
@@ -743,16 +803,18 @@ controller.getAllAvailableContent = function(req, callback) {
                 var queryAboveCount = ParetoContent.estimatedDocumentCount({block : { $gt : blockHeightDelta}});
 
                 try{
-                    allResults = await ParetoContent.find(
-                        { $or:[
-                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}]}
-                            ]
-                        }
-                    ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
+                    const queryFind = { $and:[
+                            { $or:[
+                                    {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}]}
+                                ]
+                            } ]
+                    };
+                    queryFind.$and = queryFind.$and.concat( controller.validateQuery(req.query));
+                    allResults = await ParetoContent.find(queryFind).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
                     let newResults = [];
                     allResults.forEach(function(entry){
                         /*
