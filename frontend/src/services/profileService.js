@@ -26,9 +26,9 @@ export default class profileService {
 
             let etherscan = "https://etherscan.io/";
             switch (res.data.netWorkId) {
-                case '3':{ etherscan="https://ropsten.etherscan.io/"; break;}
-                case '4':{ etherscan="https://rinkeby.etherscan.io/";break;}
-                case '42':{ etherscan="https://kovan.etherscan.io/";break;}
+                case '3':{ etherscan="https://ropsten.etherscan.io"; break;}
+                case '4':{ etherscan="https://rinkeby.etherscan.io";break;}
+                case '42':{ etherscan="https://kovan.etherscan.io";break;}
 
             }
             window.localStorage.setItem('etherscan', etherscan);
