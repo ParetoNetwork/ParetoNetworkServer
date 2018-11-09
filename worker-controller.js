@@ -914,7 +914,7 @@ workerController.retrieveRanksAtAddress = function(rank, limit, page, callback){
 workerController.getScoreAndSaveRedis = function(callback){
 
     //get all address sorted by score, then grouping all by self and retrieve with ranking index
-    const query = ParetoAddress.aggregate().sort({score : -1}).group(
+    const query = ParetoAddress.aggregate().match({score: { $gt: 0}}).sort({score : -1}).group(
         { "_id": false,
             "addresses": {
                 "$push": {
