@@ -136,6 +136,7 @@
     import LeaderboardService from '../services/leaderboardService';
     import DashboardService from '../services/dashboardService';
     import Auth from '../services/authService';
+    import Profile from '../services/profileService';
     import {mapMutations, mapState} from 'vuex';
     import ModalSignIn from './VModalManualSigIn';
 
@@ -176,7 +177,7 @@
                 rank: 0,
                 lastRank : 100,
                 score: 0,
-                etherscan: (window.localStorage.getItem('netWorkId') == 3)? 'https://ropsten.etherscan.io': 'https://etherscan.io',
+                etherscan: window.localStorage.getItem('etherscan') ,
                 address: '',
                 textSize : 100,
                 page: 0,
@@ -252,6 +253,7 @@
         },
         methods: {
             getAddress() {
+                Profile.updateConfig( res => {this.etherscan = window.localStorage.getItem('etherscan')});
                 return DashboardService.getAddress(data => {
                     this.init(data);
                 }, () => {
