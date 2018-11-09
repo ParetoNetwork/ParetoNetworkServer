@@ -1296,7 +1296,7 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
       });
     }else{
       // return the cached ranking
-      return  callback(null, results);
+      return  callback(null, results.filter(data => data));
     }
 
 
