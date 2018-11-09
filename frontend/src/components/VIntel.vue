@@ -182,7 +182,7 @@
                 bio: "",
                 picture: "",
                 baseURL: environment.baseURL,
-                etherscanUrl: environment.etherscanDomain,
+                etherscanUrl: (window.localStorage.getItem('netWorkId') == 3)? 'https://ropsten.etherscan.io': 'https://etherscan.io',
                 user: {
                     rank: 0,
                     score: 0,

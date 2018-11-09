@@ -115,7 +115,7 @@
                                                         @ready="onReady"></ICountUp>
                                             </td>
                                             <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
-                                            <td><a v-bind:href="'https://etherscan.io/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
+                                            <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>
@@ -176,6 +176,7 @@
                 rank: 0,
                 lastRank : 100,
                 score: 0,
+                etherscan: (window.localStorage.getItem('netWorkId') == 3)? 'https://ropsten.etherscan.io': 'https://etherscan.io',
                 address: '',
                 textSize : 100,
                 page: 0,
