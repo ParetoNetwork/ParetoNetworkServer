@@ -16,8 +16,7 @@
                 <div class="review" style="left: 60px; top: 0;">
                     <div class="review__avatar"><img src="../assets/images/p1.png" alt=""></div>
                     <div class="review__content">
-                        <p>Critical bug found in new hardware wallet, effects 10% of market. Here are the details to
-                            execute or short.</p>
+                        <p>Proxy trade Apple's (AAPL) earnings report using SPY 11/2 $270 Straddle to avoid IV crush, thanks to heavy weighting and correlation.</p>
                         <p align="right" style="color: orange;">est. reward <b style="font-size: 20px; color: #008000">$15,000</b>
                         </p>
                     </div>
@@ -36,7 +35,7 @@
                 <div class="review" style="left: 50%; top: 35%;">
                     <div class="review__avatar"><img src="../assets/images/p2.jpg" alt=""></div>
                     <div class="review__content">
-                        <p>How to double spend on the IOTA tangle, before everyone else figures it out</p>
+                        <p>Large Tesla (TSLA) director sales detected in Form 4, open $300 strike puts with expiration 70 days out.</p>
                         <p align="right" style="color: orange;">est. reward <b style="font-size: 20px; color: #008000">$200,000</b>
                         </p>
                     </div>

@@ -16,7 +16,7 @@
             <div class="mr-3"> CONTENT CONTRIBUTOR GUIDELINES </div> -->
             <a class="mr-3 nav-link" href="/api-docs/"> API </a>
             <a class="mr-3 nav-link" href="https://exchange.pareto.network/" target="_blank"> BUY PARETO </a>
-            <a class="mr-3 nav-link border" style="font-weight: bold;" href="https://t.me/paretonetworkdiscussion"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 1px;"></i>TELEGRAM</a>
+            <a class="mr-3 nav-link border" style="font-weight: bold;" href="https://t.me/paretonetworkofficial"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 1px;"></i>TELEGRAM</a>
         </div>
     </div>
 </template>

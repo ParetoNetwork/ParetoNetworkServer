@@ -90,7 +90,7 @@
         beforeMount: function(){
             this.$store.state.makingRequest = true;
             this.requestCall()
-            console.log(this.$route.params);
+           // console.log(this.$route.params);
         },
         methods: {
             ...mapMutations(["iniWs"]),
@@ -114,7 +114,7 @@
             },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
-                    console.log(res)
+                   // console.log(res)
                     this.address = res;
                 }, () => {
                     alert(error);

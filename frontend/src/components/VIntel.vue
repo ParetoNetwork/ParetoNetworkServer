@@ -72,9 +72,17 @@
 
                 <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
                 <div v-else class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h5 class="title"><b>MY POSTS</b></h5>
-                        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST NEW INTEL
+                    <div class="p-3">
+                        <h5 class="title text-left border-bottom p-2"><b>EVENTS</b></h5>
+                        <div v-for="tx in pendingTransactions" class="mt-1">
+                            <div class="d-flex justify-content-between cursor-pointer">
+                                <div @click="clickTransaction(tx)"> Reward: {{tx.amount}}</div>
+                                <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
+                                <a class="text-primary" :href="etherscanUrl + '/' + (tx.txRewardHash || tx.txHash)" target="_blank"> Hash: {{tx.txHash.substring(0,10)}} </a>
+                            </div>
+                        </div>
+                        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
+                            NEW INTEL
                         </button>
                     </div>
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
@@ -137,7 +145,7 @@
     import ICountUp from "vue-countup-v2";
 
     import VIntelFeed from "./VIntelFeed.vue";
-    import {mapMutations, mapState} from "vuex";
+    import {mapMutations, mapState, mapActions} from "vuex";
     import environment from "../utils/environment";
     import {countUpMixin} from "../mixins/countUp";
 
@@ -159,7 +167,7 @@
             return {
                 address: null,
                 loading: true,
-                block : 0,
+                block: 0,
                 modalWaiting: false,
                 hardwareAvailable: false,
                 rewardId: '',
@@ -174,12 +182,13 @@
                 bio: "",
                 picture: "",
                 baseURL: environment.baseURL,
+                etherscanUrl: environment.etherscanDomain,
                 user: {
                     rank: 0,
                     score: 0,
                     tokens: 0
                 },
-                updateContentVar : 0
+                updateContentVar: 0
             };
         },
         directives: {
@@ -204,13 +213,44 @@
             this.main();
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
+            ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+            clickTransaction: function(transaction){
+                ContentService.pendingTransactionApproval(
+                    transaction,
+                    {signType: this.signType, pathId: this.pathId},
+                    {
+
+                        addTransaction : this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
+                    res => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            text: 'Success'
+                        });
+                    },
+                    err => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            text: err.message ? err.message : err
+                        });
+                    });
+            },
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
-                    {ID},{signType: this.signType, pathId: this.pathId},
+                    {ID}, {signType: this.signType, pathId: this.pathId},
                     res => {
                         //  console.log(res);
                     },
@@ -218,12 +258,26 @@
                     }
                 );
             },
-            intelRoute(intel){
-                let param = (intel.txHash === '0x0')? intel._id : intel.txHash;
+            intelRoute(intel) {
+                let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
             },
             goToIntelPage: function () {
                 window.location = '/#/create';
+            },
+            getTransactions: function () {
+                return ContentService.getTransactions(data => {
+                    this.assignTransactions(data);
+                }, error => {
+                    let errorText = error.message ? error.message : error;
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Login',
+                        text: errorText
+                    });
+                });
             },
             loadAddress: function () {
                 return dashboardService.getAddress(
@@ -231,13 +285,14 @@
                         this.address = res;
                     },
                     error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Login',
-                            text: errorText });
+                            text: errorText
+                        });
                     }
                 );
             },
@@ -249,7 +304,7 @@
                     }
                 );
             },
-            updateContent: function(){
+            updateContent: function () {
                 return dashboardService.getAllContent(params,
                     res => {
                         this.loading = false;
@@ -258,18 +313,19 @@
                         this.myFeed.content = [...this.myFeed.content, ...res];
                     },
                     error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Content',
-                            text: errorText });
+                            text: errorText
+                        });
                     }
                 );
             },
-            numberToScientificNotation(number){
-                return (number+"").length>12? number.toExponential(5) : number;
+            numberToScientificNotation(number) {
+                return (number + "").length > 12 ? number.toExponential(5) : number;
             },
             overrideOnMessage() {
                 let wsa = this.ws;
@@ -284,9 +340,9 @@
                             // this.user.block = info.data.block;
                             this.block = info.data.block;
                         }
-                        if (info.data.action){
-                            switch (info.data.action){
-                                case 'updateContent':{
+                        if (info.data.action) {
+                            switch (info.data.action) {
+                                case 'updateContent': {
                                     this.loadMyContent();
                                     this.updateContentVar++;
                                 }
@@ -320,7 +376,7 @@
                         this.myContent = this.allMyContent.slice(0, 10);
                     },
                     error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'Content',
@@ -358,7 +414,8 @@
                     this.loadProfile(),
                     this.loadMyContent(),
                     this.loadAddress(),
-                    this.loadContent()
+                    this.loadContent(),
+                    this.getTransactions()
                 ]).then(values => {
                     this.$store.state.makingRequest = false;
                 });
@@ -385,6 +442,16 @@
                 profileService.uploadProfilePic(formData, res => {
                     this.user.profile_pic = res;
                 });
+            },
+            transactionStatus: function(status) {
+                switch (status){
+                    case 0:
+                        return 'Pending Approval';
+                    case 1:
+                        return 'Approved';
+                    case 2:
+                        return 'Pending Reward';
+                }
             },
             updateProfile() {
                 const profile = {
