@@ -30,7 +30,7 @@ var ETH_NETWORK = process.env.ETH_NETWORK;
 const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
 //const CONTRACT_CREATION_BLOCK_INT = 4953750;
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
-const EXPONTENT_BLOCK_AGO = process.env.EXPONTENT_BLOCK_AGO;
+const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const START_CLOCK = process.env.START_CLOCK || 1;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 
@@ -276,7 +276,7 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
  *  addExponent using db instead of Ethereum network
  */
 workerController.addExponentAprox =  function(addresses, scores,  blockHeight,callback){
-    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONTENT_BLOCK_AGO)} }).exec(function(err, values) {
+    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONENT_BLOCK_AGO)} }).exec(function(err, values) {
         if (err) {
             callback(err);
         }
@@ -328,7 +328,7 @@ workerController.addExponent = async function(addresses, scores, blockHeight,cal
                 try{
                     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i]);
                     promises.push(intel.getPastEvents('Reward', {
-                        fromBlock: "0x" + ((blockHeight-EXPONTENT_BLOCK_AGO).toString(16)) ,
+                        fromBlock: "0x" + ((blockHeight-EXPONENT_BLOCK_AGO).toString(16)) ,
                         toBlock: 'latest'
                     }))
                 }catch (e) { console.log(e) }
@@ -539,9 +539,11 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                             //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
                             var divisor = Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
 
-                            //console.log("divisor: " + divisor);
+                            var multiple =  (blockHeightDifference.div(divisor));
 
-                            var multiple =  (blockHeightDifference.div(divisor) );
+                            //need to understand what multiple is, or can be
+                            console.log("multiple (blockHeightDifference.div(divisor)): " + multiple);
+
                             var score = parseFloat(amountBn.mul(multiple));
                             var bonus = parseFloat(blockHeightDifference.div(divisor)) ;
 
