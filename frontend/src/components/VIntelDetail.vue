@@ -15,7 +15,7 @@
                                 </div>
                                 <div class="col-md-2 p-0 pl-1">
                                     <div class="d-flex flex-column align-items-end">
-                                        <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
+                                        <span v-if="profile.alias" class="subtitle-dashboard" ><b> {{profile.alias}} </b></span>
                                         <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
                                         <span class="mb-2" style="font-size: 10px;">
                                             <ICountUp
@@ -79,8 +79,7 @@
                 address : {},
                 profile: {
                     address: '',
-                    first_name: '' ,
-                    last_name: '',
+                    alias: '',
                     biography: '',
                     rank: 1000
                 },

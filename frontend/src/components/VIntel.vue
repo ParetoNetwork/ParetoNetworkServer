@@ -24,7 +24,7 @@
                         </div>
 
                         <div class="media-body flex-column text-left mt-2 ellipsis">
-                            <span class="name-title"><b>{{user.first_name|| ''}}  {{user.last_name || ''}}</b></span>
+                            <span class="name-title"><b>{{user.alias|| ''}}</b></span>
                             <p v-if="user.address" class="ellipsis"><b class="ellipsis"> {{user.address}} </b></p>
                             <div class="mt-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
@@ -115,17 +115,12 @@
         <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
             <div class="d-block text-center">
                 <form action="">
-                    <label for="first_name">First Name</label>
+                    <label for="alias" style="float: left;">Name</label>
                     <div class="input-group mb-3">
-                        <input v-model="firstName" type="text" class="form-control" id="first_name"
+                        <input v-model="alias" type="text" class="form-control" id="alias"
                                aria-describedby="basic-addon3">
                     </div>
-                    <label for="last_name">Last Name</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="last_name" v-model="lastName"
-                               aria-describedby="basic-addon3">
-                    </div>
-                    <label for="bio">Biography</label>
+                    <label for="bio" style="float: left;">Biography</label>
                     <div class="input-group mb-3">
                         <textarea v-model="bio" class="form-control" id="bio"
                                   aria-describedby="basic-addon3"> </textarea>
@@ -177,8 +172,7 @@
                 myContent: [],
                 allMyContent: [],
                 moment: moment,
-                firstName: "",
-                lastName: "",
+                alias: "",
                 bio: "",
                 picture: "",
                 baseURL: environment.baseURL,
@@ -391,8 +385,7 @@
                 return profileService.getProfile(
                     res => {
                         this.user = res;
-                        this.firstName = res.first_name;
-                        this.lastName = res.last_name;
+                        this.alias = res.alias;
                         this.bio = res.biography;
                     },
                     () => {
@@ -455,8 +448,7 @@
             },
             updateProfile() {
                 const profile = {
-                    first_name: this.firstName,
-                    last_name: this.lastName,
+                    alias: this.alias,
                     biography: this.bio
                 };
                 profileService.updateProfile(
