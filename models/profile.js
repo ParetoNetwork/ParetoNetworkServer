@@ -4,8 +4,7 @@ var Schema = mongoose.Schema;
 var paretoProfileSchema = new Schema(
   {
     address: String,
-    firstName: String,
-    lastName: String,
+    alias: String,
     biography: String,
     profilePic: String,
     rewardsGiven: [
