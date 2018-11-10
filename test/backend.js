@@ -108,7 +108,7 @@ describe('Server application /', function() {
                 .expect( function (res) {
                     let body = res.body;
                     assert(body.success, "must be true");
-                    assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens','alias', 'biography' , 'profile_pic' ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
@@ -126,7 +126,7 @@ describe('Server application /', function() {
                 .expect( function (res) {
                     let body = res.body;
                     if(body.success){
-                        assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens','first_name' , "last_name", 'biography' , "profile_pic" ]);
+                        assert.containsAllKeys(body.data,  [  'address',  'rank' , 'score' , 'tokens', 'alias', 'biography' , 'profile_pic' ]);
                     }else{
                         assert('Ethereum server response failed , please try again'===body.message, 'Only Ethereum servers error are allowed');
                     }
@@ -141,7 +141,7 @@ describe('Server application /', function() {
     it('Update Information about User', function (done) {
         getAuthenticatedCookie(data,  function(cookie) {
             request(serverApp.app).post("/v1/updateuser")
-                .send({ 'first_name': "Test Name", "last_name": "Test Last Name",
+                .send({ 'alias': "Test Name",
                         'biography': "Lorem ipsum ..."
                 })
                 .set('cookie', cookie)
@@ -149,7 +149,7 @@ describe('Server application /', function() {
                 .expect( function (res) {
                     let body = res.body;
                     assert(body.success, "must be true");
-                    assert.containsAllKeys(body.data,  [  'first_name' , "last_name", 'biography' , "profile_pic" ]);
+                    assert.containsAllKeys(body.data,  [  'alias', 'biography' , 'profile_pic' ]);
                 })
                 .end(function(err, res) {
                     if (err) { return done(err); }
