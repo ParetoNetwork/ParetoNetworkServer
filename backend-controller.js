@@ -32,7 +32,7 @@ var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
 const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
 //const CONTRACT_CREATION_BLOCK_INT = 4953750;
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
-const EXPONTENT_BLOCK_AGO = process.env.EXPONTENT_BLOCK_AGO;
+const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const  REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 const queue = kue.createQueue({
     redis: REDIS_URL,
@@ -596,7 +596,7 @@ controller.updateIntelReward=function(intelIndex, txHash, sender){
  *  addExponent using db instead of Ethereum network
  */
 controller.addExponentAprox =  function(addresses, scores,  blockHeight,callback){
-    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONTENT_BLOCK_AGO)} }).exec(function(err, values) {
+    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONENT_BLOCK_AGO)} }).exec(function(err, values) {
         if (err) {
             callback(err);
         }
@@ -845,8 +845,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 _v: entry._v,
                                 createdBy: {
                                     address: entry.createdBy.address,
-                                    firstName: entry.createdBy.firstName,
-                                    lastName: entry.createdBy.lastName,
+                                    alias: entry.createdBy.alias,
                                     biography: entry.createdBy.biography,
                                     profilePic: entry.createdBy.profilePic
                                 }
@@ -908,8 +907,7 @@ controller.updateUser = function(address, userinfo ,callback){
          callback(new Error('Invalid Address'));
     } else {
         const profile = {address: address};
-        if(userinfo.first_name) {profile.firstName = userinfo.first_name}
-        if(userinfo.last_name) {profile.lastName = userinfo.last_name}
+        if(userinfo.alias) {profile.alias = userinfo.alias}
         if(userinfo.biography) {profile.biography = userinfo.biography}
         if(userinfo.profile_pic) {profile.profilePic = userinfo.profile_pic}
         controller.insertProfile(profile, function (error, result) {
@@ -937,8 +935,7 @@ controller.getUserInfo = function(address ,callback){
                     if(error){ callback(error)}
                     let ranking = rankings[0];
                     callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
-                        'first_name': profile.firstName, "last_name": profile.lastName,
-                        'biography': profile.biography, "profile_pic" : profile.profilePic } );
+                        'alias': profile.alias, 'biography': profile.biography, "profile_pic" : profile.profilePic } );
                 });
             }
 
@@ -991,8 +988,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           _v: entry._v,
                           createdBy: {
                               address: entry.createdBy.address,
-                              firstName: entry.createdBy.firstName,
-                              lastName: entry.createdBy.lastName,
+                              alias: entry.createdBy.alias,
                               biography: entry.createdBy.biography,
                               profilePic: entry.createdBy.profilePic
                           }
@@ -1173,7 +1169,7 @@ controller.insertProfile = function(profile,callback){
                   console.error('unable to write to db because: ', err);
               } else {
                   const multi = redisClient.multi();
-                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+                  let profile = {address: r.address, alias: r.alias, biography: r.biography, profilePic: r.profilePic};
                   multi.hmset("profile"+profile.address+ "", profile );
                   multi.exec(function(errors, results) {
                       if(errors){ console.log(errors); callback(errors)}
@@ -1212,7 +1208,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
    ParetoProfile.findOne({  address : address } ,
        function(err, r){
            if(r){
-               let profile = {address: address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+               let profile = {address: address, alias: r.alias, biography: r.biography, profilePic: r.profilePic};
                const multi = redisClient.multi();
                multi.hmset("profile"+profile.address+ "", profile );
                multi.exec(function(errors, results) {
@@ -1220,7 +1216,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
                    return callback(null, profile );
                })
            } else{
-              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "" };
+              let profile = {address: address, alias: "", biography: "", profilePic: "" };
                controller.insertProfile(profile, callback)
            }
        }
@@ -1296,7 +1292,7 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
       });
     }else{
       // return the cached ranking
-      return  callback(null, results);
+      return  callback(null, results.filter(data => data));
     }
 
 

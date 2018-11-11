@@ -3,12 +3,12 @@
         <div v-if="profile.address" class="row">
             <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
                 <div class="thumb profile-pic"
-                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage( profile.profile_pic)}"
+                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic)}"
                 ></div>
             </div>
             <div class="col-12 col-sm-7 col-md-12 border p-5">
                 <div class="row text-group">
-                    <h6 v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> About {{profile.first_name}} {{profile.last_name}} :</b></h6>
+                    <h6 v-if="profile.alias" class="subtitle-dashboard" ><b> About {{profile.alias}} :</b></h6>
                     <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address}}:</b></h6>
                 </div>
                 <div class="row text-group">
@@ -82,8 +82,7 @@
             return {
                 profile: {
                     address: '',
-                    first_name: '' ,
-                    last_name: '',
+                    alias: '' ,
                     biography: '',
                     rank: 1000
                 },
