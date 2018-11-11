@@ -30,7 +30,7 @@
                                             <div class="">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <div>
-                                                    <span class="text-dashboard">Disclosed by: {{row.alias ? row.alias : row.address}}
+                                                    <span class="text-dashboard">Disclosed by: {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}}
                                                     </span>
                                                 </div>
                                                 <div>
