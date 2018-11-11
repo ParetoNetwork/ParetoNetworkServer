@@ -14,7 +14,7 @@
                 <ul class="list-unstyled list-group">
                     <li class="text-left list-group-item border-0 px-1 py-2" :key="row._id"
                         v-for="row of myFeed.content">
-                        <div class="row border-bottom pb-2">
+                        <div class="row pb-2">
                             <router-link tag="div" :to="intelRoute(row)" class="col-lg-9 pr-0">
                                 <div class="row cursor-pointer">
                                     <div class="col-2">
@@ -30,27 +30,10 @@
                                             <div class="">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <div>
-                                                    <span class="text-dashboard">Disclosed by: {{row.address}}
+                                                    <span class="text-dashboard">Disclosed by: <!-- <a v-bind:href="'/'+row.createdBy.address"> --> {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}} <!-- </a> -->
                                                     </span>
                                                 </div>
-                                                <div>
-                                                    Blocks ago:
-                                                    <ICountUp
-                                                            :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
-                                                            :endVal="parseFloat(row.blockAgo)"
-                                                            :decimals="decimalsLength(row.blockAgo)"
-                                                            :duration="randomNumber(1,3)"
-                                                            :options="countUp.options"
-                                                            @ready="onReady"/>
 
-                                                </div>
-                                                <div>
-                                                    <span class="text-dashboard">
-                                                        <b>
-                                                            {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - {{ dateStringFormat(row.dateCreated)| moment("from", "now") }}
-                                                        </b>
-                                                    </span>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -65,10 +48,6 @@
                                 <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
                                      class="text-center">
                                     <div class="d-inline-block">
-                                        <p class="text-right text-secondary ellipsis reward-text"><img
-                                                src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                            <b> {{ row.totalReward }} </b>
-                                        </p>
                                         <b-btn class="btn-primary-pareto mx-auto px-4"
                                                style="width: 120px;"
                                                :disabled="pendingRowTransactions(row)"
@@ -80,6 +59,42 @@
                                 </div>
                             </div>
 
+                        </div>
+                        <div class="row">
+
+                            <!-- blocks ago -->
+                            <div class="col-md col-xs ellipsis">
+                                <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
+                                <ICountUp
+                                        :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
+                                        :endVal="parseFloat(row.blockAgo)"
+                                        :decimals="decimalsLength(row.blockAgo)"
+                                        :duration="randomNumber(1,3)"
+                                        :options="countUp.options"
+                                        @ready="onReady"/>
+                            </div>
+
+                            <!-- time ago with txid link to etherscan -->
+
+                            <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
+                                <i class="fa fa-clock" style="color: #000;"></i>&nbsp;
+                                <span class="text-dashboard"><b><!-- {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(row.dateCreated)| moment("from", "now") }}</b></span>
+                            </div>
+
+                            <!-- rewards collected, align right -->
+                            <div class="col-md col-xs">
+                                <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
+                                        src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                    <b> {{ row.totalReward }} </b>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row border-bottom">
+                            <div class="col-md col-xs ellipsis" style="text-align: left;">
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+row.txHash" target="_blank">TXID: {{ row.txHash }} <i class="fa fa-external-link-square"></i></a>
+
+
+                            </div>
                         </div>
 
                     </li>
@@ -210,6 +225,7 @@
                 intelAddress: '',
                 hardwareAvailable: false,
                 moment: moment,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
                 modalWaiting: false,
                 myFeed: {
                     content: [],
