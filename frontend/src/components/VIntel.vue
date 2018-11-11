@@ -91,7 +91,7 @@
                             <div class="d-flex justify-content-between cursor-pointer">
                                 <div @click="clickTransaction(tx)"> Reward: {{tx.amount}}</div>
                                 <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
-                                <a class="text-primary" :href="etherscanUrl + '/' + (tx.txRewardHash || tx.txHash)" target="_blank"> Hash: {{tx.txHash.substring(0,10)}} </a>
+                                <a class="text-primary" :href="etherscanUrl + '/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
                             </div>
                         </div>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
@@ -109,8 +109,10 @@
                                             <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
                                             <span>{{post.dateCreated | date}}</span>
                                         </div>
-                                        <div class="d-flex ">
-                                            <span class="underline text-primary ellipsis"><u><b>TXID:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
+                                        <div class="d-flex border" style="padding: 5px;">
+                                            <a class="text-primary" :href="etherscanUrl + '/' + (tx.txRewardHash || tx.txHash)" target="_blank">
+                                                <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
+                                                &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
                                         </div>
                                     </div>
                                 </router-link>
