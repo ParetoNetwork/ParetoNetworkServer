@@ -60,11 +60,11 @@
                             </div>
 
                         </div>
-                        <div class="row border-bottom pb-2">
+                        <div class="row">
 
                             <!-- blocks ago -->
-                            <div class="col-md-3 col-xs-4">
-                                <i class="fa fa-th-large" style="color: #000; margin-top: 5px;"></i>&nbsp;
+                            <div class="col-md col-xs ellipsis">
+                                <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
                                 <ICountUp
                                         :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
                                         :endVal="parseFloat(row.blockAgo)"
@@ -76,19 +76,23 @@
 
                             <!-- time ago with txid link to etherscan -->
 
-                            <div class="col-md-3 col-xs-4">
-                                <i class="fa fa-clock" style="color: #000;"></i>
-                                <span class="text-dashboard">
-                                    <b><!-- {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(row.dateCreated)| moment("from", "now") }}</b>
-                                </span>
+                            <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
+                                <i class="fa fa-clock" style="color: #000;"></i>&nbsp;
+                                <span class="text-dashboard"><b><!-- {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(row.dateCreated)| moment("from", "now") }}</b></span>
                             </div>
 
                             <!-- rewards collected, align right -->
-                            <div class="col-md-3 col-xs-4">
-                                <p class="text-right text-secondary ellipsis reward-text"><img
+                            <div class="col-md col-xs">
+                                <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
                                         src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
                                     <b> {{ row.totalReward }} </b>
                                 </p>
+                            </div>
+                        </div>
+                        <div class="row border-bottom">
+                            <div class="col-md col-xs ellipsis" style="text-align: left;">
+                                TXID: {{ row.txHash }}
+                                <i class="fa fa-external-link-square"></i>
                             </div>
                         </div>
 
