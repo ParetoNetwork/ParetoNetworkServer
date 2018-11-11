@@ -30,8 +30,7 @@
                                             <div class="">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <div>
-                                                    <span class="text-dashboard">Disclosed by: <!-- <a v-bind:href="'/'+row.createdBy.address"> --> {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}} <!-- </a> -->
-                                                    </span>
+                                                    <router-link tag="span" :to="creatorRoute(row.address)" class="text-dashboard">Disclosed by: <!-- <a v-bind:href="'/'+row.createdBy.address"> --> {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}} <!-- </a> --></router-link>
                                                 </div>
 
                                             </div>
@@ -60,25 +59,28 @@
                             </div>
 
                         </div>
-                        <div class="row">
+                        <div class="row border-bottom">
 
                             <!-- blocks ago -->
                             <div class="col-md col-xs ellipsis">
-                                <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
-                                <ICountUp
-                                        :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
-                                        :endVal="parseFloat(row.blockAgo)"
-                                        :decimals="decimalsLength(row.blockAgo)"
-                                        :duration="randomNumber(1,3)"
-                                        :options="countUp.options"
-                                        @ready="onReady"/>
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+row.txHash" target="_blank">
+                                    <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
+                                    <ICountUp
+                                            :startVal="parseFloat(row.block) + parseFloat(row.blockAgo)"
+                                            :endVal="parseFloat(row.blockAgo)"
+                                            :decimals="decimalsLength(row.blockAgo)"
+                                            :duration="randomNumber(1,3)"
+                                            :options="countUp.options"
+                                            @ready="onReady"/>
+
+                                </a>
                             </div>
 
                             <!-- time ago with txid link to etherscan -->
 
                             <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
-                                <i class="fa fa-clock" style="color: #000;"></i>&nbsp;
-                                <span class="text-dashboard"><b><!-- {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(row.dateCreated)| moment("from", "now") }}</b></span>
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+row.txHash" target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                                    <span class="text-dashboard"><b><!-- {{dateStringFormat(row.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(row.dateCreated)| moment("from", "now") }}</b></span></a>
                             </div>
 
                             <!-- rewards collected, align right -->
@@ -89,14 +91,6 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="row border-bottom">
-                            <div class="col-md col-xs ellipsis" style="text-align: left;">
-                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+row.txHash" target="_blank">TXID: {{ row.txHash }} <i class="fa fa-external-link-square"></i></a>
-
-
-                            </div>
-                        </div>
-
                     </li>
                 </ul>
             </div>
@@ -259,6 +253,9 @@
                     item.blockAgo = block - item.block > 0 ? block - item.block : 0;
                     return item;
                 });
+            },
+            creatorRoute(address) {
+                return '/intel/' + address + '/';
             },
             dateStringFormat(date) {
                 return new Date(date);
