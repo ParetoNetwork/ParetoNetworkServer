@@ -91,8 +91,9 @@
                         </div>
                         <div class="row border-bottom">
                             <div class="col-md col-xs ellipsis" style="text-align: left;">
-                                TXID: {{ row.txHash }}
-                                <i class="fa fa-external-link-square"></i>
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+row.txHash" target="_blank">TXID: {{ row.txHash }} <i class="fa fa-external-link-square"></i></a>
+
+
                             </div>
                         </div>
 
@@ -224,6 +225,7 @@
                 intelAddress: '',
                 hardwareAvailable: false,
                 moment: moment,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
                 modalWaiting: false,
                 myFeed: {
                     content: [],
