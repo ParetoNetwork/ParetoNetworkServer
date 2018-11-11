@@ -20,9 +20,19 @@ export default class profileService {
         });
     }
 
-    static updateConfig(){
+    static updateConfig(onFinish){
         http.post('/v1/config_basic', {}).then(res => {
             res= res.data;
+
+            let etherscan = "https://etherscan.io/";
+            switch (res.data.netWorkId) {
+                case '3':{ etherscan="https://ropsten.etherscan.io"; break;}
+                case '4':{ etherscan="https://rinkeby.etherscan.io";break;}
+                case '42':{ etherscan="https://kovan.etherscan.io";break;}
+
+            }
+            window.localStorage.setItem('etherscan', etherscan);
+
             if(res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
             || res.data.paretoAddress !== window.localStorage.getItem('paretoAddress')
                 || res.data.netWorkId !== window.localStorage.getItem('netWorkId')
@@ -37,9 +47,10 @@ export default class profileService {
                         window.localStorage.setItem('intelc',JSON.stringify(res.data.intel));
                         window.localStorage.setItem('paretoc',JSON.stringify(res.data.pareto));
                     }
-                }).catch(error => { });
+                    if (onFinish) onFinish();
+                }).catch(error => {if (onFinish) onFinish(); });
             }
-        }).catch(error => { });
+        }).catch(error => {if (onFinish) onFinish(); });
     }
 
     static getSpecificProfile(onSuccess, onError, address){

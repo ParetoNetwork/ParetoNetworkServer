@@ -50,7 +50,7 @@
             }
         },
         mounted: function () {
-            window.addEventListener('scroll', this.foo);
+            //window.addEventListener('scroll', this.foo);
             this.bottomNav = $('.hiden-navbar-bottom');
         },
         methods: {
