@@ -22,7 +22,7 @@
 
                         <div class="media-body flex-column text-left ellipsis">
                             <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address" class="cursor-pointer ellipsis">
-                                <i class="fa fa-user" style="color: #856404; margin: 2px;"></i>
+                                <i class="fa fa-user" style="color: #4e555b; margin: 2px;"></i>
                                 <span v-if="user.alias" class="name-title"><b>{{user.alias}}<br/></b></span>
                                 <span class="ellipsis">{{user.address}}</span>
                             </router-link>
@@ -37,7 +37,7 @@
                             <router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">
                                 <div class="row mt-2">
                                     <div class="col-md col-xs mb-2 ellipsis">
-                                            <i class="fa fa-area-chart" style="color: #856404; margin: 2px;"></i>
+                                            <i class="fa fa-area-chart" style="color: #4e555b; margin: 2px;"></i>
                                             <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
                                             <ICountUp
                                                     :startVal="countUp.startVal"
@@ -64,7 +64,7 @@
                             </router-link>
 
                             <!-- make this upwards of four lines before ellipsis -->
-                            <i class="fa fa-edit cursor-pointer" style="color: #856404; margin: 2px;" @click="showModal"></i>{{user.biography || 'No biography provided'}}
+                            <i class="fa fa-edit cursor-pointer" style="color: #4e555b; margin: 2px;" @click="showModal"></i>{{user.biography || 'No biography provided'}}
 
                             <!--<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">-->
                             <!--Calculate-->
