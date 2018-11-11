@@ -30,7 +30,7 @@
                                             <div class="">
                                                 <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <div>
-                                                    <router-link tag="span" :to="creatorRoute(row.address)" class="text-dashboard">Disclosed by: <!-- <a v-bind:href="'/'+row.createdBy.address"> --> {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}} <!-- </a> --></router-link>
+                                                    <span class="text-dashboard">Disclosed by: <!-- <a v-bind:href="'/'+row.createdBy.address"> --> {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}} <!-- </a> --></span>
                                                 </div>
 
                                             </div>
