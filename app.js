@@ -274,7 +274,7 @@ app.get("/getIntels", (req, res) => {
         const netWorkId = process.env.ETH_NETWORK;
         const pcontract = process.env.CRED_PARETOCONTRACT;
         const psignversion = process.env.PARETO_SIGN_VERSION;
-        res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId , intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
+        res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId, intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
     });
 
 /********* AUTHENTICATED v1 APIs *********/
