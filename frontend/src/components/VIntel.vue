@@ -18,40 +18,53 @@
                                 </div>
                                 <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
                             </div>
-                            <button class="btn btn-primary-pareto" @click="showModal">
-                                EDIT PROFILE
-                            </button>
                         </div>
 
-                        <div class="media-body flex-column text-left mt-2 ellipsis">
-                            <span class="name-title"><b>{{user.alias|| ''}}</b></span>
-                            <p v-if="user.address" class="ellipsis"><b class="ellipsis"> {{user.address}} </b></p>
+                        <div class="media-body flex-column text-left ellipsis">
+                            <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address" class="cursor-pointer ellipsis">
+                                <i class="fa fa-user" style="color: #856404; margin: 2px;"></i>
+                                <span v-if="user.alias" class="name-title"><b>{{user.alias}}<br/></b></span>
+                                <span class="ellipsis">{{user.address}}</span>
+                            </router-link>
+
+
                             <div class="mt-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
                             </div>
-                            <p class="mb-2 mt-2">
-                                <b>Network Rank:&nbsp;</b>
-                                <ICountUp
-                                        :startVal="countUp.startVal"
-                                        :endVal="parseFloat(user.rank)"
-                                        :decimals="decimalsLength(user.rank)"
-                                        :duration="randomNumber(3,6)"
-                                        :options="countUp.options"
-                                        @ready="onReady"/>
-                            </p>
-                            <p class="mb-2 mt-2">
-                                <b>User Score:&nbsp;</b>
-                                <ICountUp
-                                        v-if="user.score"
-                                        :startVal="countUp.startVal"
-                                        :endVal="parseFloat(user.score)"
-                                        :decimals="decimalsLength(user.score)"
-                                        :duration="randomNumber(3,6)"
-                                        :options="countUp.options"
-                                        @ready="onReady"/>
-                                <span v-else> 0 </span>
-                            </p>
+
+                            <!-- rank, icon globe color should be contingent on access level, whether above or below the threshold. Globe icon for "global rank" -->
+                            <router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">
+                                <div class="row mt-2">
+                                    <div class="col-md col-xs mb-2 ellipsis">
+                                            <i class="fa fa-area-chart" style="color: #856404; margin: 2px;"></i>
+                                            <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
+                                            <ICountUp
+                                                    :startVal="countUp.startVal"
+                                                    :endVal="parseFloat(user.rank)"
+                                                    :decimals="decimalsLength(user.rank)"
+                                                    :duration="randomNumber(3,6)"
+                                                    :options="countUp.options"
+                                                    @ready="onReady"/>
+                                    </div>
+                                    <!-- score, star for score, earn more stars for a greater score -->
+                                    <div class="col-md col-xs mb-2 ellipsis">
+                                        <i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>
+                                        <ICountUp
+                                                v-if="user.score"
+                                                :startVal="countUp.startVal"
+                                                :endVal="parseFloat(user.score)"
+                                                :decimals="decimalsLength(user.score)"
+                                                :duration="randomNumber(3,6)"
+                                                :options="countUp.options"
+                                                @ready="onReady"/>
+                                        <span v-else> 0 </span>
+                                    </div>
+                                </div>
+                            </router-link>
+
+                            <!-- make this upwards of four lines before ellipsis -->
+                            <i class="fa fa-edit cursor-pointer" style="color: #856404; margin: 2px;" @click="showModal"></i>{{user.biography || 'No biography provided'}}
 
                             <!--<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">-->
                             <!--Calculate-->
@@ -62,7 +75,7 @@
                             <!--<div class="">-->
                             <!--<span class="subtitle-dashboard"><b>BIO:</b></span>-->
                             <!--<p class="text-dashboard text-pareto-gray">-->
-                            <!--{{user.biography || 'No biography provided'}}-->
+
                             <!--</p>-->
                             <!--</div>-->
                             <!--</div>-->
@@ -175,6 +188,7 @@
                 alias: "",
                 bio: "",
                 picture: "",
+                paretoAddress: window.localStorage.getItem('paretoAddress'),
                 baseURL: environment.baseURL,
                 etherscanUrl: window.localStorage.getItem('etherscan') ,
                 user: {
@@ -242,6 +256,9 @@
                         });
                     });
             },
+            creatorRoute(address) {
+                return '/intel/' + address + '/';
+            },
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
                     {ID}, {signType: this.signType, pathId: this.pathId},
@@ -272,6 +289,9 @@
                         text: errorText
                     });
                 });
+            },
+            leaderboards(address){
+                return '/leaderboards' + '?address=' + address;
             },
             loadAddress: function () {
                 return dashboardService.getAddress(
