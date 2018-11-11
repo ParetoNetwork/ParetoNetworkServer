@@ -80,10 +80,10 @@
                                 <thead>
                                 <tr>
                                     <th width="55px" class="th-header">
-                                        Rank
+                                        <i class="fa fa-globe"></i>
                                     </th>
                                     <th width="123px" class="th-header">
-                                        Score
+                                        <i class="fa fa-star" style="color: #fca130;"></i>
                                     </th>
                                     <th class="th-header address-header" width="250px">
                                         Address
