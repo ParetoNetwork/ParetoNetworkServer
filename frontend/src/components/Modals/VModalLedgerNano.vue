@@ -76,7 +76,7 @@
                                             <i id="copyAddressLegacy"
                                                @click="copyTextClipboard(paths[0].selected.address, 'tooltipText1')"
                                                class="fa fa-copy cursor-pointer"></i>
-                                            <a v-if="!!paths[0].selected.address" v-bind:href="'https://etherscan.io/address/'+paths[0].selected.address" target="_blank">
+                                            <a v-if="!!paths[0].selected.address" v-bind:href="etherscan+'/address/'+paths[0].selected.address" target="_blank">
                                                 <i class="fa fa-external-link"></i>
                                             </a>
                                             <i v-else class="fa fa-external-link"></i>
@@ -125,7 +125,7 @@
                                             <i id="copyAddressStandard"
                                                @click="copyTextClipboard(paths[1].selected.address, 'tooltipText2')"
                                                class="fa fa-copy cursor-pointer"></i>
-                                            <a v-if="!!paths[1].selected.address" v-bind:href="'https://etherscan.io/address/'+paths[1].selected.address" target="_blank">
+                                            <a v-if="!!paths[1].selected.address" v-bind:href="etherscan+'/address/'+paths[1].selected.address" target="_blank">
                                                 <i class="fa fa-external-link"></i>
                                             </a>
                                             <i v-else class="fa fa-external-link"></i>
@@ -178,7 +178,7 @@
                                             <i id="copyAddressCustom"
                                                @click="copyTextClipboard(paths[2].selected.address, 'tooltipText3')"
                                                class="fa fa-copy cursor-pointer"></i>
-                                            <a v-if="!!paths[2].selected.address" v-bind:href="'https://etherscan.io/address/'+paths[2].selected.address" target="_blank">
+                                            <a v-if="!!paths[2].selected.address" v-bind:href="etherscan+'/address/'+paths[2].selected.address" target="_blank">
                                                 <i class="fa fa-external-link"></i>
                                             </a>
                                             <i v-else class="fa fa-external-link"></i>
@@ -225,6 +225,7 @@
                 selectedPath: null,
                 selectedAddress: '',
                 customPath: '',
+                etherscan: window.localStorage.getItem('etherscan') ,
                 customPathError: true,
                 loadingCustomPath: false,
                 loadingInfiniteScrollData: false,
