@@ -104,12 +104,12 @@
                                 <div class="split">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
-                                            <h5 class="title"><b>{{post.title}}</b></h5>
+                                            <h5 class="title ellipsis"><b>{{post.title}}</b></h5>
                                             <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
                                             <span>{{post.dateCreated | date}}</span>
                                         </router-link>
                                         <div class="d-flex border" style="padding: 5px;">
-                                            <a class="text-primary" :href="etherscanUrl + '/' + (post.txRewardHash || post.txHash)" target="_blank">
+                                            <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
                                                 <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
                                                 &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
                                         </div>
