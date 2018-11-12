@@ -24,7 +24,7 @@ export default class profileService {
         http.post('/v1/config_basic', {}).then(res => {
             res= res.data;
 
-            let etherscan = "https://etherscan.io/";
+            let etherscan = "https://etherscan.io";
             switch (res.data.netWorkId) {
                 case '3':{ etherscan="https://ropsten.etherscan.io"; break;}
                 case '4':{ etherscan="https://rinkeby.etherscan.io";break;}
