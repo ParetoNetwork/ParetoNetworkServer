@@ -15,7 +15,7 @@ const Intel = new web3.eth.Contract(
   Intel_Contract_Schema.networks[process.env.ETH_NETWORK].address
 );
 
-const privKey = process.env.PRIV_KEY_DISTRIBUTOR.toString();
+const privKey = process.env.PRIV_KEY_DISTRIBUTOR || "";
 
 let privateKeyBuff = new Buffer(
   privKey,
