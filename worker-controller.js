@@ -544,7 +544,7 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                             //need to understand what multiple is, or can be
                             console.log("multiple (blockHeightDifference.div(divisor)): " + multiple);
 
-                            var score = parseFloat(amountBn.mul(multiple));
+                            var score = parseFloat(amountBn.mul(multiple < 1 ? 1 + multiple : multiple)); //if multiple is less than 1, make it at least 1. ie 0.4 = 1.4
                             var bonus = parseFloat(blockHeightDifference.div(divisor)) ;
 
 
