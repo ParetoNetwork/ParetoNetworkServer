@@ -101,21 +101,52 @@
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
                             <li class="list-group-item border-0 p-3" v-for="post in myContent" :key="post.id">
-                                <router-link tag="div" class="split" :to="intelRoute(post)"
-                                             @click="showDetails(post)">
+                                <div class="split">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <div class="d-flex flex-column text-left">
+                                        <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
                                             <h5 class="title"><b>{{post.title}}</b></h5>
                                             <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
                                             <span>{{post.dateCreated | date}}</span>
-                                        </div>
+                                        </router-link>
                                         <div class="d-flex border" style="padding: 5px;">
-                                            <a class="text-primary" :href="etherscanUrl + '/' + (tx.txRewardHash || tx.txHash)" target="_blank">
+                                            <a class="text-primary" :href="etherscanUrl + '/' + (post.txRewardHash || post.txHash)" target="_blank">
                                                 <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
                                                 &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
                                         </div>
                                     </div>
-                                </router-link>
+                                </div>
+                                <div class="row border-bottom">
+
+                                    <!-- blocks ago -->
+                                    <div class="col-md col-xs ellipsis text-left">
+                                        <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+post.txHash" target="_blank">
+                                            <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
+                                            <ICountUp
+                                                    :startVal="parseFloat(post.block) + parseFloat(post.blockAgo)"
+                                                    :endVal="parseFloat(post.blockAgo)"
+                                                    :decimals="decimalsLength(post.blockAgo)"
+                                                    :duration="randomNumber(1,3)"
+                                                    :options="countUp.options"
+                                                    @ready="onReady"/>
+
+                                        </a>
+                                    </div>
+
+                                    <!-- time ago with txid link to etherscan -->
+
+                                    <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
+                                        <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+post.txHash" target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                                            <span class="text-dashboard"><b>{{ dateStringFormat(post.dateCreated)| moment("from", "now") }}</b></span></a>
+                                    </div>
+
+                                    <!-- rewards collected, align right -->
+                                    <div class="col-md col-xs">
+                                        <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
+                                                src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                            <b> {{ post.totalReward }} </b>
+                                        </p>
+                                    </div>
+                                </div>
                             </li>
                         </ul>
                         <span v-else> No data to display </span>
@@ -260,6 +291,9 @@
             },
             creatorRoute(address) {
                 return '/intel/' + address + '/';
+            },
+            dateStringFormat(date) {
+                return new Date(date);
             },
             distributeReward: function (ID) {
                 ContentService.distributeRewards(
