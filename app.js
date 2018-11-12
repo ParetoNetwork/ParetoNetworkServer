@@ -275,7 +275,7 @@ app.get("/getIntels", (req, res) => {
         const netWorkId = process.env.ETH_NETWORK;
         const pcontract = process.env.CRED_PARETOCONTRACT;
         const psignversion = process.env.PARETO_SIGN_VERSION;
-        res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId , intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
+        res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId, intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
     });
 
 /********* AUTHENTICATED v1 APIs *********/
@@ -381,6 +381,42 @@ app.post('/v1/content', function (req, res) {
         //needs to check address whitelist against the authorized address, if people figure out the post body format.
 
         controller.postContent(req, function (err, obj) {
+            if (err) {
+                res.status(200).json(ErrorHandler.getError(err));
+            } else {
+                res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
+            }
+
+        });
+    }
+
+}); //end content post
+
+
+app.get('/v1/transaction', function (req, res) {
+
+    controller.getPendingTransaction(req.user, function (err, obj) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(obj));
+        }
+    });
+
+}); //end content post
+
+
+app.post('/v1/transaction', function (req, res) {
+
+    const noParams = (!req.body.address  || !req.body.intel || !req.body.amount || !req.body.event || !req.body.intelAddress);
+    if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
+        || !req.body.txHash ||  (noParams && (!req.body.txRewardHash && !req.body.status))) {
+        res.status(200).json(ErrorHandler.bodyMissingError());
+    }  else {
+
+        //needs to check address whitelist against the authorized address, if people figure out the post body format.
+
+        controller.watchTransaction(req.body, function (err, obj) {
             if (err) {
                 res.status(200).json(ErrorHandler.getError(err));
             } else {

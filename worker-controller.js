@@ -30,7 +30,8 @@ var ETH_NETWORK = process.env.ETH_NETWORK;
 const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
 //const CONTRACT_CREATION_BLOCK_INT = 4953750;
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
-const EXPONTENT_BLOCK_AGO = process.env.EXPONTENT_BLOCK_AGO;
+const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
+const START_CLOCK = process.env.START_CLOCK || 1;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 
 const modelsPath = path.resolve(__dirname, 'models');
@@ -101,6 +102,7 @@ mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoReward = mongoose.model('reward');
+const ParetoTransaction = mongoose.model('transaction');
 
 
 // set up Pareto and Intel contracts instances
@@ -274,7 +276,7 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
  *  addExponent using db instead of Ethereum network
  */
 workerController.addExponentAprox =  function(addresses, scores,  blockHeight,callback){
-    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONTENT_BLOCK_AGO)} }).exec(function(err, values) {
+    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONENT_BLOCK_AGO)} }).exec(function(err, values) {
         if (err) {
             callback(err);
         }
@@ -326,7 +328,7 @@ workerController.addExponent = async function(addresses, scores, blockHeight,cal
                 try{
                     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, results[i]);
                     promises.push(intel.getPastEvents('Reward', {
-                        fromBlock: "0x" + ((blockHeight-EXPONTENT_BLOCK_AGO).toString(16)) ,
+                        fromBlock: "0x" + ((blockHeight-EXPONENT_BLOCK_AGO).toString(16)) ,
                         toBlock: 'latest'
                     }))
                 }catch (e) { console.log(e) }
@@ -537,10 +539,19 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                             //but multiple and divisor are both counting linearly, so some newcoming people will never get a boost, fix that.
                             var divisor = Decimal( Math.max(parseFloat(blockHeightBn.sub(contractBn)),1)).div(hBn);
 
-                            //console.log("divisor: " + divisor);
+                            var multiple =  (blockHeightDifference.div(divisor));
 
-                            var multiple =  (blockHeightDifference.div(divisor) );
-                            var score = parseFloat(amountBn.mul(multiple));
+                            //need to understand what multiple is, or can be
+                            console.log("multiple = (blockHeightDifference.div(divisor)): " + multiple + "for address: " + address);
+
+                            if(multiple < 1 && multiple >= 0){
+                                multiple = multiple.add(1);
+                            }
+                            else if(multiple > -1 && multiple <= 0){
+                                multiple = multiple.sub(1);
+                            }
+
+                            var score = parseFloat(amountBn.mul(multiple)); //if multiple is less than 1, make it at least 1. ie 0.4 = 1.4
                             var bonus = parseFloat(blockHeightDifference.div(divisor)) ;
 
 
@@ -739,6 +750,31 @@ workerController.aproxAllScoreRanking = async function(callback){
                 }
 
             });
+            ParetoTransaction.find({ $or: [ {status: 0}, {status: 2} ]}, function (err, results) {
+                results.forEach( data =>{
+                    if(data.status == 0){
+                        web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
+                            if(receipt){
+                                ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: 1}, { multi: false }, function (err, data) {
+                                });
+                            }
+                        });
+                    } else{
+                        if (data.txRewardHash && data.status ==2){
+                            web3.eth.getTransactionReceipt(data.txRewardHash, function (err, receipt) {
+                                if(receipt){
+                                    ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txRewardHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
+                                    });
+                                }
+
+                            });
+                        }
+                    }
+                })
+
+
+            })
+
         }, function (error) {
             console.log(error);
             callback(null, {} );
@@ -783,7 +819,10 @@ workerController.realAllScoreRanking = async function(callback){
                     for (let i=0; i< arrayAddress.length; i++){
                         const address = arrayAddress[i];
                         await workerController.generateScore(blockHeight,address,0,function (err, result) {
-                            if(!err && result.tokens > 0 && !isNaN(result.score)){
+                            if(!err ){
+                                if (result.tokens == 0) {
+                                    result.score = 0;
+                                }
                                 scores.push(result);
                                 addressesExponent.push(address);
                             }
@@ -884,7 +923,7 @@ workerController.retrieveRanksAtAddress = function(rank, limit, page, callback){
 workerController.getScoreAndSaveRedis = function(callback){
 
     //get all address sorted by score, then grouping all by self and retrieve with ranking index
-    const query = ParetoAddress.aggregate().sort({score : -1}).group(
+    const query = ParetoAddress.aggregate().match({score: { $gt: 0}}).sort({score : -1}).group(
         { "_id": false,
             "addresses": {
                 "$push": {
@@ -1048,7 +1087,7 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 };
 
 
-workerController.updateFromLastIntel = function(){
+workerController.updateFromLastIntel =  function(){
     ParetoContent.aggregate([
         {
             $group: {
@@ -1079,7 +1118,7 @@ workerController.updateFromLastIntel = function(){
                         }
                     }
 
-                })
+                });
             }
 
         }
@@ -1164,8 +1203,10 @@ const start = async () => {
 
         });
 
-        const clock = require('./clock.js');
-        clock.start(queue);
+        if(START_CLOCK==1){
+            const clock = require('./clock.js');
+            clock.start(queue);
+        }
     } catch (error) {
         console.log(error);
     }

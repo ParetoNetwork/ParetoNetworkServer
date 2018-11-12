@@ -1,6 +1,6 @@
 <template>
-    <div class="navbar hiden-navbar-bottom d-flex justify-content-around font-body py-0">
-        <div class="d-flex flex-row mt-1 p-1">
+    <div class="navbar hiden-navbar-bottom d-flex font-body py-0">
+        <div class="col-md col-xs" style="text-align: left;">
             <a class="mr-3" href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
             <!-- <div class="mr-3"> PARETO PRICE: {{paretoUSD}} </div>
              <div class="mr-3"> RECOMMENDED ETHEREUM GAS PRICE: {{recommendedGasPrice}} gwei </div>
@@ -8,15 +8,19 @@
              <div class="mr-3"> STATUS: CONNECTED </div>
              <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
         </div>
-        <div class="d-flex flex-row py-1">
-            <!--
-            <div class="mr-3"> CONTACT </div>
-            <div class="mr-3"> TERMS OF USE </div>
-            <div class="mr-3"> PRIVACY POLICY </div>
-            <div class="mr-3"> CONTENT CONTRIBUTOR GUIDELINES </div> -->
-            <a class="mr-3 nav-link" href="/api-docs/"> API </a>
-            <a class="mr-3 nav-link" href="https://exchange.pareto.network/" target="_blank"> BUY PARETO </a>
-            <a class="mr-3 nav-link border" style="font-weight: bold;" href="https://t.me/paretonetworkdiscussion"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 1px;"></i>TELEGRAM</a>
+        <div class="col-md col-xs" style="text-align: right;">
+            <div class="row" style="text-align: right;">
+                <!--
+                <div class="mr-3"> CONTACT </div>
+                <div class="mr-3"> TERMS OF USE </div>
+                <div class="mr-3"> PRIVACY POLICY </div>
+                <div class="mr-3"> CONTENT CONTRIBUTOR GUIDELINES </div> -->
+
+                <!-- re-display these, make them aligned right
+                <a class="mr-3 nav-link" href="/api-docs/"> API </a>
+                <a class="mr-3 nav-link border" style="font-weight: bold;" href="https://t.me/paretonetworkdiscussion"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 1px;"></i>Support</a>
+                -->
+            </div>
         </div>
     </div>
 </template>

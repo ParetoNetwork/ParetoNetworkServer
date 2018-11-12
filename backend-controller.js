@@ -32,7 +32,7 @@ var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
 const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
 //const CONTRACT_CREATION_BLOCK_INT = 4953750;
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
-const EXPONTENT_BLOCK_AGO = process.env.EXPONTENT_BLOCK_AGO;
+const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const  REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 const queue = kue.createQueue({
     redis: REDIS_URL,
@@ -107,6 +107,7 @@ const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 const ParetoReward = mongoose.model('reward');
+const ParetoTransaction = mongoose.model('transaction');
 
 
 // set up Pareto and Intel contracts instances
@@ -244,6 +245,40 @@ controller.postContent = function (req, callback) {
 
 };
 
+
+controller.getPendingTransaction = function (address, callback){
+    ParetoTransaction.find({address: address, status: {$lt: 3}}).sort({dateCreated : -1}).exec( callback);
+}
+
+controller.watchTransaction =  function (data, callback){
+    if(data.address){
+        data.address = data.address.toLowerCase();
+    }
+
+    var dbQuery = {
+        txHash: data.txHash
+    };
+    if (data.txRewardHash){
+        data.status = 2;
+    }
+    var dbValues = {
+        $set: data
+    };
+    var dbOptions = {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true
+    };
+
+    var updateQuery = ParetoTransaction.findOneAndUpdate(dbQuery, dbValues, dbOptions);
+    updateQuery.exec().then(function (r) {
+         callback(null, r);
+    }).catch(function(e){
+        callback(e)
+    });
+}
+
+
 /**
  * Watch Intel events. Support watch rewards for old Intel address
  */
@@ -351,7 +386,7 @@ controller.startwatchNewIntel = function(){
                                             callback(err);
                                         }
                                     });
-                                    controller.updateIntelReward(intelIndex);
+                                    controller.updateIntelReward(intelIndex, event.transactionHash,event.returnValues.sender.toLowerCase());
 
 
                                 }
@@ -368,6 +403,43 @@ controller.startwatchNewIntel = function(){
 
             }
 
+        }
+    });
+
+
+    web3_events.eth.subscribe( 'logs',
+        {
+            fromBlock: 'latest',
+            address: PARETO_CONTRACT_ADDRESS,
+            topics: ['0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925', null, null]
+        }).on('data', function (log) {
+        const txHash = log.transactionHash;
+        const blockNumber = log.blockNumber;
+        if(blockNumber!=null){
+        ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { status: 1, block: blockNumber }, function (err, r) {
+            if(!err && r){
+                if(controller.wss){
+                    try{
+                        controller.wss.clients.forEach(function each(client) {
+                            if (client.isAlive === false) return client.terminate();
+                            if (client.readyState === controller.WebSocket.OPEN ) {
+                                if(client.user && client.user.user== data.address){
+                                   client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
+
+                                }
+                            }
+                        });
+                    }catch (e) {
+                        console.log(e);
+                    }
+                }else{
+                    console.log('no wss');
+                }
+            }else{
+               if(err){console.log(err);}
+            }
+
+            })
         }
     });
 
@@ -415,8 +487,8 @@ controller.updateAddressReward = function(event, token){
                 controller.getScoreAndSaveRedis( function (err, result) {
                     if(!err){
                         if(controller.wss){
-                            try{
-                                controller.wss.clients.forEach(function each(client) {
+                            controller.wss.clients.forEach(function each(client) {
+                                try{
                                     if (client.isAlive === false) return client.terminate();
                                     if (client.readyState === controller.WebSocket.OPEN ) {
                                         // Validate if the user is subscribed a set of information
@@ -447,10 +519,11 @@ controller.updateAddressReward = function(event, token){
                                             });
                                         }
                                     }
-                                });
-                            }catch (e) {
-                                console.log(e);
-                            }
+                                }catch (e) {
+                                    console.log(e);
+                                }
+                            });
+
                         }else{
                             console.log('no wss')
                         }
@@ -466,8 +539,9 @@ controller.updateAddressReward = function(event, token){
 /**
  * Update totalreward count in Intel document
  * @param intelIndex
+ * @param txHash
  */
-controller.updateIntelReward=function(intelIndex){
+controller.updateIntelReward=function(intelIndex, txHash, sender){
     let agg =  [ {$match: { 'intelId': intelIndex } },
         { $group: { _id: null,
                 rewards : {
@@ -484,38 +558,45 @@ controller.updateIntelReward=function(intelIndex){
     ParetoReward.aggregate( agg).exec(function (err, r) {
         if(r.length > 0) {
             const reward = r[0].reward;
-            ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward}, { }, (err, intel) => {
-                if(!err){
-                    if(controller.wss){
-                        try{
-                            controller.wss.clients.forEach(function each(client) {
+            let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
+            ,  ParetoTransaction.findOneAndUpdate({ $or: [{ txRewardHash: txHash },
+                    {txRewardHash: null, address: sender, intel: intelIndex}]}, { status: 3,  txRewardHash: txHash  })];
+            Promise.all(promises).then( values =>{
+                    if(values.length > 0 && controller.wss){
+                        controller.wss.clients.forEach(function each(client) {
+                            try{
                                 if (client.isAlive === false) return client.terminate();
                                 if (client.readyState === controller.WebSocket.OPEN ) {
                                     // Validate if the user is subscribed a set of information
                                     if(client.user){
                                         client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                                        if(values.length > 1 && values[1]){
+                                            if(client.user && client.user.user== values[1].address) {
+                                                client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: values[1]})) );
+
+                                            }
+                                        }
                                     }
                                 }
-                            });
-                        }catch (e) {
-                            console.log(e);
-                        }
-                    }else{
-                        console.log('no wss')
+                            }catch (e) {
+                                console.log(e);
+                            }
+                        });
                     }
-                }
-
-            });
+                })
+                .catch(e=>{
+                    console.log(e);
+                });
         }
     })
-}
+};
 
 
 /**
  *  addExponent using db instead of Ethereum network
  */
 controller.addExponentAprox =  function(addresses, scores,  blockHeight,callback){
-    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONTENT_BLOCK_AGO)} }).exec(function(err, values) {
+    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONENT_BLOCK_AGO)} }).exec(function(err, values) {
         if (err) {
             callback(err);
         }
@@ -550,6 +631,63 @@ controller.addExponentAprox =  function(addresses, scores,  blockHeight,callback
     })
 };
 
+
+controller.validateQuery = function(query){
+    const array = [];
+    if( query.created && !isNaN(Date.parse(query.created))) {
+        try {
+            const date =new Date(query.created);
+            const date2 =new Date(date.getTime() + 86400000);
+            array.push({
+                $and: [
+                    {dateCreated: {$gte: date}},
+                    {dateCreated: {$lte: date2}}
+                ]
+
+            }) 
+        } catch (e) {
+            console.log(e)
+        }
+    }
+    if( query.title ) {
+        try {
+            array.push({
+                title: {$regex : ".*"+query.title+".*"}
+            })
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    if( query.address ) {
+        try {
+            data = query.address.split(',')
+                .filter( address =>{ return web3.utils.isAddress(address) } ).map(address => {return address.toLowerCase()});
+            if( data.length > 0 ) {
+                array.push({ address: { $in: data} })
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+    } else{
+        if( query.exclude ) {
+            try {
+                data = query.exclude.split(',')
+                    .filter( address =>{ return web3.utils.isAddress(address) } ).map(address => {return address.toLowerCase()});
+                if( data.length > 0 ) {
+                    array.push({ address: { $nin: data} })
+                }
+
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }
+    return array;
+
+}
+
 controller.getAllAvailableContent = function(req, callback) {
 
     var limit = parseInt(req.query.limit || 100);
@@ -561,6 +699,9 @@ controller.getAllAvailableContent = function(req, callback) {
   if(web3.utils.isAddress(req.user) == false){
     if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
   } else {
+
+
+      //address exclude created title
     //1. get score from address, then get standard deviation of score
     controller.retrieveAddress(req.user, function(err,result) {
 
@@ -662,16 +803,18 @@ controller.getAllAvailableContent = function(req, callback) {
                 var queryAboveCount = ParetoContent.estimatedDocumentCount({block : { $gt : blockHeightDelta}});
 
                 try{
-                    allResults = await ParetoContent.find(
-                        { $or:[
-                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}]}
-                            ]
-                        }
-                    ).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
+                    const queryFind = { $and:[
+                            { $or:[
+                                    {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                    {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}]}
+                                ]
+                            } ]
+                    };
+                    queryFind.$and = queryFind.$and.concat( controller.validateQuery(req.query));
+                    allResults = await ParetoContent.find(queryFind).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
                     let newResults = [];
                     allResults.forEach(function(entry){
                         /*
@@ -702,8 +845,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 _v: entry._v,
                                 createdBy: {
                                     address: entry.createdBy.address,
-                                    firstName: entry.createdBy.firstName,
-                                    lastName: entry.createdBy.lastName,
+                                    alias: entry.createdBy.alias,
                                     biography: entry.createdBy.biography,
                                     profilePic: entry.createdBy.profilePic
                                 }
@@ -765,8 +907,7 @@ controller.updateUser = function(address, userinfo ,callback){
          callback(new Error('Invalid Address'));
     } else {
         const profile = {address: address};
-        if(userinfo.first_name) {profile.firstName = userinfo.first_name}
-        if(userinfo.last_name) {profile.lastName = userinfo.last_name}
+        if(userinfo.alias) {profile.alias = userinfo.alias}
         if(userinfo.biography) {profile.biography = userinfo.biography}
         if(userinfo.profile_pic) {profile.profilePic = userinfo.profile_pic}
         controller.insertProfile(profile, function (error, result) {
@@ -790,12 +931,11 @@ controller.getUserInfo = function(address ,callback){
             if(error){
                 callback(error)
             }else{
-                controller.retrieveProfileWithRedis([address], function (error, profile) {
+                controller.retrieveProfileWithRedis(address, function (error, profile) {
                     if(error){ callback(error)}
                     let ranking = rankings[0];
                     callback( null, { 'address': address,   'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
-                        'first_name': profile.firstName, "last_name": profile.lastName,
-                        'biography': profile.biography, "profile_pic" : profile.profilePic } );
+                        'alias': profile.alias, 'biography': profile.biography, "profile_pic" : profile.profilePic } );
                 });
             }
 
@@ -848,8 +988,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           _v: entry._v,
                           createdBy: {
                               address: entry.createdBy.address,
-                              firstName: entry.createdBy.firstName,
-                              lastName: entry.createdBy.lastName,
+                              alias: entry.createdBy.alias,
                               biography: entry.createdBy.biography,
                               profilePic: entry.createdBy.profilePic
                           }
@@ -1030,7 +1169,7 @@ controller.insertProfile = function(profile,callback){
                   console.error('unable to write to db because: ', err);
               } else {
                   const multi = redisClient.multi();
-                  let profile = {address: r.address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+                  let profile = {address: r.address, alias: r.alias, biography: r.biography, profilePic: r.profilePic};
                   multi.hmset("profile"+profile.address+ "", profile );
                   multi.exec(function(errors, results) {
                       if(errors){ console.log(errors); callback(errors)}
@@ -1069,7 +1208,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
    ParetoProfile.findOne({  address : address } ,
        function(err, r){
            if(r){
-               let profile = {address: address, firstName: r.firstName, lastName: r.lastName, biography: r.biography, profilePic: r.profilePic};
+               let profile = {address: address, alias: r.alias, biography: r.biography, profilePic: r.profilePic};
                const multi = redisClient.multi();
                multi.hmset("profile"+profile.address+ "", profile );
                multi.exec(function(errors, results) {
@@ -1077,7 +1216,7 @@ controller.getProfileAndSaveRedis = function(address,callback){
                    return callback(null, profile );
                })
            } else{
-              let profile = {address: address, firstName: "", lastName: "", biography: "", profilePic: "" };
+              let profile = {address: address, alias: "", biography: "", profilePic: "" };
                controller.insertProfile(profile, callback)
            }
        }
@@ -1153,7 +1292,7 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
       });
     }else{
       // return the cached ranking
-      return  callback(null, results);
+      return  callback(null, results.filter(data => data));
     }
 
 
