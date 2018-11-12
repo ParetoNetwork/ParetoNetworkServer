@@ -16,7 +16,7 @@
                                 <div class="col-md-2 p-0 pl-1">
                                     <div class="d-flex flex-column align-items-end">
                                         <span v-if="profile.alias" class="subtitle-dashboard" ><b> {{profile.alias}} </b></span>
-                                        <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
+                                        <span v-else class="subtitle-dashboard" ><b> {{intel.address.slice(0,15) + '...'}} </b></span>
                                         <div v-if="user.address != intel.address && intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
                                              class="text-center">
                                             <div class="d-inline-block">
