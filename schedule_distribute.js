@@ -24,7 +24,7 @@ const publicKey = wallet.getChecksumAddressString();
 
 let gPrice, txData, data, transaction, serializedTx;
 
-cron.schedule("*/30 * * * *", () => {
+cron.schedule("*/30 * * * *", async () => {
   console.log("Running rewards distriute scheduler");
 
   let current_time = Math.floor(new Date().getTime() / 1000);
@@ -64,3 +64,4 @@ cron.schedule("*/30 * * * *", () => {
     }
   );
 });
+ 
