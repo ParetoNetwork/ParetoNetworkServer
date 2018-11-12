@@ -7,45 +7,46 @@
                      style="padding-top: 30px; padding-bottom: 30px; display: flex; align-items: center;">
                     <div>
                         <div class="row" style="color: #ffffff; justify-content: center;">
-                            <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
+                            <!-- <p class="font-body text-left" style="padding: 35px; font-size: 12px; font-weight: bold">
                                 Check
                                 your <b>PARETO</b> scores
                                 easily by signing your wallet address using Metamask or a web3-enabled browser.
                                 Otherwise, sign manually.</p>
                             <br/>
                             <br/>
-                            <br/>
+                            <br/> -->
                             <!-- hidden by default unless metamask connect -->
                             <form id="lookup" style="margin: 5px;">
                                 <div class="group">
                                     <div class="d-flex flex-column justify-content-center">
 
-                                        <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Wallet
-                                            Address</label>
+                                        <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search by <i class="fa fa-globe"></i> Global Rank or Address</label>
 
-                                        <input id="lookup-input" type="text" name="address" readonly="readonly"
+                                        <input id="lookup-input" type="text" name="address"
                                                v-bind:value="address || null" class="font-weight-bold">
                                     </div>
                                     <span class="highlight"></span>
                                     <span class="bar"></span>
                                 </div>
                             </form>
-                            <button v-on:click="showModal()" id="lookupSignButton" type="button" class="mt-5"
+                            <!-- <button v-on:click="showModal()" id="lookupSignButton"  type="button" class="mt-5"
                                     data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Calculating"
                                     form="lookup"
                             >Sign
-                            </button>
+                            </button> -->
+                            <button type="button" id="lookupSignButton" class="mt-5"><i class="fa fa-search"></i></button>
                         </div>
 
-                        <div class="row"
-                             style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
-                            <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
+                        <div class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
+                            <!-- <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
                                                                          src="../assets/images/pareto-logo-mark-color.svg"
-                                                                         alt="Pareto Logo for Ranking">
-                            </div>
+                                                                         alt="Pareto Logo">
+                            </div> -->
                             <div id="score-counter" class="d-flex">
-                                <div class="iCountUp d-flex align-items-center" v-bind:style="{ fontSize: textSize + 'px'  }">
-                                    <ICountUp
+                                <div class="row" v-bind:style="{ fontSize: textSize + 'px'  }">
+                                    <div class="col-md-1 col-xs-1 text-left"><i class="fa fa-star" style="color: #fca130;"></i></div>
+                                    <div class="col-md col-xs">
+                                        <ICountUp
                                             v-if="score"
                                             :startVal="countUp.startVal"
                                             :endVal="parseFloat(score)"
@@ -53,13 +54,49 @@
                                             :duration="randomNumber(3,6)"
                                             :options="countUp.options"
                                             @ready="onReady"
-                                    />
-                                    <span v-else>
+                                        />
+                                        <span v-else>
                                         0
                                     </span>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
+                        <!--
+                        <div class="mt-2">
+                            <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
+                            <a v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                        </div>
+
+                        <router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">
+                            <div class="row mt-2">
+                                <div class="col-md col-xs mb-2 ellipsis">
+                                    <i class="fa fa-area-chart" style="color: #4e555b; margin: 2px;"></i>
+                                    <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
+                                    <ICountUp
+                                            :startVal="countUp.startVal"
+                                            :endVal="parseFloat(user.rank)"
+                                            :decimals="decimalsLength(user.rank)"
+                                            :duration="randomNumber(3,6)"
+                                            :options="countUp.options"
+                                            @ready="onReady"/>
+                                </div>
+
+                                <div class="col-md col-xs mb-2 ellipsis">
+                                    <i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>
+                                    <ICountUp
+                                            v-if="user.score"
+                                            :startVal="countUp.startVal"
+                                            :endVal="parseFloat(user.score)"
+                                            :decimals="decimalsLength(user.score)"
+                                            :duration="randomNumber(3,6)"
+                                            :options="countUp.options"
+                                            @ready="onReady"/>
+                                    <span v-else> 0 </span>
+                                </div>
+                            </div>
+                        </router-link> -->
                         <div id="address-metrics" class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center; opacity: 0">
                             <div id="rank-text">You rank:&nbsp;</div>
@@ -105,7 +142,7 @@
                                         >
                                             <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
                                             <!--<td>{{rank.score}}</td>-->
-                                            <td style="width: 123px; text=align: left;">
+                                            <td style="width: 123px; text-align: left;">
                                                 <ICountUp
                                                         :startVal="countUp.startVal"
                                                         :endVal="parseFloat(rank.score)"
