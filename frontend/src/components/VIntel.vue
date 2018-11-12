@@ -91,7 +91,7 @@
                             <div class="d-flex justify-content-between cursor-pointer">
                                 <div @click="clickTransaction(tx)"> Reward: {{tx.amount}}</div>
                                 <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
-                                <a class="text-primary" :href="etherscanUrl + '/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
+                                <a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
                             </div>
                         </div>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
