@@ -142,7 +142,7 @@
                                         >
                                             <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
                                             <!--<td>{{rank.score}}</td>-->
-                                            <td style="width: 123px; text-align: left;">
+                                            <td style="width: 123px;">
                                                 <ICountUp
                                                         :startVal="countUp.startVal"
                                                         :endVal="parseFloat(rank.score)"
