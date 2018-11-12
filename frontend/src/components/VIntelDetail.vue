@@ -9,28 +9,60 @@
                     <div class="row text-group">
                         <VShimmerIntelInformation v-if="!intel.blockAgo"></VShimmerIntelInformation>
                         <div v-else class="col-12 border p-3">
-                            <div class="row py-4 border-bottom m-0">
+                            <div class="row py-4 m-0">
                                 <div class="col-md-10 p-0 pr-1">
                                     <span class="name-title"> {{intel.title}} </span>
                                 </div>
                                 <div class="col-md-2 p-0 pl-1">
                                     <div class="d-flex flex-column align-items-end">
-                                        <span v-if="profile.first_name || profile.last_name" class="subtitle-dashboard" ><b> {{profile.first_name}} {{profile.last_name}} </b></span>
-                                        <span v-else class="subtitle-dashboard" ><b> {{profile.address.slice(0,15) + '...'}} </b></span>
-                                        <span class="mb-2" style="font-size: 10px;">
-                                            <ICountUp
-                                                    v-if="intel.blockAgo"
-                                                    :startVal="countUp.startVal"
-                                                    :endVal="parseFloat(intel.blockAgo)"
-                                                    :decimals="countUp.decimals"
-                                                    :duration="randomNumber(1,3)"
-                                                    :options="countUp.options"
-                                                    @ready="onReady"/>
-                                            <span v-else> 0 </span>
-                                            Blocks Ago
-                                        </span>
-                                        <!-- <span v-if="false" class="text-dashboard text-pareto-gray"> REWARDED {{intel.reward}} TIMES </span> -->
+                                        <span v-if="profile.alias" class="subtitle-dashboard" ><b> {{profile.alias}} </b></span>
+                                        <span v-else class="subtitle-dashboard" ><b> {{intel.address.slice(0,15) + '...'}} </b></span>
+                                        <div v-if="user.address != intel.address && intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
+                                             class="text-center">
+                                            <div class="d-inline-block">
+                                                <b-btn class="btn-primary-pareto mx-auto px-4"
+                                                       style="width: 120px;"
+                                                       :disabled="pendingRowTransactions(row)"
+                                                       v-b-modal.modalToken @click="openRewardModal(row)">
+                                                    <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
+                                                    <b> {{ row.reward }} </b>
+                                                </b-btn>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+
+                            </div>
+                            <div class="row border-bottom">
+
+                                <!-- blocks ago -->
+                                <div class="col-md col-xs ellipsis">
+                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
+                                        <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
+                                        <ICountUp
+                                                :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
+                                                :endVal="parseFloat(intel.blockAgo)"
+                                                :decimals="decimalsLength(intel.blockAgo)"
+                                                :duration="randomNumber(1,3)"
+                                                :options="countUp.options"
+                                                @ready="onReady"/>
+
+                                    </a>
+                                </div>
+
+                                <!-- time ago with txid link to etherscan -->
+
+                                <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
+                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                                        <span class="text-dashboard"><b><!-- {{dateStringFormat(intel.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
+                                </div>
+
+                                <!-- rewards collected, align right -->
+                                <div class="col-md col-xs">
+                                    <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
+                                            src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                        <b> {{ intel.totalReward }} </b>
+                                    </p>
                                 </div>
                             </div>
                             <div class="text-group mt-4">
@@ -77,10 +109,10 @@
                 loading: true,
                 intel: {},
                 address : {},
+                etherscanUrl: window.localStorage.getItem('etherscan'),
                 profile: {
                     address: '',
-                    first_name: '' ,
-                    last_name: '',
+                    alias: '',
                     biography: '',
                     rank: 1000
                 },
@@ -90,10 +122,24 @@
         beforeMount: function(){
             this.$store.state.makingRequest = true;
             this.requestCall()
-            console.log(this.$route.params);
+           // console.log(this.$route.params);
         },
         methods: {
             ...mapMutations(["iniWs"]),
+            dateStringFormat(date) {
+                return new Date(date);
+            },
+            isAvailable() {
+                if (this.signType === 'LedgerNano') {
+                    this.hardwareAvailable = false;
+                    AuthService.doWhenIsConnected(() => {
+                        this.hardwareAvailable = true;
+                        AuthService.deleteWatchNano();
+                    })
+                } else {
+                    this.hardwareAvailable = true;
+                }
+            },
             getIntel: function () {
                 return DashboardService.getIntel(this.id, res => {
                    this.getProfile(res.address);
@@ -114,7 +160,7 @@
             },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
-                    console.log(res)
+                   // console.log(res)
                     this.address = res;
                 }, () => {
                     alert(error);
@@ -134,6 +180,12 @@
                 }else{
                     this.overrideOnMessage();
                 }
+            },
+            openRewardModal: function (row) {
+                this.rewardId = row.id;
+                this.intelAddress = row.intelAddress;
+                this.tokenAmount = Math.min(this.user.tokens, row.reward);
+                this.isAvailable();
             },
             overrideOnMessage(){
                 this.ws.onmessage = (data) => {
