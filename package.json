@@ -41,7 +41,6 @@
     "multer": "^1.3.0",
     "multer-s3": "^2.7.0",
     "node-cron": "^1.2.1",
-    "node-rsa": "^1.0.1",
     "redis": "^2.8.0",
     "redoc": "^2.0.0-alpha.25",
     "request-promise": "4.2.2",
