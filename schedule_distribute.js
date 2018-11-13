@@ -3,8 +3,6 @@ var Web3 = require("web3");
 const mongoose = require("mongoose");
 const ETHwallet = require("ethereumjs-wallet");
 var Tx = require("ethereumjs-tx");
-const NodeRSA = require("node-rsa");
-const key = new NodeRSA({ b: 512 });
 
 const web3 = new Web3(process.env.WEB3_URL);
 
@@ -20,7 +18,8 @@ const Intel = new web3.eth.Contract(
   Intel_Contract_Schema.networks[ethNetwork].address
 );
 
-decryptedPrivKey = key.decrypt(privKey, "utf8");
+decryptedPrivKey = Buffer.from(privKey, 'base64').toString('ascii');
+
 let privateKeyBuff = new Buffer(decryptedPrivKey, "hex");
 const wallet = ETHwallet.fromPrivateKey(privateKeyBuff);
 const publicKey = wallet.getChecksumAddressString();
