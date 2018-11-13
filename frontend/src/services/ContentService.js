@@ -380,6 +380,10 @@ export default class ContentService {
     static async distributeRewards(content, signData, onSuccess, onError) {
         try {
             await this.Setup(signData);
+            Intel = new web3.eth.Contract(
+                Intel_Contract_Schema,
+                content.intelAddress
+            );
         } catch (e) {
             return onError(e)
         }
@@ -405,12 +409,32 @@ export default class ContentService {
                     gasPrice
                 })
                 .on("transactionHash", hash => {
+                    let params = {
+                        address: distributor,
+                        txHash: hash,
+                        intel: content.ID,
+                        amount: 0,
+                        event: 'distribute',
+                        intelAddress: content.intelAddress,
+                        status: 0
+                    };
+                    events.addTransaction(params);
+                    this.postTransactions(params);
                     waitForReceipt(hash, receipt => {
-                        onSuccess("success");
+                        if (ContentService.ledgerNanoEngine) {
+                            ContentService.ledgerNanoEngine.stop();
+                        }
+                        events.transactionComplete(hash);
+                        onSuccess("Transaction Completed");
                     });
                 })
                 .on("error", error => {
+                    if (ContentService.ledgerNanoEngine) {
+                        ContentService.ledgerNanoEngine.stop();
+                    }
+                    events.transactionComplete(content.txHash);
                     onError(error);
+
                 });
         });
     }
