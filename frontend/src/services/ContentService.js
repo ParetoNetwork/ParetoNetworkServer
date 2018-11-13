@@ -331,7 +331,7 @@ export default class ContentService {
                 .estimateGas({from: rewarder_address});
 
             await ParetoTokenInstance.methods
-                .approve(Intel.options.address, depositAmount)
+                .increaseApproval(Intel.options.address, depositAmount)
                 .send({
                     from: rewarder_address,
                     gas: gasApprove,
