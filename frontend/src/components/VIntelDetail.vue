@@ -15,17 +15,27 @@
                                 </div>
                                 <div class="col-md-2 p-0 pl-1">
                                     <div class="d-flex flex-column align-items-end">
-                                        <span v-if="profile.alias" class="subtitle-dashboard" ><b> {{profile.alias}} </b></span>
-                                        <span v-else class="subtitle-dashboard" ><b> {{intel.address.slice(0,15) + '...'}} </b></span>
-                                        <div v-if="user.address != intel.address && intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-                                             class="text-center">
+                                        <span v-if="profile.alias" class="subtitle-dashboard"><b> {{profile.alias}} </b></span>
+                                        <span v-else class="subtitle-dashboard"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
+                                        <div class="text-center">
                                             <div class="d-inline-block">
-                                                <b-btn class="btn-primary-pareto mx-auto px-4"
+                                                <b-btn v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
+                                                       class="btn-primary-pareto mx-auto px-4"
                                                        style="width: 120px;"
-                                                       :disabled="pendingRowTransactions(intel)"
+                                                       :disabled="pendingRowTransactions(intel) || user.address === intel.address"
                                                        @click="openRewardModal()">
                                                     <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                                                     <b> {{ intel.reward }} </b>
+                                                </b-btn>
+                                                <b-btn
+                                                        v-if="user.address === intel.address &&
+                                                        intel.intelAddress &&
+                                                        signType != 'Manual' &&
+                                                        intel.expires < Math.round(new Date().getTime() / 1000) &&
+                                                        !intel.distributed"
+                                                        class="btn-primary-pareto mx-auto px-4"
+                                                        @click="distribute(intel)">
+                                                    DISTRIBUTE
                                                 </b-btn>
                                             </div>
                                         </div>
@@ -37,7 +47,8 @@
 
                                 <!-- blocks ago -->
                                 <div class="col-md col-xs ellipsis">
-                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
+                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                       target="_blank">
                                         <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
                                         <ICountUp
                                                 :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
@@ -53,7 +64,8 @@
                                 <!-- time ago with txid link to etherscan -->
 
                                 <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
-                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                       target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
                                         <span class="text-dashboard"><b><!-- {{dateStringFormat(intel.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
                                 </div>
 
@@ -66,7 +78,7 @@
                                 </div>
                             </div>
                             <div class="text-group mt-4">
-                                <p v-html="intel.body"> </p>
+                                <p v-html="intel.body"></p>
                             </div>
                         </div>
                     </div>
@@ -83,7 +95,7 @@
     import ContentService from '../services/ContentService';
 
     import ICountUp from 'vue-countup-v2';
-    import {mapMutations, mapState} from "vuex";
+    import {mapMutations, mapState, mapActions} from "vuex";
     import {countUpMixin} from "../mixins/countUp";
     import AuthService from "../services/authService";
     import environment from '../utils/environment';
@@ -112,7 +124,7 @@
                 id: this.$route.params.id,
                 loading: true,
                 intel: {},
-                address : {},
+                address: {},
                 etherscanUrl: window.localStorage.getItem('etherscan'),
                 profile: {
                     address: '',
@@ -122,13 +134,13 @@
                 },
                 user: {},
                 intelReward: {},
-                baseURL : environment.baseURL
+                baseURL: environment.baseURL
             };
         },
-        beforeMount: function(){
+        beforeMount: function () {
             this.$store.state.makingRequest = true;
             this.requestCall()
-           // console.log(this.$route.params);
+            // console.log(this.$route.params);
         },
         methods: {
             ...mapMutations(["iniWs", "openModalReward"]),
@@ -149,32 +161,32 @@
             },
             getIntel: function () {
                 return DashboardService.getIntel(this.id, res => {
-                   this.getProfile(res.address);
-                   this.intel = res;
-                   console.log(this.intel);
+                    this.getProfile(res.address);
+                    this.intel = res;
+                    console.log(this.intel);
                 }, error => {
                 });
             },
             getProfile: function (address) {
-                ProfileService.getSpecificProfile( res => {
+                ProfileService.getSpecificProfile(res => {
                     this.profile = res;
                     this.loading = false;
                 }, error => {
                 }, address)
             },
-            loadProfileImage: function(pic){
+            loadProfileImage: function (pic) {
                 let path = this.baseURL + '/profile-image?image=';
                 return ProfileService.getProfileImage(path, pic);
             },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
-                   // console.log(res)
+                    // console.log(res)
                     this.address = res;
                 }, () => {
                     alert(error);
                 });
             },
-            socketConnection () {
+            socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     AuthService.getSocketToken(res => {
@@ -185,16 +197,16 @@
                         };
                         this.overrideOnMessage();
                     });
-                }else{
+                } else {
                     this.overrideOnMessage();
                 }
             },
             openRewardModal: function () {
                 this.openModalReward(true);
             },
-            distribute: function(intel){
-                ContentService.rewardIntel(
-                    {ID: intel.id,   intelAddress: intel.intelAddress},
+            distribute: function (intel) {
+                ContentService.distributeRewards(
+                    {ID: intel.id, intelAddress: intel.intelAddress},
                     {signType: this.signType, pathId: this.pathId},
                     {
                         addTransaction: this.addTransaction,
@@ -209,7 +221,7 @@
                             type: 'success',
                             duration: 10000,
                             title: 'Event: Reward',
-                            text: 'Confirmed Reward'
+                            text: 'Confirmed Distribution'
                         });
                     },
                     err => {
@@ -232,7 +244,7 @@
                     }
                 );
             },
-            overrideOnMessage(){
+            overrideOnMessage() {
                 this.ws.onmessage = (data) => {
                     try {
                         const info = JSON.parse(data.data);
@@ -245,21 +257,21 @@
                     }
                 };
             },
-            pendingRowTransactions: function(intel){
+            pendingRowTransactions: function (intel) {
                 let transactionPending = false;
                 this.pendingTransactions.forEach(transaction => {
-                    if(intel.id === transaction.intel){
+                    if (intel.id === transaction.intel) {
                         transactionPending = true;
                     }
                 });
                 return transactionPending;
             },
-            requestCall : function(){
+            requestCall: function () {
                 Promise.all([
                     this.getIntel(),
                     this.getAddress(),
                     this.loadProfile()
-                ]).then( values => {
+                ]).then(values => {
                     this.$store.state.makingRequest = false;
                     this.socketConnection();
                 });
