@@ -331,7 +331,7 @@ export default class ContentService {
                 .estimateGas({from: rewarder_address});
 
             await ParetoTokenInstance.methods
-                .approve(Intel.options.address, depositAmount)
+                .increaseApproval(Intel.options.address, depositAmount)
                 .send({
                     from: rewarder_address,
                     gas: gasApprove,
@@ -377,7 +377,7 @@ export default class ContentService {
         });
     }
 
-    static async distributeRewards(content, signData, onSuccess, onError) {
+    static async distributeRewards(content, signData, events, onSuccess, onError) {
         try {
             await this.Setup(signData);
             Intel = new web3.eth.Contract(
@@ -394,7 +394,6 @@ export default class ContentService {
                 return;
             }
             const distributor = accounts[0];
-
             let gasDistribute = await Intel.methods
                 .distributeReward(content.ID)
                 .estimateGas({from: distributor});
@@ -432,7 +431,6 @@ export default class ContentService {
                     if (ContentService.ledgerNanoEngine) {
                         ContentService.ledgerNanoEngine.stop();
                     }
-                    events.transactionComplete(content.txHash);
                     onError(error);
 
                 });
