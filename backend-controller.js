@@ -624,7 +624,7 @@ controller.updateIntelReward=function(intelIndex, txHash, sender){
             const reward = r[0].reward;
             let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
             ,  ParetoTransaction.findOneAndUpdate({ $or: [{ txRewardHash: txHash },
-                    {txRewardHash: null, address: sender, intel: intelIndex}]}, { status: 3,  txRewardHash: txHash  })];
+                    {txRewardHash: null, address: sender, intel: intelIndex, event: 'reward'}]}, { status: 3,  txRewardHash: txHash  })];
             Promise.all(promises).then( values =>{
                     if(values.length > 0 && controller.wss){
                         controller.wss.clients.forEach(function each(client) {
