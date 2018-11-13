@@ -392,7 +392,7 @@ controller.startwatchReward= function(intel){
 }
 
 controller.startwatchDistribute= function (intel){
-    intel.events.distributeReward().on('data',  event => {
+    intel.events.RewardDistributed().on('data',  event => {
         try{
             const intelIndex = parseInt(event.returnValues.intelIndex);
 
