@@ -9,13 +9,14 @@ const web3 = new Web3(process.env.WEB3_URL);
 const ParetoIntel = mongoose.model("content");
 const ParetoProfile = mongoose.model("profile");
 
+const ethNetwork = process.env.ETH_NETWORK;
+const privKey = process.env.PRIV_KEY_DISTRIBUTOR;
+
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
 const Intel = new web3.eth.Contract(
   Intel_Contract_Schema.abi,
-  Intel_Contract_Schema.networks[process.env.ETH_NETWORK].address
+  Intel_Contract_Schema.networks[ethNetwork].address
 );
-
-const privKey = process.env.PRIV_KEY_DISTRIBUTOR;
 
 let privateKeyBuff = new Buffer(
   privKey,
@@ -51,7 +52,7 @@ cron.schedule("*/30 * * * *", async () => {
           nonce: web3.utils.toHex(nonceNumber++),
           gasLimit: web3.utils.toHex(900000),
           gasPrice: web3.utils.toHex(30e9), // 10 Gwei
-          to: Intel_Contract_Schema.networks[process.env.ETH_NETWORK].address,
+          to: Intel_Contract_Schema.networks[ethNetwork].address,
           from: publicKey,
           data
         };
