@@ -22,10 +22,10 @@
                                             <div class="d-inline-block">
                                                 <b-btn class="btn-primary-pareto mx-auto px-4"
                                                        style="width: 120px;"
-                                                       :disabled="pendingRowTransactions(row)"
-                                                       v-b-modal.modalToken @click="openRewardModal(row)">
+                                                       :disabled="pendingRowTransactions(intel)"
+                                                       @click="openRewardModal()">
                                                     <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-                                                    <b> {{ row.reward }} </b>
+                                                    <b> {{ intel.reward }} </b>
                                                 </b-btn>
                                             </div>
                                         </div>
@@ -74,6 +74,7 @@
             </div>
 
         </div>
+        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 <script>
@@ -90,6 +91,7 @@
 
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
     import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
+    import VModalReward from "./Modals/VModalReward";
 
     export default {
         name: 'VIntelDetail',
@@ -98,10 +100,11 @@
             ICountUp,
             VShimmerUserProfile,
             VShimmerIntelInformation,
-            VProfile
+            VProfile,
+            VModalReward
         },
         computed: {
-            ...mapState(["ws"])
+            ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
         },
         data: function () {
             return {
@@ -116,6 +119,8 @@
                     biography: '',
                     rank: 1000
                 },
+                user: {},
+                intelReward: {},
                 baseURL : environment.baseURL
             };
         },
@@ -125,7 +130,7 @@
            // console.log(this.$route.params);
         },
         methods: {
-            ...mapMutations(["iniWs"]),
+            ...mapMutations(["iniWs", "openModalReward"]),
             dateStringFormat(date) {
                 return new Date(date);
             },
@@ -144,6 +149,7 @@
                 return DashboardService.getIntel(this.id, res => {
                    this.getProfile(res.address);
                    this.intel = res;
+                   console.log(this.intel);
                 }, error => {
                 });
             },
@@ -181,11 +187,17 @@
                     this.overrideOnMessage();
                 }
             },
-            openRewardModal: function (row) {
-                this.rewardId = row.id;
-                this.intelAddress = row.intelAddress;
-                this.tokenAmount = Math.min(this.user.tokens, row.reward);
-                this.isAvailable();
+            openRewardModal: function () {
+                this.openModalReward(true);
+            },
+            loadProfile: function () {
+                return ProfileService.getProfile(
+                    res => {
+                        this.user = res;
+                    },
+                    () => {
+                    }
+                );
             },
             overrideOnMessage(){
                 this.ws.onmessage = (data) => {
@@ -200,10 +212,20 @@
                     }
                 };
             },
+            pendingRowTransactions: function(intel){
+                let transactionPending = false;
+                this.pendingTransactions.forEach(transaction => {
+                    if(intel.id === transaction.intel){
+                        transactionPending = true;
+                    }
+                });
+                return transactionPending;
+            },
             requestCall : function(){
                 Promise.all([
                     this.getIntel(),
-                    this.getAddress()
+                    this.getAddress(),
+                    this.loadProfile()
                 ]).then( values => {
                     this.$store.state.makingRequest = false;
                     this.socketConnection();
