@@ -64,8 +64,6 @@
             }
         },
         mounted: function(){
-            console.log(this.intel);
-            console.log(this.showModalReward) ;
             this.$refs.modalReward.show();
             this.rewardId = this.intel.id;
             this.intelAddress = this.intel.intelAddress;

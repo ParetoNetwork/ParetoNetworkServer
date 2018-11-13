@@ -163,7 +163,6 @@
                 return DashboardService.getIntel(this.id, res => {
                     this.getProfile(res.address);
                     this.intel = res;
-                    console.log(this.intel);
                 }, error => {
                 });
             },
