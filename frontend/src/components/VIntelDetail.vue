@@ -80,6 +80,7 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import ProfileService from '../services/profileService';
+    import ContentService from '../services/ContentService';
 
     import ICountUp from 'vue-countup-v2';
     import {mapMutations, mapState} from "vuex";
@@ -131,6 +132,7 @@
         },
         methods: {
             ...mapMutations(["iniWs", "openModalReward"]),
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             dateStringFormat(date) {
                 return new Date(date);
             },
@@ -189,6 +191,37 @@
             },
             openRewardModal: function () {
                 this.openModalReward(true);
+            },
+            distribute: function(intel){
+                ContentService.rewardIntel(
+                    {ID: intel.id,   intelAddress: intel.intelAddress},
+                    {signType: this.signType, pathId: this.pathId},
+                    {
+                        addTransaction: this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
+                    res => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            title: 'Event: Reward',
+                            text: 'Confirmed Reward'
+                        });
+                    },
+                    err => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            text: err.message ? err.message : err
+                        });
+                    }
+                );
             },
             loadProfile: function () {
                 return ProfileService.getProfile(
