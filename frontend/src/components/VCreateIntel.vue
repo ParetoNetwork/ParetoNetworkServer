@@ -198,7 +198,8 @@
     import AuthService from '../services/authService';
     import ProfileService from '../services/profileService';
     import ContentService from '../services/ContentService';
-    import { mapState} from "vuex";
+    import { mapState } from "vuex";
+
     require('summernote/dist/summernote.css');
     require('summernote');
 
@@ -206,7 +207,6 @@
         name: 'VCreateIntel',
         data: function () {
             return {
-                aviso: 'importante',
                 nextRoute: {
                     canAsk: true,
                     to: {}
@@ -230,23 +230,7 @@
                 },
                 modalToken : false,
                 modalWaiting : false,
-                modalCloseWarning: false,
-                notificationSystem: {
-                    options: {
-                        success: {
-                            position: 'bottomCenter'
-                        },
-                        info: {
-                            overlay: true,
-                            timeout: 50000,
-                            position: 'bottomRight'
-                        },
-                        error: {
-                            timeout: 20000,
-                            position: 'bottomRight'
-                        }
-                    }
-                }
+                modalCloseWarning: false
             };
         },
         updated: function() {
