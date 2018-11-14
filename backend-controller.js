@@ -399,35 +399,23 @@ controller.startwatchDistribute= function (intel, intelAddress){
             let promises = [ ParetoContent.findOneAndUpdate({id:intelIndex}, {distributed: true})
                 ,  ParetoTransaction.findOneAndUpdate({   txHash: event.transactionHash } , { status: 3,  txRewardHash: event.transactionHash  })];
             Promise.all(promises).then( values =>{
-                let address = event.returnValues.sender.toLowerCase();
-                controller.getBalance(address,0, function(err, count){
-                    if(!err){
-                        controller.getScoreAndSaveRedis(function (err, results) {
-                            if(!err && r){
-                                if(controller.wss){
-                                    try{
-                                        controller.wss.clients.forEach(function each(client) {
-                                            if (client.isAlive === false) return client.terminate();
-                                            if (client.readyState === controller.WebSocket.OPEN ) {
-                                                if(client.user && client.user.user== address){
-                                                    client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
+                if(controller.wss && values.length){
+                    try{
+                        controller.wss.clients.forEach(function each(client) {
+                            if (client.isAlive === false) return client.terminate();
+                            if (client.readyState === controller.WebSocket.OPEN ) {
+                                if(client.user && client.user.user== values[0].address){
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
 
-                                                }
-                                            }
-                                        });
-                                    }catch (e) {
-                                        console.log(e);
-                                    }
-                                }else{
-                                    console.log('no wss');
                                 }
                             }
-
-                        } )
-                    }else{
-                        callback(err);
+                        });
+                    }catch (e) {
+                        console.log(e);
                     }
-                });
+                }else{
+                    console.log('no wss');
+                }
             })
                 .catch(e=>{
                     console.log(e);
