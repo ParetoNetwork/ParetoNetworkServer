@@ -30,7 +30,7 @@ cron.schedule("*/30 * * * *", async () => {
   console.log("Running rewards distriute scheduler");
 
   let current_time = Math.floor(new Date().getTime() / 1000);
-  let distributeTime = current_time;
+  let distributeTime = current_time - 864000;
   let nonceNumber = await web3.eth.getTransactionCount(publicKey);
 
   ParetoIntel.find(
