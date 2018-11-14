@@ -110,7 +110,7 @@ export default class ContentService {
             const provider_address = accounts[0];
 
 
-            const _ttl = Math.round(new Date().getTime() / 1000) + 360; // add five seconds to to allow the rewarder to reward pareto tokens
+            const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add five seconds to to allow the rewarder to reward pareto tokens
 
             const decimals = web3.utils.toBN(18);
             const amount = web3.utils.toBN(parseFloat(tokenAmount));
