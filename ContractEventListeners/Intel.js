@@ -10,11 +10,12 @@ var web3 = new Web3(WEB3_WEBSOCKET_URL);
 const ParetoIntel = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 
+var ethNetwork = process.env.ETH_NETWORK;
 
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("../build/contracts/Intel.json");
 
-const Intel = new web3.eth.Contract(Intel_Contract_Schema.abi,  Intel_Contract_Schema.networks[process.env.ETH_NETWORK].address);
+const Intel = new web3.eth.Contract(Intel_Contract_Schema.abi,  Intel_Contract_Schema.networks[ethNetwork].address);
 Intel.events.Reward({
     fromBlock: 'latest'
 }, function (error, event) {
