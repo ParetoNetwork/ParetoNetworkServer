@@ -338,7 +338,7 @@ controller.startwatchNewIntel = function(){
 }
 
 
-controller.startwatchReward= function(intel){
+controller.startwatchReward= function(intel, intelAddress){
     intel.events.Reward().on('data',  event => {
         try{
             const intelIndex = parseInt(event.returnValues.intelIndex);
@@ -391,7 +391,7 @@ controller.startwatchReward= function(intel){
     });
 }
 
-controller.startwatchDistribute= function (intel){
+controller.startwatchDistribute= function (intel, intelAddress){
     intel.events.RewardDistributed().on('data',  event => {
         try{
             const intelIndex = parseInt(event.returnValues.intelIndex);
@@ -399,6 +399,7 @@ controller.startwatchDistribute= function (intel){
             let promises = [ ParetoContent.findOneAndUpdate({id:intelIndex}, {distributed: true})
                 ,  ParetoTransaction.findOneAndUpdate({   txHash: event.transactionHash } , { status: 3,  txRewardHash: event.transactionHash  })];
             Promise.all(promises).then( values =>{
+                let address = event.returnValues.sender.toLowerCase();
                 controller.getBalance(address,0, function(err, count){
                     if(!err){
                         controller.getScoreAndSaveRedis(function (err, results) {
@@ -499,8 +500,8 @@ controller.startwatchIntel = function(){
             for (let i=0;i<results.length;i=i+1) {
                 const intelAddress =results[i];
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
-                controller.startwatchReward(intel)
-                controller.startwatchDistribute(intel)
+                controller.startwatchReward(intel, intelAddress);
+                controller.startwatchDistribute(intel, intelAddress);
             }
 
         }
