@@ -373,7 +373,6 @@ app.post('/v1/content', function (req, res) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }
     else if (req.user === undefined || req.body.title === undefined || req.body.body === undefined) {
-        console.log(req.body);
         res.status(200).json(ErrorHandler.contentMissingError());
     } else {
 
@@ -405,8 +404,6 @@ app.get('/v1/transaction', function (req, res) {
 
 
 app.post('/v1/transaction', function (req, res) {
-    console.log(req.body);
-
     const noParams = (!req.body.address  || !req.body.intel || (!req.body.amount && req.body.event !== 'distribute') || !req.body.event || !req.body.intelAddress);
     if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
         || !req.body.txHash ||  (noParams && (!req.body.txRewardHash && !req.body.status))) {
