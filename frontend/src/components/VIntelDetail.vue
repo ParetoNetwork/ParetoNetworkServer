@@ -15,17 +15,27 @@
                                 </div>
                                 <div class="col-md-2 p-0 pl-1">
                                     <div class="d-flex flex-column align-items-end">
-                                        <span v-if="profile.alias" class="subtitle-dashboard" ><b> {{profile.alias}} </b></span>
-                                        <span v-else class="subtitle-dashboard" ><b> {{intel.address.slice(0,15) + '...'}} </b></span>
-                                        <div v-if="user.address != intel.address && intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-                                             class="text-center">
+                                        <span v-if="profile.alias" class="subtitle-dashboard"><b> {{profile.alias}} </b></span>
+                                        <span v-else class="subtitle-dashboard"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
+                                        <div class="text-center">
                                             <div class="d-inline-block">
-                                                <b-btn class="btn-primary-pareto mx-auto px-4"
+                                                <b-btn v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
+                                                       class="btn-primary-pareto mx-auto px-4"
                                                        style="width: 120px;"
-                                                       :disabled="pendingRowTransactions(row)"
-                                                       v-b-modal.modalToken @click="openRewardModal(row)">
+                                                       :disabled="pendingRowTransactions(intel) || user.address === intel.address"
+                                                       @click="openRewardModal()">
                                                     <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-                                                    <b> {{ row.reward }} </b>
+                                                    <b> {{ intel.reward }} </b>
+                                                </b-btn>
+                                                <b-btn
+                                                        v-if="user.address === intel.address &&
+                                                        intel.intelAddress &&
+                                                        signType != 'Manual' &&
+                                                        intel.expires < Math.round(new Date().getTime() / 1000) &&
+                                                        !intel.distributed"
+                                                        class="btn-primary-pareto mx-auto px-4"
+                                                        @click="distribute(intel)">
+                                                    COLLECT
                                                 </b-btn>
                                             </div>
                                         </div>
@@ -37,7 +47,8 @@
 
                                 <!-- blocks ago -->
                                 <div class="col-md col-xs ellipsis">
-                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
+                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                       target="_blank">
                                         <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
                                         <ICountUp
                                                 :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
@@ -53,7 +64,8 @@
                                 <!-- time ago with txid link to etherscan -->
 
                                 <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
-                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                       target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
                                         <span class="text-dashboard"><b><!-- {{dateStringFormat(intel.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
                                 </div>
 
@@ -66,7 +78,7 @@
                                 </div>
                             </div>
                             <div class="text-group mt-4">
-                                <p v-html="intel.body"> </p>
+                                <p v-html="intel.body"></p>
                             </div>
                         </div>
                     </div>
@@ -74,14 +86,16 @@
             </div>
 
         </div>
+        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 <script>
     import DashboardService from '../services/dashboardService';
     import ProfileService from '../services/profileService';
+    import ContentService from '../services/ContentService';
 
     import ICountUp from 'vue-countup-v2';
-    import {mapMutations, mapState} from "vuex";
+    import {mapMutations, mapState, mapActions} from "vuex";
     import {countUpMixin} from "../mixins/countUp";
     import AuthService from "../services/authService";
     import environment from '../utils/environment';
@@ -90,6 +104,7 @@
 
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
     import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
+    import VModalReward from "./Modals/VModalReward";
 
     export default {
         name: 'VIntelDetail',
@@ -98,17 +113,18 @@
             ICountUp,
             VShimmerUserProfile,
             VShimmerIntelInformation,
-            VProfile
+            VProfile,
+            VModalReward
         },
         computed: {
-            ...mapState(["ws"])
+            ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
         },
         data: function () {
             return {
                 id: this.$route.params.id,
                 loading: true,
                 intel: {},
-                address : {},
+                address: {},
                 etherscanUrl: window.localStorage.getItem('etherscan'),
                 profile: {
                     address: '',
@@ -116,16 +132,19 @@
                     biography: '',
                     rank: 1000
                 },
-                baseURL : environment.baseURL
+                user: {},
+                intelReward: {},
+                baseURL: environment.baseURL
             };
         },
-        beforeMount: function(){
+        beforeMount: function () {
             this.$store.state.makingRequest = true;
             this.requestCall()
-           // console.log(this.$route.params);
+            // console.log(this.$route.params);
         },
         methods: {
-            ...mapMutations(["iniWs"]),
+            ...mapMutations(["iniWs", "openModalReward"]),
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             dateStringFormat(date) {
                 return new Date(date);
             },
@@ -142,31 +161,31 @@
             },
             getIntel: function () {
                 return DashboardService.getIntel(this.id, res => {
-                   this.getProfile(res.address);
-                   this.intel = res;
+                    this.getProfile(res.address);
+                    this.intel = res;
                 }, error => {
                 });
             },
             getProfile: function (address) {
-                ProfileService.getSpecificProfile( res => {
+                ProfileService.getSpecificProfile(res => {
                     this.profile = res;
                     this.loading = false;
                 }, error => {
                 }, address)
             },
-            loadProfileImage: function(pic){
+            loadProfileImage: function (pic) {
                 let path = this.baseURL + '/profile-image?image=';
                 return ProfileService.getProfileImage(path, pic);
             },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
-                   // console.log(res)
+                    // console.log(res)
                     this.address = res;
                 }, () => {
                     alert(error);
                 });
             },
-            socketConnection () {
+            socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     AuthService.getSocketToken(res => {
@@ -177,17 +196,54 @@
                         };
                         this.overrideOnMessage();
                     });
-                }else{
+                } else {
                     this.overrideOnMessage();
                 }
             },
-            openRewardModal: function (row) {
-                this.rewardId = row.id;
-                this.intelAddress = row.intelAddress;
-                this.tokenAmount = Math.min(this.user.tokens, row.reward);
-                this.isAvailable();
+            openRewardModal: function () {
+                this.openModalReward(true);
             },
-            overrideOnMessage(){
+            distribute: function (intel) {
+                ContentService.distributeRewards(
+                    {ID: intel.id, intelAddress: intel.intelAddress},
+                    {signType: this.signType, pathId: this.pathId},
+                    {
+                        addTransaction: this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
+                    res => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            title: 'Event: Collect',
+                            text: 'Confirmed Collect'
+                        });
+                    },
+                    err => {
+                        this.modalWaiting = false;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            text: err.message ? err.message : err
+                        });
+                    }
+                );
+            },
+            loadProfile: function () {
+                return ProfileService.getProfile(
+                    res => {
+                        this.user = res;
+                    },
+                    () => {
+                    }
+                );
+            },
+            overrideOnMessage() {
                 this.ws.onmessage = (data) => {
                     try {
                         const info = JSON.parse(data.data);
@@ -200,11 +256,21 @@
                     }
                 };
             },
-            requestCall : function(){
+            pendingRowTransactions: function (intel) {
+                let transactionPending = false;
+                this.pendingTransactions.forEach(transaction => {
+                    if (intel.id === transaction.intel) {
+                        transactionPending = true;
+                    }
+                });
+                return transactionPending;
+            },
+            requestCall: function () {
                 Promise.all([
                     this.getIntel(),
-                    this.getAddress()
-                ]).then( values => {
+                    this.getAddress(),
+                    this.loadProfile()
+                ]).then(values => {
                     this.$store.state.makingRequest = false;
                     this.socketConnection();
                 });

@@ -755,7 +755,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                     if(data.status == 0){
                         web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
                             if(receipt){
-                                ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: 1}, { multi: false }, function (err, data) {
+                                ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: (data.event == 'distribute')? 3:1 }, { multi: false }, function (err, data) {
                                 });
                             }
                         });

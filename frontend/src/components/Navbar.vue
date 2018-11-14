@@ -41,7 +41,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" style="font-size: 11px"
                              aria-labelledby="navbarDropdown">
-                            <a v-if="address" class="dropdown-item" href="#"><a style="color: black;" v-bind:href="'https://etherscan.io/address/'+address" target="_blank">{{address}} <i class="fa fa-external-link"></i></a></a>
+                            <a v-if="address" class="dropdown-item" href="#"><a style="color: black;" v-bind:href="etherscan+'/address/'+address" target="_blank">{{address}} <i class="fa fa-external-link"></i></a></a>
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
@@ -112,6 +112,7 @@
         },
         data: function () {
             return {
+                etherscan: window.localStorage.getItem('etherscan'),
                 loading : false,
                 finish : false,
                 colorNav : {}

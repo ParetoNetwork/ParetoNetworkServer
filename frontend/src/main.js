@@ -25,6 +25,7 @@ const store = new Vuex.Store({
         showModalSign: false,
         showModalLoginOptions: false,
         showModalLedgerNano: false,
+        showModalReward: false,
         makingLogin: false,
         makingRequest: false,
         requestFinish: false,
@@ -91,7 +92,11 @@ const store = new Vuex.Store({
                   }
                   return item;
             });
-        }, deleteTransaction(state, txHash) {
+        },
+        openModalReward(state, open){
+            state.showModalReward = open;
+        },
+        deleteTransaction(state, txHash) {
             state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
         }
     },
