@@ -418,7 +418,7 @@ controller.startWatchApprove=function (){
         if(blockNumber!=null){
             ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { status: 1, block: blockNumber }, function (err, r) {
                 if(!err && r){
-                    controller.SendInfoWebsocket({address: data.address, transaction: r});
+                    controller.SendInfoWebsocket({address: r.address, transaction: r});
                 }else{
                     if(err){console.log(err);}
                 }
@@ -523,7 +523,7 @@ controller.SendInfoWebsocket = function (data ){
                         });
 
                         if(data.transaction){
-                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
+                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: data.transaction})) );
                         } else{
 
                             const rank = parseInt(client.info.rank) || 1;
