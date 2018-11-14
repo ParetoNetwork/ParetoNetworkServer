@@ -71,7 +71,7 @@ var web3_events = null;
 controller.startW3WebSocket = function () {
     web3_events_provider.on('connect', function () {
         console.log('WS web3 connected');
-        controller.startwatchNewIntel()
+        controller.startwatchIntel()
     });
 
     web3_events_provider.on('end', e => {
@@ -279,9 +279,6 @@ controller.watchTransaction =  function (data, callback){
 }
 
 
-/**
- * Watch Intel events. Support watch rewards for old Intel address
- */
 controller.startwatchNewIntel = function(){
     const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     console.log('startWatch');
@@ -290,46 +287,31 @@ controller.startwatchNewIntel = function(){
             const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
             const expiry_time = event.returnValues.ttl;
             ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                   if(!err && data){
-                       try{
-                           controller.getBalance(data.address,0, function(err, count){
-                               if(!err){
-                                   ParetoAddress.findOneAndUpdate({address: data.address}, {tokens : count}, (e, result)=>{
-                                       controller.getScoreAndSaveRedis((err, result)=>{
-                                           if(controller.wss){
-                                               try{
-                                                   controller.wss.clients.forEach(function each(client) {
-                                                       if (client.isAlive === false) return client.terminate();
-                                                       if (client.readyState === controller.WebSocket.OPEN ) {
-                                                           // Validate if the user is subscribed a set of information
-                                                           if(client.user){
-                                                               //console.log('updateContent');
-                                                               client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                                               if(client.user.user== data.address){
-                                                                   controller.retrieveAddress(client.user.user, function (err, result) {
-                                                                       if (!err) {
-                                                                           client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                                                                       }
-                                                                   });
-                                                               }
-                                                           }
-                                                       }
-                                                   });
-                                               }catch (e) {
-                                                   console.log(e);
-                                               }
-                                           }else{
-                                               console.log('no wss')
-                                           }
-                                       })
-                                   })
-                               }
-                           });
+                if(!err && data){
+                    try{
+                        controller.getBalance(data.address,0, function(err, count){
+                            if(!err){
+                                let promises = [ParetoAddress.findOneAndUpdate({address: data.address}, {tokens : count})
+                                    ,  ParetoTransaction.findOneAndUpdate(
+                                            {txRewardHash: null,  intel: event.returnValues.intelID, event: 'create'}, { status: 3  })];
+                                        Promise.all(promises).then( values =>{
+                                            if(values.length > 1 ){
+                                                controller.getScoreAndSaveRedis((err, result)=>{
+                                                    controller.SendInfoWebsocket({address: data.address, transaction: values[1]});
+                                                })
+                                            }
+                                        })
+                                    .catch(e=>{
+                                        console.log(e);
+                                    });
 
-                       }catch (e) {
-                           console.log(e);
-                       }
-                   }
+                            }
+                        });
+
+                    }catch (e) {
+                        console.log(e);
+                    }
+                }
             });
         }catch (e) {
             console.log(e);
@@ -338,6 +320,119 @@ controller.startwatchNewIntel = function(){
     }).on('error', err=>{
         console.log(err);
     });
+}
+
+
+controller.startwatchReward= function(intel, intelAddress){
+    intel.events.Reward().on('data',  event => {
+        try{
+            const intelIndex = parseInt(event.returnValues.intelIndex);
+            const rewardData = {
+                sender: event.returnValues.sender.toLowerCase(),
+                receiver: '',
+                intelAddress: intelAddress,
+                intelId: intelIndex,
+                txHash: event.transactionHash,
+                dateCreated:  Date.now() ,
+                block: event.blockNumber,
+                amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
+            };
+
+            ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},rewardData, {upsert: true, new: true},
+                function(err, r){
+                    if(err){
+                        console.error('unable to write to db because: ', err);
+                    } else {
+                        ParetoContent.findOne({id:intelIndex}, (err, intel) => {
+                            if(intel){
+                                const {address} = intel;
+                                ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {},
+                                    function(err, r){ }
+                                );
+                            }
+
+                        });
+
+                        controller.getBalance(event.returnValues.sender.toLowerCase(),0, function(err, count){
+                            if(!err){
+                                controller.updateAddressReward(event, count);
+                            }else{
+                                callback(err);
+                            }
+                        });
+                        controller.updateIntelReward(intelIndex, event.transactionHash,event.returnValues.sender.toLowerCase());
+
+
+                    }
+                }
+            );
+
+        }catch (e) {
+            console.log(e);
+        }
+
+    }).on('error', err=>{
+        console.log(err);
+    });
+}
+
+controller.startwatchDistribute= function (intel, intelAddress){
+    intel.events.RewardDistributed().on('data',  event => {
+        try{
+            const intelIndex = parseInt(event.returnValues.intelIndex);
+
+            let promises = [ ParetoContent.findOneAndUpdate({id:intelIndex}, {distributed: true})
+                ,  ParetoTransaction.findOneAndUpdate({   txHash: event.transactionHash } , { status: 3,  txRewardHash: event.transactionHash  })];
+            Promise.all(promises).then( values =>{
+                if(controller.wss && values.length > 1){
+                    controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
+                }else{
+                    console.log('no wss');
+                }
+            })
+                .catch(e=>{
+                    console.log(e);
+                });
+
+
+
+        }catch (e) {
+            console.log(e);
+        }
+
+    }).on('error', err=>{
+        console.log(err);
+    });
+}
+
+
+controller.startWatchApprove=function (){
+    web3_events.eth.subscribe( 'logs',
+        {
+            fromBlock: 'latest',
+            address: PARETO_CONTRACT_ADDRESS,
+            topics: ['0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925', null, null]
+        }).on('data', function (log) {
+        const txHash = log.transactionHash;
+        const blockNumber = log.blockNumber;
+        if(blockNumber!=null){
+            ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { status: 1, block: blockNumber }, function (err, r) {
+                if(!err && r){
+                    controller.SendInfoWebsocket({address: r.address, transaction: r});
+                }else{
+                    if(err){console.log(err);}
+                }
+
+            })
+        }
+    });
+}
+
+/**
+ * Watch Intel events. Support watch rewards for old Intel address
+ */
+controller.startwatchIntel = function(){
+    controller.startwatchNewIntel()
     ParetoContent.find({ 'expires':{ $gt : Math.round(new Date().getTime() / 1000)}, 'validated': true }).distinct('intelAddress').exec(function(err, results) {
         if (err) {
             callback(err);
@@ -350,98 +445,13 @@ controller.startwatchNewIntel = function(){
             for (let i=0;i<results.length;i=i+1) {
                 const intelAddress =results[i];
                 const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
-                intel.events.Reward().on('data',  event => {
-                    try{
-                        const intelIndex = parseInt(event.returnValues.intelIndex);
-                        const rewardData = {
-                            sender: event.returnValues.sender.toLowerCase(),
-                            receiver: '',
-                            intelAddress: intelAddress,
-                            intelId: intelIndex,
-                            txHash: event.transactionHash,
-                            dateCreated:  Date.now() ,
-                            block: event.blockNumber,
-                            amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
-                        };
-
-                        ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},rewardData, {upsert: true, new: true},
-                            function(err, r){
-                                if(err){
-                                    console.error('unable to write to db because: ', err);
-                                } else {
-                                    ParetoContent.findOne({id:intelIndex}, (err, intel) => {
-                                        if(intel){
-                                            const {address} = intel;
-                                            ParetoReward.findOneAndUpdate({ txHash: event.transactionHash},{receiver: address}, {},
-                                                function(err, r){ }
-                                            );
-                                        }
-
-                                    });
-
-                                    controller.getBalance(event.returnValues.sender.toLowerCase(),0, function(err, count){
-                                        if(!err){
-                                            controller.updateAddressReward(event, count);
-                                        }else{
-                                            callback(err);
-                                        }
-                                    });
-                                    controller.updateIntelReward(intelIndex, event.transactionHash,event.returnValues.sender.toLowerCase());
-
-
-                                }
-                            }
-                        );
-
-                    }catch (e) {
-                        console.log(e);
-                    }
-
-                }).on('error', err=>{
-                    console.log(err);
-                });
-
+                controller.startwatchReward(intel, intelAddress);
+                controller.startwatchDistribute(intel, intelAddress);
             }
 
         }
     });
-
-
-    web3_events.eth.subscribe( 'logs',
-        {
-            fromBlock: 'latest',
-            address: PARETO_CONTRACT_ADDRESS,
-            topics: ['0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925', null, null]
-        }).on('data', function (log) {
-        const txHash = log.transactionHash;
-        const blockNumber = log.blockNumber;
-        if(blockNumber!=null){
-        ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { status: 1, block: blockNumber }, function (err, r) {
-            if(!err && r){
-                if(controller.wss){
-                    try{
-                        controller.wss.clients.forEach(function each(client) {
-                            if (client.isAlive === false) return client.terminate();
-                            if (client.readyState === controller.WebSocket.OPEN ) {
-                                if(client.user && client.user.user== data.address){
-                                   client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
-
-                                }
-                            }
-                        });
-                    }catch (e) {
-                        console.log(e);
-                    }
-                }else{
-                    console.log('no wss');
-                }
-            }else{
-               if(err){console.log(err);}
-            }
-
-            })
-        }
-    });
+    controller.startWatchApprove();
 
 };
 
@@ -486,47 +496,7 @@ controller.updateAddressReward = function(event, token){
             updateQuery.exec().then(function (r) {
                 controller.getScoreAndSaveRedis( function (err, result) {
                     if(!err){
-                        if(controller.wss){
-                            controller.wss.clients.forEach(function each(client) {
-                                try{
-                                    if (client.isAlive === false) return client.terminate();
-                                    if (client.readyState === controller.WebSocket.OPEN ) {
-                                        // Validate if the user is subscribed a set of information
-                                        if(client.user && client.user.user==addressToUpdate){
-                                            //console.log('updateContent');
-                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                            const rank = parseInt(client.info.rank) || 1;
-                                            let limit = parseInt(client.info.limit) || 100;
-                                            const page = parseInt(client.info.page) || 0;
-
-                                            //max limit
-                                            if (limit > 500) {
-                                                limit = 500;
-                                            }
-                                            /**
-                                             * Send ranking
-                                             */
-                                            controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
-                                                if (!err) {
-                                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
-                                                }
-                                            });
-
-                                            controller.retrieveAddress(client.user.user, function (err, result) {
-                                                if (!err) {
-                                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                                                }
-                                            });
-                                        }
-                                    }
-                                }catch (e) {
-                                    console.log(e);
-                                }
-                            });
-
-                        }else{
-                            console.log('no wss')
-                        }
+                        controller.SendInfoWebsocket({address: addressToUpdate});
                     }else{
                         console.log(err);
                     }
@@ -534,6 +504,53 @@ controller.updateAddressReward = function(event, token){
             })
         });
     })
+}
+
+
+controller.SendInfoWebsocket = function (data ){
+    if(controller.wss){
+        controller.wss.clients.forEach(function each(client) {
+            try{
+                if (client.isAlive === false) return client.terminate();
+                if (client.readyState === controller.WebSocket.OPEN ) {
+                    // Validate if the user is subscribed a set of information
+                    client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                    if(client.user && client.user.user==data.address){
+                        controller.retrieveAddress(client.user.user, function (err, result) {
+                            if (!err) {
+                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                            }
+                        });
+
+                        if(data.transaction){
+                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: data.transaction})) );
+                        } else{
+
+                            const rank = parseInt(client.info.rank) || 1;
+                            let limit = parseInt(client.info.limit) || 100;
+                            const page = parseInt(client.info.page) || 0;
+
+                            //max limit
+                            if (limit > 500) {
+                                limit = 500;
+                            }
+                            /**
+                             * Send ranking
+                             */
+                            controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                                if (!err) {
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                                }
+                            });
+                        }
+                    }
+                }
+            }catch (e) {
+                console.log(e);
+            }
+        });
+    }
+
 }
 
 /**
@@ -560,28 +577,10 @@ controller.updateIntelReward=function(intelIndex, txHash, sender){
             const reward = r[0].reward;
             let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
             ,  ParetoTransaction.findOneAndUpdate({ $or: [{ txRewardHash: txHash },
-                    {txRewardHash: null, address: sender, intel: intelIndex}]}, { status: 3,  txRewardHash: txHash  })];
+                    {txRewardHash: null, address: sender, intel: intelIndex, event: 'reward'}]}, { status: 3,  txRewardHash: txHash  })];
             Promise.all(promises).then( values =>{
-                    if(values.length > 0 && controller.wss){
-                        controller.wss.clients.forEach(function each(client) {
-                            try{
-                                if (client.isAlive === false) return client.terminate();
-                                if (client.readyState === controller.WebSocket.OPEN ) {
-                                    // Validate if the user is subscribed a set of information
-                                    if(client.user){
-                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                        if(values.length > 1 && values[1]){
-                                            if(client.user && client.user.user== values[1].address) {
-                                                client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: values[1]})) );
-
-                                            }
-                                        }
-                                    }
-                                }
-                            }catch (e) {
-                                console.log(e);
-                            }
-                        });
+                    if(values.length > 1 && controller.wss){
+                        controller.SendInfoWebsocket({address: values[1].address, transaction: values[1]});
                     }
                 })
                 .catch(e=>{
