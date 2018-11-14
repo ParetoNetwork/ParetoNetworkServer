@@ -291,35 +291,20 @@ controller.startwatchNewIntel = function(){
                     try{
                         controller.getBalance(data.address,0, function(err, count){
                             if(!err){
-                                ParetoAddress.findOneAndUpdate({address: data.address}, {tokens : count}, (e, result)=>{
-                                    controller.getScoreAndSaveRedis((err, result)=>{
-                                        if(controller.wss){
-                                            try{
-                                                controller.wss.clients.forEach(function each(client) {
-                                                    if (client.isAlive === false) return client.terminate();
-                                                    if (client.readyState === controller.WebSocket.OPEN ) {
-                                                        // Validate if the user is subscribed a set of information
-                                                        if(client.user){
-                                                            //console.log('updateContent');
-                                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                                            if(client.user.user== data.address){
-                                                                controller.retrieveAddress(client.user.user, function (err, result) {
-                                                                    if (!err) {
-                                                                        client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    }
-                                                });
-                                            }catch (e) {
-                                                console.log(e);
+                                let promises = [ParetoAddress.findOneAndUpdate({address: data.address}, {tokens : count})
+                                    ,  ParetoTransaction.findOneAndUpdate(
+                                            {txRewardHash: null,  intel: event.returnValues.intelID, event: 'create'}, { status: 3  })];
+                                        Promise.all(promises).then( values =>{
+                                            if(values.length > 1 ){
+                                                controller.getScoreAndSaveRedis((err, result)=>{
+                                                    controller.SendInfoWebsocket({address: data.address, transaction: values[1]});
+                                                })
                                             }
-                                        }else{
-                                            console.log('no wss')
-                                        }
-                                    })
-                                })
+                                        })
+                                    .catch(e=>{
+                                        console.log(e);
+                                    });
+
                             }
                         });
 
@@ -399,20 +384,8 @@ controller.startwatchDistribute= function (intel, intelAddress){
             let promises = [ ParetoContent.findOneAndUpdate({id:intelIndex}, {distributed: true})
                 ,  ParetoTransaction.findOneAndUpdate({   txHash: event.transactionHash } , { status: 3,  txRewardHash: event.transactionHash  })];
             Promise.all(promises).then( values =>{
-                if(controller.wss && values.length){
-                    try{
-                        controller.wss.clients.forEach(function each(client) {
-                            if (client.isAlive === false) return client.terminate();
-                            if (client.readyState === controller.WebSocket.OPEN ) {
-                                if(client.user && client.user.user== values[0].address){
-                                    client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
-
-                                }
-                            }
-                        });
-                    }catch (e) {
-                        console.log(e);
-                    }
+                if(controller.wss && values.length > 1){
+                    controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
                 }else{
                     console.log('no wss');
                 }
@@ -445,23 +418,7 @@ controller.startWatchApprove=function (){
         if(blockNumber!=null){
             ParetoTransaction.findOneAndUpdate({ txHash: txHash }, { status: 1, block: blockNumber }, function (err, r) {
                 if(!err && r){
-                    if(controller.wss){
-                        try{
-                            controller.wss.clients.forEach(function each(client) {
-                                if (client.isAlive === false) return client.terminate();
-                                if (client.readyState === controller.WebSocket.OPEN ) {
-                                    if(client.user && client.user.user== data.address){
-                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
-
-                                    }
-                                }
-                            });
-                        }catch (e) {
-                            console.log(e);
-                        }
-                    }else{
-                        console.log('no wss');
-                    }
+                    controller.SendInfoWebsocket({address: data.address, transaction: r});
                 }else{
                     if(err){console.log(err);}
                 }
@@ -539,47 +496,7 @@ controller.updateAddressReward = function(event, token){
             updateQuery.exec().then(function (r) {
                 controller.getScoreAndSaveRedis( function (err, result) {
                     if(!err){
-                        if(controller.wss){
-                            controller.wss.clients.forEach(function each(client) {
-                                try{
-                                    if (client.isAlive === false) return client.terminate();
-                                    if (client.readyState === controller.WebSocket.OPEN ) {
-                                        // Validate if the user is subscribed a set of information
-                                        if(client.user && client.user.user==addressToUpdate){
-                                            //console.log('updateContent');
-                                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                            const rank = parseInt(client.info.rank) || 1;
-                                            let limit = parseInt(client.info.limit) || 100;
-                                            const page = parseInt(client.info.page) || 0;
-
-                                            //max limit
-                                            if (limit > 500) {
-                                                limit = 500;
-                                            }
-                                            /**
-                                             * Send ranking
-                                             */
-                                            controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
-                                                if (!err) {
-                                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
-                                                }
-                                            });
-
-                                            controller.retrieveAddress(client.user.user, function (err, result) {
-                                                if (!err) {
-                                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                                                }
-                                            });
-                                        }
-                                    }
-                                }catch (e) {
-                                    console.log(e);
-                                }
-                            });
-
-                        }else{
-                            console.log('no wss')
-                        }
+                        controller.SendInfoWebsocket({address: addressToUpdate});
                     }else{
                         console.log(err);
                     }
@@ -587,6 +504,53 @@ controller.updateAddressReward = function(event, token){
             })
         });
     })
+}
+
+
+controller.SendInfoWebsocket = function (data ){
+    if(controller.wss){
+        controller.wss.clients.forEach(function each(client) {
+            try{
+                if (client.isAlive === false) return client.terminate();
+                if (client.readyState === controller.WebSocket.OPEN ) {
+                    // Validate if the user is subscribed a set of information
+                    client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
+                    if(client.user && client.user.user==data.address){
+                        controller.retrieveAddress(client.user.user, function (err, result) {
+                            if (!err) {
+                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                            }
+                        });
+
+                        if(data.transaction){
+                            client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: r})) );
+                        } else{
+
+                            const rank = parseInt(client.info.rank) || 1;
+                            let limit = parseInt(client.info.limit) || 100;
+                            const page = parseInt(client.info.page) || 0;
+
+                            //max limit
+                            if (limit > 500) {
+                                limit = 500;
+                            }
+                            /**
+                             * Send ranking
+                             */
+                            controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                                if (!err) {
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                                }
+                            });
+                        }
+                    }
+                }
+            }catch (e) {
+                console.log(e);
+            }
+        });
+    }
+
 }
 
 /**
@@ -615,26 +579,8 @@ controller.updateIntelReward=function(intelIndex, txHash, sender){
             ,  ParetoTransaction.findOneAndUpdate({ $or: [{ txRewardHash: txHash },
                     {txRewardHash: null, address: sender, intel: intelIndex, event: 'reward'}]}, { status: 3,  txRewardHash: txHash  })];
             Promise.all(promises).then( values =>{
-                    if(values.length > 0 && controller.wss){
-                        controller.wss.clients.forEach(function each(client) {
-                            try{
-                                if (client.isAlive === false) return client.terminate();
-                                if (client.readyState === controller.WebSocket.OPEN ) {
-                                    // Validate if the user is subscribed a set of information
-                                    if(client.user){
-                                        client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateContent'})) );
-                                        if(values.length > 1 && values[1]){
-                                            if(client.user && client.user.user== values[1].address) {
-                                                client.send(JSON.stringify(ErrorHandler.getSuccess({ action: 'updateHash', data: values[1]})) );
-
-                                            }
-                                        }
-                                    }
-                                }
-                            }catch (e) {
-                                console.log(e);
-                            }
-                        });
+                    if(values.length > 1 && controller.wss){
+                        controller.SendInfoWebsocket({address: values[1].address, transaction: values[1]});
                     }
                 })
                 .catch(e=>{
