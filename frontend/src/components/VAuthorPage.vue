@@ -40,7 +40,6 @@
                 return profileService.getProfile(
                     res => {
                         this.user = res;
-                        console.log(this.user);
                     },
                     () => {
                     }

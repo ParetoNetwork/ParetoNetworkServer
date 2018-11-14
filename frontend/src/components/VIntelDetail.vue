@@ -35,7 +35,7 @@
                                                         !intel.distributed"
                                                         class="btn-primary-pareto mx-auto px-4"
                                                         @click="distribute(intel)">
-                                                    DISTRIBUTE
+                                                    COLLECT
                                                 </b-btn>
                                             </div>
                                         </div>
