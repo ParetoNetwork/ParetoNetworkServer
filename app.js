@@ -101,7 +101,6 @@ const ErrorHandler = require('./error-handler.js');
 });*/
 
 require("./ContractEventListeners/Intel");
-require("./schedule_distribute");
 
 app.get('/profile-image', function (req, res) {
     var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
