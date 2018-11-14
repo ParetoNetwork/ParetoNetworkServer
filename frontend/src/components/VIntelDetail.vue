@@ -219,8 +219,8 @@
                             group: 'notification',
                             type: 'success',
                             duration: 10000,
-                            title: 'Event: Reward',
-                            text: 'Confirmed Distribution'
+                            title: 'Event: Collect',
+                            text: 'Confirmed Collect'
                         });
                     },
                     err => {

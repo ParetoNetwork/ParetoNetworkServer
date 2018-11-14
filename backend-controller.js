@@ -842,6 +842,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 id:entry.id,
                                 intelAddress: entry.intelAddress,
                                 _v: entry._v,
+                                distributed: entry.distributed,
                                 createdBy: {
                                     address: entry.createdBy.address,
                                     alias: entry.createdBy.alias,
@@ -984,6 +985,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           expires: entry.expires,
                           validated: entry.validated,
                           intelAddress: entry.intelAddress,
+                          distributed: entry.distributed,
                           _v: entry._v,
                           createdBy: {
                               address: entry.createdBy.address,
