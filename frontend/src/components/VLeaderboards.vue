@@ -370,11 +370,11 @@
                 if(!this.loading) this.getLeaderboard();
             },
             onScroll: function(){
-
                 let bottomReached = false;
 
                 if(this.table){
                     this.scroll.distance = this.table.scrollTop;
+                    console.log('scrolled');
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
@@ -408,8 +408,9 @@
                 }
             },
             scrollBack: function () {
-                if(this.row){
-                    this.row.scrollIntoView();
+                if(this.row && this.table){
+                    this.table.scrollTop = this.row.offsetTop;
+                    //this.row.scrollIntoView();
                     this.scroll.distance = this.table.scrollTop;
                 }
             },
