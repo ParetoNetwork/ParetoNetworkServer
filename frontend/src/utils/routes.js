@@ -28,14 +28,7 @@ const routes = [
         path: '/intel/:address', component: VAuthorPage, name: 'VAuthorPage'
     },
     {
-        path: '/intel', component: Vintel, beforeEnter: (to, from, next) => {
-            // ...
-            AuthService.auth(() => {
-                next();
-            }, () => {
-                next('/');
-            });
-        }
+        path: '/intel', component: Vintel
     },
     {
         path: '/intel/:address/:id', component: VIntelDetail, name: 'VIntelDetail'
@@ -47,6 +40,19 @@ const routes = [
     {path: '/leaderboards', component: VLeaderboards},
     {path: '/create', component: VCreateIntel},
 ];
+
 const router = new VueRouter({routes});
+
+router.beforeEach((to, from, next) => {
+    // ...
+    const publicPages = ['/', '/leaderboards', '/about'];
+    const authRequired = !publicPages.includes(to.path);
+    AuthService.auth(() => {
+        next();
+    }, () => {
+        authRequired? next('/') : next();
+    });
+});
+
 export default router;
 

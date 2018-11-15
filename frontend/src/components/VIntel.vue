@@ -88,11 +88,17 @@
                     <div class="p-3">
                         <h5 class="title text-left border-bottom p-2"><b>EVENTS</b></h5>
                         <div v-for="tx in pendingTransactions" class="mt-1">
+                            <div class="row border-bottom m-0">
+                                <div class="col">
+                                    <div>Event: {{tx.event}}</div>
+                                    <div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>
+                                </div>
+                                <div class="col">
+                                    <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
+                                    <a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
+                                </div>
+                            </div>
                             <div class="d-flex justify-content-between cursor-pointer">
-                                <div>Event: {{tx.event}}</div>
-                                <div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>
-                                <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
-                                <a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
                             </div>
                         </div>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
@@ -252,6 +258,7 @@
             }
         },
         mounted: function () {
+            console.log(this.pendingTransactions);
             this.main();
         },
         computed: {

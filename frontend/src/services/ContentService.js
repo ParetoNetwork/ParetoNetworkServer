@@ -67,7 +67,7 @@ export default class ContentService {
     static postTransactions(params, onSucess, onError) {
         http.post("/v1/transaction", params)
             .then(res => {
-                //console.log(res);
+                console.log(res);
             });
     }
 
@@ -86,7 +86,7 @@ export default class ContentService {
         gasPrice ? OnSuccess(gasPrice) : OnError('There was a problem fetching the current recommended gas price');
     }
 
-    static async createIntel(serverData, tokenAmount, signData, onSuccess, onError) {
+    static async createIntel(serverData, tokenAmount, signData, events, onSuccess, onError) {
         try {
             await this.Setup(signData);
         } catch (e) {
@@ -130,9 +130,31 @@ export default class ContentService {
                     gas: gasApprove,
                     gasPrice
                 })
-                .once("transactionHash", function (hash) {
+                .once("transactionHash", (hash) => {
+
+                    console.log("Create: First Step");
+                    console.log(Intel.options.address);
+                    console.log(serverData);
+                    console.log(signData);
+                    let params = {
+                        intelAddress: Intel.options.address,
+                        address: serverData.address,
+                        txHash: hash,
+                        intel: -1,
+                        amount: tokenAmount,
+                        event: 'create',
+                        status: 0
+                    };
+
+                    var txHash = hash;
+                    events.addTransaction(params);
+                    this.postTransactions(params);
+
                     waitForReceipt(hash, receipt => {
-                        // console.log(receipt);
+
+                        console.log("Confirm: Second Step");
+                        serverData.approveHash = txHash;
+                        events.editTransaction({hash: hash, status: 1});
 
                         ContentService.uploadContent(
                             serverData,
@@ -161,10 +183,13 @@ export default class ContentService {
                                         gasPrice
                                     })
                                     .on("transactionHash", hash => {
+
+                                        events.editTransaction({hash: txHash, status: 2});
                                         waitForReceipt(hash, receipt => {
                                             if (ContentService.ledgerNanoEngine) {
                                                 ContentService.ledgerNanoEngine.stop();
                                             }
+                                            events.transactionComplete(txHash);
                                             onSuccess("successfull");
                                         });
                                     })
@@ -172,6 +197,7 @@ export default class ContentService {
                                         if (ContentService.ledgerNanoEngine) {
                                             ContentService.ledgerNanoEngine.stop();
                                         }
+                                        events.transactionComplete(txHash);
                                         onError(err.message || err);
                                     });
                             },

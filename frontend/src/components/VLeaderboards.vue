@@ -370,7 +370,6 @@
                 if(!this.loading) this.getLeaderboard();
             },
             onScroll: function(){
-
                 let bottomReached = false;
 
                 if(this.table){
