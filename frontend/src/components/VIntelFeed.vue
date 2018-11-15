@@ -44,16 +44,31 @@
                                     <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                     <span class="text-right">{{row.totalReward}}</span>
                                 </div>
-                                <div v-if="row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
-                                     class="text-center">
+                                <div class="text-center">
                                     <div class="d-inline-block">
-                                        <b-btn class="btn-primary-pareto mx-auto px-4"
-                                               style="width: 120px;"
+                                        <b-btn v-if="row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
+                                               class="btn-primary-pareto mx-auto px-4"
                                                :disabled="pendingRowTransactions(row) || user.address === row.address"
                                                @click="openRewardModal(row)">
                                             <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                                             <b> {{ row.reward }} </b>
                                         </b-btn>
+                                        <b-btn v-if="user.address === row.address &&
+                                                        row.intelAddress &&
+                                                        signType != 'Manual' &&
+                                                        row.expires < Math.round(new Date().getTime() / 1000) &&
+                                                        !row.distributed"
+                                                class="btn-primary-pareto mx-auto px-4"
+                                                @click="distribute(intel)">
+                                            COLLECT
+                                        </b-btn>
+                                        <a  v-if="user.address === row.address && row.distributed"
+                                            v-bind:href="etherscanUrl+'/tx/'+ (row.txHashDistribute || row.txHash)"
+                                            target="_blank">
+                                            <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
+                                                <i class="fa fa-external-link"></i> SENT
+                                            </b-btn>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -107,13 +122,14 @@
     import moment from "moment";
     import environment from "../utils/environment";
 
-    import {mapState, mapMutations} from "vuex";
+    import {mapState, mapMutations, mapActions} from "vuex";
 
     import dashboardService from "../services/dashboardService";
     import profileService from "../services/profileService";
 
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
     import VModalReward from "./Modals/VModalReward";
+    import ContentService from "../services/ContentService";
 
     export default {
         name: "VIntelFeed",
@@ -123,7 +139,7 @@
             VModalReward
         },
         props: [
-            'updateContent', 'block', 'user', 'fetchAddress', 'title'
+            'updateContent', 'block', 'user', 'fetchAddress', 'title', 'address'
         ],
         mixins: [countUpMixin],
         data: function () {
@@ -142,7 +158,8 @@
             }
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"]),
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
         },
         beforeMount: function () {
             this.loadContent();
@@ -169,6 +186,35 @@
             },
             dateStringFormat(date) {
                 return new Date(date);
+            },
+            distribute: function (intel) {
+                ContentService.distributeRewards(
+                    {ID: intel.id, intelAddress: intel.intelAddress},
+                    {signType: this.signType, pathId: this.pathId},
+                    {
+                        addTransaction: this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
+                    res => {
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            title: 'Event: Collect',
+                            text: 'Confirmed Collect'
+                        });
+                    },
+                    err => {
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            text: err.message ? err.message : err
+                        });
+                    }
+                );
             },
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;

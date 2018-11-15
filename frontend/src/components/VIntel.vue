@@ -101,7 +101,7 @@
                     </div>
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
-                            <li class="list-group-item border-0 p-3" v-for="post in myContent" :key="post.id">
+                            <li class="list-group-item border-0 px-0 py-3" v-for="post in myContent" :key="post.id">
                                 <div class="split">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
@@ -109,6 +109,32 @@
                                             <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
                                             <span>{{post.dateCreated | date}}</span>
                                         </router-link>
+
+                                        <div class="text-center">
+                                            <div class="d-inline-block">
+                                                <b-btn v-if="post.intelAddress && signType != 'Manual' && post.expires > Math.round(new Date().getTime() / 1000)"
+                                                       class="btn-primary-pareto mx-auto px-4"
+                                                       :disabled="user.address === post.address">
+                                                    <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
+                                                    <b> {{ post.reward }} </b>
+                                                </b-btn>
+                                                <b-btn v-if="user.address === post.address &&
+                                                        post.intelAddress &&
+                                                        signType != 'Manual' &&
+                                                        post.expires < Math.round(new Date().getTime() / 1000) &&
+                                                        !post.distributed"
+                                                       class="btn-primary-pareto mx-auto px-4">
+                                                    COLLECT
+                                                </b-btn>
+                                                <a  v-if="user.address === post.address && post.distributed"
+                                                    v-bind:href="etherscanUrl+'/tx/'+ (post.txHashDistribute || post.txHash)"
+                                                    target="_blank">
+                                                    <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
+                                                        <i class="fa fa-external-link"></i> SENT
+                                                    </b-btn>
+                                                </a>
+                                            </div>
+                                        </div>
                                         <div class="d-flex border" style="padding: 5px;">
                                             <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
                                                 <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
@@ -153,10 +179,9 @@
                         <span v-else> No data to display </span>
                     </div>
                 </div>
-
             </div>
             <div class="col-md-7 mb-3">
-                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block"></VIntelFeed>
+                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
             </div>
         </div>
         <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
@@ -333,6 +358,8 @@
             loadAddress: function () {
                 return dashboardService.getAddress(
                     res => {
+                        this.user.address = res.address;
+                        console.log(this.user.address);
                         this.address = res;
                     },
                     error => {
