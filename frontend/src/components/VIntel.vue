@@ -44,7 +44,6 @@
                                         <span v-else> 0 </span>
                                     </div>
                                     <div class="col-md col-xs mb-2 ellipsis">
-                                        <i class="fa fa-area-chart" style="color: #4e555b; margin: 2px;"></i>
                                         <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
                                         <ICountUp
                                                 :startVal="countUp.startVal"
@@ -57,7 +56,7 @@
                                 </div>
                             </router-link>
 
-                            <div class="mt-2">
+                            <div class="mb-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                 <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
                             </div>
