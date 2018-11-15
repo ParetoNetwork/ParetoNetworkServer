@@ -18,40 +18,13 @@
                                         <span v-if="profile.alias" class="subtitle-dashboard"><b> {{profile.alias}} </b></span>
                                         <span v-else class="subtitle-dashboard"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
                                         <div class="text-center">
-                                            <div class="d-inline-block">
-                                                <b-btn v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-                                                       class="btn-primary-pareto mx-auto px-4"
-                                                       style="width: 120px;"
-                                                       :disabled="pendingRowTransactions(intel) || user.address === intel.address"
-                                                       @click="openRewardModal()">
-                                                    <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-                                                    <b> {{ intel.reward }} </b>
-                                                </b-btn>
-                                                <b-btn
-                                                        v-if="user.address === intel.address &&
-                                                        intel.intelAddress &&
-                                                        signType != 'Manual' &&
-                                                        intel.expires < Math.round(new Date().getTime() / 1000) &&
-                                                        !intel.distributed"
-                                                        class="btn-primary-pareto mx-auto px-4"
-                                                        @click="distribute(intel)">
-                                                    COLLECT
-                                                </b-btn>
-                                                <a  v-if="intel.distributed"
-                                                    v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
-                                                    target="_blank">
-                                                    <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
-                                                        <i class="fa fa-external-link"></i> SENT
-                                                    </b-btn>
-                                                </a>
-                                            </div>
+                                            <VIntelButtonAction :userAddress="user.address" :intel="intel"></VIntelButtonAction>
                                         </div>
                                     </div>
                                 </div>
 
                             </div>
                             <div class="row border-bottom">
-
                                 <!-- blocks ago -->
                                 <div class="col-md col-xs ellipsis">
                                     <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
@@ -112,6 +85,7 @@
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
     import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
     import VModalReward from "./Modals/VModalReward";
+    import VIntelButtonAction from "./Events/VIntelButtonAction";
 
     export default {
         name: 'VIntelDetail',
@@ -121,7 +95,8 @@
             VShimmerUserProfile,
             VShimmerIntelInformation,
             VProfile,
-            VModalReward
+            VModalReward,
+            VIntelButtonAction
         },
         computed: {
             ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
