@@ -3,13 +3,13 @@
         <b-btn v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
                class="btn-primary-pareto mx-auto px-4"
                style="width: 120px;"
-               :disabled="pendingRowTransactions(intel) || user.address === intel.address"
+               :disabled="pendingRowTransactions(intel) || userAddress === intel.address"
                @click="openRewardModal()">
-            <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
+            <img src="../../assets/images/LogoMarkWhite.svg" width="20px" alt="">
             <b> {{ intel.reward }} </b>
         </b-btn>
         <b-btn
-                v-if="user.address === intel.address &&
+                v-if="userAddress === intel.address &&
                     intel.intelAddress &&
                     signType != 'Manual' &&
                     intel.expires < Math.round(new Date().getTime() / 1000) &&
@@ -18,7 +18,7 @@
                 @click="distribute(intel)">
             COLLECT
         </b-btn>
-        <a v-if="intel.distributed"
+        <a v-if="userAddress === intel.address && intel.distributed"
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
            target="_blank">
             <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
@@ -37,8 +37,16 @@
         props: [
             'userAddress', 'intel'
         ],
+        data: function () {
+            return {
+                etherscanUrl: window.localStorage.getItem('etherscan')
+            };
+        },
         computed: {
             ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
+        },
+        mounted : function(){
+            console.log(this.userAddress, this.intel)
         },
         methods: {
             ...mapMutations(["openModalReward"]),
