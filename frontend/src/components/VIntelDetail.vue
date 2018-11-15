@@ -37,6 +37,13 @@
                                                         @click="distribute(intel)">
                                                     COLLECT
                                                 </b-btn>
+                                                <a  v-if="intel.distributed"
+                                                    v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
+                                                    target="_blank">
+                                                    <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
+                                                        <i class="fa fa-external-link"></i> SENT
+                                                    </b-btn>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -163,6 +170,7 @@
                 return DashboardService.getIntel(this.id, res => {
                     this.getProfile(res.address);
                     this.intel = res;
+                    console.log(this.intel);
                 }, error => {
                 });
             },
