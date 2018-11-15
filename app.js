@@ -1,7 +1,7 @@
 "use strict";
 
-var compression = require('compression');
 var express = require('express');
+var secure = require('ssl-express-www');
 const cors = require('cors');
 const fs = require("fs");
 const expressStaticGzip = require('express-static-gzip');
@@ -32,6 +32,7 @@ var controller = require('./backend-controller.js');
 
 
 var app = express();
+app.use(secure);
 var compression = require('compression');
 
 var uniqueRandomArray = require('unique-random-array');
@@ -373,7 +374,6 @@ app.post('/v1/content', function (req, res) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }
     else if (req.user === undefined || req.body.title === undefined || req.body.body === undefined) {
-        console.log(req.body);
         res.status(200).json(ErrorHandler.contentMissingError());
     } else {
 
@@ -393,7 +393,6 @@ app.post('/v1/content', function (req, res) {
 
 
 app.get('/v1/transaction', function (req, res) {
-
     controller.getPendingTransaction(req.user, function (err, obj) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
@@ -406,13 +405,11 @@ app.get('/v1/transaction', function (req, res) {
 
 
 app.post('/v1/transaction', function (req, res) {
-
-    const noParams = (!req.body.address  || !req.body.intel || !req.body.amount || !req.body.event || !req.body.intelAddress);
+    const noParams = (!req.body.address  || !req.body.intel || (!req.body.amount && req.body.event !== 'distribute') || !req.body.event || !req.body.intelAddress);
     if ((req.body.constructor === Object && Object.keys(req.body).length === 0)
         || !req.body.txHash ||  (noParams && (!req.body.txRewardHash && !req.body.status))) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }  else {
-
         //needs to check address whitelist against the authorized address, if people figure out the post body format.
 
         controller.watchTransaction(req.body, function (err, obj) {

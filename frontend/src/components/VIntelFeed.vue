@@ -28,7 +28,7 @@
                                         <div class="d-flex flex-column flex-grow-1 pr-3">
                                             <h1 class="title ellipsis">{{row.title|| 'No title'}}</h1>
                                             <div class="">
-                                                <span v-if="false" class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
+                                                <span class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <div>
                                                     <span class="text-dashboard">Disclosed by: <!-- <a v-bind:href="'/'+row.createdBy.address"> --> {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}} <!-- </a> --></span>
                                                 </div>
@@ -44,13 +44,13 @@
                                     <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                     <span class="text-right">{{row.totalReward}}</span>
                                 </div>
-                                <div v-if="user.address != row.address && row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
+                                <div v-if="row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
                                      class="text-center">
                                     <div class="d-inline-block">
                                         <b-btn class="btn-primary-pareto mx-auto px-4"
                                                style="width: 120px;"
-                                               :disabled="pendingRowTransactions(row)"
-                                               v-b-modal.modalToken @click="openRewardModal(row)">
+                                               :disabled="pendingRowTransactions(row) || user.address === row.address"
+                                               @click="openRewardModal(row)">
                                             <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                                             <b> {{ row.reward }} </b>
                                         </b-btn>
@@ -94,93 +94,8 @@
                     </li>
                 </ul>
             </div>
-            <b-modal
-                    id="modalToken"
-                    ref="modalToken"
-                    centered
-                    hide-header
-                    hide-footer
-                    :body-bg-variant="'dark'"
-                    :body-text-variant="'light'">
-                <b-container fluid>
-                    <h4 class="font-body mb-3"> Reward</h4>
-                    <div v-if="this.signType==='LedgerNano'" class="text-left">
-                        <p> Before use Ledger Nano S, verify the next items: </p>
-                        <div class="m-2 ml-4">
-                            <ul>
-                                <li> The Browser must be Google Chrome</li>
-                                <li> Plugged-in their Ledger Wallet Nano S</li>
-                                <li> Input digits pin</li>
-                                <li> Navigated to the Ethereum app on their device</li>
-                                <li> Enabled 'browser' support from the Ethereum app settings</li>
-                            </ul>
-                        </div>
-                        <br/>
-                    </div>
-                    <p class="text-dashboard mb-2" style="font-size: 16px"> Please enter the number of Pareto Tokens to
-                        reward</p>
-                    <b-form-input
-                            v-model="tokenAmount"
-                            style="font-size: 25px"
-                            :formatter="formatAmountNumber"
-                            type="number">
-                    </b-form-input>
-                    <b-row class="m-2 mt-4 d-flex justify-content-center">
-                        <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                        <b-button :disabled="!hardwareAvailable || tokenAmount<=0 ||  user.tokens < tokenAmount"
-                                  style="background-color: rgb(107, 194, 123)" variant="success"
-                                  @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
-                        </b-button>
-                    </b-row>
-                </b-container>
-            </b-modal>
-            <div>
-                <b-modal
-                        no-close-on-backdrop
-                        v-model="modalWaiting"
-                        centered
-                        hide-header
-                        hide-footer
-                        :body-bg-variant="'dark'"
-                        :body-text-variant="'light'">
 
-                    <b-container fluid>
-                        <h3 class="font-body mb-4">Reward has a two step confirmation </h3>
-                        <div>
-                            <div class="m-2 ml-4">
-                                <ol class="text-left">
-                                    <li>First, confirm the amount of Pareto that you'd like to
-                                        deposit
-                                    </li>
-                                    <li>Last, reward on the Ethereum Blockchain</li>
-                                </ol>
-                                <p class="text-center mt-4"
-                                   style="text-align: justify !important; text-justify: inter-word;">
-                                    This operation may take a while as we communicate with the Ethereum Blockchain.
-                                    Please do not close your browser or navigate to a different page. </p>
-                                <i class="fa fa-spinner fa-spin fa-3x mt-4"></i>
-                            </div>
-
-                            <div v-if="this.signType!=='LedgerNano'" class="d-flex justify-content-between mt-4 mb-1">
-                                <p class="text-center" style="font-size: 11px">
-                                    If MetaMask does not popup, please check your MetaMask extension icon for a new
-                                    badge
-                                    that signifies an operation should be taken on MetaMask
-
-                                </p>
-                                <span class="mt-1 ml-2"
-                                      style="background: #505050;
-                                             border-radius: 3px;
-                                             padding-left: 2px;">
-                                <img src="../assets/images/mmicon.png" alt=""
-                                     class="icon-mini">
-                            </span>
-                            </div>
-
-                        </div>
-                    </b-container>
-                </b-modal>
-            </div>
+            <VModalReward :intel="intelReward" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
         </div>
         <VShimmerFeed v-else></VShimmerFeed>
     </div>
@@ -191,22 +106,21 @@
     import {countUpMixin} from "../mixins/countUp";
     import moment from "moment";
     import environment from "../utils/environment";
-    import fromExponential from 'from-exponential';
 
-    import {mapState, mapActions} from "vuex";
+    import {mapState, mapMutations} from "vuex";
 
-    import ContentService from "../services/ContentService";
-    import AuthService from "../services/authService";
     import dashboardService from "../services/dashboardService";
     import profileService from "../services/profileService";
 
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
+    import VModalReward from "./Modals/VModalReward";
 
     export default {
         name: "VIntelFeed",
         components: {
             ICountUp,
-            VShimmerFeed
+            VShimmerFeed,
+            VModalReward
         },
         props: [
             'updateContent', 'block', 'user', 'fetchAddress', 'title'
@@ -216,23 +130,19 @@
             return {
                 allMyContent: [],
                 baseURL: environment.baseURL,
-                intelAddress: '',
-                hardwareAvailable: false,
                 moment: moment,
                 etherscanUrl: window.localStorage.getItem('etherscan'),
-                modalWaiting: false,
                 myFeed: {
                     content: [],
                     loading: false,
                     page: 0,
                 },
-                rewardId: '',
-                tokenAmount: 1,
-                loading: true
+                loading: true,
+                intelReward: {}
             }
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"])
         },
         beforeMount: function () {
             this.loadContent();
@@ -247,7 +157,7 @@
             }
         },
         methods: {
-            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
+            ...mapMutations(["openModalReward"]),
             assignBlock(block) {
                 this.myFeed.content = this.myFeed.content.map(item => {
                     item.blockAgo = block - item.block > 0 ? block - item.block : 0;
@@ -263,24 +173,6 @@
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
-            },
-            hideModal() {
-                if (this.signType === 'LedgerNano') {
-                    AuthService.deleteWatchNano();
-                    this.hardwareAvailable = false;
-                }
-                this.$refs.modalToken.hide()
-            },
-            isAvailable() {
-                if (this.signType === 'LedgerNano') {
-                    this.hardwareAvailable = false;
-                    AuthService.doWhenIsConnected(() => {
-                        this.hardwareAvailable = true;
-                        AuthService.deleteWatchNano();
-                    })
-                } else {
-                    this.hardwareAvailable = true;
-                }
             },
             loadContent: function (params) {
                 params = params || null;
@@ -322,10 +214,8 @@
                 }
             },
             openRewardModal: function (row) {
-                this.rewardId = row.id;
-                this.intelAddress = row.intelAddress;
-                this.tokenAmount = Math.min(this.user.tokens, row.reward);
-                this.isAvailable();
+                this.intelReward = row;
+                this.openModalReward(true);
             },
             updateFeedContent: function () {
                 let params = {
@@ -364,9 +254,6 @@
                 let path = this.baseURL + "/profile-image?image=";
                 return profileService.getProfileImage(path, pic);
             },
-            formatAmountNumber: function (value, event) {
-                return fromExponential(value);
-            },
             pendingRowTransactions: function(intel){
                 let transactionPending = false;
                 this.pendingTransactions.forEach(transaction => {
@@ -378,51 +265,6 @@
             },
             randomNumber: function (min = 1, max = 3) {
                 return Math.floor(Math.random() * (max - min + 1) + min);
-            },
-            rewardIntel: function (ID, tokenAmount, intelAddress) {
-                this.hideModal();
-                //this.modalWaiting = true;
-                if (!tokenAmount) {
-                    this.$notify({
-                        group: 'notification',
-                        type: 'error',
-                        duration: 10000,
-                        text: 'No Token Amount'
-                    });
-
-                    this.tokenAmount = 1;
-                    return;
-                }
-
-                ContentService.rewardIntel(
-                    {ID, tokenAmount, intelAddress},
-                    {signType: this.signType, pathId: this.pathId},
-                    {
-                        addTransaction: this.addTransaction,
-                        transactionComplete: this.transactionComplete,
-                        editTransaction: this.editTransaction,
-                        toastTransaction: this.$notify
-                    },
-                    res => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'success',
-                            duration: 10000,
-                            title: 'Event: Reward',
-                            text: 'Confirmed Reward'
-                        });
-                    },
-                    err => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            text: err.message ? err.message : err
-                        });
-                    }
-                );
             },
             scrollMyFeed: function () {
                 let list = document.getElementById("myfeed");
