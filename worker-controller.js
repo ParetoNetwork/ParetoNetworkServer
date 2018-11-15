@@ -1205,7 +1205,7 @@ const start = async () => {
 
         if(START_CLOCK==1){
             const clock = require('./clock.js');
-            require("./schedule_distribute");
+            //require("./schedule_distribute");
 
             clock.start(queue);
         }
