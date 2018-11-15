@@ -32,7 +32,7 @@ var controller = require('./backend-controller.js');
 
 
 var app = express();
-app.use(secure);
+//app.use(secure);
 var compression = require('compression');
 
 var uniqueRandomArray = require('unique-random-array');
