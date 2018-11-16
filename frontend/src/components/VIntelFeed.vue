@@ -45,7 +45,7 @@
                                     <span class="text-right">{{row.totalReward}}</span>
                                 </div>
                                 <div class="text-center">
-                                    <VIntelButtonAction @intelReward="intelReward" :user="user" :intel="row"></VIntelButtonAction>
+                                    <VIntelButtonAction :user="user" :intel="row"></VIntelButtonAction>
                                 </div>
                             </div>
 
@@ -87,7 +87,6 @@
             </div>
         </div>
         <VShimmerFeed v-else></VShimmerFeed>
-        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 
@@ -164,9 +163,6 @@
             },
             dateStringFormat(date) {
                 return new Date(date);
-            },
-            intelReward(intel){
-                this.intel = intel;
             },
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;

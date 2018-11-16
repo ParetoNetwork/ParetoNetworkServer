@@ -111,7 +111,7 @@
                                         </div>
                                         <div class="col-sm-4 px-1">
                                             <div class="text-center">
-                                                <VIntelButtonAction @intelReward="intelReward" :user="user" :intel="post"></VIntelButtonAction>
+                                                <VIntelButtonAction :user="user" :intel="post"></VIntelButtonAction>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 px-1">
@@ -180,7 +180,6 @@
                 </form>
             </div>
         </b-modal>
-        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 
@@ -202,7 +201,6 @@
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
     import VIntelButtonAction from "./Events/VIntelButtonAction";
-    import VModalReward from "./Modals/VModalReward";
 
     export default {
         name: "VIntel",
@@ -213,7 +211,6 @@
             VShimmerMyPost,
             VShimmerFeed,
             VIntelFeed,
-            VModalReward,
             VIntelButtonAction
         },
         data: function () {
@@ -241,7 +238,8 @@
                     score: 0,
                     tokens: 0
                 },
-                updateContentVar: 0
+                updateContentVar: 0,
+                intel : {}
             };
         },
         directives: {
@@ -306,19 +304,6 @@
             },
             dateStringFormat(date) {
                 return new Date(date);
-            },
-            distributeReward: function (ID) {
-                ContentService.distributeRewards(
-                    {ID}, {signType: this.signType, pathId: this.pathId},
-                    res => {
-                        //  console.log(res);
-                    },
-                    error => {
-                    }
-                );
-            },
-            intelReward(intel){
-                this.intel = intel;
             },
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
