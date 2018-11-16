@@ -99,18 +99,27 @@
                     </div>
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
-                            <li class="list-group-item border-0 p-3" v-for="post in myContent" :key="post.id">
+                            <li class="list-group-item border-0 px-0 py-3" v-for="post in myContent" :key="post.id">
                                 <div class="split">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
-                                            <h5 class="title ellipsis"><b>{{post.title}}</b></h5>
-                                            <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
-                                            <span>{{post.dateCreated | date}}</span>
-                                        </router-link>
-                                        <div class="d-flex border" style="padding: 5px;">
-                                            <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
-                                                <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
-                                                &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                                    <div class="row mx-0">
+                                        <div class="col-sm-5 px-0">
+                                            <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
+                                                <h5 class="title ellipsis"><b>{{post.title}}</b></h5>
+                                                <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
+                                                <span>{{post.dateCreated | date}}</span>
+                                            </router-link>
+                                        </div>
+                                        <div class="col-sm-4 px-1">
+                                            <div class="text-center">
+                                                <VIntelButtonAction :user="user" :intel="post"></VIntelButtonAction>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 px-1">
+                                            <div class="d-flex border" style="padding: 5px;">
+                                                <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
+                                                    <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
+                                                    &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -127,7 +136,6 @@
                                                     :duration="randomNumber(1,3)"
                                                     :options="countUp.options"
                                                     @ready="onReady"/>
-
                                         </a>
                                     </div>
 
@@ -151,10 +159,9 @@
                         <span v-else> No data to display </span>
                     </div>
                 </div>
-
             </div>
             <div class="col-md-7 mb-3">
-                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block"></VIntelFeed>
+                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
             </div>
         </div>
         <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
@@ -193,6 +200,8 @@
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
+    import VIntelButtonAction from "./Events/VIntelButtonAction";
+
     export default {
         name: "VIntel",
         mixins: [countUpMixin],
@@ -201,7 +210,8 @@
             VShimmerUser,
             VShimmerMyPost,
             VShimmerFeed,
-            VIntelFeed
+            VIntelFeed,
+            VIntelButtonAction
         },
         data: function () {
             return {
@@ -228,7 +238,8 @@
                     score: 0,
                     tokens: 0
                 },
-                updateContentVar: 0
+                updateContentVar: 0,
+                intel : {}
             };
         },
         directives: {
@@ -253,7 +264,7 @@
             this.main();
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"])
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
@@ -294,16 +305,6 @@
             dateStringFormat(date) {
                 return new Date(date);
             },
-            distributeReward: function (ID) {
-                ContentService.distributeRewards(
-                    {ID}, {signType: this.signType, pathId: this.pathId},
-                    res => {
-                        //  console.log(res);
-                    },
-                    error => {
-                    }
-                );
-            },
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
@@ -331,6 +332,8 @@
             loadAddress: function () {
                 return dashboardService.getAddress(
                     res => {
+                        this.user.address = res.address;
+                        console.log(this.user.address);
                         this.address = res;
                     },
                     error => {
@@ -423,6 +426,7 @@
                         this.allMyContent = res;
                         this.loadedMyContent = true;
                         this.myContent = this.allMyContent.slice(0, 10);
+                        console.log(this.myContent);
                     },
                     error => {
                         let errorText = error.message ? error.message : error;
