@@ -1,7 +1,7 @@
 "use strict";
 
-var compression = require('compression');
 var express = require('express');
+var secure = require('ssl-express-www');
 const cors = require('cors');
 const fs = require("fs");
 const expressStaticGzip = require('express-static-gzip');
@@ -32,6 +32,7 @@ var controller = require('./backend-controller.js');
 
 
 var app = express();
+app.use(secure);
 var compression = require('compression');
 
 var uniqueRandomArray = require('unique-random-array');
