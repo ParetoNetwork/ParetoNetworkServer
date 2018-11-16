@@ -28,7 +28,6 @@
                                         <div class="d-flex flex-column flex-grow-1 pr-3">
                                             <h1 class="title ellipsis">{{row.title|| 'No title'}}</h1>
                                             <div class="">
-                                                <span class="text-dashboard">Rewarded {{row.rewarded}} Times</span>
                                                 <div>
                                                     <span class="text-dashboard">Disclosed by: <!-- <a v-bind:href="'/'+row.createdBy.address"> --> {{row.createdBy.alias ? row.createdBy.alias : row.createdBy.address}} <!-- </a> --></span>
                                                 </div>
@@ -42,7 +41,7 @@
                             <div class="col-12 col-lg-2 mt-2 mt-lg-0 ml-1 px-0">
                                 <div v-if="false" class="text-right font-weight-bold">
                                     <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
-                                    <span class="text-right">{{row.totalReward}}</span>
+                                    <span class="text-right">{{row.totalReward}} {{row.rewarded ? ", " + row.rewarded : ''}}</span>
                                 </div>
                                 <div v-if="row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
                                      class="text-center">
