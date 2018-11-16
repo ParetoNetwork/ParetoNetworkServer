@@ -32,7 +32,7 @@
             </b-form-input>
             <b-row class="m-2 mt-4 d-flex justify-content-center">
                 <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                <b-button :disabled="!hardwareAvailable || tokenAmount<=0 ||  userTokens < tokenAmount"
+                <b-button :disabled="!hardwareAvailable || tokenAmount<=0 ||  myTokens < tokenAmount"
                           style="background-color: rgb(107, 194, 123)" variant="success"
                           @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
                 </b-button>
@@ -50,11 +50,8 @@
     export default {
         name: "VModalReward",
         computed: {
-            ...mapState(["signType", "pathId" , "showModalReward"])
+            ...mapState(["signType", "pathId" , "showModalReward", "intelReward", "myTokens"])
         },
-        props: [
-            'intel', 'userTokens'
-        ],
         data: function () {
             return{
                 rewardId: '',
@@ -64,10 +61,11 @@
             }
         },
         mounted: function(){
+            console.log(this.intelReward, this.myTokens);
             this.$refs.modalReward.show();
-            this.rewardId = this.intel.id;
-            this.intelAddress = this.intel.intelAddress;
-            this.tokenAmount = Math.min(this.userTokens, this.intel.reward);
+            this.rewardId = this.intelReward.id;
+            this.intelAddress = this.intelReward.intelAddress;
+            this.tokenAmount = Math.min(this.myTokens, this.intelReward.reward);
             this.isAvailable();
         },
         methods: {
