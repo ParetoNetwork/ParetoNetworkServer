@@ -973,6 +973,7 @@ controller.getContentByCurrentUser = function(req, callback){
                   results.forEach(function(entry){
                       let data = {
                           _id: entry._id,
+                          id: entry.id,
                           blockAgo : Math.max(blockHeight - entry.block),
                           block : entry.block,
                           address: entry.address,

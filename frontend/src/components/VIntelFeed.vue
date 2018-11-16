@@ -45,31 +45,7 @@
                                     <span class="text-right">{{row.totalReward}}</span>
                                 </div>
                                 <div class="text-center">
-                                    <div class="d-inline-block">
-                                        <b-btn v-if="row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
-                                               class="btn-primary-pareto mx-auto px-4"
-                                               :disabled="pendingRowTransactions(row) || user.address === row.address"
-                                               @click="openRewardModal(row)">
-                                            <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-                                            <b> {{ row.reward }} </b>
-                                        </b-btn>
-                                        <b-btn v-if="user.address === row.address &&
-                                                        row.intelAddress &&
-                                                        signType != 'Manual' &&
-                                                        row.expires < Math.round(new Date().getTime() / 1000) &&
-                                                        !row.distributed"
-                                                class="btn-primary-pareto mx-auto px-4"
-                                                @click="distribute(intel)">
-                                            COLLECT
-                                        </b-btn>
-                                        <a  v-if="user.address === row.address && row.distributed"
-                                            v-bind:href="etherscanUrl+'/tx/'+ (row.txHashDistribute || row.txHash)"
-                                            target="_blank">
-                                            <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
-                                                <i class="fa fa-external-link"></i> SENT
-                                            </b-btn>
-                                        </a>
-                                    </div>
+                                    <VIntelButtonAction @intelReward="intelReward" :user="user" :intel="row"></VIntelButtonAction>
                                 </div>
                             </div>
 
@@ -109,10 +85,9 @@
                     </li>
                 </ul>
             </div>
-
-            <VModalReward :intel="intelReward" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
         </div>
         <VShimmerFeed v-else></VShimmerFeed>
+        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 
@@ -128,14 +103,16 @@
     import profileService from "../services/profileService";
 
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
+
+    import VIntelButtonAction from "./Events/VIntelButtonAction";
     import VModalReward from "./Modals/VModalReward";
-    import ContentService from "../services/ContentService";
 
     export default {
         name: "VIntelFeed",
         components: {
             ICountUp,
             VShimmerFeed,
+            VIntelButtonAction,
             VModalReward
         },
         props: [
@@ -154,7 +131,7 @@
                     page: 0,
                 },
                 loading: true,
-                intelReward: {}
+                intel: {}
             }
         },
         computed: {
@@ -163,6 +140,7 @@
         },
         beforeMount: function () {
             this.loadContent();
+            console.log(this.user);
         },
         watch: {
             //Updates when parent view, which has the webSocket, receives new information and refreshes
@@ -187,34 +165,8 @@
             dateStringFormat(date) {
                 return new Date(date);
             },
-            distribute: function (intel) {
-                ContentService.distributeRewards(
-                    {ID: intel.id, intelAddress: intel.intelAddress},
-                    {signType: this.signType, pathId: this.pathId},
-                    {
-                        addTransaction: this.addTransaction,
-                        transactionComplete: this.transactionComplete,
-                        editTransaction: this.editTransaction,
-                        toastTransaction: this.$notify
-                    },
-                    res => {
-                        this.$notify({
-                            group: 'notification',
-                            type: 'success',
-                            duration: 10000,
-                            title: 'Event: Collect',
-                            text: 'Confirmed Collect'
-                        });
-                    },
-                    err => {
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            text: err.message ? err.message : err
-                        });
-                    }
-                );
+            intelReward(intel){
+                this.intel = intel;
             },
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
@@ -259,10 +211,6 @@
                     );
                 }
             },
-            openRewardModal: function (row) {
-                this.intelReward = row;
-                this.openModalReward(true);
-            },
             updateFeedContent: function () {
                 let params = {
                     page: 0,
@@ -299,15 +247,6 @@
             loadProfileImage: function (pic) {
                 let path = this.baseURL + "/profile-image?image=";
                 return profileService.getProfileImage(path, pic);
-            },
-            pendingRowTransactions: function(intel){
-                let transactionPending = false;
-                this.pendingTransactions.forEach(transaction => {
-                    if(intel.id === transaction.intel){
-                        transactionPending = true;
-                    }
-                });
-                return transactionPending;
             },
             randomNumber: function (min = 1, max = 3) {
                 return Math.floor(Math.random() * (max - min + 1) + min);

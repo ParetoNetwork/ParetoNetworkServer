@@ -111,29 +111,7 @@
                                         </router-link>
 
                                         <div class="text-center">
-                                            <div class="d-inline-block">
-                                                <b-btn v-if="post.intelAddress && signType != 'Manual' && post.expires > Math.round(new Date().getTime() / 1000)"
-                                                       class="btn-primary-pareto mx-auto px-4"
-                                                       :disabled="user.address === post.address">
-                                                    <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-                                                    <b> {{ post.reward }} </b>
-                                                </b-btn>
-                                                <b-btn v-if="user.address === post.address &&
-                                                        post.intelAddress &&
-                                                        signType != 'Manual' &&
-                                                        post.expires < Math.round(new Date().getTime() / 1000) &&
-                                                        !post.distributed"
-                                                       class="btn-primary-pareto mx-auto px-4">
-                                                    COLLECT
-                                                </b-btn>
-                                                <a  v-if="user.address === post.address && post.distributed"
-                                                    v-bind:href="etherscanUrl+'/tx/'+ (post.txHashDistribute || post.txHash)"
-                                                    target="_blank">
-                                                    <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
-                                                        <i class="fa fa-external-link"></i> SENT
-                                                    </b-btn>
-                                                </a>
-                                            </div>
+                                            <VIntelButtonAction @intelReward="intelReward" :user="user" :intel="post"></VIntelButtonAction>
                                         </div>
                                         <div class="d-flex border" style="padding: 5px;">
                                             <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
@@ -155,7 +133,6 @@
                                                     :duration="randomNumber(1,3)"
                                                     :options="countUp.options"
                                                     @ready="onReady"/>
-
                                         </a>
                                     </div>
 
@@ -200,6 +177,7 @@
                 </form>
             </div>
         </b-modal>
+        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 
@@ -220,6 +198,9 @@
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
+    import VIntelButtonAction from "./Events/VIntelButtonAction";
+    import VModalReward from "./Modals/VModalReward";
+
     export default {
         name: "VIntel",
         mixins: [countUpMixin],
@@ -228,7 +209,9 @@
             VShimmerUser,
             VShimmerMyPost,
             VShimmerFeed,
-            VIntelFeed
+            VIntelFeed,
+            VModalReward,
+            VIntelButtonAction
         },
         data: function () {
             return {
@@ -280,7 +263,7 @@
             this.main();
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"])
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
@@ -330,6 +313,9 @@
                     error => {
                     }
                 );
+            },
+            intelReward(intel){
+                this.intel = intel;
             },
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
@@ -452,6 +438,7 @@
                         this.allMyContent = res;
                         this.loadedMyContent = true;
                         this.myContent = this.allMyContent.slice(0, 10);
+                        console.log(this.myContent);
                     },
                     error => {
                         let errorText = error.message ? error.message : error;

@@ -18,7 +18,7 @@
                                         <span v-if="profile.alias" class="subtitle-dashboard"><b> {{profile.alias}} </b></span>
                                         <span v-else class="subtitle-dashboard"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
                                         <div class="text-center">
-                                            <VIntelButtonAction :userAddress="user.address" :intel="intel"></VIntelButtonAction>
+                                            <VIntelButtonAction @intelReward="intelReward" :user="user" :intel="intel"></VIntelButtonAction>
                                         </div>
                                     </div>
                                 </div>
@@ -64,7 +64,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
         <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
@@ -84,8 +83,9 @@
 
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
     import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
-    import VModalReward from "./Modals/VModalReward";
     import VIntelButtonAction from "./Events/VIntelButtonAction";
+
+    import VModalReward from "./Modals/VModalReward";
 
     export default {
         name: 'VIntelDetail',
@@ -95,8 +95,8 @@
             VShimmerUserProfile,
             VShimmerIntelInformation,
             VProfile,
-            VModalReward,
-            VIntelButtonAction
+            VIntelButtonAction,
+            VModalReward
         },
         computed: {
             ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
@@ -140,6 +140,9 @@
                 } else {
                     this.hardwareAvailable = true;
                 }
+            },
+            intelReward(intel){
+                this.intel = intel;
             },
             getIntel: function () {
                 return DashboardService.getIntel(this.id, res => {
