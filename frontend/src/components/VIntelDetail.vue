@@ -18,7 +18,7 @@
                                         <span v-if="profile.alias" class="subtitle-dashboard"><b> {{profile.alias}} </b></span>
                                         <span v-else class="subtitle-dashboard"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
                                         <div class="text-center">
-                                            <VIntelButtonAction @intelReward="intelReward" :user="user" :intel="intel"></VIntelButtonAction>
+                                            <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                                         </div>
                                     </div>
                                 </div>
@@ -65,7 +65,6 @@
                 </div>
             </div>
         </div>
-        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 <script>
@@ -115,7 +114,6 @@
                     rank: 1000
                 },
                 user: {},
-                intelReward: {},
                 baseURL: environment.baseURL
             };
         },
@@ -140,9 +138,6 @@
                 } else {
                     this.hardwareAvailable = true;
                 }
-            },
-            intelReward(intel){
-                this.intel = intel;
             },
             getIntel: function () {
                 return DashboardService.getIntel(this.id, res => {
@@ -185,40 +180,6 @@
                 } else {
                     this.overrideOnMessage();
                 }
-            },
-            openRewardModal: function () {
-                this.openModalReward(true);
-            },
-            distribute: function (intel) {
-                ContentService.distributeRewards(
-                    {ID: intel.id, intelAddress: intel.intelAddress},
-                    {signType: this.signType, pathId: this.pathId},
-                    {
-                        addTransaction: this.addTransaction,
-                        transactionComplete: this.transactionComplete,
-                        editTransaction: this.editTransaction,
-                        toastTransaction: this.$notify
-                    },
-                    res => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'success',
-                            duration: 10000,
-                            title: 'Event: Collect',
-                            text: 'Confirmed Collect'
-                        });
-                    },
-                    err => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            text: err.message ? err.message : err
-                        });
-                    }
-                );
             },
             loadProfile: function () {
                 return ProfileService.getProfile(

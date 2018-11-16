@@ -47,12 +47,12 @@
             };
         },
         computed: {
-            ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
+            ...mapState(["ws", "signType", "pendingTransactions"])
         },
-        mounted : function(){
+        mounted: function () {
         },
         methods: {
-            ...mapMutations(["openModalReward"]),
+            ...mapMutations(["openModalReward", "addReward"]),
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             distribute: function (intel) {
                 console.log(intel);
@@ -88,7 +88,12 @@
                 );
             },
             openRewardModal: function () {
-                this.$emit('intelReward', this.intel);
+                console.log(this.intel, this.user.tokens);
+                let params = {
+                    intel: this.intel,
+                    tokens: this.user.tokens
+                };
+                this.addReward(params);
                 this.openModalReward(true);
             },
             pendingRowTransactions: function (intel) {
