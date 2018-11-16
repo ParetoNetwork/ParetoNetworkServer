@@ -1,7 +1,7 @@
 "use strict";
 
 var express = require('express');
-var secure = require('ssl-express-www');
+var secure = {};
 const cors = require('cors');
 const fs = require("fs");
 const expressStaticGzip = require('express-static-gzip');
@@ -15,6 +15,10 @@ var multerS3 = require('multer-s3');
 const cron = require("node-cron");
 let constants = {};
 const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
+
+if(!process.env.DISABLE_SSL){
+    secure = require('ssl-express-www');
+}
 
 if (fs.existsSync(constantsPath)) {
     constants = require(constantsPath);
@@ -32,7 +36,11 @@ var controller = require('./backend-controller.js');
 
 
 var app = express();
-app.use(secure);
+
+if(!process.env.DISABLE_SSL){
+    app.use(secure);
+}
+
 var compression = require('compression');
 
 var uniqueRandomArray = require('unique-random-array');
