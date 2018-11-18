@@ -381,7 +381,7 @@ controller.startwatchDistribute= function (intel, intelAddress){
         try{
             const intelIndex = parseInt(event.returnValues.intelIndex);
 
-            let promises = [ ParetoContent.findOneAndUpdate({id:intelIndex}, {distributed: true})
+            let promises = [ ParetoContent.findOneAndUpdate({id:intelIndex}, {distributed: true, txHashDistribute: event.transactionHash})
                 ,  ParetoTransaction.findOneAndUpdate({   txHash: event.transactionHash } , { status: 3,  txRewardHash: event.transactionHash  })];
             Promise.all(promises).then( values =>{
                 if(controller.wss && values.length > 1){
@@ -840,6 +840,7 @@ controller.getAllAvailableContent = function(req, callback) {
                                 reward:  entry.reward,
                                 speed: entry.speed,
                                 id:entry.id,
+                                txHashDistribute: entry.txHashDistribute,
                                 intelAddress: entry.intelAddress,
                                 _v: entry._v,
                                 distributed: entry.distributed,
@@ -972,6 +973,7 @@ controller.getContentByCurrentUser = function(req, callback){
                   results.forEach(function(entry){
                       let data = {
                           _id: entry._id,
+                          id: entry.id,
                           blockAgo : Math.max(blockHeight - entry.block),
                           block : entry.block,
                           address: entry.address,
@@ -982,6 +984,7 @@ controller.getContentByCurrentUser = function(req, callback){
                           totalReward:  entry.totalReward || 0,
                           reward:  entry.reward,
                           speed: entry.speed,
+                          txHashDistribute: entry.txHashDistribute,
                           expires: entry.expires,
                           validated: entry.validated,
                           intelAddress: entry.intelAddress,
