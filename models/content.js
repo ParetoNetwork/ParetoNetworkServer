@@ -11,7 +11,8 @@ var paretoContentSchema = new Schema({
 	text: String, //this is the plain text version of the html formatted body
 	reward: { type: Number, default: 0 }, //set required { type: Number, required: true }
     totalReward: { type: Number, default: 0 },
-    txHash: String, //set required { type: String, required: true }
+    txHash: String,
+    txHashDistribute: String,//set required { type: String, required: true }
 	speed: Number,
 	dateCreated: { type: Date, default: Date.now },
 	block: Number,

@@ -374,7 +374,6 @@
 
                 if(this.table){
                     this.scroll.distance = this.table.scrollTop;
-                    console.log('scrolled');
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){

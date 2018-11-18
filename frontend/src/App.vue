@@ -25,6 +25,7 @@
             </template>
         </notifications>
 
+        <VModalReward v-if="showModalReward"></VModalReward>
         <VBottomNav></VBottomNav>
     </div>
 </template>
@@ -37,12 +38,17 @@
     import Auth from "./services/authService";
     import {mapMutations, mapState} from 'vuex';
 
+    import VModalReward from "./components/Modals/VModalReward";
     export default {
         name: 'App',
         components: {
             Navbar,
             SplashDashboard,
-            VBottomNav
+            VBottomNav,
+            VModalReward
+        },
+        computed: {
+            ...mapState(["showModalReward"])
         },
         data: function(){
             return{
