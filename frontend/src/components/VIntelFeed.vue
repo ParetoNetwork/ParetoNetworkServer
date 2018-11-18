@@ -43,17 +43,8 @@
                                     <img src="../assets/images/icon-mini.svg" alt="" class="icon-mini">
                                     <span class="text-right">{{row.totalReward}} {{row.rewarded ? ", " + row.rewarded : ''}}</span>
                                 </div>
-                                <div v-if="row.intelAddress && signType != 'Manual' && row.expires > Math.round(new Date().getTime() / 1000)"
-                                     class="text-center">
-                                    <div class="d-inline-block">
-                                        <b-btn class="btn-primary-pareto mx-auto px-4"
-                                               style="width: 120px;"
-                                               :disabled="pendingRowTransactions(row) || user.address === row.address"
-                                               @click="openRewardModal(row)">
-                                            <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-                                            <b> {{ row.reward }} </b>
-                                        </b-btn>
-                                    </div>
+                                <div class="text-center">
+                                    <VIntelButtonAction :user="user" :intel="row"></VIntelButtonAction>
                                 </div>
                             </div>
 
@@ -93,8 +84,6 @@
                     </li>
                 </ul>
             </div>
-
-            <VModalReward :intel="intelReward" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
         </div>
         <VShimmerFeed v-else></VShimmerFeed>
     </div>
@@ -106,12 +95,14 @@
     import moment from "moment";
     import environment from "../utils/environment";
 
-    import {mapState, mapMutations} from "vuex";
+    import {mapState, mapMutations, mapActions} from "vuex";
 
     import dashboardService from "../services/dashboardService";
     import profileService from "../services/profileService";
 
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
+
+    import VIntelButtonAction from "./Events/VIntelButtonAction";
     import VModalReward from "./Modals/VModalReward";
 
     export default {
@@ -119,10 +110,11 @@
         components: {
             ICountUp,
             VShimmerFeed,
+            VIntelButtonAction,
             VModalReward
         },
         props: [
-            'updateContent', 'block', 'user', 'fetchAddress', 'title'
+            'updateContent', 'block', 'user', 'fetchAddress', 'title', 'address'
         ],
         mixins: [countUpMixin],
         data: function () {
@@ -137,14 +129,16 @@
                     page: 0,
                 },
                 loading: true,
-                intelReward: {}
+                intel: {}
             }
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"]),
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
         },
         beforeMount: function () {
             this.loadContent();
+            console.log(this.user);
         },
         watch: {
             //Updates when parent view, which has the webSocket, receives new information and refreshes
@@ -212,10 +206,6 @@
                     );
                 }
             },
-            openRewardModal: function (row) {
-                this.intelReward = row;
-                this.openModalReward(true);
-            },
             updateFeedContent: function () {
                 let params = {
                     page: 0,
@@ -252,15 +242,6 @@
             loadProfileImage: function (pic) {
                 let path = this.baseURL + "/profile-image?image=";
                 return profileService.getProfileImage(path, pic);
-            },
-            pendingRowTransactions: function(intel){
-                let transactionPending = false;
-                this.pendingTransactions.forEach(transaction => {
-                    if(intel.id === transaction.intel){
-                        transactionPending = true;
-                    }
-                });
-                return transactionPending;
             },
             randomNumber: function (min = 1, max = 3) {
                 return Math.floor(Math.random() * (max - min + 1) + min);

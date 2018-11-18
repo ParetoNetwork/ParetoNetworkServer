@@ -18,33 +18,13 @@
                                         <span v-if="profile.alias" class="subtitle-dashboard"><b> {{profile.alias}} </b></span>
                                         <span v-else class="subtitle-dashboard"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
                                         <div class="text-center">
-                                            <div class="d-inline-block">
-                                                <b-btn v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-                                                       class="btn-primary-pareto mx-auto px-4"
-                                                       style="width: 120px;"
-                                                       :disabled="pendingRowTransactions(intel) || user.address === intel.address"
-                                                       @click="openRewardModal()">
-                                                    <img src="../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-                                                    <b> {{ intel.reward }} </b>
-                                                </b-btn>
-                                                <b-btn
-                                                        v-if="user.address === intel.address &&
-                                                        intel.intelAddress &&
-                                                        signType != 'Manual' &&
-                                                        intel.expires < Math.round(new Date().getTime() / 1000) &&
-                                                        !intel.distributed"
-                                                        class="btn-primary-pareto mx-auto px-4"
-                                                        @click="distribute(intel)">
-                                                    COLLECT
-                                                </b-btn>
-                                            </div>
+                                            <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                                         </div>
                                     </div>
                                 </div>
 
                             </div>
                             <div class="row border-bottom">
-
                                 <!-- blocks ago -->
                                 <div class="col-md col-xs ellipsis">
                                     <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
@@ -84,9 +64,7 @@
                     </div>
                 </div>
             </div>
-
         </div>
-        <VModalReward :intel="intel" :userTokens="user.tokens" v-if="showModalReward"></VModalReward>
     </div>
 </template>
 <script>
@@ -104,6 +82,8 @@
 
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
     import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
+    import VIntelButtonAction from "./Events/VIntelButtonAction";
+
     import VModalReward from "./Modals/VModalReward";
 
     export default {
@@ -114,6 +94,7 @@
             VShimmerUserProfile,
             VShimmerIntelInformation,
             VProfile,
+            VIntelButtonAction,
             VModalReward
         },
         computed: {
@@ -133,7 +114,6 @@
                     rank: 1000
                 },
                 user: {},
-                intelReward: {},
                 baseURL: environment.baseURL
             };
         },
@@ -163,6 +143,7 @@
                 return DashboardService.getIntel(this.id, res => {
                     this.getProfile(res.address);
                     this.intel = res;
+                    console.log(this.intel);
                 }, error => {
                 });
             },
@@ -199,40 +180,6 @@
                 } else {
                     this.overrideOnMessage();
                 }
-            },
-            openRewardModal: function () {
-                this.openModalReward(true);
-            },
-            distribute: function (intel) {
-                ContentService.distributeRewards(
-                    {ID: intel.id, intelAddress: intel.intelAddress},
-                    {signType: this.signType, pathId: this.pathId},
-                    {
-                        addTransaction: this.addTransaction,
-                        transactionComplete: this.transactionComplete,
-                        editTransaction: this.editTransaction,
-                        toastTransaction: this.$notify
-                    },
-                    res => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'success',
-                            duration: 10000,
-                            title: 'Event: Collect',
-                            text: 'Confirmed Collect'
-                        });
-                    },
-                    err => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            text: err.message ? err.message : err
-                        });
-                    }
-                );
             },
             loadProfile: function () {
                 return ProfileService.getProfile(
