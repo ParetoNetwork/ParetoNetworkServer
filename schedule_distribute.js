@@ -32,53 +32,59 @@ cron.schedule("*/30 * * * *", async () => {
   let current_time = Math.floor(new Date().getTime() / 1000);
   let distributeTime = current_time - 864000;
   let nonceNumber = await web3.eth.getTransactionCount(publicKey);
-
-  ParetoIntel.find(
-    {
-      $and: [{ distributed: false }, { expires: { $lt: distributeTime } }]
-    },
-    async (err, intels) => {
-      let intelsDistributed = 0;
-      for (let i = 0; i < intels.length; i++) {
-        const intelID = intels[i].id;
-        const intelProvider = intels[i].address;
-        const fetched_intel = await Intel.methods.getIntel(intelID).call();
-        // console.log(fetched_intel);
-        if (fetched_intel.depositAmount == 0) {
-          continue;
-        }
-
-        if (fetched_intel.rewarded == true) {
-          continue;
-        }
-
-        if (fetched_intel.rewardAfter > distributeTime) {
-          continue;
-        }
-
-        console.log(fetched_intel);
-        const data = Intel.methods.distributeReward(intelID).encodeABI();
-        // construct the transaction data
-        txData = {
-          nonce: web3.utils.toHex(nonceNumber++),
-          gasLimit: web3.utils.toHex(900000),
-          gasPrice: web3.utils.toHex(30e9), // 10 Gwei
-          to: Intel_Contract_Schema.networks[ethNetwork].address,
-          from: publicKey,
-          data
-        };
-
-        transaction = new Tx(txData);
-        transaction.sign(privateKeyBuff);
-        serializedTx = transaction.serialize().toString("hex");
-        web3.eth.sendSignedTransaction("0x" + serializedTx, (err, hash) => {
-          if(err){
-            console.log("Distribute Scheduler Transaction error: ",err);
+  try {
+    ParetoIntel.find(
+      {
+        $and: [{ distributed: false }, { expires: { $lt: distributeTime } }]
+      },
+      async (err, intels) => {
+        let intelsDistributed = 0;
+        for (let i = 0; i < intels.length; i++) {
+          const intelID = intels[i].id;
+          const intelProvider = intels[i].address;
+          const fetched_intel = await Intel.methods.getIntel(intelID).call();
+          // console.log(fetched_intel);
+          if (fetched_intel.depositAmount == 0) {
+            continue;
           }
-          intelsDistributed++;
-        });
+
+          if (fetched_intel.rewarded == true) {
+            continue;
+          }
+
+          if (fetched_intel.rewardAfter > distributeTime) {
+            continue;
+          }
+
+          console.log(fetched_intel);
+          const data = Intel.methods.distributeReward(intelID).encodeABI();
+          // construct the transaction data
+          txData = {
+            nonce: web3.utils.toHex(nonceNumber++),
+            gasLimit: web3.utils.toHex(900000),
+            gasPrice: web3.utils.toHex(30e9), // 10 Gwei
+            to: Intel_Contract_Schema.networks[ethNetwork].address,
+            from: publicKey,
+            data
+          };
+
+          transaction = new Tx(txData);
+          transaction.sign(privateKeyBuff);
+          serializedTx = transaction.serialize().toString("hex");
+          web3.eth.sendSignedTransaction("0x" + serializedTx, (err, hash) => {
+            if (err) {
+              console.log("Distribute Scheduler Transaction error: ", err);
+            }
+            intelsDistributed++;
+          });
+        }
+        console.log(
+          "================== Intels distributed ================== ",
+          intelsDistributed
+        );
       }
-      console.log("================== Intels distributed ================== ", intelsDistributed);
-    }
-  );
+    );
+  } catch (err) {
+    console.log("Error in try/catch of distribute scheduler ", err);
+  }
 });
