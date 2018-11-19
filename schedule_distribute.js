@@ -72,6 +72,9 @@ cron.schedule("*/30 * * * *", async () => {
         transaction.sign(privateKeyBuff);
         serializedTx = transaction.serialize().toString("hex");
         web3.eth.sendSignedTransaction("0x" + serializedTx, (err, hash) => {
+          if(err){
+            console.log("Distribute Scheduler Transaction error: ",err);
+          }
           intelsDistributed++;
         });
       }
