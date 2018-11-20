@@ -7,7 +7,6 @@ var Tx = require("ethereumjs-tx");
 const web3 = new Web3(process.env.WEB3_URL);
 
 const ParetoIntel = mongoose.model("content");
-const ParetoProfile = mongoose.model("profile");
 
 const ethNetwork = process.env.ETH_NETWORK;
 const privKey = process.env.DT_ORACLE_SYS;
@@ -24,13 +23,13 @@ let privateKeyBuff = new Buffer(decryptedPrivKey, "hex");
 const wallet = ETHwallet.fromPrivateKey(privateKeyBuff);
 const publicKey = wallet.getChecksumAddressString();
 
-let gPrice, txData, data, transaction, serializedTx;
+let txData, transaction, serializedTx;
 
-cron.schedule("*/30 * * * *", async () => {
+cron.schedule("* * * * *", async () => {
   console.log("Running rewards distriute scheduler");
 
   let current_time = Math.floor(new Date().getTime() / 1000);
-  let distributeTime = current_time - 864000;
+  let distributeTime = current_time; //- 864000;
   let nonceNumber = await web3.eth.getTransactionCount(publicKey);
   try {
     /* 
@@ -38,17 +37,20 @@ cron.schedule("*/30 * * * *", async () => {
         When we invoke the Intel smart contract distributeReward function, an event is fired per transaction. 
         An event listener resides in the backend javacript, when the event is received the ParetoIntel.distributed flag           
         is set to true.
-    */ 
+    */
     ParetoIntel.find(
       {
         $and: [{ distributed: false }, { expires: { $lt: distributeTime } }]
       },
       async (err, intels) => {
+        if (err) {
+          console.log("ERROR FROM MONGODB: ", err);
+          return;
+        }
         //Iterate through each result.
         let intelsDistributed = 0;
         for (let i = 0; i < intels.length; i++) {
           const intelID = intels[i].id;
-          const intelProvider = intels[i].address;
 
           //For each intel that we fetch from the Mongo, fetch information from the Intel smart contract for more details
           const fetched_intel = await Intel.methods.getIntel(intelID).call();
@@ -75,11 +77,13 @@ cron.schedule("*/30 * * * *", async () => {
           //Lets calculate the gasLimit and gasPrice dynamically
 
           const gasPrice = await web3.eth.getGasPrice();
-          const gas = await Intel.methods.distributeReward(intelID).estimateGas({from:publicKey});
-          
+          const gas = await Intel.methods
+            .distributeReward(intelID)
+            .estimateGas({ from: publicKey });
+
           const data = Intel.methods.distributeReward(intelID).encodeABI();
           // construct the transaction data
-                    txData = {
+          txData = {
             nonce: web3.utils.toHex(nonceNumber++),
             gasLimit: web3.utils.toHex(gas),
             gasPrice: web3.utils.toHex(gasPrice),
