@@ -10,7 +10,7 @@ const ParetoIntel = mongoose.model("content");
 const ParetoProfile = mongoose.model("profile");
 
 const ethNetwork = process.env.ETH_NETWORK;
-const privKey = process.env.PRIV_KEY_DISTRIBUTOR;
+const privKey = process.env.DT_ORACLE_SYS;
 
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
 const Intel = new web3.eth.Contract(
@@ -18,7 +18,7 @@ const Intel = new web3.eth.Contract(
   Intel_Contract_Schema.networks[ethNetwork].address
 );
 
-decryptedPrivKey = Buffer.from(privKey, 'base64').toString('ascii');
+decryptedPrivKey = Buffer.from(privKey, "base64").toString("ascii");
 
 let privateKeyBuff = new Buffer(decryptedPrivKey, "hex");
 const wallet = ETHwallet.fromPrivateKey(privateKeyBuff);
@@ -30,39 +30,61 @@ cron.schedule("*/30 * * * *", async () => {
   console.log("Running rewards distriute scheduler");
 
   let current_time = Math.floor(new Date().getTime() / 1000);
-  let distributeTimeAfter10Days = current_time + 864000;
+  let distributeTime = current_time - 864000;
   let nonceNumber = await web3.eth.getTransactionCount(publicKey);
+  try {
+    ParetoIntel.find(
+      {
+        $and: [{ distributed: false }, { expires: { $lt: distributeTime } }]
+      },
+      async (err, intels) => {
+        let intelsDistributed = 0;
+        for (let i = 0; i < intels.length; i++) {
+          const intelID = intels[i].id;
+          const intelProvider = intels[i].address;
+          const fetched_intel = await Intel.methods.getIntel(intelID).call();
+          // console.log(fetched_intel);
+          if (fetched_intel.depositAmount == 0) {
+            continue;
+          }
 
-  ParetoIntel.find(
-    {
-      $and: [
-        { distributed: false },
-        { expires: { $lt: distributeTimeAfter10Days } }
-      ]
-    },
-    async (err, intels) => {
-      for (let i = 0; i < intels.length; i++) {
-        const intelID = intels[i].id;
-        const intelProvider = intels[i].address;
+          if (fetched_intel.rewarded == true) {
+            continue;
+          }
 
-        const data = Intel.methods.distributeReward(intelID).encodeABI();
-        // construct the transaction data
-        txData = {
-          nonce: web3.utils.toHex(nonceNumber++),
-          gasLimit: web3.utils.toHex(900000),
-          gasPrice: web3.utils.toHex(30e9), // 10 Gwei
-          to: Intel_Contract_Schema.networks[ethNetwork].address,
-          from: publicKey,
-          data
-        };
+          if (fetched_intel.rewardAfter > distributeTime) {
+            continue;
+          }
 
-        transaction = new Tx(txData);
-        transaction.sign(privateKeyBuff);
-        serializedTx = transaction.serialize().toString("hex");
-        web3.eth.sendSignedTransaction("0x" + serializedTx, (err, hash) => {
-          console.log(hash);
-        });
+          console.log(fetched_intel);
+          const data = Intel.methods.distributeReward(intelID).encodeABI();
+          // construct the transaction data
+          txData = {
+            nonce: web3.utils.toHex(nonceNumber++),
+            gasLimit: web3.utils.toHex(900000),
+            gasPrice: web3.utils.toHex(30e9), // 10 Gwei
+            to: Intel_Contract_Schema.networks[ethNetwork].address,
+            from: publicKey,
+            data
+          };
+
+          transaction = new Tx(txData);
+          transaction.sign(privateKeyBuff);
+          serializedTx = transaction.serialize().toString("hex");
+          web3.eth.sendSignedTransaction("0x" + serializedTx, (err, hash) => {
+            if (err) {
+              console.log("Distribute Scheduler Transaction error: ", err);
+            }
+            intelsDistributed++;
+          });
+        }
+        console.log(
+          "================== Intels distributed ================== ",
+          intelsDistributed
+        );
       }
-    }
-  );
+    );
+  } catch (err) {
+    console.log("Error in try/catch of distribute scheduler ", err);
+  }
 });
