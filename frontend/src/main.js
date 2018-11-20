@@ -33,9 +33,16 @@ const store = new Vuex.Store({
         signType: (window.localStorage.getItem('signType')) || 'Metamask',
         pathId: (window.localStorage.getItem('pathId')) || '',
         ws: null,
-        pendingTransactions: []
+        pendingTransactions: [],
+        intelReward : {},
+        myTokens : 0
     },
     mutations: {
+        addReward(state, data){
+            console.log(data);
+            state.intelReward = data.intel;
+            state.myTokens = data.tokens
+        },
         login(state, data) {
             state.isLogged = true;
             state.address = data.address.address;

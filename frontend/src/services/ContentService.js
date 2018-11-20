@@ -90,7 +90,7 @@ export default class ContentService {
         try {
             await this.Setup(signData);
         } catch (e) {
-            return onError(e)
+            return onError(e);
         }
         //console.log(tokenAmount);
 
@@ -109,7 +109,6 @@ export default class ContentService {
             let gasPrice = await web3.eth.getGasPrice();
             const provider_address = accounts[0];
 
-
             const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add five seconds to to allow the rewarder to reward pareto tokens
 
             const decimals = web3.utils.toBN(18);
@@ -122,43 +121,37 @@ export default class ContentService {
                 .approve(Intel.options.address, depositAmount)
                 .estimateGas({from: provider_address});
 
+            console.log(serverData);
+            ContentService.uploadContent(
+                serverData,
+                async res => {
+                    await ParetoTokenInstance.methods
+                        .approve(Intel.options.address, depositAmount)
+                        .send({
+                            from: provider_address,
+                            gas: gasApprove,
+                            gasPrice
+                        })
+                        .once("transactionHash", hash => {
+                            let params = {
+                                intelAddress: Intel.options.address,
+                                address: serverData.address,
+                                txHash: hash,
+                                intel: res.content.Intel_ID,
+                                amount: tokenAmount,
+                                event: 'create',
+                                status: 0
+                            };
 
-            await ParetoTokenInstance.methods
-                .approve(Intel.options.address, depositAmount)
-                .send({
-                    from: provider_address,
-                    gas: gasApprove,
-                    gasPrice
-                })
-                .once("transactionHash", (hash) => {
+                            var txHash = hash;
+                            events.addTransaction(params);
+                            this.postTransactions(params);
 
-                    console.log("Create: First Step");
-                    console.log(Intel.options.address);
-                    console.log(serverData);
-                    console.log(signData);
-                    let params = {
-                        intelAddress: Intel.options.address,
-                        address: serverData.address,
-                        txHash: hash,
-                        intel: -1,
-                        amount: tokenAmount,
-                        event: 'create',
-                        status: 0
-                    };
+                            waitForReceipt(hash, async receipt => {
+                                console.log("Confirm: Second Step");
+                                serverData.approveHash = txHash;
+                                events.editTransaction({hash: hash, status: 1});
 
-                    var txHash = hash;
-                    events.addTransaction(params);
-                    this.postTransactions(params);
-
-                    waitForReceipt(hash, receipt => {
-
-                        console.log("Confirm: Second Step");
-                        serverData.approveHash = txHash;
-                        events.editTransaction({hash: hash, status: 1});
-
-                        ContentService.uploadContent(
-                            serverData,
-                            async res => {
                                 let gasCreateIntel = await Intel.methods
                                     .create(
                                         provider_address,
@@ -183,7 +176,6 @@ export default class ContentService {
                                         gasPrice
                                     })
                                     .on("transactionHash", hash => {
-
                                         events.editTransaction({hash: txHash, status: 2});
                                         waitForReceipt(hash, receipt => {
                                             if (ContentService.ledgerNanoEngine) {
@@ -200,85 +192,193 @@ export default class ContentService {
                                         events.transactionComplete(txHash);
                                         onError(err.message || err);
                                     });
-                            },
-                            err => {
-                                onError(err.message || err);
-                            }
-                        );
-                    });
-                })
-                .on("error", err => {
-                    onError(err.message || err);
+                            });
+                        })
+                        .on("error", err => {
+                            onError(err.message || err);
+                        });
                 });
         });
     }
 
     static async pendingTransactionApproval(content, signData, events, onSuccess, onError) {
         try {
+
             await this.Setup(signData);
             Intel = new web3.eth.Contract(
                 Intel_Contract_Schema,
                 content.intelAddress
             );
             const accounts = await web3.eth.getAccounts();
-            if (accounts[0].toLowerCase() == content.address.toLowerCase()){
-                const rewarder_address = accounts[0];
-                let gasPrice = await web3.eth.getGasPrice();
-                const decimals = web3.utils.toBN(18);
-                const amount = web3.utils.toBN(parseFloat(content.amount));
-                const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
-                switch (content.status){
-                    case 0: {
-                        waitForReceipt(content.txHash, async receipt => {
-                            events.toastTransaction({
-                                group: 'notification',
-                                title: 'Event Ready',
-                                type: 'warning',
-                                duration: 10000,
-                                text: 'Second transaction ready, complete it'
-                            });
-                            events.editTransaction({hash: content.txHash, status: 1});
 
-                            ContentService.sendReward(Intel, {
-                                intel: content.intel,
-                                depositAmount: depositAmount,
-                                txHash: content.txHash,
-                                rewarder_address: rewarder_address,
-                                gasPrice: gasPrice
-                            }, events, onSuccess, onError);
-                        });
-                        break;
-                    }
-                    case 1: {
-                        ContentService.sendReward(Intel, {
-                            intel: content.intel,
-                            depositAmount: depositAmount,
-                            txHash: content.txHash,
-                            rewarder_address: rewarder_address,
-                            gasPrice: gasPrice
-                        }, events, onSuccess, onError);
-                        break;
-                    }
-                    case 2:{
-                        waitForReceipt(content.txRewardHash, receipt => {
-                            if (ContentService.ledgerNanoEngine) {
-                                ContentService.ledgerNanoEngine.stop();
+            let gasPrice = await web3.eth.getGasPrice();
+
+            const decimals = web3.utils.toBN(18);
+            const amount = web3.utils.toBN(parseFloat(content.amount));
+            const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
+
+            const desiredReward = "100";
+
+            console.log(content);
+            if (accounts[0].toLowerCase() == content.address.toLowerCase()) {
+
+                switch (content.event) {
+                    case "reward":
+                        const rewarder_address = accounts[0];
+                        switch (content.status) {
+                            case 0: {
+                                waitForReceipt(content.txHash, async receipt => {
+                                    events.toastTransaction({
+                                        group: 'notification',
+                                        title: 'Event Ready',
+                                        type: 'warning',
+                                        duration: 10000,
+                                        text: 'Second transaction ready, complete it'
+                                    });
+                                    events.editTransaction({hash: content.txHash, status: 1});
+
+                                    ContentService.sendReward(Intel, {
+                                        intel: content.intel,
+                                        depositAmount: depositAmount,
+                                        txHash: content.txHash,
+                                        rewarder_address: rewarder_address,
+                                        gasPrice: gasPrice
+                                    }, events, onSuccess, onError);
+                                });
+                                break;
                             }
-                            events.transactionComplete(content.txHash);
-                            onSuccess("success");
-                        });
+                            case 1: {
+                                ContentService.sendReward(Intel, {
+                                    intel: content.intel,
+                                    depositAmount: depositAmount,
+                                    txHash: content.txHash,
+                                    rewarder_address: rewarder_address,
+                                    gasPrice: gasPrice
+                                }, events, onSuccess, onError);
+                                break;
+                            }
+                            case 2: {
+                                waitForReceipt(content.txRewardHash, receipt => {
+                                    if (ContentService.ledgerNanoEngine) {
+                                        ContentService.ledgerNanoEngine.stop();
+                                    }
+                                    events.transactionComplete(content.txHash);
+                                    onSuccess("success");
+                                });
+                                break;
+                            }
+                        }
+
                         break;
-                    }
+                    case "create":
+                        const provider_address = accounts[0];
+                        const _ttl = Math.round(new Date().getTime() / 1000) + 864000;
+
+                        console.log(provider_address);
+                        console.log(depositAmount);
+                        console.log(desiredReward);
+                        console.log(content);
+                        console.log(_ttl);
+                        let gasCreateIntel = await Intel.methods
+                            .create(
+                                provider_address,
+                                depositAmount,
+                                web3.utils.toWei(desiredReward, "ether"),
+                                content.intel,
+                                _ttl
+                            )
+                            .estimateGas({from: provider_address});
+
+                        switch (content.status){
+                            case 0:
+                                waitForReceipt(content.txHash, async receipt => {
+                                    console.log("Confirm: Second Step");
+                                    events.editTransaction({hash: content.txHash, status: 1});
+
+                                    await Intel.methods
+                                        .create(
+                                            provider_address,
+                                            depositAmount,
+                                            web3.utils.toWei(desiredReward, "ether"),
+                                            content.intel,
+                                            _ttl
+                                        )
+                                        .send({
+                                            from: provider_address,
+                                            gas: gasCreateIntel,
+                                            gasPrice
+                                        })
+                                        .on("transactionHash", hash => {
+                                            events.editTransaction({hash: content.txHash, status: 2});
+                                            waitForReceipt(hash, receipt => {
+                                                if (ContentService.ledgerNanoEngine) {
+                                                    ContentService.ledgerNanoEngine.stop();
+                                                }
+                                                events.transactionComplete(content.txHash);
+                                                onSuccess("successfull");
+                                            });
+                                        })
+                                        .on("error", err => {
+                                            if (ContentService.ledgerNanoEngine) {
+                                                ContentService.ledgerNanoEngine.stop();
+                                            }
+                                            events.transactionComplete(content.txHash);
+                                            onError(err.message || err);
+                                        });
+                                });
+                                break;
+                            case 1:
+                                console.log("llega hasta el nuevo");
+                                await Intel.methods
+                                    .create(
+                                        provider_address,
+                                        depositAmount,
+                                        web3.utils.toWei(desiredReward, "ether"),
+                                        content.intel,
+                                        _ttl
+                                    )
+                                    .send({
+                                        from: provider_address,
+                                        gas: gasCreateIntel,
+                                        gasPrice
+                                    })
+                                    .on("transactionHash", hash => {
+                                        events.editTransaction({hash: content.txHash, status: 2});
+                                        waitForReceipt(hash, receipt => {
+                                            if (ContentService.ledgerNanoEngine) {
+                                                ContentService.ledgerNanoEngine.stop();
+                                            }
+                                            events.transactionComplete(content.txHash);
+                                            onSuccess("successfull");
+                                        });
+                                    })
+                                    .on("error", err => {
+                                        if (ContentService.ledgerNanoEngine) {
+                                            ContentService.ledgerNanoEngine.stop();
+                                        }
+                                        events.transactionComplete(content.txHash);
+                                        onError(err.message || err);
+                                    });
+                                break;
+                            case 2:
+                                waitForReceipt(hash, receipt => {
+                                    if (ContentService.ledgerNanoEngine) {
+                                        ContentService.ledgerNanoEngine.stop();
+                                    }
+                                    events.transactionComplete(content.txHash);
+                                    onSuccess("successfull");
+                                });
+                        }
+                        break;
                 }
             }
-
         } catch (e) {
             return onError(e)
         }
     }
 
-    static async sendReward(Intel, content, events, onSuccess, onError){
-        try{
+    static async sendReward(Intel, content, events, onSuccess, onError) {
+        try {
             const gasSendReward = await Intel.methods
                 .sendReward(content.intel, content.depositAmount)
                 .estimateGas({from: content.rewarder_address});
@@ -312,7 +412,7 @@ export default class ContentService {
                     events.transactionComplete(content.txHash);
                     onError(error);
                 });
-        }catch (e) {
+        } catch (e) {
             let params = {
                 txHash: content.txHash,
                 status: 4
@@ -328,7 +428,6 @@ export default class ContentService {
                 text: 'Transaction Failed'
             });
         }
-
     }
 
     static async rewardIntel(content, signData, events, onSuccess, onError) {
