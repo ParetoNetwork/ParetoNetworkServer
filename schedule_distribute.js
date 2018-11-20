@@ -25,11 +25,12 @@ const publicKey = wallet.getChecksumAddressString();
 
 let txData, transaction, serializedTx;
 
+//execute cron job every 30 minutes
 cron.schedule("*/30 * * * *", async () => {
   console.log("Running rewards distriute scheduler");
 
   let current_time = Math.floor(new Date().getTime() / 1000);
-  let distributeTime = current_time - 864000;
+  let distributeTime = current_time - 864000;    // get time from 10 days agp
   let nonceNumber = await web3.eth.getTransactionCount(publicKey);
   try {
     /* 
