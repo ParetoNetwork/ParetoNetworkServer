@@ -27,26 +27,9 @@
                                 <span class="ellipsis">{{user.address}}</span>
                             </router-link>
 
-
-                            <div class="mt-2">
-                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
-                            </div>
-
                             <!-- rank, icon globe color should be contingent on access level, whether above or below the threshold. Globe icon for "global rank" -->
                             <router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">
                                 <div class="row mt-2">
-                                    <div class="col-md col-xs mb-2 ellipsis">
-                                            <i class="fa fa-area-chart" style="color: #4e555b; margin: 2px;"></i>
-                                            <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
-                                            <ICountUp
-                                                    :startVal="countUp.startVal"
-                                                    :endVal="parseFloat(user.rank)"
-                                                    :decimals="decimalsLength(user.rank)"
-                                                    :duration="randomNumber(3,6)"
-                                                    :options="countUp.options"
-                                                    @ready="onReady"/>
-                                    </div>
                                     <!-- score, star for score, earn more stars for a greater score -->
                                     <div class="col-md col-xs mb-2 ellipsis">
                                         <i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>
@@ -60,8 +43,23 @@
                                                 @ready="onReady"/>
                                         <span v-else> 0 </span>
                                     </div>
+                                    <div class="col-md col-xs mb-2 ellipsis">
+                                        <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
+                                        <ICountUp
+                                                :startVal="countUp.startVal"
+                                                :endVal="parseFloat(user.rank)"
+                                                :decimals="decimalsLength(user.rank)"
+                                                :duration="randomNumber(3,6)"
+                                                :options="countUp.options"
+                                                @ready="onReady"/>
+                                    </div>
                                 </div>
                             </router-link>
+
+                            <div class="mb-2">
+                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                            </div>
 
                             <!-- make this upwards of four lines before ellipsis -->
                             <i class="fa fa-edit cursor-pointer" style="color: #4e555b; margin: 2px;" @click="showModal"></i>{{user.biography || 'No biography provided'}}
@@ -88,17 +86,11 @@
                     <div class="p-3">
                         <h5 class="title text-left border-bottom p-2"><b>EVENTS</b></h5>
                         <div v-for="tx in pendingTransactions" class="mt-1">
-                            <div class="row border-bottom m-0">
-                                <div class="col">
-                                    <div>Event: {{tx.event}}</div>
-                                    <div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>
-                                </div>
-                                <div class="col">
-                                    <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
-                                    <a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
-                                </div>
-                            </div>
                             <div class="d-flex justify-content-between cursor-pointer">
+                                <div>Event: {{(tx.event == 'distribute')? 'collect': tx.event}}</div>
+                                <div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>
+                                <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
+                                <a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
                             </div>
                         </div>
                         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
@@ -107,18 +99,27 @@
                     </div>
                     <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
-                            <li class="list-group-item border-0 p-3" v-for="post in myContent" :key="post.id">
+                            <li class="list-group-item border-0 px-0 py-3" v-for="post in myContent" :key="post.id">
                                 <div class="split">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
-                                            <h5 class="title ellipsis"><b>{{post.title}}</b></h5>
-                                            <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
-                                            <span>{{post.dateCreated | date}}</span>
-                                        </router-link>
-                                        <div class="d-flex border" style="padding: 5px;">
-                                            <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
-                                                <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
-                                                &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                                    <div class="row mx-0">
+                                        <div class="col-sm-5 px-0">
+                                            <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
+                                                <h5 class="title ellipsis"><b>{{post.title}}</b></h5>
+                                                <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
+                                                <span>{{post.dateCreated | date}}</span>
+                                            </router-link>
+                                        </div>
+                                        <div class="col-sm-4 px-1">
+                                            <div class="text-center">
+                                                <VIntelButtonAction :user="user" :intel="post"></VIntelButtonAction>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 px-1">
+                                            <div class="d-flex border" style="padding: 5px;">
+                                                <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
+                                                    <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
+                                                    &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -135,7 +136,6 @@
                                                     :duration="randomNumber(1,3)"
                                                     :options="countUp.options"
                                                     @ready="onReady"/>
-
                                         </a>
                                     </div>
 
@@ -159,10 +159,9 @@
                         <span v-else> No data to display </span>
                     </div>
                 </div>
-
             </div>
             <div class="col-md-7 mb-3">
-                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block"></VIntelFeed>
+                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
             </div>
         </div>
         <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
@@ -201,6 +200,8 @@
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
+    import VIntelButtonAction from "./Events/VIntelButtonAction";
+
     export default {
         name: "VIntel",
         mixins: [countUpMixin],
@@ -209,7 +210,8 @@
             VShimmerUser,
             VShimmerMyPost,
             VShimmerFeed,
-            VIntelFeed
+            VIntelFeed,
+            VIntelButtonAction
         },
         data: function () {
             return {
@@ -236,7 +238,8 @@
                     score: 0,
                     tokens: 0
                 },
-                updateContentVar: 0
+                updateContentVar: 0,
+                intel : {}
             };
         },
         directives: {
@@ -258,11 +261,10 @@
             }
         },
         mounted: function () {
-            console.log(this.pendingTransactions);
             this.main();
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"])
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
@@ -303,16 +305,6 @@
             dateStringFormat(date) {
                 return new Date(date);
             },
-            distributeReward: function (ID) {
-                ContentService.distributeRewards(
-                    {ID}, {signType: this.signType, pathId: this.pathId},
-                    res => {
-                        //  console.log(res);
-                    },
-                    error => {
-                    }
-                );
-            },
             intelRoute(intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
@@ -323,6 +315,7 @@
             getTransactions: function () {
                 return ContentService.getTransactions(data => {
                     this.assignTransactions(data);
+                    console.log(data);
                 }, error => {
                     let errorText = error.message ? error.message : error;
                     this.$notify({
@@ -340,6 +333,8 @@
             loadAddress: function () {
                 return dashboardService.getAddress(
                     res => {
+                        this.user.address = res.address;
+                        console.log(this.user.address);
                         this.address = res;
                     },
                     error => {
@@ -432,6 +427,7 @@
                         this.allMyContent = res;
                         this.loadedMyContent = true;
                         this.myContent = this.allMyContent.slice(0, 10);
+                        console.log(this.myContent);
                     },
                     error => {
                         let errorText = error.message ? error.message : error;

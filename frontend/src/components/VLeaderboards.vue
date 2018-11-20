@@ -407,8 +407,9 @@
                 }
             },
             scrollBack: function () {
-                if(this.row){
-                    this.row.scrollIntoView();
+                if(this.row && this.table){
+                    this.table.scrollTop = this.row.offsetTop;
+                    //this.row.scrollIntoView();
                     this.scroll.distance = this.table.scrollTop;
                 }
             },
