@@ -315,7 +315,7 @@
             getTransactions: function () {
                 return ContentService.getTransactions(data => {
                     this.assignTransactions(data);
-                    console.log(data);
+
                 }, error => {
                     let errorText = error.message ? error.message : error;
                     this.$notify({
@@ -334,7 +334,6 @@
                 return dashboardService.getAddress(
                     res => {
                         this.user.address = res.address;
-                        console.log(this.user.address);
                         this.address = res;
                     },
                     error => {
@@ -427,7 +426,6 @@
                         this.allMyContent = res;
                         this.loadedMyContent = true;
                         this.myContent = this.allMyContent.slice(0, 10);
-                        console.log(this.myContent);
                     },
                     error => {
                         let errorText = error.message ? error.message : error;
