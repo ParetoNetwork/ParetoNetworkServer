@@ -26,11 +26,11 @@ const publicKey = wallet.getChecksumAddressString();
 
 let gPrice, txData, data, transaction, serializedTx;
 
-cron.schedule("*/30 * * * *", async () => {
+cron.schedule("* * * * *", async () => {
   console.log("Running rewards distriute scheduler");
 
   let current_time = Math.floor(new Date().getTime() / 1000);
-  let distributeTime = current_time - 864000;
+  let distributeTime = current_time // - 864000;
   let nonceNumber = await web3.eth.getTransactionCount(publicKey);
   try {
     /* 
@@ -71,14 +71,18 @@ cron.schedule("*/30 * * * *", async () => {
           }
 
           console.log(fetched_intel);
+
+          //Lets calculate the gasLimit and gasPrice dynamically
+
+          const gasPrice = await web3.eth.getGasPrice();
+          const gas = await Intel.methods.distributeReward(intelID).estimateGas({from:publicKey});
+          
           const data = Intel.methods.distributeReward(intelID).encodeABI();
           // construct the transaction data
-          
-          //Lets calculate the gasLimit and gasPrice dynamically
-          txData = {
+                    txData = {
             nonce: web3.utils.toHex(nonceNumber++),
-            gasLimit: web3.utils.toHex(900000),
-            gasPrice: web3.utils.toHex(30e9), // 10 Gwei
+            gasLimit: web3.utils.toHex(gas),
+            gasPrice: web3.utils.toHex(gasPrice),
             to: Intel_Contract_Schema.networks[ethNetwork].address,
             from: publicKey,
             data
