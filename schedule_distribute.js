@@ -33,25 +33,39 @@ cron.schedule("*/30 * * * *", async () => {
   let distributeTime = current_time - 864000;
   let nonceNumber = await web3.eth.getTransactionCount(publicKey);
   try {
+    /* 
+        Find Pareto Intel that has not been distributed where the expires timestamp is less than distributeTime
+        When we invoke the Intel smart contract distributeReward function, an event is fired per transaction. 
+        An event listener resides in the backend javacript, when the event is received the ParetoIntel.distributed flag           
+        is set to true.
+    */ 
     ParetoIntel.find(
       {
         $and: [{ distributed: false }, { expires: { $lt: distributeTime } }]
       },
       async (err, intels) => {
+        //Iterate through each result.
         let intelsDistributed = 0;
         for (let i = 0; i < intels.length; i++) {
           const intelID = intels[i].id;
           const intelProvider = intels[i].address;
+
+          //For each intel that we fetch from the Mongo, fetch information from the Intel smart contract for more details
           const fetched_intel = await Intel.methods.getIntel(intelID).call();
-          // console.log(fetched_intel);
+
+          //There are Intels in the Mongo that are not referenced in the Intel smart contract. These always have an intel.depositAmount of 0
           if (fetched_intel.depositAmount == 0) {
             continue;
           }
 
+          //If, for some reason, the intel has always been rewarded. There are some records that are marked as not rewarded in the Mongo, but
+          //are recorded as rewarded in the smart contract. Skip these.
           if (fetched_intel.rewarded == true) {
             continue;
           }
 
+          //The Mongo tells us that we should reward on this piece of intel. The smart contract Intel tells us that the time has not arrived to distribute.
+          //Adhere to the data in the smart contract. Skip this record as well.
           if (fetched_intel.rewardAfter > distributeTime) {
             continue;
           }
@@ -59,6 +73,8 @@ cron.schedule("*/30 * * * *", async () => {
           console.log(fetched_intel);
           const data = Intel.methods.distributeReward(intelID).encodeABI();
           // construct the transaction data
+          
+          //Lets calculate the gasLimit and gasPrice dynamically
           txData = {
             nonce: web3.utils.toHex(nonceNumber++),
             gasLimit: web3.utils.toHex(900000),
