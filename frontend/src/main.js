@@ -35,7 +35,8 @@ const store = new Vuex.Store({
         ws: null,
         pendingTransactions: [],
         intelReward : {},
-        myTokens : 0
+        myTokens : 0,
+
     },
     mutations: {
         addReward(state, data){
