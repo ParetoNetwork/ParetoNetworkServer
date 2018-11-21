@@ -83,10 +83,10 @@
 
                 <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
                 <div v-else class="border mb-3 mb-md-1 px-2">
-                    <div class="p-3">
-                        <h5 class="title text-left border-bottom p-2"><b>EVENTS</b></h5>
-                        <div v-for="tx in pendingTransactions" class="mt-1">
-                            <div class="d-flex justify-content-between cursor-pointer">
+                    <div class="p-2 py-4">
+                        <h5 class="title text-left border-bottom p-1"><b>EVENTS</b></h5>
+                        <div class="mt-1 p-1">
+                            <div v-for="tx in pendingTransactions" class="d-flex justify-content-between cursor-pointer">
                                 <div>Event: {{(tx.event == 'distribute')? 'collect': tx.event}}</div>
                                 <div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>
                                 <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
@@ -97,7 +97,7 @@
                             NEW INTEL
                         </button>
                     </div>
-                    <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
+                    <div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
                             <li class="list-group-item border-0" v-for="post in myContent" :key="post.id">
                                 <VIntelPreview :user="user" :intel="post" :eventRow="true"></VIntelPreview>
@@ -283,7 +283,6 @@
                 return dashboardService.getAddress(
                     res => {
                         this.user.address = res.address;
-                        console.log(this.user.address);
                         this.address = res;
                     },
                     error => {
@@ -376,7 +375,6 @@
                         this.allMyContent = res;
                         this.loadedMyContent = true;
                         this.myContent = this.allMyContent.slice(0, 10);
-                        console.log(this.myContent);
                     },
                     error => {
                         let errorText = error.message ? error.message : error;

@@ -39,7 +39,6 @@ const store = new Vuex.Store({
     },
     mutations: {
         addReward(state, data){
-            console.log(data);
             state.intelReward = data.intel;
             state.myTokens = data.tokens
         },

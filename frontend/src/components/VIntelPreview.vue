@@ -19,7 +19,7 @@
                 <p v-if="!intel.validated && eventRow"> Pending Blockchain Confirmation</p>
                 <p>{{intel.dateCreated | dateFilter}}</p>
             </router-link>
-            <div v-bind:class="{ 'col-12 col-lg-4' : !eventRow , 'col-12 col-lg-5': eventRow }">
+            <div class="p-1" v-bind:class="{ 'col-12 col-lg-4' : !eventRow , 'col-12 col-lg-5': eventRow }">
                 <div class="text-center">
                     <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                 </div>
