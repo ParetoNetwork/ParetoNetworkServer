@@ -350,7 +350,6 @@ controller.startwatchReward= function(intel, intelAddress){
                                     function(err, r){ }
                                 );
                             }
-
                         });
 
                         controller.getBalance(event.returnValues.sender.toLowerCase(),0, function(err, count){
@@ -361,8 +360,6 @@ controller.startwatchReward= function(intel, intelAddress){
                             }
                         });
                         controller.updateIntelReward(intelIndex, event.transactionHash,event.returnValues.sender.toLowerCase());
-
-
                     }
                 }
             );
@@ -407,7 +404,7 @@ controller.startwatchDistribute= function (intel, intelAddress){
 
 
 controller.startWatchApprove=function (){
-    web3_events.eth.subscribe( 'logs',
+    web3_events.eth.subscribe('logs',
         {
             fromBlock: 'latest',
             address: PARETO_CONTRACT_ADDRESS,
