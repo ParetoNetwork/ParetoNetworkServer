@@ -335,7 +335,6 @@
             },
             overrideOnMessage() {
                 let wsa = this.ws;
-                //console.log(this.ws)
                 this.ws.onmessage = (data) => {
                     try {
                         const info = JSON.parse(data.data);
