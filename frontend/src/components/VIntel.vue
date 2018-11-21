@@ -270,34 +270,40 @@
             ...mapMutations(["intelEnter", "iniWs"]),
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
             clickTransaction: function(transaction){
-                ContentService.pendingTransactionApproval(
-                    transaction,
-                    {signType: this.signType, pathId: this.pathId},
-                    {
 
-                        addTransaction : this.addTransaction,
-                        transactionComplete: this.transactionComplete,
-                        editTransaction: this.editTransaction,
-                        toastTransaction: this.$notify
-                    },
-                    res => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'success',
-                            duration: 10000,
-                            text: 'Success'
+                if(!transaction.clicked) {
+                    transaction.clicked = true;
+                    ContentService.pendingTransactionApproval(
+                        transaction,
+                        {signType: this.signType, pathId: this.pathId},
+                        {
+
+                            addTransaction: this.addTransaction,
+                            transactionComplete: this.transactionComplete,
+                            editTransaction: this.editTransaction,
+                            toastTransaction: this.$notify
+                        },
+                        res => {
+                            this.modalWaiting = false;
+                        },
+                        err => {
+                            this.modalWaiting = false;
+                            this.$notify({
+                                group: 'notification',
+                                type: 'error',
+                                duration: 10000,
+                                text: err.message ? err.message : err
+                            });
                         });
-                    },
-                    err => {
-                        this.modalWaiting = false;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            text: err.message ? err.message : err
-                        });
+                }else{
+                    this.$notify({
+                        group: 'notification',
+                        type: 'success',
+                        title: 'You already Clicked!',
+                        duration: 10000,
+                        text: 'Wait for the process to complete'
                     });
+                }
             },
             creatorRoute(address) {
                 return '/intel/' + address + '/';
