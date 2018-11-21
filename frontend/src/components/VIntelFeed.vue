@@ -68,7 +68,6 @@
         },
         beforeMount: function () {
             this.loadContent();
-            console.log(this.user);
         },
         watch: {
             //Updates when parent view, which has the webSocket, receives new information and refreshes
