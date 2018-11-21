@@ -18,15 +18,6 @@ export default class authService {
     static ledgerNanoProvider = null;
     static ledgerNanoEngine = null;
     static actualConnection = null;
-    static getSocketToken(onSuccess){
-        http.get("/v1/signws")
-            .then(res => {
-                onSuccess(res);
-            })
-            .catch(error => {
-                console.log(error)
-            });
-    }
 
 
     static getIsLogged() {
