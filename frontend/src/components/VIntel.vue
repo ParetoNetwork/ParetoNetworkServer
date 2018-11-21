@@ -148,7 +148,6 @@
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
     import VIntelButtonAction from "./Events/VIntelButtonAction";
-
     import VIntelPreview from "./VIntelPreview";
 
     export default {
@@ -227,7 +226,6 @@
                         transaction,
                         {signType: this.signType, pathId: this.pathId},
                         {
-
                             addTransaction: this.addTransaction,
                             transactionComplete: this.transactionComplete,
                             editTransaction: this.editTransaction,
@@ -248,8 +246,8 @@
                 }else{
                     this.$notify({
                         group: 'notification',
-                        type: 'success',
-                        title: 'You already Clicked!',
+                        type: 'warning',
+                        title: 'Your transaction is being processed',
                         duration: 10000,
                         text: 'Wait for the process to complete'
                     });
@@ -337,7 +335,6 @@
             },
             overrideOnMessage() {
                 let wsa = this.ws;
-                //console.log(this.ws)
                 this.ws.onmessage = (data) => {
                     try {
                         const info = JSON.parse(data.data);
