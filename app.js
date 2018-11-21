@@ -156,7 +156,6 @@ app.get('/intel', function (req, res) {
 /********* UNAUTHENTICATED v1 APIs *********/
 
 app.post('/v1/sign', function (req, res) {
-
     controller.sign(req.body, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
@@ -172,10 +171,8 @@ app.post('/v1/sign', function (req, res) {
                 }); //should set a debug flag for env variable
             }
             res.status(200).json(ErrorHandler.getSuccess({}))
-
         }
     });
-
 });
 
 
@@ -202,7 +199,6 @@ app.get('/v1/rank', function (req, res) {
 });
 
 app.get('/v1/balance', function (req, res) {
-
     controller.getBalance(req.query.address,0, function(err, count){
         if(!err){
             res.status(200).json(ErrorHandler.getSuccess(count));
@@ -210,7 +206,6 @@ app.get('/v1/balance', function (req, res) {
             res.status(200).json(ErrorHandler.getError(err));
         }
     });
-
 });
 
 //get info about your address
@@ -222,9 +217,7 @@ app.post('/v1/addresses', function (req, res) {
             res.status(200).json(ErrorHandler.getSuccess(results));
         }
     });
-
 });
-
 
 app.get("/getIntels", (req, res) => {
     controller.getAllIntel((err, response) => {
@@ -408,7 +401,6 @@ app.get('/v1/transaction', function (req, res) {
             res.status(200).json(ErrorHandler.getSuccess(obj));
         }
     });
-
 }); //end content post
 
 

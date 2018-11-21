@@ -82,11 +82,11 @@
                 </template>
 
                 <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
-                <div v-else class="border  mb-3 mb-md-1 px-2 px-md-4 py-3">
-                    <div class="p-3">
-                        <h5 class="title text-left border-bottom p-2"><b>EVENTS</b></h5>
-                        <div v-for="tx in pendingTransactions" class="mt-1">
-                            <div class="d-flex justify-content-between cursor-pointer">
+                <div v-else class="border mb-3 mb-md-1 px-2">
+                    <div class="p-2 py-4">
+                        <h5 class="title text-left border-bottom p-1"><b>EVENTS</b></h5>
+                        <div class="mt-1 p-1">
+                            <div v-for="tx in pendingTransactions" class="d-flex justify-content-between cursor-pointer">
                                 <div>Event: {{(tx.event == 'distribute')? 'collect': tx.event}}</div>
                                 <div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>
                                 <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
@@ -97,63 +97,10 @@
                             NEW INTEL
                         </button>
                     </div>
-                    <div class="p-1 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
+                    <div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                         <ul v-if="myContent.length" class="list-group list-unstyled">
-                            <li class="list-group-item border-0 px-0 py-3" v-for="post in myContent" :key="post.id">
-                                <div class="split">
-                                    <div class="row mx-0">
-                                        <div class="col-sm-5 px-0">
-                                            <router-link tag="div" class="d-flex flex-column text-left" :to="intelRoute(post)">
-                                                <h5 class="title ellipsis"><b>{{post.title}}</b></h5>
-                                                <span v-if="!post.validated"> Pending Blockchain Confirmation</span>
-                                                <span>{{post.dateCreated | date}}</span>
-                                            </router-link>
-                                        </div>
-                                        <div class="col-sm-4 px-1">
-                                            <div class="text-center">
-                                                <VIntelButtonAction :user="user" :intel="post"></VIntelButtonAction>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3 px-1">
-                                            <div class="d-flex border" style="padding: 5px;">
-                                                <a class="text-primary" :href="etherscanUrl + '/tx/' + (post.txRewardHash || post.txHash)" target="_blank">
-                                                    <span class="text-primary ellipsis"><u><b>txid:</b> {{post.txHash>7 ? post.txHash.slice(0,7):post.txHash }}</u></span>
-                                                    &nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row border-bottom">
-
-                                    <!-- blocks ago -->
-                                    <div class="col-md col-xs ellipsis text-left">
-                                        <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+post.txHash" target="_blank">
-                                            <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
-                                            <ICountUp
-                                                    :startVal="parseFloat(post.block) + parseFloat(post.blockAgo)"
-                                                    :endVal="parseFloat(post.blockAgo)"
-                                                    :decimals="decimalsLength(post.blockAgo)"
-                                                    :duration="randomNumber(1,3)"
-                                                    :options="countUp.options"
-                                                    @ready="onReady"/>
-                                        </a>
-                                    </div>
-
-                                    <!-- time ago with txid link to etherscan -->
-
-                                    <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
-                                        <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+post.txHash" target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
-                                            <span class="text-dashboard"><b>{{ dateStringFormat(post.dateCreated)| moment("from", "now") }}</b></span></a>
-                                    </div>
-
-                                    <!-- rewards collected, align right -->
-                                    <div class="col-md col-xs">
-                                        <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
-                                                src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                            <b> {{ post.totalReward }} </b>
-                                        </p>
-                                    </div>
-                                </div>
+                            <li class="list-group-item border-0" v-for="post in myContent" :key="post.id">
+                                <VIntelPreview :user="user" :intel="post" :eventRow="true"></VIntelPreview>
                             </li>
                         </ul>
                         <span v-else> No data to display </span>
@@ -201,6 +148,7 @@
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
     import VIntelButtonAction from "./Events/VIntelButtonAction";
+    import VIntelPreview from "./VIntelPreview";
 
     export default {
         name: "VIntel",
@@ -211,7 +159,8 @@
             VShimmerMyPost,
             VShimmerFeed,
             VIntelFeed,
-            VIntelButtonAction
+            VIntelButtonAction,
+            VIntelPreview
         },
         data: function () {
             return {
