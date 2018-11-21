@@ -39,7 +39,6 @@ const store = new Vuex.Store({
     },
     mutations: {
         addReward(state, data){
-            console.log(data);
             state.intelReward = data.intel;
             state.myTokens = data.tokens
         },
@@ -88,9 +87,7 @@ const store = new Vuex.Store({
         }, iniWs(state) {
             state.ws = new WebSocket(Environment.webSocketURL);
         }, addTransaction(state, item) {
-            console.log(item);
             state.pendingTransactions.unshift(item);
-            console.log(state.pendingTransactions);
         }, assignTransactions(state, transactions) {
             state.pendingTransactions = transactions;
         }, editTransaction(state, {hash, status}){

@@ -67,7 +67,6 @@ export default class ContentService {
     static postTransactions(params, onSucess, onError) {
         http.post("/v1/transaction", params)
             .then(res => {
-                console.log(res);
             });
     }
 
