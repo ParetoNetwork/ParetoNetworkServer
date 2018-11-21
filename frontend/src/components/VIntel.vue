@@ -364,17 +364,13 @@
             socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
-                    AuthService.getSocketToken(res => {
-                        this.iniWs();
-                        let wss = this.ws;
-                        this.ws.onopen = function open() {
-                            wss.send(JSON.stringify(params));
-                        };
-                        this.overrideOnMessage();
-                    });
-                } else {
-                    this.overrideOnMessage();
+                    this.iniWs();
+                    let wss = this.ws;
+                    this.ws.onopen = function open() {
+                        wss.send(JSON.stringify(params));
+                    };
                 }
+                this.overrideOnMessage();
             },
             loadMyContent: function () {
                 return dashboardService.getContent('',

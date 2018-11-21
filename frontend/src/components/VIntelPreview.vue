@@ -85,7 +85,6 @@
             }
         },
         mounted: function(){
-          console.log(this.intel);
         },
         methods : {
             dateStringFormat(date) {
