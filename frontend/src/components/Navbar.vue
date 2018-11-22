@@ -139,28 +139,6 @@
                     $('#navbarSupportedContent').collapse('toggle');
                 }
             },
-            hardware: function () {
-                this.loadingLogin();
-                authService.signWallet(data => {
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: data,
-                    });
-                    this.collapseContent();
-                    this.$router.push('/intel');
-                }, error => {
-                    this.stopLogin();
-
-                    let errorText= error.message? error.message : error;
-                    this.$notify({
-                        group: 'notification',
-                        type: 'error',
-                        duration: 10000,
-                        title: 'Ledger Nano',
-                        text: errorText
-                    });
-                });
-            },
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
