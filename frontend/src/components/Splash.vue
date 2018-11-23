@@ -30,8 +30,8 @@
                                 </center>
                                 -->
 
-                                <div class="font-body"><h1 style="font-size: 25px; font-weight: bold">Post. Trade.
-                                    Earn.</h1></div>
+                                <div class="font-body"><h2 style="font-size: 20px;">Connect your<br/><i>PARETO Score&trade;</i> to<br/><b>Post, Trade,
+                                    & Earn.</b></h2></div>
                                 <br/>
 
                                 <!--<button class="button button&#45;&#45;transparent button&#45;&#45;login"-->
@@ -45,8 +45,7 @@
                                                                                                          class="fa fa-spinner fa-spin"></span>
                                 </button>
                                 <br/>
-                                <div class="font-body"><h6 style="font-size: 12px;">Requires a PARETO platform
-                                    license.<br/> More information <a
+                                <div class="font-body"><h6 style="font-size: 12px;">Requires PARETO Scores&trade;<br/> More information <a
                                             style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;"
                                             href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a>
                                     <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> -->

@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar hiden-navbar-bottom d-flex font-body py-0">
+    <div class="navbar hiden-navbar-bottom d-flex font-body py-0" style="opacity: 0">
         <div class="col-md col-xs" style="text-align: left;">
             <a class="mr-3" href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
             <!-- <div class="mr-3"> PARETO PRICE: {{paretoUSD}} </div>
