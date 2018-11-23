@@ -26,22 +26,24 @@
                                        name="intel-title" v-model="title">
                                 <span class="highlight"></span>
                                 <span class="bar"></span>
-                                <label v-if="formError.title === false" class="pareto-label" style="color: red"> Required Field </label>
+                                <label v-if="formError.title === false" class="pareto-label" style="color: red">
+                                    Required Field </label>
                             </div>
 
                             <textarea id="intel-body-input"
                                       name="editordata"
                                       v-model="body"
                             ></textarea>
-                            <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required Field </label>
+                            <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required
+                                Field </label>
 
                             <div class="d-flex justify-content-center">
                                 <input v-if="intel.state ==='empty'"
-                                        class="button bg-white pareto-text-blue mt-2"
-                                        style="width:100px; height: 35px; line-height: 32px;"
-                                        type="submit"
-                                        form="intel"
-                                        value="Submit">
+                                       class="button bg-white pareto-text-blue mt-2"
+                                       style="width:100px; height: 35px; line-height: 32px;"
+                                       type="submit"
+                                       form="intel"
+                                       value="Submit">
                             </div>
                             <div class="d-flex justify-content-center">
                                 <label class="pareto-label"> {{intel.text}}
@@ -58,7 +60,7 @@
 
                     <div id="preview"
                          style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
-                        <p v-html="body"> </p>
+                        <p v-html="body"></p>
                     </div>
 
                 </div>
@@ -88,13 +90,17 @@
                             </div>
                             <br/>
                         </div>
-                        <p class="text-dashboard mb-2" style="font-size: 16px">  You need to deposit Pareto tokens to create Intel. Please input the amount to deposit</p>
+                        <p class="text-dashboard mb-2" style="font-size: 16px"> You need to deposit Pareto tokens to
+                            create Intel. Please input the amount to deposit</p>
 
                         <b-form-input v-model="tokens"
                                       type="number"></b-form-input>
                         <b-row class="m-2 mt-4 d-flex justify-content-center">
-                            <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel </b-button>
-                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="!hardwareAvailable || tokens<=0 || tokens > maxTokens" variant="success" @click="upload()"> Confirm </b-button>
+                            <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)"
+                                      :disabled="!hardwareAvailable || tokens<=0 || tokens > maxTokens"
+                                      variant="success" @click="createIntel()"> Confirm
+                            </b-button>
                         </b-row>
                     </b-container>
                 </b-modal>
@@ -178,12 +184,16 @@
                         :body-text-variant="'light'">
                     <b-container fluid>
                         <h4 class="font-body mb-3"> Warning! </h4>
-                        <p class="text-dashboard mb-2" style="font-size: 16px"> You are interrupting the process of creating an Intel and it may will not be created </p>
+                        <p class="text-dashboard mb-2" style="font-size: 16px"> You are interrupting the process of
+                            creating an Intel and it may will not be created </p>
                         <p class="text-dashboard mb-2" style="font-size: 16px"> Do you want to continue? </p>
 
                         <b-row class="m-2 mt-4 d-flex justify-content-center">
-                            <b-button class="mr-2" variant="danger" @click="hideModalWarning"> Cancel </b-button>
-                            <b-button style="background-color: rgb(107, 194, 123)" :disabled="tokens<=0 || tokens > maxTokens" variant="success" @click="routeLeaving()"> Confirm </b-button>
+                            <b-button class="mr-2" variant="danger" @click="hideModalWarning"> Cancel</b-button>
+                            <b-button style="background-color: rgb(107, 194, 123)"
+                                      :disabled="tokens<=0 || tokens > maxTokens" variant="success"
+                                      @click="routeLeaving()"> Confirm
+                            </b-button>
                         </b-row>
                     </b-container>
                 </b-modal>
@@ -198,7 +208,7 @@
     import AuthService from '../services/authService';
     import ProfileService from '../services/profileService';
     import ContentService from '../services/ContentService';
-    import { mapState } from "vuex";
+    import {mapState, mapActions} from "vuex";
 
     require('summernote/dist/summernote.css');
     require('summernote');
@@ -213,37 +223,37 @@
                 },
                 logged: false,
                 block: null,
-                body : '',
+                body: '',
                 hardwareAvailable: false,
-                content : '',
-                title:'',
+                content: '',
+                title: '',
                 maxTokens: 1,
-                blockChainAddress:'',
+                blockChainAddress: '',
                 tokens: 1,
-                intel :{
+                intel: {
                     state: 'empty',  // 'creating', 'created'
-                    text : '',
+                    text: '',
                 },
                 formError: {
-                    title :'',
-                    body : ''
+                    title: '',
+                    body: ''
                 },
-                modalToken : false,
-                modalWaiting : false,
+                modalToken: false,
+                modalWaiting: false,
                 modalCloseWarning: false
             };
         },
-        updated: function() {
+        updated: function () {
             this.$nextTick(function () {
                 let edit = $('.note-editable')[0];
-                if(edit){
+                if (edit) {
                     $(edit).keyup(() => {
                         this.body = edit.innerHTML;
                     });
                 }
             });
         },
-        computed : {
+        computed: {
             bodyFunction: function () {
                 return content;
             },
@@ -286,28 +296,27 @@
             */
 
             this.routeRealod();
-
-
         },
-        beforeRouteLeave(to, from, next){
+        /*beforeRouteLeave(to, from, next) {
 
-            if(this.nextRoute.canAsk && this.intel.state === 'creating'){
+            if (this.nextRoute.canAsk && this.intel.state === 'creating') {
                 this.modalCloseWarning = true;
                 this.nextRoute.to = to;
                 next(false);
-            }else{
+            } else {
                 next();
             }
-        },
+        },*/
         methods: {
-            isAvailable(){
-                if(this.signType === 'LedgerNano'){
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
+            isAvailable() {
+                if (this.signType === 'LedgerNano') {
                     this.hardwareAvailable = false;
-                    AuthService.doWhenIsConnected(()=>{
+                    AuthService.doWhenIsConnected(() => {
                         this.hardwareAvailable = true;
                         AuthService.deleteWatchNano();
                     })
-                }else{
+                } else {
                     this.hardwareAvailable = true;
                 }
             },
@@ -320,16 +329,16 @@
 
                 });
             },
-            validateContent: function(e){
+            validateContent: function (e) {
 
                 this.formError.title = !!this.title;
-                this.formError.body = this.body.length>3;
+                this.formError.body = this.body.length > 3;
 
-                if(!this.formError.title || !this.formError.body) return;
+                if (!this.formError.title || !this.formError.body) return;
 
                 this.showModal();
             },
-            upload: function () {
+            createIntel: function () {
                 this.hideModal();
                 //console.log(this.tokens);
 
@@ -337,54 +346,66 @@
                 //console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
 
                 this.$store.state.makingRequest = true;
-                this.modalWaiting = true;
+                //this.modalWaiting = true;
 
-                ContentService.createIntel({block:this.block, title: this.title, body: this.body, address: this.blockChainAddress}, this.tokens, {signType: this.signType, pathId: this.pathId},(res) => {
+                ContentService.createIntel(
+                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress},
+                    this.tokens,
+                    {signType: this.signType, pathId: this.pathId},
+                    {
+                        addTransaction: this.addTransaction,
+                        transactionComplete: this.transactionComplete,
+                        editTransaction: this.editTransaction,
+                        toastTransaction: this.$notify
+                    },
+                    (res) => {
+                        this.$store.state.makingRequest = false;
+                        this.intelState('created', 'Intel Created!');
 
-                    this.$store.state.makingRequest = false;
-                    this.intelState('created', 'Intel Created!');
-
-                    this.$notify({
-                        group: 'notification',
-                        type: 'success',
-                        duration: 10000,
-                        text: 'The Intel was created' });
-
-                    this.modalWaiting = false;
-
-                    this.$router.push('/intel');
-                }, (err) => {
-
-                    console.log(err);
-                    if ( err.includes('Transaction was not mined within')){
                         this.$notify({
                             group: 'notification',
-                            type: 'warning',
-                            duration: 20000,
-                            title: 'Warning!',
-                            text: err});
-                    }else{
-                        this.intelState('empty', '');
+                            type: 'success',
+                            duration: 10000,
+                            text: 'The Intel was created'
+                        });
+
                         this.modalWaiting = false;
 
-                        if (typeof err === 'string')
-                            err='Could not create Intel. ' +  err.split('\n')[0];
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 20000,
-                            text: err || 'Could not create Intel' });
+                        //this.$router.push('/intel');
+                    }, (err) => {
 
-                        this.$store.state.makingRequest = false;
-                    }
-                });
+                        console.log(err);
+                        if (err.includes('Transaction was not mined within')) {
+                            this.$notify({
+                                group: 'notification',
+                                type: 'warning',
+                                duration: 20000,
+                                title: 'Warning!',
+                                text: err
+                            });
+                        } else {
+                            this.intelState('empty', '');
+                            this.modalWaiting = false;
+
+                            if (typeof err === 'string')
+                                err = 'Could not create Intel. ' + err.split('\n')[0];
+                            this.$notify({
+                                group: 'notification',
+                                type: 'error',
+                                duration: 20000,
+                                text: err || 'Could not create Intel'
+                            });
+
+                            this.$store.state.makingRequest = false;
+                        }
+                    });
             },
-            routeLeaving: function(){
+            routeLeaving: function () {
                 this.nextRoute.canAsk = false;
                 this.modalCloseWarning = false;
                 this.$router.push(this.nextRoute.to.path);
             },
-            routeRealod : function(){
+            routeRealod: function () {
                 window.onbeforeunload = function () {
                     if (document.location.href.indexOf('create') !== -1) {
                         return '';
@@ -393,21 +414,20 @@
                     }
                 };
             },
-            intelState : function (state, text) {
+            intelState: function (state, text) {
                 this.intel.state = state;
                 this.intel.text = text;
             },
-            showModal () {
+            showModal() {
                 this.modalToken = true;
-                this.isAvailable()
+                this.isAvailable();
             },
-            hideModalWarning: function(){
+            hideModalWarning: function () {
                 this.modalCloseWarning = false;
-                this.modalWaiting = true;
             },
-            hideModal () {
+            hideModal() {
                 this.modalToken = false;
-                if(this.signType === 'LedgerNano'){
+                if (this.signType === 'LedgerNano') {
                     AuthService.deleteWatchNano();
                     this.hardwareAvailable = false;
                 }
@@ -454,6 +474,7 @@
         -moz-transition: 0.2s ease all;
         -webkit-transition: 0.2s ease all;
     }
+
     .lookup-input {
         padding: 10px 10px 10px 5px;
         display: block;
