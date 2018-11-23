@@ -45,7 +45,7 @@
                                                                                                          class="fa fa-spinner fa-spin"></span>
                                 </button>
                                 <br/>
-                                <div class="font-body"><h6 style="font-size: 12px;">Requires PARETO Scores&trade;.<br/> More information <a
+                                <div class="font-body"><h6 style="font-size: 12px;">Requires PARETO Scores&trade;<br/> More information <a
                                             style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;"
                                             href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a>
                                     <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> -->
