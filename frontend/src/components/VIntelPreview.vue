@@ -84,9 +84,6 @@
                 return temp.format("MMMM Do, YYYY");
             }
         },
-        mounted: function(){
-          console.log(this.intel);
-        },
         methods : {
             dateStringFormat(date) {
                 return new Date(date);

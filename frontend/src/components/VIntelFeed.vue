@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="!loading" class="border p-2">
+        <div v-if="!loading && address" class="border p-2">
             <div class="border-bottom p-2 p-md-3">
                 <h5 class="title">MY INTEL FEED</h5>
             </div>
@@ -68,7 +68,6 @@
         },
         beforeMount: function () {
             this.loadContent();
-            console.log(this.user);
         },
         watch: {
             //Updates when parent view, which has the webSocket, receives new information and refreshes
