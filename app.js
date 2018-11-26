@@ -321,10 +321,6 @@ app.get('/v1/splash-auth', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/dashboard.html'));
 });
 
-app.get('/v1/signws', function (req, res){
-    res.status(200).json(ErrorHandler.getSuccess({token:  jwt.sign({user: req.user}, 'ParetoWs',  { expiresIn: "5y" })}));
-});
-
 /*
 * Unsign - clears cookie session for the client side, which cannot access secure httpOnly cookies
 */
