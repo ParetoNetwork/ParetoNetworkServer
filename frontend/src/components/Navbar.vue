@@ -139,42 +139,19 @@
                     $('#navbarSupportedContent').collapse('toggle');
                 }
             },
-            hardware: function () {
-                this.loadingLogin();
-                authService.signWallet(data => {
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: data,
-                    });
-                    this.collapseContent();
-                    this.$router.push('/intel');
-                }, error => {
-                    this.stopLogin();
-
-                    let errorText= error.message? error.message : error;
-                    this.$notify({
-                        group: 'notification',
-                        type: 'error',
-                        duration: 10000,
-                        title: 'Ledger Nano',
-                        text: errorText
-                    });
-                });
-            },
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                    DashboardService.getAddress(res => {
-                        this.$store.dispatch({
-                            type: 'login',
-                            address: {address: res, dataSign: {signType: 'Metamask', pathId: ''}},
-                        });
-                        this.collapseContent();
-                        this.$router.push('/intel');
-                    }, (err) => {
-                        console.log(err);
-                    });
-
+                    this.$router.push('/intel');
+                    this.collapseContent();
+                    authService.postSign(
+                        res => {
+                            this.$store.dispatch({
+                                type: 'login',
+                                address: {address: res.address, dataSign: {signType: 'Metamask', pathId: ''}},
+                            });
+                        },
+                    );
                 }, error => {
                     this.stopLogin();
                     let errorText= error.message? error.message : error;

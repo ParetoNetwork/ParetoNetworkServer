@@ -450,13 +450,18 @@
                 const pathId = path.substring(0,path.length-1)+this.selectedindx;
                 authService.signWallet(pathId, this.selectedAddress, data => {
                     this.loadingSign = false;
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: {address: this.selectedAddress, dataSign: {signType: 'LedgerNano', pathId: pathId}},
-                    });
                     this.collapseContent();
                     this.$router.push('/intel');
-                    this.onClosedModal()
+                    this.onClosedModal();
+
+                    authService.postSign(
+                        res => {
+                            this.$store.dispatch({
+                                type: 'login',
+                                address: {address: this.selectedAddress, dataSign: {signType: 'LedgerNano', pathId: pathId}},
+                            });
+                        },
+                    );
                 }, error => {
                     this.loadingSign = false;
                     this.stopLogin();

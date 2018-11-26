@@ -105,7 +105,6 @@
             },
             getProfile: function (address) {
                 ProfileService.getSpecificProfile( res => {
-                    console.log(res);
                     this.profile = res;
                     this.loading = false;
                 }, error => {
@@ -121,7 +120,6 @@
         },
         watch: {
             addressProfile: function (newVal) {
-                console.log(newVal);
                 this.getProfile(newVal);
             }
         }
