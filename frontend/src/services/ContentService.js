@@ -138,7 +138,8 @@ export default class ContentService {
                                 intel: res.content.Intel_ID,
                                 amount: tokenAmount,
                                 event: 'create',
-                                status: 0
+                                status: 0,
+                                clicked: true
                             };
 
                             var txHash = hash;
@@ -469,7 +470,8 @@ export default class ContentService {
                         amount: content.tokenAmount,
                         event: 'reward',
                         intelAddress: content.intelAddress,
-                        status: 0
+                        status: 0,
+                        clicked: true
                     };
 
                     var txHash = hash;

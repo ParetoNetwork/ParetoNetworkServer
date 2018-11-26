@@ -61,7 +61,6 @@
             }
         },
         mounted: function(){
-            console.log(this.intelReward, this.myTokens);
             this.$refs.modalReward.show();
             this.rewardId = this.intelReward.id;
             this.intelAddress = this.intelReward.intelAddress;

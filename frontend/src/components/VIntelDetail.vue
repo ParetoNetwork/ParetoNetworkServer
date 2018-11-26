@@ -143,7 +143,6 @@
                 return DashboardService.getIntel(this.id, res => {
                     this.getProfile(res.address);
                     this.intel = res;
-                    console.log(this.intel);
                 }, error => {
                 });
             },
@@ -169,17 +168,13 @@
             socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
-                    AuthService.getSocketToken(res => {
-                        this.iniWs();
-                        let wss = this.ws;
-                        this.ws.onopen = function open() {
-                            wss.send(JSON.stringify(params));
-                        };
-                        this.overrideOnMessage();
-                    });
-                } else {
-                    this.overrideOnMessage();
+                    this.iniWs();
+                    let wss = this.ws;
+                    this.ws.onopen = function open() {
+                        wss.send(JSON.stringify(params));
+                    };
                 }
+                this.overrideOnMessage();
             },
             loadProfile: function () {
                 return ProfileService.getProfile(
