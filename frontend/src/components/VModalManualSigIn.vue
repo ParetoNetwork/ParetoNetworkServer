@@ -75,12 +75,15 @@
                 Auth.manualLogin( this.addresstemp, this.message, this.signed, res => {
                     this.$store.state.showModalSign = false;
                     $('#signModal').modal('hide');
-                    //console.log(data);
-                    this.$store.dispatch({
-                        type: 'login',
-                        address: {address: res, dataSign: {signType: 'Manual', pathId: ''}},
-                    });
                     this.$router.push('/intel');
+                    Auth.postSign(
+                        res => {
+                            this.$store.dispatch({
+                                type: 'login',
+                                address: {address: res, dataSign: {signType: 'Manual', pathId: ''}},
+                            });
+                        },
+                    );
                 }, error => {
                     $('#signModal').modal('hide');
                     this.stopLogin();

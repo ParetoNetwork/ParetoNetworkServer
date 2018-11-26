@@ -55,8 +55,7 @@
             ...mapMutations(["openModalReward", "addReward"]),
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             distribute: function (intel) {
-                console.log(intel);
-                console.log(this.user);
+
                 ContentService.distributeRewards(
                     {ID: intel.id, intelAddress: intel.intelAddress},
                     {signType: this.signType, pathId: this.pathId},
