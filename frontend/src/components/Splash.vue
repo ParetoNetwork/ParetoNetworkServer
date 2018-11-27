@@ -17,7 +17,7 @@
                                 <img src="../assets/images/LogoReverse.svg" style="width: 400px; max-width: 100%;"
                                      malt="">
                                 <h1 class="font-body text-left">Current, reputable &
-                                    actionable intel for traders and investors. <br/><br/> <h6>Event driven, alternative data source for capturing alpha.</h6></h1>
+                                    actionable intel for traders and investors.<!--<br/><br/> <h6>Event driven, alternative data source for capturing alpha.</h6> --></h1>
                             </div>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-6">
@@ -47,7 +47,7 @@
                                 <br/>
                                 <div class="font-body"><h6 style="font-size: 12px;">Requires PARETO Scores&trade;<br/> More information <a
                                             style="text-decoration: underline; font-weight: bold; text-size: 16px; color: white;"
-                                            href="https://blog.pareto.network/how-to-access-the-pareto-network-with-a-web3-browser-8c7dfa917c0b">here.</a>
+                                            href="https://blog.pareto.network/pareto-scores-your-ticket-to-vip-access-6d9aa92f846b">here.</a>
                                     <!-- Purchase from these <a style="text-decoration: underline; font-weight: bold; text-size: 16px;" href="https://coinmarketcap.com/currencies/pareto-network/#markets">active markets.</a> -->
                                 </h6></div>
                             </div>
