@@ -55,6 +55,16 @@
                 bottomNav : {}
             }
         },
+        metaInfo: {
+            title: 'PARETO NETWORK',
+            titleTemplate: '%s | The Pareto Network is a platform providing current, ' +
+                'reputable & actionable intel for traders and investors. It is an event driven, ' +
+                'alternative data source for capturing alpha.',
+            meta: [
+                { charset: 'utf-8' },
+                { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+            ]
+        },
         mounted: function () {
             //window.addEventListener('scroll', this.foo);
             this.bottomNav = $('.hiden-navbar-bottom');
