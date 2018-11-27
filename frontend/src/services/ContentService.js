@@ -110,11 +110,9 @@ export default class ContentService {
 
             const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add five seconds to to allow the rewarder to reward pareto tokens
 
-            const decimals = web3.utils.toBN(18);
-            const amount = web3.utils.toBN(parseFloat(tokenAmount));
-            const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
 
-            const desiredReward = "100";
+            const  depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
+            const  desiredReward = depositAmount;
 
             let gasApprove = await ParetoTokenInstance.methods
                 .increaseApproval(Intel.options.address, depositAmount)
@@ -188,11 +186,8 @@ export default class ContentService {
 
             let gasPrice = await web3.eth.getGasPrice();
 
-            const decimals = web3.utils.toBN(18);
-            const amount = web3.utils.toBN(parseFloat(content.amount));
-            const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
-
-            const desiredReward = "100";
+            const  depositAmount = web3.utils.toWei(content.amount.toString(), "ether");
+            const  desiredReward = depositAmount;
 
             if (accounts[0].toLowerCase() == content.address.toLowerCase()) {
                 switch (content.event) {
@@ -308,7 +303,7 @@ export default class ContentService {
                 .create(
                     content.provider_address,
                     content.depositAmount,
-                    web3.utils.toWei(content.desiredReward, "ether"),
+                    content.desiredReward,
                     content.intel,
                     content._ttl
                 )
@@ -318,7 +313,7 @@ export default class ContentService {
                 .create(
                     content.provider_address,
                     content.depositAmount,
-                    web3.utils.toWei(content.desiredReward, "ether"),
+                    content.desiredReward,
                     content.intel,
                     content._ttl
                 )
