@@ -63,7 +63,7 @@
             meta: [
                 { charset: 'utf-8' },
                 { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-                { name: 'keywords', content: 'Pareto, Blockchain' }
+                { name: 'keywords', content: 'Pareto, Pareto Network, Pareto Efficiency, 80/20 rule, 80/20 principle, Pareto principle, Vilfredo Pareto, ERC20, dapp, Ethereum, dApp, distributed ledger technology, DLT, EIP 712, BIP 32, BIP 39, BIP 44, Blockchain, PARETO Scores, PARETO Rewards, PARETO Rewards Program, PARETO Score, Crypto, Finance, Coinmarketcap, Valuations, 0xMarket, 0x, Financial Service, Token Metrics, Airdrop, STO, Utility Tokens, Options, Equities, Volatility, VIX' }
             ]
         },
         mounted: function () {
