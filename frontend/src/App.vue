@@ -62,7 +62,8 @@
                 'alternative data source for capturing alpha.',
             meta: [
                 { charset: 'utf-8' },
-                { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+                { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+                { name: 'keywords', content: 'Pareto, Blockchain' }
             ]
         },
         mounted: function () {
