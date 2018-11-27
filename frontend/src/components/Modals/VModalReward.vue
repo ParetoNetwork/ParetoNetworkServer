@@ -94,8 +94,6 @@
             onClosedModal: function () {
                 this.openModalReward(false);
             },
-            openRewardModal: function (row) {
-            },
             rewardIntel: function (ID, tokenAmount, intelAddress) {
                 this.hideModal();
                 if (!tokenAmount) {
