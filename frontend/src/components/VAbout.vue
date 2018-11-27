@@ -528,7 +528,25 @@
                                 </div>
                             </div> <!-- end team-member -->
                         </div>
-                        <!-- need will here -->
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-willmclarren.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Will McLellarn</span>
+                                    <span class="position">Product Marketing.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Stanford Economics BA | Goldman Sachs | Sumo | Behavioral Marketing Expert |
+                                        At Pareto Network, leading Product Marketing efforts, and contributing thematic content.</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/willmclellarn/" target="_blank"><i
+                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
