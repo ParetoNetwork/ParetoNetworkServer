@@ -1,6 +1,7 @@
 <template>
     <div class="head">
         <notifications group="auth" position="bottom right"/>
+        <meta name="google-site-verification" content="_BI5wzvhwJ8Popg4ZENWUXl-TIsRk9XcmEPGqDhCH3g" />
         <div
                 id="gradient"
                 class="bar">&nbsp;
