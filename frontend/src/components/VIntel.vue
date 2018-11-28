@@ -84,7 +84,11 @@
                 <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
                 <div v-else class="border mb-3 mb-md-1 px-2">
                     <div class="p-2 py-4">
-                        <h5 class="title text-left border-bottom p-1"><b>EVENTS</b></h5>
+                        <div class="text-left border-bottom p-1">
+                            <h5 class="title "><b>EVENTS</b></h5>
+                            <p v-if="alertTransactions > 0" class="pt-1" style="color: red">
+                                <i class="fa fa-exclamation-circle"></i> You got some pending transactions, click on them to complete them</p>
+                        </div>
                         <div class="mt-1 p-1">
                             <div v-for="tx in pendingTransactions" class="d-flex justify-content-between cursor-pointer">
                                 <div>Event: {{(tx.event == 'distribute')? 'collect': tx.event}}</div>
@@ -166,8 +170,8 @@
             return {
                 address: null,
                 loading: true,
+                alertTransactions: 0,
                 block: 0,
-                modalWaiting: false,
                 hardwareAvailable: false,
                 rewardId: '',
                 intelAddress: '',
@@ -212,14 +216,21 @@
         mounted: function () {
             this.main();
         },
+        watch: {
+          'pendingTransactions' : function () {
+              this.pendingTransactions.forEach(tx => {
+                  if (!tx.clicked) this.alertTransactions++;
+              });
+          }
+        },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"]),
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
             clickTransaction: function(transaction){
-
+                this.alertTransactions--;
                 if(!transaction.clicked) {
                     transaction.clicked = true;
                     ContentService.pendingTransactionApproval(
@@ -232,10 +243,15 @@
                             toastTransaction: this.$notify
                         },
                         res => {
-                            this.modalWaiting = false;
+                            this.$notify({
+                                group: 'notification',
+                                type: 'success',
+                                duration: 10000,
+                                title: 'Event: ' + transaction.event,
+                                text: 'Confirmed ' + transaction.event
+                            });
                         },
                         err => {
-                            this.modalWaiting = false;
                             this.$notify({
                                 group: 'notification',
                                 type: 'error',
