@@ -86,7 +86,7 @@
                 );
             },
             openRewardModal: function () {
-                console.log(this.intel, this.user.tokens);
+                //console.log(this.intel, this.user.tokens);
                 let params = {
                     intel: this.intel,
                     tokens: this.user.tokens
