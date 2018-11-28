@@ -165,7 +165,7 @@ contract Intel{
     /// @dev Uses 'now' for timestamps.
     /// @param intelIndex is the ID of the Intel to send the rewards to
     /// @param rewardAmount is the amount of Pareto tokens the rewarder wants to reward to the Intel
-    /// @return returns true in case of successfull completion
+    /// @return returns true in case of successful completion
     /// requires 72283 gas on Rinkeby Network
     function sendReward(uint intelIndex, uint rewardAmount) public returns(bool success){
 
@@ -201,7 +201,7 @@ contract Intel{
     /// @notice this function distributes rewards to the Intel provider
     /// @dev Uses 'now' for timestamps.
     /// @param intelIndex is the ID of the Intel to distribute tokens to
-    /// @return returns true in case of successfull completion
+    /// @return returns true in case of successful completion
     /// requires 91837 gas on Rinkeby Network
     function distributeReward(uint intelIndex) public returns(bool success){
 
@@ -246,7 +246,7 @@ contract Intel{
     
 
     
-    /// @notice this function sends back the mistankenly sent non-Pareto ERC20 tokens
+    /// @notice this function sends back the mistakenly sent non-Pareto ERC20 tokens
     /// @dev only owner can call it
     /// @param destination is the contract address where the tokens were received from mistakenly
     /// @param account is the external account's address which sent the wrong tokens
@@ -270,7 +270,7 @@ contract Intel{
 
         assembly {
             let x := mload(0x40) //Find empty storage location using "free memory pointer"
-        mstore(x,sig) //Place signature at begining of empty storage 
+        mstore(x,sig) //Place signature at beginning of empty storage 
         mstore(add(x,0x04),account)
         mstore(add(x,0x24),amount)
 
