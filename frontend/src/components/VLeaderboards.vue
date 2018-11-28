@@ -273,6 +273,7 @@
         },
         mounted: function () {
             this.getAddress();
+            console.log('first params');
         },
         updated: function() {
             this.updated++;
