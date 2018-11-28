@@ -11,7 +11,9 @@
                     <div class="row">
                         <div class="col-9">
                             <b v-if="!props.item.title"> Notification </b>
-                            <b><div v-html="props.item.title"></div></b>
+                            <b>
+                                <div v-html="props.item.title"></div>
+                            </b>
                         </div>
                         <div class="offset-1 col-2">
                             <a class="close" @click="props.close">
@@ -39,6 +41,7 @@
     import {mapMutations, mapState} from 'vuex';
 
     import VModalReward from "./components/Modals/VModalReward";
+
     export default {
         name: 'App',
         components: {
@@ -50,21 +53,22 @@
         computed: {
             ...mapState(["showModalReward"])
         },
-        data: function(){
-            return{
-                bottomNav : {}
+        data: function () {
+            return {
+                bottomNav: {}
             }
         },
         metaInfo: {
             title: 'PARETO NETWORK',
-            titleTemplate: '%s | The Pareto Network is a platform providing current, ' +
-                'reputable & actionable intel for traders and investors. It is an event driven, ' +
-                'alternative data source for capturing alpha.',
+            titleTemplate: '%s | Post, Trade, & Earn',
             meta: [
-                { charset: 'utf-8' },
-                { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-                { name: 'keywords', content: 'Pareto, Blockchain' }
-            ]
+                { name: "description", content: 'custom description' },
+                { name: "keywords", content: 'Pareto, Blockchain' }
+            ],
+            headAttrs: {
+                test: true
+            },
+            __dangerouslyDisableSanitizers: ['script']
         },
         mounted: function () {
             //window.addEventListener('scroll', this.foo);
@@ -74,7 +78,7 @@
             foo: function () {
                 if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
                     this.bottomNav.addClass('show-navbar-bottom');
-                }else{
+                } else {
                     this.bottomNav.removeClass('show-navbar-bottom');
                 }
             }
@@ -120,7 +124,7 @@
         url('./assets/fonts/font-body-regular.svg#svgFontName') format('svg'); /* Legacy iOS */
     }
 
-    a{
+    a {
         color: #ffffff;
     }
 
@@ -135,15 +139,15 @@
         margin: 0;
     }
 
-    .error{
+    .error {
         background-color: #dc3545 !important;
     }
 
-    .success{
+    .success {
         background-color: rgb(107, 194, 123) !important;
     }
 
-    .warning{
+    .warning {
         background-color: #ffae42 !important;
     }
 
