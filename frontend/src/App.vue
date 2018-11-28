@@ -62,8 +62,10 @@
             title: 'PARETO NETWORK',
             titleTemplate: '%s | Post, Trade, & Earn',
             meta: [
-                { name: "description", content: 'custom description' },
-                { name: "keywords", content: 'Pareto, Blockchain' }
+                { name: "description", content: 'The Pareto Network is a platform providing current, \' +\n' +
+                        '                \'reputable & actionable intel for traders and investors. It is an event driven, \' +\n' +
+                        '                \'alternative data source for capturing alpha.' },
+                { name: 'keywords', content: 'Pareto, Pareto Network, Pareto Efficiency, 80/20 rule, 80/20 principle, Pareto principle, Vilfredo Pareto, ERC20, dapp, Ethereum, dApp, distributed ledger technology, DLT, EIP 712, BIP 32, BIP 39, BIP 44, Blockchain, PARETO Scores, PARETO Rewards, PARETO Rewards Program, PARETO Score, Crypto, Finance, Coinmarketcap, Valuations, 0xMarket, 0x, Financial Service, Token Metrics, Airdrop, STO, Utility Tokens, Options, Equities, Volatility, VIX' }
             ],
             headAttrs: {
                 test: true
