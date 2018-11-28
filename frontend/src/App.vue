@@ -59,8 +59,8 @@
             }
         },
         metaInfo: {
-            title: 'PARETO NETWORK',
-            titleTemplate: '%s | Post, Trade, & Earn',
+            title: 'Pareto Network ',
+            titleTemplate: '%s | Post. Trade. Earn.',
             meta: [
                 { name: "description", content: 'The Pareto Network is a platform providing current, \' +\n' +
                         '                \'reputable & actionable intel for traders and investors. It is an event driven, \' +\n' +
