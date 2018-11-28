@@ -6,12 +6,14 @@
                     <img style="width: 400px; max-width: 100%;" src="../assets/images/LogoReverse.svg" alt="">
                     <h1 class="font-body padding-main text-left text-white mb-5">Current, reputable &
                         actionable intel for traders and investors. <br/><br/> <h6>Event driven, alternative data source for capturing alpha.</h6></h1>
-                    <a href="download/Pareto-Brochure.pdf" class="mr-2 btn btn-primary" target="_blank">Brochure</a>
-                    <a href="download/Pareto-Technical-White-Paper.pdf" class="mr-2 btn btn-primary" target="_blank">Whitepaper</a>
+                    <!-- <a href="download/Pareto-Brochure.pdf" class="mr-2 btn btn-primary" target="_blank">Brochure</a>
+                    <a href="download/Pareto-Technical-White-Paper.pdf" class="mr-2 btn btn-primary" target="_blank">Whitepaper</a> -->
+                    <a href="https://blog.pareto.network/pareto-scores-your-ticket-to-vip-access-6d9aa92f846b" class="mr-2 btn btn-primary" target="_blank">PARETO Scores</a>
+                    <a href="https://blog.pareto.network/pareto-rewards-program-812fbe47af5" class="mr-2 btn btn-primary" target="_blank">Rewards</a>
                     <a href="https://github.com/ParetoNetwork/Pareto-Network-Roadmap/projects/1?fullscreen=true"
                        class="btn btn-primary" target="_blank">Roadmap</a>
                 </div>
-                <div class="col-12 col-lg-6">
+                <!-- <div class="col-12 col-lg-6">
                     <div class="video-box">
                         <iframe width="100%" height="100%"
                                 src="https://www.youtube.com/embed/j6MFoSQkT7U?rel=0&amp;showinfo=0" frameborder="0"
@@ -19,7 +21,7 @@
                     </div>
 
 
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -526,7 +528,25 @@
                                 </div>
                             </div> <!-- end team-member -->
                         </div>
-                        <!-- need will here -->
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-willmclarren.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Will McLellarn</span>
+                                    <span class="position">Product Marketing.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Stanford Economics BA | Goldman Sachs | Sumo | Behavioral Marketing Expert |
+                                        At Pareto Network, leading Product Marketing efforts, and contributing thematic content.</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/willmclellarn/" target="_blank"><i
+                                            class="fa fa-linkedin-square" aria-hidden="true"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
