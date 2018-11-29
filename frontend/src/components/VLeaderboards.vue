@@ -43,7 +43,7 @@
                                                                          alt="Pareto Logo">
                             </div> -->
                             <div id="score-counter" class="d-flex">
-                                <div class="row" v-bind:style="{ fontSize: textSize + 'px'  }">
+                                <div class="row" v-bind:style="{ fontSize: changeFontSize(score) + 'px'  }">
                                     <div class="col-md-1 col-xs-1 text-left"><i class="fa fa-star" style="color: #fca130;"></i></div>
                                     <div class="col-md col-xs">
                                         <ICountUp
@@ -336,7 +336,21 @@
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
-                    this.page += 100;
+
+                    this.page += res.length;
+
+                    if(this.leader.length < 1 && withParam){
+                        this.rank = 1;
+
+                        this.getLeaderboard();
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Leaderboard',
+                            text: "The ranking or address doesn't exist" });
+                        return;
+                    };
 
                     if(this.leader[0].rank > 1 && this.leader.length < 30){
                         params = { rank: 1, limit: this.leader[0].rank-1, page: 0};
@@ -345,8 +359,7 @@
                         }, err => {
                             console.log(err);
                         });
-                    };
-
+                    }
                 }, error => {
                     this.getLeaderboard();
                     let errorText= error.message? error.message : error;
@@ -405,6 +418,7 @@
                     this.textSize = 100 - (score.length - 4)*4;
                 else
                     this.textSize = 100 - textLength*4;
+                return this.textSize;
             },
             infiniteScrollFunction: function(){
                 console.log(!this.loading)
