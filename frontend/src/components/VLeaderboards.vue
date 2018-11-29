@@ -137,7 +137,7 @@
                                         <tr
                                                 v-for="rank in leader"
                                                 :key="rank.address"
-                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
+                                                v-bind:class="{ 'table-row-highlight': tableRowHighlight(rank)}"
                                                 v-bind:id="rank.rank"
                                         >
                                             <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
@@ -210,6 +210,11 @@
         },
         data: function () {
             return {
+                routeParams: {
+                    valids: ['address', 'rank', 'score'],
+                    param: '',
+                    value: ''
+                },
                 leader: [],
                 rank: 0,
                 lastRank : 100,
@@ -236,7 +241,6 @@
         },
         watch: {
             'scroll.distance' : function (value) {
-
                 let top = this.row.offsetTop + this.row.offsetHeight;
                 let bottom = this.row.offsetTop - this.table.offsetHeight;
 
@@ -273,21 +277,38 @@
         },
         mounted: function () {
             this.getAddress();
-            console.log('first params');
+
+            //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
+            let routeSplit = this.$route.fullPath.split('?')[1];
+            if(routeSplit){
+                let params = routeSplit.split('=');
+                if ( this.routeParams.valids.indexOf(params[0]) >= 0){
+                    this.routeParams.param = params[0];
+                    this.routeParams.value = params[1].split(/[^a-z0-9+]+/gi)[0];
+                    console.log(this.routeParams.value);
+                }else{
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Leaderboard',
+                        text: 'Not a valid url parameter' });
+                }
+            }
         },
         updated: function() {
             this.updated++;
             this.$nextTick(function () {
                 let table = document.getElementById("leaderboard-table");
-                if(table) this.table = table
+                if(table) this.table = table;
 
                 let row = document.getElementsByClassName("table-row-highlight")[0];
                 if(row) this.row = row;
 
-                if(this.updated == 2 && this.address){
+                if(this.updated === 2 && this.address){
                     this.scrollBack();
                 }
-            })
+            });
         },
         methods: {
             getAddress() {
@@ -298,16 +319,36 @@
                     this.loading = false;
                     this.infiniteScrollFunction();
                 });
-            }, getLeaderboard: function () {
-                this.$store.state.makingRequest = true;
 
-                this.socketParams = { rank: this.rank, limit: 100, page: this.page};
-                LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
+            }, getLeaderboard: function (withParam) {
+                this.$store.state.makingRequest = true;
+                let params = {};
+
+                if (withParam) {
+                    params = { limit: 100, page: this.page};
+                    params[this.routeParams.param] = this.routeParams.value;
+                } else {
+                    params = { rank: this.rank, limit: 100, page: this.page};
+                }
+
+                this.socketParams = params;
+                LeaderboardService.getLeaderboard(params, res => {
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += 100;
+
+                    if(this.leader[0].rank > 1 && this.leader.length < 30){
+                        params = { rank: 1, limit: this.leader[0].rank-1, page: 0};
+                        LeaderboardService.getLeaderboard(params, res => {
+                            this.leader = [... res,...this.leader];
+                        }, err => {
+                            console.log(err);
+                        });
+                    };
+
                 }, error => {
+                    this.getLeaderboard();
                     let errorText= error.message? error.message : error;
                     this.$notify({
                         group: 'notification',
@@ -359,7 +400,6 @@
                 }
             },
             changeFontSize : function ( score ) {
-
                 let textLength = score.toString().length;
                 if (score < 1)
                     this.textSize = 100 - (score.length - 4)*4;
@@ -367,6 +407,7 @@
                     this.textSize = 100 - textLength*4;
             },
             infiniteScrollFunction: function(){
+                console.log(!this.loading)
                 this.busy = true;
                 if(!this.loading) this.getLeaderboard();
             },
@@ -378,7 +419,6 @@
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
-
                     this.$store.state.makingRequest = true;
                     this.table.scrollTop += 2;
                     this.busy = true;
@@ -416,6 +456,17 @@
             },
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
+            },
+            tableRowHighlight(rank){
+                let param = this.routeParams.param;
+                let found = param? (rank[param] == this[param]) : (rank.address === this.address || (rank.rank == 1 && !this.address));
+
+                if(found){
+                    this.rank = rank.rank;
+                    this.address = rank.address;
+                    this.score = rank.score;
+                }
+                return found;
             },
             overrideOnMessage(){
                 let wsa = this.ws;
@@ -464,16 +515,22 @@
                 this.overrideOnMessage();
             },
             init : function(profile){
-                this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
-                this.address = profile.address;
-                this.score = profile.score;
                 this.loading = false;
+
+                if (this.routeParams.param) {
+                    this[this.routeParams.param] = this.routeParams.value;
+                    this.getLeaderboard(true);
+                }else{
+                    this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
+                    this.address = profile.address;
+                    this.score = profile.score;
+                    this.infiniteScrollFunction();
+                }
 
                 this.socketConnection();
                 // profile.score = Number(profile.score);
                 // this.score = Number(profile.score.toFixed(5));
                 this.changeFontSize(this.score);
-                this.infiniteScrollFunction();
             },
             ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin', 'iniWs']
