@@ -177,8 +177,6 @@ app.post('/v1/sign', function (req, res) {
 
 
 app.get('/v1/rank', function (req, res) {
-
-    var rank = parseInt(req.query.rank) || 1;
     var limit = parseInt(req.query.limit) || 100;
     var page = parseInt(req.query.page) || 0;
 
@@ -186,15 +184,34 @@ app.get('/v1/rank', function (req, res) {
     if (limit > 500) {
         limit = 500;
     }
+    if(req.query.address){
+        controller.retrieveAddressRankWithRedis([req.query.address],true,function (error, rankings) {
+            if(error){
+                res.status(200).json(ErrorHandler.getError(error));
+            }else{
+                var {rank} = rankings[0];
+                controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                    if (err) {
+                        res.status(200).json(ErrorHandler.getError(err));
+                    }  else {
+                        res.status(200).json(ErrorHandler.getSuccess(result));
+                    }
+                });
+            }
 
-    controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
+        });
+    }else {
+        var rank = parseInt(req.query.rank) || 1;
+        controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+            if (err) {
+                res.status(200).json(ErrorHandler.getError(err));
 
-        }  else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
+            }  else {
+                res.status(200).json(ErrorHandler.getSuccess(result));
+            }
+        });
+    }
+
 
 });
 
