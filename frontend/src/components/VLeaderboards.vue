@@ -211,7 +211,7 @@
         data: function () {
             return {
                 routeParams: {
-                    valids: ['address', 'rank', 'score'],
+                    valids: ['address', 'rank', 'score', 'q'],
                     param: '',
                     value: ''
                 },
@@ -284,8 +284,7 @@
                 let params = routeSplit.split('=');
                 if ( this.routeParams.valids.indexOf(params[0]) >= 0){
                     this.routeParams.param = params[0];
-                    this.routeParams.value = params[1].split(/[^a-z0-9+]+/gi)[0];
-                    console.log(this.routeParams.value);
+                    this.routeParams.value = params[1];//.split(/[^a-z0-9+]+/gi)[0];
                 }else{
                     this.$notify({
                         group: 'notification',
@@ -343,12 +342,12 @@
                         this.rank = 1;
 
                         this.getLeaderboard();
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Leaderboard',
-                            text: "The ranking or address doesn't exist" });
+                        // this.$notify({
+                        //     group: 'notification',
+                        //     type: 'error',
+                        //     duration: 10000,
+                        //     title: 'Leaderboard',
+                        //     text: "The ranking or address doesn't exist" });
                         return;
                     };
 

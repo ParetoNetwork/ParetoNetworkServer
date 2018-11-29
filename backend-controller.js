@@ -1148,27 +1148,40 @@ controller.unsign = function(callback){
 */
 controller.retrieveRanksAtAddress = function(q, limit, page, callback){
     if(web3.utils.isAddress(q+"")){
-        let address = q.indexOf("0x")<0? "0x"+q.toLowerCase():q.toLowerCase()
+        let address = q.indexOf("0x")<0? "0x"+q.toLowerCase():q.toLowerCase();
         controller.retrieveAddressRankWithRedis([address],true,function (error, rankings) {
             if(error){
                 callback(error);
             }else{
                 var {rank} = rankings[0];
-                controller.retrieveRanksWithRedis(q, limit, page, true, callback);
+                controller.retrieveRanksWithRedis(rank, limit, page, true, callback);
             }
 
         });
 
     } else {
-        if (Number.isInteger(q)){
+        if (Number.isInteger(q) || ( typeof q === 'string' && q.indexOf(".")<0 &&  !isNaN(parseInt(q))) ){
             controller.retrieveRanksWithRedis(q, limit, page, true, callback);
         }else{
             if ( !isNaN(parseFloat(q)) ){
-                ParetoAddress.findOne({score: {$gte: q}},{score: {$lte: q}}).sort('score').limit(1).exec(function(e, r){
-                    if(e){
+                ParetoAddress.aggregate([
+                    {$match:{score: {$ne:null, $gt: 0}}},
+                    {$project: {diff: {$abs: {$subtract: [parseFloat(q), '$score']}}, doc: '$$ROOT'}},
+                    {$sort: {diff: 1}},
+                    {$limit: 1}
+                ]).exec(function(e, r){
+                    if(e || r.length === 0 || !r[0].doc ||  !r[0].doc.address){
                         callback(e)
                     }else{
-                        controller.retrieveRanksWithRedis(r.rank, limit, page, true, callback);
+                        controller.retrieveAddressRankWithRedis([r[0].doc.address],true,function (error, rankings) {
+                            if(error){
+                                callback(error);
+                            }else{
+                                var {rank} = rankings[0];
+                                controller.retrieveRanksWithRedis(rank, limit, page, true, callback);
+                            }
+
+                        });
                     }
                 })
             }

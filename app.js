@@ -184,7 +184,10 @@ app.get('/v1/rank', function (req, res) {
     if (limit > 500) {
         limit = 500;
     }
-    const query = req.query.q || req.query.rank || 1;
+    let query = req.query.q || req.query.rank  || req.query.address  || req.query.score || 1;
+    if(req.query.score && !isNaN(parseFloat(req.query.score))){
+        query = parseFloat(req.query.score).toFixed(3)
+    }
     controller.retrieveRanksAtAddress(query, limit, page, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
