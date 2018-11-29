@@ -108,7 +108,7 @@ export default class ContentService {
             let gasPrice = await web3.eth.getGasPrice();
             const provider_address = accounts[0];
 
-            const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add five seconds to to allow the rewarder to reward pareto tokens
+            const _ttl = Math.round(new Date().getTime() / 1000) + 1200; // add 20 minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
 
 
             const  depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");

@@ -1146,8 +1146,35 @@ controller.unsign = function(callback){
 /*
 * Retrieves rank around address
 */
-controller.retrieveRanksAtAddress = function(rank, limit, page, callback){
-  controller.retrieveRanksWithRedis(rank, limit, page, true,callback)
+controller.retrieveRanksAtAddress = function(q, limit, page, callback){
+    if(web3.utils.isAddress(q+"")){
+        let address = q.indexOf("0x")<0? "0x"+q.toLowerCase():q.toLowerCase()
+        controller.retrieveAddressRankWithRedis([address],true,function (error, rankings) {
+            if(error){
+                callback(error);
+            }else{
+                var {rank} = rankings[0];
+                controller.retrieveRanksWithRedis(q, limit, page, true, callback);
+            }
+
+        });
+
+    } else {
+        if (Number.isInteger(q)){
+            controller.retrieveRanksWithRedis(q, limit, page, true, callback);
+        }else{
+            if ( !isNaN(parseFloat(q)) ){
+                ParetoAddress.findOne({score: {$gte: q}},{score: {$lte: q}}).sort('score').limit(1).exec(function(e, r){
+                    if(e){
+                        callback(e)
+                    }else{
+                        controller.retrieveRanksWithRedis(r.rank, limit, page, true, callback);
+                    }
+                })
+            }
+        }
+
+    }
 };
 
 /**
