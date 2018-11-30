@@ -34,7 +34,9 @@
                                     form="lookup"
                             >Sign
                             </button> -->
-                            <button type="button" id="lookupSignButton" class="mt-5"><i class="fa fa-search"></i></button>
+                            <button type="button" id="lookupSignButton" class="mt-5" @click="changeRoute('0x5ce86284f302df0b6fd75a61008ac5d1f25ea812')">
+                                <i class="fa fa-search"></i>
+                            </button>
                         </div>
 
                         <div class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
@@ -410,6 +412,23 @@
                         this.stopLogin();
                     });
                 }
+            },//This method reload the leader according to the address or rank of the button search
+            changeRoute: function(value){
+                let paramType = '';
+                if(value.split(/[^a-z]+/g).length > 2){
+                    paramType = 'address';
+                } else {
+                    paramType = 'rank';
+                }
+
+                this.page = 0;
+                this.leader = [];
+                this.lastRank = 0;
+
+                this.routeParams.param = paramType;
+                this.routeParams.value = value;
+
+                this.init();
             },
             changeFontSize : function ( score ) {
                 let textLength = score.toString().length;
