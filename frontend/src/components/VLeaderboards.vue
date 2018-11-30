@@ -284,14 +284,14 @@
                 let params = routeSplit.split('=');
                 if ( this.routeParams.valids.indexOf(params[0]) >= 0){
                     this.routeParams.param = params[0];
-                    this.routeParams.value = params[1];//.split(/[^a-z0-9+]+/gi)[0];
+                    this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
                 }else{
                     this.$notify({
                         group: 'notification',
                         type: 'error',
                         duration: 10000,
                         title: 'Leaderboard',
-                        text: 'Not a valid url parameter' });
+                        text: 'Url parameter not found'});
                 }
             }
         },
@@ -342,14 +342,14 @@
                         this.rank = 1;
 
                         this.getLeaderboard();
-                        // this.$notify({
-                        //     group: 'notification',
-                        //     type: 'error',
-                        //     duration: 10000,
-                        //     title: 'Leaderboard',
-                        //     text: "The ranking or address doesn't exist" });
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Leaderboard',
+                            text: "The param doesn't exist" });
                         return;
-                    };
+                    }
 
                     if(this.leader[0].rank > 1 && this.leader.length < 30){
                         params = { rank: 1, limit: this.leader[0].rank-1, page: 0};
@@ -472,7 +472,19 @@
             },
             tableRowHighlight(rank){
                 let param = this.routeParams.param;
-                let found = param? (rank[param] == this[param]) : (rank.address === this.address || (rank.rank == 1 && !this.address));
+                let value = this.routeParams.value;
+
+                if(param === 'q'){
+                    if(value.split(/[^a-z]+/g).length > 2){
+                        param = 'address';
+                    } else if (value.indexOf(".") >= 0){
+                        param = 'score';
+                    } else {
+                        param = 'rank';
+                    }
+                }
+
+                let found = param? (rank[param] == this.routeParams.value) : (rank.address === this.address || (rank.rank == 1 && !this.address));
 
                 if(found){
                     this.rank = rank.rank;
