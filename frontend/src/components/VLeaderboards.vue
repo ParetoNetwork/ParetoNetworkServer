@@ -23,7 +23,10 @@
                                         <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search by <i class="fa fa-globe"></i> Global Rank or Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
-                                               v-bind:value="address || null" class="font-weight-bold">
+                                               v-bind:placeholder="address || null"
+                                               onfocus="this.placeholder = ''"
+                                               v-model="searchValue"
+                                               class="font-weight-bold">
                                     </div>
                                     <span class="highlight"></span>
                                     <span class="bar"></span>
@@ -34,7 +37,7 @@
                                     form="lookup"
                             >Sign
                             </button> -->
-                            <button type="button" id="lookupSignButton" class="mt-5" @click="changeRoute('0x5ce86284f302df0b6fd75a61008ac5d1f25ea812')">
+                            <button type="button" id="lookupSignButton" class="mt-5" @click="changeRoute(searchValue)">
                                 <i class="fa fa-search"></i>
                             </button>
                         </div>
@@ -234,6 +237,7 @@
                 updated: 0,
                 table : '',
                 row : '',
+                searchValue : '',
                 scroll : {
                     distance: 0,
                     active: false
@@ -324,8 +328,7 @@
                     this.loading = false;
                     this.infiniteScrollFunction();
                 });
-
-            }, getLeaderboard: function (withParam) {
+            }, getLeaderboard: function (withParam) {//withParam means a manual search
                 this.$store.state.makingRequest = true;
                 let params = {};
 
@@ -344,9 +347,9 @@
 
                     this.page += res.length;
 
+                    //This means the search param didn't get any results, so we look for the default leaderboard
                     if(this.leader.length < 1 && withParam){
                         this.rank = 1;
-
                         this.getLeaderboard();
                         this.$notify({
                             group: 'notification',
@@ -357,16 +360,18 @@
                         return;
                     }
 
+                    //this means the server has just a few data to work with and the list isn't scrollable, so we look for any other results above
                     if(this.leader[0].rank > 1 && this.leader.length < 30){
+                        this.busy = true;
                         params = { rank: 1, limit: this.leader[0].rank-1, page: 0};
                         LeaderboardService.getLeaderboard(params, res => {
+                            this.busy = false;
                             this.leader = [... res,...this.leader];
                         }, err => {
                             console.log(err);
                         });
                     }
                 }, error => {
-                    this.getLeaderboard();
                     let errorText= error.message? error.message : error;
                     this.$notify({
                         group: 'notification',
@@ -570,6 +575,7 @@
 
                 if (this.routeParams.param) {
                     this[this.routeParams.param] = this.routeParams.value;
+                    this.busy = true;
                     this.getLeaderboard(true);
                 }else{
                     this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
