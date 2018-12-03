@@ -100,6 +100,7 @@ mongoose.connect(CONNECTION_URL, { useNewUrlParser: true }).then(tmp=>{
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
+const ParetoHistoricalRanking = mongoose.model('historicalRanking');
 const ParetoContent = mongoose.model('content');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
@@ -899,6 +900,65 @@ workerController.updateScore = function(address, callback){
     });
 };
 
+/**
+ * Get the sorted score from MongoDB and indexing with rank. The result data is saved in historical mongo document
+ * @param callback Response when the process is finished
+ */
+
+workerController.getScoreAndSaveSnapshot = function(callback){
+
+    const date = new Date();
+    date.setHours(0,0,0,0);
+    console.log('Snapshot at '+date.toISOString());
+    const query = ParetoAddress.aggregate().sort({score : -1}).group(
+        { "_id": false,
+            "addresses": {
+                "$push": {
+                    "address" : "$address",
+                    "score" : "$score",
+                    "block" : "$block",
+                    "bonus" : "$bonus",
+                    "tokens" : "$tokens"
+                }
+            }}).unwind({
+        "path": "$addresses",
+        "includeArrayIndex": "rank"
+    });
+
+    query.exec(function(err, results){
+        if(err){
+            callback(err);
+        }
+        else {
+            // Put the data in  Redis hashing by rank
+
+            let COUNT = 20.0;
+            const avr = parseFloat(results.length)/COUNT;
+            let ini = 0.0;
+            let promises = [];
+            while (ini < results.length-1){
+                const bulk = [];
+                for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
+                    let data = results[j].addresses;
+                    data.rank =  results[j].rank + 1;
+                    data.dateCreated = date;
+                    bulk.push({updateOne:{ filter: {address : data.address, dateCreated: date}, update: data, upsert: true}});
+                }
+                promises.push(ParetoHistoricalRanking.bulkWrite(bulk));
+                ini = ini + avr;
+            }
+
+            Promise.all(promises).then(values => {
+                callback(null, 'snapshot' );
+            }).catch(err=>{
+                console.log(err);
+                callback(null, 'snapshot' );
+            });
+
+        }
+    });
+};
+
 
 /*
 * Retrieves rank around address
@@ -922,8 +982,11 @@ workerController.retrieveRanksAtAddress = function(rank, limit, page, callback){
 
 workerController.getScoreAndSaveRedis = function(callback){
 
+
+    const date = new Date();//(new Date().getTime() - (24 * 60 * 60 * 1000));
+    date.setHours(0,0,0,0);
     //get all address sorted by score, then grouping all by self and retrieve with ranking index
-    const query = ParetoAddress.aggregate().match({score: { $gt: 0}}).sort({score : -1}).group(
+    Promise.all([ ParetoAddress.aggregate().match({score: { $gt: 0}}).sort({score : -1}).group(
         { "_id": false,
             "addresses": {
                 "$push": {
@@ -935,42 +998,75 @@ workerController.getScoreAndSaveRedis = function(callback){
             }}).unwind({
         "path": "$addresses",
         "includeArrayIndex": "rank"
-    });
-
-    query.exec(function(err, results){
-        if(err){
-            callback(err);
-        }
-        else {
-            // Put the data in  Redis hashing by rank
-
-            let COUNT = 20.0;
-            const avr = parseFloat(results.length)/COUNT;
-            let ini = 0.0;
-            let promises = [];
-            while (ini < results.length-1){
-                const multi = redisClient.multi();
-                for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
-                    let result = results[j];
-                    result.addresses.rank = result.rank + 1;
-                    multi.hmset(result.addresses.rank+ "",  result.addresses);
-                    const rank = { rank: result.addresses.rank + ""};
-                    multi.hmset("address"+result.addresses.address+ "", rank );
+    }).exec(), ParetoHistoricalRanking.find({dateCreated: date}).sort('address').exec()]).then(values => {
+        const results = values[0].sort(function(a, b) {
+            if (a.addresses.address > b.addresses.address) {
+                return 1;
+            }
+            if (a.addresses.address < b.addresses.address) {
+                return -1;
+            }
+            return 0;
+        });
+        const historical = values[1];
+        const deleteAddress =[];
+        let COUNT = 20.0;
+        const avr = parseFloat(results.length)/COUNT;
+        const total = (avr<=1)?results.length:results.length-1;
+        let ini = 0.0;
+        let promises = [];
+        let k=0;
+        while (ini < total){
+            const multi = redisClient.multi();
+            for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
+                let result = results[j];
+                result.addresses.rank = result.rank + 1;
+                while(k<historical.length && historical[k].address < result.addresses.address){
+                    deleteAddress.push("address"+historical[k].address+ "");
+                    k=k+1;
+                }
+                if(k<historical.length && historical[k].address == result.addresses.address){
+                    const lrank = (result.addresses.rank - historical[k].rank);
+                    const ltokens = (result.addresses.tokens - historical[k].tokens);
+                    const lscore = (result.addresses.score - historical[k].score);
+                    result.addresses.lrank = (lrank > 0)? '+':((lrank < 0)? '-': '=');
+                    result.addresses.ltokens = (ltokens > 0)? '+':((ltokens < 0)? '-': '=');
+                    result.addresses.lscore = (lscore > 0)? '+':((lscore < 0)? '-': '=');
+                    k=k+1
+                }else{
+                    result.addresses.lrank = '=';
+                    result.addresses.ltokens = '=';
+                    result.addresses.lscore = '=';
                 }
 
-                promises.push(new Promise( (resolve, reject)=>{
-                    multi.exec(function(errors, results) {
-                        if(errors){
-                            return reject(err)
-                        }else{
-                            return resolve(results)
-                        }
-                    })
-                } ));
-
-                ini = ini + avr;
+                multi.hmset(result.addresses.rank+ "",  result.addresses);
+                const rank = { rank: result.addresses.rank + ""};
+                multi.hmset("address"+result.addresses.address+ "", rank );
             }
 
+            promises.push(new Promise( (resolve, reject)=>{
+                multi.exec(function(errors, results) {
+                    if(errors){
+                        return reject(err)
+                    }else{
+                        return resolve(results)
+                    }
+                })
+            } ));
+
+            ini = ini + avr;
+        }
+
+        let delkeys =[];
+        if(historical.length > results.length){
+            let dini = results.length +1;
+            let dfinal = historical.length;
+            for (let i=dini;i<=dfinal;i=i+1){
+                delkeys.push(""+i);
+            }
+        }
+        delkeys.concat(deleteAddress);
+        redisClient.del( delkeys,function (err, succeeded) {
             Promise.all(promises).then(values => {
                 if(callback && typeof callback === "function") { callback(null, {} ); }
             }).catch(err=>{
@@ -978,15 +1074,14 @@ workerController.getScoreAndSaveRedis = function(callback){
                 if(callback && typeof callback === "function") { callback(null, {} ); }
             });
 
+        });
 
-
-
-
-
-        }
+    }).catch(err=>{
+        console.log(err);
+        if(callback && typeof callback === "function") { callback(null, {} ); }
     });
-};
 
+};
 
 
 /**
@@ -1169,6 +1264,11 @@ const start = async () => {
                         }
 
                     });
+                    break;
+                }
+                case 1440:{
+                    workerController.getScoreAndSaveSnapshot(done);
+                    break;
                 }
             }
         });

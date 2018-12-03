@@ -111,7 +111,6 @@
                     <h4 class="font-body font-weight-bold mb-3">Leaderboard</h4>
                     <div class="" style="font-size: 12px">
                         <div class="table-area">
-
                             <table class="table text-left position-relative">
                                 <!-- <button class="btn btn-success mt-1" id="button-scroll-up" @click="scrollBack()"> <i class="fa"></i> Scroll Back </button> -->
                                 <thead>
@@ -140,7 +139,10 @@
                                                 v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
                                                 v-bind:id="rank.rank"
                                         >
-                                            <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
+                                            <td style="width: 55px; text-align: left;">
+                                                {{rank.rank}}
+                                                <i v-bind:class="changeHistoricalSymbol(rank.lrank)"></i>
+                                            </td>
                                             <!--<td>{{rank.score}}</td>-->
                                             <td style="width: 123px;">
                                                 <ICountUp
@@ -150,6 +152,7 @@
                                                         :duration="randomNumber(3,6)"
                                                         :options="countUp.options"
                                                         @ready="onReady"></ICountUp>
+                                                <i v-bind:class="changeHistoricalSymbol(rank.lscore)"></i>
                                             </td>
                                             <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
                                             <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
@@ -302,6 +305,7 @@
 
                 this.socketParams = { rank: this.rank, limit: 100, page: this.page};
                 LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
+                    console.log(res);
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
@@ -364,6 +368,10 @@
                     this.textSize = 100 - (score.length - 4)*4;
                 else
                     this.textSize = 100 - textLength*4;
+            },
+            changeHistoricalSymbol: function(symbol){
+                if (symbol === '+') return 'fa fa-chevron-up historical-up';
+                if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function(){
                 this.busy = true;
@@ -490,6 +498,14 @@
 
     .table-fixed thead {
         width: 97%;
+    }
+
+    .historical-up{
+        color: green;
+    }
+
+    .historical-down{
+        color: red;
     }
 
     .table-fixed tbody {
