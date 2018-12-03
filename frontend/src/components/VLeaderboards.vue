@@ -142,7 +142,10 @@
                                                 v-bind:class="{ 'table-row-highlight': tableRowHighlight(rank)}"
                                                 v-bind:id="rank.rank"
                                         >
-                                            <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
+                                            <td style="width: 55px; text-align: left;">
+                                                {{rank.rank}}
+                                                <i v-bind:class="changeHistoricalSymbol(rank.lrank)"></i>
+                                            </td>
                                             <!--<td>{{rank.score}}</td>-->
                                             <td style="width: 123px;">
                                                 <ICountUp
@@ -152,6 +155,7 @@
                                                         :duration="randomNumber(3,6)"
                                                         :options="countUp.options"
                                                         @ready="onReady"></ICountUp>
+                                                <i v-bind:class="changeHistoricalSymbol(rank.lscore)"></i>
                                             </td>
                                             <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
                                             <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
@@ -438,8 +442,11 @@
                     this.textSize = 100 - textLength*4;
                 return this.textSize;
             },
+            changeHistoricalSymbol: function(symbol){
+                if (symbol === '+') return 'fa fa-chevron-up historical-up';
+                if (symbol === '-') return 'fa fa-chevron-down historical-down';
+            },
             infiniteScrollFunction: function(){
-                console.log(!this.loading)
                 this.busy = true;
                 if(!this.loading) this.getLeaderboard();
             },
@@ -592,6 +599,14 @@
 
     .table-fixed thead {
         width: 97%;
+    }
+
+    .historical-up{
+        color: green;
+    }
+
+    .historical-down{
+        color: red;
     }
 
     .table-fixed tbody {
