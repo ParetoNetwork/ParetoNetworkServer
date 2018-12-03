@@ -24,6 +24,7 @@
 
                                         <input id="lookup-input" type="text" name="address"
                                                v-bind:placeholder="address || null"
+                                               onfocus="this.placeholder = ''"
                                                v-model="searchValue"
                                                class="font-weight-bold">
                                     </div>
@@ -315,6 +316,9 @@
             });
         },
         methods: {
+            fadePlaceholder(){
+                console.log(arguments)
+            },
             getAddress() {
                 Profile.updateConfig( res => {this.etherscan = window.localStorage.getItem('etherscan')});
                 return DashboardService.getAddress(data => {
