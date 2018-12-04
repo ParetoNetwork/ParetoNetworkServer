@@ -324,14 +324,12 @@
                 if (withParam) {
                     params = { limit: 100, page: 0};
                     params[this.routeParams.param] = this.routeParams.value;
-                    this.leader = [];
                 } else {
                     params = { rank: this.rank, limit: 100, page: this.page};
                 }
 
                 this.socketParams = params;
                 LeaderboardService.getLeaderboard(params, res => {
-                    console.log(res);
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
@@ -352,6 +350,7 @@
                         return;
                     }
 
+                    if(this.leader.length < 1) return;
                     //this means the server has just a few data to work with and the list isn't scrollable, so we look for any other results above
                     if(this.leader[0].rank > 1 && this.leader.length < 30){
                         this.busy = true;
@@ -375,6 +374,7 @@
             },
             //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
             leaderFromUrlParams(route){
+
                 let routeSplit = route.fullPath.split('?')[1];
                 if(routeSplit){
                     let params = routeSplit.split('=');
@@ -473,6 +473,9 @@
                     this.scroll.distance = this.table.scrollTop;
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
+
+                if(this.leader.length < 1) return;
+
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
                     this.$store.state.makingRequest = true;
                     this.table.scrollTop += 2;
