@@ -9,7 +9,7 @@
                         <div class="d-flex flex-column mr-2">
                             <div class="border p-2 mb-2" @click="openInput()">
                                 <div data-v-514e8c24="" class="thumb" id="wrapper"
-                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic)}"
+                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic, user.address)}"
                                      style="width: 100px; height: 100px;">
                                     <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i
                                             class="fa fa-pencil"
@@ -415,9 +415,9 @@
                     }
                 );
             },
-            loadProfileImage: function (pic) {
+            loadProfileImage: function (pic, profileAddress) {
                 let path = this.baseURL + "/profile-image?image=";
-                return profileService.getProfileImage(path, pic);
+                return profileService.getProfileImage(path, pic, profileAddress);
             },
             openInput: function () {
                 document.getElementById("file").click();

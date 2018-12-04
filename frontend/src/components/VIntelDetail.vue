@@ -153,10 +153,6 @@
                 }, error => {
                 }, address)
             },
-            loadProfileImage: function (pic) {
-                let path = this.baseURL + '/profile-image?image=';
-                return ProfileService.getProfileImage(path, pic);
-            },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
                     // console.log(res)

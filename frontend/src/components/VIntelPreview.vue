@@ -4,7 +4,7 @@
             <div v-if="!eventRow" v-bind:class="{ 'col-3 col-lg-2' : !eventRow }">
                 <div class="border p-1 mr-2" style="height: 50px; width: 50px;">
                     <div data-v-514e8c24="" class="thumb"
-                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(intel.createdBy.profilePic)}"
+                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(intel.createdBy.profilePic, intel.createdBy.address)}"
                          style="width: 40px; height: 40px;">
                     </div>
                 </div>
@@ -92,9 +92,9 @@
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + intel.address + '/' + param;
             },
-            loadProfileImage: function (pic) {
+            loadProfileImage: function (pic, profileAddress) {
                 let path = this.baseURL + "/profile-image?image=";
-                return profileService.getProfileImage(path, pic);
+                return profileService.getProfileImage(path, pic, profileAddress);
             },
             randomNumber: function (min = 1, max = 3) {
                 return Math.floor(Math.random() * (max - min + 1) + min);

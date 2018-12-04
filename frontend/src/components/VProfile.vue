@@ -4,7 +4,7 @@
             <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
                 <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.address)">
                     <div class="thumb profile-pic"
-                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic)}"
+                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                     ></div>
                 </router-link>
             </div>
@@ -113,9 +113,9 @@
             leaderboards(address){
                 return '/leaderboards' + '?address=' + address;
             },
-            loadProfileImage: function(pic){
+            loadProfileImage: function(pic, profileAddress){
                 let path = this.baseURL + '/profile-image?image=';
-                return ProfileService.getProfileImage(path, pic);
+                return ProfileService.getProfileImage(path, pic, profileAddress);
             },
         },
         watch: {
