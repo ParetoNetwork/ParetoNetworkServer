@@ -23,7 +23,10 @@
                                         <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search by <i class="fa fa-globe"></i> Global Rank or Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
-                                               v-bind:value="address || null" class="font-weight-bold">
+                                               v-bind:placeholder="address || null"
+                                               onfocus="this.placeholder = ''"
+                                               v-model="searchValue"
+                                               class="font-weight-bold">
                                     </div>
                                     <span class="highlight"></span>
                                     <span class="bar"></span>
@@ -34,7 +37,9 @@
                                     form="lookup"
                             >Sign
                             </button> -->
-                            <button type="button" id="lookupSignButton" class="mt-5"><i class="fa fa-search"></i></button>
+                            <button type="button" id="lookupSignButton" class="mt-5" @click="changeRoute(searchValue)">
+                                <i class="fa fa-search"></i>
+                            </button>
                         </div>
 
                         <div class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
@@ -43,7 +48,7 @@
                                                                          alt="Pareto Logo">
                             </div> -->
                             <div id="score-counter" class="d-flex">
-                                <div class="row" v-bind:style="{ fontSize: textSize + 'px'  }">
+                                <div class="row" v-bind:style="{ fontSize: changeFontSize(score) + 'px'  }">
                                     <div class="col-md-1 col-xs-1 text-left"><i class="fa fa-star" style="color: #fca130;"></i></div>
                                     <div class="col-md col-xs">
                                         <ICountUp
@@ -137,10 +142,13 @@
                                         <tr
                                                 v-for="rank in leader"
                                                 :key="rank.address"
-                                                v-bind:class="{ 'table-row-highlight': (rank.address === address || (rank.rank == 1 && !address))}"
+                                                v-bind:class="{ 'table-row-highlight': tableRowHighlight(rank)}"
                                                 v-bind:id="rank.rank"
                                         >
-                                            <td style="width: 55px; text-align: left;">{{rank.rank}}</td>
+                                            <td style="width: 55px; text-align: left;">
+                                                {{rank.rank}}
+                                                <i v-bind:class="changeHistoricalSymbol(rank.lrank)"></i>
+                                            </td>
                                             <!--<td>{{rank.score}}</td>-->
                                             <td style="width: 123px;">
                                                 <ICountUp
@@ -150,6 +158,7 @@
                                                         :duration="randomNumber(3,6)"
                                                         :options="countUp.options"
                                                         @ready="onReady"></ICountUp>
+                                                <i v-bind:class="changeHistoricalSymbol(rank.lscore)"></i>
                                             </td>
                                             <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
                                             <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
@@ -210,6 +219,11 @@
         },
         data: function () {
             return {
+                routeParams: {
+                    valids: ['address', 'rank', 'score', 'q'],
+                    param: '',
+                    value: ''
+                },
                 leader: [],
                 rank: 0,
                 lastRank : 100,
@@ -223,6 +237,7 @@
                 updated: 0,
                 table : '',
                 row : '',
+                searchValue : '',
                 scroll : {
                     distance: 0,
                     active: false
@@ -236,7 +251,6 @@
         },
         watch: {
             'scroll.distance' : function (value) {
-
                 let top = this.row.offsetTop + this.row.offsetHeight;
                 let bottom = this.row.offsetTop - this.table.offsetHeight;
 
@@ -273,20 +287,37 @@
         },
         mounted: function () {
             this.getAddress();
+
+            //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
+            let routeSplit = this.$route.fullPath.split('?')[1];
+            if(routeSplit){
+                let params = routeSplit.split('=');
+                if ( this.routeParams.valids.indexOf(params[0]) >= 0){
+                    this.routeParams.param = params[0];
+                    this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
+                }else{
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Leaderboard',
+                        text: 'Url parameter not found'});
+                }
+            }
         },
         updated: function() {
             this.updated++;
             this.$nextTick(function () {
                 let table = document.getElementById("leaderboard-table");
-                if(table) this.table = table
+                if(table) this.table = table;
 
                 let row = document.getElementsByClassName("table-row-highlight")[0];
                 if(row) this.row = row;
 
-                if(this.updated == 2 && this.address){
+                if(this.updated === 2 && this.address){
                     this.scrollBack();
                 }
-            })
+            });
         },
         methods: {
             getAddress() {
@@ -297,15 +328,49 @@
                     this.loading = false;
                     this.infiniteScrollFunction();
                 });
-            }, getLeaderboard: function () {
+            }, getLeaderboard: function (withParam) {//withParam means a manual search
                 this.$store.state.makingRequest = true;
+                let params = {};
 
-                this.socketParams = { rank: this.rank, limit: 100, page: this.page};
-                LeaderboardService.getLeaderboard({rank: this.rank, limit: 100, page: this.page}, res => {
+                if (withParam) {
+                    params = { limit: 100, page: this.page};
+                    params[this.routeParams.param] = this.routeParams.value;
+                } else {
+                    params = { rank: this.rank, limit: 100, page: this.page};
+                }
+
+                this.socketParams = params;
+                LeaderboardService.getLeaderboard(params, res => {
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
-                    this.page += 100;
+
+                    this.page += res.length;
+
+                    //This means the search param didn't get any results, so we look for the default leaderboard
+                    if(this.leader.length < 1 && withParam){
+                        this.rank = 1;
+                        this.getLeaderboard();
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Leaderboard',
+                            text: "The param doesn't exist" });
+                        return;
+                    }
+
+                    //this means the server has just a few data to work with and the list isn't scrollable, so we look for any other results above
+                    if(this.leader[0].rank > 1 && this.leader.length < 30){
+                        this.busy = true;
+                        params = { rank: 1, limit: this.leader[0].rank-1, page: 0};
+                        LeaderboardService.getLeaderboard(params, res => {
+                            this.busy = false;
+                            this.leader = [... res,...this.leader];
+                        }, err => {
+                            console.log(err);
+                        });
+                    }
                 }, error => {
                     let errorText= error.message? error.message : error;
                     this.$notify({
@@ -356,14 +421,35 @@
                         this.stopLogin();
                     });
                 }
+            },//This method reload the leader according to the address or rank of the button search
+            changeRoute: function(value){
+                let paramType = '';
+                if(value.split(/[^a-z]+/g).length > 2){
+                    paramType = 'address';
+                } else {
+                    paramType = 'rank';
+                }
+
+                this.page = 0;
+                this.leader = [];
+                this.lastRank = 0;
+
+                this.routeParams.param = paramType;
+                this.routeParams.value = value;
+
+                this.init();
             },
             changeFontSize : function ( score ) {
-
                 let textLength = score.toString().length;
                 if (score < 1)
                     this.textSize = 100 - (score.length - 4)*4;
                 else
                     this.textSize = 100 - textLength*4;
+                return this.textSize;
+            },
+            changeHistoricalSymbol: function(symbol){
+                if (symbol === '+') return 'fa fa-chevron-up historical-up';
+                if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function(){
                 this.busy = true;
@@ -377,7 +463,6 @@
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
-
                     this.$store.state.makingRequest = true;
                     this.table.scrollTop += 2;
                     this.busy = true;
@@ -415,6 +500,29 @@
             },
             showModal () {
                 this.$store.state.showModalLoginOptions = true;
+            },
+            tableRowHighlight(rank){
+                let param = this.routeParams.param;
+                let value = this.routeParams.value;
+
+                if(param === 'q'){
+                    if(value.split(/[^a-z]+/g).length > 2){
+                        param = 'address';
+                    } else if (value.indexOf(".") >= 0){
+                        param = 'score';
+                    } else {
+                        param = 'rank';
+                    }
+                }
+
+                let found = param? (rank[param] == this.routeParams.value) : (rank.address === this.address || (rank.rank == 1 && !this.address));
+
+                if(found){
+                    this.rank = rank.rank;
+                    this.address = rank.address;
+                    this.score = rank.score;
+                }
+                return found;
             },
             overrideOnMessage(){
                 let wsa = this.ws;
@@ -463,16 +571,23 @@
                 this.overrideOnMessage();
             },
             init : function(profile){
-                this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
-                this.address = profile.address;
-                this.score = profile.score;
                 this.loading = false;
+
+                if (this.routeParams.param) {
+                    this[this.routeParams.param] = this.routeParams.value;
+                    this.busy = true;
+                    this.getLeaderboard(true);
+                }else{
+                    this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
+                    this.address = profile.address;
+                    this.score = profile.score;
+                    this.infiniteScrollFunction();
+                }
 
                 this.socketConnection();
                 // profile.score = Number(profile.score);
                 // this.score = Number(profile.score.toFixed(5));
                 this.changeFontSize(this.score);
-                this.infiniteScrollFunction();
             },
             ...mapMutations(
                 ['login', 'loadingLogin', 'stopLogin', 'iniWs']
@@ -490,6 +605,14 @@
 
     .table-fixed thead {
         width: 97%;
+    }
+
+    .historical-up{
+        color: green;
+    }
+
+    .historical-down{
+        color: red;
     }
 
     .table-fixed tbody {
