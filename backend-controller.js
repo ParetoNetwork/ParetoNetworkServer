@@ -47,9 +47,8 @@ fs.readdirSync(modelsPath).forEach(file => {
  * Redis Initialization
  */
 const redis = require("redis");
-redisClient = redis.createClient(
-    REDIS_URL
-);
+redisClient = redis.createClient(REDIS_URL, {no_ready_check: true});
+
 redisClient.on("connect", function () {
   console.log("PARETO: Success connecting to Redis ")
 });
