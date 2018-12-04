@@ -241,6 +241,20 @@
       "constant": false,
       "inputs": [
         {
+          "name": "_newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "changeOwner",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
           "name": "intelProvider",
           "type": "address"
         },
@@ -30051,14 +30065,14 @@
     "1": {
       "events": {},
       "links": {},
-      "address": "0x6232ef9d82b375cdaa3658f43399095e9723dfcf",
-      "transactionHash": "0xb0ebdcc37f80b1c516d9889ddfeb03fbb58a7491752eda09f0fb430736471ee6"
+      "address": "0x56d5a5802d3da04bb1a4fe3a84f674bb027be28b",
+      "transactionHash": "0xdb68bfea616e3f9b463842c90b0ace3225bd6fff60b81cb283af1f763c0dc63f"
     },
     "3": {
       "events": {},
       "links": {},
-      "address": "0x3e9d6a88fe5a0043c0a8676899ede1d078fd4797",
-      "transactionHash": "0xcfb2dcd0848380247eb36d34724f57849a2853132976c50a194f9ecda437f82d"
+      "address": "0xe47bf276828cf8ce81686a9adea90f1d8d0ae273",
+      "transactionHash": "0x97224500810cc56e600e6e4f6b3bcfdf2d67dde5c6b398e4536a9b10c6e7e83b"
     }
   },
   "schemaVersion": "2.0.1",

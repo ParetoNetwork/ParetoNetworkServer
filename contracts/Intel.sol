@@ -60,7 +60,7 @@ contract ERC20 is ERC20Basic {
 
 
 /// @title Intel contract
-/// @author Sheraz
+
 /// @notice Intel, A contract for creating, rewarding and distributing Intels
 contract Intel{
     
@@ -99,15 +99,23 @@ contract Intel{
     address public ParetoAddress;
 
     
-    constructor(address _owner) public {
+    constructor(address _owner, address _token) public {
         owner = _owner;  // owner is a Pareto wallet which should be able to perform admin functions
+        token = ERC20(_token);
+        ParetoAddress = _token;
     }
     
 
     // modifier to check of the sender of transaction is the owner
     modifier onlyOwner(){
-        require(msg.sender == owner);
+        require(msg.sender == owner, "sender must be the owner only");
         _;
+    }
+
+
+    function changeOwner(address _newOwner) public onlyOwner{
+        require(_newOwner != address(0x0), "New owner address is not valid");
+        owner = _newOwner;
     }
     
 
@@ -117,7 +125,7 @@ contract Intel{
     event LogProxy(address destination, address account, uint amount, uint gasLimit);
     
 
-    /// @author Sheraz
+    
     /// @notice this function creates an Intel
     /// @dev Uses 'now' for timestamps.
     /// @param intelProvider is the address of the Intel's provider
@@ -128,11 +136,14 @@ contract Intel{
     /// requires 210769 gas in Rinkeby Network
     function create(address intelProvider, uint depositAmount, uint desiredReward, uint intelID, uint ttl) public {
 
-        require(address(intelProvider) != address(0x0));
-        require(depositAmount > 0);
-        require(desiredReward > 0);
-        require(ttl > now);
-        
+        require(address(intelProvider) != address(0x0), "Intel Provider's address provided is invalid.");
+        require(depositAmount > 0, "Amount should be greater than 0.");
+        require(desiredReward > 0, "Desired reward should be greater than 0.");
+        require(ttl > now, "Expiration date for Intel should be greater than now.");
+                
+        IntelState storage intel = intelDB[intelID];
+        require(intel.depositAmount == 0, "Intel with the provided ID already exists");
+
         token.transferFrom(intelProvider, address(this), depositAmount);  // transfer token from caller to Intel contract
         
         address[] memory contributionsList;
@@ -149,20 +160,23 @@ contract Intel{
     }
     
 
-    /// @author Sheraz
+    
     /// @notice this function sends rewards to the Intel
     /// @dev Uses 'now' for timestamps.
     /// @param intelIndex is the ID of the Intel to send the rewards to
     /// @param rewardAmount is the amount of Pareto tokens the rewarder wants to reward to the Intel
-    /// @return returns true in case of successfull completion
+    /// @return returns true in case of successful completion
     /// requires 72283 gas on Rinkeby Network
     function sendReward(uint intelIndex, uint rewardAmount) public returns(bool success){
 
+        require(intelIndex > 0, "Intel's ID should be greater than 0.");
+        require(rewardAmount > 0, "Reward amount should be greater than 0.");
+
         IntelState storage intel = intelDB[intelIndex];
-        require(intel.intelProvider != address(0x0));  // make sure that Intel exists
-        require(msg.sender != intel.intelProvider); // rewarding address should not be an intel address
-        require(intel.rewardAfter > now);       //You cannot reward intel if the timestamp of the transaction is greater than rewardAfter
-        require(!intel.rewarded);  // You cannot reward intel if the intel’s rewards have already been distributed
+        require(intel.intelProvider != address(0x0), "Intel for the provided ID does not exist.");  // make sure that Intel exists
+        require(msg.sender != intel.intelProvider, "msg.sender should not be the current Intel's provider."); // rewarding address should not be an intel address
+        require(intel.rewardAfter > now, "Intel is expired");       //You cannot reward intel if the timestamp of the transaction is greater than rewardAfter
+        require(!intel.rewarded, "Intel is already rewarded");  // You cannot reward intel if the intel’s rewards have already been distributed
         
 
         token.transferFrom(msg.sender, address(this), rewardAmount);  // transfer token from caller to Intel contract
@@ -183,35 +197,28 @@ contract Intel{
     }
     
 
-    /// @author Sheraz
+    
     /// @notice this function distributes rewards to the Intel provider
     /// @dev Uses 'now' for timestamps.
     /// @param intelIndex is the ID of the Intel to distribute tokens to
-    /// @return returns true in case of successfull completion
+    /// @return returns true in case of successful completion
     /// requires 91837 gas on Rinkeby Network
     function distributeReward(uint intelIndex) public returns(bool success){
 
-        require(intelIndex > 0);
+        require(intelIndex > 0, "Intel's ID should be greater than 0.");
         
 
         IntelState storage intel = intelDB[intelIndex];
         
-        require(!intel.rewarded);
-        require(now >= intel.rewardAfter);
+        require(!intel.rewarded, "Intel is already rewarded.");
+        require(now >= intel.rewardAfter, "Intel needs to be expired for distribution.");
         
 
         intel.rewarded = true;
         uint distributed_amount = 0;
 
-       
-
-
-        if (intel.balance > intel.desiredReward){         // check if the Intel's balance is greater than the reward desired by Provider
-            distributed_amount = intel.desiredReward;    // tarnsfer tokens to the provider's address equal to the desired reward
-
-        } else {
-            distributed_amount = intel.balance;  // transfer token to the provider's address equal to Intel's balance
-        }
+        distributed_amount = intel.balance;
+        intel.balance = 0;
 
         uint fee = distributed_amount.div(10);    // calculate 10% as the fee for distribution
         distributed_amount = distributed_amount.sub(fee);   // calculate final distribution amount
@@ -225,7 +232,7 @@ contract Intel{
 
     }
     
-    /// @author Sheraz
+    
     /// @notice this function sets the address of Pareto Token
     /// @dev only owner can call it
     /// @param _token is the Pareto token address
@@ -238,8 +245,8 @@ contract Intel{
     }
     
 
-    /// @author Sheraz
-    /// @notice this function sends back the mistankenly sent non-Pareto ERC20 tokens
+    
+    /// @notice this function sends back the mistakenly sent non-Pareto ERC20 tokens
     /// @dev only owner can call it
     /// @param destination is the contract address where the tokens were received from mistakenly
     /// @param account is the external account's address which sent the wrong tokens
@@ -248,7 +255,7 @@ contract Intel{
     /// requires 27431 gas on Rinkeby Network
     function proxy(address destination, address account, uint amount, uint gasLimit) public onlyOwner{
 
-        require(destination != ParetoAddress);    // check that the destination is not the Pareto token contract
+        require(destination != ParetoAddress, "Pareto Token cannot be assigned as destination.");    // check that the destination is not the Pareto token contract
 
         // make the call to transfer function of the 'destination' contract
         // if(!address(destination).call.gas(gasLimit)(bytes4(keccak256("transfer(address,uint256)")),account, amount)){
@@ -263,7 +270,7 @@ contract Intel{
 
         assembly {
             let x := mload(0x40) //Find empty storage location using "free memory pointer"
-        mstore(x,sig) //Place signature at begining of empty storage 
+        mstore(x,sig) //Place signature at beginning of empty storage 
         mstore(add(x,0x04),account)
         mstore(add(x,0x24),amount)
 
@@ -283,13 +290,13 @@ contract Intel{
         emit LogProxy(destination, account, amount, gasLimit);
     }
 
-    /// @author Sheraz
+    
     /// @notice It's a fallback function supposed to return sent Ethers by reverting the transaction
     function() external{
         revert();
     }
 
-    /// @author Sheraz
+    
     /// @notice this function provide the Intel based on its index
     /// @dev it's a constant function which can be called
     /// @param intelIndex is the ID of Intel that is to be returned from intelDB
@@ -354,7 +361,7 @@ contract Intel{
         }
     }
 
-    function contributionsByIntel(uint intelIndex) public view returns(address[] addresses, uint[] amounts){
+    function contributionsByIntel(uint intelIndex) public view returns(address[] memory addresses, uint[] memory amounts){
         IntelState storage intel = intelDB[intelIndex];
                 
         uint length = intel.contributionsList.length;
