@@ -23,6 +23,7 @@
                                         <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search by <i class="fa fa-globe"></i> Global Rank or Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
+                                               @submit.prevent="changeRoute(searchValue)"
                                                v-bind:placeholder="address || null"
                                                onfocus="this.placeholder = ''"
                                                v-model="searchValue"
@@ -251,22 +252,7 @@
         },
         watch: {
             $route (to, from){
-                //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
-                let routeSplit = to.fullPath.split('?')[1];
-                if(routeSplit){
-                    let params = routeSplit.split('=');
-                    if ( this.routeParams.valids.indexOf(params[0]) >= 0){
-                        this.routeParams.param = params[0];
-                        this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
-                    }else{
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Leaderboard',
-                            text: 'Url parameter not found'});
-                    }
-                }
+                this.leaderFromUrlParams(to);
                 this.init();
             },
             'scroll.distance' : function (value) {
@@ -305,6 +291,7 @@
             ])
         },
         mounted: function () {
+            this.leaderFromUrlParams(this.$route);
             this.getAddress();
         },
         updated: function() {
@@ -353,7 +340,9 @@
 
                     //This means the search param didn't get any results, so we look for the default leaderboard
                     if(this.leader.length < 1 && withParam){
+                        this.busy = true;
                         this.rank = 1;
+                        this.page = 0;
                         this.getLeaderboard();
                         this.$notify({
                             group: 'notification',
@@ -384,7 +373,26 @@
                         title: 'Leaderboard',
                         text: errorText });
                 });
-            }, authLogin() {
+            },
+            //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
+            leaderFromUrlParams(route){
+                let routeSplit = route.fullPath.split('?')[1];
+                if(routeSplit){
+                    let params = routeSplit.split('=');
+                    if ( this.routeParams.valids.indexOf(params[0]) >= 0){
+                        this.routeParams.param = params[0];
+                        this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
+                    }else{
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Leaderboard',
+                            text: 'Url parameter not found'});
+                    }
+                }
+            },
+            authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
                         this.getAddress()
