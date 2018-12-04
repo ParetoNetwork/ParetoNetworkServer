@@ -1,5 +1,6 @@
 import http from './HttpService';
 import environment from '../utils/environment';
+import Identicon from 'identicon.js';
 
 export default class profileService {
 
@@ -54,7 +55,6 @@ export default class profileService {
     }
 
     static getSpecificProfile(onSuccess, onError, address){
-       // console.log(address);
         http.get('/v1/userinfo/' + address).then(res => {
             return onSuccess(res.data.data);
         }).catch(error => {
@@ -62,9 +62,13 @@ export default class profileService {
         });
     }
 
-    static getProfileImage(path, pic){
+    //Returns profile image url or gravatar generated image using the address
+    static getProfileImage(path, pic, profileAddress){
         if (pic) return path + pic;
-        return environment.baseURL + '/profile-image';
+
+        //replaces not numeric hex characters: Gravatar only generates images based on numbers
+        var data = new Identicon(profileAddress, 420).toString();
+        return 'data:image/png;base64,' + data;
     }
 
     static uploadProfilePic(form, onSuccess, onError) {
