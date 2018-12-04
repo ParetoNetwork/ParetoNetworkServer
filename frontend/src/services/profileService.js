@@ -1,5 +1,6 @@
 import http from './HttpService';
 import environment from '../utils/environment';
+import Identicon from 'identicon.js';
 
 export default class profileService {
 
@@ -66,8 +67,8 @@ export default class profileService {
         if (pic) return path + pic;
 
         //replaces not numeric hex characters: Gravatar only generates images based on numbers
-        profileAddress = profileAddress.replace(/([^a-f0-9]+)/gi, '');
-        return environment.imageGenerator.base + profileAddress + environment.imageGenerator.query;
+        var data = new Identicon(profileAddress, 420).toString();
+        return 'data:image/png;base64,' + data;
     }
 
     static uploadProfilePic(form, onSuccess, onError) {
