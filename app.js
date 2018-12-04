@@ -177,8 +177,6 @@ app.post('/v1/sign', function (req, res) {
 
 
 app.get('/v1/rank', function (req, res) {
-
-    var rank = parseInt(req.query.rank) || 1;
     var limit = parseInt(req.query.limit) || 100;
     var page = parseInt(req.query.page) || 0;
 
@@ -186,12 +184,15 @@ app.get('/v1/rank', function (req, res) {
     if (limit > 500) {
         limit = 500;
     }
-
-    controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+    let query = req.query.q || req.query.rank  || req.query.address  || req.query.score || 1;
+    if(req.query.score && !isNaN(parseFloat(req.query.score))){
+        query = parseFloat(req.query.score).toFixed(3)
+    }
+    controller.retrieveRanksAtAddress(query, limit, page, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
 
-        }  else {
+        } else {
             res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
