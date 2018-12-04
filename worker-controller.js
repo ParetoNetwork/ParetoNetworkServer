@@ -910,53 +910,64 @@ workerController.getScoreAndSaveSnapshot = function(callback){
     const date = new Date();
     date.setHours(0,0,0,0);
     console.log('Snapshot at '+date.toISOString());
-    const query = ParetoAddress.aggregate().sort({score : -1}).group(
-        { "_id": false,
-            "addresses": {
-                "$push": {
-                    "address" : "$address",
-                    "score" : "$score",
-                    "block" : "$block",
-                    "bonus" : "$bonus",
-                    "tokens" : "$tokens"
-                }
-            }}).unwind({
-        "path": "$addresses",
-        "includeArrayIndex": "rank"
+    ParetoHistoricalRanking.findOne({dateCreated: date}).exec(function (error, result){
+       if(!error && !result){
+           const query = ParetoAddress.aggregate().sort({score : -1}).group(
+               { "_id": false,
+                   "addresses": {
+                       "$push": {
+                           "address" : "$address",
+                           "score" : "$score",
+                           "block" : "$block",
+                           "bonus" : "$bonus",
+                           "tokens" : "$tokens"
+                       }
+                   }}).unwind({
+               "path": "$addresses",
+               "includeArrayIndex": "rank"
+           });
+
+           query.exec(function(err, results){
+               if(err){
+                   callback(err);
+               }
+               else {
+                   // Put the data in  Redis hashing by rank
+
+                   let COUNT = 25.0;
+                   const avr = parseFloat(results.length)/COUNT;
+                   let ini = 0.0;
+                   let promises = [];
+                   while (ini < results.length-1){
+                       try{
+                           const bulk = [];
+                           for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
+                               let data = results[j].addresses;
+                               data.rank =  results[j].rank + 1;
+                               data.dateCreated = date;
+                               bulk.push(data);
+                           }
+                           promises.push(ParetoHistoricalRanking.insertMany(bulk,{ordered:false}));
+                       }catch (e) {
+
+                       }
+                       ini = ini + avr;
+                   }
+
+                   Promise.all(promises).then(values => {
+                       callback(null, 'snapshot' );
+                   }).catch(err=>{
+                       console.log(err);
+                       callback(null, 'snapshot' );
+                   });
+
+               }
+           });
+       }else{
+           callback(null, 'snapshot' );
+       }
     });
 
-    query.exec(function(err, results){
-        if(err){
-            callback(err);
-        }
-        else {
-            // Put the data in  Redis hashing by rank
-
-            let COUNT = 20.0;
-            const avr = parseFloat(results.length)/COUNT;
-            let ini = 0.0;
-            let promises = [];
-            while (ini < results.length-1){
-                const bulk = [];
-                for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
-                    let data = results[j].addresses;
-                    data.rank =  results[j].rank + 1;
-                    data.dateCreated = date;
-                    bulk.push({updateOne:{ filter: {address : data.address, dateCreated: date}, update: data, upsert: true}});
-                }
-                promises.push(ParetoHistoricalRanking.bulkWrite(bulk));
-                ini = ini + avr;
-            }
-
-            Promise.all(promises).then(values => {
-                callback(null, 'snapshot' );
-            }).catch(err=>{
-                console.log(err);
-                callback(null, 'snapshot' );
-            });
-
-        }
-    });
 };
 
 
