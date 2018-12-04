@@ -76,3 +76,5 @@ images/*
 #conflict npm vs yarn
 *package-lock.json
 
+#heroku deployment file
+Procfile

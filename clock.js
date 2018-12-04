@@ -13,7 +13,6 @@ clock.start= function(wqueue){
         });
     }
 
-
     /**
      * This is a scheduled task that approximate score every minute.
      */
@@ -35,6 +34,7 @@ clock.start= function(wqueue){
                             clock.snapshot = false
                         }
                         console.log('Sucessfully updated aprox' );
+
                         clock.time=(clock.time === 4)? 0: clock.time+1;
                         setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
                     });
