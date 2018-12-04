@@ -38,7 +38,7 @@ var controller = require('./backend-controller.js');
 var app = express();
 
 if(!process.env.DISABLE_SSL){
-    //app.use(secure);
+    app.use(secure);
 }
 
 var compression = require('compression');
