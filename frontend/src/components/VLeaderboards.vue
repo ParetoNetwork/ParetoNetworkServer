@@ -23,7 +23,7 @@
                                         <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search by <i class="fa fa-globe"></i> Global Rank or Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
-                                               @submit.prevent="changeRoute(searchValue)"
+                                               v-on:keydown.enter.prevent="changeRoute(searchValue)"
                                                v-bind:placeholder="address || null"
                                                onfocus="this.placeholder = ''"
                                                v-model="searchValue"
@@ -303,7 +303,7 @@
                 let row = document.getElementsByClassName("table-row-highlight")[0];
                 if(row) this.row = row;
 
-                if(this.updated === 2 && this.address){
+                if(this.updated >= 2 && this.address){
                     this.scrollBack();
                 }
             });
@@ -335,7 +335,6 @@
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
-
                     this.page += res.length;
 
                     //This means the search param didn't get any results, so we look for the default leaderboard
