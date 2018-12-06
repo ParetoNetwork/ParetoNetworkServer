@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row mx-2 pt-5">
                 <div class="col-12 order-last order-lg-first col-lg-4 mb-4 p-0">
-                    <VProfile :addressProfile="intel.address"></VProfile>
+                    <VProfile :addressProfile="intel.address" :profileObject="profile"></VProfile>
                 </div>
                 <div class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
                     <div class="row text-group">
@@ -103,6 +103,7 @@
         data: function () {
             return {
                 id: this.$route.params.id,
+                profileObject: true,
                 loading: true,
                 intel: {},
                 address: {},
