@@ -324,6 +324,7 @@
                 if (withParam) {
                     params = { limit: 100, page: 0};
                     params[this.routeParams.param] = this.routeParams.value;
+                    this.leader = [];
                 } else {
                     params = { rank: this.rank, limit: 100, page: this.page};
                 }

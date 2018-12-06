@@ -286,7 +286,7 @@
                 }
             });
             this.address();
-            ProfileService.updateConfig();
+            //ProfileService.updateConfig();
             /*
             window.addEventListener('popstate', function () {
                 console.log('new backbutton');

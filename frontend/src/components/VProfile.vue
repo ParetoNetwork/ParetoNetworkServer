@@ -77,16 +77,14 @@
         name: "VProfile",
         mixins: [countUpMixin],
         props: [
-            'addressProfile'
+            'addressProfile', 'profileObject'
         ],
         components: {
             ICountUp,
             VShimmerUserProfile
         },
         beforeMount: function () {
-            if(this.addressProfile){
-                this.getProfile(this.addressProfile);
-            }
+            if(this.addressProfile) this.getProfile(this.addressProfile);
         },
         data: function () {
             return {
@@ -120,7 +118,13 @@
         },
         watch: {
             addressProfile: function (newVal) {
-                this.getProfile(newVal);
+                if (!this.profileObject){
+                    this.getProfile(newVal);
+                }
+            },
+
+            profileObject: function (loadedProfile) {
+                if (loadedProfile.address) this.profile = loadedProfile;
             }
         }
     }

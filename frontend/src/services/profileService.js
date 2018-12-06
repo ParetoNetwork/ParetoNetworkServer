@@ -12,13 +12,22 @@ export default class profileService {
         });
     }
 
+    //Returns the current user profile, but if send a profile parameter (address), will return the query profile
     static getProfile(onSuccess, onError, profile = null) {
-        profileService.updateConfig();
-        return http.get('/v1/userinfo', profile).then(res => {
-            return onSuccess(res.data.data);
-        }).catch(error => {
-            return onError(error);
-        });
+        const cachedProfile = this.getProfile.profile;
+
+        //Saves the last searched profile
+        if(cachedProfile && !profile){
+            return onSuccess(cachedProfile);
+        }else{
+            return http.get('/v1/userinfo', profile).then(res => {
+                this.getProfile.profile = res.data.data;
+                return onSuccess(res.data.data);
+            }).catch(error => {
+                return onError(error);
+            });
+        }
+
     }
 
     static updateConfig(onFinish){
@@ -54,19 +63,28 @@ export default class profileService {
         }).catch(error => {if (onFinish) onFinish(); });
     }
 
+    //Returns a profile. If none address is defined, returns last searched user profile
     static getSpecificProfile(onSuccess, onError, address){
-        http.get('/v1/userinfo/' + address).then(res => {
-            return onSuccess(res.data.data);
-        }).catch(error => {
-            return onError(error);
-        });
+        const profile = this.getSpecificProfile.profile || {};
+
+        //Cached profile
+        if(profile.address === address){
+            return profile;
+        }else{
+            http.get('/v1/userinfo/' + address).then(res => {
+                if(!address) this.getSpecificProfile.profile = res.data.data;
+                return onSuccess(res.data.data);
+            }).catch(error => {
+                return onError(error);
+            });
+        }
     }
 
     //Returns profile image url or gravatar generated image using the address
     static getProfileImage(path, pic, profileAddress){
         if (pic) return path + pic;
 
-        //replaces not numeric hex characters: Gravatar only generates images based on numbers
+        //replaces not numeric hex characters: IdenticonJs only generates images based on numbers
         var data = new Identicon(profileAddress, 420).toString();
         return 'data:image/png;base64,' + data;
     }
