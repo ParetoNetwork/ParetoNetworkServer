@@ -5757,6 +5757,11 @@ void-elements@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
 
+vue-line-clamp@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/vue-line-clamp/-/vue-line-clamp-1.2.4.tgz#4465b25efd9829e8f6ead17d7db72d48d8237a5d"
+  integrity sha512-qYj2uLf4Q2ZAuPmMAgFP7tSF9x36olst+DRsVKl16nBr85bVhA8utfDWxMYnaPGOFNtW/RG1qZxi43Z2jwnimg==
+
 vue-meta@^1.5.6:
   version "1.5.6"
   resolved "https://registry.yarnpkg.com/vue-meta/-/vue-meta-1.5.6.tgz#8c6e56e560217c63637bb9ed66434df15c162057"
