@@ -6,6 +6,7 @@ import App from './App.vue';
 import VueRouter from 'vue-router';
 import router from './utils/routes';
 import Meta from 'vue-meta';
+import lineClamp from 'vue-line-clamp'
 
 import Vuex from 'vuex';
 import Notifications from 'vue-notification'
@@ -20,7 +21,8 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(Notifications);
-Vue.use(require('vue-moment'))
+Vue.use(lineClamp);
+Vue.use(require('vue-moment'));
 
 
 Vue.use(Meta);
