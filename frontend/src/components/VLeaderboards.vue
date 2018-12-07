@@ -375,7 +375,6 @@
             },
             //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
             leaderFromUrlParams(route){
-
                 let routeSplit = route.fullPath.split('?')[1];
                 if(routeSplit){
                     let params = routeSplit.split('=');
