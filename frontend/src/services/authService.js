@@ -42,9 +42,9 @@ export default class authService {
             dataType: 'json'
         }).then(res => {
             if(res.data.success){
-              return  onSuccess(res.data.data);
+              return onSuccess(res.data.data);
             }else{
-              return   onError(res.data.message);
+              return onError(res.data.message);
             }
         }).catch(error => {
             return onError(error);

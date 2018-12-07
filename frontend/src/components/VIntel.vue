@@ -9,7 +9,7 @@
                         <div class="d-flex flex-column mr-2">
                             <div class="border p-2 mb-2" @click="openInput()">
                                 <div data-v-514e8c24="" class="thumb" id="wrapper"
-                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic)}"
+                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic, user.address)}"
                                      style="width: 100px; height: 100px;">
                                     <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i
                                             class="fa fa-pencil"
@@ -318,34 +318,6 @@
                     }
                 );
             },
-            loadContent: function () {
-                return dashboardService.getAllContent(null,
-                    res => {
-                    },
-                    error => {
-                    }
-                );
-            },
-            updateContent: function () {
-                return dashboardService.getAllContent(params,
-                    res => {
-                        this.loading = false;
-                        this.myFeed.page++;
-                        this.myFeed.loading = false;
-                        this.myFeed.content = [...this.myFeed.content, ...res];
-                    },
-                    error => {
-                        let errorText = error.message ? error.message : error;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Content',
-                            text: errorText
-                        });
-                    }
-                );
-            },
             numberToScientificNotation(number) {
                 return (number + "").length > 12 ? number.toExponential(5) : number;
             },
@@ -415,9 +387,9 @@
                     }
                 );
             },
-            loadProfileImage: function (pic) {
+            loadProfileImage: function (pic, profileAddress) {
                 let path = this.baseURL + "/profile-image?image=";
-                return profileService.getProfileImage(path, pic);
+                return profileService.getProfileImage(path, pic, profileAddress);
             },
             openInput: function () {
                 document.getElementById("file").click();
@@ -430,7 +402,6 @@
                     this.loadProfile(),
                     this.loadMyContent(),
                     this.loadAddress(),
-                    this.loadContent(),
                     this.getTransactions()
                 ]).then(values => {
                     this.$store.state.makingRequest = false;
@@ -439,18 +410,14 @@
             scrollMyPost: function () {
                 let list = document.getElementById("mypost");
 
-                if (list.scrollTop + list.offsetHeight >= list.scrollHeight
+                if (list.scrollTop + list.offsetHeight + 10 >= list.scrollHeight
                     && this.myContent.length < this.allMyContent.length) {
                     this.myContent = this.allMyContent.slice(0, this.myContent.length + 10);
-                    // console.log(this.myContent);
                 }
             },
             showModal() {
                 this.$refs.myModalRef.show();
             },
-            // substringTitle(title) {
-            //     return (title.length > 35) ? title.substring(0, 35) + ' ...' : title;
-            // },
             updatePicture: function () {
                 let file = this.$refs.file.files[0];
                 let formData = new FormData();

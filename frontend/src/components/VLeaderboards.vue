@@ -23,6 +23,7 @@
                                         <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search by <i class="fa fa-globe"></i> Global Rank or Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
+                                               v-on:keydown.enter.prevent="changeRoute(searchValue)"
                                                v-bind:placeholder="address || null"
                                                onfocus="this.placeholder = ''"
                                                v-model="searchValue"
@@ -250,6 +251,10 @@
             };
         },
         watch: {
+            $route (to, from){
+                this.leaderFromUrlParams(to);
+                this.init();
+            },
             'scroll.distance' : function (value) {
                 let top = this.row.offsetTop + this.row.offsetHeight;
                 let bottom = this.row.offsetTop - this.table.offsetHeight;
@@ -286,24 +291,8 @@
             ])
         },
         mounted: function () {
+            this.leaderFromUrlParams(this.$route);
             this.getAddress();
-
-            //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
-            let routeSplit = this.$route.fullPath.split('?')[1];
-            if(routeSplit){
-                let params = routeSplit.split('=');
-                if ( this.routeParams.valids.indexOf(params[0]) >= 0){
-                    this.routeParams.param = params[0];
-                    this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
-                }else{
-                    this.$notify({
-                        group: 'notification',
-                        type: 'error',
-                        duration: 10000,
-                        title: 'Leaderboard',
-                        text: 'Url parameter not found'});
-                }
-            }
         },
         updated: function() {
             this.updated++;
@@ -314,7 +303,7 @@
                 let row = document.getElementsByClassName("table-row-highlight")[0];
                 if(row) this.row = row;
 
-                if(this.updated === 2 && this.address){
+                if(this.updated >= 2 && this.address){
                     this.scrollBack();
                 }
             });
@@ -333,8 +322,9 @@
                 let params = {};
 
                 if (withParam) {
-                    params = { limit: 100, page: this.page};
+                    params = { limit: 100, page: 0};
                     params[this.routeParams.param] = this.routeParams.value;
+                    this.leader = [];
                 } else {
                     params = { rank: this.rank, limit: 100, page: this.page};
                 }
@@ -344,12 +334,13 @@
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader,... res];
                     this.busy = false;
-
                     this.page += res.length;
 
                     //This means the search param didn't get any results, so we look for the default leaderboard
                     if(this.leader.length < 1 && withParam){
+                        this.busy = true;
                         this.rank = 1;
+                        this.page = 0;
                         this.getLeaderboard();
                         this.$notify({
                             group: 'notification',
@@ -360,6 +351,7 @@
                         return;
                     }
 
+                    if(this.leader.length < 1) return;
                     //this means the server has just a few data to work with and the list isn't scrollable, so we look for any other results above
                     if(this.leader[0].rank > 1 && this.leader.length < 30){
                         this.busy = true;
@@ -380,7 +372,27 @@
                         title: 'Leaderboard',
                         text: errorText });
                 });
-            }, authLogin() {
+            },
+            //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
+            leaderFromUrlParams(route){
+
+                let routeSplit = route.fullPath.split('?')[1];
+                if(routeSplit){
+                    let params = routeSplit.split('=');
+                    if ( this.routeParams.valids.indexOf(params[0]) >= 0){
+                        this.routeParams.param = params[0];
+                        this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
+                    }else{
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Leaderboard',
+                            text: 'Url parameter not found'});
+                    }
+                }
+            },
+            authLogin() {
                 if (this.madeLogin) {
                     Auth.postSign(() => {
                         this.getAddress()
@@ -462,6 +474,9 @@
                     this.scroll.distance = this.table.scrollTop;
                     bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
                 }
+
+                if(this.leader.length < 1) return;
+
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
                     this.$store.state.makingRequest = true;
                     this.table.scrollTop += 2;
