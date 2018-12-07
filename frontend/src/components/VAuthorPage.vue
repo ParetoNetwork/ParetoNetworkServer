@@ -6,7 +6,7 @@
                     <VProfile :addressProfile="address"></VProfile>
                 </div>
                 <div class="col-lg-7 offset-lg-1 mb-3 px-0 mt-2">
-                    <VIntelFeed :user="user" :fetchAddress="address" :title="title"></VIntelFeed>
+                    <VIntelFeed :user="user" :fetchAddress="address" :address="true" :title="title"></VIntelFeed>
                 </div>
             </div>
         </div>
