@@ -40,7 +40,7 @@ var controller = require('./backend-controller.js');
 
 var app = express();
 
-app.all(/^\/api-docs$/, function(req, res) { res.redirect('/api-docs/'); });
+app.all(/^\/api-docs$/, function(req, res) { res.redirect('/api-docs/index.html'); });
 
 app.use(history({
     rewrites: [
