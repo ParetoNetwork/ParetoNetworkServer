@@ -1389,6 +1389,11 @@ concat-stream@^1.5.1, concat-stream@^1.5.2, concat-stream@^1.6.0, concat-stream@
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
+connect-history-api-fallback@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/connect-history-api-fallback/-/connect-history-api-fallback-1.5.0.tgz#b06873934bc5e344fef611a196a6faae0aee015a"
+  integrity sha1-sGhzk0vF40T+9hGhlqb6rgruAVo=
+
 connect-mongo@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/connect-mongo/-/connect-mongo-2.0.1.tgz#514d649cff1d5d5546c087193245bb54ff5b703b"
@@ -5756,6 +5761,11 @@ vm-browserify@^1.0.0:
 void-elements@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
+
+vue-line-clamp@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/vue-line-clamp/-/vue-line-clamp-1.2.4.tgz#4465b25efd9829e8f6ead17d7db72d48d8237a5d"
+  integrity sha512-qYj2uLf4Q2ZAuPmMAgFP7tSF9x36olst+DRsVKl16nBr85bVhA8utfDWxMYnaPGOFNtW/RG1qZxi43Z2jwnimg==
 
 vue-meta@^1.5.6:
   version "1.5.6"
