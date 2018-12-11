@@ -953,7 +953,7 @@ controller.getContentByCurrentUser = function(req, callback){
   if(web3.utils.isAddress(address) == false){
     if(callback && typeof callback === "function") { callback(new Error('Invalid Address')); }
   } else {
-    var query = ParetoContent.find({address : address}).sort({dateCreated : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
+    var query = ParetoContent.find({address : address, validated: true}).sort({dateCreated : -1}).skip(limit*page).limit(limit).populate( 'createdBy' );
 
     query.exec(function(err, results){
       if(err){
