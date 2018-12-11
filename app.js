@@ -55,7 +55,7 @@ app.use(history({
             }
         },
         {
-            from: /^\/api-docs.*$/,
+            from: /^\/api-docs\/.*$/,
             to: function(context) {
                 return  context.parsedUrl.pathname;
             }
