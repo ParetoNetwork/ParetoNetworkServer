@@ -58,7 +58,7 @@
                                 </div>
                             </div>
                             <div class="text-group mt-4">
-                                <p v-html="intel.body"></p>
+                                <p class="intel-body" v-html="intel.body"></p>
                             </div>
                         </div>
                     </div>
@@ -218,5 +218,8 @@
     };
 </script>
 
-<style scoped lang="scss">
+<style>
+    .intel-body a {
+        color: #007bff;
+    }
 </style>
