@@ -148,9 +148,7 @@
                                         >
                                             <td style="width: 55px; text-align: left;">
                                                 {{rank.rank}}
-                                                <i v-bind:class="changeHistoricalSymbol(rank.lrank)"></i>
                                             </td>
-                                            <!--<td>{{rank.score}}</td>-->
                                             <td style="width: 123px;">
                                                 <ICountUp
                                                         :startVal="countUp.startVal"
@@ -494,7 +492,7 @@
                 return this.textSize;
             },
             changeHistoricalSymbol: function(symbol){
-                if (symbol === '+') return 'fa fa-chevron-up historical-up';
+                //if (symbol === '+') return 'fa fa-chevron-up historical-up'; //as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
                 if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function(){
