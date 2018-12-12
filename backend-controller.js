@@ -1313,7 +1313,7 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
   }
 
   const multi = redisClient.multi();
-  for (let i =queryRank*(page+1) ; i<queryRank*(page+1)+limit; i=i+1){
+  for (let i =queryRank+(page*limit) ; i<queryRank+(page*limit)+limit; i=i+1){
     multi.hgetall(i+ "");
   }
   multi.hgetall("maxRank");
@@ -1325,7 +1325,7 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
 
     // if there's no ranking stored in redis, add it there.
     if((!results || results.length ===0 || !results[0]) && attempts){
-        if(results && results[results.length-1] && !isNaN(results[results.length-1].rank) && results[results.length-1].rank < queryRank*(page+1) ){
+        if(results && results[results.length-1] && !isNaN(results[results.length-1].rank) && results[results.length-1].rank < queryRank+(page*limit) ){
             return callback(null, []);
         }
         controller.getScoreAndSaveRedis(function(err, result){

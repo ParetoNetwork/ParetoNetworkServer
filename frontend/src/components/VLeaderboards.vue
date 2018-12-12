@@ -259,7 +259,6 @@
         },
         watch: {
             'score': function (newScore, oldScore) {
-                console.log(oldScore);
                 this.lastScore = oldScore;
             },
             $route(to, from) {
@@ -343,7 +342,10 @@
                     this.leader = [];
                     this.updated = 0;
                 } else {
-                    params = {rank: this.rank, limit: 100, page: this.page};
+                    if(this.leader[this.leader.length-1]){
+                        this.rank = parseInt(this.leader[this.leader.length-1].rank) + 4;
+                    }
+                    params = {rank: this.rank, limit: 100, page: 0};
                 }
 
                 this.socketParams = params;
@@ -351,7 +353,6 @@
                     this.$store.state.makingRequest = false;
                     this.leader = [...this.leader, ...res];
                     this.busy = false;
-                    this.page += res.length;
 
                     if (withParam) {
                         setTimeout(() => {
@@ -403,7 +404,6 @@
 
                 LeaderboardService.getLeaderboard({rank: rank, limit: minimunLimit, page: 0}, res => {
                     this.$store.state.makingRequest = false;
-                    this.lastRank += 100;
                     this.busy = false;
 
                     this.leader = [...res, ...this.leader];
@@ -507,7 +507,6 @@
             changeFontSize: function (score) {
                 let lastScoreLength = 0;
 
-                console.log(this.lastScore, score);
                 let textLength = score.toString().length;
                 if (score < 1){
                     this.textSize = 100 - (score.length - 4) * 4;
@@ -535,10 +534,12 @@
                     bottomReached = (this.scroll.distance + this.table.offsetHeight + 10 >= this.table.scrollHeight);
                 }
 
+                console.log(this.scroll.distance + this.table.offsetHeight + 10 , this.table.scrollHeight)
+
                 if (this.leader.length < 1) return;
 
                 if (this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy) {
-                    this.getLeaderboardTop(this.rank - this.lastRank, false);
+                    this.getLeaderboardTop(this.leader[0].rank - 100, false);
                 }
 
                 if (bottomReached && !this.busy) {
