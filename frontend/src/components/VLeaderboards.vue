@@ -296,6 +296,7 @@
         },
         updated: function() {
             this.updated++;
+
             this.$nextTick(function () {
                 let table = document.getElementById("leaderboard-table");
                 if(table) this.table = table;
@@ -303,7 +304,7 @@
                 let row = document.getElementsByClassName("table-row-highlight")[0];
                 if(row) this.row = row;
 
-                if(this.updated >= 2 && this.address){
+                if(this.updated == 2 && this.address){
                     this.scrollBack();
                 }
             });
@@ -319,12 +320,14 @@
                 });
             }, getLeaderboard: function (withParam) {//withParam means a manual search
                 this.$store.state.makingRequest = true;
+                this.busy = true;
                 let params = {};
-
+                console.log('comes back here');
                 if (withParam) {
                     params = { limit: 100, page: 0};
                     params[this.routeParams.param] = this.routeParams.value;
                     this.leader = [];
+                    this.updated = 0;
                 } else {
                     params = { rank: this.rank, limit: 100, page: this.page};
                 }
@@ -335,6 +338,12 @@
                     this.leader = [...this.leader,... res];
                     this.busy = false;
                     this.page += res.length;
+
+                    if(withParam){
+                        setTimeout(()=> {
+                            this.scrollBack();
+                        }, 100);
+                    }
 
                     //This means the search param didn't get any results, so we look for the default leaderboard
                     if(this.leader.length < 1 && withParam){
@@ -352,16 +361,42 @@
                     }
 
                     if(this.leader.length < 1) return;
-                    //this means the server has just a few data to work with and the list isn't scrollable, so we look for any other results above
+                    //this means the server brings only so few results that the list isn't scrollable, so we look for any other results above
                     if(this.leader[0].rank > 1 && this.leader.length < 30){
-                        this.busy = true;
-                        params = { rank: 1, limit: this.leader[0].rank-1, page: 0};
-                        LeaderboardService.getLeaderboard(params, res => {
-                            this.busy = false;
-                            this.leader = [... res,...this.leader];
-                        }, err => {
-                            console.log(err);
-                        });
+                        this.getLeaderboardTop(this.leader[0].rank-100, true);
+                    }
+                }, error => {
+                    let errorText= error.message? error.message : error;
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Leaderboard',
+                        text: errorText });
+                });
+            },
+            //Search leaderboard values above the ones we have
+            getLeaderboardTop(rank, withParam){
+                this.$store.state.makingRequest = true;
+                this.table.scrollTop += 2;
+                this.busy = true;
+                let minimunLimit = 100;
+                if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
+
+                this.socketParams = { rank: rank, limit: 100, page: 0};
+
+                LeaderboardService.getLeaderboard({rank: rank, limit: minimunLimit, page: 0}, res => {
+                    this.$store.state.makingRequest = false;
+                    this.lastRank += 100;
+                    this.busy = false;
+
+                    console.log(this.busy)
+                    this.leader = [... res,...this.leader];
+
+                    if(withParam){
+                        setTimeout(()=> {
+                            this.scrollBack();
+                        }, 100);
                     }
                 }, error => {
                     let errorText= error.message? error.message : error;
@@ -443,7 +478,7 @@
 
                 this.page = 0;
                 this.leader = [];
-                this.lastRank = 0;
+                this.lastRank = 100;
 
                 this.routeParams.param = paramType;
                 this.routeParams.value = value;
@@ -463,7 +498,6 @@
                 if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function(){
-                this.busy = true;
                 if(!this.loading) this.getLeaderboard();
             },
             onScroll: function(){
@@ -471,34 +505,15 @@
 
                 if(this.table){
                     this.scroll.distance = this.table.scrollTop;
-                    bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
+                    bottomReached = (this.scroll.distance + this.table.offsetHeight + 10 >= this.table.scrollHeight);
                 }
 
                 if(this.leader.length < 1) return;
 
+                console.log(this.table.scrollTop === 0, this.leader[0].rank, !this.busy);
                 if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
-                    this.$store.state.makingRequest = true;
-                    this.table.scrollTop += 2;
-                    this.busy = true;
-                    let minimunLimit = 100;
-                    if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
-
-                    this.socketParams = { rank: this.rank-this.lastRank, limit: 100, page: 0};
-
-                    LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
-                        this.$store.state.makingRequest = false;
-                        this.lastRank += 100;
-                        this.busy = false;
-                        this.leader = [... res,...this.leader];
-                    }, error => {
-                        let errorText= error.message? error.message : error;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Leaderboard',
-                            text: errorText });
-                    });
+                    console.log('new item')
+                    this.getLeaderboardTop(this.rank-this.lastRank, false);
                 }
 
                 if(bottomReached && !this.busy){
