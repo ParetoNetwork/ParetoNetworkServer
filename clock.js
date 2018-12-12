@@ -1,7 +1,6 @@
 
 var clock = module.exports = {};
 clock.time = 0;
-clock.snapshot = true;
 clock.start= function(wqueue){
     const cron = require("node-cron");
     const kue  = require ('kue');
@@ -20,7 +19,7 @@ clock.start= function(wqueue){
     setTimeout(function run() {
         try{
             const time = (new Date().getTime());
-            const minutes = clock.snapshot? 1440: ((clock.time === 0)? 5: 1);
+            const minutes =   ((clock.time === 0)? 5: 1);
             const job = queue
                 .create('clock-job',{minutes} )
                 .removeOnComplete(true)
@@ -30,9 +29,6 @@ clock.start= function(wqueue){
                         return;
                     }
                     job.on('complete', result => {
-                        if(result==='snapshot'){
-                            clock.snapshot = false
-                        }
                         console.log('Sucessfully updated aprox' );
 
                         clock.time=(clock.time === 4)? 0: clock.time+1;
@@ -48,12 +44,35 @@ clock.start= function(wqueue){
 
         }catch (e) {
             console.log(e);
+            setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
         }
 
     }, 60000);
 
-    cron.schedule('0 0 0 * * *', () => {
-        clock.snapshot = true
+    cron.schedule('* * * * *', () => {
+        try{
+
+            const job = queue
+                .create('clock-job-snapshot',{} )
+                .removeOnComplete(true)
+                .save((error) => {
+                    if (error) {
+                        next(error);
+                        return;
+                    }
+                    job.on('complete', result => {
+                        console.log('Sucessfully weekly snap' );
+                    });
+                    job.on('failed', () => {
+                        console.log('fail weekly snap' );
+                    });
+                });
+
+
+
+        }catch (e) {
+            console.log(e);
+        }
     });
 }
 
