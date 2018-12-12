@@ -1311,10 +1311,12 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
   if(queryRank <= 0){
     queryRank = 1;
   }
+
   const multi = redisClient.multi();
-  for (let i =queryRank+page ; i<queryRank+limit+page; i=i+1){
+  for (let i =queryRank*(page+1) ; i<queryRank*(page+1)+limit; i=i+1){
     multi.hgetall(i+ "");
   }
+  multi.hgetall("maxRank");
   multi.exec(function(err, results) {
 
     if(err){
@@ -1323,16 +1325,20 @@ controller.retrieveRanksWithRedis = function(rank, limit, page, attempts, callba
 
     // if there's no ranking stored in redis, add it there.
     if((!results || results.length ===0 || !results[0]) && attempts){
-      controller.getScoreAndSaveRedis(function(err, result){
-        if(err){
-            return callback(err);
-        } else {
-          controller.retrieveRanksWithRedis(rank, limit, page,false ,callback);
+        if(results && results[results.length-1] && !isNaN(results[results.length-1].rank) && results[results.length-1].rank < queryRank*(page+1) ){
+            return callback(null, []);
         }
-      });
+        controller.getScoreAndSaveRedis(function(err, result){
+            if(err){
+                return callback(err);
+            } else {
+              controller.retrieveRanksWithRedis(rank, limit, page,false ,callback);
+            }
+        });
+
     }else{
       // return the cached ranking
-      return  callback(null, results.filter(data => data));
+      return  callback(null, results.filter(data => { return (data && data.address)}));
     }
 
 
@@ -1358,13 +1364,20 @@ controller.retrieveAddressRankWithRedis = function(addressess, attempts, callbac
             return callback(err);
         }
         if((!results || results.length ===0 || (!results[0] && results.length ===1)) && attempts){
-            controller.getScoreAndSaveRedis(function(err, result){
-                if(err){
-                    return callback(err);
-                } else {
-                    controller.retrieveAddressRankWithRedis(addressess ,false,callback);
+            ParetoAddress.find({address: { $in: addressess}}, function (err, result) {
+                if(!err && (!result || (result && !result.length)) ){
+                    callback(ErrorHandler.addressNotFound)
+                }else{
+                    controller.getScoreAndSaveRedis(function(err, result){
+                        if(err){
+                            return callback(err);
+                        } else {
+                            controller.retrieveAddressRankWithRedis(addressess ,false,callback);
+                        }
+                    });
                 }
             });
+
         }else{
           if((!results || results.length ===0 || (!results[0] && results.length ===1))){
               // hopefully, users without pareto shouldn't get here now.
