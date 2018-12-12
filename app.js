@@ -13,8 +13,11 @@ var cookieParser = require('cookie-parser');
 const multer = require("multer");
 var multerS3 = require('multer-s3');
 const cron = require("node-cron");
+var history = require('connect-history-api-fallback');
 let constants = {};
 const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
+
+console.log(__dirname);
 
 if(!process.env.DISABLE_SSL){
     secure = require('ssl-express-www');
@@ -36,6 +39,31 @@ var controller = require('./backend-controller.js');
 
 
 var app = express();
+
+app.all(/^\/api-docs$/, function(req, res) { res.redirect('/api-docs/index.html'); });
+
+app.use(history({
+    rewrites: [
+        {
+            from: /^\/v1\/.*$/,
+            to: function(context) {
+                return  context.parsedUrl.pathname;
+            }
+        },
+        {
+            from: /^\/profile-image.*$/,
+            to: function(context) {
+                return  context.parsedUrl.pathname;
+            }
+        },
+        {
+            from: /^\/api-docs.*$/,
+            to: function(context) {
+                return  context.parsedUrl.pathname;
+            }
+        }
+    ]
+}));
 
 if(!process.env.DISABLE_SSL){
     app.use(secure);
@@ -74,6 +102,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50
 app.use(cookieParser());
 app.use(compression());
 
+
     const corsOptions = {
     origin: 'http://localhost:8080',
     credentials: true
@@ -109,7 +138,9 @@ const ErrorHandler = require('./error-handler.js');
   res.end();
 });*/
 
-
+app.get('/sitemap.xml', function (req, res) {
+    res.sendFile(path.join(__dirname + '/sitemap.xml'));
+});
 
 app.get('/profile-image', function (req, res) {
     var params = {Bucket: 'pareto-images', Key: 'profile-images/' + req.query.image};
@@ -123,7 +154,6 @@ app.get('/profile-image', function (req, res) {
         }else{
             res.sendFile(path.join(__dirname + '/default-avatar.png'));
         }
-
     });
 });
 
