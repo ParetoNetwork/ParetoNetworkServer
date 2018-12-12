@@ -939,8 +939,8 @@ workerController.getScoreAndSaveSnapshot = function(callback){
                            const bulkop = [];
                            for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
                                let data =  {} ;
-                               data.last_rank =  results[j].rank + 1;
-                               data.last_score =  results[j].addresses.score;
+                               data.lastRank =  results[j].rank + 1;
+                               data.lastScore =  results[j].addresses.score;
 
                                bulkop.push({updateOne:{ filter: {address : results[j].addresses.address}, update: data}});
 
@@ -997,8 +997,8 @@ workerController.getScoreAndSaveRedis = function(callback){
                     "address" : "$address",
                     "score" : "$score",
                     "block" : "$block",
-                    "last_score" : "$last_score",
-                    "last_rank" : "$last_rank",
+                    "lastScore" : "$lastScore",
+                    "lastRank" : "$lastRank",
                     "tokens" : "$tokens"
                 }
             }}).unwind({
@@ -1032,9 +1032,9 @@ workerController.getScoreAndSaveRedis = function(callback){
                 data.rank = result.rank + 1;
 
 
-                if(result.addresses.last_rank > 0 && result.addresses.last_score > 0){
-                    const lrank = (result.addresses.rank - result.addresses.last_rank);
-                    const lscore = (result.addresses.score - result.addresses.last_score);
+                if(result.addresses.lastRank > 0 && result.addresses.lastScore > 0){
+                    const lrank = (result.addresses.rank - result.addresses.lastRank);
+                    const lscore = (result.addresses.score - result.addresses.lastScore);
                     data.lrank = (lrank > 0)? '+':((lrank < 0)? '-': '=');
                     data.lscore = (lscore > 0)? '+':((lscore < 0)? '-': '=');
                     k=k+1
