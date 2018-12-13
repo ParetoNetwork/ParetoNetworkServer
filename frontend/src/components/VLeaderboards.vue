@@ -527,6 +527,7 @@
                 if (!this.loading) this.getLeaderboard();
             },
             onScroll: function () {
+                
                 let bottomReached = false;
 
                 if (this.table) {
@@ -603,21 +604,15 @@
                                         let bigNumber = item.score > 100 && socketRanking[socketIndex].score > 100;
                                         let change = Math.abs(item.score-socketRanking[socketIndex].score);
 
-                                        let highLitghtRow = function (animationType) {
-                                            $('#' + rank).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
-                                                $(this).removeClass(animationType);
-                                            }).addClass(animationType);
-                                        };
-
                                         if(item.score != socketRanking[socketIndex].score ){
                                             if(bigNumber){
                                                 if(change > 10){
-                                                    highLitghtRow('high-flash')
+                                                    this.rowFlashLight(rank, 'high-flash');
                                                 }else if (change > 0.1){
-                                                    highLitghtRow('light-flash')
+                                                    this.rowFlashLight(rank, 'light-flash');
                                                 }
                                             }else{
-                                                highLitghtRow('light-flash')
+                                                this.rowFlashLight(rank, 'light-flash');
                                             }
                                         }
 
@@ -627,6 +622,7 @@
 
                                     return item;
                                 });
+                                this.randomFlash();
                             }
                         }
 
@@ -636,7 +632,29 @@
                 };
             },
             randomFlash(){
+                if (this.row && this.table) {
+                    let graphicPosition = (this.table.scrollTop + this.table.offsetHeight ) / this.table.scrollHeight;
+                    let leaderPosition = Math.floor(graphicPosition*this.leader.length);
 
+                    let cap = 50;
+                    for(let index = leaderPosition-50; index < leaderPosition + 50; index++){
+                        if(this.leader[index]){
+                            let luckyNumber = this.randomNumber(0, 100);
+                            console.log(luckyNumber, cap);
+                            if(luckyNumber < cap){
+                                this.rowFlashLight(index, 'light-flash');
+                                cap /= 2;
+                            }else{
+                                cap = 50;
+                            }
+                        }
+                    }
+                }
+            },
+            rowFlashLight (rank, animationType) {
+                $('#' + rank).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
+                    $(this).removeClass(animationType);
+                }).addClass(animationType);
             },
             socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
