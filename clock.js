@@ -49,7 +49,7 @@ clock.start= function(wqueue){
 
     }, 60000);
 
-    cron.schedule('* * * * *', () => {
+    cron.schedule('0 0 0 * * 7', () => {
         try{
 
             const job = queue
