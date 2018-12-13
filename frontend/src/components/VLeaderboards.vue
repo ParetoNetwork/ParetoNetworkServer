@@ -20,7 +20,8 @@
                                 <div class="group">
                                     <div class="d-flex flex-column justify-content-center">
 
-                                        <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search by <i class="fa fa-globe"></i> Global Rank or Address</label>
+                                        <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search
+                                            by <i class="fa fa-globe"></i> Global Rank or Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
                                                v-on:keydown.enter.prevent="changeRoute(searchValue)"
@@ -43,23 +44,25 @@
                             </button>
                         </div>
 
-                        <div class="row" style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
+                        <div class="row"
+                             style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center;">
                             <!-- <div id="rank-logo-holder" class="mr-2"><img id="rank-logo"
                                                                          src="../assets/images/pareto-logo-mark-color.svg"
                                                                          alt="Pareto Logo">
                             </div> -->
                             <div id="score-counter" class="d-flex">
                                 <div class="row" v-bind:style="{ fontSize: changeFontSize(score) + 'px'  }">
-                                    <div class="col-md-1 col-xs-1 text-left"><i class="fa fa-star" style="color: #fca130;"></i></div>
+                                    <div class="col-md-1 col-xs-1 text-left"><i class="fa fa-star"
+                                                                                style="color: #fca130;"></i></div>
                                     <div class="col-md col-xs">
                                         <ICountUp
-                                            v-if="score"
-                                            :startVal="countUp.startVal"
-                                            :endVal="parseFloat(score)"
-                                            :decimals="decimalsLength(score + '')"
-                                            :duration="randomNumber(3,6)"
-                                            :options="countUp.options"
-                                            @ready="onReady"
+                                                v-if="score"
+                                                :startVal="countUp.startVal"
+                                                :endVal="parseFloat(score)"
+                                                :decimals="decimalsLength(score + '')"
+                                                :duration="randomNumber(3,6)"
+                                                :options="countUp.options"
+                                                @ready="onReady"
                                         />
                                         <span v-else>
                                         0
@@ -135,7 +138,9 @@
                                 </tr>
                                 </thead>
                             </table>
-                            <div id="leaderboard-table" style="position: relative; overflow: auto; height: 70vh; width: 100%;" v-on:scroll="onScroll">
+                            <div id="leaderboard-table"
+                                 style="position: relative; overflow: auto; height: 70vh; width: 100%;"
+                                 v-on:scroll="onScroll">
                                 <VShimmerLeaderboard v-if="!leader.length"></VShimmerLeaderboard>
                                 <table v-else class="table table-responsive-lg position-relative">
                                     <div>
@@ -159,8 +164,11 @@
                                                         @ready="onReady"></ICountUp>
                                                 <i v-bind:class="changeHistoricalSymbol(rank.lscore)"></i>
                                             </td>
-                                            <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
-                                            <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
+                                            <td class="break-line" style="width: 400px; text-align: left;">
+                                                {{rank.address}}
+                                            </td>
+                                            <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i
+                                                    class="fa fa-external-link"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>
@@ -225,23 +233,24 @@
                 },
                 leader: [],
                 rank: 0,
-                lastRank : 100,
+                lastRank: 100,
+                lastScore: 0,
                 score: 0,
-                etherscan: window.localStorage.getItem('etherscan') ,
+                etherscan: window.localStorage.getItem('etherscan'),
                 address: '',
-                textSize : 100,
+                textSize: 100,
                 page: 0,
                 busy: false,
-                loading : true,
+                loading: true,
                 updated: 0,
-                table : '',
-                row : '',
-                searchValue : '',
-                scroll : {
+                table: '',
+                row: '',
+                searchValue: '',
+                scroll: {
                     distance: 0,
                     active: false
                 },
-                socketParams : {
+                socketParams: {
                     rank: '',
                     limit: '',
                     page: ''
@@ -249,39 +258,43 @@
             };
         },
         watch: {
-            $route (to, from){
+            'score': function (newScore, oldScore) {
+                this.lastScore = oldScore;
+            },
+            $route(to, from) {
                 this.leaderFromUrlParams(to);
                 this.init();
             },
-            'scroll.distance' : function (value) {
+            'scroll.distance': function (value) {
                 let top = this.row.offsetTop + this.row.offsetHeight;
                 let bottom = this.row.offsetTop - this.table.offsetHeight;
 
                 let inRange = (value < top && value > bottom);
 
-                if ( !inRange && this.scroll.active === false) {
+                if (!inRange && this.scroll.active === false) {
 
                     let button = $('#button-scroll-up');
 
-                    if (value < top){
-                        button.removeClass( "fa-arrow-up" ).addClass( "fa-arrow-down" );
-                    }else{
-                        button.removeClass( "fa-arrow-down" ).addClass( "fa-arrow-up" );
+                    if (value < top) {
+                        button.removeClass("fa-arrow-up").addClass("fa-arrow-down");
+                    } else {
+                        button.removeClass("fa-arrow-down").addClass("fa-arrow-up");
                     }
 
                     button.stop(true, true).fadeIn();
                     this.scroll.active = true;
-                } else if( inRange && this.scroll.active === true){
+                } else if (inRange && this.scroll.active === true) {
 
                     let button = $('#button-scroll-up');
                     button.stop(true, true).fadeOut();
                     this.scroll.active = false;
-                } else if ( !inRange ) {
+                } else if (!inRange) {
                     this.scroll.active = true;
                 }
             }
         },
-        computed: {...mapState(['madeLogin',
+        computed: {
+            ...mapState(['madeLogin',
                 'showModalSign',
                 'showModalLoginOptions',
                 'showModalLedgerNano',
@@ -292,23 +305,26 @@
             this.leaderFromUrlParams(this.$route);
             this.getAddress();
         },
-        updated: function() {
+        updated: function () {
             this.updated++;
+
             this.$nextTick(function () {
                 let table = document.getElementById("leaderboard-table");
-                if(table) this.table = table;
+                if (table) this.table = table;
 
                 let row = document.getElementsByClassName("table-row-highlight")[0];
-                if(row) this.row = row;
+                if (row) this.row = row;
 
-                if(this.updated >= 2 && this.address){
+                if (this.updated == 2 && this.address) {
                     this.scrollBack();
                 }
             });
         },
         methods: {
             getAddress() {
-                Profile.updateConfig( res => {this.etherscan = window.localStorage.getItem('etherscan')});
+                Profile.updateConfig(res => {
+                    this.etherscan = window.localStorage.getItem('etherscan')
+                });
                 return DashboardService.getAddress(data => {
                     this.init(data);
                 }, () => {
@@ -317,25 +333,35 @@
                 });
             }, getLeaderboard: function (withParam) {//withParam means a manual search
                 this.$store.state.makingRequest = true;
+                this.busy = true;
                 let params = {};
 
                 if (withParam) {
-                    params = { limit: 100, page: 0};
+                    params = {limit: 100, page: 0};
                     params[this.routeParams.param] = this.routeParams.value;
                     this.leader = [];
+                    this.updated = 0;
                 } else {
-                    params = { rank: this.rank, limit: 100, page: this.page};
+                    if(this.leader[this.leader.length-1]){
+                        this.rank = parseInt(this.leader[this.leader.length-1].rank) + 4;
+                    }
+                    params = {rank: this.rank, limit: 100, page: 0};
                 }
 
                 this.socketParams = params;
                 LeaderboardService.getLeaderboard(params, res => {
                     this.$store.state.makingRequest = false;
-                    this.leader = [...this.leader,... res];
+                    this.leader = [...this.leader, ...res];
                     this.busy = false;
-                    this.page += res.length;
+
+                    if (withParam) {
+                        setTimeout(() => {
+                            this.scrollBack();
+                        }, 100);
+                    }
 
                     //This means the search param didn't get any results, so we look for the default leaderboard
-                    if(this.leader.length < 1 && withParam){
+                    if (this.leader.length < 1 && withParam) {
                         this.busy = true;
                         this.rank = 1;
                         this.page = 0;
@@ -345,47 +371,75 @@
                             type: 'error',
                             duration: 10000,
                             title: 'Leaderboard',
-                            text: "The param doesn't exist" });
+                            text: "The param doesn't exist"
+                        });
                         return;
                     }
 
-                    if(this.leader.length < 1) return;
-                    //this means the server has just a few data to work with and the list isn't scrollable, so we look for any other results above
-                    if(this.leader[0].rank > 1 && this.leader.length < 30){
-                        this.busy = true;
-                        params = { rank: 1, limit: this.leader[0].rank-1, page: 0};
-                        LeaderboardService.getLeaderboard(params, res => {
-                            this.busy = false;
-                            this.leader = [... res,...this.leader];
-                        }, err => {
-                            console.log(err);
-                        });
+                    if (this.leader.length < 1) return;
+                    //this means the server brings only so few results that the list isn't scrollable, so we look for any other results above
+                    if (this.leader[0].rank > 1 && this.leader.length < 30) {
+                        this.getLeaderboardTop(this.leader[0].rank - 100, true);
                     }
                 }, error => {
-                    let errorText= error.message? error.message : error;
+                    let errorText = error.message ? error.message : error;
                     this.$notify({
                         group: 'notification',
                         type: 'error',
                         duration: 10000,
                         title: 'Leaderboard',
-                        text: errorText });
+                        text: errorText
+                    });
+                });
+            },
+            //Search leaderboard values above the ones we have
+            getLeaderboardTop(rank, withParam) {
+                this.$store.state.makingRequest = true;
+                this.table.scrollTop += 2;
+                this.busy = true;
+                let minimunLimit = 100;
+                if (this.leader[0].rank < 100) minimunLimit = this.leader[0].rank - 1;
+
+                this.socketParams = {rank: rank, limit: 100, page: 0};
+
+                LeaderboardService.getLeaderboard({rank: rank, limit: minimunLimit, page: 0}, res => {
+                    this.$store.state.makingRequest = false;
+                    this.busy = false;
+
+                    this.leader = [...res, ...this.leader];
+
+                    if (withParam) {
+                        setTimeout(() => {
+                            this.scrollBack();
+                        }, 100);
+                    }
+                }, error => {
+                    let errorText = error.message ? error.message : error;
+                    this.$notify({
+                        group: 'notification',
+                        type: 'error',
+                        duration: 10000,
+                        title: 'Leaderboard',
+                        text: errorText
+                    });
                 });
             },
             //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
-            leaderFromUrlParams(route){
+            leaderFromUrlParams(route) {
                 let routeSplit = route.fullPath.split('?')[1];
-                if(routeSplit){
+                if (routeSplit) {
                     let params = routeSplit.split('=');
-                    if ( this.routeParams.valids.indexOf(params[0]) >= 0){
+                    if (this.routeParams.valids.indexOf(params[0]) >= 0) {
                         this.routeParams.param = params[0];
                         this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
-                    }else{
+                    } else {
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Leaderboard',
-                            text: 'Url parameter not found'});
+                            text: 'Url parameter not found'
+                        });
                     }
                 }
             },
@@ -394,13 +448,14 @@
                     Auth.postSign(() => {
                         this.getAddress()
                     }, error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Content',
-                            text: errorText });
+                            text: errorText
+                        });
                     });
                 } else {
                     this.loadingLogin();
@@ -420,20 +475,21 @@
 
 
                     }, error => {
-                        let errorText= error.message? error.message : error;
+                        let errorText = error.message ? error.message : error;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
                             duration: 10000,
                             title: 'Leaderboard',
-                            text: errorText });
+                            text: errorText
+                        });
                         this.stopLogin();
                     });
                 }
             },//This method reload the leader according to the address or rank of the button search
-            changeRoute: function(value){
+            changeRoute: function (value) {
                 let paramType = '';
-                if(value.split(/[^a-z]+/g).length > 2){
+                if (value.split(/[^a-z]+/g).length > 2) {
                     paramType = 'address';
                 } else {
                     paramType = 'rank';
@@ -441,102 +497,89 @@
 
                 this.page = 0;
                 this.leader = [];
-                this.lastRank = 0;
+                this.lastRank = 100;
 
                 this.routeParams.param = paramType;
                 this.routeParams.value = value;
 
                 this.init();
             },
-            changeFontSize : function ( score ) {
+            changeFontSize: function (score) {
+                let lastScoreLength = 0;
+
                 let textLength = score.toString().length;
-                if (score < 1)
-                    this.textSize = 100 - (score.length - 4)*4;
-                else
-                    this.textSize = 100 - textLength*4;
-                return this.textSize;
+                if (score < 1){
+                    this.textSize = 100 - (score.length - 4) * 4;
+                    lastScoreLength = 100 - (this.lastScore.toString().length - 4) * 4;
+                }
+                else{
+                    this.textSize = 100 - textLength * 4;
+                    lastScoreLength = 100 - this.lastScore.toString().length * 4;
+                }
+
+                return Math.min(lastScoreLength, this.textSize);
             },
-            changeHistoricalSymbol: function(symbol){
+            changeHistoricalSymbol: function (symbol) {
                 //if (symbol === '+') return 'fa fa-chevron-up historical-up'; //as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
                 if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
-            infiniteScrollFunction: function(){
-                this.busy = true;
-                if(!this.loading) this.getLeaderboard();
+            infiniteScrollFunction: function () {
+                if (!this.loading) this.getLeaderboard();
             },
-            onScroll: function(){
+            onScroll: function () {
                 let bottomReached = false;
 
-                if(this.table){
+                if (this.table) {
                     this.scroll.distance = this.table.scrollTop;
-                    bottomReached = (this.scroll.distance + this.table.offsetHeight >= this.table.scrollHeight);
+                    bottomReached = (this.scroll.distance + this.table.offsetHeight + 10 >= this.table.scrollHeight);
                 }
 
-                if(this.leader.length < 1) return;
+                console.log(this.scroll.distance + this.table.offsetHeight + 10 , this.table.scrollHeight)
 
-                if(this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy){
-                    this.$store.state.makingRequest = true;
-                    this.table.scrollTop += 2;
-                    this.busy = true;
-                    let minimunLimit = 100;
-                    if(this.leader[0].rank < 100) minimunLimit = this.leader[0].rank-1;
+                if (this.leader.length < 1) return;
 
-                    this.socketParams = { rank: this.rank-this.lastRank, limit: 100, page: 0};
-
-                    LeaderboardService.getLeaderboard({rank: this.rank-this.lastRank, limit: minimunLimit, page: 0}, res => {
-                        this.$store.state.makingRequest = false;
-                        this.lastRank += 100;
-                        this.busy = false;
-                        this.leader = [... res,...this.leader];
-                    }, error => {
-                        let errorText= error.message? error.message : error;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Leaderboard',
-                            text: errorText });
-                    });
+                if (this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy) {
+                    this.getLeaderboardTop(this.leader[0].rank - 100, false);
                 }
 
-                if(bottomReached && !this.busy){
+                if (bottomReached && !this.busy) {
                     this.infiniteScrollFunction();
                 }
             },
             scrollBack: function () {
-                if(this.row && this.table){
+                if (this.row && this.table) {
                     this.table.scrollTop = this.row.offsetTop;
                     //this.row.scrollIntoView();
                     this.scroll.distance = this.table.scrollTop;
                 }
             },
-            showModal () {
+            showModal() {
                 this.$store.state.showModalLoginOptions = true;
             },
-            tableRowHighlight(rank){
+            tableRowHighlight(rank) {
                 let param = this.routeParams.param;
                 let value = this.routeParams.value;
 
-                if(param === 'q'){
-                    if(value.split(/[^a-z]+/g).length > 2){
+                if (param === 'q') {
+                    if (value.split(/[^a-z]+/g).length > 2) {
                         param = 'address';
-                    } else if (value.indexOf(".") >= 0){
+                    } else if (value.indexOf(".") >= 0) {
                         param = 'score';
                     } else {
                         param = 'rank';
                     }
                 }
 
-                let found = param? (rank[param] == this.routeParams.value) : (rank.address === this.address || (rank.rank == 1 && !this.address));
+                let found = param ? (rank[param] == this.routeParams.value) : (rank.address === this.address || (rank.rank == 1 && !this.address));
 
-                if(found){
+                if (found) {
                     this.rank = rank.rank;
                     this.address = rank.address;
                     this.score = rank.score;
                 }
                 return found;
             },
-            overrideOnMessage(){
+            overrideOnMessage() {
                 let wsa = this.ws;
                 this.ws.onmessage = (data) => {
                     wsa.send(JSON.stringify(this.socketParams));
@@ -546,7 +589,7 @@
                         if (info.data.address) {
                             this.score = info.data.score;
                         } else {
-                            if (!info.data.action){
+                            if (!info.data.action) {
                                 let socketIndex = 0;
                                 let socketRanking = info.data;
                                 let firstRank = socketRanking[socketIndex].rank;
@@ -570,8 +613,8 @@
                         console.log(e);
                     }
                 };
-            } ,
-            socketConnection () {
+            },
+            socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     this.iniWs();
@@ -582,14 +625,14 @@
                 }
                 this.overrideOnMessage();
             },
-            init : function(profile){
+            init: function (profile) {
                 this.loading = false;
 
                 if (this.routeParams.param) {
                     this[this.routeParams.param] = this.routeParams.value;
                     this.busy = true;
                     this.getLeaderboard(true);
-                }else{
+                } else {
                     this.rank = profile.rank <= 0 ? 0.0 : profile.rank;
                     this.address = profile.address;
                     this.score = profile.score;
@@ -619,11 +662,11 @@
         width: 97%;
     }
 
-    .historical-up{
+    .historical-up {
         color: green;
     }
 
-    .historical-down{
+    .historical-down {
         color: red;
     }
 
@@ -634,7 +677,7 @@
         position: relative;
     }
 
-    .table-row-highlight{
+    .table-row-highlight {
         background-color: #5a6268;
     }
 
@@ -651,7 +694,7 @@
         vertical-align: middle;
     }
 
-    #button-scroll-up{
+    #button-scroll-up {
         position: absolute;
         right: 70px;
         top: 0px;
