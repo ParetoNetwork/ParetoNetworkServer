@@ -12,6 +12,22 @@ clock.start= function(wqueue){
         });
     }
 
+    kue.Job.rangeByState( 'active', 0, 100, 'asc', function( err, jobs ) {
+        console.log('actives');
+        jobs.forEach( function( job ) {
+            job.remove( function(){
+                console.log( 'removed ', job.id );
+            });
+        });
+    });
+    kue.Job.rangeByState( 'inactive', 0, 100, 'asc', function( err, jobs ) {
+        console.log('inactives');
+        jobs.forEach( function( job ) {
+            job.remove( function(){
+                console.log( 'removed ', job.id );
+            });
+        });
+    });
     /**
      * This is a scheduled task that approximate score every minute.
      */
