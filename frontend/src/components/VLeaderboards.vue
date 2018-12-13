@@ -520,7 +520,7 @@
                 return Math.min(lastScoreLength, this.textSize);
             },
             changeHistoricalSymbol: function (symbol) {
-                //if (symbol === '+') return 'fa fa-chevron-up historical-up'; //as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
+                if (symbol === '+') return 'fa fa-chevron-up historical-up'; //as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
                 if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function () {

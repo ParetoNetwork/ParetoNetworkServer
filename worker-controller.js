@@ -32,7 +32,7 @@ const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
 const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const START_CLOCK = process.env.START_CLOCK || 1;
-const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.0001;
+const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.00001;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 
 const modelsPath = path.resolve(__dirname, 'models');
@@ -720,7 +720,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                             bonus:  Decimal(Math.abs(results[len].bonus) || ((results[len].tokens === 0)? 0:(Math.abs(results[len].score)/results[len].tokens)) ),
                             tokens:  Decimal(results[len].tokens || 0),
                         } ;
-                        if(parseFloat(item.tokens)>0){
+                        if(parseFloat(item.tokens)>0 && parseFloat(item.bonus.logarithm()) !=0) {
                             var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
 
                             const w = item.block.sub(item.bonus.mul(divisor));
@@ -1027,14 +1027,11 @@ workerController.getScoreAndSaveRedis = function(callback){
                 data.lscore = '=';
                 data.lrank = '=';
                 if(result.addresses.lastRank > 0 && result.addresses.lastScore > 0){
-                    const lrank = (result.addresses.rank - result.addresses.lastRank);
+                    const lrank = (data.rank - result.addresses.lastRank);
                     const lscore = (result.addresses.score - result.addresses.lastScore);
                     data.lrank = (lrank > 0)? '+':((lrank < 0)? '-': '=');
-                    if (Math.abs(lscore) > MIN_DELTA_SCORE){
-                        data.lscore = (lscore > 0)? '+':((lscore < 0)? '-': '=');
-                    }
+                    data.lscore = (lscore > 0 && lscore > MIN_DELTA_SCORE)? '+':((lscore < 0)? '-': '=');
                 }
-
                 multi.hmset(data.rank+ "",  data);
                 const rank = { rank: data.rank + ""};
                 multi.hmset("address"+data.address+ "", rank );
