@@ -997,7 +997,7 @@ workerController.getScoreAndSaveRedis = function(callback){
     const date = new Date();//(new Date().getTime() - (24 * 60 * 60 * 1000));
     date.setHours(0,0,0,0);
     //get all address sorted by score, then grouping all by self and retrieve with ranking index
-    Promise.all([ ParetoAddress.aggregate().match({score: { $gt: 0}}).sort({score : -1}).group(
+    Promise.all([ ParetoAddress.aggregate().match({score: {$gt: 0}}).sort({score : -1}).group(
         { "_id": false,
             "addresses": {
                 "$push": {
@@ -1027,6 +1027,7 @@ workerController.getScoreAndSaveRedis = function(callback){
         let ini = 0.0;
         let promises = [];
         let k=0;
+        const maxRank = results[results.length-1].rank +1;
         while (ini < total){
             const multi = redisClient.multi();
             for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
@@ -1054,11 +1055,11 @@ workerController.getScoreAndSaveRedis = function(callback){
                 const rank = { rank: result.addresses.rank + ""};
                 multi.hmset("address"+result.addresses.address+ "", rank );
             }
-
+            multi.hmset("maxRank", {rank: maxRank} );
             promises.push(new Promise( (resolve, reject)=>{
                 multi.exec(function(errors, results) {
                     if(errors){
-                        return reject(err)
+                        return reject(errors)
                     }else{
                         return resolve(results)
                     }
