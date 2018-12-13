@@ -1458,8 +1458,8 @@ controller.getIntelsByProvider = async function(providerAddress ,callback){
         console.log(err,"errr");
         callback(err, null)
     }
-
 }
+
 controller.getAnIntel = async function(Id, callback){
     const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     const result = await IntelInstance.methods.getIntel(Id).call();
