@@ -100,7 +100,6 @@ mongoose.connect(CONNECTION_URL, { useNewUrlParser: true }).then(tmp=>{
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
-const ParetoHistoricalRanking = mongoose.model('historicalRanking');
 const ParetoContent = mongoose.model('content');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
@@ -1042,9 +1041,9 @@ workerController.getScoreAndSaveRedis = function(callback){
                     data.lrank = '=';
                     data.lscore = '=';
                 }
-                if( !data.tokens ){
-                    data.tokens = 0;
-                }
+                // if( !data.tokens ){
+                //     data.tokens = 0;
+                // }
 
                 multi.hmset(data.rank+ "",  data);
                 const rank = { rank: data.rank + ""};
