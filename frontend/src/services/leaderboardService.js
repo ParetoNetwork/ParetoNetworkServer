@@ -6,6 +6,7 @@ export default class LeaderboardService {
             if(res.data.success){
                 return onSuccess(res.data.data);
             }else{
+
                 return onError(res.data.message);
             }
         }, error => {

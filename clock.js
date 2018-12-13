@@ -13,7 +13,7 @@ clock.start= function(wqueue){
     }
 
     kue.Job.rangeByState( 'active', 0, 100, 'asc', function( err, jobs ) {
-        console.log('actives');
+        console.log('actives jobs');
         jobs.forEach( function( job ) {
             job.remove( function(){
                 console.log( 'removed ', job.id );
@@ -21,7 +21,7 @@ clock.start= function(wqueue){
         });
     });
     kue.Job.rangeByState( 'inactive', 0, 100, 'asc', function( err, jobs ) {
-        console.log('inactives');
+        console.log('inactives jobs');
         jobs.forEach( function( job ) {
             job.remove( function(){
                 console.log( 'removed ', job.id );

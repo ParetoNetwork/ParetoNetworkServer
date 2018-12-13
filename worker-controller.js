@@ -32,6 +32,7 @@ const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
 const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const START_CLOCK = process.env.START_CLOCK || 1;
+const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.0001;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 
 const modelsPath = path.resolve(__dirname, 'models');
@@ -985,9 +986,6 @@ workerController.retrieveRanksAtAddress = function(rank, limit, page, callback){
  */
 
 workerController.getScoreAndSaveRedis = function(callback){
-
-
-
     //get all address sorted by score, then grouping all by self and retrieve with ranking index
     Promise.all([ParetoAddress.find({score: { $lte: 0}}) ,ParetoAddress.aggregate().match({score: { $gt: 0}}).sort({score : -1}).group(
         { "_id": false,
@@ -1009,15 +1007,12 @@ workerController.getScoreAndSaveRedis = function(callback){
         if(values[0].length > 0){
             deleteAddress =  values[0].map( d=> {return d.address});
         }
-
-
         let COUNT = 20.0;
         let maxRank = results[results.length-1].rank + 2;
         const avr = parseFloat(results.length)/COUNT;
         const total = (avr<=1)?results.length:results.length-1;
         let ini = 0.0;
         let promises = [];
-        let k=0;
         while (ini < total){
             const multi = redisClient.multi();
             for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
@@ -1029,28 +1024,26 @@ workerController.getScoreAndSaveRedis = function(callback){
                     tokens : result.addresses.tokens
                 };
                 data.rank = result.rank + 1;
-
-
+                data.lscore = '=';
+                data.lrank = '=';
                 if(result.addresses.lastRank > 0 && result.addresses.lastScore > 0){
                     const lrank = (result.addresses.rank - result.addresses.lastRank);
                     const lscore = (result.addresses.score - result.addresses.lastScore);
                     data.lrank = (lrank > 0)? '+':((lrank < 0)? '-': '=');
-                    data.lscore = (lscore > 0)? '+':((lscore < 0)? '-': '=');
-                    k=k+1
-                }else{
-                    data.lrank = '=';
-                    data.lscore = '=';
+                    if (Math.abs(lscore) > MIN_DELTA_SCORE){
+                        data.lscore = (lscore > 0)? '+':((lscore < 0)? '-': '=');
+                    }
                 }
 
                 multi.hmset(data.rank+ "",  data);
                 const rank = { rank: data.rank + ""};
                 multi.hmset("address"+data.address+ "", rank );
             }
-
+            multi.hmset("maxRank", {rank: maxRank} );
             promises.push(new Promise( (resolve, reject)=>{
                 multi.exec(function(errors, results) {
                     if(errors){
-                        return reject(err)
+                        return reject(errors)
                     }else{
                         return resolve(results)
                     }
@@ -1276,7 +1269,7 @@ const start = async () => {
             workerController.getScoreAndSaveSnapshot(done);
         });
 
-        queue.process('controller-job', 5, (job, done) => {
+        queue.process('controller-job', 4, (job, done) => {
             switch (job.data.type) {
                 case 'update': {
                     workerController.updateScore(job.data.address, function (err, result) {
