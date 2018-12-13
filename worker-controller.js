@@ -1041,9 +1041,6 @@ workerController.getScoreAndSaveRedis = function(callback){
                     data.lrank = '=';
                     data.lscore = '=';
                 }
-                // if( !data.tokens ){
-                //     data.tokens = 0;
-                // }
 
                 multi.hmset(data.rank+ "",  data);
                 const rank = { rank: data.rank + ""};
