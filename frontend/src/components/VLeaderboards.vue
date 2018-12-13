@@ -246,6 +246,7 @@
                 table: '',
                 row: '',
                 searchValue: '',
+                socketActivity: true,
                 scroll: {
                     distance: 0,
                     active: false
@@ -527,7 +528,7 @@
                 if (!this.loading) this.getLeaderboard();
             },
             onScroll: function () {
-                
+
                 let bottomReached = false;
 
                 if (this.table) {
@@ -589,6 +590,7 @@
                             this.score = info.data.score;
                         } else {
                             if (!info.data.action) {
+                                this.socketActivity = true;
                                 let socketIndex = 0;
                                 let socketRanking = info.data;
                                 let firstRank = socketRanking[socketIndex].rank;
@@ -622,7 +624,6 @@
 
                                     return item;
                                 });
-                                this.randomFlash();
                             }
                         }
 
@@ -640,7 +641,7 @@
                     for(let index = leaderPosition-50; index < leaderPosition + 50; index++){
                         if(this.leader[index]){
                             let luckyNumber = this.randomNumber(0, 100);
-                            console.log(luckyNumber, cap);
+
                             if(luckyNumber < cap){
                                 this.rowFlashLight(index, 'light-flash');
                                 cap /= 2;
@@ -657,6 +658,14 @@
                 }).addClass(animationType);
             },
             socketConnection() {
+                setInterval(()=>{
+
+                    if(this.socketActivity === true){
+                        this.socketActivity = false;
+                    }else{
+                        this.randomFlash();
+                    }
+                }, 60000);
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     this.iniWs();
