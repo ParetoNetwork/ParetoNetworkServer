@@ -534,8 +534,6 @@
                     bottomReached = (this.scroll.distance + this.table.offsetHeight + 10 >= this.table.scrollHeight);
                 }
 
-                console.log(this.scroll.distance + this.table.offsetHeight + 10 , this.table.scrollHeight)
-
                 if (this.leader.length < 1) return;
 
                 if (this.table.scrollTop === 0 && this.leader[0].rank > 1 && !this.busy) {
@@ -582,7 +580,7 @@
             overrideOnMessage() {
                 let wsa = this.ws;
                 this.ws.onmessage = (data) => {
-                    wsa.send(JSON.stringify(this.socketParams));
+                    wsa.send(JSON.stringify({rank: this.leader[0].rank, limit: this.leader.length, page: 0}));
                     try {
                         const info = JSON.parse(data.data);
                         // console.log(info);
@@ -600,10 +598,33 @@
                                     let socketRank;
                                     if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
 
-                                    if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
+                                    if (rank === socketRank && item.score !== socketRanking[socketIndex].score){
+
+                                        let bigNumber = item.score > 100 && socketRanking[socketIndex].score > 100;
+                                        let change = Math.abs(item.score-socketRanking[socketIndex].score);
+
+                                        let highLitghtRow = function (animationType) {
+                                            $('#' + rank).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
+                                                $(this).removeClass(animationType);
+                                            }).addClass(animationType);
+                                        };
+
+                                        if(item.score != socketRanking[socketIndex].score ){
+                                            if(bigNumber){
+                                                if(change > 10){
+                                                    highLitghtRow('high-flash')
+                                                }else if (change > 0.1){
+                                                    highLitghtRow('light-flash')
+                                                }
+                                            }else{
+                                                highLitghtRow('light-flash')
+                                            }
+                                        }
+
                                         item.score = socketRanking[socketIndex].score;
                                         socketIndex++;
                                     }
+
                                     return item;
                                 });
                             }
@@ -613,6 +634,9 @@
                         console.log(e);
                     }
                 };
+            },
+            randomFlash(){
+
             },
             socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
@@ -768,4 +792,29 @@
         text-align: center;
     }
 
+    @keyframes high-flash {
+        0% {
+            background: #6aba82;
+        }
+        100% {
+            background: none;
+        }
+    }
+
+    .high-flash {
+        animation:  high-flash 2s;
+    }
+
+    @keyframes light-flash {
+        0% {
+            background: #9ff677;
+        }
+        100% {
+            background: none;
+        }
+    }
+
+    .light-flash {
+        animation:  high-flash 1s;
+    }
 </style>
