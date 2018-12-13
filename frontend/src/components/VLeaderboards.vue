@@ -527,14 +527,13 @@
                 if (!this.loading) this.getLeaderboard();
             },
             onScroll: function () {
+                
                 let bottomReached = false;
 
                 if (this.table) {
                     this.scroll.distance = this.table.scrollTop;
                     bottomReached = (this.scroll.distance + this.table.offsetHeight + 10 >= this.table.scrollHeight);
                 }
-
-                //console.log(this.scroll.distance + this.table.offsetHeight + 10 , this.table.scrollHeight)
 
                 if (this.leader.length < 1) return;
 
@@ -582,7 +581,7 @@
             overrideOnMessage() {
                 let wsa = this.ws;
                 this.ws.onmessage = (data) => {
-                    wsa.send(JSON.stringify(this.socketParams));
+                    wsa.send(JSON.stringify({rank: this.leader[0].rank, limit: this.leader.length, page: 0}));
                     try {
                         const info = JSON.parse(data.data);
                         // console.log(info);
@@ -600,12 +599,30 @@
                                     let socketRank;
                                     if (socketIndex < 100) socketRank = parseFloat(socketRanking[socketIndex].rank);
 
-                                    if (rank >= firstRank && rank < (firstRank + 99) && rank === socketRank) {
+                                    if (rank === socketRank && item.score !== socketRanking[socketIndex].score){
+
+                                        let bigNumber = item.score > 100 && socketRanking[socketIndex].score > 100;
+                                        let change = Math.abs(item.score-socketRanking[socketIndex].score);
+
+                                        if(item.score != socketRanking[socketIndex].score ){
+                                            if(bigNumber){
+                                                if(change > 10){
+                                                    this.rowFlashLight(rank, 'high-flash');
+                                                }else if (change > 0.1){
+                                                    this.rowFlashLight(rank, 'light-flash');
+                                                }
+                                            }else{
+                                                this.rowFlashLight(rank, 'light-flash');
+                                            }
+                                        }
+
                                         item.score = socketRanking[socketIndex].score;
                                         socketIndex++;
                                     }
+
                                     return item;
                                 });
+                                this.randomFlash();
                             }
                         }
 
@@ -613,6 +630,31 @@
                         console.log(e);
                     }
                 };
+            },
+            randomFlash(){
+                if (this.row && this.table) {
+                    let graphicPosition = (this.table.scrollTop + this.table.offsetHeight ) / this.table.scrollHeight;
+                    let leaderPosition = Math.floor(graphicPosition*this.leader.length);
+
+                    let cap = 50;
+                    for(let index = leaderPosition-50; index < leaderPosition + 50; index++){
+                        if(this.leader[index]){
+                            let luckyNumber = this.randomNumber(0, 100);
+                            console.log(luckyNumber, cap);
+                            if(luckyNumber < cap){
+                                this.rowFlashLight(index, 'light-flash');
+                                cap /= 2;
+                            }else{
+                                cap = 50;
+                            }
+                        }
+                    }
+                }
+            },
+            rowFlashLight (rank, animationType) {
+                $('#' + rank).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
+                    $(this).removeClass(animationType);
+                }).addClass(animationType);
             },
             socketConnection() {
                 let params = {rank: this.rank, limit: 100, page: this.page};
@@ -768,4 +810,29 @@
         text-align: center;
     }
 
+    @keyframes high-flash {
+        0% {
+            background: #6aba82;
+        }
+        100% {
+            background: none;
+        }
+    }
+
+    .high-flash {
+        animation:  high-flash 2s;
+    }
+
+    @keyframes light-flash {
+        0% {
+            background: #9ff677;
+        }
+        100% {
+            background: none;
+        }
+    }
+
+    .light-flash {
+        animation:  high-flash 1s;
+    }
 </style>
