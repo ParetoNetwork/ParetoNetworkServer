@@ -32,6 +32,7 @@ const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
 const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const START_CLOCK = process.env.START_CLOCK || 1;
+const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.00001;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 
 const modelsPath = path.resolve(__dirname, 'models');
@@ -100,7 +101,6 @@ mongoose.connect(CONNECTION_URL, { useNewUrlParser: true }).then(tmp=>{
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
-const ParetoHistoricalRanking = mongoose.model('historicalRanking');
 const ParetoContent = mongoose.model('content');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
@@ -720,7 +720,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                             bonus:  Decimal(Math.abs(results[len].bonus) || ((results[len].tokens === 0)? 0:(Math.abs(results[len].score)/results[len].tokens)) ),
                             tokens:  Decimal(results[len].tokens || 0),
                         } ;
-                        if(parseFloat(item.tokens)>0){
+                        if(parseFloat(item.tokens)>0 && parseFloat(item.bonus.logarithm()) !=0) {
                             var divisor = Decimal( Math.max(parseFloat(item.block.sub(contractBn)),1)).div(hBn);
 
                             const w = item.block.sub(item.bonus.mul(divisor));
@@ -910,17 +910,12 @@ workerController.getScoreAndSaveSnapshot = function(callback){
     const date = new Date();
     date.setHours(0,0,0,0);
     console.log('Snapshot at '+date.toISOString());
-    ParetoHistoricalRanking.findOne({dateCreated: date}).exec(function (error, result){
-       if(!error && !result){
            const query = ParetoAddress.aggregate().sort({score : -1}).group(
                { "_id": false,
                    "addresses": {
                        "$push": {
                            "address" : "$address",
-                           "score" : "$score",
-                           "block" : "$block",
-                           "bonus" : "$bonus",
-                           "tokens" : "$tokens"
+                           "score" : "$score"
                        }
                    }}).unwind({
                "path": "$addresses",
@@ -938,16 +933,19 @@ workerController.getScoreAndSaveSnapshot = function(callback){
                    const avr = parseFloat(results.length)/COUNT;
                    let ini = 0.0;
                    let promises = [];
+
                    while (ini < results.length-1){
                        try{
-                           const bulk = [];
+                           const bulkop = [];
                            for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
-                               let data = results[j].addresses;
-                               data.rank =  results[j].rank + 1;
-                               data.dateCreated = date;
-                               bulk.push(data);
+                               let data =  {} ;
+                               data.lastRank =  results[j].rank + 1;
+                               data.lastScore =  results[j].addresses.score;
+
+                               bulkop.push({updateOne:{ filter: {address : results[j].addresses.address}, update: data}});
+
                            }
-                           promises.push(ParetoHistoricalRanking.insertMany(bulk,{ordered:false}));
+                           promises.add(ParetoAddress.bulkWrite(bulkop));
                        }catch (e) {
 
                        }
@@ -963,10 +961,6 @@ workerController.getScoreAndSaveSnapshot = function(callback){
 
                }
            });
-       }else{
-           callback(null, 'snapshot' );
-       }
-    });
 
 };
 
@@ -992,68 +986,60 @@ workerController.retrieveRanksAtAddress = function(rank, limit, page, callback){
  */
 
 workerController.getScoreAndSaveRedis = function(callback){
-
-
-    const date = new Date();//(new Date().getTime() - (24 * 60 * 60 * 1000));
-    date.setHours(0,0,0,0);
     //get all address sorted by score, then grouping all by self and retrieve with ranking index
-    Promise.all([ ParetoAddress.aggregate().match({score: {$gt: 0}}).sort({score : -1}).group(
+    Promise.all([ParetoAddress.find({score: { $lte: 0}}) ,ParetoAddress.aggregate().match({score: { $gt: 0}}).sort({score : -1}).group(
         { "_id": false,
             "addresses": {
                 "$push": {
                     "address" : "$address",
                     "score" : "$score",
                     "block" : "$block",
+                    "lastScore" : "$lastScore",
+                    "lastRank" : "$lastRank",
                     "tokens" : "$tokens"
                 }
             }}).unwind({
         "path": "$addresses",
         "includeArrayIndex": "rank"
-    }).exec(), ParetoHistoricalRanking.find({dateCreated: date}).sort('address').exec()]).then(values => {
-        const results = values[0].sort(function(a, b) {
-            if (a.addresses.address > b.addresses.address) {
-                return 1;
-            }
-            if (a.addresses.address < b.addresses.address) {
-                return -1;
-            }
-            return 0;
-        });
-        const historical = values[1];
-        const deleteAddress =[];
+    }).exec()]).then(values => {
+        let results =  values[1];
+        let deleteAddress =  [];
+        if(values[0].length > 0){
+            deleteAddress =  values[0].map( d=> {return d.address});
+        }
         let COUNT = 20.0;
+        let maxRank = results[results.length-1].rank + 2;
         const avr = parseFloat(results.length)/COUNT;
         const total = (avr<=1)?results.length:results.length-1;
         let ini = 0.0;
         let promises = [];
-        let k=0;
-        const maxRank = results[results.length-1].rank +1;
         while (ini < total){
             const multi = redisClient.multi();
             for (let j = parseInt(ini); j< parseInt((ini + avr)); j=j+1){
                 let result = results[j];
-                result.addresses.rank = result.rank + 1;
-                while(k<historical.length && historical[k].address < result.addresses.address){
-                    deleteAddress.push("address"+historical[k].address+ "");
-                    k=k+1;
-                }
-                if(k<historical.length && historical[k].address == result.addresses.address){
-                    const lrank = (result.addresses.rank - historical[k].rank);
-                    const ltokens = (result.addresses.tokens - historical[k].tokens);
-                    const lscore = (result.addresses.score - historical[k].score);
-                    result.addresses.lrank = (lrank > 0)? '+':((lrank < 0)? '-': '=');
-                    result.addresses.ltokens = (ltokens > 0)? '+':((ltokens < 0)? '-': '=');
-                    result.addresses.lscore = (lscore > 0)? '+':((lscore < 0)? '-': '=');
-                    k=k+1
-                }else{
-                    result.addresses.lrank = '=';
-                    result.addresses.ltokens = '=';
-                    result.addresses.lscore = '=';
-                }
+                const data = {
+                    address : result.addresses.address,
+                    score : result.addresses.score,
+                    block : result.addresses.block,
+                    tokens : result.addresses.tokens
+                };
+                data.rank = result.rank + 1;
+                data.lscore = '=';
+                data.lrank = '=';
+                if(result.addresses.lastRank > 0 && result.addresses.lastScore > 0){
+                    const lrank = (data.rank - result.addresses.lastRank);
+                    const lscore = (result.addresses.score - result.addresses.lastScore);
+                    data.lrank = (lrank > 0)? '+':((lrank < 0)? '-': '=');
+                    let min_delta = MIN_DELTA_SCORE;
+                    if(!isNaN(parseFloat(result.addresses.lastScore))){
+                        min_delta = parseFloat(Decimal(parseFloat(MIN_DELTA_SCORE)).mul(Decimal(parseFloat(result.addresses.lastScore))));
+                    }
 
-                multi.hmset(result.addresses.rank+ "",  result.addresses);
-                const rank = { rank: result.addresses.rank + ""};
-                multi.hmset("address"+result.addresses.address+ "", rank );
+                    data.lscore = (lscore > 0 && lscore > min_delta)? '+':((lscore < 0)? '-': '=');
+                }
+                multi.hmset(data.rank+ "",  data);
+                const rank = { rank: data.rank + ""};
+                multi.hmset("address"+data.address+ "", rank );
             }
             multi.hmset("maxRank", {rank: maxRank} );
             promises.push(new Promise( (resolve, reject)=>{
@@ -1070,10 +1056,8 @@ workerController.getScoreAndSaveRedis = function(callback){
         }
 
         let delkeys =[];
-        if(historical.length > results.length){
-            let dini = results.length +1;
-            let dfinal = historical.length;
-            for (let i=dini;i<=dfinal;i=i+1){
+        if(deleteAddress.length > 0){
+            for (let i=maxRank;i<maxRank+deleteAddress.length;i=i+1){
                 delkeys.push(""+i);
             }
         }
@@ -1278,14 +1262,16 @@ const start = async () => {
                     });
                     break;
                 }
-                case 1440:{
-                    workerController.getScoreAndSaveSnapshot(done);
-                    break;
-                }
+
             }
         });
 
-        queue.process('controller-job', 2, (job, done) => {
+
+        queue.process('clock-job-snapshot',  (job, done) => {
+            workerController.getScoreAndSaveSnapshot(done);
+        });
+
+        queue.process('controller-job', 4, (job, done) => {
             switch (job.data.type) {
                 case 'update': {
                     workerController.updateScore(job.data.address, function (err, result) {
