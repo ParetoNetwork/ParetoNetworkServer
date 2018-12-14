@@ -328,9 +328,11 @@
                 });
                 return DashboardService.getAddress(data => {
                     this.init(data);
+                    this.randomFlash();
                 }, () => {
                     this.loading = false;
                     this.infiniteScrollFunction();
+                    this.randomFlash();
                 });
             }, getLeaderboard: function (withParam) {//withParam means a manual search
                 this.$store.state.makingRequest = true;
@@ -633,24 +635,30 @@
                 };
             },
             randomFlash(){
-                if (this.row && this.table) {
-                    let graphicPosition = (this.table.scrollTop + this.table.offsetHeight ) / this.table.scrollHeight;
-                    let leaderPosition = Math.floor(graphicPosition*this.leader.length);
+                setInterval(()=>{
+                    if(this.socketActivity === true){
+                        this.socketActivity = false;
+                    }else{
+                        if (this.row && this.table) {
+                            let graphicPosition = (this.table.scrollTop + this.table.offsetHeight ) / this.table.scrollHeight;
+                            let leaderPosition = Math.floor(graphicPosition*this.leader.length);
 
-                    let cap = 50;
-                    for(let index = leaderPosition-50; index < leaderPosition + 50; index++){
-                        if(this.leader[index]){
-                            let luckyNumber = this.randomNumber(0, 100);
+                            let cap = 50;
+                            for(let index = leaderPosition-50; index < leaderPosition + 50; index++){
+                                if(this.leader[index]){
+                                    let luckyNumber = this.randomNumber(0, 100);
 
-                            if(luckyNumber < cap){
-                                this.rowFlashLight(index, 'light-flash');
-                                cap /= 2;
-                            }else{
-                                cap = 50;
+                                    if(luckyNumber < cap){
+                                        this.rowFlashLight(index, 'light-flash');
+                                        cap /= 2;
+                                    }else{
+                                        cap = 50;
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                }, 20000);
             },
             rowFlashLight (rank, animationType) {
                 $('#' + rank).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
@@ -658,14 +666,6 @@
                 }).addClass(animationType);
             },
             socketConnection() {
-                setInterval(()=>{
-
-                    if(this.socketActivity === true){
-                        this.socketActivity = false;
-                    }else{
-                        this.randomFlash();
-                    }
-                }, 60000);
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     this.iniWs();
