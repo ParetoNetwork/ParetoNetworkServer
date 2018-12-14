@@ -1030,7 +1030,12 @@ workerController.getScoreAndSaveRedis = function(callback){
                     const lrank = (data.rank - result.addresses.lastRank);
                     const lscore = (result.addresses.score - result.addresses.lastScore);
                     data.lrank = (lrank > 0)? '+':((lrank < 0)? '-': '=');
-                    data.lscore = (lscore > 0 && lscore > MIN_DELTA_SCORE)? '+':((lscore < 0)? '-': '=');
+                    let min_delta = MIN_DELTA_SCORE;
+                    if(!isNaN(parseFloat(result.addresses.lastScore))){
+                        min_delta = parseFloat(Decimal(parseFloat(MIN_DELTA_SCORE)).mul(Decimal(parseFloat(result.addresses.lastScore))));
+                    }
+
+                    data.lscore = (lscore > 0 && lscore > min_delta)? '+':((lscore < 0)? '-': '=');
                 }
                 multi.hmset(data.rank+ "",  data);
                 const rank = { rank: data.rank + ""};
