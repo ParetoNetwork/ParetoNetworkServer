@@ -21,7 +21,7 @@
                                     <div class="d-flex flex-column justify-content-center">
 
                                         <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search
-                                            by <i class="fa fa-globe"></i> Global Rank or Address</label>
+                                            by Rank/Score/Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
                                                v-on:keydown.enter.prevent="changeRoute(searchValue)"
@@ -523,7 +523,8 @@
                 return Math.min(lastScoreLength, this.textSize);
             },
             changeHistoricalSymbol: function (symbol) {
-                if (symbol === '+') return 'fa fa-chevron-up historical-up'; //as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
+                // before showing chevron-up, need to know if score boost is greater than just the block height increasing. Need to show aberrations
+                // if (symbol === '+') return 'fa fa-chevron-up historical-up';as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
                 if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function () {
