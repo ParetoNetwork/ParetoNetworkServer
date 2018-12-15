@@ -10600,6 +10600,11 @@ vue-infinite-scroll@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/vue-infinite-scroll/-/vue-infinite-scroll-2.0.2.tgz#ca37a91fe92ee0ad3b74acf8682c00917144b711"
 
+vue-line-clamp@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/vue-line-clamp/-/vue-line-clamp-1.2.4.tgz#4465b25efd9829e8f6ead17d7db72d48d8237a5d"
+  integrity sha512-qYj2uLf4Q2ZAuPmMAgFP7tSF9x36olst+DRsVKl16nBr85bVhA8utfDWxMYnaPGOFNtW/RG1qZxi43Z2jwnimg==
+
 vue-loader@^15.2.4:
   version "15.2.6"
   resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-15.2.6.tgz#4ad4e56a0ca1fd89ebc4220f9e3bd4723097b397"
