@@ -635,7 +635,7 @@
                 };
             },
             randomFlash(){
-                setInterval(()=>{
+                setTimeout(()=>{
                     if(this.socketActivity === true){
                         this.socketActivity = false;
                     }else{
@@ -658,7 +658,8 @@
                             }
                         }
                     }
-                }, 20000);
+                    this.randomFlash();
+                }, this.randomNumber(8000, 20000));
             },
             rowFlashLight (rank, animationType) {
                 $('#' + rank).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
