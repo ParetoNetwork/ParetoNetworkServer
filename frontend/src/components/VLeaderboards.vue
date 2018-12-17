@@ -21,7 +21,7 @@
                                     <div class="d-flex flex-column justify-content-center">
 
                                         <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search
-                                            by <i class="fa fa-globe"></i> Global Rank or Address</label>
+                                            by Rank/Score/Address</label>
 
                                         <input id="lookup-input" type="text" name="address"
                                                v-on:keydown.enter.prevent="changeRoute(searchValue)"
@@ -328,9 +328,11 @@
                 });
                 return DashboardService.getAddress(data => {
                     this.init(data);
+                    this.randomFlash();
                 }, () => {
                     this.loading = false;
                     this.infiniteScrollFunction();
+                    this.randomFlash();
                 });
             }, getLeaderboard: function (withParam) {//withParam means a manual search
                 this.$store.state.makingRequest = true;
@@ -521,7 +523,8 @@
                 return Math.min(lastScoreLength, this.textSize);
             },
             changeHistoricalSymbol: function (symbol) {
-                if (symbol === '+') return 'fa fa-chevron-up historical-up'; //as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
+                // before showing chevron-up, need to know if score boost is greater than just the block height increasing. Need to show aberrations
+                // if (symbol === '+') return 'fa fa-chevron-up historical-up';as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
                 if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function () {
@@ -633,24 +636,31 @@
                 };
             },
             randomFlash(){
-                if (this.row && this.table) {
-                    let graphicPosition = (this.table.scrollTop + this.table.offsetHeight ) / this.table.scrollHeight;
-                    let leaderPosition = Math.floor(graphicPosition*this.leader.length);
+                setTimeout(()=>{
+                    if(this.socketActivity === true){
+                        this.socketActivity = false;
+                    }else{
+                        if (this.row && this.table) {
+                            let graphicPosition = (this.table.scrollTop + this.table.offsetHeight ) / this.table.scrollHeight;
+                            let leaderPosition = Math.floor(graphicPosition*this.leader.length);
 
-                    let cap = 50;
-                    for(let index = leaderPosition-50; index < leaderPosition + 50; index++){
-                        if(this.leader[index]){
-                            let luckyNumber = this.randomNumber(0, 100);
+                            let cap = 50;
+                            for(let index = leaderPosition-50; index < leaderPosition + 50; index++){
+                                if(this.leader[index]){
+                                    let luckyNumber = this.randomNumber(0, 100);
 
-                            if(luckyNumber < cap){
-                                this.rowFlashLight(index, 'light-flash');
-                                cap /= 2;
-                            }else{
-                                cap = 50;
+                                    if(luckyNumber < cap){
+                                        this.rowFlashLight(index, 'light-flash');
+                                        cap /= 2;
+                                    }else{
+                                        cap = 50;
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                    this.randomFlash();
+                }, this.randomNumber(8000, 20000));
             },
             rowFlashLight (rank, animationType) {
                 $('#' + rank).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
@@ -658,14 +668,6 @@
                 }).addClass(animationType);
             },
             socketConnection() {
-                setInterval(()=>{
-
-                    if(this.socketActivity === true){
-                        this.socketActivity = false;
-                    }else{
-                        this.randomFlash();
-                    }
-                }, 60000);
                 let params = {rank: this.rank, limit: 100, page: this.page};
                 if (!this.ws) {
                     this.iniWs();
