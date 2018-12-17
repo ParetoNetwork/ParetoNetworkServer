@@ -81,35 +81,36 @@
                     </div>
                 </template>
 
-                <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
-                <div v-else class="border mb-3 mb-md-1 px-2">
-                    <div class="p-2 py-4">
-                        <div class="text-left border-bottom p-1">
-                            <h5 class="title "><b>EVENTS</b></h5>
-                            <p v-if="alertTransactions > 0" class="pt-1" style="color: red">
-                                <i class="fa fa-exclamation-circle"></i> You got some pending transactions, click on them to complete them</p>
-                        </div>
-                        <div class="mt-1 p-1">
-                            <div v-for="tx in pendingTransactions" class="d-flex justify-content-between cursor-pointer">
-                                <div>Event: {{(tx.event == 'distribute')? 'collect': tx.event}}</div>
-                                <div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>
-                                <div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>
-                                <a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>
-                            </div>
-                        </div>
-                        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
-                            NEW INTEL
-                        </button>
-                    </div>
-                    <div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
-                        <ul v-if="myContent.length" class="list-group list-unstyled">
-                            <li class="list-group-item border-0" v-for="post in myContent" :key="post.id">
-                                <VIntelPreview :user="user" :intel="post" :eventRow="true"></VIntelPreview>
-                            </li>
-                        </ul>
-                        <span v-else> No data to display </span>
-                    </div>
-                </div>
+                <!--<VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>-->
+                <!--<div v-else class="border mb-3 mb-md-1 px-2">-->
+                    <!--<div class="p-2 py-4">-->
+                        <!--<div class="text-left border-bottom p-1">-->
+                            <!--<h5 class="title "><b>EVENTS</b></h5>-->
+                            <!--<p v-if="alertTransactions > 0" class="pt-1" style="color: red">-->
+                                <!--<i class="fa fa-exclamation-circle"></i> You got some pending transactions, click on them to complete them</p>-->
+                        <!--</div>-->
+                        <!--<div class="mt-1 p-1">-->
+                            <!--<div v-for="tx in pendingTransactions" class="d-flex justify-content-between cursor-pointer">-->
+                                <!--<div>Event: {{(tx.event == 'distribute')? 'collect': tx.event}}</div>-->
+                                <!--<div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>-->
+                                <!--<div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>-->
+                                <!--<a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST-->
+                            <!--NEW INTEL-->
+                        <!--</button>-->
+                    <!--</div>-->
+                    <!--<div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">-->
+                        <!--<ul v-if="myContent.length" class="list-group list-unstyled">-->
+                            <!--<li class="list-group-item border-0" v-for="post in myContent" :key="post.id">-->
+                                <!--<VIntelPreview :user="user" :intel="post" :eventRow="true"></VIntelPreview>-->
+                            <!--</li>-->
+                        <!--</ul>-->
+                        <!--<span v-else> No data to display </span>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <VEventFeed :user="user"></VEventFeed>
             </div>
             <div class="col-md-7 mb-3">
                 <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
@@ -153,6 +154,7 @@
 
     import VIntelButtonAction from "./Events/VIntelButtonAction";
     import VIntelPreview from "./VIntelPreview";
+    import VEventFeed from "./VEventFeed";
 
     export default {
         name: "VIntel",
@@ -164,7 +166,8 @@
             VShimmerFeed,
             VIntelFeed,
             VIntelButtonAction,
-            VIntelPreview
+            VIntelPreview,
+            VEventFeed
         },
         data: function () {
             return {
@@ -224,7 +227,7 @@
           }
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"]),
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"]),
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
@@ -282,6 +285,7 @@
             goToIntelPage: function () {
                 window.location = '/#/create';
             },
+            //Loads the pendingTransactions state
             getTransactions: function () {
                 return ContentService.getTransactions(data => {
                     this.assignTransactions(data);
