@@ -80,7 +80,7 @@
             }
         },
         mounted: function() {
-            console.log('agre')
+
             this.getTransactions();
             this.loadMyContent();
         },
@@ -178,6 +178,10 @@
                         return 'Approved';
                     case 2:
                         return 'Pending Reward';
+                    case 3:
+                        return 'Completed';
+                    case 4:
+                        return 'Rejected';
                 }
             },
         }
