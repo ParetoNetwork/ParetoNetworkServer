@@ -191,7 +191,7 @@
                         <b-row class="m-2 mt-4 d-flex justify-content-center">
                             <b-button class="mr-2" variant="danger" @click="hideModalWarning"> Cancel</b-button>
                             <b-button style="background-color: rgb(107, 194, 123)"
-                                      :disabled="tokens<=0 || tokens > maxTokens" variant="success"
+                                      :disabled="tokens<=0 ||  parseFloat(myTokens) > parseFloat(maxTokens)" variant="success"
                                       @click="routeLeaving()"> Confirm
                             </b-button>
                         </b-row>
