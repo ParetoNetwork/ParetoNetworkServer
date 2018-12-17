@@ -245,8 +245,30 @@ controller.postContent = function (req, callback) {
 };
 
 
-controller.getPendingTransaction = function (address, callback){
-    ParetoTransaction.find({address: address, status: {$lt: 3}}).sort({dateCreated : -1}).exec( callback);
+controller.getTransaction = function (data, callback){
+    const query = {address: data.user};
+    if(data.query.q){
+        switch (data.query.q){
+            case 'complete': {
+                data.status = {$gte: 3};
+                break;
+            }
+            case 'pending': {
+                data.status = {$lt: 3};
+                break;
+            }
+            case 'all': {
+                break;
+            }
+            default:  data.status = {$lt: 3}
+        }
+    }else{
+        data.status = {$lt: 3}
+    }
+    const limit = data.query.limit || 100;
+    const skip = limit * (data.query.page || 0);
+
+    ParetoTransaction.find(query).sort({dateCreated : -1}).skip(skip).limit(limit).exec( callback);
 }
 
 controller.watchTransaction =  function (data, callback){

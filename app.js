@@ -421,14 +421,17 @@ app.post('/v1/content', function (req, res) {
 
 
 app.get('/v1/transaction', function (req, res) {
-    controller.getPendingTransaction(req.user, function (err, obj) {
+    controller.getTransaction(req, function (err, obj) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
             res.status(200).json(ErrorHandler.getSuccess(obj));
         }
     });
+
 }); //end content post
+
+
 
 
 app.post('/v1/transaction', function (req, res) {
