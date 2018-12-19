@@ -143,15 +143,8 @@
             return {
                 address: null,
                 loading: true,
-                alertTransactions: 0,
                 block: 0,
-                hardwareAvailable: false,
-                rewardId: '',
-                intelAddress: '',
                 tokenAmount: 1,
-                loadedMyContent: false,
-                myContent: [],
-                allMyContent: [],
                 moment: moment,
                 alias: "",
                 bio: "",
@@ -164,21 +157,8 @@
                     score: 0,
                     tokens: 0
                 },
-                updateContentVar: 0,
-                intel : {}
+                updateContentVar: 0
             };
-        },
-        directives: {
-            scroll: {
-                inserted: function (el, binding) {
-                    let f = function (evt) {
-                        if (binding.value(evt, el)) {
-                            window.removeEventListener('scroll', f)
-                        }
-                    };
-                    window.addEventListener('scroll', f)
-                }
-            }
         },
         filters: {
             date: function formatDate(date) {
@@ -188,13 +168,6 @@
         },
         mounted: function () {
             this.main();
-        },
-        watch: {
-          'pendingTransactions' : function () {
-              this.pendingTransactions.forEach(tx => {
-                  if (!tx.clicked) this.alertTransactions++;
-              });
-          }
         },
         computed: {
             ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"]),
@@ -247,7 +220,6 @@
                         if (info.data.action) {
                             switch (info.data.action) {
                                 case 'updateContent': {
-                                    this.loadMyContent();
                                     this.updateContentVar++;
                                 }
                             }
@@ -267,25 +239,6 @@
                     };
                 }
                 this.overrideOnMessage();
-            },
-            loadMyContent: function () {
-                return dashboardService.getContent('',
-                    res => {
-                        this.allMyContent = res;
-                        this.loadedMyContent = true;
-                        this.myContent = this.allMyContent.slice(0, 10);
-                    },
-                    error => {
-                        let errorText = error.message ? error.message : error;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'Content',
-                            duration: 10000,
-                            title: 'Content',
-                            text: errorText
-                        });
-                    }
-                );
             },
             loadProfile: function () {
                 return profileService.getProfile(
@@ -311,7 +264,6 @@
             requestCall: function () {
                 Promise.all([
                     this.loadProfile(),
-                    this.loadMyContent(),
                     this.loadAddress()
                 ]).then(values => {
                     this.$store.state.makingRequest = false;

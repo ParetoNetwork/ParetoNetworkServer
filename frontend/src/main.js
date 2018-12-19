@@ -100,6 +100,7 @@ const store = new Vuex.Store({
         }, assignTransactions(state, transactions) {
             state.pendingTransactions = [...state.pendingTransactions, ...transactions];
         }, editTransaction(state, {hash, key, value}){
+            console.log(state.pendingTransactions);
             state.pendingTransactions = state.pendingTransactions.map(item => {
                   if(item.txHash === hash){
                       item[key] = value;
