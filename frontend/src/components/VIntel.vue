@@ -80,36 +80,6 @@
                         </div>
                     </div>
                 </template>
-
-                <!--<VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>-->
-                <!--<div v-else class="border mb-3 mb-md-1 px-2">-->
-                    <!--<div class="p-2 py-4">-->
-                        <!--<div class="text-left border-bottom p-1">-->
-                            <!--<h5 class="title "><b>EVENTS</b></h5>-->
-                            <!--<p v-if="alertTransactions > 0" class="pt-1" style="color: red">-->
-                                <!--<i class="fa fa-exclamation-circle"></i> You got some pending transactions, click on them to complete them</p>-->
-                        <!--</div>-->
-                        <!--<div class="mt-1 p-1">-->
-                            <!--<div v-for="tx in pendingTransactions" class="d-flex justify-content-between cursor-pointer">-->
-                                <!--<div>Event: {{(tx.event == 'distribute')? 'collect': tx.event}}</div>-->
-                                <!--<div v-if="tx.event !== 'distribute'" @click="clickTransaction(tx)"> Amount: {{tx.amount}}</div>-->
-                                <!--<div @click="clickTransaction(tx)"> Status: {{transactionStatus(tx.status)}}</div>-->
-                                <!--<a class="text-primary" :href="etherscanUrl + '/tx/' + (tx.txRewardHash || tx.txHash)" target="_blank"> txid: {{tx.txHash.substring(0,10)}} </a>-->
-                            <!--</div>-->
-                        <!--</div>-->
-                        <!--<button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST-->
-                            <!--NEW INTEL-->
-                        <!--</button>-->
-                    <!--</div>-->
-                    <!--<div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">-->
-                        <!--<ul v-if="myContent.length" class="list-group list-unstyled">-->
-                            <!--<li class="list-group-item border-0" v-for="post in myContent" :key="post.id">-->
-                                <!--<VIntelPreview :user="user" :intel="post" :eventRow="true"></VIntelPreview>-->
-                            <!--</li>-->
-                        <!--</ul>-->
-                        <!--<span v-else> No data to display </span>-->
-                    <!--</div>-->
-                <!--</div>-->
                 <VEventFeed :user="user"></VEventFeed>
             </div>
             <div class="col-md-7 mb-3">
@@ -232,74 +202,11 @@
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
-            clickTransaction: function(transaction){
-                this.alertTransactions--;
-                if(!transaction.clicked) {
-                    transaction.clicked = true;
-                    ContentService.pendingTransactionApproval(
-                        transaction,
-                        {signType: this.signType, pathId: this.pathId},
-                        {
-                            addTransaction: this.addTransaction,
-                            transactionComplete: this.transactionComplete,
-                            editTransaction: this.editTransaction,
-                            toastTransaction: this.$notify
-                        },
-                        res => {
-                            this.$notify({
-                                group: 'notification',
-                                type: 'success',
-                                duration: 10000,
-                                title: 'Event: ' + transaction.event,
-                                text: 'Confirmed ' + transaction.event
-                            });
-                        },
-                        err => {
-                            this.$notify({
-                                group: 'notification',
-                                type: 'error',
-                                duration: 10000,
-                                text: err.message ? err.message : err
-                            });
-                        });
-                }else{
-                    this.$notify({
-                        group: 'notification',
-                        type: 'warning',
-                        title: 'Your transaction is being processed',
-                        duration: 10000,
-                        text: 'Wait for the process to complete'
-                    });
-                }
-            },
             creatorRoute(address) {
                 return '/intel/' + address + '/';
             },
-            dateStringFormat(date) {
-                return new Date(date);
-            },
-            intelRoute(intel) {
-                let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
-                return '/intel/' + intel.address + '/' + param;
-            },
             goToIntelPage: function () {
                 window.location = '/#/create';
-            },
-            //Loads the pendingTransactions state
-            getTransactions: function () {
-                return ContentService.getTransactions(data => {
-                    this.assignTransactions(data);
-
-                }, error => {
-                    let errorText = error.message ? error.message : error;
-                    this.$notify({
-                        group: 'notification',
-                        type: 'error',
-                        duration: 10000,
-                        title: 'Login',
-                        text: errorText
-                    });
-                });
             },
             leaderboards(address){
                 return '/leaderboards' + '?address=' + address;
@@ -405,19 +312,10 @@
                 Promise.all([
                     this.loadProfile(),
                     this.loadMyContent(),
-                    this.loadAddress(),
-                    this.getTransactions()
+                    this.loadAddress()
                 ]).then(values => {
                     this.$store.state.makingRequest = false;
                 });
-            },
-            scrollMyPost: function () {
-                let list = document.getElementById("mypost");
-
-                if (list.scrollTop + list.offsetHeight + 10 >= list.scrollHeight
-                    && this.myContent.length < this.allMyContent.length) {
-                    this.myContent = this.allMyContent.slice(0, this.myContent.length + 10);
-                }
             },
             showModal() {
                 this.$refs.myModalRef.show();
@@ -429,16 +327,6 @@
                 profileService.uploadProfilePic(formData, res => {
                     this.user.profile_pic = res;
                 });
-            },
-            transactionStatus: function(status) {
-                switch (status){
-                    case 0:
-                        return 'Pending Approval';
-                    case 1:
-                        return 'Approved';
-                    case 2:
-                        return 'Pending Reward';
-                }
             },
             updateProfile() {
                 const profile = {

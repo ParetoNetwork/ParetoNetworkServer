@@ -265,11 +265,11 @@ controller.getTransaction = function (data, callback){
     }else{
         data.status = {$lt: 3}
     }
-    const limit = data.query.limit || 100;
+    const limit = parseInt(data.query.limit) || 100;
     const skip = limit * (data.query.page || 0);
 
     ParetoTransaction.find(query).sort({dateCreated : -1}).skip(skip).limit(limit).exec( callback);
-}
+};
 
 controller.watchTransaction =  function (data, callback){
     if(data.address){

@@ -96,11 +96,6 @@
             },
             pendingRowTransactions: function (intel) {
                 let transactionPending = false;
-                this.pendingTransactions.forEach(transaction => {
-                    if (intel.id === transaction.intel) {
-                        transactionPending = true;
-                    }
-                });
                 return transactionPending;
             },
         }

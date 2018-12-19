@@ -44,8 +44,7 @@ const store = new Vuex.Store({
         ws: null,
         pendingTransactions: [],
         intelReward : {},
-        myTokens : 0,
-
+        myTokens : 0
     },
     mutations: {
         addReward(state, data){
@@ -99,12 +98,11 @@ const store = new Vuex.Store({
         }, addTransaction(state, item) {
             state.pendingTransactions.unshift(item);
         }, assignTransactions(state, transactions) {
-            state.pendingTransactions = transactions;
-        }, editTransaction(state, {hash, status}){
+            state.pendingTransactions = [...state.pendingTransactions, ...transactions];
+        }, editTransaction(state, {hash, key, value}){
             state.pendingTransactions = state.pendingTransactions.map(item => {
                   if(item.txHash === hash){
-                     // console.log(status);
-                      item.status = status;
+                      item[key] = value;
                   }
                   return item;
             });
