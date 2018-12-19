@@ -1,9 +1,10 @@
 <template>
     <div class="text-left">
-        <div class="row p-0 cursor-pointer" >
+        <div class="row p-0 cursor-pointer" @click="clickTransaction()">
             <div class="col-12 col-lg-7 p-0">
                 <h1 class="title" v-line-clamp="2">{{transactionStatus(transaction.status)}}
-                    <i v-if="transaction.status < 3" class="fa fa-exclamation-circle" style="color: red"></i>
+                    <span v-bind:id="transaction.txHash + '-span'"> </span>
+                    <i v-if="transaction.status < 3 && !transaction.clicked" class="fa fa-exclamation-circle" style="color: red"></i>
                 </h1>
             </div>
             <div class="col-12 col-lg-5 p-0">
@@ -51,7 +52,7 @@
     export default {
         name: "VTransaction",
         props: [
-            "transaction"
+            "transaction" , "creatingLoading"
         ],
         mixins: [countUpMixin],
         components: {
@@ -60,6 +61,7 @@
         data: function () {
             return {
                 etherscanUrl: window.localStorage.getItem('etherscan'),
+                loadingEffect: {}
             }
         },
         filters: {
@@ -68,10 +70,95 @@
                 return temp.format("MMMM Do, YYYY");
             }
         },
+        watch: {
+            'transaction.clicked' : function (valNew, valOld) {
+                this.loadingTransaction();
+            }
+        },
+        mounted : function(){
+            let newId = this.transaction.txHash + '-span';
+            this.loadingEffect = document.getElementById(newId);
+            this.loadingTransaction();
+        },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+            clickTransaction: function(){
+                if(this.transaction.status >= 3) {
+                    this.$notify({
+                        group: 'notification',
+                        type: 'warning',
+                        title: 'Transaction Completed',
+                        duration: 10000,
+                        text: 'This transaction was already completed'
+                    });
+                    return;
+                }
+
+                if(!this.transaction.clicked) {
+                    this.loadingTransaction();
+
+                    this.$set(this.transaction, 'clicked', true);
+                    this.editTransaction({hash: this.transaction.txHash, key: 'clicked', value: 'true'});
+
+                    ContentService.pendingTransactionApproval(
+                        this.transaction,
+                        {signType: this.signType, pathId: this.pathId},
+                        {
+                            addTransaction: this.addTransaction,
+                            transactionComplete: this.transactionComplete,
+                            editTransaction: this.editTransaction,
+                            toastTransaction: this.$notify
+                        },
+                        res => {
+                            this.$notify({
+                                group: 'notification',
+                                type: 'success',
+                                duration: 10000,
+                                title: 'Event: ' + this.transaction.event,
+                                text: 'Confirmed ' + this.transaction.event
+                            });
+                            console.log(res);
+                        },
+                        err => {
+                            this.$notify({
+                                group: 'notification',
+                                type: 'error',
+                                duration: 10000,
+                                text: err.message ? err.message : err
+                            });
+                        });
+                }else{
+                    this.$notify({
+                        group: 'notification',
+                        type: 'warning',
+                        title: 'Your transaction is being processed',
+                        duration: 10000,
+                        text: 'Wait for the process to complete'
+                    });
+                }
+            },
             dateStringFormat(date) {
                 return new Date(date);
+            },
+            loadingTransaction: function(){
+                let points = 0;
+                if(this.transaction.clicked && this.transaction.status < 3){
+                    let updateTitle = setInterval(()=>{
+                        if(points < 4){
+                            this.loadingEffect.innerHTML  = '.' + this.loadingEffect.innerHTML;
+                        }
+                        else{
+                            this.loadingEffect.innerHTML = '';
+                            points = 0;
+                        }
+                        points++;
+
+                        if(this.transaction.status > 2){
+                            clearInterval(updateTitle);
+                            this.loadingEffect.innerHTML = '';
+                        }
+                    }, 200);
+                }
             },
             transactionStatus: function (status) {
                 switch (status) {

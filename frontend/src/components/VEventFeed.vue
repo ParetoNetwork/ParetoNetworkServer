@@ -11,10 +11,10 @@
                 </button>
             </div>
             <div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
-                <ul v-if="pendingTransactions.length" class="list-group list-unstyled">
-                    <li class="list-group-item border-0" v-for="tx in pendingTransactions">
+                <ul v-if="transactions.length" class="list-group list-unstyled">
+                    <li v-bind:id="tx.txHash" class="list-group-item border-0" v-for="tx in transactions">
                         <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>
-                        <VTransaction v-else @click.native="clickTransaction(tx)" :transaction="tx"></VTransaction>
+                        <VTransaction v-else :transaction="tx"></VTransaction>
                     </li>
                 </ul>
                 <span v-else> No data to display </span>
@@ -46,7 +46,9 @@
                 allContent : [],
                 page: 0,
                 limit: 10,
-                isLoadingScroll: false
+                isLoadingScroll: false,
+                transactions: [],
+                lastFlashed: ''
             }
         },
         components: {
@@ -73,68 +75,34 @@
             this.loadRequest();
         },
         watch: {
-
+            'pendingTransactions': function (newTransactions) {
+                newTransactions.forEach( item => {
+                    let wasFound = false;
+                    this.transactions.forEach( tx => {
+                        if(tx.txHash === item.txHash){
+                            console.log(tx.txHash);
+                            console.log(tx, item);
+                            wasFound = true;
+                            if(item.status >= tx.status) {
+                                this.$set(tx, 'status', item.status);
+                            }
+                            if(item.status === 3 && item.event === 'create' && item.txHash != this.lastFlashed){
+                                console.log(this.lastFlashed);
+                                this.updateCreateEvent(tx);
+                            }
+                        }
+                    });
+                    if(!wasFound) this.transactions.unshift(item);
+                });
+            },
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
-            clickTransaction: function(transaction){
-
-                if(transaction.status >= 3) {
-                    this.$notify({
-                        group: 'notification',
-                        type: 'warning',
-                        title: 'Transaction Completed',
-                        duration: 10000,
-                        text: 'This transaction was already completed'
-                    });
-                    return;
-                }
-
-                if(!transaction.clicked) {
-                    transaction.clicked = true;
-                    this.alertTransactions--;
-                    ContentService.pendingTransactionApproval(
-                        transaction,
-                        {signType: this.signType, pathId: this.pathId},
-                        {
-                            addTransaction: this.addTransaction,
-                            transactionComplete: this.transactionComplete,
-                            editTransaction: this.editTransaction,
-                            toastTransaction: this.$notify
-                        },
-                        res => {
-                            this.$notify({
-                                group: 'notification',
-                                type: 'success',
-                                duration: 10000,
-                                title: 'Event: ' + transaction.event,
-                                text: 'Confirmed ' + transaction.event
-                            });
-                            console.log(res);
-                        },
-                        err => {
-                            this.$notify({
-                                group: 'notification',
-                                type: 'error',
-                                duration: 10000,
-                                text: err.message ? err.message : err
-                            });
-                        });
-                }else{
-                    this.$notify({
-                        group: 'notification',
-                        type: 'warning',
-                        title: 'Your transaction is being processed',
-                        duration: 10000,
-                        text: 'Wait for the process to complete'
-                    });
-                }
-            },
             //Loads the pendingTransactions state
             getTransactions: function () {
                 let params = {q : 'all', page: this.page, limit: 10};
                 return ContentService.getTransactions(params, data => {
-                    this.assignTransactions(data);
+                    this.transactions = [...this.transactions, ...data];
                 }, error => {
                     let errorText = error.message ? error.message : error;
                     this.$notify({
@@ -174,18 +142,26 @@
                     this.isLoadingScroll = false;
                     this.page += 1;
 
-                    this.pendingTransactions.forEach( tx => {
+                    this.transactions.forEach( tx => {
                         if(tx.event === 'create' && tx.status > 2){
                             this.myContent.forEach( item => {
                                 if(item.id == tx.intel){
-                                    this.editTransaction({hash: tx.txHash, key: 'intelInfo', value: item});
+                                    this.$set(tx, 'intelInfo', item);
                                 }
                             });
                         }
 
-                        if(tx.status <= 2 && !tx.clicked){
-                            console.log("theres one")
-                            this.alertTransactions++;
+                        if(this.pendingTransactions.length === 0 && tx.status < 3){
+                            this.addTransaction(tx);
+                        }else{
+                            this.pendingTransactions.forEach(item => {
+                                if(tx.txHash === item.txHash){
+                                    if(item.status >= tx.status){
+                                        this.$set(tx, 'status', item.status);
+                                        this.$set(tx, 'clicked', true);
+                                    }
+                                }
+                            });
                         }
                     });
                 });
@@ -198,11 +174,48 @@
                     this.isLoadingScroll = true;
                     this.loadRequest();
                 }
-            }
+            },
+            updateCreateEvent: function (tx) {
+                let params = {page: 0, limit: 10};
+
+                return dashboardService.getContent(params,
+                    res => {
+                        console.log(res);
+                        console.log(tx);
+                        let intel = res.find(item => {
+                            return item.id == tx.intel;
+                        });
+                        console.log(intel);
+                        if(intel){
+                            $('#' + tx.txHash).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
+                                $(this).removeClass('higher-flash');
+                            }).addClass('higher-flash');
+                        }
+                        this.lastFlashed = tx.txHash;
+                        this.$set(tx, 'intelInfo', intel);
+                        //clearInterval(updateTitle);
+                    },
+                    error => {
+                    }
+                );
+            },
+
         }
     }
 </script>
 
 <style scoped>
 
+    @keyframes higher-flash {
+        0% {
+            background: #6aba82;
+        }
+        100% {
+            background: none;
+        }
+    }
+
+    .higher-flash {
+        animation:  higher-flash 3s;
+    }
 </style>

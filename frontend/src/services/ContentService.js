@@ -112,8 +112,8 @@ export default class ContentService {
             const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
 
 
-            const  depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
-            const  desiredReward = depositAmount;
+            const depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
+            const desiredReward = depositAmount;
 
             let gasApprove = await ParetoTokenInstance.methods
                 .increaseApproval(Intel.options.address, depositAmount)
@@ -139,11 +139,12 @@ export default class ContentService {
                                 event: 'create',
                                 status: 0,
                                 clicked: true,
-                                dateCreated : new Date()
+                                dateCreated: new Date()
                             };
 
                             var txHash = hash;
-                            //events.addTransaction(params);
+
+                            events.addTransaction(params);
                             this.postTransactions(params);
 
                             waitForReceipt(hash, async receipt => {
@@ -188,8 +189,8 @@ export default class ContentService {
 
             let gasPrice = await web3.eth.getGasPrice();
 
-            const  depositAmount = web3.utils.toWei(content.amount.toString(), "ether");
-            const  desiredReward = depositAmount;
+            const depositAmount = web3.utils.toWei(content.amount.toString(), "ether");
+            const desiredReward = depositAmount;
 
             if (accounts[0].toLowerCase() == content.address.toLowerCase()) {
                 switch (content.event) {
@@ -407,7 +408,7 @@ export default class ContentService {
                     if (ContentService.ledgerNanoEngine) {
                         ContentService.ledgerNanoEngine.stop();
                     }
-                    events.editTransaction({hash: content.txHash, key: 'status', value:4});
+                    events.editTransaction({hash: content.txHash, key: 'status', value: 4});
                     onError(error);
                 });
         } catch (e) {
@@ -470,7 +471,7 @@ export default class ContentService {
                         intelAddress: content.intelAddress,
                         status: 0,
                         clicked: true,
-                        dateCreated : new Date()
+                        dateCreated: new Date()
                     };
 
                     var txHash = hash;
