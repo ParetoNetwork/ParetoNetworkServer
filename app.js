@@ -493,24 +493,13 @@ app.get('/v1/content/me', function (req, res) {
 
 //get info about another address
 app.get('/v1/content/:content', function (req, res) {
-    req.query.limit = 1000;
-    req.query.page = 0;
-    controller.getAllAvailableContent(req, function (err, result) {
+    controller.getContentByIntel(req,req.params.content, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
-            let mycontent = {};
-            for (let i = 0; i < result.length; i = i+1){
-                if(result[i]._id.toString() === req.params.content ||
-                    result[i].txHash.toString() === req.params.content){
-                    mycontent = result[i];
-                    break;
-                }
-            }
-            res.status(200).json(ErrorHandler.getSuccess(mycontent));
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
-
 });
 
 
