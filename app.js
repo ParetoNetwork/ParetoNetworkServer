@@ -397,7 +397,6 @@ app.get('/v1/summation', function (req, res) {
 
 app.post('/v1/content', function (req, res) {
 
-
     if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }
@@ -421,14 +420,18 @@ app.post('/v1/content', function (req, res) {
 
 
 app.get('/v1/transaction', function (req, res) {
-    controller.getPendingTransaction(req.user, function (err, obj) {
+    console.log(req.query);
+    controller.getTransaction(req, function (err, obj) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
             res.status(200).json(ErrorHandler.getSuccess(obj));
         }
     });
+
 }); //end content post
+
+
 
 
 app.post('/v1/transaction', function (req, res) {
@@ -490,24 +493,13 @@ app.get('/v1/content/me', function (req, res) {
 
 //get info about another address
 app.get('/v1/content/:content', function (req, res) {
-    req.query.limit = 1000;
-    req.query.page = 0;
-    controller.getAllAvailableContent(req, function (err, result) {
+    controller.getContentByIntel(req,req.params.content, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
-            let mycontent = {};
-            for (let i = 0; i < result.length; i = i+1){
-                if(result[i]._id.toString() === req.params.content ||
-                    result[i].txHash.toString() === req.params.content){
-                    mycontent = result[i];
-                    break;
-                }
-            }
-            res.status(200).json(ErrorHandler.getSuccess(mycontent));
+            res.status(200).json(ErrorHandler.getSuccess(result));
         }
     });
-
 });
 
 

@@ -53,8 +53,8 @@ export default class ContentService {
             })
     }
 
-    static getTransactions(onSuccess, onError) {
-        return http.get("/v1/transaction")
+    static getTransactions(params, onSuccess, onError) {
+        return http.get("/v1/transaction", {params})
             .then(res => {
                 if (res.data.success) {
                     return onSuccess(res.data.data);
@@ -111,8 +111,8 @@ export default class ContentService {
             const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
 
 
-            const  depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
-            const  desiredReward = depositAmount;
+            const depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
+            const desiredReward = depositAmount;
 
             let gasApprove = await ParetoTokenInstance.methods
                 .increaseApproval(Intel.options.address, depositAmount)
@@ -137,16 +137,18 @@ export default class ContentService {
                                 amount: tokenAmount,
                                 event: 'create',
                                 status: 0,
-                                clicked: true
+                                clicked: true,
+                                dateCreated: new Date()
                             };
 
                             var txHash = hash;
+
                             events.addTransaction(params);
                             this.postTransactions(params);
 
                             waitForReceipt(hash, async receipt => {
                                 serverData.approveHash = txHash;
-                                events.editTransaction({hash: hash, status: 1});
+                                events.editTransaction({hash: hash, key: 'status', value: 1});
 
                                 events.toastTransaction({
                                     group: 'notification',
@@ -186,8 +188,8 @@ export default class ContentService {
 
             let gasPrice = await web3.eth.getGasPrice();
 
-            const  depositAmount = web3.utils.toWei(content.amount.toString(), "ether");
-            const  desiredReward = depositAmount;
+            const depositAmount = web3.utils.toWei(content.amount.toString(), "ether");
+            const desiredReward = depositAmount;
 
             if (accounts[0].toLowerCase() == content.address.toLowerCase()) {
                 switch (content.event) {
@@ -203,7 +205,7 @@ export default class ContentService {
                                         duration: 10000,
                                         text: 'Second transaction ready, complete it'
                                     });
-                                    events.editTransaction({hash: content.txHash, status: 1});
+                                    events.editTransaction({hash: content.txHash, key: 'status', value: 1});
 
                                     ContentService.sendReward(Intel, {
                                         intel: content.intel,
@@ -230,7 +232,7 @@ export default class ContentService {
                                     if (ContentService.ledgerNanoEngine) {
                                         ContentService.ledgerNanoEngine.stop();
                                     }
-                                    events.transactionComplete(content.txHash);
+                                    events.editTransaction({hash: content.txHash, key: 'status', value: 3});
                                     onSuccess("success");
                                 });
                                 break;
@@ -245,7 +247,7 @@ export default class ContentService {
                         switch (content.status) {
                             case 0:
                                 waitForReceipt(content.txHash, async receipt => {
-                                    events.editTransaction({hash: content.txHash, status: 1});
+                                    events.editTransaction({hash: content.txHash, key: 'status', value: 1});
 
                                     events.toastTransaction({
                                         group: 'notification',
@@ -285,7 +287,7 @@ export default class ContentService {
                                     if (ContentService.ledgerNanoEngine) {
                                         ContentService.ledgerNanoEngine.stop();
                                     }
-                                    events.transactionComplete(content.txHash);
+                                    events.editTransaction({hash: content.txHash, key: 'status', value: 3});
                                     onSuccess("successfull");
                                 });
                         }
@@ -323,7 +325,7 @@ export default class ContentService {
                     gasPrice: content.gasPrice
                 })
                 .on("transactionHash", hash => {
-                    events.editTransaction({hash: content.txHash, status: 2});
+                    events.editTransaction({hash: content.txHash, key: 'status', value: 2});
 
                     let params = {
                         txHash: content.txHash,
@@ -335,21 +337,22 @@ export default class ContentService {
                         if (ContentService.ledgerNanoEngine) {
                             ContentService.ledgerNanoEngine.stop();
                         }
-                        events.transactionComplete(content.txHash);
+                        events.editTransaction({hash: content.txHash, key: 'status', value: 3});
+                        events.editTransaction({hash: content.txHash, intelInfo: 'status', value: 'noFetch'});
 
                         let params = {
                             txHash: content.txHash,
                             status: 3
                         };
                         this.postTransactions(params);
-                        onSuccess("successfull");
+                        onSuccess({success: true, res: content});
                     });
                 })
                 .on("error", err => {
                     if (ContentService.ledgerNanoEngine) {
                         ContentService.ledgerNanoEngine.stop();
                     }
-                    events.transactionComplete(content.txHash);
+                    events.editTransaction({hash: content.txHash, key: 'status', value: 4});
                     onError(err.message || err);
                 });
 
@@ -360,7 +363,7 @@ export default class ContentService {
             };
             this.postTransactions(params);
 
-            events.transactionComplete(content.txHash);
+            events.editTransaction({hash: content.txHash, key: 'status', value: 4});
             events.toastTransaction({
                 group: 'notification',
                 title: 'Error:',
@@ -385,7 +388,7 @@ export default class ContentService {
                     gasPrice: content.gasPrice
                 })
                 .on("transactionHash", hash => {
-                    events.editTransaction({hash: content.txHash, status: 2});
+                    events.editTransaction({hash: content.txHash, key: 'status', value: 2});
                     let params = {
                         txHash: content.txHash,
                         txRewardHash: hash
@@ -396,7 +399,7 @@ export default class ContentService {
                         if (ContentService.ledgerNanoEngine) {
                             ContentService.ledgerNanoEngine.stop();
                         }
-                        events.transactionComplete(content.txHash);
+                        events.editTransaction({hash: content.txHash, key: 'status', value: 3});
                         onSuccess("Transaction Completed");
                     });
                 })
@@ -404,7 +407,7 @@ export default class ContentService {
                     if (ContentService.ledgerNanoEngine) {
                         ContentService.ledgerNanoEngine.stop();
                     }
-                    events.transactionComplete(content.txHash);
+                    events.editTransaction({hash: content.txHash, key: 'status', value: 4});
                     onError(error);
                 });
         } catch (e) {
@@ -414,7 +417,7 @@ export default class ContentService {
             };
             this.postTransactions(params);
 
-            events.transactionComplete(content.txHash);
+            events.editTransaction({hash: content.txHash, key: 'status', value: 4});
             events.toastTransaction({
                 group: 'notification',
                 title: 'Error:',
@@ -466,7 +469,8 @@ export default class ContentService {
                         event: 'reward',
                         intelAddress: content.intelAddress,
                         status: 0,
-                        clicked: true
+                        clicked: true,
+                        dateCreated: new Date()
                     };
 
                     var txHash = hash;
@@ -481,7 +485,7 @@ export default class ContentService {
                             duration: 10000,
                             text: 'Second transaction ready, complete it'
                         });
-                        events.editTransaction({hash: hash, status: 1});
+                        events.editTransaction({hash: hash, key: 'status', value: 1});
 
                         ContentService.sendReward(Intel, {
                             intel: content.ID,
@@ -544,7 +548,7 @@ export default class ContentService {
                         if (ContentService.ledgerNanoEngine) {
                             ContentService.ledgerNanoEngine.stop();
                         }
-                        events.transactionComplete(hash);
+                        events.editTransaction({hash: content.txHash, key: 'status', value: 3});
                         onSuccess("Transaction Completed");
                     });
                 })
