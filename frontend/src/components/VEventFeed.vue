@@ -80,14 +80,11 @@
                     let wasFound = false;
                     this.transactions.forEach( tx => {
                         if(tx.txHash === item.txHash){
-                            console.log(tx.txHash);
-                            console.log(tx, item);
                             wasFound = true;
                             if(item.status >= tx.status) {
                                 this.$set(tx, 'status', item.status);
                             }
                             if(item.status === 3 && item.event === 'create' && item.txHash != this.lastFlashed){
-                                console.log(this.lastFlashed);
                                 this.updateCreateEvent(tx);
                             }
                         }
@@ -180,12 +177,9 @@
 
                 return dashboardService.getContent(params,
                     res => {
-                        console.log(res);
-                        console.log(tx);
                         let intel = res.find(item => {
                             return item.id == tx.intel;
                         });
-                        console.log(intel);
                         if(intel){
                             $('#' + tx.txHash).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
                                 $(this).removeClass('higher-flash');
