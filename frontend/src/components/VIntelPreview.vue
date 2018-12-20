@@ -40,7 +40,6 @@
             </div>
             <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
                 <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
-                    <font-awesome-icon class="ml-2 mr-1" :icon="['far', 'calendar']" />&nbsp
                     <font-awesome-icon class="ml-2 mr-1" :icon="['fas', 'calendar']" />&nbsp
                     <span class="text-dashboard"><b>{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
             </div>
