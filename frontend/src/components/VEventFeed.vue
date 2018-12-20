@@ -140,7 +140,7 @@
                     this.page += 1;
 
                     this.transactions.forEach( tx => {
-                        if(tx.event === 'create' && tx.status > 2){
+                        if((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2){
                             this.myContent.forEach( item => {
                                 if(item.id == tx.intel){
                                     this.$set(tx, 'intelInfo', item);
