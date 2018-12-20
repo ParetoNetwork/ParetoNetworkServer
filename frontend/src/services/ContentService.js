@@ -540,11 +540,16 @@ export default class ContentService {
                         amount: 0,
                         event: 'distribute',
                         intelAddress: content.intelAddress,
-                        status: 0
+                        status: 0,
+                        clicked: true,
+                        dateCreated: new Date()
                     };
+
                     events.addTransaction(params);
                     this.postTransactions(params);
+
                     waitForReceipt(hash, receipt => {
+                        console.log('deberia entrar en la transacción');
                         if (ContentService.ledgerNanoEngine) {
                             ContentService.ledgerNanoEngine.stop();
                         }
