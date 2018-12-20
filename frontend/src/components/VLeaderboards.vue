@@ -72,7 +72,7 @@
                         <!--
                         <div class="mt-2">
                             <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                            <a v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                            <a v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>
                         </div>
 
                         <router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">
@@ -131,7 +131,7 @@
                                     <th class="th-header address-header" width="250px">
                                         Address
                                     </th>
-                                    <th style="text-align: right;"><i class="fa fa-external-link-square"></i></th>
+                                    <th style="text-align: right;"><i class="fa fa-external-link-square-alt"></i></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -162,7 +162,7 @@
                                                 <i v-bind:class="changeHistoricalSymbol(rank.lscore)"></i>
                                             </td>
                                             <td class="break-line" style="width: 400px; text-align: left;">{{rank.address}}</td>
-                                            <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i class="fa fa-external-link"></i></a></td>
+                                            <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i class="fa fa-external-link-alt"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>
