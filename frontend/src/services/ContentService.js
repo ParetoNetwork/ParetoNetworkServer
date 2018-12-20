@@ -56,7 +56,6 @@ export default class ContentService {
     static getTransactions(params, onSuccess, onError) {
         return http.get("/v1/transaction", {params})
             .then(res => {
-                console.log(res);
                 if (res.data.success) {
                     return onSuccess(res.data.data);
                 } else {
