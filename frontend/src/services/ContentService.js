@@ -540,7 +540,7 @@ export default class ContentService {
                         amount: 0,
                         event: 'distribute',
                         intelAddress: content.intelAddress,
-                        status: 0,
+                        status: 2,
                         clicked: true,
                         dateCreated: new Date()
                     };
@@ -549,11 +549,10 @@ export default class ContentService {
                     this.postTransactions(params);
 
                     waitForReceipt(hash, receipt => {
-                        console.log('deberia entrar en la transacción');
                         if (ContentService.ledgerNanoEngine) {
                             ContentService.ledgerNanoEngine.stop();
                         }
-                        events.editTransaction({hash: content.txHash, key: 'status', value: 3});
+                        events.editTransaction({hash, key: 'status', value: 3});
                         onSuccess("Transaction Completed");
                     });
                 })
