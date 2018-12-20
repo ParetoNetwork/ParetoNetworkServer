@@ -65,7 +65,6 @@
                         toastTransaction: this.$notify
                     },
                     res => {
-                        this.modalWaiting = false;
                         this.$notify({
                             group: 'notification',
                             type: 'success',
@@ -75,7 +74,6 @@
                         });
                     },
                     err => {
-                        this.modalWaiting = false;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
@@ -86,7 +84,7 @@
                 );
             },
             openRewardModal: function () {
-                //console.log(this.intel, this.user.tokens);
+
                 let params = {
                     intel: this.intel,
                     tokens: this.user.tokens
@@ -98,7 +96,7 @@
                 let transactionPending = false;
 
                 this.pendingTransactions.forEach( tx => {
-                    if(tx.status < 3){
+                    if(tx.status < 3 && tx.event === 'reward'){
                         transactionPending = true;
                     }
                 });
