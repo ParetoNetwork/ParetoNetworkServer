@@ -37,12 +37,7 @@ export default class dashboardService {
     }
 
     static getContent(params, onSuccess, onError) {
-        let query = '';
-        if (params) {
-            query = '?limit=' + params.limit + '&page=' + params.page + '&user=' + params.user;
-        }
-
-        return http.get('/v1/content/me' + query).then(res => {
+        return http.get('/v1/content/me', {params}).then(res => {
             if (res.data.success) {
                 return onSuccess(res.data.data);
             } else {

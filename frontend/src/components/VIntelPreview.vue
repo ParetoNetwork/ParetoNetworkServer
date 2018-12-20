@@ -39,8 +39,11 @@
                 </a>
             </div>
             <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
-                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
-                    <span class="text-dashboard"><b>{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
+                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
+                    <i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                    <span class="text-dashboard">
+                        <b>{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
+                        </b></span></a>
             </div>
             <div class="col-md col-xs">
                 <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
@@ -77,6 +80,9 @@
                 baseURL: environment.baseURL,
                 etherscanUrl: window.localStorage.getItem('etherscan') ,
             }
+        },
+        mounted : function (){
+
         },
         filters: {
             dateFilter: function formatDate(date) {
