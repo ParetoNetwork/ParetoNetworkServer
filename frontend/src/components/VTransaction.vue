@@ -117,7 +117,6 @@
                                 title: 'Event: ' + this.transaction.event,
                                 text: 'Confirmed ' + this.transaction.event
                             });
-                            console.log(res);
                         },
                         err => {
                             this.$notify({
