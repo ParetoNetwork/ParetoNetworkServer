@@ -79,6 +79,7 @@
             let newId = this.transaction.txHash + '-span';
             this.loadingEffect = document.getElementById(newId);
             this.loadingTransaction();
+
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
