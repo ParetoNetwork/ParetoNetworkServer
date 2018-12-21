@@ -452,7 +452,7 @@ controller.startWatchApprove=function (){
  */
 controller.startwatchIntel = function(){
     controller.startwatchNewIntel()
-    ParetoContent.find({ 'expires':{ $gt : Math.round(new Date().getTime() / 1000)}, 'validated': true }).distinct('intelAddress').exec(function(err, results) {
+    ParetoContent.find({  'validated': true }).distinct('intelAddress').exec(function(err, results) {
         if (err) {
             callback(err);
         }
