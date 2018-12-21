@@ -510,7 +510,7 @@ export default class ContentService {
                 content.intelAddress
             );
         } catch (e) {
-            return onError(e)
+            return onError(e);
         }
 
         web3.eth.getAccounts(async (err, accounts) => {
@@ -540,7 +540,7 @@ export default class ContentService {
                         amount: 0,
                         event: 'distribute',
                         intelAddress: content.intelAddress,
-                        status: 2,
+                        status: 0,
                         clicked: true,
                         dateCreated: new Date()
                     };

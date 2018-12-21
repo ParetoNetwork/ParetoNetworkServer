@@ -279,6 +279,7 @@ controller.watchTransaction =  function (data, callback){
     var dbQuery = {
         txHash: data.txHash
     };
+
     if (data.txRewardHash){
         data.status = 2;
     }
