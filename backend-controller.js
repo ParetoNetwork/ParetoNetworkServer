@@ -246,15 +246,20 @@ controller.postContent = function (req, callback) {
 
 
 controller.getTransaction = function (data, callback){
-    const query = {address: data.user};
+    const query = { address: data.user };
+
     if(data.query.q){
         switch (data.query.q){
             case 'complete': {
-                data.status = {$gte: 3};
+                query.status = {$gte: 3};
                 break;
             }
             case 'pending': {
-                data.status = {$lt: 3};
+                query.status = {$lt: 3};
+                break;
+            }
+            case 'nd' : {
+                query.event = { $nin: [ 'distribute' ]};
                 break;
             }
             case 'all': {
@@ -262,9 +267,8 @@ controller.getTransaction = function (data, callback){
             }
             default:  data.status = {$lt: 3}
         }
-    }else{
-        data.status = {$lt: 3}
     }
+
     const limit = parseInt(data.query.limit) || 100;
     const skip = limit * (data.query.page || 0);
 

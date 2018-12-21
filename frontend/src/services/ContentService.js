@@ -519,50 +519,61 @@ export default class ContentService {
                 return;
             }
             const distributor = accounts[0];
-            let gasDistribute = await Intel.methods
-                .distributeReward(content.ID)
-                .estimateGas({from: distributor});
+            let gasDistribute = {};
 
-            let gasPrice = await web3.eth.getGasPrice();
+            try {
+                gasDistribute = await Intel.methods
+                    .distributeReward(content.ID)
+                    .estimateGas({from: distributor});
 
-            await Intel.methods
-                .distributeReward(content.ID)
-                .send({
-                    from: distributor,
-                    gas: gasDistribute,
-                    gasPrice
-                })
-                .on("transactionHash", hash => {
-                    let params = {
-                        address: distributor,
-                        txHash: hash,
-                        intel: content.ID,
-                        amount: 0,
-                        event: 'distribute',
-                        intelAddress: content.intelAddress,
-                        status: 0,
-                        clicked: true,
-                        dateCreated: new Date()
-                    };
+                events.addDistribute({
+                    intel: content.ID,
+                    event: 'distribute',
+                    status: 0,
+                    clicked: true,
+                    dateCreated: new Date()
+                });
 
-                    events.addTransaction(params);
-                    this.postTransactions(params);
+                let gasPrice = await web3.eth.getGasPrice();
+                await Intel.methods
+                    .distributeReward(content.ID)
+                    .send({
+                        from: distributor,
+                        gas: gasDistribute,
+                        gasPrice
+                    })
+                    .on("transactionHash", hash => {
+                        let params = {
+                            address: distributor,
+                            txHash: hash,
+                            intel: content.ID,
+                            amount: 0,
+                            event: 'distribute',
+                            intelAddress: content.intelAddress,
+                            status: 0,
+                            clicked: true,
+                            dateCreated: new Date()
+                        };
 
-                    waitForReceipt(hash, receipt => {
+                        this.postTransactions(params);
+
+                        waitForReceipt(hash, receipt => {
+                            if (ContentService.ledgerNanoEngine) {
+                                ContentService.ledgerNanoEngine.stop();
+                            }
+
+                            onSuccess("Transaction Completed");
+                        });
+                    })
+                    .on("error", error => {
                         if (ContentService.ledgerNanoEngine) {
                             ContentService.ledgerNanoEngine.stop();
                         }
-                        events.editTransaction({hash, key: 'status', value: 3});
-                        onSuccess("Transaction Completed");
+                        onError(error);
                     });
-                })
-                .on("error", error => {
-                    if (ContentService.ledgerNanoEngine) {
-                        ContentService.ledgerNanoEngine.stop();
-                    }
-                    onError(error);
-
-                });
+            } catch (e) {
+                onError(e);
+            }
         });
     }
 

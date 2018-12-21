@@ -15,7 +15,8 @@
                     class="cursor-pointer p-0"
                     v-bind:class="{ 'col-9 col-lg-6' : !eventRow , 'col-12 col-lg-7': eventRow }">
                 <h1 class="title" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
-                <p class="text-dashboard ellipsis">Disclosed by: {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}} </p>
+                <p class="text-dashboard ellipsis">Disclosed by: {{intel.createdBy.alias ? intel.createdBy.alias :
+                    intel.createdBy.address}} </p>
                 <p v-if="!intel.validated && eventRow"> Pending Blockchain Confirmation</p>
                 <p>{{intel.dateCreated | dateFilter}}</p>
             </router-link>
@@ -67,7 +68,7 @@
 
     export default {
         name: "VIntelPreview",
-        props : [
+        props: [
             'user', 'intel', 'eventRow'
         ],
         mixins: [countUpMixin],
@@ -75,13 +76,13 @@
             ICountUp,
             VIntelButtonAction,
         },
-        data : function () {
+        data: function () {
             return {
                 baseURL: environment.baseURL,
-                etherscanUrl: window.localStorage.getItem('etherscan') ,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
             }
         },
-        mounted : function (){
+        mounted: function () {
 
         },
         filters: {
@@ -90,7 +91,7 @@
                 return temp.format("MMMM Do, YYYY");
             }
         },
-        methods : {
+        methods: {
             dateStringFormat(date) {
                 return new Date(date);
             },

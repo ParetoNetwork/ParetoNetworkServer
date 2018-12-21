@@ -76,7 +76,7 @@
         },
         watch: {
             'pendingTransactions': function (newTransactions) {
-                newTransactions.forEach( item => {
+                newTransactions.forEach( (item, index) => {
                     let wasFound = false;
                     this.transactions.forEach( tx => {
                         if(tx.txHash === item.txHash){
@@ -84,7 +84,7 @@
                             if(item.status >= tx.status) {
                                 this.$set(tx, 'status', item.status);
                             }
-                            if(item.status === 3 && item.event === 'create' && item.txHash != this.lastFlashed){
+                            if(item.status === 3 && item.event === 'create' && !tx.intelInfo){
                                 this.updateCreateEvent(tx);
                             }
                         }
@@ -97,7 +97,7 @@
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
             //Loads the pendingTransactions state
             getTransactions: function () {
-                let params = {q : 'all', page: this.page, limit: 10};
+                let params = {q : 'nd', page: this.page, limit: 10};
                 return ContentService.getTransactions(params, data => {
                     this.transactions = [...this.transactions, ...data];
                 }, error => {
