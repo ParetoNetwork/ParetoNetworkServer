@@ -77,9 +77,9 @@
                                                @click="copyTextClipboard(paths[0].selected.address, 'tooltipText1')"
                                                class="fa fa-copy cursor-pointer"></i>
                                             <a v-if="!!paths[0].selected.address" v-bind:href="etherscan+'/address/'+paths[0].selected.address" target="_blank">
-                                                <i class="fa fa-external-link"></i>
+                                                <i class="fa fa-external-link-alt"></i>
                                             </a>
-                                            <i v-else class="fa fa-external-link"></i>
+                                            <i v-else class="fa fa-external-link-alt"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -126,9 +126,9 @@
                                                @click="copyTextClipboard(paths[1].selected.address, 'tooltipText2')"
                                                class="fa fa-copy cursor-pointer"></i>
                                             <a v-if="!!paths[1].selected.address" v-bind:href="etherscan+'/address/'+paths[1].selected.address" target="_blank">
-                                                <i class="fa fa-external-link"></i>
+                                                <i class="fa fa-external-link-alt"></i>
                                             </a>
-                                            <i v-else class="fa fa-external-link"></i>
+                                            <i v-else class="fa fa-external-link-alt"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -179,9 +179,9 @@
                                                @click="copyTextClipboard(paths[2].selected.address, 'tooltipText3')"
                                                class="fa fa-copy cursor-pointer"></i>
                                             <a v-if="!!paths[2].selected.address" v-bind:href="etherscan+'/address/'+paths[2].selected.address" target="_blank">
-                                                <i class="fa fa-external-link"></i>
+                                                <i class="fa fa-external-link-alt"></i>
                                             </a>
-                                            <i v-else class="fa fa-external-link"></i>
+                                            <i v-else class="fa fa-external-link-alt"></i>
                                         </div>
                                     </div>
                                 </div>
