@@ -420,7 +420,6 @@ app.post('/v1/content', function (req, res) {
 
 
 app.get('/v1/transaction', function (req, res) {
-    console.log(req.query);
     controller.getTransaction(req, function (err, obj) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
