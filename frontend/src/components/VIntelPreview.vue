@@ -14,7 +14,7 @@
                     :to="intelRoute(intel)"
                     class="cursor-pointer p-0"
                     v-bind:class="{ 'col-9 col-lg-6' : !eventRow , 'col-12 col-lg-7': eventRow }">
-                <h1 class="title ellipsis">{{intel.title|| 'No title'}}</h1>
+                <h1 class="title" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
                 <p class="text-dashboard ellipsis">Disclosed by: {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}} </p>
                 <p v-if="!intel.validated && eventRow"> Pending Blockchain Confirmation</p>
                 <p>{{intel.dateCreated | dateFilter}}</p>
@@ -41,7 +41,9 @@
             <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
                 <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
                     <font-awesome-icon class="ml-2 mr-1" :icon="['fas', 'calendar']" />&nbsp
-                    <span class="text-dashboard"><b>{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
+                    <span class="text-dashboard">
+                        <b>{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
+                        </b></span></a>
             </div>
             <div class="col-md col-xs">
                 <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
