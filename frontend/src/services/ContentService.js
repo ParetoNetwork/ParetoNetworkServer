@@ -561,7 +561,6 @@ export default class ContentService {
                             if (ContentService.ledgerNanoEngine) {
                                 ContentService.ledgerNanoEngine.stop();
                             }
-
                             onSuccess("Transaction Completed");
                         });
                     })
