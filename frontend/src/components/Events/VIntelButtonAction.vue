@@ -96,8 +96,9 @@
             },
             pendingRowTransactions: function (intel) {
                 let transactionPending = false;
-                this.pendingTransactions.forEach(transaction => {
-                    if (intel.id === transaction.intel) {
+
+                this.pendingTransactions.forEach( tx => {
+                    if(tx.status < 3){
                         transactionPending = true;
                     }
                 });

@@ -6,6 +6,7 @@ import App from './App.vue';
 import VueRouter from 'vue-router';
 import router from './utils/routes';
 import Meta from 'vue-meta';
+import lineClamp from 'vue-line-clamp'
 
 import Vuex from 'vuex';
 import Notifications from 'vue-notification'
@@ -28,7 +29,8 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(Notifications);
-Vue.use(require('vue-moment'))
+Vue.use(lineClamp);
+Vue.use(require('vue-moment'));
 
 
 Vue.use(Meta);
@@ -51,8 +53,7 @@ const store = new Vuex.Store({
         ws: null,
         pendingTransactions: [],
         intelReward : {},
-        myTokens : 0,
-
+        myTokens : 0
     },
     mutations: {
         addReward(state, data){
@@ -106,12 +107,11 @@ const store = new Vuex.Store({
         }, addTransaction(state, item) {
             state.pendingTransactions.unshift(item);
         }, assignTransactions(state, transactions) {
-            state.pendingTransactions = transactions;
-        }, editTransaction(state, {hash, status}){
+            state.pendingTransactions = [...state.pendingTransactions, ...transactions];
+        }, editTransaction(state, {hash, key, value}){
             state.pendingTransactions = state.pendingTransactions.map(item => {
                   if(item.txHash === hash){
-                     // console.log(status);
-                      item.status = status;
+                      item[key] = value;
                   }
                   return item;
             });
