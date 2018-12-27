@@ -33,7 +33,7 @@
                     <li class="nav-item dropdown mx-lg-4 active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-user">&nbsp;</i>
+                            <i class="fa fa-user mr-1">&nbsp;</i>
                             <span v-if="address">
                                 {{address.slice(0,10) + '...'}}
                             </span>
