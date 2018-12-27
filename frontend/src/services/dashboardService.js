@@ -50,7 +50,7 @@ export default class dashboardService {
 
     static getAllContent(params, onSuccess, onError) {
         const {limit, page} = params || {limit: 10, page: 0};
-        let query_params = window.location.hash.split('?');
+        let query_params = window.location.search.split('?');
         let total_query = "";
         if (query_params.length > 0) {
             total_query = "&" + query_params[1];
