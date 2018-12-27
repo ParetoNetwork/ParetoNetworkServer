@@ -100,7 +100,7 @@
                                     <th class="th-header address-header" width="250px">
                                         Address
                                     </th>
-                                    <th style="text-align: right;"><i class="fa fa-external-link-square"></i></th>
+                                    <th style="text-align: right;"><i class="fa fa-external-link-square-alt"></i></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -134,7 +134,7 @@
                                                 {{rank.address}}
                                             </td>
                                             <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i
-                                                    class="fa fa-external-link"></i></a></td>
+                                                    class="fa fa-external-link-alt"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>

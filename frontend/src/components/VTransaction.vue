@@ -25,7 +25,7 @@
                 <a style="color: #000;"
                    :href="etherscanUrl + '/tx/' + (transaction.txRewardHash || transaction.txHash)"
                    target="_blank">
-                    <i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                    <i class="fa fa-calendar" style="color: #000;"></i>&nbsp;
                     <span class="text-dashboard">
                         <b>{{ dateStringFormat(transaction.dateCreated)| moment("from", "now") }}</b>
                     </span>

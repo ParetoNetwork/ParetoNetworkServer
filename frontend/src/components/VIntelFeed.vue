@@ -2,7 +2,7 @@
     <div>
         <div v-if="!loading && address" class="border p-2">
             <div class="border-bottom p-2 p-md-3">
-                <h5 class="title">MY INTEL FEED</h5>
+                <h5 class="title">MY INTEL FEED </h5>
             </div>
             <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
                 <ul class="list-unstyled list-group">

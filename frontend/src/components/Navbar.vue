@@ -33,7 +33,7 @@
                     <li class="nav-item dropdown mx-lg-4 active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-user">&nbsp;</i>
+                            <i class="fa fa-user mr-1">&nbsp;</i>
                             <span v-if="address">
                                 {{address.slice(0,10) + '...'}}
                             </span>
@@ -41,7 +41,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" style="font-size: 11px"
                              aria-labelledby="navbarDropdown">
-                            <a v-if="address" class="dropdown-item" href="#"><a style="color: black;" v-bind:href="etherscan+'/address/'+address" target="_blank">{{address}} <i class="fa fa-external-link"></i></a></a>
+                            <a v-if="address" class="dropdown-item" href="#"><a style="color: black;" v-bind:href="etherscan+'/address/'+address" target="_blank">{{address}} <i class="fa fa-external-link-alt"></i></a></a>
                             <a v-else class="dropdown-item disabled" href="#">No user AUTHENTICATED</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="login()">MetaMask</a>
                             <a v-if="!isLogged" class="dropdown-item" href="#" v-on:click="manual()">Manually</a>
