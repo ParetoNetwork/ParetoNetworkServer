@@ -72,40 +72,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!--
-                        <div class="mt-2">
-                            <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                            <a v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
-                        </div>
-
-                        <router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">
-                            <div class="row mt-2">
-                                <div class="col-md col-xs mb-2 ellipsis">
-                                    <i class="fa fa-area-chart" style="color: #4e555b; margin: 2px;"></i>
-                                    <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
-                                    <ICountUp
-                                            :startVal="countUp.startVal"
-                                            :endVal="parseFloat(user.rank)"
-                                            :decimals="decimalsLength(user.rank)"
-                                            :duration="randomNumber(3,6)"
-                                            :options="countUp.options"
-                                            @ready="onReady"/>
-                                </div>
-
-                                <div class="col-md col-xs mb-2 ellipsis">
-                                    <i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>
-                                    <ICountUp
-                                            v-if="user.score"
-                                            :startVal="countUp.startVal"
-                                            :endVal="parseFloat(user.score)"
-                                            :decimals="decimalsLength(user.score)"
-                                            :duration="randomNumber(3,6)"
-                                            :options="countUp.options"
-                                            @ready="onReady"/>
-                                    <span v-else> 0 </span>
-                                </div>
-                            </div>
-                        </router-link> -->
                         <div id="address-metrics" class="row"
                              style="word-wrap:break-word; overflow-wrap: break-word; justify-content: center; opacity: 0">
                             <div id="rank-text">You rank:&nbsp;</div>
@@ -134,7 +100,7 @@
                                     <th class="th-header address-header" width="250px">
                                         Address
                                     </th>
-                                    <th style="text-align: right;"><i class="fa fa-external-link-square"></i></th>
+                                    <th style="text-align: right;"><i class="fa fa-external-link-square-alt"></i></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -168,7 +134,7 @@
                                                 {{rank.address}}
                                             </td>
                                             <td><a v-bind:href="etherscan+'/address/'+rank.address" target="_blank"><i
-                                                    class="fa fa-external-link"></i></a></td>
+                                                    class="fa fa-external-link-alt"></i></a></td>
                                         </tr>
                                         </tbody>
                                     </div>

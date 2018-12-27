@@ -37,12 +37,7 @@ export default class dashboardService {
     }
 
     static getContent(params, onSuccess, onError) {
-        let query = '';
-        if (params) {
-            query = '?limit=' + params.limit + '&page=' + params.page + '&user=' + params.user;
-        }
-
-        return http.get('/v1/content/me' + query).then(res => {
+        return http.get('/v1/content/me', {params}).then(res => {
             if (res.data.success) {
                 return onSuccess(res.data.data);
             } else {
@@ -55,7 +50,7 @@ export default class dashboardService {
 
     static getAllContent(params, onSuccess, onError) {
         const {limit, page} = params || {limit: 10, page: 0};
-        let query_params = window.location.hash.split('?');
+        let query_params = window.location.search.split('?');
         let total_query = "";
         if (query_params.length > 0) {
             total_query = "&" + query_params[1];
