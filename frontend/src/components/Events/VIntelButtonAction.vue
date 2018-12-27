@@ -22,7 +22,7 @@
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
            target="_blank">
             <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
-                <i class="fa fa-external-link"></i> SENT
+                <i class="fa fa-external-link-alt"></i> SENT
             </b-btn>
         </a>
     </div>
@@ -96,8 +96,9 @@
             },
             pendingRowTransactions: function (intel) {
                 let transactionPending = false;
-                this.pendingTransactions.forEach(transaction => {
-                    if (intel.id === transaction.intel) {
+
+                this.pendingTransactions.forEach( tx => {
+                    if(tx.status < 3){
                         transactionPending = true;
                     }
                 });

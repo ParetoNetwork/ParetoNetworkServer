@@ -245,9 +245,31 @@ controller.postContent = function (req, callback) {
 };
 
 
-controller.getPendingTransaction = function (address, callback){
-    ParetoTransaction.find({address: address, status: {$lt: 3}}).sort({dateCreated : -1}).exec( callback);
-}
+controller.getTransaction = function (data, callback){
+    const query = {address: data.user};
+    if(data.query.q){
+        switch (data.query.q){
+            case 'complete': {
+                data.status = {$gte: 3};
+                break;
+            }
+            case 'pending': {
+                data.status = {$lt: 3};
+                break;
+            }
+            case 'all': {
+                break;
+            }
+            default:  data.status = {$lt: 3}
+        }
+    }else{
+        data.status = {$lt: 3}
+    }
+    const limit = parseInt(data.query.limit) || 100;
+    const skip = limit * (data.query.page || 0);
+
+    ParetoTransaction.find(query).sort({dateCreated : -1}).skip(skip).limit(limit).exec( callback);
+};
 
 controller.watchTransaction =  function (data, callback){
     if(data.address){
@@ -683,193 +705,245 @@ controller.validateQuery = function(query){
 
 }
 
+
+controller.getQueryContentByUser = function(address, intel,  callback) {
+
+    if(web3.utils.isAddress(address) == false){
+        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+    } else {
+
+
+        //address exclude created title
+        //1. get score from address, then get standard deviation of score
+        controller.retrieveAddress(address, function(err,result) {
+
+            if(err){
+                if(callback && typeof callback === "function") {
+                    callback(err);
+                }
+            } else {
+
+                if(result == null){
+
+                    //this can happen if a new address is found which is not in the system yet. in reality it should be calculated beforehand, or upon initial auth
+
+                    if(callback && typeof callback === "function") { callback(null, [] ); }
+                } else {
+                    //1b. get block height
+                    web3.eth.getBlock('latest')
+                        .then(function(res) {
+                            blockHeight = res.number;
+
+                            //2. get percentile
+
+                            //2a. get total rank where score > 0
+                            ParetoAddress.estimatedDocumentCount({ score : { $gte : 0 }}, async(err, count) => {
+                                var count = count;
+
+                                //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
+                                if(result.rank == null){
+                                    result.rank = count - 1;
+                                }
+
+                                var percentile = 1 - (result.rank / count); //this should be a decimal number
+
+                                var blockDelay = 0;
+
+                                if(percentile > .99) {
+
+                                    //then do multiplication times the rank to determine the block height delta.
+                                    if(result.rank < PARETO_RANK_GRANULARIZED_LIMIT){
+                                        blockDelay = result.rank * 10;
+                                    } else {
+                                        blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 10;
+                                    }
+                                    /*} else { //this would be a dynamic method where var factor = Math.pow(10, -1);
+                                           //would be used with var wholePercentile = percentile * 100;
+                                           //Math.round(wholePercentile * factor) / factor in order to get the percentile
+
+                                    var factor = Math.pow(10, -1);
+                                    var wholePercentile = percentile * 100;
+                                    var roundedToNearestPercentile = Math.round(wholePercentile * factor) / factor;
+                                    //var multiplier = 100 * Math.floor(percentile);
+                                    blockDelay = (100 - roundedToNearestPercentile)) * PARETO_RANK_GRANULARIZED_LIMIT;
+
+                                  }*/
+
+                                } else if (percentile > .90) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 20;
+
+                                } else if (percentile > .80) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 30;
+
+                                } else if (percentile > .70) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 40;
+
+                                } else if (percentile > .60) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 50;
+
+                                } else if (percentile > .50) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 60;
+
+                                } else if (percentile > .40) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 70;
+
+                                } else if (percentile > .30) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 80;
+
+                                } else if (percentile > .20) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 90;
+
+                                } else if (percentile > .10) {
+
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 100;
+
+                                } else {
+                                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
+                                }
+
+                                var blockHeightDelta = blockHeight - blockDelay;
+
+
+                                    return callback(null, { $and:[
+                                            { $or:[
+                                                    {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                    {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                    {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                    {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                    {address : address, $or:[ {validated: true}, {block: { $gt: 0 }}]}
+                                                ]
+                                            } ]
+                                    });
+
+
+                            });
+                        }, function (error) {
+                            callback(error);
+                        }).catch(function (err) {
+                        callback(err);
+                    });//end web3
+
+                }//end else
+
+            }
+        });
+    } // end else for address validation
+
+};
+
 controller.getAllAvailableContent = function(req, callback) {
 
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
-  //check if user, then return what the user is privy to see
+    controller.getQueryContentByUser(req.user, null,async function(error, queryFind){
+        if(error) return callback(error);
+        try{
+            queryFind.$and = queryFind.$and.concat( controller.validateQuery(req.query));
+            const allResults = await ParetoContent.find(queryFind).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
+            let newResults = [];
+            allResults.forEach(function(entry){
+                /*
 
-  //check block number or block age, then retrieve all content after that block. add more limitations/filters later
+                 currently: force use of limit to keep json response smaller.
+                 limit isn't used earlier so that redis knows the full result,
+                 and because the queries for each speed of content are separate
 
-  if(web3.utils.isAddress(req.user) == false){
-    if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
-  } else {
+                 future: server should already have an idea of what content any user can see,
+                 since it knows their latest scores and the current block height. therefore the full content response can be queried at once, perhaps, and pages can be done fictionally
 
+                 */
+                let data = {
+                    _id: entry._id,
+                    blockAgo: Math.max(blockHeight - entry.block, 0),
+                    block: entry.block,
+                    title: entry.title,
+                    address: entry.address,
+                    body: entry.body,
+                    expires: entry.expires,
+                    dateCreated: entry.dateCreated,
+                    txHash: entry.txHash,
+                    totalReward:  entry.totalReward || 0,
+                    reward:  entry.reward,
+                    speed: entry.speed,
+                    id:entry.id,
+                    txHashDistribute: entry.txHashDistribute,
+                    intelAddress: entry.intelAddress,
+                    _v: entry._v,
+                    distributed: entry.distributed,
+                    createdBy: {
+                        address: entry.createdBy.address,
+                        alias: entry.createdBy.alias,
+                        biography: entry.createdBy.biography,
+                        profilePic: entry.createdBy.profilePic
+                    }
+                };
 
-      //address exclude created title
-    //1. get score from address, then get standard deviation of score
-    controller.retrieveAddress(req.user, function(err,result) {
+                newResults.push(data);
+            });
+            //console.log(allResults);
 
-      if(err){
-        if(callback && typeof callback === "function") {
-          callback(err);
+            if(callback && typeof callback === "function") { callback(null, newResults ); }
+
+        } catch (err) {
+            if(callback && typeof callback === "function") { callback(err); }
         }
-      } else {
-
-        if(result == null){
-
-          //this can happen if a new address is found which is not in the system yet. in reality it should be calculated beforehand, or upon initial auth
-
-          if(callback && typeof callback === "function") { callback(null, [] ); }
-        } else {
-          //1b. get block height
-          web3.eth.getBlock('latest')
-            .then(function(res) {
-              blockHeight = res.number;
-
-              //2. get percentile
-
-              //2a. get total rank where score > 0
-              ParetoAddress.estimatedDocumentCount({ score : { $gte : 0 }}, async(err, count) => {
-                var count = count;
-
-                //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
-                if(result.rank == null){
-                  result.rank = count - 1;
-                }
-
-                var percentile = 1 - (result.rank / count); //this should be a decimal number
-
-                var blockDelay = 0;
-
-                if(percentile > .99) {
-
-                  //then do multiplication times the rank to determine the block height delta.
-                  if(result.rank < PARETO_RANK_GRANULARIZED_LIMIT){
-                    blockDelay = result.rank * 10;
-                  } else {
-                    blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 10;
-                  }
-                  /*} else { //this would be a dynamic method where var factor = Math.pow(10, -1);
-                         //would be used with var wholePercentile = percentile * 100;
-                         //Math.round(wholePercentile * factor) / factor in order to get the percentile
-
-                  var factor = Math.pow(10, -1);
-                  var wholePercentile = percentile * 100;
-                  var roundedToNearestPercentile = Math.round(wholePercentile * factor) / factor;
-                  //var multiplier = 100 * Math.floor(percentile);
-                  blockDelay = (100 - roundedToNearestPercentile)) * PARETO_RANK_GRANULARIZED_LIMIT;
-
-                }*/
-
-                } else if (percentile > .90) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 20;
-
-                } else if (percentile > .80) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 30;
-
-                } else if (percentile > .70) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 40;
-
-                } else if (percentile > .60) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 50;
-
-                } else if (percentile > .50) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 60;
-
-                } else if (percentile > .40) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 70;
-
-                } else if (percentile > .30) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 80;
-
-                } else if (percentile > .20) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 90;
-
-                } else if (percentile > .10) {
-
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 100;
-
-                } else {
-                  blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
-                }
-
-                var blockHeightDelta = blockHeight - blockDelay;
-
-                //stop gap solution, more censored content can come down and be manipulated before posting client side
-                var queryAboveCount = ParetoContent.estimatedDocumentCount({block : { $gt : blockHeightDelta}});
-
-                try{
-                    const queryFind = { $and:[
-                            { $or:[
-                                    {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                    {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                    {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                    {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                    {address : req.user, $or:[ {validated: true}, {block: { $gt: 0 }}]}
-                                ]
-                            } ]
-                    };
-                    queryFind.$and = queryFind.$and.concat( controller.validateQuery(req.query));
-                    allResults = await ParetoContent.find(queryFind).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
-                    let newResults = [];
-                    allResults.forEach(function(entry){
-                        /*
-
-                         currently: force use of limit to keep json response smaller.
-                         limit isn't used earlier so that redis knows the full result,
-                         and because the queries for each speed of content are separate
-
-                         future: server should already have an idea of what content any user can see,
-                         since it knows their latest scores and the current block height. therefore the full content response can be queried at once, perhaps, and pages can be done fictionally
-
-                         */
-                            let data = {
-                                _id: entry._id,
-                                blockAgo: Math.max(blockHeight - entry.block, 0),
-                                block: entry.block,
-                                title: entry.title,
-                                address: entry.address,
-                                body: entry.body,
-                                expires: entry.expires,
-                                dateCreated: entry.dateCreated,
-                                txHash: entry.txHash,
-                                totalReward:  entry.totalReward || 0,
-                                reward:  entry.reward,
-                                speed: entry.speed,
-                                id:entry.id,
-                                txHashDistribute: entry.txHashDistribute,
-                                intelAddress: entry.intelAddress,
-                                _v: entry._v,
-                                distributed: entry.distributed,
-                                createdBy: {
-                                    address: entry.createdBy.address,
-                                    alias: entry.createdBy.alias,
-                                    biography: entry.createdBy.biography,
-                                    profilePic: entry.createdBy.profilePic
-                                }
-                            };
-
-                            newResults.push(data);
-                    });
-                  //console.log(allResults);
-
-                  if(callback && typeof callback === "function") { callback(null, newResults ); }
-
-                } catch (err) {
-                  if(callback && typeof callback === "function") { callback(err); }
-                }
-
-              });
-            }, function (error) {
-                callback(error);
-            }).catch(function (err) {
-              callback(err);
-          });//end web3
-
-        }//end else
-
-      }
     });
-  } // end else for address validation
+
+};
+
+controller.getContentByIntel = function(req, intel,  callback){
+    controller.getQueryContentByUser(req.user, intel, async function(error, queryFind){
+        if(error) return callback(error);
+        try{
+            if(mongoose.Types.ObjectId.isValid(intel)) {
+                queryFind.$and = queryFind.$and.concat({_id: mongoose.Types.ObjectId(intel)})
+            }else{
+                queryFind.$and = queryFind.$and.concat({txHash: intel})
+            }
+            const allResults = await ParetoContent.find(queryFind).sort({dateCreated : -1}).populate( 'createdBy' ).exec();
+            if(allResults && allResults.length>0){
+                const entry = allResults[0];
+                return callback(null, {
+                    _id: entry._id,
+                    blockAgo: Math.max(blockHeight - entry.block, 0),
+                    block: entry.block,
+                    title: entry.title,
+                    address: entry.address,
+                    body: entry.body,
+                    expires: entry.expires,
+                    dateCreated: entry.dateCreated,
+                    txHash: entry.txHash,
+                    totalReward:  entry.totalReward || 0,
+                    reward:  entry.reward,
+                    speed: entry.speed,
+                    id:entry.id,
+                    txHashDistribute: entry.txHashDistribute,
+                    intelAddress: entry.intelAddress,
+                    _v: entry._v,
+                    distributed: entry.distributed,
+                    createdBy: {
+                        address: entry.createdBy.address,
+                        alias: entry.createdBy.alias,
+                        biography: entry.createdBy.biography,
+                        profilePic: entry.createdBy.profilePic
+                    }
+                } )
+            } else{
+                callback(null, {})
+            }
+
+        } catch (err) {
+            if(callback && typeof callback === "function") { callback(err); }
+        }
+    });
 
 };
 

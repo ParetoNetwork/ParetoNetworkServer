@@ -28,7 +28,7 @@
                 <router-link tag="div" class="cursor-pointer" :to="leaderboards(profile.address)">
                     <div class="row mt-2">
                         <div class="col-md col-xs mb-2 ellipsis text-left">
-                            <i class="fa fa-area-chart" style="color: #4e555b; margin: 2px;"></i>
+                            <i class="fa fa-chart-area" style="color: #4e555b; margin: 2px;"></i>
                             <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
                             <ICountUp
                                     :startVal="countUp.startVal"
