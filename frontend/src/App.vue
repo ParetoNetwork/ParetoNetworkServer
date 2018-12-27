@@ -17,7 +17,7 @@
                         </div>
                         <div class="offset-1 col-2">
                             <a class="close" @click="props.close">
-                                <i class="fa fa-fw fa-close"></i>
+                                <i class="fa fa-fw fa-window-close"></i>
                             </a>
                         </div>
                     </div>
