@@ -15,6 +15,14 @@ const snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/
 import BootstrapVue from 'bootstrap-vue';
 import 'bootstrap';
 import Environment from './utils/environment';
+import { dom } from '@fortawesome/fontawesome-svg-core';
+
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+dom.watch();
+library.add(fas);
 
 Vue.use(BootstrapVue);
 Vue.config.productionTip = false;
@@ -26,6 +34,7 @@ Vue.use(require('vue-moment'));
 
 
 Vue.use(Meta);
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 const store = new Vuex.Store({
     state: {
