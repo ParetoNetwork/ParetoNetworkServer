@@ -22,7 +22,7 @@
 
                         <div class="media-body flex-column text-left ellipsis">
                             <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address" class="cursor-pointer ellipsis">
-                                <i class="fa fa-user" style="color: #4e555b; margin: 2px;"></i>
+                                <svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>
                                 <span v-if="user.alias" class="name-title"><b>{{user.alias}}<br/></b></span>
                                 <span class="ellipsis">{{user.address}}</span>
                             </router-link>
@@ -58,7 +58,7 @@
 
                             <div class="mb-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link" style="color: #1f69c0;"></i></a>
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>
                             </div>
 
                             <!-- make this upwards of four lines before ellipsis -->

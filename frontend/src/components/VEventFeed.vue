@@ -12,7 +12,7 @@
             </div>
             <div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                 <ul v-if="transactions.length" class="list-group list-unstyled">
-                    <li v-bind:id="tx.txHash" class="list-group-item border-0" v-for="tx in transactions">
+                    <li v-bind:id="tx.txHash" class="list-group-item border-0" v-for="tx in transactions" :key="tx.txHash">
                         <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>
                         <VTransaction v-else :transaction="tx"></VTransaction>
                     </li>
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-    import { mapState, mapActions } from "vuex";
+    import { mapState, mapActions, mapMutations } from "vuex";
     import ContentService from "../services/ContentService";
     import dashboardService from "../services/dashboardService";
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
@@ -89,16 +89,26 @@
                             }
                         }
                     });
-                    if(!wasFound) this.transactions.unshift(item);
+                    if(!wasFound) {
+                        this.transactions.unshift(item)
+                    }
                 });
             },
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+            ...mapMutations(["addDistribute"]),
             //Loads the pendingTransactions state
             getTransactions: function () {
-                let params = {q : 'nd', page: this.page, limit: 10};
+                let params = {q : 'all', page: this.page, limit: 10};
                 return ContentService.getTransactions(params, data => {
+                    data = data.filter(item => {
+                        if(item.event === 'distribute'){
+                            this.addDistribute(item);
+                            return false;
+                        }
+                        return true;
+                    });
                     this.transactions = [...this.transactions, ...data];
                 }, error => {
                     let errorText = error.message ? error.message : error;
