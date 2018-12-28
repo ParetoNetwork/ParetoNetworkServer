@@ -102,10 +102,8 @@
                 if(!this.transaction.clicked) {
                     this.loadingTransaction();
                     this.clicked = true;
-                    console.log(this.transaction);
                     this.$set(this.transaction, 'clicked', true);
-                    console.log(this.transaction.clicked);
-                    console.log(this.transaction.status < 3, !this.clicked);
+
                     this.editTransaction({hash: this.transaction.txHash, key: 'clicked', value: 'true'});
 
                     ContentService.pendingTransactionApproval(

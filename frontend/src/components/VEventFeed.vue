@@ -45,7 +45,7 @@
                 myContent : [],
                 allContent : [],
                 page: 0,
-                limit: 10,
+                limit: 20,
                 isLoadingScroll: false,
                 transactions: [],
                 lastFlashed: ''
@@ -100,7 +100,7 @@
             ...mapMutations(["addDistribute"]),
             //Loads the pendingTransactions state
             getTransactions: function () {
-                let params = {q : 'all', page: this.page, limit: 10};
+                let params = {q : 'all', page: this.page, limit: this.limit};
                 return ContentService.getTransactions(params, data => {
                     data = data.filter(item => {
                         if(item.event === 'distribute'){
@@ -122,7 +122,7 @@
                 });
             },
             loadMyContent: function () {
-                let params = {page: this.page, limit: 10};
+                let params = {page: this.page, limit: this.limit};
                 return dashboardService.getContent(params,
                     res => {
                         this.loadedMyContent = true;
@@ -145,9 +145,14 @@
                     this.getTransactions(),
                     this.loadMyContent()
                 ]).then(values => {
+                    if(this.limit === 20){
+                        this.limit = 10;
+                        this.page += 2;
+                    }else{
+                        this.page += 1;
+                    }
                     this.$store.state.makingRequest = false;
                     this.isLoadingScroll = false;
-                    this.page += 1;
 
                     this.transactions.forEach( tx => {
                         if((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2){
