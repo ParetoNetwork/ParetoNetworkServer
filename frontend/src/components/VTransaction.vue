@@ -4,7 +4,9 @@
             <div class="col-12 col-lg-7 p-0">
                 <h1 class="title" v-line-clamp="2">{{transactionStatus(transaction.status)}}
                     <span v-bind:id="transaction.txHash + '-span'"> </span>
-                    <i v-if="transaction.status < 3 && !transaction.clicked" class="fa fa-exclamation-circle" style="color: red"></i>
+                    <span v-show="transaction.status < 3 && !clicked">
+                        <i  class="fa fa-exclamation-circle" style="color: red"></i>
+                    </span>
                 </h1>
             </div>
             <div class="col-12 col-lg-5 p-0">
@@ -25,7 +27,7 @@
                 <a style="color: #000;"
                    :href="etherscanUrl + '/tx/' + (transaction.txRewardHash || transaction.txHash)"
                    target="_blank">
-                    <i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                    <i class="fa fa-calendar" style="color: #000;"></i>&nbsp;
                     <span class="text-dashboard">
                         <b>{{ dateStringFormat(transaction.dateCreated)| moment("from", "now") }}</b>
                     </span>
@@ -61,7 +63,8 @@
         data: function () {
             return {
                 etherscanUrl: window.localStorage.getItem('etherscan'),
-                loadingEffect: {}
+                loadingEffect: {},
+                clicked: false
             }
         },
         filters: {
@@ -77,6 +80,7 @@
         },
         mounted : function(){
             let newId = this.transaction.txHash + '-span';
+            this.clicked = this.transaction.clicked;
             this.loadingEffect = document.getElementById(newId);
             this.loadingTransaction();
 
@@ -97,8 +101,11 @@
 
                 if(!this.transaction.clicked) {
                     this.loadingTransaction();
-
+                    this.clicked = true;
+                    console.log(this.transaction);
                     this.$set(this.transaction, 'clicked', true);
+                    console.log(this.transaction.clicked);
+                    console.log(this.transaction.status < 3, !this.clicked);
                     this.editTransaction({hash: this.transaction.txHash, key: 'clicked', value: 'true'});
 
                     ContentService.pendingTransactionApproval(

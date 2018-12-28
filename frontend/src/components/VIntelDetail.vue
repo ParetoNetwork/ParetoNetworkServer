@@ -45,7 +45,7 @@
 
                                 <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
                                     <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                                       target="_blank"><i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                                       target="_blank"><i class="fa fa-calendar" style="color: #000;"></i>&nbsp;
                                         <span class="text-dashboard"><b><!-- {{dateStringFormat(intel.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
                                 </div>
 

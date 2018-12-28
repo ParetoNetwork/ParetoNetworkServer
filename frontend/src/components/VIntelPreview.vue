@@ -15,8 +15,7 @@
                     class="cursor-pointer p-0"
                     v-bind:class="{ 'col-9 col-lg-6' : !eventRow , 'col-12 col-lg-7': eventRow }">
                 <h1 class="title" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
-                <p class="text-dashboard ellipsis">Disclosed by: {{intel.createdBy.alias ? intel.createdBy.alias :
-                    intel.createdBy.address}} </p>
+                <p class="text-dashboard ellipsis">Disclosed by: {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}} </p>
                 <p v-if="!intel.validated && eventRow"> Pending Blockchain Confirmation</p>
                 <p>{{intel.dateCreated | dateFilter}}</p>
             </router-link>
@@ -29,7 +28,7 @@
         <div class="row border-bottom">
             <div class="col-md col-xs ellipsis text-left">
                 <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
-                    <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
+                    <font-awesome-icon class="ml-2 mr-1" icon="th" />
                     <ICountUp
                             :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
                             :endVal="parseFloat(intel.blockAgo)"
@@ -41,7 +40,7 @@
             </div>
             <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
                 <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash" target="_blank">
-                    <i class="fa fa-calendar-o" style="color: #000;"></i>&nbsp;
+                    <font-awesome-icon class="ml-2 mr-1" :icon="['fas', 'calendar']" />&nbsp
                     <span class="text-dashboard">
                         <b>{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
                         </b></span></a>
@@ -81,9 +80,6 @@
                 baseURL: environment.baseURL,
                 etherscanUrl: window.localStorage.getItem('etherscan'),
             }
-        },
-        mounted: function () {
-
         },
         filters: {
             dateFilter: function formatDate(date) {

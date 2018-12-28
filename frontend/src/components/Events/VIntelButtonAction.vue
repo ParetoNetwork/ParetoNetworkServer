@@ -23,7 +23,7 @@
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
            target="_blank">
             <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
-                <i class="fa fa-external-link"></i> SENT
+                <i class="fa fa-external-link-alt"></i> SENT
             </b-btn>
         </a>
     </div>
@@ -62,8 +62,6 @@
                    return distribute.intel === this.intel.id;
                 });
 
-                console.log("foundIntel");
-                console.log(foundIntel);
                 if(foundIntel) {
                     this.$notify({
                         group: 'notification',
