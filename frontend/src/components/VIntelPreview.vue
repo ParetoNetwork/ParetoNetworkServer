@@ -67,7 +67,7 @@
 
     export default {
         name: "VIntelPreview",
-        props : [
+        props: [
             'user', 'intel', 'eventRow'
         ],
         mixins: [countUpMixin],
@@ -75,10 +75,10 @@
             ICountUp,
             VIntelButtonAction,
         },
-        data : function () {
+        data: function () {
             return {
                 baseURL: environment.baseURL,
-                etherscanUrl: window.localStorage.getItem('etherscan') ,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
             }
         },
         filters: {
@@ -87,7 +87,7 @@
                 return temp.format("MMMM Do, YYYY");
             }
         },
-        methods : {
+        methods: {
             dateStringFormat(date) {
                 return new Date(date);
             },

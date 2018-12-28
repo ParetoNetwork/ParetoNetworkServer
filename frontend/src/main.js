@@ -52,6 +52,7 @@ const store = new Vuex.Store({
         pathId: (window.localStorage.getItem('pathId')) || '',
         ws: null,
         pendingTransactions: [],
+        currentDistributes: [],
         intelReward : {},
         myTokens : 0
     },
@@ -115,11 +116,20 @@ const store = new Vuex.Store({
                   }
                   return item;
             });
-        },
-        openModalReward(state, open){
+        }, addDistribute(state, item) {
+            state.currentDistributes.unshift(item);
+        }, editDistribute(state, {hash, key, value}){
+            state.currentDistributes = state.currentDistributes.map(item => {
+                if(item.txHash === hash){
+                    item[key] = value;
+                }
+                return item;
+            });
+        }, deleteDistribute(state, intelId) {
+            state.currentDistributes = state.currentDistributes.filter(item => item.intel !== intelId);
+        }, openModalReward(state, open){
             state.showModalReward = open;
-        },
-        deleteTransaction(state, txHash) {
+        }, deleteTransaction(state, txHash) {
             state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
         }
     },

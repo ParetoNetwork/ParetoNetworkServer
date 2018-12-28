@@ -246,15 +246,20 @@ controller.postContent = function (req, callback) {
 
 
 controller.getTransaction = function (data, callback){
-    const query = {address: data.user};
+    const query = { address: data.user };
+
     if(data.query.q){
         switch (data.query.q){
             case 'complete': {
-                data.status = {$gte: 3};
+                query.status = {$gte: 3};
                 break;
             }
             case 'pending': {
-                data.status = {$lt: 3};
+                query.status = {$lt: 3};
+                break;
+            }
+            case 'nd' : {
+                query.event = { $nin: [ 'distribute' ]};
                 break;
             }
             case 'all': {
@@ -262,9 +267,8 @@ controller.getTransaction = function (data, callback){
             }
             default:  data.status = {$lt: 3}
         }
-    }else{
-        data.status = {$lt: 3}
     }
+
     const limit = parseInt(data.query.limit) || 100;
     const skip = limit * (data.query.page || 0);
 
@@ -279,6 +283,7 @@ controller.watchTransaction =  function (data, callback){
     var dbQuery = {
         txHash: data.txHash
     };
+
     if (data.txRewardHash){
         data.status = 2;
     }
@@ -451,7 +456,7 @@ controller.startWatchApprove=function (){
  */
 controller.startwatchIntel = function(){
     controller.startwatchNewIntel()
-    ParetoContent.find({ 'expires':{ $gt : Math.round(new Date().getTime() / 1000)}, 'validated': true }).distinct('intelAddress').exec(function(err, results) {
+    ParetoContent.find({  'validated': true }).distinct('intelAddress').exec(function(err, results) {
         if (err) {
             callback(err);
         }
