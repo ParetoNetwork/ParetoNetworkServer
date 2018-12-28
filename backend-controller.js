@@ -536,7 +536,9 @@ controller.SendInfoWebsocket = function (data ){
                     if(client.user && client.user.user==data.address){
                         controller.retrieveAddress(client.user.user, function (err, result) {
                             if (!err) {
-                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                if (client.readyState === WebSocket.OPEN ) {
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                }
                             }
                         });
 
@@ -557,7 +559,9 @@ controller.SendInfoWebsocket = function (data ){
                              */
                             controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                                 if (!err) {
-                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                                    if (client.readyState === WebSocket.OPEN ) {
+                                        client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                    }
                                 }
                             });
                         }
