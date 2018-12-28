@@ -723,7 +723,7 @@ app.initializeWebSocket = function(server){
     /**
      * Validates if the connection is alive and sends info each minute,
      */
-    cron.schedule("* * * * *", function() {
+    cron.schedule("*/30 * * * * *", function() {
         try{
             wss.clients.forEach(function each(client) {
                 if (client.isAlive === false) return client.terminate();
@@ -746,13 +746,17 @@ app.initializeWebSocket = function(server){
                          */
                         controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                             if (!err) {
-                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)) );
+                                if (client.readyState === WebSocket.OPEN ) {
+                                    (client.sendJSON.stringify(ErrorHandler.getSuccess(result)));
+                                }
                             }
                         });
 
                         controller.retrieveAddress(client.user.user, function (err, result) {
                             if (!err) {
-                                client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                if (client.readyState === WebSocket.OPEN ) {
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                }
                             }
                         });
 
