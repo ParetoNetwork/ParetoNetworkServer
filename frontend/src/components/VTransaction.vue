@@ -4,7 +4,9 @@
             <div class="col-12 col-lg-7 p-0">
                 <h1 class="title" v-line-clamp="2">{{transactionStatus(transaction.status)}}
                     <span v-bind:id="transaction.txHash + '-span'"> </span>
-                    <i v-if="transaction.status < 3 && !transaction.clicked" class="fa fa-exclamation-circle" style="color: red"></i>
+                    <span v-show="transaction.status < 3 && !clicked">
+                        <i  class="fa fa-exclamation-circle" style="color: red"></i>
+                    </span>
                 </h1>
             </div>
             <div class="col-12 col-lg-5 p-0">
@@ -61,7 +63,8 @@
         data: function () {
             return {
                 etherscanUrl: window.localStorage.getItem('etherscan'),
-                loadingEffect: {}
+                loadingEffect: {},
+                clicked: false
             }
         },
         filters: {
@@ -77,8 +80,10 @@
         },
         mounted : function(){
             let newId = this.transaction.txHash + '-span';
+            this.clicked = this.transaction.clicked;
             this.loadingEffect = document.getElementById(newId);
             this.loadingTransaction();
+
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
@@ -96,8 +101,9 @@
 
                 if(!this.transaction.clicked) {
                     this.loadingTransaction();
-
+                    this.clicked = true;
                     this.$set(this.transaction, 'clicked', true);
+
                     this.editTransaction({hash: this.transaction.txHash, key: 'clicked', value: 'true'});
 
                     ContentService.pendingTransactionApproval(

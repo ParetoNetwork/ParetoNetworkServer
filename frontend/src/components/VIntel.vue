@@ -12,7 +12,7 @@
                                      v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic, user.address)}"
                                      style="width: 100px; height: 100px;">
                                     <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i
-                                            class="fa fa-pencil"
+                                            class="fa fa-pencil-alt"
                                             aria-hidden="true"></i></span>
                                     </div>
                                 </div>
