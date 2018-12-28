@@ -14,6 +14,7 @@
                     signType != 'Manual' &&
                     intel.expires < Math.round(new Date().getTime() / 1000) &&
                     !intel.distributed"
+                :disabled="clickedCollect"
                 class="btn-primary-pareto mx-auto px-4"
                 @click="distribute(intel)">
             COLLECT
@@ -29,7 +30,7 @@
 </template>
 
 <script>
-    import {mapMutations, mapState, mapActions} from "vuex";
+    import {mapMutations, mapState} from "vuex";
     import ContentService from "../../services/ContentService";
     import VModalReward from "../Modals/VModalReward";
 
@@ -43,29 +44,42 @@
         },
         data: function () {
             return {
+                clickedCollect: false,
                 etherscanUrl: window.localStorage.getItem('etherscan')
             };
         },
         computed: {
-            ...mapState(["ws", "signType", "pendingTransactions"])
+            ...mapState(["ws", "signType", "pendingTransactions", "currentDistributes"])
         },
         mounted: function () {
         },
         methods: {
-            ...mapMutations(["openModalReward", "addReward"]),
-            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
+            ...mapMutations(["openModalReward", "addReward", "addDistribute", "deleteDistribute"]),
             distribute: function (intel) {
+                this.clickedCollect = true;
+
+                let foundIntel = this.currentDistributes.find( distribute => {
+                   return distribute.intel === this.intel.id;
+                });
+
+                if(foundIntel) {
+                    this.$notify({
+                        group: 'notification',
+                        type: 'warning',
+                        duration: 10000,
+                        text: "The Intel was already Collected"
+                    });
+                    return;
+                }
+
                 ContentService.distributeRewards(
                     {ID: intel.id, intelAddress: intel.intelAddress},
                     {signType: this.signType, pathId: this.pathId},
                     {
-                        addTransaction: this.addTransaction,
-                        transactionComplete: this.transactionComplete,
-                        editTransaction: this.editTransaction,
-                        toastTransaction: this.$notify
+                        addDistribute: this.addDistribute
                     },
                     res => {
-                        this.modalWaiting = false;
+                        this.intel.distributed = true;
                         this.$notify({
                             group: 'notification',
                             type: 'success',
@@ -75,7 +89,10 @@
                         });
                     },
                     err => {
-                        this.modalWaiting = false;
+                        console.log(intel.id);
+                        console.log(this.currentDistributes);
+                        this.deleteDistribute(intel.id);
+                        this.clickedCollect = false;
                         this.$notify({
                             group: 'notification',
                             type: 'error',
@@ -86,7 +103,6 @@
                 );
             },
             openRewardModal: function () {
-                //console.log(this.intel, this.user.tokens);
                 let params = {
                     intel: this.intel,
                     tokens: this.user.tokens
@@ -98,7 +114,7 @@
                 let transactionPending = false;
 
                 this.pendingTransactions.forEach( tx => {
-                    if(tx.status < 3){
+                    if(tx.status < 3 && tx.event === 'reward'){
                         transactionPending = true;
                     }
                 });
