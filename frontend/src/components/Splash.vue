@@ -78,12 +78,12 @@
                 <a href="https://www.linkedin.com/company/11252108/" class="app-icon linkedin" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
                 <a href="https://github.com/ParetoNetwork" class="app-icon git" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
                  -->
-                <a href="https://blog.pareto.network/" class="app-icon medium" target="_blank"><i class="fa fa-medium"
+                <a href="https://blog.pareto.network/" class="app-icon medium" target="_blank"><i class="fab fa-medium-m"
                                                                                                   aria-hidden="true"></i></a>
                 <a href="https://twitter.com/ParetoNetwork" class="app-icon twitter" target="_blank"><i
-                        class="fa fa-twitter" aria-hidden="true"></i></a>
+                        class="fab fa-twitter" aria-hidden="true"></i></a>
                 <a href="https://www.youtube.com/channel/UCWbAwsAEmNksqhhDlgBaSQA" class="app-icon youtube"
-                   target="_blank"><i class="fa fa-youtube" aria-hidden="true"></i></a>
+                   target="_blank"><i class="fab fa-youtube" aria-hidden="true"></i></a>
 
 
             </div>
