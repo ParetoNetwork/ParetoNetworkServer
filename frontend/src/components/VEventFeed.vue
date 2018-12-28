@@ -12,7 +12,7 @@
             </div>
             <div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
                 <ul v-if="transactions.length" class="list-group list-unstyled">
-                    <li v-bind:id="tx.txHash" class="list-group-item border-0" v-for="tx in transactions">
+                    <li v-bind:id="tx.txHash" class="list-group-item border-0" v-for="tx in transactions" :key="tx.txHash">
                         <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>
                         <VTransaction v-else :transaction="tx"></VTransaction>
                     </li>
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-    import { mapState, mapActions } from "vuex";
+    import { mapState, mapActions, mapMutations } from "vuex";
     import ContentService from "../services/ContentService";
     import dashboardService from "../services/dashboardService";
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
@@ -45,7 +45,7 @@
                 myContent : [],
                 allContent : [],
                 page: 0,
-                limit: 10,
+                limit: 20,
                 isLoadingScroll: false,
                 transactions: [],
                 lastFlashed: ''
@@ -76,7 +76,7 @@
         },
         watch: {
             'pendingTransactions': function (newTransactions) {
-                newTransactions.forEach( item => {
+                newTransactions.forEach( (item, index) => {
                     let wasFound = false;
                     this.transactions.forEach( tx => {
                         if(tx.txHash === item.txHash){
@@ -84,21 +84,31 @@
                             if(item.status >= tx.status) {
                                 this.$set(tx, 'status', item.status);
                             }
-                            if(item.status === 3 && item.event === 'create' && item.txHash != this.lastFlashed){
+                            if(item.status === 3 && item.event === 'create' && !tx.intelInfo){
                                 this.updateCreateEvent(tx);
                             }
                         }
                     });
-                    if(!wasFound) this.transactions.unshift(item);
+                    if(!wasFound) {
+                        this.transactions.unshift(item)
+                    }
                 });
             },
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+            ...mapMutations(["addDistribute"]),
             //Loads the pendingTransactions state
             getTransactions: function () {
-                let params = {q : 'all', page: this.page, limit: 10};
+                let params = {q : 'all', page: this.page, limit: this.limit};
                 return ContentService.getTransactions(params, data => {
+                    data = data.filter(item => {
+                        if(item.event === 'distribute'){
+                            this.addDistribute(item);
+                            return false;
+                        }
+                        return true;
+                    });
                     this.transactions = [...this.transactions, ...data];
                 }, error => {
                     let errorText = error.message ? error.message : error;
@@ -112,7 +122,7 @@
                 });
             },
             loadMyContent: function () {
-                let params = {page: this.page, limit: 10};
+                let params = {page: this.page, limit: this.limit};
                 return dashboardService.getContent(params,
                     res => {
                         this.loadedMyContent = true;
@@ -135,12 +145,17 @@
                     this.getTransactions(),
                     this.loadMyContent()
                 ]).then(values => {
+                    if(this.limit === 20){
+                        this.limit = 10;
+                        this.page += 2;
+                    }else{
+                        this.page += 1;
+                    }
                     this.$store.state.makingRequest = false;
                     this.isLoadingScroll = false;
-                    this.page += 1;
 
                     this.transactions.forEach( tx => {
-                        if(tx.event === 'create' && tx.status > 2){
+                        if((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2){
                             this.myContent.forEach( item => {
                                 if(item.id == tx.intel){
                                     this.$set(tx, 'intelInfo', item);

@@ -440,7 +440,6 @@ app.post('/v1/transaction', function (req, res) {
         res.status(200).json(ErrorHandler.bodyMissingError());
     }  else {
         //needs to check address whitelist against the authorized address, if people figure out the post body format.
-
         controller.watchTransaction(req.body, function (err, obj) {
             if (err) {
                 res.status(200).json(ErrorHandler.getError(err));
@@ -747,7 +746,7 @@ app.initializeWebSocket = function(server){
                         controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                             if (!err) {
                                 if (client.readyState === WebSocket.OPEN ) {
-                                    (client.sendJSON.stringify(ErrorHandler.getSuccess(result)));
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
                         });
