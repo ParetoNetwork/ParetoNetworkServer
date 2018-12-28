@@ -89,6 +89,8 @@
                         });
                     },
                     err => {
+                        console.log(intel.id);
+                        console.log(this.currentDistributes);
                         this.deleteDistribute(intel.id);
                         this.clickedCollect = false;
                         this.$notify({
@@ -101,7 +103,6 @@
                 );
             },
             openRewardModal: function () {
-
                 let params = {
                     intel: this.intel,
                     tokens: this.user.tokens

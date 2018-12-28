@@ -126,7 +126,7 @@ const store = new Vuex.Store({
                 return item;
             });
         }, deleteDistribute(state, intelId) {
-            state.currentDistributes = state.currentDistributes.filter(item => item.txHash !== intelId);
+            state.currentDistributes = state.currentDistributes.filter(item => item.intel !== intelId);
         }, openModalReward(state, open){
             state.showModalReward = open;
         }, deleteTransaction(state, txHash) {
