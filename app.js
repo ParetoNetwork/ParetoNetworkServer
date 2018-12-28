@@ -747,7 +747,7 @@ app.initializeWebSocket = function(server){
                         controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                             if (!err) {
                                 if (client.readyState === WebSocket.OPEN ) {
-                                    (client.sendJSON.stringify(ErrorHandler.getSuccess(result)));
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
                         });

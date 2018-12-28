@@ -814,18 +814,22 @@ controller.getQueryContentByUser = function(address, intel,  callback) {
                                 }
 
                                 var blockHeightDelta = blockHeight - blockDelay;
+                                var returnQuery = { $and:[
+                                        { $or:[
+                                                {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
+                                                {address : address, $or:[ {validated: true}, {block: { $gt: 0 }}]}
+                                            ]
+                                        } ]
+                                };
+                                const threshold = result.threshold || (1-percentile);
+                                if(threshold>=0.15){
+                                    returnQuery.$and.push({expires: {$lte : (new Date()).getTime()+86400}, validated: true});
+                                }
 
-
-                                    return callback(null, { $and:[
-                                            { $or:[
-                                                    {block : { $lte : blockHeightDelta*1 }, speed : 1,$or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                                    {block : { $lte : blockHeightDelta*50 }, speed : 2, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                                    {block : { $lte : blockHeightDelta*100 }, speed : 3, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                                    {block : { $lte : blockHeightDelta*150 }, speed : 4, $or:[ {validated: true}, {block: { $gt: 0 }}]},
-                                                    {address : address, $or:[ {validated: true}, {block: { $gt: 0 }}]}
-                                                ]
-                                            } ]
-                                    });
+                                    return callback(null, returnQuery);
 
 
                             });

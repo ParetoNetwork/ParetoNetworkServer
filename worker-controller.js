@@ -1037,6 +1037,7 @@ workerController.getScoreAndSaveRedis = function(callback){
 
                     data.lscore = (lscore > 0 && lscore > min_delta)? '+':((lscore < 0)? '-': '=');
                 }
+                data.threshold = (parseFloat(data.rank)/parseFloat(maxRank)).toFixed(2);
                 multi.hmset(data.rank+ "",  data);
                 const rank = { rank: data.rank + ""};
                 multi.hmset("address"+data.address+ "", rank );
