@@ -16,6 +16,10 @@
   background-color: $dark-pareto;
 }
 
+.pareto-blue-dark {
+  background-color: $dark-blue-pareto;
+}
+
 body {
   height: 100%;
   width: 100%;
@@ -96,6 +100,8 @@ body {
   text-overflow: ellipsis;
   border: 1px solid #000000;
 }
+
+
 //
 //.popover {
 //  display: none;

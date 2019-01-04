@@ -1,110 +1,115 @@
 <template>
-    <div class="pareto-bg-dark">
+    <div class="pareto-blue-dark">
         <notifications group="auth" position="bottom right"/>
-        <div class="container main  wrapp pb-5"
+        <div class="container main wrapp pb-5"
              style="min-height: 100vh;">
-            <div class="row mt-5 p-1 text-left">
-                <div class="col-md-5 font-body">
-                    <div class="flex-row">
-                        <form id="intel"
-                              style="margin: 5px;"
-                              v-on:submit.prevent
-                              @submit="validateContent">
-                            <div class="group">
-                                <label class="pareto-label"><b>Authorized Contributor</b></label>
-                                <input class="lookup-input"
-                                       type="text"
-                                       name="address" readonly v-model="blockChainAddress">
-                                <span class="highlight"></span>
-                                <span class="bar"></span>
-                            </div>
-
-                            <div class="group my-4">
-                                <label class="pareto-label"><b>Title</b> <span style="color: red">*</span> </label>
-                                <input id="intel-title-input"
-                                       type="text" class="lookup-input"
-                                       name="intel-title" v-model="title">
-                                <span class="highlight"></span>
-                                <span class="bar"></span>
-                                <label v-if="formError.title === false" class="pareto-label" style="color: red">
-                                    Required Field </label>
-                            </div>
-
-                            <textarea id="intel-body-input"
-                                      name="editordata"
-                                      v-model="body"
-                            ></textarea>
-                            <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required
-                                Field </label>
-
-                            <div class="d-flex justify-content-center">
-                                <input v-if="intel.state ==='empty'"
-                                       class="button bg-white pareto-text-blue mt-2"
-                                       style="width:100px; height: 35px; line-height: 32px;"
-                                       type="submit"
-                                       form="intel"
-                                       value="Submit">
-                            </div>
-                            <div class="d-flex justify-content-center">
-                                <label class="pareto-label"> {{intel.text}}
-                                    <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
-                                </label>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="col-md-6 font-body text-left"
-                     style="color: #fff; min-height: 80vh;">
-                    <label class="pareto-label"><b>Intel Content Preview</b></label>
-
-                    <div id="preview"
-                         style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
-                        <p v-html="body"></p>
-                    </div>
-
-                </div>
-            </div>
-            <div>
-                <b-modal
-                        v-model="modalToken"
-                        centered
-                        hide-header
-                        hide-footer
-                        @hide="hideModal"
-                        :body-bg-variant="'dark'"
-                        :body-text-variant="'light'">
-
-                    <b-container fluid>
-                        <h4 class="font-body mb-3"> Pareto Amount</h4>
-                        <div v-if="this.signType==='LedgerNano'" class="text-left">
-                            <p> Before use Ledger Nano S, verify the next items: </p>
-                            <div class="m-2 ml-4">
-                                <ul>
-                                    <li> The Browser must be Google Chrome</li>
-                                    <li> Plugged-in their Ledger Wallet Nano S</li>
-                                    <li> Input digits pin</li>
-                                    <li> Navigated to the Ethereum app on their device</li>
-                                    <li> Enabled 'browser' support from the Ethereum app settings</li>
-                                </ul>
-                            </div>
-                            <br/>
+            <form id="intel"
+                  style="margin: 5px;"
+                  v-on:submit.prevent
+                  @submit="validateContent">
+                <div class="mt-5 p-1 text-left">
+                    <div class="row mb-md-3">
+                        <div class="col-12 p-1">
+                            <label class="pareto-label"><b>NEW INTEL</b></label>
                         </div>
-                        <p class="text-dashboard mb-2" style="font-size: 16px"> You need to deposit Pareto tokens to
-                            create Intel. Please input the amount to deposit</p>
+                        <div class="col-md-5 col-lg-4 p-1 mb-2">
+                            <p class="create-input"> {{blockChainAddress}} </p>
+                        </div>
+                        <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
+                            <input type="number" class="create-input" step="0.0001" required>
+                            <span class="floating-label">Pareto Amount</span>
+                        </div>
+                    </div>
+                    <div class="row  mt-2">
+                        <div v-if="!isPreview" class="col-10 font-body p-1 mt-4 mt-md-1">
+                            <div class="flex-row create-intel-container">
+                                <div class="group create-input-space">
+                                    <input id="intel-title-input"
+                                           type="text" class="create-input create-content-text"
+                                           name="intel-title" v-model="title" required>
+                                    <span  class="floating-label create-content-text"><b>Title</b> <span style="color: red">*</span> </span>
+                                    <label v-if="formError.title === false" class="pareto-label" style="color: red">
+                                        Required Field </label>
 
-                        <b-form-input v-model="tokens"
-                                      type="number"></b-form-input>
-                        <b-row class="m-2 mt-4 d-flex justify-content-center">
-                            <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                            <b-button style="background-color: rgb(107, 194, 123)"
-                                      :disabled="!hardwareAvailable || parseFloat(tokens)<=0 || parseFloat(tokens) > parseFloat(maxTokens)"
-                                      variant="success" @click="createIntel()"> Confirm
-                            </b-button>
-                        </b-row>
-                    </b-container>
-                </b-modal>
-            </div>
+                                </div>
+
+                                <textarea id="intel-body-input"
+                                          name="editordata"
+                                          v-model="body"
+                                ></textarea>
+                                <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required
+                                    Field </label>
+
+                                <div class="d-flex justify-content-center">
+                                    <input v-if="intel.state ==='empty'"
+                                           class="button bg-white pareto-text-blue mt-2"
+                                           style="width:100px; height: 35px; line-height: 32px;"
+                                           type="submit"
+                                           form="intel"
+                                           value="Submit">
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <label class="pareto-label"> {{intel.text}}
+                                        <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="isPreview" class="col-12 font-body text-left"
+                             style="color: #fff; min-height: 80vh;">
+                            <label class="pareto-label"><b>Intel Content Preview</b></label>
+                            <div id="preview"
+                                 style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
+                                <p v-html="body"></p>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <button> SUBMIT</button>
+                            <button> PREVIEW</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <b-modal
+                            v-model="modalToken"
+                            centered
+                            hide-header
+                            hide-footer
+                            @hide="hideModal"
+                            :body-bg-variant="'dark'"
+                            :body-text-variant="'light'">
+
+                        <b-container fluid>
+                            <h4 class="font-body mb-3"> Pareto Amount</h4>
+                            <div v-if="this.signType==='LedgerNano'" class="text-left">
+                                <p> Before use Ledger Nano S, verify the next items: </p>
+                                <div class="m-2 ml-4">
+                                    <ul>
+                                        <li> The Browser must be Google Chrome</li>
+                                        <li> Plugged-in their Ledger Wallet Nano S</li>
+                                        <li> Input digits pin</li>
+                                        <li> Navigated to the Ethereum app on their device</li>
+                                        <li> Enabled 'browser' support from the Ethereum app settings</li>
+                                    </ul>
+                                </div>
+                                <br/>
+                            </div>
+                            <p class="text-dashboard mb-2" style="font-size: 16px"> You need to deposit Pareto tokens to
+                                create Intel. Please input the amount to deposit</p>
+
+                            <b-form-input v-model="tokens"
+                                          type="number"></b-form-input>
+                            <b-row class="m-2 mt-4 d-flex justify-content-center">
+                                <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
+                                <b-button style="background-color: rgb(107, 194, 123)"
+                                          :disabled="!hardwareAvailable || parseFloat(tokens)<=0 || parseFloat(tokens) > parseFloat(maxTokens)"
+                                          variant="success" @click="createIntel()"> Confirm
+                                </b-button>
+                            </b-row>
+                        </b-container>
+                    </b-modal>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -147,7 +152,8 @@
                 },
                 modalToken: false,
                 modalWaiting: false,
-                modalCloseWarning: false
+                modalCloseWarning: false,
+                isPreview: false
             };
         },
         updated: function () {
@@ -340,11 +346,18 @@
                 }
             }
         }
-
     };
 </script>
 
 <style>
+    input:focus ~ .floating-label,
+    input:not(:focus):valid ~ .floating-label{
+        top: -25px;
+        bottom: 10px;
+        left: 5px;
+        font-size: 16px;
+    }
+
     textarea a {
         text-decoration: underline;
         color: blue;
@@ -372,6 +385,49 @@
         }
     }
 
+    .create-input-space {
+        position: relative;
+    }
+
+    .create-input {
+        padding: 10px;
+        border-radius: 3px;
+        border: 0px;
+        background-color: #3f7989;
+        color: white;
+        width: 100%;
+    }
+
+    .create-intel-container {
+         border-radius: 3px;
+         border: 0px;
+         background-color: #3f7989;
+     }
+
+    .create-content-text {
+        font-size: 18px !important;
+    }
+
+    .note-editable {
+         background: #3f7989!important;
+         color: white !important;
+         padding: 0px !important;
+         padding-top: 20px !important;
+     }
+
+    .note-editor.note-frame.panel {
+        padding: 10px;
+        border: none;
+    }
+
+    .note-toolbar.panel-heading {
+        padding: 0px;
+    }
+
+    .note-editing-area {
+        margin-top: 2px;
+    }
+
     .pareto-label {
         color: #ffffff;
         font-size: 18px;
@@ -390,5 +446,15 @@
         background-color: #040f1e;
         border-bottom: 1px solid #757575;
         color: white;
+    }
+
+    .floating-label {
+        color: white;
+        position: absolute;
+        pointer-events: none;
+        left: 10px;
+        top: 10px;
+        transition: 0.2s ease all;
+        font-size: 14px;
     }
 </style>
