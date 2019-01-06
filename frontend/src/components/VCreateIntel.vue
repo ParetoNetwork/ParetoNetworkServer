@@ -3,113 +3,124 @@
         <notifications group="auth" position="bottom right"/>
         <div class="container main wrapp pb-5"
              style="min-height: 100vh;">
-            <form id="intel"
-                  style="margin: 5px;"
-                  v-on:submit.prevent
-                  @submit="validateContent">
-                <div class="mt-5 p-1 text-left">
-                    <div class="row mb-md-3">
-                        <div class="col-12 p-1">
-                            <label class="pareto-label"><b>NEW INTEL</b></label>
-                        </div>
-                        <div class="col-md-5 col-lg-4 p-1 mb-2">
-                            <p class="create-input"> {{blockChainAddress}} </p>
-                        </div>
-                        <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
-                            <input type="number" class="create-input" step="0.0001" required>
-                            <span class="floating-label">Pareto Amount</span>
-                        </div>
+            <div class="mt-5 p-1 text-left">
+                <div class="row mb-md-4">
+                    <div class="col-12 p-1">
+                        <label class="pareto-label" style="padding-left: 10px"><b>NEW INTEL</b></label>
                     </div>
-                    <div class="row  mt-2">
-                        <div v-if="!isPreview" class="col-10 font-body p-1 mt-4 mt-md-1">
-                            <div class="flex-row create-intel-container">
-                                <div class="group create-input-space">
-                                    <input id="intel-title-input"
-                                           type="text" class="create-input create-content-text"
-                                           name="intel-title" v-model="title" required>
-                                    <span  class="floating-label create-content-text"><b>Title</b> <span style="color: red">*</span> </span>
-                                    <label v-if="formError.title === false" class="pareto-label" style="color: red">
-                                        Required Field </label>
-
-                                </div>
-
-                                <textarea id="intel-body-input"
-                                          name="editordata"
-                                          v-model="body"
-                                ></textarea>
-                                <label v-if="formError.body === false" class="pareto-label" style="color: red"> Required
-                                    Field </label>
-
-                                <div class="d-flex justify-content-center">
-                                    <input v-if="intel.state ==='empty'"
-                                           class="button bg-white pareto-text-blue mt-2"
-                                           style="width:100px; height: 35px; line-height: 32px;"
-                                           type="submit"
-                                           form="intel"
-                                           value="Submit">
-                                </div>
-                                <div class="d-flex justify-content-center">
-                                    <label class="pareto-label"> {{intel.text}}
-                                        <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-if="isPreview" class="col-12 font-body text-left"
-                             style="color: #fff; min-height: 80vh;">
-                            <label class="pareto-label"><b>Intel Content Preview</b></label>
-                            <div id="preview"
-                                 style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
-                                <p v-html="body"></p>
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <button> SUBMIT</button>
-                            <button> PREVIEW</button>
-                        </div>
+                    <div class="col-md-6 col-lg-4 p-1 mb-4 mb-md-2">
+                        <p class="create-input"> {{blockChainAddress}} </p>
+                    </div>
+                    <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
+                        <input type="number" v-model="tokens" class="create-input" step="0.000000001" required>
+                        <span class="floating-label">Pareto Amount
+                            <span v-if="formError.tokens"> <i class="fa fa-exclamation-circle" style="color: red"></i> </span>
+                        </span>
                     </div>
                 </div>
-                <div>
-                    <b-modal
-                            v-model="modalToken"
-                            centered
-                            hide-header
-                            hide-footer
-                            @hide="hideModal"
-                            :body-bg-variant="'dark'"
-                            :body-text-variant="'light'">
-
-                        <b-container fluid>
-                            <h4 class="font-body mb-3"> Pareto Amount</h4>
-                            <div v-if="this.signType==='LedgerNano'" class="text-left">
-                                <p> Before use Ledger Nano S, verify the next items: </p>
-                                <div class="m-2 ml-4">
-                                    <ul>
-                                        <li> The Browser must be Google Chrome</li>
-                                        <li> Plugged-in their Ledger Wallet Nano S</li>
-                                        <li> Input digits pin</li>
-                                        <li> Navigated to the Ethereum app on their device</li>
-                                        <li> Enabled 'browser' support from the Ethereum app settings</li>
-                                    </ul>
-                                </div>
-                                <br/>
+                <div class="row mt-4 mt-md-2">
+                    <div v-if="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
+                        <div class="flex-row create-intel-container">
+                            <div class="group create-input-space">
+                                <input id="intel-title-input"
+                                       type="text" class="create-input create-content-text"
+                                       style="font-weight: bolder"
+                                       name="intel-title" v-model="title" required>
+                                <span class="floating-label create-content-text">
+                                    <b>Title</b>
+                                    <span v-if="formError.title" > <i class="fa fa-exclamation-circle" style="color: red"></i></span>
+                                </span>
                             </div>
-                            <p class="text-dashboard mb-2" style="font-size: 16px"> You need to deposit Pareto tokens to
-                                create Intel. Please input the amount to deposit</p>
-
-                            <b-form-input v-model="tokens"
-                                          type="number"></b-form-input>
-                            <b-row class="m-2 mt-4 d-flex justify-content-center">
-                                <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                                <b-button style="background-color: rgb(107, 194, 123)"
-                                          :disabled="!hardwareAvailable || parseFloat(tokens)<=0 || parseFloat(tokens) > parseFloat(maxTokens)"
-                                          variant="success" @click="createIntel()"> Confirm
-                                </b-button>
-                            </b-row>
-                        </b-container>
-                    </b-modal>
+                            <svg height="1" width="100%" class="px-3">
+                                <line x1="0" y1="0" x2="100%" y2="0"
+                                      style="stroke:rgb(255,255,255);stroke-width:2"/>
+                            </svg>
+                            <textarea v-show="false"
+                                      id="intel-body-input"
+                                      name="editordata"
+                                      v-model="body">
+                            </textarea>
+                            <div v-if="intel.state !== 'empty'" class="d-flex justify-content-center">
+                                <label class="pareto-label"> {{intel.text}}
+                                    <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1"
+                         style="color: #fff; min-height: 80vh;">
+                        <label class="pareto-label"><b>Intel Content Preview</b></label>
+                        <div id="preview"
+                             style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
+                            <p v-html="body"></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-2  text-right">
+                        <button class="btn btn-dark-primary-pareto mt-2" @click="validateContent()"><b>submit</b></button>
+                        <button class="btn btn-dark-secondary-pareto mt-2 ml-2 ml-lg-0" @click="showPreview()">
+                            <b v-if="!isPreview">preview</b>
+                            <b v-if="isPreview">edit</b>
+                        </button>
+                    </div>
                 </div>
-            </form>
+            </div>
+            <div>
+                <b-modal
+                        v-model="modalToken"
+                        centered
+                        hide-header
+                        hide-footer
+                        @hide="hideModal"
+                        :body-bg-variant="'dark'"
+                        :body-text-variant="'light'">
+
+                    <b-container fluid>
+                        <h4 class="font-body my-3"> CONFIRM PUBLISH </h4>
+                        <div v-if="this.signType==='LedgerNano'" class="text-left">
+                            <p> Before use Ledger Nano S, verify the next items: </p>
+                            <div class="m-2 ml-4">
+                                <ul>
+                                    <li> The Browser must be Google Chrome</li>
+                                    <li> Plugged-in their Ledger Wallet Nano S</li>
+                                    <li> Input digits pin</li>
+                                    <li> Navigated to the Ethereum app on their device</li>
+                                    <li> Enabled 'browser' support from the Ethereum app settings</li>
+                                </ul>
+                            </div>
+                            <br/>
+                        </div>
+
+                        <div class="create-input w-100">
+                            <div class="d-flex justify-content-start w-100 pr-5 pb-3 modal-input">
+                                <span> Address </span>
+                                <span class="ml-4 ellipsis"> {{blockChainAddress}} </span>
+                            </div>
+                        </div>
+
+                        <div class="create-input w-100 mt-3">
+                            <div class="d-flex justify-content-start w-100 pr-5 pb-3 modal-input">
+                                <span> Deposit </span>
+                                <span class="ml-4">
+                                    <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
+                                    {{tokens}}
+                                </span>
+                            </div>
+                        </div>
+
+                        <b-row class="m-2 mt-4 d-flex justify-content-end">
+                            <button
+                                    class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0"
+                                    @click="hideModal()"
+                                    :disabled="!hardwareAvailable || validateTokenAmount()">Cancel
+                            </button>
+                            <button
+                                    class="btn btn-dark-primary-pareto mt-2 ml-2"
+                                    @click="createIntel()">Confirm
+                            </button>
+                        </b-row>
+                    </b-container>
+                </b-modal>
+            </div>
         </div>
     </div>
 
@@ -141,14 +152,15 @@
                 title: '',
                 maxTokens: 1,
                 blockChainAddress: '',
-                tokens: 1,
+                tokens: '',
                 intel: {
                     state: 'empty',  // 'creating', 'created'
                     text: '',
                 },
                 formError: {
-                    title: '',
-                    body: ''
+                    title: false,
+                    body: false,
+                    tokens: false
                 },
                 modalToken: false,
                 modalWaiting: false,
@@ -174,6 +186,7 @@
         },
         mounted: function () {
             $('#intel-body-input').summernote({
+                placeholder: 'Content...',
                 height: 300, // set editor height
                 minHeight: null, // set minimum height of editor
                 maxHeight: null, // set maximum height of editor
@@ -199,40 +212,9 @@
                 }
             });
             this.address();
-            //ProfileService.updateConfig();
-            /*
-            window.addEventListener('popstate', function () {
-                console.log('new backbutton');
-                history.pushState(null, null, document.URL);
-                window.prompt()
-            });
-            */
-
-            this.routeRealod();
         },
-        /*beforeRouteLeave(to, from, next) {
-
-            if (this.nextRoute.canAsk && this.intel.state === 'creating') {
-                this.modalCloseWarning = true;
-                this.nextRoute.to = to;
-                next(false);
-            } else {
-                next();
-            }
-        },*/
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
-            isAvailable() {
-                if (this.signType === 'LedgerNano') {
-                    this.hardwareAvailable = false;
-                    AuthService.doWhenIsConnected(() => {
-                        this.hardwareAvailable = true;
-                        AuthService.deleteWatchNano();
-                    })
-                } else {
-                    this.hardwareAvailable = true;
-                }
-            },
             address: function () {
                 DashboardService.getAddress(res => {
                     this.block = res.block;
@@ -242,24 +224,12 @@
 
                 });
             },
-            validateContent: function (e) {
-
-                this.formError.title = !!this.title;
-                this.formError.body = this.body.length > 3;
-
-                if (!this.formError.title || !this.formError.body) return;
-
-                this.showModal();
-            },
             createIntel: function () {
                 this.hideModal();
-                //console.log(this.tokens);
 
                 this.intelState('creating', 'Creating Intel, please wait');
-                //console.log({block:this.block, title: this.title, body: this.body.innerHTML, address: this.blockChainAddress});
 
                 this.$store.state.makingRequest = true;
-                //this.modalWaiting = true;
 
                 ContentService.createIntel(
                     {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress},
@@ -287,7 +257,6 @@
                         //this.$router.push('/intel');
                     }, (err) => {
 
-                        console.log(err);
                         if (err.includes('Transaction was not mined within')) {
                             this.$notify({
                                 group: 'notification',
@@ -313,28 +282,6 @@
                         }
                     });
             },
-            routeLeaving: function () {
-                this.nextRoute.canAsk = false;
-                this.modalCloseWarning = false;
-                this.$router.push(this.nextRoute.to.path);
-            },
-            routeRealod: function () {
-                window.onbeforeunload = function () {
-                    if (document.location.href.indexOf('create') !== -1) {
-                        return '';
-                    } else {
-                        return void (0);
-                    }
-                };
-            },
-            intelState: function (state, text) {
-                this.intel.state = state;
-                this.intel.text = text;
-            },
-            showModal() {
-                this.modalToken = true;
-                this.isAvailable();
-            },
             hideModalWarning: function () {
                 this.modalCloseWarning = false;
             },
@@ -344,15 +291,62 @@
                     AuthService.deleteWatchNano();
                     this.hardwareAvailable = false;
                 }
+            },
+            intelState: function (state, text) {
+                this.intel.state = state;
+                this.intel.text = text;
+            },
+            isAvailable() {
+                if (this.signType === 'LedgerNano') {
+                    this.hardwareAvailable = false;
+                    AuthService.doWhenIsConnected(() => {
+                        this.hardwareAvailable = true;
+                        AuthService.deleteWatchNano();
+                    })
+                } else {
+                    this.hardwareAvailable = true;
+                }
+            },
+            showModal() {
+                this.modalToken = true;
+                this.isAvailable();
+            },
+            showPreview() {
+                this.isPreview = !this.isPreview;
+
+                if(!this.isPreview){
+
+                }
+            },
+            validateContent: function (e) {
+                this.formError.tokens = this.validateTokenAmount();
+                this.formError.title = !this.title;
+
+                //The lenght is 12 because summernote, on first click, creates an empty p and br, creating 12 characters
+                this.formError.body = this.body.length < 12 || !this.body;
+
+                $('#miss-content').remove();
+                if (this.formError.body) {
+                    $('.note-placeholder').append('<i id="miss-content" class="fa fa-exclamation-circle" style="color: red"></i>')
+                }
+
+                if (this.formError.tokens || this.formError.title || this.formError.body) return;
+
+                this.showModal();
+            },
+            validateTokenAmount: function () {
+                return !this.tokens || parseFloat(this.tokens) <= 0 || parseFloat(this.tokens) > parseFloat(this.maxTokens);
             }
         }
     };
 </script>
 
-<style>
+<style lang="scss">
+    $light-blue-pareto: #1f344f;
+
     input:focus ~ .floating-label,
-    input:not(:focus):valid ~ .floating-label{
-        top: -25px;
+    input:not(:focus):valid ~ .floating-label {
+        top: -35px;
         bottom: 10px;
         left: 5px;
         font-size: 16px;
@@ -385,47 +379,71 @@
         }
     }
 
+    .bg-dark {
+        background-color: transparent !important;
+    }
+
     .create-input-space {
         position: relative;
     }
 
     .create-input {
-        padding: 10px;
+        padding: 10px 0px 8px 15px;
         border-radius: 3px;
         border: 0px;
-        background-color: #3f7989;
+        background-color: $light-blue-pareto;
         color: white;
         width: 100%;
     }
 
     .create-intel-container {
-         border-radius: 3px;
-         border: 0px;
-         background-color: #3f7989;
-     }
+        border-radius: 3px;
+        border: 0px;
+        background-color: $light-blue-pareto;
+    }
 
     .create-content-text {
         font-size: 18px !important;
     }
 
+    .modal-content{
+        border: 0;
+        border-radius: 2px !important;
+        background: #040f1e;
+        box-shadow: 0px 25px 30px 1px black;
+    }
+
+    .modal-input{
+        font-size: 13px;
+    }
+
     .note-editable {
-         background: #3f7989!important;
-         color: white !important;
-         padding: 0px !important;
-         padding-top: 20px !important;
-     }
+        background: $light-blue-pareto !important;
+        color: white !important;
+        padding: 0px !important;
+        padding-top: 20px !important;
+        font-size: 16px !important;
+        padding-left: 10px !important;
+    }
 
     .note-editor.note-frame.panel {
-        padding: 10px;
+        padding: 10px 10px 0px;
         border: none;
     }
 
     .note-toolbar.panel-heading {
         padding: 0px;
+        padding-left: 5px;
     }
 
     .note-editing-area {
         margin-top: 2px;
+    }
+
+    .note-placeholder {
+        color: white;
+        font-size: 16px;
+        padding-top: 20px !important;
     }
 
     .pareto-label {
@@ -456,5 +474,7 @@
         top: 10px;
         transition: 0.2s ease all;
         font-size: 14px;
+        font-weight: bolder;
+        padding-left: 10px;
     }
 </style>
