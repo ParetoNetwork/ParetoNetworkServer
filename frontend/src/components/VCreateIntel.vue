@@ -19,7 +19,7 @@
                     </div>
                 </div>
                 <div class="row mt-4 mt-md-2">
-                    <div v-if="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
+                    <div v-show="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
                         <div class="flex-row create-intel-container">
                             <div class="group create-input-space">
                                 <input id="intel-title-input"
@@ -47,11 +47,9 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1"
-                         style="color: #fff; min-height: 80vh;">
-                        <label class="pareto-label"><b>Intel Content Preview</b></label>
-                        <div id="preview"
-                             style="padding: 5px; color: #000; background-color: rgba(161, 161, 161, 1); width: 100%; height: 95%; min-height: 400px; border: 1px solid #a9a9a9; border-radius: 5px;">
+                    <div v-show="isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
+                        <!--<label class="pareto-label"><b>Intel Content Preview</b></label>-->
+                        <div id="preview">
                             <p v-html="body"></p>
                         </div>
                     </div>
@@ -133,7 +131,7 @@
     import ContentService from '../services/ContentService';
     import {mapState, mapActions} from "vuex";
 
-    require('summernote/dist/summernote.css');
+    require('summernote/dist/summernote-bs4.css');
     require('summernote');
 
     export default {
@@ -187,7 +185,7 @@
         mounted: function () {
             $('#intel-body-input').summernote({
                 placeholder: 'Content...',
-                height: 300, // set editor height
+                height: 400, // set editor height
                 minHeight: null, // set minimum height of editor
                 maxHeight: null, // set maximum height of editor
                 focus: true, // set focus to editable area after initializing summernote
@@ -195,15 +193,10 @@
                     ['link', ['linkDialogShow', 'unlink']]
                 ],
                 toolbar: [
-                    ['font', ['bold', 'italic', 'underline' /*, 'clear'*/]],
-                    // ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-                    //['color', ['color']],
-                    ['para', [/*'ul', 'ol', */ 'paragraph']],
-                    //['height', ['height']],
-                    //['table', ['table']],
-                    ['insert', ['link', /*'picture',*/]],
-                    //['view', ['fullscreen' /*, 'codeview'*/]],
-                    //['help', ['help']]
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
                 ],
                 popover: {
                     image: [],
@@ -314,8 +307,10 @@
             showPreview() {
                 this.isPreview = !this.isPreview;
 
-                if(!this.isPreview){
-
+                if(this.isPreview){
+                    $('.note-editor').hide();
+                }else{
+                    $('.note-editor').show();
                 }
             },
             validateContent: function (e) {
@@ -355,6 +350,10 @@
     textarea a {
         text-decoration: underline;
         color: blue;
+    }
+
+    .note-toolbar-wrapper{
+        height: 30.8px !important;
     }
 
     .note-editable a {
@@ -436,6 +435,10 @@
         padding-left: 5px;
     }
 
+    .note-toolbar.panel-heading a{
+        color: black;
+    }
+
     .note-editing-area {
         margin-top: 2px;
     }
@@ -454,6 +457,16 @@
         transition: 0.2s ease all;
         -moz-transition: 0.2s ease all;
         -webkit-transition: 0.2s ease all;
+    }
+
+    #preview{
+        padding: 5px;
+        color: #000;
+        background-color: #1f344f;
+        width: 100%;
+        height: 95%;
+        min-height: 300px;
+        border-radius: 3px;
     }
 
     .lookup-input {
