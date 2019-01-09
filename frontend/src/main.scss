@@ -2,11 +2,12 @@
 @import './styles/fonts';
 @import "~bootstrap/scss/bootstrap";
 @import "~bootstrap-vue/dist/bootstrap-vue.css";
+@import "styles/animations";
+@import "styles/button";
+@import "styles/components";
 @import "styles/splash";
 @import "styles/splash-custom";
-@import "styles/button";
 @import "styles/shimmer";
-@import "styles/components";
 
 .header {
   background-color: blue;

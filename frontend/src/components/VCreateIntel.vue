@@ -14,7 +14,7 @@
                     <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
                         <input type="number" v-model="tokens" class="create-input" step="0.000000001" required>
                         <span class="floating-label">Pareto Amount
-                            <span v-if="formError.tokens"> <i class="fa fa-exclamation-circle" style="color: red"></i> </span>
+                            <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake" style="color: red"></i> </span>
                         </span>
                     </div>
                 </div>
@@ -27,8 +27,9 @@
                                        style="font-weight: bolder"
                                        name="intel-title" v-model="title" required>
                                 <span class="floating-label create-content-text">
-                                    <b>Title</b>
-                                    <span v-if="formError.title" > <i class="fa fa-exclamation-circle" style="color: red"></i></span>
+                                    <b>Title </b>
+                                    <span v-if="formError.title && !title"> <i class="fa fa-exclamation-circle shake"
+                                                                     style="color: red"></i></span>
                                 </span>
                             </div>
                             <svg height="1" width="100%" class="px-3">
@@ -42,19 +43,37 @@
                             </textarea>
                             <div v-if="intel.state !== 'empty'" class="d-flex justify-content-center">
                                 <label class="pareto-label"> {{intel.text}}
-                                    <i v-if="intel.state === 'creating'" class="fa fa-spinner fa-spin"></i>
+                                    <span v-if="intel.state === 'creating'">
+                                         <i class="fa fa-spinner fa-spin"></i>
+                                    </span>
                                 </label>
                             </div>
                         </div>
                     </div>
                     <div v-show="isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
-                        <!--<label class="pareto-label"><b>Intel Content Preview</b></label>-->
-                        <div id="preview">
-                            <p v-html="body"></p>
+                        <div class="flex-row create-intel-container">
+                            <div class="group create-input-space">
+                                <input
+                                        type="text" class="create-input create-content-text"
+                                        style="font-weight: bolder"
+                                        name="intel-title" v-model="title" readonly>
+                            </div>
+                            <svg height="1" width="100%" class="px-3">
+                                <line x1="0" y1="0" x2="100%" y2="0"
+                                      style="stroke:rgb(255,255,255);stroke-width:2"/>
+                            </svg>
+                            <div id="preview" class="note-editable">
+                                <p v-html="body" style="padding-left: 10px;"></p>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-2  text-right">
-                        <button class="btn btn-dark-primary-pareto mt-2" @click="validateContent()"><b>submit</b></button>
+                        <button
+                                class="btn btn-dark-primary-pareto mt-2"
+                                @click="validateContent()"
+                                :disabled="intel.state === 'creating'">
+                            <b>submit</b>
+                        </button>
                         <button class="btn btn-dark-secondary-pareto mt-2 ml-2 ml-lg-0" @click="showPreview()">
                             <b v-if="!isPreview">preview</b>
                             <b v-if="isPreview">edit</b>
@@ -235,6 +254,8 @@
                         toastTransaction: this.$notify
                     },
                     (res) => {
+                        const intelId = res.res.intel;
+
                         this.$store.state.makingRequest = false;
                         this.intelState('created', 'Intel Created!');
 
@@ -247,9 +268,10 @@
 
                         this.modalWaiting = false;
 
+                        this.redirectAfterCreateIntel(intelId);
+
                         //this.$router.push('/intel');
                     }, (err) => {
-
                         if (err.includes('Transaction was not mined within')) {
                             this.$notify({
                                 group: 'notification',
@@ -300,6 +322,20 @@
                     this.hardwareAvailable = true;
                 }
             },
+            redirectAfterCreateIntel(intelId) {
+                let params = {page: 0, limit: 10};
+                return DashboardService.getContent(params,
+                    res => {
+                        const intel = res.find(item => {
+                            return intelId == item.id;
+                        });
+
+                        console.log(intel);
+                        if(this.$route.path ===  '/create'){
+                            this.$router.push(`intel/${intel.address}/${intel.txHash}`);
+                        }
+                    });
+            },
             showModal() {
                 this.modalToken = true;
                 this.isAvailable();
@@ -307,9 +343,9 @@
             showPreview() {
                 this.isPreview = !this.isPreview;
 
-                if(this.isPreview){
+                if (this.isPreview) {
                     $('.note-editor').hide();
-                }else{
+                } else {
                     $('.note-editor').show();
                 }
             },
@@ -322,7 +358,7 @@
 
                 $('#miss-content').remove();
                 if (this.formError.body) {
-                    $('.note-placeholder').append('<i id="miss-content" class="fa fa-exclamation-circle" style="color: red"></i>')
+                    $('.note-placeholder').append('<i id="miss-content" class="fa fa-exclamation-circle shake" style="color: red"></i>')
                 }
 
                 if (this.formError.tokens || this.formError.title || this.formError.body) return;
@@ -352,7 +388,7 @@
         color: blue;
     }
 
-    .note-toolbar-wrapper{
+    .note-toolbar-wrapper {
         height: 30.8px !important;
     }
 
@@ -405,24 +441,22 @@
         font-size: 18px !important;
     }
 
-    .modal-content{
+    .modal-content {
         border: 0;
         border-radius: 2px !important;
         background: #040f1e;
         box-shadow: 0px 25px 30px 1px black;
     }
 
-    .modal-input{
+    .modal-input {
         font-size: 13px;
     }
 
     .note-editable {
         background: $light-blue-pareto !important;
         color: white !important;
-        padding: 0px !important;
-        padding-top: 20px !important;
+        padding: 20px 10px !important;
         font-size: 16px !important;
-        padding-left: 10px !important;
     }
 
     .note-editor.note-frame.panel {
@@ -435,7 +469,7 @@
         padding-left: 5px;
     }
 
-    .note-toolbar.panel-heading a{
+    .note-toolbar.panel-heading a {
         color: black;
     }
 
@@ -459,14 +493,12 @@
         -webkit-transition: 0.2s ease all;
     }
 
-    #preview{
-        padding: 5px;
-        color: #000;
-        background-color: #1f344f;
-        width: 100%;
-        height: 95%;
-        min-height: 300px;
+    #preview {
         border-radius: 3px;
+        height: 442px;
+        min-height: 300px;
+        overflow: auto;
+        width: 100%;
     }
 
     .lookup-input {
