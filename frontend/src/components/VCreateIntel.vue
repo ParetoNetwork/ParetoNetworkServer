@@ -54,9 +54,11 @@
                         <div class="flex-row create-intel-container">
                             <div class="group create-input-space">
                                 <input
-                                        type="text" class="create-input create-content-text"
+                                        type="text"
+                                        class="create-input create-content-text"
                                         style="font-weight: bolder"
-                                        name="intel-title" v-model="title" readonly>
+                                        name="intel-title"
+                                        v-model="title" readonly>
                             </div>
                             <svg height="1" width="100%" class="px-3">
                                 <line x1="0" y1="0" x2="100%" y2="0"
@@ -67,16 +69,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-2  text-right">
+                    <div class="col-lg-2 d-flex flex-lg-column justify-content-end justify-content-lg-start">
+                        <button class="btn btn-dark-secondary-pareto mt-2 order-lg-2"
+                                @click="showPreview()">
+                            <b v-if="!isPreview">preview</b>
+                            <b v-if="isPreview">edit</b>
+                        </button>
                         <button
-                                class="btn btn-dark-primary-pareto mt-2"
+                                class="btn btn-dark-primary-pareto ml-2 ml-lg-0 mt-2 order-lg-1"
                                 @click="validateContent()"
                                 :disabled="intel.state === 'creating'">
                             <b>submit</b>
-                        </button>
-                        <button class="btn btn-dark-secondary-pareto mt-2 ml-2 ml-lg-0" @click="showPreview()">
-                            <b v-if="!isPreview">preview</b>
-                            <b v-if="isPreview">edit</b>
                         </button>
                     </div>
                 </div>
@@ -126,13 +129,13 @@
 
                         <b-row class="m-2 mt-4 d-flex justify-content-end">
                             <button
-                                    class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0"
-                                    @click="hideModal()"
-                                    :disabled="!hardwareAvailable || validateTokenAmount()">Cancel
+                                    class="btn btn-dark-primary-pareto mt-2 ml-2 order-md-2"
+                                    @click="createIntel()">Confirm
                             </button>
                             <button
-                                    class="btn btn-dark-primary-pareto mt-2 ml-2"
-                                    @click="createIntel()">Confirm
+                                    class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0 order-md-1"
+                                    @click="hideModal()"
+                                    :disabled="!hardwareAvailable || validateTokenAmount()">Cancel
                             </button>
                         </b-row>
                     </b-container>
@@ -213,7 +216,6 @@
                 ],
                 toolbar: [
                     ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['strikethrough', 'superscript', 'subscript']],
                     ['fontsize', ['fontsize']],
                     ['color', ['color']],
                 ],
