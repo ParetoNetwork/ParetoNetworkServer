@@ -362,7 +362,7 @@
                             type: 'error',
                             duration: 10000,
                             title: 'Leaderboard',
-                            text: "The paramer doesn't exist"
+                            text: "The parameter doesn't exist"
                         });
                         return;
                     }
@@ -424,7 +424,9 @@
                         this.routeParams.param = params[0];
                         this.routeParams.value = params[1].split(/[^a-z0-9,.+]+/gi)[0];
 
-                        if(this.routeParams.param === 'q' && this.routeParams.value.indexOf(',') >=0) this.routeParams.param = 'score';
+                        if(this.routeParams.param === 'q' && (this.routeParams.value.indexOf(',') >=0 || this.routeParams.value.indexOf('.') >=0))
+                            this.routeParams.param = 'score';
+
                         if(this.routeParams.param === 'score') this.routeParams.value = this.routeParams.value.split(',').join('');
                     } else {
                         this.$notify({
