@@ -126,6 +126,16 @@
         url('./assets/fonts/font-body-regular.svg#svgFontName') format('svg'); /* Legacy iOS */
     }
 
+    @font-face {
+        font-family: 'Montserrat';
+        src: url('./assets/fonts/Montserrat-Light.otf');
+    }
+
+    @font-face {
+        font-family: 'Montserrat-Regular';
+        src: url('./assets/fonts/Montserrat-Regular.otf');
+    }
+
     a {
         color: #ffffff;
     }

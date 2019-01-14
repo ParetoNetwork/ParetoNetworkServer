@@ -22,8 +22,8 @@
                         <div class="media-body flex-column text-left ellipsis">
                             <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address" class="cursor-pointer ellipsis">
                                 <svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>
-                                <span v-if="user.alias" class="name-title"><b>{{user.alias}}<br/></b></span>
-                                <span class="ellipsis">{{user.address}}</span>
+                                <span v-if="user.alias" class="name-title title-user-content "><b>{{user.alias}}<br/></b></span>
+                                <span class="ellipsis text-user-content">{{user.address}}</span>
                             </router-link>
 
                             <!-- rank, icon globe color should be contingent on access level, whether above or below the threshold. Globe icon for "global rank" -->
