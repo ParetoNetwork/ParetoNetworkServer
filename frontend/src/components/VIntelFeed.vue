@@ -86,9 +86,6 @@
                     return item;
                 });
             },
-            creatorRoute(address) {
-                return '/intel/' + address + '/';
-            },
             loadContent: function (params) {
                 params = params || null;
 
@@ -128,6 +125,25 @@
                     );
                 }
             },
+            randomNumber: function (min = 1, max = 3) {
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            },
+            scrollMyFeed: function () {
+                let list = document.getElementById("myfeed");
+
+                if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
+                    && !this.myFeed.loading) {
+                    const params = {limit: 10, page: this.myFeed.page};
+                    this.myFeed.loading = true;
+
+                    this.$store.state.makingRequest = true;
+
+                    let myFeedContentReady = this.loadContent(params);
+                    myFeedContentReady.then(() => {
+                        this.$store.state.makingRequest = false;
+                    });
+                }
+            },
             updateFeedContent: function () {
                 let params = {
                     page: 0,
@@ -160,25 +176,6 @@
                         });
                     }
                 );
-            },
-            randomNumber: function (min = 1, max = 3) {
-                return Math.floor(Math.random() * (max - min + 1) + min);
-            },
-            scrollMyFeed: function () {
-                let list = document.getElementById("myfeed");
-
-                if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
-                    && !this.myFeed.loading) {
-                    const params = {limit: 10, page: this.myFeed.page};
-                    this.myFeed.loading = true;
-
-                    this.$store.state.makingRequest = true;
-
-                    let myFeedContentReady = this.loadContent(params);
-                    myFeedContentReady.then(() => {
-                        this.$store.state.makingRequest = false;
-                    });
-                }
             }
         }
     }
