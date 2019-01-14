@@ -19,7 +19,6 @@
                                 <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
                             </div>
                         </div>
-
                         <div class="media-body flex-column text-left ellipsis">
                             <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address" class="cursor-pointer ellipsis">
                                 <svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>
