@@ -7,7 +7,7 @@
                 </div>
                 <div class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
                     <div class="row text-group">
-                        <VShimmerIntelInformation v-if="!intel.blockAgo"></VShimmerIntelInformation>
+                        <VShimmerIntelInformation v-if="!intel.block"></VShimmerIntelInformation>
                         <div v-else class="col-12 border p-3">
                             <div class="row py-4 m-0">
                                 <div class="col-md-10 p-0 pr-1">
@@ -119,6 +119,7 @@
             };
         },
         beforeMount: function () {
+            console.log(this.id);
             this.$store.state.makingRequest = true;
             this.requestCall()
             // console.log(this.$route.params);
@@ -135,13 +136,14 @@
                     AuthService.doWhenIsConnected(() => {
                         this.hardwareAvailable = true;
                         AuthService.deleteWatchNano();
-                    })
+                    });
                 } else {
                     this.hardwareAvailable = true;
                 }
             },
             getIntel: function () {
                 return DashboardService.getIntel(this.id, res => {
+                    console.log(res);
                     this.getProfile(res.address);
                     this.intel = res;
                 }, error => {
@@ -156,7 +158,6 @@
             },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
-                    // console.log(res)
                     this.address = res;
                 }, () => {
                     alert(error);

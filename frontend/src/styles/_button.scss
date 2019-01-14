@@ -9,3 +9,58 @@
   background-image: linear-gradient(to bottom, #00628f, #1b4e8b);
   width: 120px;
 }
+
+.btn-pareto{
+  border-radius: 3px;
+  font-family: 'Body';
+  font-weight: bolder;
+  font-size: 16px;
+  margin: 0px;
+  padding: 5px;
+  width: 150px;
+}
+
+.btn-dark-primary-pareto{
+  @extend .btn-pareto;
+  background-size: 200% auto;
+  background-image: linear-gradient(to right, #6aba82, #85c568, #9ff677, #85c568, #6aba82);
+  transition: 0.5s;
+  color: $dark-blue-pareto;
+}
+
+.btn-dark-secondary-pareto{
+  @extend .btn-pareto;
+   background: $light-blue-pareto;
+   color: #6aba82;
+ }
+
+ .btn-darker-secondary-pareto{
+   @extend .btn-pareto;
+   background: $dark-blue-pareto;
+   color: #6aba82;
+ }
+
+ .btn-dark-primary-pareto, .btn-dark-secondary-pareto, .btn-darker-secondary-pareto {
+   &:hover {
+     color: #ffffff;
+     background-position: right center;
+   }
+ }
+
+.btn-dark-secondary-pareto:hover, .btn-darker-secondary-pareto {
+  &:hover {
+    background-size: 200% auto;
+    background: #122742;
+    transition: 0.75s;
+  }
+}
+
+@-webkit-keyframes buttonShimmer {
+  0% {
+    background-position: -100px 0;
+  }
+
+  100% {
+    background-position: 100px 0;
+  }
+}
