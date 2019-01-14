@@ -323,6 +323,28 @@
                     this.leader = [...this.leader, ...res];
                     this.busy = false;
 
+                    //If we search a score, and there isn't one, we look for the nearest score
+                    //It will always be the third position inside response, except if the score is inside the first 3 positions
+                    if(withParam && this.routeParams.param === 'score'){
+                        if(this.leader[3].rank <= 4){
+                            let absDiff = 0;
+                            let found = 0;
+
+                            this.leader.forEach( rank => {
+                                let rankDiff = rank.score;
+
+                                if(Math.abs(rankDiff-this.routeParams.value) < Math.abs(absDiff-this.routeParams.value)){
+                                    found = rank.score;
+                                }
+                                absDiff = rankDiff;
+                            });
+
+                            this.routeParams.value = this.score = found
+                        }else{
+                            this.routeParams.value = this.score = this.leader[3].score;
+                        }
+                    }
+
                     if (withParam) {
                         setTimeout(() => {
                             this.scrollBack();
@@ -340,7 +362,7 @@
                             type: 'error',
                             duration: 10000,
                             title: 'Leaderboard',
-                            text: "The param doesn't exist"
+                            text: "The paramer doesn't exist"
                         });
                         return;
                     }
@@ -400,7 +422,10 @@
                     let params = routeSplit.split('=');
                     if (this.routeParams.valids.indexOf(params[0]) >= 0) {
                         this.routeParams.param = params[0];
-                        this.routeParams.value = params[1].split(/[^a-z0-9.+]+/gi)[0];
+                        this.routeParams.value = params[1].split(/[^a-z0-9,.+]+/gi)[0];
+
+                        if(this.routeParams.param === 'q' && this.routeParams.value.indexOf(',') >=0) this.routeParams.param = 'score';
+                        if(this.routeParams.param === 'score') this.routeParams.value = this.routeParams.value.split(',').join('');
                     } else {
                         this.$notify({
                             group: 'notification',
@@ -441,8 +466,6 @@
                             this.loading = false;
                             this.infiniteScrollFunction();
                         });
-
-
                     }, error => {
                         let errorText = error.message ? error.message : error;
                         this.$notify({
@@ -460,6 +483,8 @@
                 let paramType = '';
                 if (value.split(/[^a-z]+/g).length > 2) {
                     paramType = 'address';
+                } else if(value.indexOf(".") >= 0 || value.indexOf(',')>=0){
+                    paramType = 'score';
                 } else {
                     paramType = 'rank';
                 }
@@ -468,9 +493,8 @@
                 this.leader = [];
                 this.lastRank = 100;
 
-                this.routeParams.param = paramType;
-                this.routeParams.value = value;
 
+                this.leaderFromUrlParams({fullPath: `?${paramType}=${value}`});
                 this.init();
             },
             changeFontSize: function (score) {
@@ -489,8 +513,6 @@
                 return Math.min(lastScoreLength, this.textSize);
             },
             changeHistoricalSymbol: function (symbol) {
-                // before showing chevron-up, need to know if score boost is greater than just the block height increasing. Need to show aberrations
-                // if (symbol === '+') return 'fa fa-chevron-up historical-up';as blocks increase, all scores go up, so therefore we should have a threshold of showing these increases
                 if (symbol === '-') return 'fa fa-chevron-down historical-down';
             },
             infiniteScrollFunction: function () {
@@ -532,7 +554,7 @@
                 if (param === 'q') {
                     if (value.split(/[^a-z]+/g).length > 2) {
                         param = 'address';
-                    } else if (value.indexOf(".") >= 0) {
+                    } else if (value.indexOf(".") >= 0 || value.indexOf(",") >= 0) {
                         param = 'score';
                     } else {
                         param = 'rank';
@@ -540,6 +562,13 @@
                 }
 
                 let found = param ? (rank[param] == this.routeParams.value) : (rank.address === this.address || (rank.rank == 1 && !this.address));
+
+                if(param === 'score'){
+                    const parsedScore = Math.floor(rank[param]);
+                    const parsedRankScore = Math.floor(this.routeParams.value.split(',').join(''));
+
+                    found = parsedScore === parsedRankScore;
+                }
 
                 if (found) {
                     this.rank = rank.rank;
@@ -554,7 +583,7 @@
                     wsa.send(JSON.stringify({rank: this.leader[0].rank, limit: this.leader.length, page: 0}));
                     try {
                         const info = JSON.parse(data.data);
-                        // console.log(info);
+
                         if (info.data.address) {
                             this.score = info.data.score;
                         } else {
@@ -590,12 +619,10 @@
                                         item.score = socketRanking[socketIndex].score;
                                         socketIndex++;
                                     }
-
                                     return item;
                                 });
                             }
                         }
-
                     } catch (e) {
                         console.log(e);
                     }
