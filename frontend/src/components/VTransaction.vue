@@ -5,7 +5,7 @@
                 <h1 class="title" v-line-clamp="2">{{transactionStatus(transaction.status)}}
                     <span v-bind:id="transaction.txHash + '-span'"> </span>
                     <span v-show="transaction.status < 3 && !clicked">
-                        <i  class="fa fa-exclamation-circle" style="color: red"></i>
+                        <i class="fa fa-exclamation-circle" style="color: red"></i>
                     </span>
                 </h1>
             </div>
