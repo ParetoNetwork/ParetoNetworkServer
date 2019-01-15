@@ -11,12 +11,12 @@
                         <div v-else class="col-12 border p-3">
                             <div class="row py-4 m-0">
                                 <div class="col-md-10 p-0 pr-1">
-                                    <span class="name-title"> {{intel.title}} </span>
+                                    <span class="name-title title-user-content"> {{intel.title}} </span>
                                 </div>
                                 <div class="col-md-2 p-0 pl-1">
                                     <div class="d-flex flex-column align-items-end">
-                                        <span v-if="profile.alias" class="subtitle-dashboard"><b> {{profile.alias}} </b></span>
-                                        <span v-else class="subtitle-dashboard"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
+                                        <span v-if="profile.alias" class="subtitle-dashboard text-user-content"><b> {{profile.alias}} </b></span>
+                                        <span v-else class="subtitle-dashboard text-user-content"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
                                         <div class="text-center">
                                             <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                                         </div>
@@ -58,7 +58,7 @@
                                 </div>
                             </div>
                             <div class="text-group mt-4">
-                                <p class="intel-body" v-html="intel.body"></p>
+                                <p class="intel-body text-user-content" v-html="intel.body"></p>
                             </div>
                         </div>
                     </div>
