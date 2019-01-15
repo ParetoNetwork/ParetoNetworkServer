@@ -90,6 +90,7 @@
                 params = params || null;
 
                 let onSuccess = (res) => {
+                    console.log(res);
                     this.loading = false;
                     this.myFeed.page++;
                     this.myFeed.loading = false;
