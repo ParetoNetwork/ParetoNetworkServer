@@ -69,13 +69,13 @@ var web3_events = null;
 
 controller.startW3WebSocket = function () {
     web3_events_provider.on('connect', function () {
-        console.log('WS web3 connected');
+        //console.log('WS web3 connected');
         controller.startwatchIntel()
     });
 
     web3_events_provider.on('end', e => {
-        console.log('WS web3 closed');
-        console.log('Attempting to reconnect...');
+        //console.log('WS web3 closed');
+        //console.log('Attempting to reconnect...');
         web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
         web3_events = new Web3(web3_events_provider);
         controller.startW3WebSocket()
