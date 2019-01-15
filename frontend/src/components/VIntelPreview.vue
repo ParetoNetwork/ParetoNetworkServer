@@ -14,8 +14,12 @@
                     :to="intelRoute(intel)"
                     class="cursor-pointer p-0"
                     v-bind:class="{ 'col-9 col-lg-6' : !eventRow , 'col-12 col-lg-7': eventRow }">
-                <h1 class="title" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
-                <p class="text-dashboard ellipsis">Disclosed by: {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}} </p>
+                <h1 class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
+                <p class="text-dashboard ellipsis">Disclosed by:
+                    <span class="text-user-content">
+                        {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}}
+                    </span>
+                </p>
                 <p v-if="!intel.validated && eventRow"> Pending Blockchain Confirmation</p>
                 <p>{{intel.dateCreated | dateFilter}}</p>
             </router-link>

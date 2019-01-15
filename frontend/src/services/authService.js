@@ -453,7 +453,7 @@ export default class authService {
     }
 
     static postSign(onSuccess, onError) {
-        http.get('/v1/userinfo?latest=true',{  withCredentials: true}).then(res => {
+        http.get('/v1/userinfo?latest=true',{ withCredentials: true}).then(res => {
             if(res.data.success){
                 onSuccess(res.data.data);
             }else{

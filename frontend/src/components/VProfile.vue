@@ -9,11 +9,11 @@
                 </router-link>
             </div>
             <div class="col-12 col-sm-7 col-md-12 border p-5">
-                <div class="row text-group">
+                <div class="row text-group title-user-content">
                     <h6 v-if="profile.alias" class="subtitle-dashboard" ><b> About {{profile.alias}} :</b></h6>
                     <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address}}:</b></h6>
                 </div>
-                <div class="row text-group">
+                <div class="row text-group text-user-content">
                     <p v-if="profile.biography"> {{profile.biography}} </p>
                     <p v-else> No Bio to show </p>
                 </div>
