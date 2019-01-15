@@ -35,9 +35,9 @@ clock.start= function(wqueue){
     setTimeout(function run() {
         try{
             const time = (new Date().getTime());
-            const minutes =   ((clock.time === 0)? 5: 1);
+            const minutes =   1;
             const job = queue
-                .create('clock-job',{minutes} )
+                .create('clock-job-aprox',{minutes} )
                 .removeOnComplete(true)
                 .save((error) => {
                     if (error) {
@@ -46,8 +46,6 @@ clock.start= function(wqueue){
                     }
                     job.on('complete', result => {
                         console.log('Sucessfully updated aprox' );
-
-                        clock.time=(clock.time === 4)? 0: clock.time+1;
                         setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
                     });
                     job.on('failed', () => {
@@ -64,6 +62,33 @@ clock.start= function(wqueue){
         }
 
     }, 60000);
+
+
+    cron.schedule('*/5 * * * *', () => {
+        try{
+
+            const job = queue
+                .create('clock-job-score',{} )
+                .removeOnComplete(true)
+                .save((error) => {
+                    if (error) {
+                        next(error);
+                        return;
+                    }
+                    job.on('complete', result => {
+                        console.log('Sucessfully weekly snap' );
+                    });
+                    job.on('failed', () => {
+                        console.log('fail weekly snap' );
+                    });
+                });
+
+
+
+        }catch (e) {
+            console.log(e);
+        }
+    });
 
     cron.schedule('0 0 0 * * 7', () => {
         try{
