@@ -24,7 +24,6 @@
                             <div class="group create-input-space">
                                 <input id="intel-title-input"
                                        type="text" class="create-input create-content-text title-user-content"
-                                       style="font-weight: bolder"
                                        name="intel-title" v-model="title" required>
                                 <span class="floating-label create-content-text title-user-content">
                                     <b>Title </b>
@@ -56,7 +55,6 @@
                                 <input
                                         type="text"
                                         class="create-input create-content-text"
-                                        style="font-weight: bolder"
                                         name="intel-title"
                                         v-model="title" readonly>
                             </div>
