@@ -81,7 +81,6 @@
         mounted : function(){
             let newId = this.transaction.txHash + '-span';
             this.clicked = this.transaction.clicked;
-            console.log(this.transaction);
             this.loadingEffect = document.getElementById(newId);
             this.loadingTransaction();
 
