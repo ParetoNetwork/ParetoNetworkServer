@@ -2,11 +2,12 @@
 @import './styles/fonts';
 @import "~bootstrap/scss/bootstrap";
 @import "~bootstrap-vue/dist/bootstrap-vue.css";
+@import "styles/animations";
+@import "styles/button";
+@import "styles/components";
 @import "styles/splash";
 @import "styles/splash-custom";
-@import "styles/button";
 @import "styles/shimmer";
-@import "styles/components";
 
 .header {
   background-color: blue;
@@ -14,6 +15,14 @@
 
 .pareto-bg-dark {
   background-color: $dark-pareto;
+}
+
+.pareto-blue-dark {
+  background-color: $dark-blue-pareto;
+}
+
+.pareto-blue-light {
+  background-color: $light-blue-pareto;
 }
 
 body {
@@ -96,6 +105,8 @@ body {
   text-overflow: ellipsis;
   border: 1px solid #000000;
 }
+
+
 //
 //.popover {
 //  display: none;
