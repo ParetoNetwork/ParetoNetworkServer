@@ -68,12 +68,12 @@ var web3_events = null;
 
 workerController.startW3WebSocket = function () {
     web3_events_provider.on('connect', function () {
-        console.log('WS web3 connected on worker');
+        //console.log('WS web3 connected on worker');
     });
 
     web3_events_provider.on('end', e => {
-        console.log('WS web3 closed on worker');
-        console.log('Attempting to reconnect... on worker');
+        //console.log('WS web3 closed on worker');
+        //console.log('Attempting to reconnect... on worker');
         web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
         web3_events = new Web3(web3_events_provider);
         workerController.startW3WebSocket()
