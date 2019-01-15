@@ -20,13 +20,13 @@
                 </div>
                 <div class="row mt-4 mt-md-2">
                     <div v-show="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
-                        <div class="flex-row create-intel-container">
+                        <div class="flex-row create-intel-container text-user-content">
                             <div class="group create-input-space">
                                 <input id="intel-title-input"
                                        type="text" class="create-input create-content-text title-user-content"
                                        style="font-weight: bolder"
                                        name="intel-title" v-model="title" required>
-                                <span class="floating-label create-content-text">
+                                <span class="floating-label create-content-text title-user-content">
                                     <b>Title </b>
                                     <span v-if="formError.title && !title"> <i class="fa fa-exclamation-circle shake"
                                                                      style="color: red"></i></span>
