@@ -1098,7 +1098,7 @@ controller.getContentByCurrentUser = function(req, callback){
 controller.updateScore = function(address, callback){
     try{
         const job = queue
-            .create('controller-job', {
+            .create('controller-job-score', {
                 type: 'update',
                 address: address
             } )
@@ -1125,7 +1125,7 @@ controller.updateScore = function(address, callback){
 controller.getScoreAndSaveRedis = function(callback){
     try{
         const job = queue
-            .create('controller-job', {
+            .create('controller-job-save', {
                 type: 'save-redis',
             })
             .removeOnComplete(true)
