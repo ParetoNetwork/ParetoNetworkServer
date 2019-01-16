@@ -454,7 +454,6 @@ app.post('/v1/transaction', function (req, res) {
 
 
 app.get('/v1/content', function (req, res) {
-
     //this needs a session id, basically an authenticated address
 
     var limit = parseInt(req.query.limit) || 15;
@@ -479,7 +478,6 @@ app.get('/v1/content', function (req, res) {
 
 
 app.get('/v1/content/me', function (req, res) {
-
     controller.getContentByCurrentUser(req, function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
@@ -566,6 +564,7 @@ function responseUserInfo(req, res) {
 
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
+    console.log(req.query);
     //Get Info User
      if (req.query.latest=='true'){
          controller.isNew(req.user, function (err, success) {

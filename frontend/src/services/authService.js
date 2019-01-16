@@ -430,13 +430,10 @@ export default class authService {
                                        resultfunction( versionMethod, msgParams,err, result)
                                    });
                                }
-
-
                            }//end if valid address
                            else {
                                console.log('address invalid!');
                                return onError('Please login into MetaMask (or other web3 browser) in order to access the Pareto Network');
-
                                //set error state on input field
                            }
                        }else{
@@ -453,7 +450,7 @@ export default class authService {
     }
 
     static postSign(onSuccess, onError) {
-        http.get('/v1/userinfo?latest=true',{ withCredentials: true}).then(res => {
+        http.get('/v1/userinfo?latest=true', { withCredentials: true}).then(res => {
             if(res.data.success){
                 onSuccess(res.data.data);
             }else{

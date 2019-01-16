@@ -32,7 +32,7 @@ export default class dashboardService {
                 return onError(res.data.message);
             }
         }).catch(error => {
-            return onError(error)
+            return onError(error);
         });
     }
 

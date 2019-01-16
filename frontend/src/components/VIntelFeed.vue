@@ -67,6 +67,7 @@
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
         },
         beforeMount: function () {
+            console.log('Intel Feed Sub Component');
             this.loadContent();
         },
         watch: {
@@ -90,7 +91,6 @@
                 params = params || null;
 
                 let onSuccess = (res) => {
-                    console.log(res);
                     this.loading = false;
                     this.myFeed.page++;
                     this.myFeed.loading = false;

@@ -861,6 +861,7 @@ controller.getAllAvailableContent = function(req, callback) {
         if(error) return callback(error);
         try{
             queryFind.$and = queryFind.$and.concat( controller.validateQuery(req.query));
+            console.log(queryFind);
             const allResults = await ParetoContent.find(queryFind).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
             let newResults = [];
             allResults.forEach(function(entry){
@@ -874,34 +875,37 @@ controller.getAllAvailableContent = function(req, callback) {
                  since it knows their latest scores and the current block height. therefore the full content response can be queried at once, perhaps, and pages can be done fictionally
 
                  */
-                let data = {
-                    _id: entry._id,
-                    blockAgo: Math.max(blockHeight - entry.block, 0),
-                    block: entry.block,
-                    title: entry.title,
-                    address: entry.address,
-                    body: entry.body,
-                    expires: entry.expires,
-                    dateCreated: entry.dateCreated,
-                    txHash: entry.txHash,
-                    totalReward:  entry.totalReward || 0,
-                    reward:  entry.reward,
-                    speed: entry.speed,
-                    id:entry.id,
-                    txHashDistribute: entry.txHashDistribute,
-                    intelAddress: entry.intelAddress,
-                    _v: entry._v,
-                    distributed: entry.distributed,
-                    createdBy: {
-                        address: entry.createdBy.address,
-                        alias: entry.createdBy.alias,
-                        biography: entry.createdBy.biography,
-                        profilePic: entry.createdBy.profilePic
-                    },
-                    contentDelay
-                };
+                try {
+                    let data = {
+                        _id: entry._id,
+                        blockAgo: Math.max(blockHeight - entry.block, 0),
+                        block: entry.block,
+                        title: entry.title,
+                        address: entry.address,
+                        body: entry.body,
+                        expires: entry.expires,
+                        dateCreated: entry.dateCreated,
+                        txHash: entry.txHash,
+                        totalReward:  entry.totalReward || 0,
+                        reward:  entry.reward,
+                        speed: entry.speed,
+                        id:entry.id,
+                        txHashDistribute: entry.txHashDistribute,
+                        intelAddress: entry.intelAddress,
+                        _v: entry._v,
+                        distributed: entry.distributed,
+                        createdBy: {
+                            address: entry.createdBy.address,
+                            alias: entry.createdBy.alias,
+                            biography: entry.createdBy.biography,
+                            profilePic: entry.createdBy.profilePic
+                        },
+                        contentDelay
+                    };
 
-                newResults.push(data);
+                    newResults.push(data);
+                }catch (e) {
+                }
             });
             //console.log(allResults);
 
@@ -1027,8 +1031,6 @@ controller.getUserInfo = function(address ,callback){
             }
 
         });
-
-
     }
 
 };
@@ -1037,6 +1039,7 @@ controller.getUserInfo = function(address ,callback){
 
 controller.getContentByCurrentUser = function(req, callback){
     const address = req.query.user || req.user;
+    console.log(address);
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
 
