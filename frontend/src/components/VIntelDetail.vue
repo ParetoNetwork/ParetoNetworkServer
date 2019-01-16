@@ -119,7 +119,6 @@
             };
         },
         beforeMount: function () {
-            console.log(this.id);
             this.$store.state.makingRequest = true;
             this.requestCall()
             // console.log(this.$route.params);
@@ -143,7 +142,6 @@
             },
             getIntel: function () {
                 return DashboardService.getIntel(this.id, res => {
-                    console.log(res);
                     this.getProfile(res.address);
                     this.intel = res;
                 }, error => {
