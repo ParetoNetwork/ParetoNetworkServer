@@ -89,8 +89,6 @@
                         });
                     },
                     err => {
-                        console.log(intel.id);
-                        console.log(this.currentDistributes);
                         this.deleteDistribute(intel.id);
                         this.clickedCollect = false;
                         this.$notify({

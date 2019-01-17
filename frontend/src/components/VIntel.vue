@@ -61,7 +61,9 @@
                             </div>
 
                             <!-- make this upwards of four lines before ellipsis -->
-                            <i class="fa fa-edit cursor-pointer" style="color: #4e555b; margin: 2px;" @click="showModal"></i>{{user.biography || 'No biography provided'}}
+                            <span @click="showModal">
+                                <i class="fa fa-edit cursor-pointer" style="color: #4e555b; margin: 2px;"></i>{{user.biography || 'No biography provided'}}
+                            </span>
 
                             <!--<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">-->
                             <!--Calculate-->
@@ -79,10 +81,12 @@
                         </div>
                     </div>
                 </template>
-                <VEventFeed :user="user"></VEventFeed>
+                <VEventFeed v-if="primalLoad" :user="user"></VEventFeed>
+                <VShimmerMyPost v-else></VShimmerMyPost>
             </div>
             <div class="col-md-7 mb-3">
-                <VIntelFeed :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
+                <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
+                <VShimmerFeed v-else></VShimmerFeed>
             </div>
         </div>
         <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
@@ -156,6 +160,7 @@
                     score: 0,
                     tokens: 0
                 },
+                primalLoad: false,
                 updateContentVar: 0
             };
         },
@@ -300,15 +305,18 @@
                 if (!this.madeLogin) {
                     this.intelEnter();
                     AuthService.postSign(
-                        () => {
+                        (res) => {
+                            this.primalLoad = true;
                             this.requestCall();
                         },
                         () => {
+                            this.primalLoad = true;
                             this.socketConnection();
                             this.requestCall();
                         }
                     );
                 } else {
+                    this.primalLoad = true;
                     this.socketConnection();
                     this.requestCall();
                 }
