@@ -142,7 +142,7 @@
             login: function () {
                 this.loadingLogin();
                 authService.signSplash(data => {
-                    this.$router.push('/intel');
+                    this.$router.push('intel');
                     this.collapseContent();
                     authService.postSign(
                         res => {

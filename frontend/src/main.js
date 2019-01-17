@@ -61,9 +61,9 @@ const store = new Vuex.Store({
     mutations: {
         addReward(state, data){
             state.intelReward = data.intel;
-            state.myTokens = data.tokens
+            state.myTokens = data.tokens;
         },
-        login(state, data) {
+        login(state, data){
             state.isLogged = true;
             state.address = data.address.address;
             state.user = data.address;
