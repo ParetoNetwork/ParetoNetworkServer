@@ -73,7 +73,7 @@
                 this.loadingLogin();
                 authService.signSplash(data => {
                     this.collapseContent();
-                    this.$router.go(this.redirectRoute || '/intel');
+                    this.$router.push(this.redirectRoute || '/intel');
                     authService.postSign(
                         res => {
                             this.$store.dispatch({

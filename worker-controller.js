@@ -34,6 +34,7 @@ const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const START_CLOCK = process.env.START_CLOCK || 1;
 const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.00001;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
+const SCORE_BLOCK_AGO = process.env.SCORE_BLOCK_AGO  || 100;
 
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
@@ -798,7 +799,7 @@ workerController.realAllScoreRanking = async function(callback){
             const blockHeight = res.number;
 
             return web3.eth.getPastLogs({
-                fromBlock: "0x" + ((blockHeight-7200).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
+                fromBlock: "0x" + ((blockHeight-SCORE_BLOCK_AGO).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
                 toBlock: 'latest',
                 address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
@@ -1222,48 +1223,41 @@ const start = async () => {
         const queue = kue.createQueue({
             redis: REDIS_URL,
         });
-        queue.process('clock-job', (job, done) => {
-            switch (job.data.minutes){
-                case 1: {
-                    workerController.aproxAllScoreRanking(function(err, result){
+        queue.process('clock-job-aprox', (job, done) => {
+            workerController.aproxAllScoreRanking(function(err, result){
+                if(err){
+                    done(err );
+                }else{
+                    workerController.getScoreAndSaveRedis(function(err, result){
                         if(err){
-                            done(err );
+                            done(err);
                         }else{
-                            workerController.getScoreAndSaveRedis(function(err, result){
-                                if(err){
-                                    done(err);
-                                }else{
-                                    done(null, 'Sucessfully updated aprox');
-                                }
-
-                            });
+                            done(null, 'Sucessfully updated aprox');
                         }
 
                     });
-                    break;
-
                 }
-                case 5:{
-                    workerController.updateFromLastIntel();
-                    workerController.realAllScoreRanking(function(err, result){
+
+            });
+        });
+
+        queue.process('clock-job-score', 4, (job, done) => {
+            workerController.updateFromLastIntel();
+            workerController.realAllScoreRanking(function(err, result){
+                if(err){
+                    done(err );
+                }else{
+                    workerController.getScoreAndSaveRedis(function(err, result){
                         if(err){
                             done(err );
                         }else{
-                            workerController.getScoreAndSaveRedis(function(err, result){
-                                if(err){
-                                    done(err );
-                                }else{
-                                    done(null, 'Sucessfully updated');
-                                }
-
-                            });
+                            done(null, 'Sucessfully updated');
                         }
 
                     });
-                    break;
                 }
 
-            }
+            });
         });
 
 
@@ -1271,34 +1265,26 @@ const start = async () => {
             workerController.getScoreAndSaveSnapshot(done);
         });
 
-        queue.process('controller-job', 4, (job, done) => {
-            switch (job.data.type) {
-                case 'update': {
-                    workerController.updateScore(job.data.address, function (err, result) {
-                        if (err) {
-                            done(err);
-                        } else {
-                            done(null, result);
-                        }
-
-                    });
-                    break;
+        queue.process('controller-job-save', 2, (job, done) => {
+            workerController.getScoreAndSaveRedis (function(err, result){
+                if(err){
+                    done(err );
+                }else{
+                    done(null, result);
                 }
-                case 'save-redis':{
-                    workerController.getScoreAndSaveRedis (function(err, result){
-                        if(err){
-                            done(err );
-                        }else{
-                            done(null, result);
-                        }
 
-                    });
-                    break;
+            });
+        });
+
+        queue.process('controller-job-score', 2, (job, done) => {
+            workerController.updateScore(job.data.address, function (err, result) {
+                if (err) {
+                    done(err);
+                } else {
+                    done(null, result);
                 }
-            }
 
-
-
+            });
         });
 
         if(START_CLOCK==1){
