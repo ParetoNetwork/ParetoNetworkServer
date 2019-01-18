@@ -57,6 +57,7 @@ redisClient.on("error", function (err) {
 });
 
 
+
 /**
  * Web3 Initialization
  */
@@ -861,7 +862,6 @@ controller.getAllAvailableContent = function(req, callback) {
         if(error) return callback(error);
         try{
             queryFind.$and = queryFind.$and.concat( controller.validateQuery(req.query));
-            console.log(queryFind);
             const allResults = await ParetoContent.find(queryFind).sort({dateCreated : -1}).skip(page*limit).limit(limit).populate( 'createdBy' ).exec();
             let newResults = [];
             allResults.forEach(function(entry){
@@ -1039,7 +1039,7 @@ controller.getUserInfo = function(address ,callback){
 
 controller.getContentByCurrentUser = function(req, callback){
     const address = req.query.user || req.user;
-    console.log(address);
+
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
 
@@ -1511,7 +1511,7 @@ controller.getAllIntel = async function(callback){
     const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     try{
         const result = await IntelInstance.methods.getAllIntel().call();
-        console.log(result)
+
         response = [];
         for(let i = 0; i< result.intelID.length; i++){
             const obj = {};
@@ -1534,7 +1534,6 @@ controller.getIntelsByProvider = async function(providerAddress ,callback){
     const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     try{
         const result = await IntelInstance.methods.getIntelsByProvider(providerAddress).call();
-        console.log(result)
         response = [];
         for(let i = 0; i< result.intelID.length; i++){
             const obj = {};
@@ -1556,7 +1555,6 @@ controller.getIntelsByProvider = async function(providerAddress ,callback){
 controller.getAnIntel = async function(Id, callback){
     const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
     const result = await IntelInstance.methods.getIntel(Id).call();
-    console.log(result);
     callback(null, result);
 }
 
@@ -1565,8 +1563,6 @@ controller.getContributorsByIntel = async function (Id, callback) {
 
     try{
         const result = await IntelInstance.methods.contributionsByIntel(Id).call();
-        console.log(result.addresses);
-        console.log(result.amounts);
 
         response = [];
         for(let i = 0; i< result.addresses.length; i++){

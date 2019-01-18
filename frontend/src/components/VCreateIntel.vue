@@ -329,8 +329,6 @@
                         const intel = res.find(item => {
                             return intelId == item.id;
                         });
-
-                        console.log(intel);
                         if(this.$route.path ===  '/create'){
                             this.$router.push(`intel/${intel.address}/${intel.txHash}`);
                         }
