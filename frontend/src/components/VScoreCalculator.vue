@@ -76,7 +76,6 @@
             loadAddress: function () {
                 dashboardService.getAddress(res => {
                     this.address = res;
-                   // console.log(this.address)
                 }, () => {
                     this.$notify({
                         group: 'error',
