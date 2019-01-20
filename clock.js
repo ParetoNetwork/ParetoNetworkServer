@@ -1,4 +1,5 @@
 
+console.log(new Date());
 var clock = module.exports = {};
 clock.time = 0;
 clock.start= function(wqueue){
@@ -66,7 +67,7 @@ clock.start= function(wqueue){
 
     cron.schedule('*/5 * * * *', () => {
         try{
-
+            console.log(new Date());
             const job = queue
                 .create('clock-job-score',{} )
                 .removeOnComplete(true)
@@ -76,10 +77,11 @@ clock.start= function(wqueue){
                         return;
                     }
                     job.on('complete', result => {
-                        console.log('Sucessfully weekly snap' );
+                        console.log('Sucessfully Score' );
+                        console.log(new Date());
                     });
                     job.on('failed', () => {
-                        console.log('fail weekly snap' );
+                        console.log('Fail Score' );
                     });
                 });
 
