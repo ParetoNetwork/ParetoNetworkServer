@@ -16,6 +16,8 @@ const cron = require("node-cron");
 var history = require('connect-history-api-fallback');
 let constants = {};
 const constantsPath = path.resolve(__dirname,'backend-private-constants.json');
+const {RateLimiterRedis} = require('rate-limiter-flexible');
+
 
 console.log(__dirname);
 
@@ -37,8 +39,28 @@ const s3 = new AWS.S3();
 
 var controller = require('./backend-controller.js');
 
-
 var app = express();
+
+const newRedis = require("redis");
+
+const rateLimiter = new RateLimiterRedis({
+    redis: controller.redisClient,
+    keyPrefix: 'middleware',
+    points: 25, // 10 requests
+    duration: 1, // per 1 second by IP
+    blockDuration: 120 // 2 minutes block
+});
+
+app.use((req, res, next) => {
+    rateLimiter.consume(req.connection.remoteAddress)
+        .then(() => {
+            next();
+        })
+        .catch(() => {
+            res.status(429).send('Too Many Requests');
+        });
+});
+
 
 app.all(/^\/api-docs$/, function(req, res) { res.redirect('/api-docs/index.html'); });
 
@@ -564,7 +586,6 @@ function responseUserInfo(req, res) {
 
 //get info of himself
 app.get('/v1/userinfo', function (req, res) {
-    console.log(req.query);
     //Get Info User
      if (req.query.latest=='true'){
          controller.isNew(req.user, function (err, success) {
