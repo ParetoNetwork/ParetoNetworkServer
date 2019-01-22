@@ -17,6 +17,7 @@
     </div>
 </template>
 
+
 <script>
     import ICountUp from "vue-countup-v2";
     import {countUpMixin} from "../mixins/countUp";
