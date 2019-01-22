@@ -632,6 +632,7 @@ app.get('/v1/userinfo/:address', function (req, res) {
 
 });
 
+
 //update info user
 app.post('/v1/updateuser', function (req, res) {
     controller.updateUser(req.user, req.body, function (err, result) {
