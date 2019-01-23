@@ -113,22 +113,6 @@ function updateWithMongo() {
     //ParetoProfile.
 }
 
-function slugify(string) {
-    const a = 'àáäâãåèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
-    const b = 'aaaaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
-    const p = new RegExp(a.split('').join('|'), 'g');
-
-    return string.toString().toLowerCase()
-        .replace(/\s+/g, '-') // Replace spaces with -
-        .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
-        .replace(/&/g, '-and-') // Replace & with 'and'
-        .replace(/[^\w\-]+/g, '') // Remove all non-word characters
-        .replace(/\-\-+/g, '-') // Replace multiple - with single -
-        .replace(/^-+/, '') // Trim - from start of text
-        .replace(/-+$/, '') // Trim - from end of text
-}
-
-
 // set up Pareto and Intel contracts instances
 const Intel_Contract_Schema = require("./build/contracts/Intel.json");
 
@@ -724,7 +708,6 @@ controller.addExponentAprox = function (addresses, scores, blockHeight, callback
     })
 };
 
-
 controller.validateQuery = function (query) {
     const array = [];
     if (query.created && !isNaN(Date.parse(query.created))) {
@@ -789,6 +772,20 @@ controller.validateQuery = function (query) {
 
 }
 
+controller.slugify = function(string) {
+    const a = 'àáäâãåèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
+    const b = 'aaaaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
+    const p = new RegExp(a.split('').join('|'), 'g');
+
+    return string.toString().toLowerCase()
+        .replace(/\s+/g, '-') // Replace spaces with -
+        .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
+        .replace(/&/g, '-and-') // Replace & with 'and'
+        .replace(/[^\w\-]+/g, '') // Remove all non-word characters
+        .replace(/\-\-+/g, '-') // Replace multiple - with single -
+        .replace(/^-+/, '') // Trim - from start of text
+        .replace(/-+$/, '') // Trim - from end of text
+}
 
 controller.getQueryContentByUser = function (address, intel, callback) {
 
@@ -1115,7 +1112,7 @@ controller.updateUser = function (address, userinfo, callback) {
         const profile = {address: address};
         if (userinfo.alias) {
             profile.alias = userinfo.alias;
-            profile.aliasSlug = slugify(userinfo.alias);
+            profile.aliasSlug = controller.slugify(userinfo.alias);
         }
         if (userinfo.biography) {
             profile.biography = userinfo.biography;
@@ -1131,7 +1128,6 @@ controller.updateUser = function (address, userinfo, callback) {
             }
         })
     }
-
 };
 
 controller.getUserInfo = async function (address, callback) {
@@ -1153,6 +1149,7 @@ controller.getUserInfo = async function (address, callback) {
                         'score': ranking.score,
                         'tokens': ranking.tokens,
                         'alias': profile.alias,
+                        'aliasSlug': profile.aliasSlug,
                         'biography': profile.biography,
                         "profile_pic": profile.profilePic
                     });
@@ -1173,7 +1170,7 @@ controller.getUserInfo = async function (address, callback) {
                     let ranking = rankings[0];
                     callback(null, {
                         'address': address, 'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
-                        'alias': profile.alias, 'biography': profile.biography, "profile_pic": profile.profilePic
+                        'alias': profile.alias, 'aliasSlug': profile.aliasSlug, 'biography': profile.biography, "profile_pic": profile.profilePic
                     });
                 });
             }
@@ -1191,7 +1188,7 @@ controller.getContentByCurrentUser = async function (req, callback) {
     var page = parseInt(req.query.page || 0);
 
     if (!isAddress) {
-        let profileFound = await ParetoProfile.findOne({alias: address}).exec();
+        let profileFound = await ParetoProfile.findOne({aliasSlug: address}).exec();
         if (profileFound) address = profileFound.address;
         isAddress = web3.utils.isAddress(address) === true;
     }
@@ -1467,7 +1464,7 @@ controller.insertProfile = function (profile, callback) {
                 console.error('unable to write to db because: ', err);
             } else {
                 const multi = redisClient.multi();
-                let profile = {address: r.address, alias: r.alias, biography: r.biography, profilePic: r.profilePic};
+                let profile = {address: r.address, alias: r.alias, aliasSlug: r.aliasSlug, biography: r.biography, profilePic: r.profilePic};
                 multi.hmset("profile" + profile.address + "", profile);
                 multi.exec(function (errors, results) {
                     if (errors) {
@@ -1509,7 +1506,7 @@ controller.getProfileAndSaveRedis = function (address, callback) {
     ParetoProfile.findOne({address: address},
         function (err, r) {
             if (r) {
-                let profile = {address: address, alias: r.alias, biography: r.biography, profilePic: r.profilePic};
+                let profile = {address: address, alias: r.alias, aliasSlug: r.aliasSlug, biography: r.biography, profilePic: r.profilePic};
                 const multi = redisClient.multi();
                 multi.hmset("profile" + profile.address + "", profile);
                 multi.exec(function (errors, results) {
@@ -1520,7 +1517,7 @@ controller.getProfileAndSaveRedis = function (address, callback) {
                     return callback(null, profile);
                 })
             } else {
-                let profile = {address: address, alias: "", biography: "", profilePic: ""};
+                let profile = {address: address, alias: "", aliasSlug: "", biography: "", profilePic: ""};
                 controller.insertProfile(profile, callback)
             }
         }
