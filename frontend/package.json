@@ -37,6 +37,7 @@
     "postcss-url": "^7.2.1",
     "qs": "^6.5.2",
     "snapsvg": "^0.5.1",
+    "summernote": "^0.8.11",
     "v-debounce": "^0.1.2",
     "vue": "^2.5.16",
     "vue-countup-v2": "^1.0.3",
