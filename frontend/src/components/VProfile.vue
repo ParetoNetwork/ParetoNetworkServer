@@ -2,7 +2,7 @@
     <div>
         <div v-if="profile.address" class="row">
             <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
-                <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.alias || profile.address)">
+                <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
                     <div class="thumb profile-pic"
                          v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                     ></div>
@@ -20,7 +20,7 @@
 
 
                 <div class="row border-bottom mt-5 px-0 py-3">
-                    <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.alias || profile.address)">
+                    <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
                         <i class="fa fa-book"></i>
                         <span class="text-pareto-gray ml-3"> View Contributor Feed </span>
                     </router-link>

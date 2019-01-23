@@ -10,7 +10,7 @@ export default class profileService {
         }).catch(error => {
             return onError(error);
         });
-    }
+    }aliasSlug
 
     //Returns the current user profile, but if send a profile parameter (address), will return the query profile
     static getProfile(onSuccess, onError, profile = null) {
