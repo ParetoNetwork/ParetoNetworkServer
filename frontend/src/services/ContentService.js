@@ -446,9 +446,7 @@ export default class ContentService {
             let gasPrice = await web3.eth.getGasPrice();
 
             const rewarder_address = accounts[0];
-            const decimals = web3.utils.toBN(18);
-            const amount = web3.utils.toBN(parseFloat(content.tokenAmount));
-            const depositAmount = amount.mul(web3.utils.toBN(10).pow(decimals));
+            const depositAmount = web3.utils.toWei(content.tokenAmount.toString(), "ether");
             let gasApprove = await ParetoTokenInstance.methods
                 .increaseApproval(Intel.options.address, depositAmount)
                 .estimateGas({from: rewarder_address});
@@ -591,11 +589,11 @@ export default class ContentService {
                 const WsSubprovider = require('web3-provider-engine/subproviders/websocket');
                 var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
                 this.ledgerNanoEngine = new ProviderEngine();
-                const networkId = 3;
+                const networkId = window.localStorage.getItem('netWorkId');
                 this.ledgerWalletSubProvider = await LedgerWalletSubproviderFactory(() => networkId, pathId);
                 this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
                 this.ledgerNanoEngine.addProvider(this.ledgerWalletSubProvider);
-                this.ledgerNanoEngine.addProvider(new WsSubprovider({rpcUrl: ContentService.networks[window.localStorage.getItem('netWorkId')].wss})); // you need RPC endpoint
+                this.ledgerNanoEngine.addProvider(new WsSubprovider({rpcUrl: ContentService.networks[networkId].wss})); // you need RPC endpoint
                 this.ledgerNanoEngine.start();
                 provider = this.ledgerNanoEngine;
                 break;
