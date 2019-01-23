@@ -2,25 +2,26 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var paretoProfileSchema = new Schema(
-  {
-    address: String,
-    alias: String,
-    biography: String,
-    profilePic: String,
-    rewardsGiven: [
-      {
-        IntelID: { type: String },
-        reward: { type: Number }
-      }
-    ],
-    rewardsReceived: [
-      {
-        IntelID: { type: String },
-        reward: { type: Number }
-      }
-    ]
-  },
-  { collection: "profile" , toObject : {virtuals:true},toJSON: { virtuals: true } }
+    {
+        address: String,
+        alias: String,
+        aliasSlug: String,
+        biography: String,
+        profilePic: String,
+        rewardsGiven: [
+            {
+                IntelID: {type: String},
+                reward: {type: Number}
+            }
+        ],
+        rewardsReceived: [
+            {
+                IntelID: {type: String},
+                reward: {type: Number}
+            }
+        ]
+    },
+    {collection: "profile", toObject: {virtuals: true}, toJSON: {virtuals: true}}
 );
 paretoProfileSchema.virtual('rewardsSent', {
     ref: 'reward', // The model to use
