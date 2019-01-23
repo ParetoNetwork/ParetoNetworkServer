@@ -64,7 +64,7 @@ export default class profileService {
     }
 
     //Returns a profile. If none address is defined, returns last searched user profile
-    static getSpecificProfile(onSuccess, onError, address){
+    static getSpecificProfile(address, onSuccess, onError){
         const profile = this.getSpecificProfile.profile || {};
 
         //Cached profile

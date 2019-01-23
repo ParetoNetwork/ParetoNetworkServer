@@ -148,11 +148,11 @@
                 });
             },
             getProfile: function (address) {
-                ProfileService.getSpecificProfile(res => {
+                ProfileService.getSpecificProfile(address, res => {
                     this.profile = res;
                     this.loading = false;
                 }, error => {
-                }, address)
+                })
             },
             getAddress: function () {
                 return DashboardService.getAddress(res => {
