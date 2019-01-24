@@ -92,14 +92,12 @@
             }
         },
         mounted(){
-          console.log(this.intel) ;
         },
         methods: {
             dateStringFormat(date) {
                 return new Date(date);
             },
             intelRoute: function (intel) {
-                console.log(intel);
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
                 return '/intel/' + (intel.createdBy.aliasSlug || intel.address) + '/' + param;
             },

@@ -20,9 +20,11 @@
                             </div>
                         </div>
                         <div class="media-body flex-column text-left ellipsis">
-                            <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address" class="cursor-pointer ellipsis">
+                            <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address"
+                                         class="cursor-pointer ellipsis">
                                 <svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>
-                                <span v-if="user.alias" class="name-title title-user-content "><b>{{user.alias}}<br/></b></span>
+                                <span v-if="user.alias"
+                                      class="name-title title-user-content "><b>{{user.alias}}<br/></b></span>
                                 <span class="ellipsis text-user-content">{{user.address}}</span>
                             </router-link>
 
@@ -57,7 +59,10 @@
 
                             <div class="mb-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>
+                                <a style="color: #000;"
+                                   v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address"
+                                   target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i
+                                        class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>
                             </div>
 
                             <!-- make this upwards of four lines before ellipsis -->
@@ -85,7 +90,8 @@
                 <VShimmerMyPost v-else></VShimmerMyPost>
             </div>
             <div class="col-md-7 mb-3">
-                <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
+                <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
+                            :address="address"></VIntelFeed>
                 <VShimmerFeed v-else></VShimmerFeed>
             </div>
         </div>
@@ -154,7 +160,7 @@
                 picture: "",
                 paretoAddress: window.localStorage.getItem('paretoAddress'),
                 baseURL: environment.baseURL,
-                etherscanUrl: window.localStorage.getItem('etherscan') ,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
                 user: {
                     rank: 0,
                     score: 0,
@@ -185,7 +191,7 @@
             goToIntelPage: function () {
                 window.location = '/#/create';
             },
-            leaderboards(address){
+            leaderboards(address) {
                 return '/leaderboards' + '?address=' + address;
             },
             loadAddress: function () {
@@ -292,15 +298,26 @@
                 profileService.updateProfile(
                     profile,
                     res => {
+                        this.user.alias = res.data.alias;
                         this.$refs.myModalRef.hide();
                         this.loadProfile();
                     },
                     error => {
+                        let errorText = error.message ? error.message : error;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Login',
+                            text: errorText
+                        });
                     }
                 );
             },
             main: function () {
-                profileService.updateConfig( res => {this.etherscanUrl = window.localStorage.getItem('etherscan')});
+                profileService.updateConfig(res => {
+                    this.etherscanUrl = window.localStorage.getItem('etherscan')
+                });
                 this.$store.state.makingRequest = true;
                 if (!this.madeLogin) {
                     this.intelEnter();
