@@ -92,7 +92,8 @@
                     address: '',
                     alias: '' ,
                     biography: '',
-                    rank: 1000
+                    rank: 1000,
+                    aliasSlug: ''
                 },
                 baseURL : environment.baseURL,
             }

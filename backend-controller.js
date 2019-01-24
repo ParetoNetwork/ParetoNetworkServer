@@ -43,7 +43,6 @@ fs.readdirSync(modelsPath).forEach(file => {
 });
 
 
-
 /**
  * Redis Initialization
  */
@@ -708,7 +707,15 @@ controller.addExponentAprox = function (addresses, scores, blockHeight, callback
     })
 };
 
-controller.validateQuery = function (query) {
+controller.getAddressesWithSlug = async function (aliasArray){
+    let profiles = await ParetoProfile.find({ aliasSlug: { $in : aliasArray}}).exec();
+    if(profiles.length > 0){
+        return profiles.map(profile => profile.address);
+    }
+    return [];
+};
+
+controller.validateQuery = async function (query) {
     const array = [];
     if (query.created && !isNaN(Date.parse(query.created))) {
         try {
@@ -743,36 +750,65 @@ controller.validateQuery = function (query) {
                 }).map(address => {
                     return address.toLowerCase()
                 });
-            if (data.length > 0) {
-                array.push({address: {$in: data}})
+
+            let data2 = query.address.split(',')
+                .filter(address => {
+                    return !web3.utils.isAddress(address);
+                });
+
+            let addresses = await controller.getAddressesWithSlug(data2);
+
+            let allAddresses = [...data, ...addresses];
+            if(allAddresses.length > 0) {
+                array.push({address: {$in: allAddresses}});
             }
 
         } catch (e) {
             console.log(e)
         }
-    } else {
-        if (query.exclude) {
-            try {
-                data = query.exclude.split(',')
-                    .filter(address => {
-                        return web3.utils.isAddress(address)
-                    }).map(address => {
-                        return address.toLowerCase()
-                    });
-                if (data.length > 0) {
-                    array.push({address: {$nin: data}})
-                }
+    } else if(query.alias){
+        try {
+            data = query.alias.split(',');
 
-            } catch (e) {
-                console.log(e)
+            let addresses = await controller.getAddressesWithSlug(data);
+            if(addresses.length > 0) {
+                array.push({address: {$in: addresses}});
             }
+        } catch (e) {
+            console.log(e);
         }
+
+    } else if (query.exclude) {
+        try {
+            data = query.exclude.split(',')
+                .filter(address => {
+                    return web3.utils.isAddress(address)
+                }).map(address => {
+                    return address.toLowerCase()
+                });
+
+            let data2 = query.exclude.split(',')
+                .filter(address => {
+                    return !web3.utils.isAddress(address);
+                });
+
+            let addresses = await controller.getAddressesWithSlug(data2);
+
+            let allAddresses = [...data, ...addresses];
+            if(allAddresses.length > 0) {
+                array.push({address: {$nin: allAddresses}});
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+
     }
     return array;
 
 }
 
-controller.slugify = function(string) {
+controller.slugify = function (string) {
     const a = 'àáäâãåèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
     const b = 'aaaaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
     const p = new RegExp(a.split('').join('|'), 'g');
@@ -946,7 +982,7 @@ controller.getQueryContentByUser = function (address, intel, callback) {
     } // end else for address validation
 };
 
-controller.getAllAvailableContent = function (req, callback) {
+controller.getAllAvailableContent = async function (req, callback) {
 
     var limit = parseInt(req.query.limit || 100);
     var page = parseInt(req.query.page || 0);
@@ -954,7 +990,9 @@ controller.getAllAvailableContent = function (req, callback) {
 
         if (error) return callback(error);
         try {
-            queryFind.$and = queryFind.$and.concat(controller.validateQuery(req.query));
+            let newQuery = await controller.validateQuery(req.query);
+            queryFind.$and = queryFind.$and.concat(newQuery);
+
             const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate('createdBy').exec();
             let newResults = [];
             allResults.forEach(function (entry) {
@@ -998,6 +1036,7 @@ controller.getAllAvailableContent = function (req, callback) {
                     };
 
                     newResults.push(data);
+
                 } catch (e) {
                 }
             });
@@ -1066,8 +1105,12 @@ controller.getContentByIntel = function (req, intel, callback) {
     });
 };
 
-controller.retrieveAddressWithAlias = async function (alias, callback) {
-    return;
+controller.retrieveProfileWithAlias = function (alias) {
+    return ParetoProfile.findOne({alias: alias}).exec();
+};
+
+controller.retrieveProfileWithAliasSlug = function (alias) {
+    return ParetoProfile.findOne({aliasSlug: alias}).exec();
 };
 
 controller.retrieveAddress = function (address, callback) {
@@ -1102,7 +1145,7 @@ controller.retrieveAddresses = function (addresses, callback) {
 };
 
 //12345
-controller.updateUser = function (address, userinfo, callback) {
+controller.updateUser = async function (address, userinfo, callback) {
 
     let fixaddress = address.toLowerCase();
 
@@ -1110,9 +1153,18 @@ controller.updateUser = function (address, userinfo, callback) {
         callback(new Error('Invalid Address'));
     } else {
         const profile = {address: address};
+
         if (userinfo.alias) {
             profile.alias = userinfo.alias;
             profile.aliasSlug = controller.slugify(userinfo.alias);
+
+            let existingAlias = await controller.retrieveProfileWithAlias(profile.alias);
+            let existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
+
+            if (existingAlias || existingAliasSlug) {
+                callback(new Error("An user with that alias already exist"));
+                return;
+            }
         }
         if (userinfo.biography) {
             profile.biography = userinfo.biography;
@@ -1132,8 +1184,6 @@ controller.updateUser = function (address, userinfo, callback) {
 
 controller.getUserInfo = async function (address, callback) {
     let fixaddress = address.toLowerCase();
-    let isAddress = web3.utils.isAddress(fixaddress) == false;
-
 
     if (web3.utils.isAddress(fixaddress) == false) {
         let profile = await ParetoProfile.findOne({aliasSlug: address}).exec();
@@ -1169,8 +1219,14 @@ controller.getUserInfo = async function (address, callback) {
                     }
                     let ranking = rankings[0];
                     callback(null, {
-                        'address': address, 'rank': ranking.rank, 'score': ranking.score, 'tokens': ranking.tokens,
-                        'alias': profile.alias, 'aliasSlug': profile.aliasSlug, 'biography': profile.biography, "profile_pic": profile.profilePic
+                        'address': address,
+                        'rank': ranking.rank,
+                        'score': ranking.score,
+                        'tokens': ranking.tokens,
+                        'alias': profile.alias,
+                        'aliasSlug': profile.aliasSlug,
+                        'biography': profile.biography,
+                        "profile_pic": profile.profilePic
                     });
                 });
             }
@@ -1464,7 +1520,13 @@ controller.insertProfile = function (profile, callback) {
                 console.error('unable to write to db because: ', err);
             } else {
                 const multi = redisClient.multi();
-                let profile = {address: r.address, alias: r.alias, aliasSlug: r.aliasSlug, biography: r.biography, profilePic: r.profilePic};
+                let profile = {
+                    address: r.address,
+                    alias: r.alias,
+                    aliasSlug: r.aliasSlug,
+                    biography: r.biography,
+                    profilePic: r.profilePic
+                };
                 multi.hmset("profile" + profile.address + "", profile);
                 multi.exec(function (errors, results) {
                     if (errors) {
@@ -1506,7 +1568,13 @@ controller.getProfileAndSaveRedis = function (address, callback) {
     ParetoProfile.findOne({address: address},
         function (err, r) {
             if (r) {
-                let profile = {address: address, alias: r.alias, aliasSlug: r.aliasSlug, biography: r.biography, profilePic: r.profilePic};
+                let profile = {
+                    address: address,
+                    alias: r.alias,
+                    aliasSlug: r.aliasSlug,
+                    biography: r.biography,
+                    profilePic: r.profilePic
+                };
                 const multi = redisClient.multi();
                 multi.hmset("profile" + profile.address + "", profile);
                 multi.exec(function (errors, results) {
