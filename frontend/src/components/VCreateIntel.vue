@@ -373,8 +373,10 @@
 <style lang="scss">
     $light-blue-pareto: #1f344f;
 
+    textarea:focus ~ .floating-label,
     input:focus ~ .floating-label,
-    input:not(:focus):valid ~ .floating-label {
+    textarea:not(:focus):valid ~ .floating-label,
+    input:not(:focus):valid ~ .floating-label{
         top: -35px;
         bottom: 10px;
         left: 5px;
