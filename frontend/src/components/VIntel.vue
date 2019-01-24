@@ -317,10 +317,19 @@
                 profileService.updateProfile(
                     profile,
                     res => {
+                        this.user.alias = res.data.alias;
                         this.$refs.myModalRef.hide();
                         this.loadProfile();
                     },
                     error => {
+                        let errorText = error.message ? error.message : error;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Login',
+                            text: errorText
+                        });
                     }
                 );
             },
