@@ -1144,9 +1144,7 @@ controller.retrieveAddresses = function (addresses, callback) {
     });
 };
 
-//12345
 controller.updateUser = async function (address, userinfo, callback) {
-
     let fixaddress = address.toLowerCase();
 
     if (web3.utils.isAddress(fixaddress) == false) {
@@ -1159,11 +1157,25 @@ controller.updateUser = async function (address, userinfo, callback) {
             profile.aliasSlug = controller.slugify(userinfo.alias);
 
             let existingAlias = await controller.retrieveProfileWithAlias(profile.alias);
-            let existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
+            let existingAliasSlug = false;
 
-            if (existingAlias || existingAliasSlug) {
+            if (existingAlias) {
                 callback(new Error("An user with that alias already exist"));
                 return;
+            } else{
+                existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
+
+                while (existingAliasSlug){
+                    let positionDash = profile.aliasSlug.indexOf('-');
+                    if ( positionDash >= 0 && positionDash < (profile.aliasSlug.length - 1)) {
+                        profile.aliasSlug = profile.aliasSlug.replace('-', '');
+                    }else {
+                        profile.aliasSlug = profile.aliasSlug + '-';
+                    }
+                    existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
+                }
+
+                console.log(profile.aliasSlug);
             }
         }
         if (userinfo.biography) {

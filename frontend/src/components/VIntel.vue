@@ -105,14 +105,21 @@
             <div class="d-block text-center pt-5">
                 <form action="">
                     <div class="input-group mb-3 create-input-space">
-                        <input v-model="alias" type="text" class="create-input create-content-text" id="alias"
+                        <input v-model="alias" type="text" class="create-input create-content-text text-user-content" id="alias"
                                aria-describedby="basic-addon3" required>
                         <span class="floating-label create-content-text title-user-content">
                             <b> Alias </b>
                         </span>
                     </div>
+                    <!--<div class="input-group mb-3 create-input-space mt-5">-->
+                        <!--<input v-model="user.aliasSlug || alias" type="text" class="create-input create-content-text text-user-content" id="alias-slug"-->
+                               <!--aria-describedby="basic-addon3" onkeydown="event.preventDefault()" required>-->
+                        <!--<span class="floating-label create-content-text title-user-content">-->
+                            <!--<b>Current Alias Slug </b>-->
+                        <!--</span>-->
+                    <!--</div>-->
                     <div class="input-group mb-3 mt-5 create-input-space">
-                        <textarea v-model="bio" class="create-input create-content-text" id="bio" rows="4"
+                        <textarea v-model="bio" class="create-input create-content-text text-user-content" id="bio" rows="4"
                                   aria-describedby="basic-addon3" required> </textarea>
                         <span class="floating-label create-content-text title-user-content">
                             <b> Biography </b>
@@ -144,7 +151,9 @@
     import VIntelFeed from "./VIntelFeed.vue";
     import {mapMutations, mapState, mapActions} from "vuex";
     import environment from "../utils/environment";
+
     import {countUpMixin} from "../mixins/countUp";
+    import {utilities} from "../mixins/utilities";
 
     import VShimmerUser from "./Shimmer/IntelView/VShimmerUser";
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
@@ -156,7 +165,7 @@
 
     export default {
         name: "VIntel",
-        mixins: [countUpMixin],
+        mixins: [countUpMixin, utilities],
         components: {
             ICountUp,
             VShimmerUser,
@@ -175,6 +184,7 @@
                 tokenAmount: 1,
                 moment: moment,
                 alias: "",
+                aliasSlug: "",
                 bio: "",
                 picture: "",
                 paretoAddress: window.localStorage.getItem('paretoAddress'),
@@ -200,6 +210,11 @@
         },
         computed: {
             ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"]),
+        },
+        watch : {
+          'alias' : function (newAlias) {
+              this.aliasSlug = this.slugify(newAlias);
+          }
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
