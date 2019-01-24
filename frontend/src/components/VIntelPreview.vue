@@ -91,13 +91,15 @@
                 return temp.format("MMMM Do, YYYY");
             }
         },
+        mounted(){
+        },
         methods: {
             dateStringFormat(date) {
                 return new Date(date);
             },
             intelRoute: function (intel) {
                 let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
-                return '/intel/' + intel.address + '/' + param;
+                return '/intel/' + (intel.createdBy.aliasSlug || intel.address) + '/' + param;
             },
             loadProfileImage: function (pic, profileAddress) {
                 let path = this.baseURL + "/profile-image?image=";

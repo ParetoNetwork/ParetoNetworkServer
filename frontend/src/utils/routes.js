@@ -31,7 +31,7 @@ const routes = [
         path: '/intel', component: Vintel
     },
     {
-        path: '/intel/:address/:id', component: VIntelDetail, name: 'VIntelDetail'
+        path: '/intel/:alias/:id', component: VIntelDetail, name: 'VIntelDetail'
     },
     {
         path: '/calculator', component: VScoreCalculator, name: 'VScoreCalculator'
