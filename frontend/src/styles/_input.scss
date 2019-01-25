@@ -1,0 +1,35 @@
+textarea:focus ~ .floating-label,
+input:focus ~ .floating-label,
+textarea:not(:focus):valid ~ .floating-label,
+input:not(:focus):valid ~ .floating-label{
+  top: -35px;
+  bottom: 10px;
+  left: 5px;
+  font-size: 16px;
+}
+
+.create-input {
+  padding: 10px 0px 8px 15px;
+  border-radius: 3px;
+  border: 0px;
+  background-color: $light-blue-pareto;
+  color: white;
+  width: 100%;
+}
+
+.lookup-input {
+  padding: 10px 10px 10px 5px;
+  display: block;
+  width: 100%;
+  border: none;
+  background-color: #040f1e;
+  border-bottom: 1px solid #757575;
+  color: white;
+}
+
+input.readonly-input {
+  @extend .create-input;
+  background: #526782;
+  color: #C8C8C8;
+  cursor: not-allowed;
+}

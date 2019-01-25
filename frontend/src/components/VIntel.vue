@@ -20,9 +20,11 @@
                             </div>
                         </div>
                         <div class="media-body flex-column text-left ellipsis">
-                            <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address" class="cursor-pointer ellipsis">
+                            <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address"
+                                         class="cursor-pointer ellipsis">
                                 <svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>
-                                <span v-if="user.alias" class="name-title title-user-content "><b>{{user.alias}}<br/></b></span>
+                                <span v-if="user.alias"
+                                      class="name-title title-user-content "><b>{{user.alias}}<br/></b></span>
                                 <span class="ellipsis text-user-content">{{user.address}}</span>
                             </router-link>
 
@@ -57,7 +59,10 @@
 
                             <div class="mb-2">
                                 <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <a style="color: #000;" v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address" target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>
+                                <a style="color: #000;"
+                                   v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address"
+                                   target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i
+                                        class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>
                             </div>
 
                             <!-- make this upwards of four lines before ellipsis -->
@@ -85,24 +90,51 @@
                 <VShimmerMyPost v-else></VShimmerMyPost>
             </div>
             <div class="col-md-7 mb-3">
-                <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block" :address="address"></VIntelFeed>
+                <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
+                            :address="address"></VIntelFeed>
                 <VShimmerFeed v-else></VShimmerFeed>
             </div>
         </div>
-        <b-modal ref="myModalRef" title="Edit Profile" ok-title="Update" @ok="updateProfile">
-            <div class="d-block text-center">
+        <b-modal
+                centered
+                hide-header
+                hide-footer
+                ref="myModalRef"
+                title="Edit Profile"
+                ok-title="Update">
+            <div class="d-block text-center pt-5">
                 <form action="">
-                    <label for="alias" style="float: left;">Name</label>
-                    <div class="input-group mb-3">
-                        <input v-model="alias" type="text" class="form-control" id="alias"
-                               aria-describedby="basic-addon3">
+                    <div class="input-group mb-3 create-input-space">
+                        <input v-model="alias" type="text" class="create-input create-content-text text-user-content" id="alias"
+                               aria-describedby="basic-addon3" required>
+                        <span class="floating-label create-content-text title-user-content">
+                            <b> Alias </b>
+                        </span>
                     </div>
-                    <label for="bio" style="float: left;">Biography</label>
-                    <div class="input-group mb-3">
-                        <textarea v-model="bio" class="form-control" id="bio"
-                                  aria-describedby="basic-addon3"> </textarea>
+                    <div class="input-group mb-3 create-input-space">
+                        <b class="pareto-subtitle create-content-text title-user-content ml-3 mb-2">
+                            Current Alias Slug
+                        </b>
+                        <input v-model="user.aliasSlug || alias" type="text" class="readonly-input create-content-text text-user-content" id="alias-slug"
+                               aria-describedby="basic-addon3" onkeydown="event.preventDefault()" readonly>
+                    </div>
+                    <div class="input-group mb-3 mt-5 create-input-space">
+                        <textarea v-model="bio" class="create-input create-content-text text-user-content" id="bio" rows="4"
+                                  aria-describedby="basic-addon3" required> </textarea>
+                        <span class="floating-label create-content-text title-user-content">
+                            <b> Biography </b>
+                        </span>
                     </div>
                 </form>
+                <b-row class="m-2 mt-4 d-flex justify-content-end">
+                    <button
+                            class="btn btn-dark-primary-pareto mt-2 ml-2 order-md-2" @click="updateProfile()"> Update
+                    </button>
+                    <button
+                            class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0 order-md-1"
+                            @click="$refs.myModalRef.hide(); alias = user.alias; bio = user.biography">Cancel
+                    </button>
+                </b-row>
             </div>
         </b-modal>
     </div>
@@ -119,7 +151,9 @@
     import VIntelFeed from "./VIntelFeed.vue";
     import {mapMutations, mapState, mapActions} from "vuex";
     import environment from "../utils/environment";
+
     import {countUpMixin} from "../mixins/countUp";
+    import {utilities} from "../mixins/utilities";
 
     import VShimmerUser from "./Shimmer/IntelView/VShimmerUser";
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
@@ -131,7 +165,7 @@
 
     export default {
         name: "VIntel",
-        mixins: [countUpMixin],
+        mixins: [countUpMixin, utilities],
         components: {
             ICountUp,
             VShimmerUser,
@@ -150,11 +184,12 @@
                 tokenAmount: 1,
                 moment: moment,
                 alias: "",
+                aliasSlug: "",
                 bio: "",
                 picture: "",
                 paretoAddress: window.localStorage.getItem('paretoAddress'),
                 baseURL: environment.baseURL,
-                etherscanUrl: window.localStorage.getItem('etherscan') ,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
                 user: {
                     rank: 0,
                     score: 0,
@@ -176,6 +211,11 @@
         computed: {
             ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"]),
         },
+        watch : {
+          'alias' : function (newAlias) {
+              this.aliasSlug = this.slugify(newAlias);
+          }
+        },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
@@ -185,7 +225,7 @@
             goToIntelPage: function () {
                 window.location = '/#/create';
             },
-            leaderboards(address){
+            leaderboards(address) {
                 return '/leaderboards' + '?address=' + address;
             },
             loadAddress: function () {
@@ -292,15 +332,33 @@
                 profileService.updateProfile(
                     profile,
                     res => {
+                        this.user = res.data;
+                        console.log(this.user);
                         this.$refs.myModalRef.hide();
-                        this.loadProfile();
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            title: 'Login',
+                            text: 'Profile Updated Successfully!'
+                        });
                     },
                     error => {
+                        let errorText = error.message ? error.message : error;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Login',
+                            text: errorText
+                        });
                     }
                 );
             },
             main: function () {
-                profileService.updateConfig( res => {this.etherscanUrl = window.localStorage.getItem('etherscan')});
+                profileService.updateConfig(res => {
+                    this.etherscanUrl = window.localStorage.getItem('etherscan')
+                });
                 this.$store.state.makingRequest = true;
                 if (!this.madeLogin) {
                     this.intelEnter();
