@@ -373,13 +373,6 @@
 <style lang="scss">
     $light-blue-pareto: #1f344f;
 
-    input:focus ~ .floating-label,
-    input:not(:focus):valid ~ .floating-label {
-        top: -35px;
-        bottom: 10px;
-        left: 5px;
-        font-size: 16px;
-    }
 
     textarea a {
         text-decoration: underline;
@@ -418,15 +411,6 @@
 
     .create-input-space {
         position: relative;
-    }
-
-    .create-input {
-        padding: 10px 0px 8px 15px;
-        border-radius: 3px;
-        border: 0px;
-        background-color: $light-blue-pareto;
-        color: white;
-        width: 100%;
     }
 
     .create-intel-container {
@@ -497,16 +481,6 @@
         min-height: 300px;
         overflow: auto;
         width: 100%;
-    }
-
-    .lookup-input {
-        padding: 10px 10px 10px 5px;
-        display: block;
-        width: 100%;
-        border: none;
-        background-color: #040f1e;
-        border-bottom: 1px solid #757575;
-        color: white;
     }
 
     .floating-label {
