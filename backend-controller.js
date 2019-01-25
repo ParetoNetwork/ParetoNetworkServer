@@ -1159,25 +1159,30 @@ controller.updateUser = async function (address, userinfo, callback) {
             let existingAlias = await controller.retrieveProfileWithAlias(profile.alias);
             let existingAliasSlug = false;
 
-            if (existingAlias) {
+            if (existingAlias && existingAlias.address !== address) {
                 callback(new Error("An user with that alias already exist"));
                 return;
-            } else{
+            } else {
                 existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
 
-                while (existingAliasSlug){
-                    let positionDash = profile.aliasSlug.indexOf('-');
-                    if ( positionDash >= 0 && positionDash < (profile.aliasSlug.length - 1)) {
-                        profile.aliasSlug = profile.aliasSlug.replace('-', '');
-                    }else {
-                        profile.aliasSlug = profile.aliasSlug + '-';
+                let counter = 0;
+                while (existingAliasSlug && counter < 10){
+                    if(existingAliasSlug.address !== address){
+                        let positionDash = profile.aliasSlug.indexOf('-');
+                        if ( positionDash >= 0 && profile.aliasSlug.substring(profile.aliasSlug.length-1) !== '-') {
+                            profile.aliasSlug = profile.aliasSlug.replace('-', '');
+                        }else {
+                            profile.aliasSlug = profile.aliasSlug + '-';
+                        }
+                        existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
+                    }else{
+                        existingAliasSlug = null;
                     }
-                    existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
+                    counter++;
                 }
-
-                console.log(profile.aliasSlug);
             }
         }
+
         if (userinfo.biography) {
             profile.biography = userinfo.biography;
         }

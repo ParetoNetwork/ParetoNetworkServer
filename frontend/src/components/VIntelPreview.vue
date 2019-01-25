@@ -10,9 +10,9 @@
                 </div>
             </div>
             <router-link
-                    tag="div"
+                    tag="a"
                     :to="intelRoute(intel)"
-                    class="cursor-pointer p-0"
+                    class="cursor-pointer p-0 intel-preview"
                     v-bind:class="{ 'col-9 col-lg-6' : !eventRow , 'col-12 col-lg-7': eventRow }">
                 <h1 class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
                 <p class="text-dashboard ellipsis">Disclosed by:
@@ -113,5 +113,7 @@
 </script>
 
 <style scoped>
-
+    a.intel-preview {
+        color: black;
+    }
 </style>
