@@ -56,7 +56,7 @@
                 myFeed: {
                     content: [],
                     loading: false,
-                    page: 0,
+                    page: 1,
                 },
                 loading: true,
                 intel: {}
@@ -67,7 +67,7 @@
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
         },
         beforeMount: function () {
-            this.loadContent();
+            this.loadContent({page: 0, limit: 20});
         },
         watch: {
             //Updates when parent view, which has the webSocket, receives new information and refreshes
