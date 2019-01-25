@@ -111,13 +111,13 @@
                             <b> Alias </b>
                         </span>
                     </div>
-                    <!--<div class="input-group mb-3 create-input-space mt-5">-->
-                        <!--<input v-model="user.aliasSlug || alias" type="text" class="create-input create-content-text text-user-content" id="alias-slug"-->
-                               <!--aria-describedby="basic-addon3" onkeydown="event.preventDefault()" required>-->
-                        <!--<span class="floating-label create-content-text title-user-content">-->
-                            <!--<b>Current Alias Slug </b>-->
-                        <!--</span>-->
-                    <!--</div>-->
+                    <div class="input-group mb-3 create-input-space">
+                        <b class="pareto-subtitle create-content-text title-user-content ml-3 mb-2">
+                            Current Alias Slug
+                        </b>
+                        <input v-model="user.aliasSlug || alias" type="text" class="readonly-input create-content-text text-user-content" id="alias-slug"
+                               aria-describedby="basic-addon3" onkeydown="event.preventDefault()" readonly>
+                    </div>
                     <div class="input-group mb-3 mt-5 create-input-space">
                         <textarea v-model="bio" class="create-input create-content-text text-user-content" id="bio" rows="4"
                                   aria-describedby="basic-addon3" required> </textarea>
@@ -332,9 +332,16 @@
                 profileService.updateProfile(
                     profile,
                     res => {
-                        this.user.alias = res.data.alias;
+                        this.user = res.data;
+                        console.log(this.user);
                         this.$refs.myModalRef.hide();
-                        this.loadProfile();
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            title: 'Login',
+                            text: 'Profile Updated Successfully!'
+                        });
                     },
                     error => {
                         let errorText = error.message ? error.message : error;
