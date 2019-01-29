@@ -109,14 +109,14 @@
                         </div>
 
                         <div class="create-input w-100">
-                            <div class="d-flex justify-content-start w-100 pr-5 pb-3 modal-input">
+                            <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
                                 <span> Address </span>
                                 <span class="ml-4 ellipsis"> {{blockChainAddress}} </span>
                             </div>
                         </div>
 
                         <div class="create-input w-100 mt-3">
-                            <div class="d-flex justify-content-start w-100 pr-5 pb-3 modal-input">
+                            <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
                                 <span> Deposit </span>
                                 <span class="ml-4">
                                     <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
@@ -419,10 +419,6 @@
         background-color: $light-blue-pareto;
     }
 
-    .create-content-text {
-        font-size: 18px !important;
-    }
-
     .modal-content {
         border: 0;
         border-radius: 2px !important;
@@ -463,16 +459,6 @@
         color: white;
         font-size: 16px;
         padding-top: 20px !important;
-    }
-
-    .pareto-label {
-        color: #ffffff;
-        font-size: 18px;
-        font-weight: normal;
-        pointer-events: none;
-        transition: 0.2s ease all;
-        -moz-transition: 0.2s ease all;
-        -webkit-transition: 0.2s ease all;
     }
 
     #preview {

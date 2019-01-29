@@ -1,11 +1,11 @@
 <template>
-    <div class="main wrapp">
+    <div class="main wrapp pareto-blue-dark">
         <div class="container">
             <div class="row mx-2 pt-5">
-                <div class="col-12 order-last order-lg-first col-lg-4 mb-4 p-0">
+                <div class="col-12 order-last order-lg-first col-lg-3 mb-4 p-0">
                     <VProfile :addressProfile="intel.address" :profileObject="profile"></VProfile>
                 </div>
-                <div class="col-12 col-lg-7 offset-lg-1 mb-4 p-0">
+                <div class="col-12 col-lg-8 mb-4 p-0">
                     <div class="row text-group">
                         <VShimmerIntelInformation v-if="!intel.block"></VShimmerIntelInformation>
                         <div v-else class="col-12 border p-3">
@@ -18,7 +18,6 @@
                                         <span v-if="profile.alias" class="subtitle-dashboard text-user-content"><b> {{profile.alias}} </b></span>
                                         <span v-else class="subtitle-dashboard text-user-content"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
                                         <div class="text-center">
-                                            <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                                         </div>
                                     </div>
                                 </div>
@@ -62,6 +61,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="col-12 col-lg-1">
+                    <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                 </div>
             </div>
         </div>
