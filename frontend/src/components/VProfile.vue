@@ -1,35 +1,23 @@
 <template>
-    <div>
+    <div class="pareto-blue-dark text-left">
         <div v-if="profile.address" class="row">
-            <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
+            <div class="p-3 mx-auto">
                 <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
                     <div class="thumb profile-pic"
                          v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                     ></div>
                 </router-link>
-            </div>
-            <div class="col-12 col-sm-7 col-md-12 border p-5">
-                <div class="row text-group title-user-content">
-                    <h6 v-if="profile.alias" class="subtitle-dashboard" ><b> About {{profile.alias}} :</b></h6>
-                    <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address}}:</b></h6>
-                </div>
-                <div class="row text-group text-user-content">
-                    <p v-if="profile.biography"> {{profile.biography}} </p>
-                    <p v-else> No Bio to show </p>
-                </div>
-
-
-                <div class="row border-bottom mt-5 px-0 py-3">
-                    <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
-                        <i class="fa fa-book"></i>
-                        <span class="text-pareto-gray ml-3"> View Contributor Feed </span>
+                <div class="mt-3">
+                    <p class="subtitle-user-content" ><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
+                    <p class="text-user-content mt-2"> {{profile.biography || 'No Bio to show'}} </p>
+                    <router-link tag="div" class="row cursor-pointer mt-3" :to="creatorRoute(profile.aliasSlug || profile.address)">
+                        <i class="fa fa-book green-color" style="margin-left: -20px"></i>
+                        <span class="ml-2 col-10 ellipsis"> {{profile.address}} </span>
                     </router-link>
                 </div>
-                <router-link tag="div" class="cursor-pointer" :to="leaderboards(profile.address)">
-                    <div class="row mt-2">
-                        <div class="col-md col-xs mb-2 ellipsis text-left">
-                            <i class="fa fa-chart-area" style="color: #4e555b; margin: 2px;"></i>
-                            <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
+                <div class="row m-0 text-center mt-4">
+                    <router-link tag="div" class="cursor-pointer border p-2" :to="leaderboards(profile.address)">
+                        <p class="subtitle-user-content">
                             <ICountUp
                                     :startVal="countUp.startVal"
                                     :endVal="parseFloat(profile.rank)"
@@ -37,22 +25,24 @@
                                     :duration="randomNumber(3,6)"
                                     :options="countUp.options"
                                     @ready="onReady"/>
+                        </p>
+                        <p> My Rank </p>
+                    </router-link>
+                    <router-link tag="div" class="cursor-pointer border mx-auto p-2" :to="leaderboards(profile.address)">
+                        <div>
+                            <i class="fa fa-star green-color fa-lg"></i>
                         </div>
-                        <!-- score, star for score, earn more stars for a greater score -->
-                        <div class="col-md col-xs mb-2 ellipsis text-right">
-                            <i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>
-                            <ICountUp
-                                    v-if="profile.score"
-                                    :startVal="countUp.startVal"
-                                    :endVal="parseFloat(profile.score)"
-                                    :decimals="decimalsLength(profile.score)"
-                                    :duration="randomNumber(3,6)"
-                                    :options="countUp.options"
-                                    @ready="onReady"/>
-                            <span v-else> 0 </span>
-                        </div>
-                    </div>
-                </router-link>
+                        <ICountUp
+                                v-if="profile.score"
+                                :startVal="countUp.startVal"
+                                :endVal="parseFloat(profile.score)"
+                                :decimals="decimalsLength(profile.score)"
+                                :duration="randomNumber(3,6)"
+                                :options="countUp.options"
+                                @ready="onReady"/>
+                        <span v-else> 0 </span>
+                    </router-link>
+                </div>
             </div>
             <!--<button class="btn btn-success-pareto mt-5">-->
             <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
