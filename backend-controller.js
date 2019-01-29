@@ -1204,6 +1204,8 @@ controller.getUserInfo = async function (address, callback) {
 
     if (web3.utils.isAddress(fixaddress) == false) {
         let profile = await ParetoProfile.findOne({aliasSlug: address}).exec();
+        if(!profile) profile = await ParetoProfile.findOne({alias: address}).exec();
+
         if (profile) {
             controller.retrieveAddressRankWithRedis([profile.address], true, function (error, rankings) {
                 if (error) {
@@ -1262,6 +1264,7 @@ controller.getContentByCurrentUser = async function (req, callback) {
 
     if (!isAddress) {
         let profileFound = await ParetoProfile.findOne({aliasSlug: address}).exec();
+        if(!profileFound) profileFound = await ParetoProfile.findOne({alias: address}).exec();
         if (profileFound) address = profileFound.address;
         isAddress = web3.utils.isAddress(address) === true;
     }
