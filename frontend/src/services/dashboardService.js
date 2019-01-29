@@ -55,7 +55,7 @@ export default class dashboardService {
         if (query_params.length > 0) {
             total_query = "&" + query_params[1];
         }
-        console.log(total_query);
+
         return http.get('/v1/content?limit=' + limit + '&page=' + page + total_query).then(res => {
             //console.log(res);
             if (res.data.success) {
