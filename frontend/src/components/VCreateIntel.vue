@@ -20,7 +20,7 @@
                 </div>
                 <div class="row mt-4 mt-md-2">
                     <div v-show="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
-                        <div class="flex-row create-intel-container text-user-content">
+                        <div class="flex-row intel-container text-user-content">
                             <div class="group create-input-space">
                                 <input id="intel-title-input"
                                        type="text" class="create-input create-content-text title-user-content"
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div v-show="isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
-                        <div class="flex-row create-intel-container">
+                        <div class="flex-row intel-container">
                             <div class="group create-input-space">
                                 <input
                                         type="text"
@@ -411,12 +411,6 @@
 
     .create-input-space {
         position: relative;
-    }
-
-    .create-intel-container {
-        border-radius: 3px;
-        border: 0px;
-        background-color: $light-blue-pareto;
     }
 
     .modal-content {

@@ -43,6 +43,13 @@ li,
   margin-right: 5px;
 }
 
+.intel-container {
+  border-radius: 3px;
+  border: 0px;
+  background-color: $light-blue-pareto;
+  color: white;
+}
+
 .title {
   font-size: 18px;
   font-weight: bold;
@@ -137,4 +144,5 @@ li,
 .pareto-subtitle {
   color: white;
 }
+
 

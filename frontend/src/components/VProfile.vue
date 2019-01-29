@@ -1,7 +1,7 @@
 <template>
     <div class="pareto-blue-dark text-left">
         <div v-if="profile.address" class="row">
-            <div class="p-3 mx-auto">
+            <div class="mx-auto">
                 <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
                     <div class="thumb profile-pic"
                          v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
