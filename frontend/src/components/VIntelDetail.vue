@@ -5,56 +5,37 @@
                 <div class="col-12 order-last order-lg-first col-lg-3 mb-4 p-0">
                     <VProfile :addressProfile="intel.address" :profileObject="profile"></VProfile>
                 </div>
-                <div class="col-12 col-lg-8 mb-4 p-0">
-                    <div class="row text-group">
+                <div class="col-12 col-lg-8 mb-4 p-0 intel-container">
+                    <div class="row m-0 text-group">
                         <VShimmerIntelInformation v-if="!intel.block"></VShimmerIntelInformation>
-                        <div v-else class="col-12 border p-3">
+                        <div v-else class="col-12 p-3">
                             <div class="row py-4 m-0">
                                 <div class="col-md-10 p-0 pr-1">
-                                    <span class="name-title title-user-content"> {{intel.title}} </span>
+                                    <b class="title-user-content">  {{intel.title}} </b>
                                 </div>
-                                <div class="col-md-2 p-0 pl-1">
-                                    <div class="d-flex flex-column align-items-end">
-                                        <span v-if="profile.alias" class="subtitle-dashboard text-user-content"><b> {{profile.alias}} </b></span>
-                                        <span v-else class="subtitle-dashboard text-user-content"><b> {{intel.address.slice(0,15) + '...'}} </b></span>
-                                        <div class="text-center">
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
-                            <div class="row border-bottom">
-                                <!-- blocks ago -->
-                                <div class="col-md col-xs ellipsis">
-                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                                       target="_blank">
-                                        <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
-                                        <ICountUp
-                                                :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
-                                                :endVal="parseFloat(intel.blockAgo)"
-                                                :decimals="decimalsLength(intel.blockAgo)"
-                                                :duration="randomNumber(1,3)"
-                                                :options="countUp.options"
-                                                @ready="onReady"/>
+                            <div class="d-flex">
+                                <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
+                                        src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
+                                    <b> {{ intel.totalReward }} </b>
+                                </p>
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                   target="_blank">
+                                    <i class="fa fa-th-large green-color"></i>
+                                    <ICountUp
+                                            :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
+                                            :endVal="parseFloat(intel.blockAgo)"
+                                            :decimals="decimalsLength(intel.blockAgo)"
+                                            :duration="randomNumber(1,3)"
+                                            :options="countUp.options"
+                                            @ready="onReady"/>
 
-                                    </a>
-                                </div>
-
-                                <!-- time ago with txid link to etherscan -->
-
-                                <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
-                                    <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                                       target="_blank"><i class="fa fa-calendar" style="color: #000;"></i>&nbsp;
-                                        <span class="text-dashboard"><b><!-- {{dateStringFormat(intel.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span></a>
-                                </div>
-
-                                <!-- rewards collected, align right -->
-                                <div class="col-md col-xs">
-                                    <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
-                                            src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                        <b> {{ intel.totalReward }} </b>
-                                    </p>
-                                </div>
+                                </a>
+                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                   target="_blank">
+                                    <i class="fa fa-calendar green-color"></i>
+                                    <span class="text-dashboard"><b><!-- {{dateStringFormat(intel.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span>
+                                </a>
                             </div>
                             <div class="text-group mt-4">
                                 <p class="intel-body text-user-content" v-html="intel.body"></p>
