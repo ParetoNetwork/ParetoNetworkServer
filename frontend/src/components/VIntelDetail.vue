@@ -1,27 +1,27 @@
 <template>
     <div class="main wrapp pareto-blue-dark">
         <div class="container">
-            <div class="row mx-2 pt-5">
-                <div class="col-12 order-last order-lg-first col-lg-3 mb-4 p-0">
+            <div class="row pt-5" style="min-height: 100vh;">
+                <div class="col-12 order-last order-lg-first col-lg-2 mr-2 mb-4 p-0">
                     <VProfile :addressProfile="intel.address" :profileObject="profile"></VProfile>
                 </div>
                 <div class="col-12 col-lg-8 mb-4 p-0 intel-container">
                     <div class="row m-0 text-group">
                         <VShimmerIntelInformation v-if="!intel.block"></VShimmerIntelInformation>
-                        <div v-else class="col-12 p-3">
-                            <div class="row py-4 m-0">
+                        <div v-else class="col-12 p-4">
+                            <div class="row py-3 m-0">
                                 <div class="col-md-10 p-0 pr-1">
-                                    <b class="title-user-content">  {{intel.title}} </b>
+                                    <p class="title-user-content">  {{intel.title}} </p>
                                 </div>
                             </div>
-                            <div class="d-flex">
-                                <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
-                                        src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                                    <b> {{ intel.totalReward }} </b>
+                            <div class="row text-content m-0">
+                                <p class="text-right ellipsis mr-5">
+                                    <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
+                                    {{ intel.totalReward }}
                                 </p>
-                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                                   target="_blank">
-                                    <i class="fa fa-th-large green-color"></i>
+                                <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                   target="_blank" class="mr-5">
+                                    <i class="fa fa-th-large green-color mr-2"></i>
                                     <ICountUp
                                             :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
                                             :endVal="parseFloat(intel.blockAgo)"
@@ -31,10 +31,10 @@
                                             @ready="onReady"/>
 
                                 </a>
-                                <a style="color: #000;" v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                                   target="_blank">
-                                    <i class="fa fa-calendar green-color"></i>
-                                    <span class="text-dashboard"><b><!-- {{dateStringFormat(intel.dateCreated).toLocaleString("en-US") }} - -->{{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}</b></span>
+                                <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                   target="_blank" class="mr-5">
+                                    <i class="fa fa-calendar green-color mr-2"></i>
+                                    {{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
                                 </a>
                             </div>
                             <div class="text-group mt-4">
@@ -201,7 +201,7 @@
 </script>
 
 <style>
-    .intel-body a {
-        color: #007bff;
+    .intel-container a:hover {
+        color: whitesmoke;
     }
 </style>
