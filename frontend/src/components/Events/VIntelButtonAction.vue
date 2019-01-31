@@ -1,13 +1,12 @@
 <template>
     <div class="d-inline-block">
-        <b-btn v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-               class="btn-primary-pareto mx-auto px-4"
-               style="width: 120px;"
+        <button v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
+               class="btn btn-dark-primary-pareto mx-auto px-4"
                :disabled="pendingRowTransactions(intel) || user.address === intel.address"
                @click="openRewardModal()">
             <img src="../../assets/images/LogoMarkWhite.svg" width="20px" alt="">
-            <b> {{ intel.reward }} </b>
-        </b-btn>
+            {{ intel.reward }}
+        </button>
         <b-btn
                 v-if="user.address === intel.address &&
                     intel.intelAddress &&
@@ -15,14 +14,14 @@
                     intel.expires < Math.round(new Date().getTime() / 1000) &&
                     !intel.distributed"
                 :disabled="clickedCollect"
-                class="btn-primary-pareto mx-auto px-4"
+                class="btn-dark-primary-pareto mx-auto px-4"
                 @click="distribute(intel)">
             COLLECT
         </b-btn>
         <a v-if="user.address === intel.address && intel.distributed"
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
            target="_blank">
-            <b-btn class="cursor-pointer btn-primary-pareto mx-auto px-4">
+            <b-btn class="cursor-pointer btn-dark-primary-pareto mx-auto px-4">
                 <i class="fa fa-external-link-alt"></i> SENT
             </b-btn>
         </a>
