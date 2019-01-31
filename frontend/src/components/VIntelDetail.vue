@@ -1,7 +1,7 @@
 <template>
     <div class="main wrapp pareto-blue-dark">
         <div class="container">
-            <div class="row pt-5" style="min-height: 100vh;">
+            <div class="row pt-5" style="min-height: 100vh; width: 100%;">
                 <div class="col-12 order-last order-lg-first col-lg-2 mr-2 mb-4 p-0">
                     <VProfile :addressProfile="intel.address" :profileObject="profile"></VProfile>
                 </div>
@@ -15,12 +15,12 @@
                                 </div>
                             </div>
                             <div class="row text-content m-0">
-                                <p class="text-right ellipsis mr-5">
+                                <p class="text-right ellipsis mr-4">
                                     <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                     {{ intel.totalReward }}
                                 </p>
                                 <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                                   target="_blank" class="mr-5">
+                                   target="_blank" class="mr-4">
                                     <i class="fa fa-th-large green-color mr-2"></i>
                                     <ICountUp
                                             :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
@@ -32,7 +32,7 @@
 
                                 </a>
                                 <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                                   target="_blank" class="mr-5">
+                                   target="_blank" class="mr-4">
                                     <i class="fa fa-calendar green-color mr-2"></i>
                                     {{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
                                 </a>
@@ -192,6 +192,7 @@
                     this.getAddress(),
                     this.loadProfile()
                 ]).then(values => {
+
                     this.$store.state.makingRequest = false;
                     this.socketConnection();
                 });
@@ -201,6 +202,9 @@
 </script>
 
 <style>
+    .intel-body img {
+        max-width: 100%;
+    }
     .intel-container a:hover {
         color: whitesmoke;
     }
