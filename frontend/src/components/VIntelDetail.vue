@@ -43,7 +43,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-1">
+                <div class="col-12 mb-4 col-lg-1">
                     <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                 </div>
             </div>

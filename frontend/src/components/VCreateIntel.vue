@@ -127,13 +127,13 @@
 
                         <b-row class="m-2 mt-4 d-flex justify-content-end">
                             <button
-                                    class="btn btn-dark-primary-pareto mt-2 ml-2 order-md-2"
-                                    @click="createIntel()">Confirm
-                            </button>
-                            <button
-                                    class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0 order-md-1"
+                                    class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0"
                                     @click="hideModal()"
                                     :disabled="!hardwareAvailable || validateTokenAmount()">Cancel
+                            </button>
+                            <button
+                                    class="btn btn-dark-primary-pareto mt-2 ml-2"
+                                    @click="createIntel()">Confirm
                             </button>
                         </b-row>
                     </b-container>

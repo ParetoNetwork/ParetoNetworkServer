@@ -1,54 +1,53 @@
 <template>
-    <div class="pareto-blue-dark text-left text-center text-lg-left" >
-        <div class="" v-if="profile.address">
-            <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
-                <div class="thumb profile-pic"
-                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
-                ></div>
-            </router-link>
-            <div class="mt-3">
-                <p class="subtitle-user-content" ><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
-                <p class="text-user-content mt-2"> {{profile.biography || 'No Bio to show'}} </p>
-                <router-link tag="div" class="row cursor-pointer mt-3" :to="creatorRoute(profile.aliasSlug || profile.address)">
-                    <div class="ml-0 col ellipsis">
-                        <i class="fa fa-book green-color" style="margin-left: -10px"></i> {{profile.address}}
-                    </div>
-                </router-link>
+    <div v-if="profile.address" class="pareto-blue-dark text-left text-center text-lg-left" >
+            <router-link tag="div" class="thumb profile-pic cursor-pointer"
+                 v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
+                 :to="creatorRoute(profile.aliasSlug || profile.address)"
+            ></router-link>
+        <div class="mt-4">
+            <p class="subtitle-user-content" ><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
+            <p class="text-user-content mt-2"> {{profile.biography || 'No Bio to show'}} </p>
+            <div class="row cursor-pointer mt-3" >
+                <div class="ml-0 col ellipsis">
+                    <i class="fa fa-book green-color" style="margin-left: -15px"></i>
+                    <router-link tag="span"  :to="creatorRoute(profile.aliasSlug || profile.address)" class="d-inline-block pl-1"> {{profile.address}} </router-link>
+                </div>
             </div>
-            <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
-                <router-link tag="div" class="cursor-pointer border p-2" :to="leaderboards(profile.address)">
-                    <p class="subtitle-user-content">
-                        <ICountUp
-                                :startVal="countUp.startVal"
-                                :endVal="parseFloat(profile.rank)"
-                                :decimals="decimalsLength(profile.rank)"
-                                :duration="randomNumber(3,6)"
-                                :options="countUp.options"
-                                @ready="onReady"/>
-                    </p>
-                    <p> My Rank </p>
-                </router-link>
-                <router-link tag="div" class="cursor-pointer border ml-5 ml-lg-2 ml-xl-4 p-2" :to="leaderboards(profile.address)">
-                    <div class="mb-1">
-                        <i class="fa fa-star green-color fa-lg"></i>
-                    </div>
+        </div>
+        <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
+            <router-link tag="div" class="cursor-pointer border p-2" :to="leaderboards(profile.address)">
+                <p class="subtitle-user-content">
                     <ICountUp
-                            v-if="profile.score"
                             :startVal="countUp.startVal"
-                            :endVal="parseFloat(profile.score)"
-                            :decimals="decimalsLength(profile.score)"
+                            :endVal="parseFloat(profile.rank)"
+                            :decimals="decimalsLength(profile.rank)"
                             :duration="randomNumber(3,6)"
                             :options="countUp.options"
                             @ready="onReady"/>
-                    <span v-else> 0 </span>
-                </router-link>
-            </div>
-            <!--<button class="btn btn-success-pareto mt-5">-->
-            <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
-            <!--</button>-->
+                </p>
+                <p> My Rank </p>
+            </router-link>
+            <router-link tag="div" class="cursor-pointer border ml-5 ml-lg-2 ml-xl-4 p-2" :to="leaderboards(profile.address)">
+                <div class="mb-1">
+                    <i class="fa fa-star green-color fa-lg"></i>
+                </div>
+                <ICountUp
+                        v-if="profile.score"
+                        :startVal="countUp.startVal"
+                        :endVal="parseFloat(profile.score)"
+                        :decimals="decimalsLength(profile.score)"
+                        :duration="randomNumber(3,6)"
+                        :options="countUp.options"
+                        @ready="onReady"/>
+                <span v-else> 0 </span>
+            </router-link>
         </div>
-        <VShimmerUserProfile v-else></VShimmerUserProfile>
+        <!--<button class="btn btn-success-pareto mt-5">-->
+        <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
+        <!--</button>-->
     </div>
+    <VShimmerUserProfile v-else></VShimmerUserProfile>
+
 
 </template>
 
