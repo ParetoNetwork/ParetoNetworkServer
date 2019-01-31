@@ -1,5 +1,5 @@
 <template>
-    <div v-if="profile.address" class="pareto-blue-dark text-left text-center text-lg-left" >
+    <div v-if="profile.address" class="pareto-blue-dark text-center text-lg-left">
             <router-link tag="div" class="thumb profile-pic cursor-pointer"
                  v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                  :to="creatorRoute(profile.aliasSlug || profile.address)"
@@ -27,7 +27,7 @@
                 </p>
                 <p> My Rank </p>
             </router-link>
-            <router-link tag="div" class="cursor-pointer border ml-5 ml-lg-2 ml-xl-4 p-2" :to="leaderboards(profile.address)">
+            <router-link tag="div" class="cursor-pointer border ml-5 ml-lg-2 ml-xl-4 p-2" :to="leaderboards(profile.address)" style="min-width: 80px">
                 <div class="mb-1">
                     <i class="fa fa-star green-color fa-lg"></i>
                 </div>

@@ -1,6 +1,6 @@
 <template>
     <div class="pareto-blue-dark">
-        <div class="container main wrapp">
+        <div class="container main wrapp" style="min-height: 100vh; width: 100%;">
             <div class="row pt-5">
                 <div class="col-lg-3 mb-1 mt-2">
                     <VProfile :addressProfile="address"></VProfile>

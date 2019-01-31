@@ -4,7 +4,7 @@
                class="btn btn-dark-primary-pareto mx-auto px-4"
                :disabled="pendingRowTransactions(intel) || user.address === intel.address"
                @click="openRewardModal()">
-            <img src="../../assets/images/LogoMarkWhite.svg" width="20px" alt="">
+            <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
             {{ intel.reward }}
         </button>
         <b-btn
