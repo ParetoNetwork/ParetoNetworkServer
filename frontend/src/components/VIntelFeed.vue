@@ -56,7 +56,7 @@
                 myFeed: {
                     content: [],
                     loading: false,
-                    page: 1,
+                    page: 0,
                 },
                 loading: true,
                 intel: {}
@@ -67,7 +67,7 @@
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
         },
         beforeMount: function () {
-            this.loadContent({page: 0, limit: 20});
+            this.loadContent({page: 0, limit: 10});
         },
         watch: {
             //Updates when parent view, which has the webSocket, receives new information and refreshes
@@ -99,6 +99,7 @@
                 let onError = (error) => {
                     this.loading = false;
                     let errorText = error.message ? error.message : error;
+                    console.log('the error was here')
                     this.$notify({
                         group: 'notification',
                         type: 'error',
