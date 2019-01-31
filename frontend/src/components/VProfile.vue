@@ -92,9 +92,11 @@
             },
             getProfile: function (address) {
                 ProfileService.getSpecificProfile(address, res => {
+                    console.log(res);
                     this.profile = res;
                     this.loading = false;
                 }, error => {
+                    console.log(error)
                 })
             },
             leaderboards(address){
@@ -136,5 +138,6 @@
         font-stretch: normal;
         line-height: normal;
         letter-spacing: normal;
+        color: black;
     }
 </style>
