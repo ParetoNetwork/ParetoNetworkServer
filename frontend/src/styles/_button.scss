@@ -26,12 +26,14 @@
   background-image: linear-gradient(to right, #6aba82, #85c568, #9ff677, #85c568, #6aba82);
   transition: 0.5s;
   color: $dark-blue-pareto;
+  width: 120px;
 }
 
 .btn-dark-secondary-pareto{
   @extend .btn-pareto;
    background: $light-blue-pareto;
    color: #6aba82;
+  width: 120px;
  }
 
  .btn-darker-secondary-pareto{

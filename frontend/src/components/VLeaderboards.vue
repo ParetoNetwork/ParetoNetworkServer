@@ -20,7 +20,7 @@
                                 <div class="group">
                                     <div class="d-flex flex-column justify-content-center">
 
-                                        <label class="pareto-label font-weight-bold m-0 text-left" for="lookup-input">Search
+                                        <label class="font-weight-bold m-0 text-left" for="lookup-input">Search
                                             by Rank/Score/Address</label>
 
                                         <input id="lookup-input" type="text" name="address"

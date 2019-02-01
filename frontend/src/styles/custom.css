@@ -36,20 +36,6 @@
     font-family: 'Body';
 }
 
-/* LABEL ======================================= */
-.pareto-label          {
-    color:#ffffff;
-    font-size:18px;
-    font-weight:normal;
-    position:absolute;
-    pointer-events:none;
-    left:5px;
-    top:-20px;
-    transition:0.2s ease all;
-    -moz-transition:0.2s ease all;
-    -webkit-transition:0.2s ease all;
-}
-
 /* HIGHLIGHTER ================================== */
 .highlight {
     position:absolute;

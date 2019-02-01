@@ -1,11 +1,11 @@
 <template>
-    <div>
-        <div class="container main wrapp">
+    <div class="pareto-blue-dark">
+        <div class="container main wrapp" style="min-height: 100vh; width: 100%;">
             <div class="row pt-5">
-                <div class="col-lg-4 mb-1 mt-2">
+                <div class="col-lg-3 mb-1 mt-2">
                     <VProfile :addressProfile="address"></VProfile>
                 </div>
-                <div class="col-lg-7 offset-lg-1 mb-3 px-0 mt-2">
+                <div class="col-lg-9 mb-3 px-0 mt-2">
                     <VIntelFeed :user="user" :fetchAddress="address" :address="true" :title="title"></VIntelFeed>
                 </div>
             </div>
