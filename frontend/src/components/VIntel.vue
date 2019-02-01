@@ -24,7 +24,7 @@
                                          class="cursor-pointer ellipsis">
                                 <svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>
                                 <span v-if="user.alias"
-                                      class="name-title title-user-content "><b>{{user.alias}}<br/></b></span>
+                                      class="title-user-content "><b>{{user.alias}}<br/></b></span>
                                 <span class="ellipsis text-user-content">{{user.address}}</span>
                             </router-link>
 
