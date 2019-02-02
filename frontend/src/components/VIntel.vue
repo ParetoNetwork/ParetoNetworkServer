@@ -1,8 +1,9 @@
 <template>
-    <div class="container main  wrapp">
+    <div class="container-fluid main  wrapp">
         <notifications group="auth" position="bottom right"/>
-        <div class="row pt-5">
+        <div class="row p-lg-5">
             <div class="col-md-5 mb-5 mt-2 m-sm-0">
+                <VProfile :addressProfile="address" :profileObject="user" :can-edit="true"></VProfile>
                 <VShimmerUser v-if="!user.address"></VShimmerUser>
                 <template v-else>
                     <div class="media py-1 px-4 border mb-3 mb-md-5">
@@ -159,6 +160,7 @@
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
+    import VProfile from "./VProfile";
     import VIntelButtonAction from "./Events/VIntelButtonAction";
     import VIntelPreview from "./VIntelPreview";
     import VEventFeed from "./VEventFeed";
@@ -168,6 +170,7 @@
         mixins: [countUpMixin, utilities],
         components: {
             ICountUp,
+            VProfile,
             VShimmerUser,
             VShimmerMyPost,
             VShimmerFeed,
