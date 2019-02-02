@@ -1,7 +1,7 @@
 <template>
     <div class="main wrapp pareto-blue-dark">
-        <div class="container">
-            <div class="row pt-5" style="min-height: 100vh; width: 100%;">
+        <div class="container-fluid p-lg-5">
+            <div class="row m-0 pt-5" style="min-height: 100vh; width: 100%;">
                 <div class="col-12 order-last order-lg-first col-lg-2 mr-2 mb-4 p-0">
                     <VProfile :addressProfile="intel.address" :profileObject="profile"></VProfile>
                 </div>
