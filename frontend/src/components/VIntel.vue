@@ -1,99 +1,21 @@
 <template>
-    <div class="container-fluid main  wrapp">
-        <notifications group="auth" position="bottom right"/>
-        <div class="row p-lg-5">
-            <div class="col-md-5 mb-5 mt-2 m-sm-0">
-                <VShimmerUser v-if="!user.address"></VShimmerUser>
-                <VProfile v-else :addressProfile="address" :profileObject="user" :can-edit="true"></VProfile>
-                <!--<template v-else>-->
-                    <!--<div class="media py-1 px-4 border mb-3 mb-md-5">-->
-                        <!--<div class="d-flex flex-column mr-2">-->
-                            <!--<div class="border p-2 mb-2" @click="openInput()">-->
-                                <!--<div data-v-514e8c24="" class="thumb" id="wrapper"-->
-                                     <!--v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic, user.address)}"-->
-                                     <!--style="width: 100px; height: 100px;">-->
-                                    <!--<div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i-->
-                                            <!--class="fa fa-pencil-alt"-->
-                                            <!--aria-hidden="true"></i></span>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-                                <!--<input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>-->
-                            <!--</div>-->
-                        <!--</div>-->
-                        <!--<div class="media-body flex-column text-left ellipsis">-->
-                            <!--<router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address"-->
-                                         <!--class="cursor-pointer ellipsis">-->
-                                <!--<svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>-->
-                                <!--<span v-if="user.alias"-->
-                                      <!--class="title-user-content "><b>{{user.alias}}<br/></b></span>-->
-                                <!--<span class="ellipsis text-user-content">{{user.address}}</span>-->
-                            <!--</router-link>-->
-
-                            <!--&lt;!&ndash; rank, icon globe color should be contingent on access level, whether above or below the threshold. Globe icon for "global rank" &ndash;&gt;-->
-                            <!--<router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">-->
-                                <!--<div class="row mt-2">-->
-                                    <!--&lt;!&ndash; score, star for score, earn more stars for a greater score &ndash;&gt;-->
-                                    <!--<div class="col-md col-xs mb-2 ellipsis">-->
-                                        <!--<i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>-->
-                                        <!--<ICountUp-->
-                                                <!--v-if="user.score"-->
-                                                <!--:startVal="countUp.startVal"-->
-                                                <!--:endVal="parseFloat(user.score)"-->
-                                                <!--:decimals="decimalsLength(user.score)"-->
-                                                <!--:duration="randomNumber(3,6)"-->
-                                                <!--:options="countUp.options"-->
-                                                <!--@ready="onReady"/>-->
-                                        <!--<span v-else> 0 </span>-->
-                                    <!--</div>-->
-                                    <!--<div class="col-md col-xs mb-2 ellipsis">-->
-                                        <!--<i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>-->
-                                        <!--<ICountUp-->
-                                                <!--:startVal="countUp.startVal"-->
-                                                <!--:endVal="parseFloat(user.rank)"-->
-                                                <!--:decimals="decimalsLength(user.rank)"-->
-                                                <!--:duration="randomNumber(3,6)"-->
-                                                <!--:options="countUp.options"-->
-                                                <!--@ready="onReady"/>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-                            <!--</router-link>-->
-
-                            <!--<div class="mb-2">-->
-                                <!--<img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">-->
-                                <!--<a style="color: #000;"-->
-                                   <!--v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address"-->
-                                   <!--target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i-->
-                                        <!--class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>-->
-                            <!--</div>-->
-
-                            <!--&lt;!&ndash; make this upwards of four lines before ellipsis &ndash;&gt;-->
-                            <!--<span @click="showModal">-->
-                                <!--<i class="fa fa-edit cursor-pointer" style="color: #4e555b; margin: 2px;"></i>{{user.biography || 'No biography provided'}}-->
-                            <!--</span>-->
-
-                            <!--&lt;!&ndash;<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">&ndash;&gt;-->
-                            <!--&lt;!&ndash;Calculate&ndash;&gt;-->
-                            <!--&lt;!&ndash;</router-link>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<div class="d-flex flex-column" style="padding-left: 1.8rem;">&ndash;&gt;-->
-
-                            <!--&lt;!&ndash;&ndash;&gt;-->
-                            <!--&lt;!&ndash;<div class="">&ndash;&gt;-->
-                            <!--&lt;!&ndash;<span class="subtitle-dashboard"><b>BIO:</b></span>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<p class="text-dashboard text-pareto-gray">&ndash;&gt;-->
-
-                            <!--&lt;!&ndash;</p>&ndash;&gt;-->
-                            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                        <!--</div>-->
-                    <!--</div>-->
-                <!--</template>-->
-                <VEventFeed v-if="primalLoad" :user="user"></VEventFeed>
-                <VShimmerMyPost v-else></VShimmerMyPost>
-            </div>
-            <div class="col-md-7 mb-3">
-                <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
-                            :address="address"></VIntelFeed>
-                <VShimmerFeed v-else></VShimmerFeed>
+    <div class="main wrapp pareto-blue-dark">
+        <div class="container-fluid px-lg-5">
+            <notifications group="auth" position="bottom right"/>
+            <div class="row m-0 pt-5" style="min-height: 100vh; width: 100%;">
+                <div class="col-md-5 col-lg-2 mb-5 mt-2 m-sm-0">
+                    <VShimmerUser v-if="!user.address"></VShimmerUser>
+                    <VProfile v-else :addressProfile="address" :profileObject="user" :can-edit="true"></VProfile>
+                    <div class="mt-4">
+                        <VEventFeed v-if="primalLoad" :user="user"></VEventFeed>
+                        <VShimmerMyPost  v-else></VShimmerMyPost>
+                    </div>
+                </div>
+                <div class="col-md-7 mb-3">
+                    <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
+                                :address="address"></VIntelFeed>
+                    <VShimmerFeed v-else></VShimmerFeed>
+                </div>
             </div>
         </div>
     </div>
