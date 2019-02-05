@@ -5,7 +5,8 @@
             hide-footer
             ref="myModalRef"
             title="Edit Profile"
-            ok-title="Update">
+            @hide="onClosedModal"
+    >
         <div class="d-block text-center pt-5">
             <form action="">
                 <div class="input-group mb-3 create-input-space">
@@ -43,10 +44,73 @@
     </b-modal>
 </template>
 <script>
+    import { mapMutations} from 'vuex';
+    import {utilities} from "../../mixins/utilities";
+    import profileService from "../../services/profileService";
+
     export default {
         name: 'VModalEditProfile',
+        mixins: [utilities],
+        props : [
+          'user'
+        ],
+        data : function(){
+            return {
+                alias : '',
+                bio: '',
+                aliasSlug: '',
+            }
+        },
+        watch : {
+            'alias' : function (newAlias) {
+                this.aliasSlug = this.slugify(newAlias);
+            }
+        },
         mounted() {
-            this.$refs.myModalRef.show()
+            this.$refs.myModalRef.show();
+            this.alias = this.user.alias;
+            this.bio = this.user.biography;
+            this.alias = this.user.alias;
+        },
+        methods: {
+            ...mapMutations(["openModalEditProfile"]),
+            onClosedModal(){
+                this.alias = this.user.alias;
+                this.bio = this.user.biography;
+                this.alias = this.user.alias;
+                this.openModalEditProfile(false);
+            },
+            updateProfile() {
+                const profile = {
+                    alias: this.alias,
+                    biography: this.bio
+                };
+                profileService.updateProfile(
+                    profile,
+                    res => {
+                        this.$emit('profileEdit', res.data)
+
+                        this.onClosedModal();
+                        this.$notify({
+                            group: 'notification',
+                            type: 'success',
+                            duration: 10000,
+                            title: 'Login',
+                            text: 'Profile Updated Successfully!'
+                        });
+                    },
+                    error => {
+                        let errorText = error.message ? error.message : error;
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Login',
+                            text: errorText
+                        });
+                    }
+                );
+            },
         }
     }
 </script>

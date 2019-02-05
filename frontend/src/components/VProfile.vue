@@ -6,10 +6,11 @@
             ></router-link>
         <div class="mt-4">
             <p class="subtitle-user-content" ><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
-            <p class="text-user-content mt-2" :class="{'cursor-pointer' : !!canEdit}">
-                <!--<span v-if="canEdit">-->
-                    <!--<i class="fa fa-edit green-color" style="margin-left: -15px"></i>-->
-                <!--</span> {{profile.biography || 'No Bio to show'}}-->
+            <p class="text-user-content mt-2" :class="{'cursor-pointer' : !!canEdit}" @click="openEditProfileModal()">
+                <span v-if="canEdit">
+                    <i class="fa fa-edit green-color" style="margin-left: -15px"></i>
+                </span>
+                {{profile.biography || 'No Bio to show'}}
             </p>
             <div class="row cursor-pointer mt-3" >
                 <div class="ml-0 col ellipsis">
@@ -49,10 +50,10 @@
         <!--<button class="btn btn-success-pareto mt-5">-->
         <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
         <!--</button>-->
+
+        <VModalEditProfile v-if="showModalEditProfile" @profileEdit="editedProfileEvent" :user="profile"></VModalEditProfile>
     </div>
     <VShimmerUserProfile v-else></VShimmerUserProfile>
-
-
 </template>
 
 <script>
@@ -63,6 +64,7 @@
     import {countUpMixin} from "../mixins/countUp";
     import environment from '../utils/environment';
 
+    import VModalEditProfile from "./Modals/VModalEditProfile"
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
 
     export default {
@@ -73,13 +75,22 @@
         ],
         components: {
             ICountUp,
-            VShimmerUserProfile
+            VShimmerUserProfile,
+            VModalEditProfile
+        },
+        computed : {
+            ...mapState(['showModalEditProfile']),
         },
         beforeMount: function () {
-            if(this.addressProfile) this.getProfile(this.addressProfile);
+            if(this.profileObject){
+                this.profile = this.profileObject;
+            } else if(this.addressProfile) {
+                this.getProfile(this.addressProfile);
+            }
         },
         data: function () {
             return {
+                canOpenProfileModal : false,
                 profile: {
                     address: '',
                     alias: '' ,
@@ -91,15 +102,19 @@
             }
         },
         methods: {
+            ...mapMutations(['openModalEditProfile']),
             creatorRoute(address) {
                 return '/intel/' + address + '/';
+            },
+            editedProfileEvent(event){
+                this.profile = event;
             },
             getProfile: function (address) {
                 ProfileService.getSpecificProfile(address, res => {
                     this.profile = res;
                     this.loading = false;
                 }, error => {
-                    console.log(error)
+                    console.log(error);
                 })
             },
             leaderboards(address){
@@ -109,6 +124,11 @@
                 let path = this.baseURL + '/profile-image?image=';
                 return ProfileService.getProfileImage(path, pic, profileAddress);
             },
+            openEditProfileModal(){
+                if(this.canEdit){
+                    this.openModalEditProfile(true);
+                }
+            }
         },
         watch: {
             addressProfile: function (newVal) {
@@ -116,7 +136,6 @@
                     this.getProfile(newVal);
                 }
             },
-
             profileObject: function (loadedProfile) {
                 if (loadedProfile.address) this.profile = loadedProfile;
             }

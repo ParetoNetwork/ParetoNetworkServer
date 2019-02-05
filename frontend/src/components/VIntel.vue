@@ -3,90 +3,90 @@
         <notifications group="auth" position="bottom right"/>
         <div class="row p-lg-5">
             <div class="col-md-5 mb-5 mt-2 m-sm-0">
-                <VProfile :addressProfile="address" :profileObject="user" :can-edit="true"></VProfile>
                 <VShimmerUser v-if="!user.address"></VShimmerUser>
-                <template v-else>
-                    <div class="media py-1 px-4 border mb-3 mb-md-5">
-                        <div class="d-flex flex-column mr-2">
-                            <div class="border p-2 mb-2" @click="openInput()">
-                                <div data-v-514e8c24="" class="thumb" id="wrapper"
-                                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic, user.address)}"
-                                     style="width: 100px; height: 100px;">
-                                    <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i
-                                            class="fa fa-pencil-alt"
-                                            aria-hidden="true"></i></span>
-                                    </div>
-                                </div>
-                                <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
-                            </div>
-                        </div>
-                        <div class="media-body flex-column text-left ellipsis">
-                            <router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address"
-                                         class="cursor-pointer ellipsis">
-                                <svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>
-                                <span v-if="user.alias"
-                                      class="title-user-content "><b>{{user.alias}}<br/></b></span>
-                                <span class="ellipsis text-user-content">{{user.address}}</span>
-                            </router-link>
-
-                            <!-- rank, icon globe color should be contingent on access level, whether above or below the threshold. Globe icon for "global rank" -->
-                            <router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">
-                                <div class="row mt-2">
-                                    <!-- score, star for score, earn more stars for a greater score -->
-                                    <div class="col-md col-xs mb-2 ellipsis">
-                                        <i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>
-                                        <ICountUp
-                                                v-if="user.score"
-                                                :startVal="countUp.startVal"
-                                                :endVal="parseFloat(user.score)"
-                                                :decimals="decimalsLength(user.score)"
-                                                :duration="randomNumber(3,6)"
-                                                :options="countUp.options"
-                                                @ready="onReady"/>
-                                        <span v-else> 0 </span>
-                                    </div>
-                                    <div class="col-md col-xs mb-2 ellipsis">
-                                        <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
-                                        <ICountUp
-                                                :startVal="countUp.startVal"
-                                                :endVal="parseFloat(user.rank)"
-                                                :decimals="decimalsLength(user.rank)"
-                                                :duration="randomNumber(3,6)"
-                                                :options="countUp.options"
-                                                @ready="onReady"/>
-                                    </div>
-                                </div>
-                            </router-link>
-
-                            <div class="mb-2">
-                                <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                <a style="color: #000;"
-                                   v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address"
-                                   target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i
-                                        class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>
-                            </div>
-
-                            <!-- make this upwards of four lines before ellipsis -->
-                            <span @click="showModal">
-                                <i class="fa fa-edit cursor-pointer" style="color: #4e555b; margin: 2px;"></i>{{user.biography || 'No biography provided'}}
-                            </span>
-
-                            <!--<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">-->
-                            <!--Calculate-->
+                <VProfile v-else :addressProfile="address" :profileObject="user" :can-edit="true"></VProfile>
+                <!--<template v-else>-->
+                    <!--<div class="media py-1 px-4 border mb-3 mb-md-5">-->
+                        <!--<div class="d-flex flex-column mr-2">-->
+                            <!--<div class="border p-2 mb-2" @click="openInput()">-->
+                                <!--<div data-v-514e8c24="" class="thumb" id="wrapper"-->
+                                     <!--v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(user.profile_pic, user.address)}"-->
+                                     <!--style="width: 100px; height: 100px;">-->
+                                    <!--<div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i-->
+                                            <!--class="fa fa-pencil-alt"-->
+                                            <!--aria-hidden="true"></i></span>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                                <!--<input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="media-body flex-column text-left ellipsis">-->
+                            <!--<router-link tag="div" :to="creatorRoute(user.address)" v-if="user.address"-->
+                                         <!--class="cursor-pointer ellipsis">-->
+                                <!--<svg class="fa fa-user" style="color: #4e555b; margin: 2px;"></svg>-->
+                                <!--<span v-if="user.alias"-->
+                                      <!--class="title-user-content "><b>{{user.alias}}<br/></b></span>-->
+                                <!--<span class="ellipsis text-user-content">{{user.address}}</span>-->
                             <!--</router-link>-->
-                            <!--<div class="d-flex flex-column" style="padding-left: 1.8rem;">-->
 
-                            <!---->
-                            <!--<div class="">-->
-                            <!--<span class="subtitle-dashboard"><b>BIO:</b></span>-->
-                            <!--<p class="text-dashboard text-pareto-gray">-->
+                            <!--&lt;!&ndash; rank, icon globe color should be contingent on access level, whether above or below the threshold. Globe icon for "global rank" &ndash;&gt;-->
+                            <!--<router-link tag="div" class="cursor-pointer" :to="leaderboards(user.address)">-->
+                                <!--<div class="row mt-2">-->
+                                    <!--&lt;!&ndash; score, star for score, earn more stars for a greater score &ndash;&gt;-->
+                                    <!--<div class="col-md col-xs mb-2 ellipsis">-->
+                                        <!--<i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>-->
+                                        <!--<ICountUp-->
+                                                <!--v-if="user.score"-->
+                                                <!--:startVal="countUp.startVal"-->
+                                                <!--:endVal="parseFloat(user.score)"-->
+                                                <!--:decimals="decimalsLength(user.score)"-->
+                                                <!--:duration="randomNumber(3,6)"-->
+                                                <!--:options="countUp.options"-->
+                                                <!--@ready="onReady"/>-->
+                                        <!--<span v-else> 0 </span>-->
+                                    <!--</div>-->
+                                    <!--<div class="col-md col-xs mb-2 ellipsis">-->
+                                        <!--<i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>-->
+                                        <!--<ICountUp-->
+                                                <!--:startVal="countUp.startVal"-->
+                                                <!--:endVal="parseFloat(user.rank)"-->
+                                                <!--:decimals="decimalsLength(user.rank)"-->
+                                                <!--:duration="randomNumber(3,6)"-->
+                                                <!--:options="countUp.options"-->
+                                                <!--@ready="onReady"/>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                            <!--</router-link>-->
 
-                            <!--</p>-->
+                            <!--<div class="mb-2">-->
+                                <!--<img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">-->
+                                <!--<a style="color: #000;"-->
+                                   <!--v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a='+user.address"-->
+                                   <!--target="_blank"><span class="title"><b>{{(user.tokens || '')}}<sup></sup></b></span>&nbsp;<i-->
+                                        <!--class="fa fa-external-link-alt" style="color: #1f69c0;"></i></a>-->
                             <!--</div>-->
-                            <!--</div>-->
-                        </div>
-                    </div>
-                </template>
+
+                            <!--&lt;!&ndash; make this upwards of four lines before ellipsis &ndash;&gt;-->
+                            <!--<span @click="showModal">-->
+                                <!--<i class="fa fa-edit cursor-pointer" style="color: #4e555b; margin: 2px;"></i>{{user.biography || 'No biography provided'}}-->
+                            <!--</span>-->
+
+                            <!--&lt;!&ndash;<router-link tag="button" class="btn btn-primary-pareto" :to="'/calculator'">&ndash;&gt;-->
+                            <!--&lt;!&ndash;Calculate&ndash;&gt;-->
+                            <!--&lt;!&ndash;</router-link>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<div class="d-flex flex-column" style="padding-left: 1.8rem;">&ndash;&gt;-->
+
+                            <!--&lt;!&ndash;&ndash;&gt;-->
+                            <!--&lt;!&ndash;<div class="">&ndash;&gt;-->
+                            <!--&lt;!&ndash;<span class="subtitle-dashboard"><b>BIO:</b></span>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<p class="text-dashboard text-pareto-gray">&ndash;&gt;-->
+
+                            <!--&lt;!&ndash;</p>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</template>-->
                 <VEventFeed v-if="primalLoad" :user="user"></VEventFeed>
                 <VShimmerMyPost v-else></VShimmerMyPost>
             </div>
@@ -96,48 +96,6 @@
                 <VShimmerFeed v-else></VShimmerFeed>
             </div>
         </div>
-        <b-modal
-                centered
-                hide-header
-                hide-footer
-                ref="myModalRef"
-                title="Edit Profile"
-                ok-title="Update">
-            <div class="d-block text-center pt-5">
-                <form action="">
-                    <div class="input-group mb-3 create-input-space">
-                        <input v-model="alias" type="text" class="create-input create-content-text text-user-content" id="alias"
-                               aria-describedby="basic-addon3" required>
-                        <span class="floating-label create-content-text title-user-content">
-                            <b> Alias </b>
-                        </span>
-                    </div>
-                    <div class="input-group mb-3 create-input-space">
-                        <b class="pareto-subtitle create-content-text title-user-content ml-3 mb-2">
-                            Current Alias Slug
-                        </b>
-                        <input v-model="user.aliasSlug || alias" type="text" class="readonly-input create-content-text text-user-content" id="alias-slug"
-                               aria-describedby="basic-addon3" onkeydown="event.preventDefault()" readonly>
-                    </div>
-                    <div class="input-group mb-3 mt-5 create-input-space">
-                        <textarea v-model="bio" class="create-input create-content-text text-user-content" id="bio" rows="4"
-                                  aria-describedby="basic-addon3" required> </textarea>
-                        <span class="floating-label create-content-text title-user-content">
-                            <b> Biography </b>
-                        </span>
-                    </div>
-                </form>
-                <b-row class="m-2 mt-4 d-flex justify-content-end">
-                    <button
-                            class="btn btn-dark-primary-pareto mt-2 ml-2 order-md-2" @click="updateProfile()"> Update
-                    </button>
-                    <button
-                            class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0 order-md-1"
-                            @click="$refs.myModalRef.hide(); alias = user.alias; bio = user.biography">Cancel
-                    </button>
-                </b-row>
-            </div>
-        </b-modal>
     </div>
 </template>
 
@@ -154,7 +112,6 @@
     import environment from "../utils/environment";
 
     import {countUpMixin} from "../mixins/countUp";
-    import {utilities} from "../mixins/utilities";
 
     import VShimmerUser from "./Shimmer/IntelView/VShimmerUser";
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
@@ -167,7 +124,7 @@
 
     export default {
         name: "VIntel",
-        mixins: [countUpMixin, utilities],
+        mixins: [countUpMixin],
         components: {
             ICountUp,
             VProfile,
@@ -187,7 +144,6 @@
                 tokenAmount: 1,
                 moment: moment,
                 alias: "",
-                aliasSlug: "",
                 bio: "",
                 picture: "",
                 paretoAddress: window.localStorage.getItem('paretoAddress'),
@@ -213,11 +169,6 @@
         },
         computed: {
             ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"]),
-        },
-        watch : {
-          'alias' : function (newAlias) {
-              this.aliasSlug = this.slugify(newAlias);
-          }
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
@@ -336,7 +287,7 @@
                     profile,
                     res => {
                         this.user = res.data;
-                        console.log(this.user);
+
                         this.$refs.myModalRef.hide();
                         this.$notify({
                             group: 'notification',
