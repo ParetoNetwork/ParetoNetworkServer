@@ -4,7 +4,7 @@
             <div v-if="!eventRow" v-bind:class="{ 'col-4 col-md-4 col-lg-2' : !eventRow }">
                 <router-link tag="div" class="thumb profile-pic cursor-pointer ml-2" style="width: 50px; height: 50px"
                              v-bind:style="{
-                             backgroundImage: 'url( ' + loadProfileImage(intel.createdBy.profilePic, intel.createdBy.address)
+                                backgroundImage: 'url( ' + loadProfileImage(intel.createdBy.profilePic, intel.createdBy.address)
                              }"
                              :to="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)"
                 ></router-link>
