@@ -24,7 +24,7 @@
             <div class="scrollable p-1" id="mypost" v-on:scroll="scrollMyPost()">
                 <ul v-if="transactions.length">
                     <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
-                        <!--<VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>-->
+                        <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>
                         <VTransaction :transaction="tx"></VTransaction>
                     </li>
                 </ul>
