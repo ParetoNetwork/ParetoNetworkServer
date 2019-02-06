@@ -1,7 +1,7 @@
 <template>
     <div class="text-center position-relative pl-1">
-        <div class="dot" :class="statusColor"></div>
-        <div class="row pl-1 ml-2 mr-0 py-3 cursor-pointer border-bottom text-content" @click="clickTransaction()">
+        <div class="dot" :class="statusColor(transaction.status)"></div>
+        <div class="row pl-1 ml-2 mr-0 py-3 cursor-pointer border-bottom text-content" @click="clickTransaction()" style="border-bottom-color: black !important;">
             <div class="col-4 px-0 text-left">
                 <div class="position-relative">
                     {{transaction.event}}
@@ -57,18 +57,28 @@
             this.clicked = this.transaction.clicked;
             this.loadingEffect = document.getElementById(newId);
             this.loadingTransaction();
-
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
             clickTransaction: function(){
                 if(this.transaction.status >= 3) {
+
+                    let transactionText = 'This transaction was already completed';
+                    let title = 'Transaction Completed';
+                    let type = 'warning';
+
+                    if(this.transaction.status === 4){
+                        transactionText = 'This transaction failed';
+                        title = ' Transaction Failed';
+                        type = 'error';
+                    }
+
                     this.$notify({
                         group: 'notification',
-                        type: 'warning',
-                        title: 'Transaction Completed',
+                        type: type,
+                        title: title,
                         duration: 10000,
-                        text: 'This transaction was already completed'
+                        text: transactionText
                     });
                     return;
                 }
@@ -139,15 +149,13 @@
                     }, 200);
                 }
             },
-            statusColor(){
-                let status = this.transaction.status;
-                if(status >= 3){
-                    return 'green-background';
-                }else if(this.clicked){
-                    return 'yellow-background';
-                } else {
-                    return 'red-background';
-                }
+            statusColor(status){
+                let click = this.clicked || this.transaction.clicked;
+                return {
+                    'red-background' : status == 4 || status < 3 && !click,
+                    'green-background' : status == 3,
+                    'yellow-background' : status < 3 && click
+                };
             },
             transactionStatus: function (status) {
 

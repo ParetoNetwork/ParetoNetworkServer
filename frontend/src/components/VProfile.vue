@@ -40,14 +40,25 @@
                          style="margin-left: -5px"
                          class="mr-2">
                     <a v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a=' + profile.address"
-                       target="_blank"><span class="text-user-content">
-                        <b>{{(profile.tokens || '')}} </b></span>
-                        <i  class="fa fa-external-link-alt green-color"></i></a>
+                       target="_blank">
+                        <span class="text-user-content">
+                            <b>
+                                <ICountUp
+                                    :startVal="countUp.startVal"
+                                    :endVal="parseFloat(profile.tokens)"
+                                    :decimals="decimalsLength(profile.tokens)"
+                                    :duration="randomNumber(3,6)"
+                                    :options="countUp.options"
+                                    @ready="onReady"/>
+                            </b>
+                        </span>
+                        <i class="fa fa-external-link-alt green-color ml-1"></i>
+                    </a>
                 </div>
             </div>
         </div>
         <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
-            <router-link tag="div" class="cursor-pointer border p-2" :to="leaderboards(profile.address)">
+            <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mr-xl-4" :to="leaderboards(profile.address)" style="min-width: 80px">
                 <p class="subtitle-user-content">
                     <ICountUp
                             :startVal="countUp.startVal"
@@ -59,7 +70,7 @@
                 </p>
                 <p> My Rank </p>
             </router-link>
-            <router-link tag="div" class="cursor-pointer border ml-5 ml-lg-2 ml-xl-4 p-2"
+            <router-link tag="div" class="cursor-pointer border p-2"
                          :to="leaderboards(profile.address)" style="min-width: 80px">
                 <div class="mb-1">
                     <i class="fa fa-star green-color fa-lg"></i>
