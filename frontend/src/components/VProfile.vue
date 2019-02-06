@@ -1,66 +1,99 @@
 <template>
-    <div>
-        <div v-if="profile.address" class="row">
-            <div class="col-12 col-sm-5 col-md-12 mb-2 mb-sm-0 mb-lg-5 border py-3">
-                <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
-                    <div class="thumb profile-pic"
-                         v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
-                    ></div>
-                </router-link>
+    <div v-if="profile.address" class="pareto-blue-dark text-center text-lg-left">
+
+        <div v-if="canEdit" class="thumb profile-pic cursor-pointer" @click="openInput()">
+            <div data-v-514e8c24="" class="thumb" id="wrapper"
+                 v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
+                 style="width: 100px; height: 100px;">
+                <div class="text text-white justify-content-center align-items-center h-100 w-100"><span>Change Image <i
+                        class="fa fa-pencil-alt"
+                        aria-hidden="true"></i></span>
+                </div>
             </div>
-            <div class="col-12 col-sm-7 col-md-12 border p-5">
-                <div class="row text-group title-user-content">
-                    <h6 v-if="profile.alias" class="subtitle-dashboard" ><b> About {{profile.alias}} :</b></h6>
-                    <h6 v-else class="subtitle-dashboard" ><b> About {{profile.address}}:</b></h6>
-                </div>
-                <div class="row text-group text-user-content">
-                    <p v-if="profile.biography"> {{profile.biography}} </p>
-                    <p v-else> No Bio to show </p>
-                </div>
-
-
-                <div class="row border-bottom mt-5 px-0 py-3">
-                    <router-link tag="div" class="cursor-pointer" :to="creatorRoute(profile.aliasSlug || profile.address)">
-                        <i class="fa fa-book"></i>
-                        <span class="text-pareto-gray ml-3"> View Contributor Feed </span>
+            <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
+        </div>
+        <router-link v-if="!canEdit" tag="div" class="thumb profile-pic cursor-pointer"
+                     v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
+                     :to="creatorRoute(profile.aliasSlug || profile.address)"
+        ></router-link>
+        <div class="mt-4">
+            <p class="subtitle-user-content"><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
+            <p class="text-user-content mt-2" :class="{'cursor-pointer' : !!canEdit}" @click="openEditProfileModal()">
+                <span v-if="canEdit">
+                    <i class="fa fa-edit green-color" style="margin-left: -15px"></i>
+                </span>
+                {{profile.biography || 'No Bio to show'}}
+            </p>
+            <div class="row cursor-pointer mt-3">
+                <div class="ml-0 col ellipsis">
+                    <i class="fa fa-book green-color" style="margin-left: -15px"></i>
+                    <router-link tag="span" :to="creatorRoute(profile.aliasSlug || profile.address)"
+                                 class="d-inline-block pl-2"> {{profile.address}}
                     </router-link>
                 </div>
-                <router-link tag="div" class="cursor-pointer" :to="leaderboards(profile.address)">
-                    <div class="row mt-2">
-                        <div class="col-md col-xs mb-2 ellipsis text-left">
-                            <i class="fa fa-chart-area" style="color: #4e555b; margin: 2px;"></i>
-                            <i class="fa fa-globe" style="color: #1f69c0; margin: 2px;"></i>
-                            <ICountUp
-                                    :startVal="countUp.startVal"
-                                    :endVal="parseFloat(profile.rank)"
-                                    :decimals="decimalsLength(profile.rank)"
-                                    :duration="randomNumber(3,6)"
-                                    :options="countUp.options"
-                                    @ready="onReady"/>
-                        </div>
-                        <!-- score, star for score, earn more stars for a greater score -->
-                        <div class="col-md col-xs mb-2 ellipsis text-right">
-                            <i class="fa fa-star" style="color: #fca130; margin: 2px;"></i>
-                            <ICountUp
-                                    v-if="profile.score"
-                                    :startVal="countUp.startVal"
-                                    :endVal="parseFloat(profile.score)"
-                                    :decimals="decimalsLength(profile.score)"
-                                    :duration="randomNumber(3,6)"
-                                    :options="countUp.options"
-                                    @ready="onReady"/>
-                            <span v-else> 0 </span>
-                        </div>
-                    </div>
-                </router-link>
             </div>
-            <!--<button class="btn btn-success-pareto mt-5">-->
-            <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
-            <!--</button>-->
+            <div class="row cursor-pointer mt-3">
+                <div class="ml-0 col px-0">
+                    <img src="../assets/images/LogoMarkColor.svg"
+                         width="15px"
+                         alt=""
+                         style="margin-left: -5px"
+                         class="mr-2">
+                    <a v-bind:href="etherscanUrl+'/token/'+paretoAddress+'?a=' + profile.address"
+                       target="_blank">
+                        <span class="text-user-content">
+                            <b>
+                                <ICountUp
+                                    :startVal="countUp.startVal"
+                                    :endVal="parseFloat(profile.tokens)"
+                                    :decimals="decimalsLength(profile.tokens)"
+                                    :duration="randomNumber(3,6)"
+                                    :options="countUp.options"
+                                    @ready="onReady"/>
+                            </b>
+                        </span>
+                        <i class="fa fa-external-link-alt green-color ml-1"></i>
+                    </a>
+                </div>
+            </div>
         </div>
-        <VShimmerUserProfile v-else></VShimmerUserProfile>
-    </div>
+        <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
+            <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mr-xl-4" :to="leaderboards(profile.address)" style="min-width: 80px">
+                <p class="subtitle-user-content">
+                    <ICountUp
+                            :startVal="countUp.startVal"
+                            :endVal="parseFloat(profile.rank)"
+                            :decimals="decimalsLength(profile.rank)"
+                            :duration="randomNumber(3,6)"
+                            :options="countUp.options"
+                            @ready="onReady"/>
+                </p>
+                <p> My Rank </p>
+            </router-link>
+            <router-link tag="div" class="cursor-pointer border p-2"
+                         :to="leaderboards(profile.address)" style="min-width: 80px">
+                <div class="mb-1">
+                    <i class="fa fa-star green-color fa-lg"></i>
+                </div>
+                <ICountUp
+                        v-if="profile.score"
+                        :startVal="countUp.startVal"
+                        :endVal="parseFloat(profile.score)"
+                        :decimals="decimalsLength(profile.score)"
+                        :duration="randomNumber(3,6)"
+                        :options="countUp.options"
+                        @ready="onReady"/>
+                <span v-else> 0 </span>
+            </router-link>
+        </div>
+        <!--<button class="btn btn-success-pareto mt-5">-->
+        <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
+        <!--</button>-->
 
+        <VModalEditProfile v-if="showModalEditProfile" @profileEdit="editedProfileEvent"
+                           :user="profile"></VModalEditProfile>
+    </div>
+    <VShimmerUserProfile v-else></VShimmerUserProfile>
 </template>
 
 <script>
@@ -71,61 +104,93 @@
     import {countUpMixin} from "../mixins/countUp";
     import environment from '../utils/environment';
 
+    import VModalEditProfile from "./Modals/VModalEditProfile"
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
 
     export default {
         name: "VProfile",
         mixins: [countUpMixin],
         props: [
-            'addressProfile', 'profileObject'
+            'addressProfile', 'profileObject', 'canEdit'
         ],
         components: {
             ICountUp,
-            VShimmerUserProfile
+            VShimmerUserProfile,
+            VModalEditProfile
+        },
+        computed: {
+            ...mapState(['showModalEditProfile', 'address']),
         },
         beforeMount: function () {
-            if(this.addressProfile) this.getProfile(this.addressProfile);
+            if (this.profileObject) {
+                this.profile = this.profileObject;
+            } else if (this.addressProfile) {
+                this.getProfile(this.addressProfile);
+            }
         },
         data: function () {
             return {
+                canOpenProfileModal: false,
+                baseURL: environment.baseURL,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
                 profile: {
                     address: '',
-                    alias: '' ,
+                    alias: '',
                     biography: '',
                     rank: 1000,
                     aliasSlug: ''
                 },
-                baseURL : environment.baseURL,
+                paretoAddress: window.localStorage.getItem('paretoAddress'),
             }
         },
         methods: {
+            ...mapMutations(['openModalEditProfile']),
             creatorRoute(address) {
                 return '/intel/' + address + '/';
             },
+            editedProfileEvent(event) {
+                this.profile = event;
+            },
             getProfile: function (address) {
                 ProfileService.getSpecificProfile(address, res => {
-                    console.log(res);
                     this.profile = res;
                     this.loading = false;
                 }, error => {
-                    console.log(error)
+                    console.log(error);
                 })
             },
-            leaderboards(address){
+            leaderboards(address) {
                 return '/leaderboards' + '?address=' + address;
             },
-            loadProfileImage: function(pic, profileAddress){
+            loadProfileImage: function (pic, profileAddress) {
                 let path = this.baseURL + '/profile-image?image=';
                 return ProfileService.getProfileImage(path, pic, profileAddress);
             },
+            openEditProfileModal() {
+                if (this.canEdit) {
+                    this.openModalEditProfile(true);
+                }
+            },
+            openInput: function () {
+                document.getElementById("file").click();
+            },
+            updatePicture: function () {
+                let file = this.$refs.file.files[0];
+                let formData = new FormData();
+                formData.append("file", file);
+                ProfileService.uploadProfilePic(formData, res => {
+                    this.profile.profile_pic = res;
+                }, error => {
+                    console.log(error);
+                });
+            }
         },
         watch: {
             addressProfile: function (newVal) {
-                if (!this.profileObject){
+                if (!this.profileObject) {
                     this.getProfile(newVal);
                 }
             },
-
             profileObject: function (loadedProfile) {
                 if (loadedProfile.address) this.profile = loadedProfile;
             }

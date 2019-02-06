@@ -1,12 +1,20 @@
 <template>
-    <div>
-        <div v-if="!loading && address" class="border p-2">
-            <div class="border-bottom p-2 p-md-3">
-                <h5 class="title">MY INTEL FEED </h5>
+    <div class="intel-container">
+        <div v-if="!loading && address" class="px-3 pl-xl-5 py-4 text-left">
+            <b class="title-content">
+                MY INTEL FEED
+            </b>
+            <div class="row text-content mt-4">
+                <div class="col-4 col-md-4 col-lg-2">
+                    CONTRIBUTOR
+                </div>
+                <div class="col-8 col-md-8 col-lg-10 pl-lg-3">
+                    INTEL
+                </div>
             </div>
-            <div class="scrollable" id="myfeed" v-on:scroll="scrollMyFeed()">
-                <ul class="list-unstyled list-group">
-                    <li class="text-left list-group-item border-0 px-1 py-2" :key="row._id"
+            <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
+                <ul>
+                    <li class="text-left border-0 py-2" :key="row._id"
                         v-for="row of myFeed.content">
                         <VIntelPreview :user="user" :intel="row" :eventRow="false"></VIntelPreview>
                     </li>
@@ -99,7 +107,6 @@
                 let onError = (error) => {
                     this.loading = false;
                     let errorText = error.message ? error.message : error;
-                    console.log('the error was here')
                     this.$notify({
                         group: 'notification',
                         type: 'error',
