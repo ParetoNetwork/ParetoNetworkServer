@@ -11,7 +11,10 @@
             </div>
             <div class="cursor-pointer intel-preview"
                     v-bind:class="{ 'col-8 col-lg-7' : !eventRow , 'col-12 p-0': eventRow }">
-                <h1 class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
+                <router-link
+                        tag="h1"
+                        :to="intelRoute(intel)"
+                        class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</router-link>
                 <div class="row mt-2">
                     <div v-if="!eventRow" class="col-12 col-md-12 col-lg-5">
                         <a v-bind:href="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)" target="_blank" class="text-user ellipsis ">Disclosed by:
