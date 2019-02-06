@@ -1,18 +1,19 @@
 <template>
     <div class="text-center position-relative pl-1">
         <div class="dot" :class="statusColor(transaction.status)"></div>
-        <div class="row pl-1 ml-2 mr-0 py-3 cursor-pointer border-bottom text-content" @click="clickTransaction()" style="border-bottom-color: black !important;">
-            <div class="col-4 px-0 text-left">
-                <div class="position-relative">
+        <div class="row pl-1 ml-2 mr-0 py-3 cursor-pointer border-bottom text-content" style="border-bottom-color: black !important;">
+            <div class="col-4 px-0 text-left" @click="clickTransaction()" >
+                <div class="position-relative" >
                     {{transaction.event}}
                 </div>
             </div>
-            <div class="col-4 px-0">
+            <div class="col-4 px-0" @click="clickTransaction()" >
                 <p>  {{transaction.amount}} </p>
             </div>
-            <div class="col-4 px-0 pl-1">
+            <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
+               target="_blank" class="col-4 px-0 pl-1">
                 <p class="ellipsis">  {{transaction.txHash}} </p>
-            </div>
+            </a>
         </div>
     </div>
 </template>
