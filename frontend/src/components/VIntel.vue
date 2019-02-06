@@ -11,7 +11,7 @@
                         <VShimmerMyPost  v-else></VShimmerMyPost>
                     </div>
                 </div>
-                <div class="col-md-7 mb-3">
+                <div class="col-md-7 px-0 px-md-3 mb-3">
                     <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
                                 :address="address"></VIntelFeed>
                     <VShimmerFeed v-else></VShimmerFeed>

@@ -1,54 +1,18 @@
 <template>
-    <div class="text-center">
-        <div class="row px-0 py-2 cursor-pointer text-content" @click="clickTransaction()">
-            <div class="col-4">
-                <p> {{transactionStatus(transaction.status)}} </p>
+    <div class="text-center position-relative pl-1">
+        <div class="dot" :class="statusColor"></div>
+        <div class="row pl-1 ml-2 mr-0 py-3 cursor-pointer border-bottom text-content" @click="clickTransaction()">
+            <div class="col-4 px-0 text-left">
+                <div class="position-relative">
+                    {{transaction.event}}
+                </div>
             </div>
-            <div class="col-4">
+            <div class="col-4 px-0">
                 <p>  {{transaction.amount}} </p>
             </div>
-            <div class="col-4">
+            <div class="col-4 px-0 pl-1">
                 <p class="ellipsis">  {{transaction.txHash}} </p>
             </div>
-
-            <!--<div class="col-12 col-lg-7 p-0">-->
-                <!--<h1 class="title" v-line-clamp="2">{{transactionStatus(transaction.status)}}-->
-                    <!--<span v-bind:id="transaction.txHash + '-span'"> </span>-->
-                    <!--<span v-show="transaction.status < 3 && !clicked">-->
-                        <!--<i class="fa fa-exclamation-circle" style="color: red"></i>-->
-                    <!--</span>-->
-                <!--</h1>-->
-            <!--</div>-->
-            <!--<div class="col-12 col-lg-5 p-0">-->
-                <!--<div class="text-center">-->
-                    <!--<h1> {{transaction.event}} </h1>-->
-                <!--</div>-->
-            <!--</div>-->
-        </div>
-        <div class="row border-bottom">
-            <!--<div class="col-md col-xs ellipsis text-left">-->
-                <!--<a class="text-primary" :href="etherscanUrl + '/tx/' + (transaction.txRewardHash || transaction.txHash)"-->
-                   <!--target="_blank">-->
-                    <!--<i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>-->
-                    <!--txid: {{transaction.txHash.substring(0,10)}}-->
-                <!--</a>-->
-            <!--</div>-->
-            <!--<div class="col-md col-xs-4 ellipsis" style="text-align: center;">-->
-                <!--<a style="color: #000;"-->
-                   <!--:href="etherscanUrl + '/tx/' + (transaction.txRewardHash || transaction.txHash)"-->
-                   <!--target="_blank">-->
-                    <!--<i class="fa fa-calendar" style="color: #000;"></i>&nbsp;-->
-                    <!--<span class="text-dashboard">-->
-                        <!--<b>{{ dateStringFormat(transaction.dateCreated)| moment("from", "now") }}</b>-->
-                    <!--</span>-->
-                <!--</a>-->
-            <!--</div>-->
-            <!--<div class="col-md col-xs">-->
-                <!--<p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img-->
-                        <!--src="../assets/images/LogoMarkColor.svg" width="20px" alt="">-->
-                    <!--<b> {{transaction.amount}}</b>-->
-                <!--</p>-->
-            <!--</div>-->
         </div>
     </div>
 </template>
@@ -155,7 +119,7 @@
             dateStringFormat(date) {
                 return new Date(date);
             },
-            loadingTransaction: function(){
+            loadingTransaction(){
                 let points = 0;
                 if(this.transaction.clicked && this.transaction.status < 3){
                     let updateTitle = setInterval(()=>{
@@ -175,19 +139,18 @@
                     }, 200);
                 }
             },
-            transactionStatus: function (status) {
-                switch (status) {
-                    case 0:
-                        return 'Pending Approval';
-                    case 1:
-                        return 'Approved';
-                    case 2:
-                        return 'Pending Transaction';
-                    case 3:
-                        return 'Completed';
-                    case 4:
-                        return 'Rejected';
+            statusColor(){
+                let status = this.transaction.status;
+                if(status >= 3){
+                    return 'green-background';
+                }else if(this.clicked){
+                    return 'yellow-background';
+                } else {
+                    return 'red-background';
                 }
+            },
+            transactionStatus: function (status) {
+
             }
         }
     }
