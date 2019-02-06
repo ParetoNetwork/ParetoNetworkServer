@@ -34,7 +34,7 @@ const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const START_CLOCK = process.env.START_CLOCK || 1;
 const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.00001;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
-const SCORE_BLOCK_AGO = process.env.SCORE_BLOCK_AGO  || 20000;
+const SCORE_BLOCK_AGO = process.env.SCORE_BLOCK_AGO  || 200;
 
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {

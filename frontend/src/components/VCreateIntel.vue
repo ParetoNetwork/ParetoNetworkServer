@@ -20,7 +20,7 @@
                 </div>
                 <div class="row mt-4 mt-md-2">
                     <div v-show="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
-                        <div class="flex-row create-intel-container text-user-content">
+                        <div class="flex-row intel-container text-user-content">
                             <div class="group create-input-space">
                                 <input id="intel-title-input"
                                        type="text" class="create-input create-content-text title-user-content"
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div v-show="isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
-                        <div class="flex-row create-intel-container">
+                        <div class="flex-row intel-container">
                             <div class="group create-input-space">
                                 <input
                                         type="text"
@@ -109,14 +109,14 @@
                         </div>
 
                         <div class="create-input w-100">
-                            <div class="d-flex justify-content-start w-100 pr-5 pb-3 modal-input">
+                            <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
                                 <span> Address </span>
                                 <span class="ml-4 ellipsis"> {{blockChainAddress}} </span>
                             </div>
                         </div>
 
                         <div class="create-input w-100 mt-3">
-                            <div class="d-flex justify-content-start w-100 pr-5 pb-3 modal-input">
+                            <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
                                 <span> Deposit </span>
                                 <span class="ml-4">
                                     <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
@@ -127,13 +127,13 @@
 
                         <b-row class="m-2 mt-4 d-flex justify-content-end">
                             <button
-                                    class="btn btn-dark-primary-pareto mt-2 ml-2 order-md-2"
-                                    @click="createIntel()">Confirm
-                            </button>
-                            <button
-                                    class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0 order-md-1"
+                                    class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0"
                                     @click="hideModal()"
                                     :disabled="!hardwareAvailable || validateTokenAmount()">Cancel
+                            </button>
+                            <button
+                                    class="btn btn-dark-primary-pareto mt-2 ml-2"
+                                    @click="createIntel()">Confirm
                             </button>
                         </b-row>
                     </b-container>
@@ -413,16 +413,6 @@
         position: relative;
     }
 
-    .create-intel-container {
-        border-radius: 3px;
-        border: 0px;
-        background-color: $light-blue-pareto;
-    }
-
-    .create-content-text {
-        font-size: 18px !important;
-    }
-
     .modal-content {
         border: 0;
         border-radius: 2px !important;
@@ -463,16 +453,6 @@
         color: white;
         font-size: 16px;
         padding-top: 20px !important;
-    }
-
-    .pareto-label {
-        color: #ffffff;
-        font-size: 18px;
-        font-weight: normal;
-        pointer-events: none;
-        transition: 0.2s ease all;
-        -moz-transition: 0.2s ease all;
-        -webkit-transition: 0.2s ease all;
     }
 
     #preview {
