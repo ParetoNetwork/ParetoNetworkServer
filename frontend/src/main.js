@@ -46,6 +46,7 @@ const store = new Vuex.Store({
         showModalLoginOptions: false,
         showModalLedgerNano: false,
         showModalReward: false,
+        showModalEditProfile : false,
         makingLogin: false,
         makingRequest: false,
         requestFinish: false,
@@ -131,6 +132,8 @@ const store = new Vuex.Store({
             state.currentDistributes = state.currentDistributes.filter(item => item.intel !== intelId);
         }, openModalReward(state, open){
             state.showModalReward = open;
+        }, openModalEditProfile(state, open){
+            state.showModalEditProfile = open;
         }, deleteTransaction(state, txHash) {
             state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
         }
