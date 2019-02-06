@@ -1,7 +1,8 @@
 <template>
     <div>|
         <notifications group="auth" position="bottom right"/>
-        <b-modal ref="loginOptions"
+        <b-modal
+                ref="loginOptions"
                  centered
                  hide-header
                  hide-footer

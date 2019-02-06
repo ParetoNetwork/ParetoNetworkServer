@@ -1,20 +1,31 @@
 <template>
-    <div>
+    <div class="intel-container" style="margin: 5px -15px">
         <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
-        <div v-else class="border mb-3 mb-md-1 px-2">
+        <div v-else class="mb-3 mb-md-1 px-1">
             <div class="p-2 pt-4">
-                <div class="text-left border-bottom p-1">
-                    <h5 class="title "><b>EVENTS</b></h5>
+                <div class="text-left title-content p-1">
+                    <b>EVENTS</b>
                 </div>
                 <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
                     NEW INTEL
                 </button>
             </div>
-            <div class="p-2 scrollable" id="mypost" v-on:scroll="scrollMyPost()">
-                <ul v-if="transactions.length" class="list-group list-unstyled">
-                    <li v-bind:id="tx.txHash" class="list-group-item border-0" v-for="tx in transactions" :key="tx.txHash">
+            <div class="row mx-0 text-center text-content">
+                <div class="col-4">
+                    EVENT
+                </div>
+                <div class="col-4">
+                    AMOUNT
+                </div>
+                <div class="col-4">
+                    TX ID
+                </div>
+            </div>
+            <div class="scrollable p-1" id="mypost" v-on:scroll="scrollMyPost()">
+                <ul v-if="transactions.length">
+                    <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
                         <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>
-                        <VTransaction v-else :transaction="tx"></VTransaction>
+                        <VTransaction v-if="!tx.intelInfo" :transaction="tx"></VTransaction>
                     </li>
                 </ul>
                 <span v-else> No data to display </span>
