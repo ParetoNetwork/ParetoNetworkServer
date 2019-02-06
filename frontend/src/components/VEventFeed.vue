@@ -1,7 +1,7 @@
 <template>
-    <div style="margin: 5px -15px">
+    <div class="intel-container" style="margin: 5px -15px">
         <VShimmerMyPost v-if="!myContent.length && !loadedMyContent"></VShimmerMyPost>
-        <div v-else class="mb-3 mb-md-1 px-1 intel-container">
+        <div v-else class="mb-3 mb-md-1 px-1">
             <div class="p-2 pt-4">
                 <div class="text-left title-content p-1">
                     <b>EVENTS</b>
@@ -25,7 +25,7 @@
                 <ul v-if="transactions.length">
                     <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
                         <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>
-                        <VTransaction :transaction="tx"></VTransaction>
+                        <VTransaction v-if="!tx.intelInfo" :transaction="tx"></VTransaction>
                     </li>
                 </ul>
                 <span v-else> No data to display </span>
