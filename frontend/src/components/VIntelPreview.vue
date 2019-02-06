@@ -9,28 +9,27 @@
                              :to="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)"
                 ></router-link>
             </div>
-            <router-link
-                    tag="a"
-                    :to="intelRoute(intel)"
-                    class="cursor-pointer intel-preview"
+            <div class="cursor-pointer intel-preview"
                     v-bind:class="{ 'col-8 col-lg-7' : !eventRow , 'col-12 p-0': eventRow }">
                 <h1 class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</h1>
                 <div class="row mt-2">
                     <div v-if="!eventRow" class="col-12 col-md-12 col-lg-5">
-                        <p class="text-user ellipsis ">Disclosed by:
+                        <a v-bind:href="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)" target="_blank" class="text-user ellipsis ">Disclosed by:
                             <b>
                                 {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}}
                             </b>
-                        </p>
+                        </a>
                     </div>
-                    <div class="col-6 col-md-6" :class="{'col-lg-6': eventRow, 'col-lg-4': !eventRow}">
+                    <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                       target="_blank" class="col-6 col-md-6" :class="{'col-lg-6': eventRow, 'col-lg-4': !eventRow}">
                         <p>
                             <font-awesome-icon class="green-color" :icon="['fas', 'calendar']" />
                             {{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
                         </p>
-                    </div>
+                    </a>
                     <div class="col-6 col-md-6" :class="{'col-lg-6': eventRow, 'col-lg-3': !eventRow}">
-                        <p>
+                        <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                           target="_blank">
                             <i class="fa fa-th-large green-color mr-2"></i>
                             <ICountUp
                                     :startVal="parseFloat(intel.block) + parseFloat(intel.blockAgo)"
@@ -39,11 +38,11 @@
                                     :duration="randomNumber(1,3)"
                                     :options="countUp.options"
                                     @ready="onReady"/>
-                        </p>
+                        </a>
                     </div>
                 </div>
 
-            </router-link>
+            </div>
             <div v-if="!eventRow" v-bind:class="{ 'col-12 col-md-12 col-lg-3' : !eventRow , 'col-12 col-lg-5': eventRow }">
                 <div class="text-center text-xl-right mt-2 mt-xl-0">
                     <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
