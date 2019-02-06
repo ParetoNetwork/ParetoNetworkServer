@@ -107,7 +107,6 @@
                 let onError = (error) => {
                     this.loading = false;
                     let errorText = error.message ? error.message : error;
-                    console.log('the error was here')
                     this.$notify({
                         group: 'notification',
                         type: 'error',
