@@ -374,7 +374,6 @@ export default class ContentService {
         }
     }
 
-
     static async sendReward(Intel, content, events, onSuccess, onError) {
         try {
             const gasSendReward = await Intel.methods

@@ -305,72 +305,82 @@
                 this.busy = true;
                 let params = {};
 
-                if (withParam) {
-                    params = {limit: 100, page: 0};
-                    params[this.routeParams.param] = this.routeParams.value;
-                    this.leader = [];
-                    this.updated = 0;
-                } else {
-                    if(this.leader[this.leader.length-1]){
-                        this.rank = parseInt(this.leader[this.leader.length-1].rank) + 4;
+                try {
+                    if (withParam) {
+                        params = {limit: 100, page: 0};
+                        params[this.routeParams.param] = this.routeParams.value;
+                        this.leader = [];
+                        this.updated = 0;
+                    } else {
+                        if(this.leader[this.leader.length-1]){
+                            this.rank = parseInt(this.leader[this.leader.length-1].rank) + 4;
+                        }
+                        params = {rank: this.rank, limit: 100, page: 0};
                     }
-                    params = {rank: this.rank, limit: 100, page: 0};
+
+                    this.socketParams = params;
+                }catch (e) {
+                    console.log(e);
                 }
 
-                this.socketParams = params;
                 LeaderboardService.getLeaderboard(params, res => {
-                    this.$store.state.makingRequest = false;
-                    this.leader = [...this.leader, ...res];
-                    this.busy = false;
+                    try
+                    {
+                        this.$store.state.makingRequest = false;
+                        this.leader = [...this.leader, ...res];
+                        this.busy = false;
 
-                    //If we search a score, and there isn't one, we look for the nearest score
-                    //It will always be the third position inside response, except if the score is inside the first 3 positions
-                    if(withParam && this.routeParams.param === 'score'){
-                        if(this.leader[3].rank <= 4){
-                            let absDiff = 0;
-                            let found = 0;
+                        //If we search a score, and there isn't one, we look for the nearest score
+                        //It will always be the third position inside response, except if the score is inside the first 3 positions
+                        if(withParam && this.routeParams.param === 'score'){
+                            if(this.leader[3].rank <= 4){
+                                let absDiff = 0;
+                                let found = 0;
 
-                            this.leader.forEach( rank => {
-                                let rankDiff = rank.score;
+                                this.leader.forEach( rank => {
+                                    let rankDiff = rank.score;
 
-                                if(Math.abs(rankDiff-this.routeParams.value) < Math.abs(absDiff-this.routeParams.value)){
-                                    found = rank.score;
-                                }
-                                absDiff = rankDiff;
-                            });
+                                    if(Math.abs(rankDiff-this.routeParams.value) < Math.abs(absDiff-this.routeParams.value)){
+                                        found = rank.score;
+                                    }
+                                    absDiff = rankDiff;
+                                });
 
-                            this.routeParams.value = this.score = found
-                        }else{
-                            this.routeParams.value = this.score = this.leader[3].score;
+                                this.routeParams.value = this.score = found
+                            }else{
+                                this.routeParams.value = this.score = this.leader[3].score;
+                            }
                         }
-                    }
 
-                    if (withParam) {
-                        setTimeout(() => {
-                            this.scrollBack();
-                        }, 100);
-                    }
+                        if (withParam) {
+                            setTimeout(() => {
+                                this.scrollBack();
+                            }, 100);
+                        }
 
-                    //This means the search param didn't get any results, so we look for the default leaderboard
-                    if (this.leader.length < 1 && withParam) {
-                        this.busy = true;
-                        this.rank = 1;
-                        this.page = 0;
-                        this.getLeaderboard();
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Leaderboard',
-                            text: "The parameter doesn't exist"
-                        });
-                        return;
-                    }
+                        //This means the search param didn't get any results, so we look for the default leaderboard
+                        if (this.leader.length < 1 && withParam) {
+                            this.busy = true;
+                            this.rank = 1;
+                            this.page = 0;
+                            this.getLeaderboard();
+                            this.$notify({
+                                group: 'notification',
+                                type: 'error',
+                                duration: 10000,
+                                title: 'Leaderboard',
+                                text: "The parameter doesn't exist"
+                            });
+                            return;
+                        }
 
-                    if (this.leader.length < 1) return;
-                    //this means the server brings only so few results that the list isn't scrollable, so we look for any other results above
-                    if (this.leader[0].rank > 1 && this.leader.length < 30) {
-                        this.getLeaderboardTop(this.leader[0].rank - 100, true);
+                        if (this.leader.length < 1) return;
+                        //this means the server brings only so few results that the list isn't scrollable, so we look for any other results above
+                        if (this.leader[0].rank > 1 && this.leader.length < 30) {
+                            this.getLeaderboardTop(this.leader[0].rank - 100, true);
+                        }
+                    }catch (e) {
+                        console.log(e)
                     }
                 }, error => {
                     let errorText = error.message ? error.message : error;
@@ -418,25 +428,29 @@
             //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
             leaderFromUrlParams(route) {
                 let routeSplit = route.fullPath.split('?')[1];
-                if (routeSplit) {
-                    let params = routeSplit.split('=');
-                    if (this.routeParams.valids.indexOf(params[0]) >= 0) {
-                        this.routeParams.param = params[0];
-                        this.routeParams.value = params[1].split(/[^a-z0-9,.+]+/gi)[0];
+                try {
+                    if (routeSplit) {
+                        let params = routeSplit.split('=');
+                        if (this.routeParams.valids.indexOf(params[0]) >= 0) {
+                            this.routeParams.param = params[0];
+                            this.routeParams.value = params[1].split(/[^a-z0-9,.+]+/gi)[0];
 
-                        if(this.routeParams.param === 'q' && (this.routeParams.value.indexOf(',') >=0 || this.routeParams.value.indexOf('.') >=0))
-                            this.routeParams.param = 'score';
+                            if(this.routeParams.param === 'q' && (this.routeParams.value.indexOf(',') >=0 || this.routeParams.value.indexOf('.') >=0))
+                                this.routeParams.param = 'score';
 
-                        if(this.routeParams.param === 'score') this.routeParams.value = this.routeParams.value.split(',').join('');
-                    } else {
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Leaderboard',
-                            text: 'Url parameter not found'
-                        });
+                            if(this.routeParams.param === 'score') this.routeParams.value = this.routeParams.value.split(',').join('');
+                        } else {
+                            this.$notify({
+                                group: 'notification',
+                                type: 'error',
+                                duration: 10000,
+                                title: 'Leaderboard',
+                                text: 'Url parameter not found'
+                            });
+                        }
                     }
+                }catch (e) {
+                    console.log(e)
                 }
             },
             authLogin() {
