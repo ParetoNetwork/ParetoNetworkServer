@@ -100,7 +100,6 @@ export default class authService {
         }catch (e) {
             onError(e);
         }
-
     }
 
     static isWalletSupported(onSuccess, onError) {
@@ -161,8 +160,6 @@ export default class authService {
                 }
 
             });
-
-
         }else{
             onSuccess()
         }

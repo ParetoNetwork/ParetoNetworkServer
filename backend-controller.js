@@ -208,7 +208,6 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
             callback(err);
         });//end promise related to balance //end promise related to block height
     } //end address validation
-
 };
 
 controller.postContent = function (req, callback) {
@@ -707,9 +706,9 @@ controller.addExponentAprox = function (addresses, scores, blockHeight, callback
     })
 };
 
-controller.getAddressesWithSlug = async function (aliasArray){
-    let profiles = await ParetoProfile.find({ aliasSlug: { $in : aliasArray}}).exec();
-    if(profiles.length > 0){
+controller.getAddressesWithSlug = async function (aliasArray) {
+    let profiles = await ParetoProfile.find({aliasSlug: {$in: aliasArray}}).exec();
+    if (profiles.length > 0) {
         return profiles.map(profile => profile.address);
     }
     return [];
@@ -759,19 +758,19 @@ controller.validateQuery = async function (query) {
             let addresses = await controller.getAddressesWithSlug(data2);
 
             let allAddresses = [...data, ...addresses];
-            if(allAddresses.length > 0) {
+            if (allAddresses.length > 0) {
                 array.push({address: {$in: allAddresses}});
             }
 
         } catch (e) {
             console.log(e)
         }
-    } else if(query.alias){
+    } else if (query.alias) {
         try {
             data = query.alias.split(',');
 
             let addresses = await controller.getAddressesWithSlug(data);
-            if(addresses.length > 0) {
+            if (addresses.length > 0) {
                 array.push({address: {$in: addresses}});
             }
         } catch (e) {
@@ -795,7 +794,7 @@ controller.validateQuery = async function (query) {
             let addresses = await controller.getAddressesWithSlug(data2);
 
             let allAddresses = [...data, ...addresses];
-            if(allAddresses.length > 0) {
+            if (allAddresses.length > 0) {
                 array.push({address: {$nin: allAddresses}});
             }
 
@@ -805,8 +804,7 @@ controller.validateQuery = async function (query) {
 
     }
     return array;
-
-}
+};
 
 controller.slugify = function (string) {
     const a = 'àáäâãåèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
@@ -1166,16 +1164,16 @@ controller.updateUser = async function (address, userinfo, callback) {
                 existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
 
                 let counter = 0;
-                while (existingAliasSlug && counter < 10){
-                    if(existingAliasSlug.address !== address){
+                while (existingAliasSlug && counter < 10) {
+                    if (existingAliasSlug.address !== address) {
                         let positionDash = profile.aliasSlug.indexOf('-');
-                        if ( positionDash >= 0 && profile.aliasSlug.substring(profile.aliasSlug.length-1) !== '-') {
+                        if (positionDash >= 0 && profile.aliasSlug.substring(profile.aliasSlug.length - 1) !== '-') {
                             profile.aliasSlug = profile.aliasSlug.replace('-', '');
-                        }else {
+                        } else {
                             profile.aliasSlug = profile.aliasSlug + '-';
                         }
                         existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
-                    }else{
+                    } else {
                         existingAliasSlug = null;
                     }
                     counter++;
@@ -1204,7 +1202,7 @@ controller.getUserInfo = async function (address, callback) {
 
     if (web3.utils.isAddress(fixaddress) == false) {
         let profile = await ParetoProfile.findOne({aliasSlug: address}).exec();
-        if(!profile) profile = await ParetoProfile.findOne({alias: address}).exec();
+        if (!profile) profile = await ParetoProfile.findOne({alias: address}).exec();
 
         if (profile) {
             controller.retrieveAddressRankWithRedis([profile.address], true, function (error, rankings) {
@@ -1264,7 +1262,7 @@ controller.getContentByCurrentUser = async function (req, callback) {
 
     if (!isAddress) {
         let profileFound = await ParetoProfile.findOne({aliasSlug: address}).exec();
-        if(!profileFound) profileFound = await ParetoProfile.findOne({alias: address}).exec();
+        if (!profileFound) profileFound = await ParetoProfile.findOne({alias: address}).exec();
         if (profileFound) address = profileFound.address;
         isAddress = web3.utils.isAddress(address) === true;
     }

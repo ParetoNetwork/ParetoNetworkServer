@@ -139,17 +139,21 @@
             scrollMyFeed: function () {
                 let list = document.getElementById("myfeed");
 
-                if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
-                    && !this.myFeed.loading) {
-                    const params = {limit: 10, page: this.myFeed.page};
-                    this.myFeed.loading = true;
+                try{
+                    if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
+                        && !this.myFeed.loading) {
+                        const params = {limit: 10, page: this.myFeed.page};
+                        this.myFeed.loading = true;
 
-                    this.$store.state.makingRequest = true;
+                        this.$store.state.makingRequest = true;
 
-                    let myFeedContentReady = this.loadContent(params);
-                    myFeedContentReady.then(() => {
-                        this.$store.state.makingRequest = false;
-                    });
+                        let myFeedContentReady = this.loadContent(params);
+                        myFeedContentReady.then(() => {
+                            this.$store.state.makingRequest = false;
+                        });
+                    }
+                }catch (e) {
+                    console.log(e);
                 }
             },
             updateFeedContent: function () {
