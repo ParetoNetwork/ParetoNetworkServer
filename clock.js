@@ -1,4 +1,4 @@
-import * as ErrorHandler from "./error-handler";
+const ErrorHandler = require('./error-handler.js');
 
 console.log(new Date());
 var clock = module.exports = {};
@@ -50,8 +50,10 @@ clock.start= function(wqueue){
                         console.log('Sucessfully updated aprox' );
                         setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
                     });
-                    job.on('failed', () => {
-                        console.log('Failed')
+                    job.on('failed', (e) => {
+                        const error = ErrorHandler.backendErrorList('b10');
+                        error.systemMessage = e.message? e.message: e;
+                        console.log(JSON.stringify(error));
                         setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
                     });
                 });
@@ -59,7 +61,9 @@ clock.start= function(wqueue){
 
 
         }catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b10');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
             setTimeout(run, Math.max(100, 60000 - (new Date().getTime()) + time ));
         }
 
@@ -111,15 +115,19 @@ clock.start= function(wqueue){
                     job.on('complete', result => {
                         console.log('Sucessfully weekly snap' );
                     });
-                    job.on('failed', () => {
-                        console.log('fail weekly snap' );
+                    job.on('failed', (e) => {
+                        const error = ErrorHandler.backendErrorList('b12');
+                        error.systemMessage = e.message? e.message: e;
+                        console.log(JSON.stringify(error));
                     });
                 });
 
 
 
         }catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b12');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
     });
 }
