@@ -35,7 +35,7 @@ export default class ContentService {
                 if (res.data.success) {
                     return onSuccess(res.data.data);
                 } else {
-                    return onError(res.data.message);
+                    return onError(errorService.sendErrorMessage('f15', res.data.message));
                 }
             })
             .catch(error => {
@@ -94,19 +94,19 @@ export default class ContentService {
         try {
             await this.Setup(signData);
         } catch (e) {
-            return onError(e);
+            return onError( errorService.sendErrorMessage('f35', 3));
         }
         //console.log(tokenAmount);
 
         if (tokenAmount === null) {
             let error = "No Pareto Amount. Transaction cancelled";
-            onError(error);
+            onError(errorService.sendErrorMessage('f33', error));
             return;
         }
 
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
-                onError("Err getting accounts");
+                onError(errorService.sendErrorMessage('f34', err));
                 return;
             }
 
@@ -439,11 +439,11 @@ export default class ContentService {
         try {
             await this.Setup(signData);
         } catch (e) {
-            return onError(e)
+            return onError( errorService.sendErrorMessage('f35', 3));
         }
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
-                onError("Err getting accounts");
+                onError(errorService.sendErrorMessage('f34', err));
                 return;
             }
             Intel = new web3.eth.Contract(
@@ -520,7 +520,7 @@ export default class ContentService {
 
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
-                onError("Err getting accounts");
+                onError(errorService.sendErrorMessage('f34', err));
                 return;
             }
             const distributor = accounts[0];
