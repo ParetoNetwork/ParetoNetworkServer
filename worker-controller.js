@@ -144,7 +144,11 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
         var rankCalculation = 0;
 
         if(web3.utils.isAddress(address) == false){
-            if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+            if(callback && typeof callback === "function") {
+                const error = ErrorHandler.backendErrorList('b7');
+                error.address = address;
+                callback(error);
+            }
         } else {
 
             //ethereum servers suck, give them 5ms to breath
@@ -253,7 +257,9 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
                                 ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions,
                                     function(err, r){
                                         //c
-                                        callback(ErrorHandler.zeroParetoBalanceMessage)
+                                        const error = ErrorHandler.backendErrorList('b7');
+                                        error.address = address;
+                                        callback(error);
                                     } //end function
                                 );
                             }
@@ -617,7 +623,11 @@ workerController.getBalance = async function(address, blockHeightFixed, callback
     var blockHeight = 0;
 
     if(web3.utils.isAddress(address) == false){
-        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+        if(callback && typeof callback === "function") {
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
+        }
     } else {
 
         //console.log(address);
@@ -650,7 +660,9 @@ workerController.getBalance = async function(address, blockHeightFixed, callback
                         callback(null,amount)
                     } else {
 
-                        callback(ErrorHandler.zeroParetoBalanceMessage)
+                        const error = ErrorHandler.backendErrorList('b7');
+                        error.address = address;
+                        callback(error);
 
                     } //end
 
@@ -675,7 +687,11 @@ workerController.retrieveAddress = function(address, callback){
     address = address.toLowerCase();
 
     if(web3.utils.isAddress(address) == false){
-        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+        if(callback && typeof callback === "function") {
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
+        }
     } else {
         workerController.retrieveAddressRankWithRedis([address],true,function (error, results) {
             if(error) {callback(error)}

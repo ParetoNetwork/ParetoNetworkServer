@@ -158,7 +158,9 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
 
     if (web3.utils.isAddress(address) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
 
@@ -191,8 +193,9 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
                     if (amount > 0) {
                         callback(null, amount)
                     } else {
-
-                        callback(ErrorHandler.zeroParetoBalanceMessage)
+                        const error = ErrorHandler.backendErrorList('b7');
+                        error.address = address;
+                        callback(error);
 
                     } //end
 
@@ -217,7 +220,9 @@ controller.postContent = function (req, callback) {
     //exposed endpoint to write content to database
     if (web3.utils.isAddress(req.user) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
 
@@ -825,7 +830,9 @@ controller.getQueryContentByUser = function (address, intel, callback) {
 
     if (web3.utils.isAddress(address) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
 
@@ -1118,7 +1125,9 @@ controller.retrieveAddress = function (address, callback) {
 
     if (web3.utils.isAddress(address) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
         controller.retrieveAddressRankWithRedis([address], true, function (error, results) {
@@ -1376,12 +1385,16 @@ controller.getScoreAndSaveRedis = function (callback) {
                     callback(null, result)
                 });
                 job.on('failed', (err) => {
-                    callback(err)
+                    const error = ErrorHandler.backendErrorList('b5');
+                    error.systemMessage = err.message? err.message: err;
+                    callback(error);
                 });
             });
 
-    } catch (e) {
-        callback(e);
+    } catch (err) {
+        const error = ErrorHandler.backendErrorList('b5');
+        error.systemMessage = err.message? err.message: err;
+        return callback(error);
     }
 
 };
@@ -1394,7 +1407,7 @@ controller.getScoreAndSaveRedis = function (callback) {
 controller.sign = function (params, callback) {
 
     if (!params.data || !params.data.length || !params.data[0].value) {
-        return callback(ErrorHandler.signatureFailedMessage)
+        return callback(ErrorHandler.backendErrorList('b1'))
     } else {
 
 
@@ -1455,7 +1468,7 @@ controller.sign = function (params, callback) {
 
         } else {
             if (callback && typeof callback === "function") {
-                callback(ErrorHandler.signatureFailedMessage);
+                callback(ErrorHandler.backendErrorList('b2'));
             }
         }
     }
@@ -1497,9 +1510,11 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
                     {$project: {diff: {$abs: {$subtract: [parseFloat(q), '$score']}}, doc: '$$ROOT'}},
                     {$sort: {diff: 1}},
                     {$limit: 1}
-                ]).exec(function (e, r) {
-                    if (e || r.length === 0 || !r[0].doc || !r[0].doc.address) {
-                        callback(e)
+                ]).exec(function (err, r) {
+                    if (err || r.length === 0 || !r[0].doc || !r[0].doc.address) {
+                        const error = ErrorHandler.backendErrorList('b4');
+                        error.systemMessage = err.message? err.message: err;
+                        return callback(err);
                     } else {
                         controller.retrieveAddressRankWithRedis([r[0].doc.address], true, function (error, rankings) {
                             if (error) {
@@ -1667,6 +1682,8 @@ controller.retrieveRanksWithRedis = function (rank, limit, page, attempts, callb
     multi.exec(function (err, results) {
 
         if (err) {
+            const error = ErrorHandler.backendErrorList('b4');
+            error.systemMessage = err.message? err.message: err;
             return callback(err);
         }
 
@@ -1715,7 +1732,10 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
         if ((!results || results.length === 0 || (!results[0] && results.length === 1)) && attempts) {
             ParetoAddress.find({address: {$in: addressess}}, function (err, result) {
                 if (!err && (!result || (result && !result.length))) {
-                    callback(ErrorHandler.addressNotFound)
+                    const error = ErrorHandler.backendErrorList('b3');
+                    error.systemMessage = err.message? err.message: err;
+                    error.address = addressess;
+                    callback(error);
                 } else {
                     controller.getScoreAndSaveRedis(function (err, result) {
                         if (err) {
@@ -1730,7 +1750,10 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
         } else {
             if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
                 // hopefully, users without pareto shouldn't get here now.
-                callback(ErrorHandler.addressNotFound)
+                const error = ErrorHandler.backendErrorList('b3');
+                error.systemMessage = err.message? err.message: err;
+                error.address = addressess;
+                callback(error);
             } else {
                 const multi = redisClient.multi();
                 for (let i = 0; i < results.length; i = i + 1) {
@@ -1740,7 +1763,10 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
                 }
                 multi.exec(function (err, results) {
                     if (err) {
-                        return callback(err);
+                        const error = ErrorHandler.backendErrorList('b4');
+                        error.systemMessage = err.message? err.message: err;
+                        error.address = addressess;
+                        return callback(error);
                     }
                     // return the cached ranking
                     return callback(null, results);

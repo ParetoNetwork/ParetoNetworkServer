@@ -332,6 +332,17 @@ app.get("/getIntels", (req, res) => {
         res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId, intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
     });
 
+
+    app.post('/v1/error-log', function (req, res) {
+        if(req.body && req.body.errorState){
+            const error = req.body.errorState;
+            error.systemMessage = req.body.error;
+            error.address = req.user
+            console.log(JSON.stringify(error));
+        }
+        res.status(200).json(ErrorHandler.getSuccess({}))
+    });
+
 /********* AUTHENTICATED v1 APIs *********/
 
 app.use(function (req, res, next) {
