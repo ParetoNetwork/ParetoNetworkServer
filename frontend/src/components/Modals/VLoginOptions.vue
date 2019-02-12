@@ -41,6 +41,7 @@
     import authService from "../../services/authService";
     import dashboardService from "../../services/dashboardService";
     import ModalLedgerNano from "./VModalLedgerNano";
+    import errorService from "../../services/errorService";
 
     export default {
         name: 'LoginOptions',
@@ -91,7 +92,7 @@
                         type: 'error',
                         duration: 10000,
                         title: 'Login',
-                        text: errorText });
+                        text: errorService.sendErrorMessage('f1', errorText) });
 
                     this.stopLogin();
                 });

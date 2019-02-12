@@ -66,7 +66,10 @@
     import 'jquery';
     import authService from '../services/authService';
     import DashboardService from '../services/dashboardService';
+    import errorService from '../services/errorService';
+
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
+
 
     export default {
         name: 'Navbar',
@@ -155,12 +158,13 @@
                 }, error => {
                     this.stopLogin();
                     let errorText= error.message? error.message : error;
+
                     this.$notify({
                         group: 'notification',
                         type: 'error',
                         duration: 10000,
                         title: 'Login',
-                        text: errorText });
+                        text: errorService.sendErrorMessage('f1', errorText) });
                 });
             },
             logout: function () {

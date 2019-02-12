@@ -2,7 +2,8 @@ import Web3 from 'web3';
 import Sig from 'eth-sig-util';
 import qs from 'qs';
 import http from './HttpService';
-import profileService from './profileService'
+import profileService from './profileService';
+import errorService from './errorService';
 import ledger from "ledgerco";
 
 /* eslint-disable no-console */
@@ -30,10 +31,10 @@ export default class authService {
                 logged = false;
                 onSuccess(res.data.data);
             }else{
-                onError(res.data.message);
+                onError(errorService.sendErrorMessage('f11', res.data.message));
             }
         }).catch(error => {
-            onError(error);
+            onError(errorService.sendErrorMessage('f11', error));
         });
     }
 
@@ -44,10 +45,10 @@ export default class authService {
             if(res.data.success){
               return onSuccess(res.data.data);
             }else{
-              return onError(res.data.message);
+              return onError(errorService.sendErrorMessage('f12', res.data.message));
             }
         }).catch(error => {
-            return onError(error);
+            return onError(errorService.sendErrorMessage('f12', error));
 
         });
         try {
@@ -74,12 +75,12 @@ export default class authService {
                 logged = true;
                 return onSuccess(from);
             }else{
-                return onError(response.data.message)
+                return onError(errorService.sendErrorMessage('f2', response.data.message));
             }
 
         }).catch(error => {
             if (error.response && error.response.data) {
-                return onError(error.response.data.message);
+                return onError(errorService.sendErrorMessage('f2', error.response.data.message));
             } else {
                 return onError(error);
             }
@@ -170,7 +171,9 @@ export default class authService {
             this.ledgerWalletSubProvider.ledger.getMultipleAccounts(path, page, limit)
                 .then(res => onSuccess(res))
                 .catch(err =>  { onError(err)});
-        }, onError);
+        }, error => {
+            onError(errorService.sendErrorMessage('f4', error))
+        });
 
         return true;
     }
@@ -188,14 +191,14 @@ export default class authService {
             if(response.data.success){
                 return onSuccess(response.data);
             }else{
-                return onError(response.data.message)
+                return onError(errorService.sendErrorMessage('f13', response.data.message));
             }
 
         }).catch(error => {
             if (error.response && error.response.data) {
-                return onError(error.response.data.message);
+                return onError(errorService.sendErrorMessage('f13', error.data.message));
             } else {
-                return onError(error);
+                return onError(errorService.sendErrorMessage('f13', error));
             }
 
         });
@@ -264,7 +267,9 @@ export default class authService {
 
                 //set error state on input field
             }
-        },onError);
+        }, error => {
+            onError('f14', error);
+        });
 
 
         return true;

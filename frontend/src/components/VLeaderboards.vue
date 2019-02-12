@@ -166,6 +166,7 @@
     import VShimmerLeaderboard from "./Shimmer/LeaderboardView/VShimmerLeaderboard";
 
     import {countUpMixin} from '../mixins/countUp';
+    import errorService from "../services/errorService";
 
     export default {
         name: 'VLeaderboards',
@@ -381,9 +382,15 @@
                         }
                     }catch (e) {
                         console.log(e)
+                        let code = withParam? 'f10' : 'f9';
+                        errorService.sendErrorMessage(code, e);
                     }
                 }, error => {
                     let errorText = error.message ? error.message : error;
+                    let code = withParam? 'f10' : 'f9';
+
+                    errorService.sendErrorMessage(code, errorText);
+
                     this.$notify({
                         group: 'notification',
                         type: 'error',
@@ -416,6 +423,7 @@
                     }
                 }, error => {
                     let errorText = error.message ? error.message : error;
+                    errorService.sendErrorMessage('f9', errorText);
                     this.$notify({
                         group: 'notification',
                         type: 'error',
@@ -450,7 +458,8 @@
                         }
                     }
                 }catch (e) {
-                    console.log(e)
+                    console.log(e);
+                    errorService.sendErrorMessage('f10', e);
                 }
             },
             authLogin() {

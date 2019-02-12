@@ -41,6 +41,7 @@
     import VIntelButtonAction from "./Events/VIntelButtonAction";
     import VModalReward from "./Modals/VModalReward";
     import VIntelPreview from "./VIntelPreview";
+    import errorService from "../services/errorService";
 
     export default {
         name: "VIntelFeed",
@@ -179,6 +180,7 @@
                     },
                     error => {
                         let errorText = error.message ? error.message : error;
+                        errorService.sendErrorMessage('f8', errorText);
                         this.$notify({
                             group: 'notification',
                             type: 'error',
