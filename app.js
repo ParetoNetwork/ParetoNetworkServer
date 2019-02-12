@@ -776,7 +776,7 @@ app.initializeWebSocket = function(server){
                          */
                         controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                             if (!err) {
-                                if (client.readyState === WebSocket.OPEN ) {
+                                if (client.readyState === WebSocket.OPEN && client.isAlive) {
                                     client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
@@ -784,7 +784,7 @@ app.initializeWebSocket = function(server){
 
                         controller.retrieveAddress(client.user.user, function (err, result) {
                             if (!err) {
-                                if (client.readyState === WebSocket.OPEN ) {
+                                if (client.readyState === WebSocket.OPEN && client.isAlive ) {
                                     client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
@@ -794,7 +794,9 @@ app.initializeWebSocket = function(server){
                 }
             });
         }catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b13');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     });
