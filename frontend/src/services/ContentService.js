@@ -2,6 +2,7 @@ import axios from 'axios';
 import http from "./HttpService";
 import Web3 from "web3";
 import authService from "./authService"
+import errorService from "./errorService";
 
 let web3;
 let provider;
@@ -48,7 +49,7 @@ export default class ContentService {
                 if (res.data.success) {
                     return onSuccess(res.data.data.data.PARETO);
                 } else {
-                    return onError('Could not retrieve data from server');
+                    return onError(errorService.sendErrorMessage('f16', 'Could not retrieve data from server'));
                 }
             })
     }
@@ -59,14 +60,18 @@ export default class ContentService {
                 if (res.data.success) {
                     return onSuccess(res.data.data);
                 } else {
-                    return onError('Could not retrieve data from server');
+                    return onError(errorService.sendErrorMessage('f6', res.data.message));
                 }
             });
     }
 
     static postTransactions(params, onSucess, onError) {
         http.post("/v1/transaction", params)
-            .then(res => {
+            .then(
+                res => {
+                if(res.data.message || !res.data.success){
+                    errorService.sendErrorMessage('f18', res.data.message);
+                }
             });
     }
 
@@ -171,7 +176,8 @@ export default class ContentService {
                             });
                         })
                         .on("error", err => {
-                            onError(err.message || err);
+                            let error = err.message || err;
+                            onError(errorService.sendErrorMessage('f19', error));
                         });
                 });
         });
@@ -295,7 +301,7 @@ export default class ContentService {
                 }
             }
         } catch (e) {
-            return onError(e)
+            return onError(errorService.sendErrorMessage('f20', e));
         }
     }
 
@@ -353,7 +359,8 @@ export default class ContentService {
                         ContentService.ledgerNanoEngine.stop();
                     }
                     events.editTransaction({hash: content.txHash, key: 'status', value: 4});
-                    onError(err.message || err);
+
+                    onError( errorService.sendErrorMessage('f19', err.message || err) );
                 });
 
         } catch (e) {
@@ -364,12 +371,13 @@ export default class ContentService {
             this.postTransactions(params);
 
             events.editTransaction({hash: content.txHash, key: 'status', value: 4});
+
             events.toastTransaction({
                 group: 'notification',
                 title: 'Error:',
                 type: 'error',
                 duration: 10000,
-                text: 'Transaction Failed'
+                text: errorService.sendErrorMessage('f19', e)
             });
         }
     }
@@ -407,7 +415,7 @@ export default class ContentService {
                         ContentService.ledgerNanoEngine.stop();
                     }
                     events.editTransaction({hash: content.txHash, key: 'status', value: 4});
-                    onError(error);
+                    onError( errorService.sendErrorMessage('f21', error));
                 });
         } catch (e) {
             let params = {
@@ -422,7 +430,7 @@ export default class ContentService {
                 title: 'Error:',
                 type: 'error',
                 duration: 10000,
-                text: 'Transaction Failed'
+                text: errorService.sendErrorMessage('f21', e)
             });
         }
     }
@@ -565,10 +573,10 @@ export default class ContentService {
                         if (ContentService.ledgerNanoEngine) {
                             ContentService.ledgerNanoEngine.stop();
                         }
-                        onError(error);
+                        onError(errorService.sendErrorMessage('f22', error));
                     });
             } catch (e) {
-                onError(e);
+                onError(errorService.sendErrorMessage('f22', e));
             }
         });
     }

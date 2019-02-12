@@ -213,6 +213,7 @@
 <script>
     import authService from "../../services/authService";
     import {mapMutations} from 'vuex';
+    import errorService from "../../services/errorService";
 
     export default {
         name: 'ModalLedgerNano',
@@ -472,7 +473,7 @@
                         type: 'error',
                         duration: 10000,
                         title: 'Logout',
-                        text: errorText });
+                        text: errorService.sendErrorMessage('f14', errorText) });
                 });
             },
             onClosedModal: function () {

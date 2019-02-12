@@ -40,6 +40,7 @@
 
     import VProfile from "./VProfile";
     import VEventFeed from "./VEventFeed";
+    import errorService from "../services/errorService";
 
     export default {
         name: "VIntel",
@@ -123,6 +124,7 @@
                             }
                         }
                     } catch (e) {
+                        errorService.sendErrorMessage('f32', e);
                         console.log(e);
                     }
                 };
