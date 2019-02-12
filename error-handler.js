@@ -53,10 +53,14 @@ errorHandler.validateMessage = function(error){
                 msg = error.userMessage;
             }
         }
-       console.log(JSON.stringify(error))
+        if(!error.code){
+           error.code = 'unknown'
+        }
+        console.log(JSON.stringify(error))
+
     } else{
         if( typeof  error === 'string' ){
-            console.log('code: unKnown, systemError: '+msg);
+            console.logJSON.stringify({code: 'unknown', systemMessage: msg});
         }
     }
 
@@ -129,7 +133,7 @@ errorHandler.backendErrorList = {
     b6: {
         code: 'b6',
         description: 'Invalid Address',
-        userMessage: 'The address sent is invalid',
+        userMessage: 'The address sent is not valid',
         priority: 2
     },
     b7: {
@@ -152,17 +156,80 @@ errorHandler.backendErrorList = {
     },
     b10: {
         code: 'b10',
-        description: 'Score aproximation All Score',
-        userMessage: 'Score aproximation all score failed',
-        priority: 1
+        description: 'Score aproximation failed',
+        userMessage: '',
+        priority: 3
     },
     b11: {
         code: 'b11',
-        description: 'Error Calculating real Score',
-        userMessage: 'Error Calculating real Score',
+        description: 'Error calculating real Score',
+        userMessage: ' ',
         priority: 1
     },
     b12: {
-        code: 'b12'
+        code: 'b12',
+        description: 'Error saving weekly snap',
+        userMessage: '',
+        priority: 2
+    },
+    b13: {
+        code: 'b13',
+        description: 'Error initializing Pareto websocket chron',
+        userMessage: '',
+        priority: 2
+    } ,
+    b14: {
+        code: 'b14',
+        description: 'Error sending websocket information to the client',
+        userMessage: '',
+        priority: 2
+    },
+    b15: {
+        code: 'b15',
+        description: 'Communication problems with Mongo',
+        userMessage: '',
+        priority: 1
+    },
+    b16: {
+        code: 'b16',
+        description: 'Communication problems with Redis',
+        userMessage: '',
+        priority: 1
+    } ,
+    b17: {
+        code: 'b17',
+        description: 'Communication problems with Ethereum WebSocket',
+        userMessage: '',
+        priority: 1
+    },
+    b18: {
+        code: 'b18',
+        description: 'Error watching new Intel',
+        userMessage: '',
+        priority: 1
+    },
+    b19: {
+        code: 'b19',
+        description: 'Error watching Rewards',
+        userMessage: '',
+        priority: 1
+    },
+    b20: {
+        code: 'b20',
+        description: 'Error watching Approve',
+        userMessage: '',
+        priority: 1
+    },
+    b21: {
+        code: 'b21',
+        description: 'Error watching Distribute',
+        userMessage: '',
+        priority: 1
+    },
+    b22: {
+        code: 'b22',
+        description: 'Error updating ParetoTransaction',
+        userMessage: '',
+        priority: 1
     }
 };

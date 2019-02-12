@@ -52,8 +52,10 @@ redisClient = redis.createClient(REDIS_URL, {no_ready_check: true});
 redisClient.on("connect", function () {
     console.log("PARETO: Success connecting to Redis ")
 });
-redisClient.on("error", function (err) {
-    console.log("PARETO: Problems connecting to Redis " + err);
+redisClient.on("error", function (e) {
+    const error = ErrorHandler.backendErrorList('b17');
+    error.systemMessage = e.message? e.message: e;
+    console.log(JSON.stringify(error));
 });
 
 
@@ -76,6 +78,9 @@ controller.startW3WebSocket = function () {
     web3_events_provider.on('end', e => {
         //console.log('WS web3 closed');
         //console.log('Attempting to reconnect...');
+        const error = ErrorHandler.backendErrorList('b17');
+        error.systemMessage = e.message? e.message: e;
+        console.log(JSON.stringify(error));
         web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
         web3_events = new Web3(web3_events_provider);
         controller.startW3WebSocket()
@@ -95,7 +100,9 @@ mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
     controller.startW3WebSocket();
     console.log("PARETO: Success connecting to Mongo ")
 }).catch(err => {
-    console.log("PARETO: Problems connecting to Mongo: " + err)
+    const error = ErrorHandler.backendErrorList('b15');
+    error.systemMessage = err.message? err.message: err;
+    console.log(JSON.stringify(error));
 });
 
 
@@ -359,19 +366,25 @@ controller.startwatchNewIntel = function () {
                                     }
                                 })
                                     .catch(e => {
-                                        console.log(e);
+                                        const error = ErrorHandler.backendErrorList('b22');
+                                        error.systemMessage = e.message? e.message: e;
+                                        console.log(JSON.stringify(error));
                                     });
 
                             }
                         });
 
                     } catch (e) {
-                        console.log(e);
+                        const error = ErrorHandler.backendErrorList('b18');
+                        error.systemMessage = e.message? e.message: e;
+                        console.log(JSON.stringify(error));
                     }
                 }
             });
         } catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b18');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     }).on('error', err => {
@@ -398,14 +411,15 @@ controller.startwatchReward = function (intel, intelAddress) {
             ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, rewardData, {upsert: true, new: true},
                 function (err, r) {
                     if (err) {
-                        console.error('unable to write to db because: ', err);
+                        const error = ErrorHandler.backendErrorList('b19');
+                        error.systemMessage = e.message? e.message: e;
+                        console.log(JSON.stringify(error));
                     } else {
                         ParetoContent.findOne({id: intelIndex}, (err, intel) => {
                             if (intel) {
                                 const {address} = intel;
                                 ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, {receiver: address}, {},
-                                    function (err, r) {
-                                    }
+                                    function (err, r) { }
                                 );
                             }
                         });
@@ -423,7 +437,9 @@ controller.startwatchReward = function (intel, intelAddress) {
             );
 
         } catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b19');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     }).on('error', err => {
@@ -452,12 +468,16 @@ controller.startwatchDistribute = function (intel, intelAddress) {
                 }
             })
                 .catch(e => {
-                    console.log(e);
+                    const error = ErrorHandler.backendErrorList('b21');
+                    error.systemMessage = e.message? e.message: e;
+                    console.log(JSON.stringify(error));
                 });
 
 
         } catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b21');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     }).on('error', err => {
@@ -481,7 +501,9 @@ controller.startWatchApprove = function () {
                     controller.SendInfoWebsocket({address: r.address, transaction: r});
                 } else {
                     if (err) {
-                        console.log(err);
+                        const error = ErrorHandler.backendErrorList('b21');
+                        error.systemMessage = err.message? err.message: err;
+                        console.log(JSON.stringify(error));
                     }
                 }
 
@@ -579,7 +601,7 @@ controller.SendInfoWebsocket = function (data) {
                     if (client.user && client.user.user == data.address) {
                         controller.retrieveAddress(client.user.user, function (err, result) {
                             if (!err) {
-                                if (client.readyState === WebSocket.OPEN) {
+                                if (client.readyState === WebSocket.OPEN && client.isAlive) {
                                     client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
@@ -605,7 +627,7 @@ controller.SendInfoWebsocket = function (data) {
                              */
                             controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                                 if (!err) {
-                                    if (client.readyState === WebSocket.OPEN) {
+                                    if (client.readyState === WebSocket.OPEN && client.isAlive) {
                                         client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                     }
                                 }
@@ -614,7 +636,9 @@ controller.SendInfoWebsocket = function (data) {
                     }
                 }
             } catch (e) {
-                console.log(e);
+                const error = ErrorHandler.backendErrorList('b14');
+                error.systemMessage = e.message? e.message: e;
+                console.log(JSON.stringify(error));
             }
         });
     }
@@ -662,7 +686,9 @@ controller.updateIntelReward = function (intelIndex, txHash, sender) {
                 }
             })
                 .catch(e => {
-                    console.log(e);
+                    const error = ErrorHandler.backendErrorList('b19');
+                    error.systemMessage = e.message? e.message: e;
+                    console.log(JSON.stringify(error));
                 });
         }
     })
