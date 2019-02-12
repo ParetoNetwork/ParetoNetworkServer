@@ -1,3 +1,4 @@
+import * as ErrorHandler from "./error-handler";
 
 console.log(new Date());
 var clock = module.exports = {};
@@ -80,15 +81,19 @@ clock.start= function(wqueue){
                         console.log('Sucessfully Score' );
                         console.log(new Date());
                     });
-                    job.on('failed', () => {
-                        console.log('Fail Score' );
+                    job.on('failed', err => {
+                        const error = ErrorHandler.backendErrorList('b11');
+                        error.systemMessage = err.message? err.message: err;
+                        console.log(JSON.stringify(error));
                     });
                 });
 
 
 
         }catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b11');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
     });
 

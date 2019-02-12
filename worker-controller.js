@@ -573,7 +573,13 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
 
                         } catch (e) {
                             //console.log(e);
-                            if(callback && typeof callback === "function") { callback(e); }
+                            if(callback && typeof callback === "function")
+                            {
+                                const error = ErrorHandler.backendErrorList('b8');
+                                error.systemMessage = e;
+                                error.address = address;
+                                callback(error);
+                            }
                         }
 
 
@@ -591,7 +597,11 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         if(callback && typeof callback === "function") { callback(err); }
                     });
             }, function (error) {
-                callback(error);
+                const err = ErrorHandler.backendErrorList('b8');
+                err.systemMessage = error;
+                err.address = address;
+
+                callback(err);
             }).catch(function (err) {
                 callback(err);
             });
@@ -707,8 +717,6 @@ workerController.retrieveAddresses = function(addresses, callback){
         else { callback(null, results)}
     });
 };
-
-
 
 /**
  * This function will calculate the weightedBlock and then recalculate the new score for all address.

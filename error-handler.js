@@ -137,5 +137,32 @@ errorHandler.backendErrorList = {
         description: 'Address without Pareto balance',
         userMessage: 'We are sorry, you will need Pareto balance in order to be able to Sign In.',
         priority: 2
+    },
+    b8: {
+        code: 'b8',
+        description: 'Error generating score',
+        userMessage: 'There was an error generating the score.',
+        priority: 1
+    },
+    b9: {
+        code: 'b9',
+        description: 'Error Add Exponent',
+        userMessage: '',
+        priority: 2
+    },
+    b10: {
+        code: 'b10',
+        description: 'Score aproximation All Score',
+        userMessage: 'Score aproximation all score failed',
+        priority: 1
+    },
+    b11: {
+        code: 'b11',
+        description: 'Error Calculating real Score',
+        userMessage: 'Error Calculating real Score',
+        priority: 1
+    },
+    b12: {
+        code: 'b12'
     }
 };
