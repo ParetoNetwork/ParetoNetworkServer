@@ -19,8 +19,8 @@ errorHandler.addressNotFound = 'Address not found in DataBase';
  * @param message
  * @return {{success: boolean, message: *}}
  */
-errorHandler.getError = function (message)  {
-    return {success: false, message: errorHandler.validateMessage(message)};
+errorHandler.getError = function (error)  {
+    return {success: false, message: errorHandler.validateMessage(error)};
 };
 
 /**
@@ -43,13 +43,21 @@ errorHandler.getSuccess = function (data)  {
 };
 
 // validatingMessage
-errorHandler.validateMessage = function(message){
-    let msg = message;
-    if( typeof  message === 'object' && message.message){
-        msg = message.message;
-    }
-    if(msg.indexOf('Invalid JSON RPC') > -1){
-        msg = 'Ethereum server response failed , please try again';
+errorHandler.validateMessage = function(error){
+    let msg = error;
+    if( typeof  error === 'object' ){
+        if(error.message){
+            msg = error.message;
+        }else{
+            if(error.userMessage){
+                msg = error.userMessage;
+            }
+        }
+       console.log(JSON.stringify(error))
+    } else{
+        if( typeof  error === 'string' ){
+            console.log('code: unKnown, systemError: '+msg);
+        }
     }
 
     return msg;
@@ -83,4 +91,51 @@ errorHandler.appkeyMissingError = function () {
 };
 errorHandler.nullResponseError = function () {
     return errorHandler.getError(errorHandler.nullResponseMessage);
+};
+
+
+
+errorHandler.backendErrorList = {
+    b1: {
+        code: 'b1',
+        description: 'Missing sign in parameters',
+        userMessage: 'Sign In Error, ',
+        priority: 1
+    },
+    b2: {
+        code: 'b2',
+        description: 'Signature did not match on Sign In.',
+        userMessage: 'Signature did not match on Sign In.',
+        priority: 1
+    },
+    b3: {
+        code: 'b3',
+        description: 'Address not found in DataBase',
+        userMessage: 'Your information is not synchronizated  yet from Ethereum network, please come back later',
+        priority: 1
+    },
+    b4: {
+        code: 'b4',
+        description: 'Error retrieve Rank',
+        userMessage: 'Error retrieve inforamtion about ranking',
+        priority: 2
+    },
+    b5: {
+        code: 'b5',
+        description: 'Error to save ranking information in redis',
+        userMessage: 'Ranking information is not available',
+        priority: 1
+    },
+    b6: {
+        code: 'b6',
+        description: 'Invalid Address',
+        userMessage: 'The address sent is invalid',
+        priority: 2
+    },
+    b7: {
+        code: 'b7',
+        description: 'Address without Pareto balance',
+        userMessage: 'We are sorry, you will need Pareto balance in order to be able to Sign In.',
+        priority: 2
+    }
 };
