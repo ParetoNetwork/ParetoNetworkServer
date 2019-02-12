@@ -1,4 +1,4 @@
-import * as ErrorHandler from "./error-handler";
+const ErrorHandler = require('./error-handler.js');
 
 console.log(new Date());
 var clock = module.exports = {};

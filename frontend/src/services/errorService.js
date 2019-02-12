@@ -2,23 +2,17 @@ import http from './HttpService';
 
 export default class errorService {
 
-    static sendErrorMessage(errorCode, error, onSuccess, onError) {
+    static sendErrorMessage(errorCode, error) {
         let errorState = this.userErrorList[errorCode];
 
         http.post('/v1/error-log', {errorState, error})
             .then(res => {
-                if (res.data.success) {
-                    return onSuccess(res.data);
-                } else {
-                    console.log('Could not send error message');
-                    return onError(res.data);
-                }
             }).catch(error => {
-            console.log('Could not send error message');
-            return onError(error);
+            console.log(error);
         });
 
-        return errorState.userErrorList;
+        console.log(errorState);
+        return errorState.userMessage;
     }
 
     //This are the error messages to show to the users
@@ -214,6 +208,24 @@ export default class errorService {
             description: 'Socket Connection Override',
             userMessage: 'Socket connection error, intel information could not be retrieved',
             priority: 4
+        },
+        f33: {
+            code: 'f33',
+            description: 'No Pareto Amount. Transaction cancelled',
+            userMessage: 'It seems you do not have a token amount. The transaction was cancelled',
+            priority: 2
+        },
+        f34: {
+            code: 'f34',
+            description: 'No Pareto Amount. Transaction cancelled',
+            userMessage: 'There was an error accessing the account. The transaction was cancelled',
+            priority: 1
+        },
+        f35: {
+            code: 'f35',
+            description: 'Setup Provider Error',
+            userMessage: 'Could not initialize your current provider',
+            priority: 2
         }
     };
 }
