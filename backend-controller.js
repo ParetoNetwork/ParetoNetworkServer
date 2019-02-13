@@ -5,6 +5,8 @@ var controller = module.exports = {};
 const Decimal = require('decimal.js-light');
 const fs = require('fs');
 const path = require('path');
+const ErrorHandler = require('./error-handler.js');
+
 Decimal.set({
     precision: 20,
     rounding: Decimal.ROUND_HALF_UP,
@@ -142,9 +144,6 @@ const dbName = 'pareto';
 /*system constants*/
 const PARETO_SCORE_MINIMUM = 100000; 	//minimum score to get intel
 const PARETO_RANK_GRANULARIZED_LIMIT = 10; 		//how far down to go through ranks until separating by tiers
-
-const ErrorHandler = require('./error-handler.js');
-
 
 controller.getParetoCoinMarket = function (callback) {
     let url = 'https://pro-api.coinmarketcap.com/v1';
@@ -483,7 +482,7 @@ controller.startwatchDistribute = function (intel, intelAddress) {
     }).on('error', err => {
         console.log(err);
     });
-}
+};
 
 
 controller.startWatchApprove = function () {
