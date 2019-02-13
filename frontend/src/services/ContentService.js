@@ -94,7 +94,7 @@ export default class ContentService {
         try {
             await this.Setup(signData);
         } catch (e) {
-            return onError( errorService.sendErrorMessage('f35', 3));
+            return onError( errorService.sendErrorMessage('f35', e));
         }
         //console.log(tokenAmount);
 
@@ -439,7 +439,7 @@ export default class ContentService {
         try {
             await this.Setup(signData);
         } catch (e) {
-            return onError( errorService.sendErrorMessage('f35', 3));
+            return onError( errorService.sendErrorMessage('f35', e));
         }
         web3.eth.getAccounts(async (err, accounts) => {
             if (err) {
@@ -515,7 +515,7 @@ export default class ContentService {
                 content.intelAddress
             );
         } catch (e) {
-            return onError(e);
+            return onError( errorService.sendErrorMessage('f35', e));
         }
 
         web3.eth.getAccounts(async (err, accounts) => {
