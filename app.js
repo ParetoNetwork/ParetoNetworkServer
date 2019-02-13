@@ -332,6 +332,17 @@ app.get("/getIntels", (req, res) => {
         res.status(200).json(ErrorHandler.getSuccess({intel: intel.abi, pareto: pareto.abi, netWorkId: netWorkId, intelAddress: intel.networks[netWorkId].address, paretoAddress: pcontract, psignversion: psignversion}));
     });
 
+
+    app.post('/v1/error-log', function (req, res) {
+        if(req.body && req.body.errorState){
+            const error = req.body.errorState;
+            error.systemMessage = req.body.error;
+            error.address = req.user
+            console.log(JSON.stringify(error));
+        }
+        res.status(200).json(ErrorHandler.getSuccess({}))
+    });
+
 /********* AUTHENTICATED v1 APIs *********/
 
 app.use(function (req, res, next) {
@@ -765,7 +776,7 @@ app.initializeWebSocket = function(server){
                          */
                         controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                             if (!err) {
-                                if (client.readyState === WebSocket.OPEN ) {
+                                if (client.readyState === WebSocket.OPEN && client.isAlive) {
                                     client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
@@ -773,7 +784,7 @@ app.initializeWebSocket = function(server){
 
                         controller.retrieveAddress(client.user.user, function (err, result) {
                             if (!err) {
-                                if (client.readyState === WebSocket.OPEN ) {
+                                if (client.readyState === WebSocket.OPEN && client.isAlive ) {
                                     client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
@@ -783,7 +794,9 @@ app.initializeWebSocket = function(server){
                 }
             });
         }catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b13');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     });

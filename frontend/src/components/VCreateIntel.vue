@@ -216,6 +216,7 @@
                     ['style', ['bold', 'italic', 'underline', 'clear']],
                     ['fontsize', ['fontsize']],
                     ['color', ['color']],
+                    ['insert', ['link', 'picture']]
                 ],
                 popover: {
                     image: [],
