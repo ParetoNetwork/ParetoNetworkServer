@@ -157,9 +157,6 @@
                     'green-background' : status == 3,
                     'yellow-background' : status < 3 && click
                 };
-            },
-            transactionStatus: function (status) {
-
             }
         }
     }

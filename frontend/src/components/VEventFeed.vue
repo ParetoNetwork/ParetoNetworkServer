@@ -24,7 +24,8 @@
             <div class="scrollable p-1" id="mypost" v-on:scroll="scrollMyPost()">
                 <ul v-if="transactions.length">
                     <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
-                        <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo" :eventRow="true"></VIntelPreview>
+                        <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo"
+                                       :eventRow="true"></VIntelPreview>
                         <VTransaction v-if="!tx.intelInfo" :transaction="tx"></VTransaction>
                     </li>
                 </ul>
@@ -35,7 +36,7 @@
 </template>
 
 <script>
-    import { mapState, mapActions, mapMutations } from "vuex";
+    import {mapState, mapActions, mapMutations} from "vuex";
     import ContentService from "../services/ContentService";
     import dashboardService from "../services/dashboardService";
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
@@ -48,13 +49,13 @@
         props: [
             'user'
         ],
-        data: function(){
+        data: function () {
             return {
                 alertTransactions: 0,
                 etherscanUrl: window.localStorage.getItem('etherscan'),
                 loadedMyContent: false,
-                myContent : [],
-                allContent : [],
+                myContent: [],
+                allContent: [],
                 page: 0,
                 limit: 20,
                 isLoadingScroll: false,
@@ -82,25 +83,25 @@
                 }
             }
         },
-        mounted: function() {
+        mounted: function () {
             this.loadRequest();
         },
         watch: {
             'pendingTransactions': function (newTransactions) {
-                newTransactions.forEach( (item, index) => {
+                newTransactions.forEach((item, index) => {
                     let wasFound = false;
-                    this.transactions.forEach( tx => {
-                        if(tx.txHash === item.txHash){
+                    this.transactions.forEach(tx => {
+                        if (tx.txHash === item.txHash) {
                             wasFound = true;
-                            if(item.status >= tx.status) {
+                            if (item.status >= tx.status) {
                                 this.$set(tx, 'status', item.status);
                             }
-                            if(item.status === 3 && item.event === 'create' && !tx.intelInfo){
+                            if (item.status === 3 && item.event === 'create' && !tx.intelInfo) {
                                 this.updateCreateEvent(tx);
                             }
                         }
                     });
-                    if(!wasFound) {
+                    if (!wasFound) {
                         this.transactions.unshift(item)
                     }
                 });
@@ -111,10 +112,10 @@
             ...mapMutations(["addDistribute"]),
             //Loads the pendingTransactions state
             getTransactions: function () {
-                let params = {q : 'all', page: this.page, limit: this.limit};
+                let params = {q: 'all', page: this.page, limit: this.limit};
                 return ContentService.getTransactions(params, data => {
                     data = data.filter(item => {
-                        if(item.event === 'distribute'){
+                        if (item.event === 'distribute') {
                             this.addDistribute(item);
                             return false;
                         }
@@ -137,7 +138,7 @@
                 return dashboardService.getContent(params,
                     res => {
                         this.loadedMyContent = true;
-                        this.myContent = [...this.myContent,...res];
+                        this.myContent = [...this.myContent, ...res];
                     },
                     error => {
                         let errorText = error.message ? error.message : error;
@@ -151,42 +152,46 @@
                     }
                 );
             },
-            loadRequest : function(){
+            loadRequest: function () {
                 Promise.all([
                     this.getTransactions(),
                     this.loadMyContent()
                 ]).then(values => {
-                    if(this.limit === 20){
-                        this.limit = 10;
-                        this.page += 2;
-                    }else{
-                        this.page += 1;
-                    }
-                    this.$store.state.makingRequest = false;
-                    this.isLoadingScroll = false;
-
-                    this.transactions.forEach( tx => {
-                        if((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2){
-                            this.myContent.forEach( item => {
-                                if(item.id == tx.intel){
-                                    this.$set(tx, 'intelInfo', item);
-                                }
-                            });
+                    try {
+                        if (this.limit === 20) {
+                            this.limit = 10;
+                            this.page += 2;
+                        } else {
+                            this.page += 1;
                         }
+                        this.$store.state.makingRequest = false;
+                        this.isLoadingScroll = false;
 
-                        if(this.pendingTransactions.length === 0 && tx.status < 3){
-                            this.addTransaction(tx);
-                        }else{
-                            this.pendingTransactions.forEach(item => {
-                                if(tx.txHash === item.txHash){
-                                    if(item.status >= tx.status){
-                                        this.$set(tx, 'status', item.status);
-                                        this.$set(tx, 'clicked', true);
+                        this.transactions.forEach(tx => {
+                            if ((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2) {
+                                this.myContent.forEach(item => {
+                                    if (item.id == tx.intel) {
+                                        this.$set(tx, 'intelInfo', item);
                                     }
-                                }
-                            });
-                        }
-                    });
+                                });
+                            }
+
+                            if (this.pendingTransactions.length === 0 && tx.status < 3) {
+                                this.addTransaction(tx);
+                            } else {
+                                this.pendingTransactions.forEach(item => {
+                                    if (tx.txHash === item.txHash) {
+                                        if (item.status >= tx.status) {
+                                            this.$set(tx, 'status', item.status);
+                                            this.$set(tx, 'clicked', true);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        console.log(e)
+                    }
                 });
             },
             scrollMyPost: function () {
@@ -203,17 +208,20 @@
 
                 return dashboardService.getContent(params,
                     res => {
-                        let intel = res.find(item => {
-                            return item.id == tx.intel;
-                        });
-                        if(intel){
-                            $('#' + tx.txHash).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
-                                $(this).removeClass('higher-flash');
-                            }).addClass('higher-flash');
+                        try {
+                            let intel = res.find(item => {
+                                return item.id == tx.intel;
+                            });
+                            if (intel) {
+                                $('#' + tx.txHash).bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function () {
+                                    $(this).removeClass('higher-flash');
+                                }).addClass('higher-flash');
+                            }
+                            this.lastFlashed = tx.txHash;
+                            this.$set(tx, 'intelInfo', intel);
+                        } catch (e) {
+                            console.log(e);
                         }
-                        this.lastFlashed = tx.txHash;
-                        this.$set(tx, 'intelInfo', intel);
-                        //clearInterval(updateTitle);
                     },
                     error => {
                     }
@@ -236,6 +244,6 @@
     }
 
     .higher-flash {
-        animation:  higher-flash 3s;
+        animation: higher-flash 3s;
     }
 </style>
