@@ -1009,7 +1009,7 @@ workerController.getScoreAndSaveRedis = function(callback){
             deleteAddress =  values[0].map( d=> {return d.address});
         }
         let COUNT = 20.0;
-        let maxRank = results[results.length-1].rank + 2;
+        let maxRank =(results[results.length-1].rank? results[results.length-1].rank : 0)+2;
         const avr = parseFloat(results.length)/COUNT;
         const total = (avr<=1)?results.length:results.length-1;
         let ini = 0.0;
@@ -1021,7 +1021,7 @@ workerController.getScoreAndSaveRedis = function(callback){
                 const data = {
                     address : result.addresses.address,
                     score : result.addresses.score,
-                    block : result.addresses.block,
+                    block : result.addresses.block? result.addresses.block: 0,
                     tokens : result.addresses.tokens
                 };
                 data.rank = result.rank + 1;

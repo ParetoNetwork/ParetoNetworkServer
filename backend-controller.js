@@ -1542,10 +1542,10 @@ controller.insertProfile = function (profile, callback) {
                 const multi = redisClient.multi();
                 let profile = {
                     address: r.address,
-                    alias: r.alias,
-                    aliasSlug: r.aliasSlug,
-                    biography: r.biography,
-                    profilePic: r.profilePic
+                    alias: r.alias? r.alias: "",
+                    aliasSlug: r.aliasSlug? r.aliasSlug: "",
+                    biography: r.biography? r.biography: "",
+                    profilePic: r.profilePic? r.profilePic: ""
                 };
                 multi.hmset("profile" + profile.address + "", profile);
                 multi.exec(function (errors, results) {
@@ -1590,10 +1590,10 @@ controller.getProfileAndSaveRedis = function (address, callback) {
             if (r) {
                 let profile = {
                     address: address,
-                    alias: r.alias,
-                    aliasSlug: r.aliasSlug,
-                    biography: r.biography,
-                    profilePic: r.profilePic
+                    alias: r.alias? r.alias: "",
+                    aliasSlug: r.aliasSlug? r.aliasSlug: "",
+                    biography: r.biography? r.biography: "",
+                    profilePic: r.profilePic? r.profilePic: ""
                 };
                 const multi = redisClient.multi();
                 multi.hmset("profile" + profile.address + "", profile);
