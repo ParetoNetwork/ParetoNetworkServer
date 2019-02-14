@@ -60,7 +60,7 @@ errorHandler.validateMessage = function(error){
 
     } else{
         if( typeof  error === 'string' ){
-            console.logJSON.stringify({code: 'unknown', systemMessage: msg});
+            console.log(JSON.stringify({code: 'unknown', systemMessage: msg}));
         }
     }
 
