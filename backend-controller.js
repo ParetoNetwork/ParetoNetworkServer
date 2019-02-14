@@ -5,6 +5,8 @@ var controller = module.exports = {};
 const Decimal = require('decimal.js-light');
 const fs = require('fs');
 const path = require('path');
+const ErrorHandler = require('./error-handler.js');
+
 Decimal.set({
     precision: 20,
     rounding: Decimal.ROUND_HALF_UP,
@@ -52,8 +54,10 @@ redisClient = redis.createClient(REDIS_URL, {no_ready_check: true});
 redisClient.on("connect", function () {
     console.log("PARETO: Success connecting to Redis ")
 });
-redisClient.on("error", function (err) {
-    console.log("PARETO: Problems connecting to Redis " + err);
+redisClient.on("error", function (e) {
+    const error = ErrorHandler.backendErrorList('b17');
+    error.systemMessage = e.message? e.message: e;
+    console.log(JSON.stringify(error));
 });
 
 
@@ -76,6 +80,9 @@ controller.startW3WebSocket = function () {
     web3_events_provider.on('end', e => {
         //console.log('WS web3 closed');
         //console.log('Attempting to reconnect...');
+        const error = ErrorHandler.backendErrorList('b17');
+        error.systemMessage = e.message? e.message: e;
+        console.log(JSON.stringify(error));
         web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
         web3_events = new Web3(web3_events_provider);
         controller.startW3WebSocket()
@@ -95,7 +102,9 @@ mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
     controller.startW3WebSocket();
     console.log("PARETO: Success connecting to Mongo ")
 }).catch(err => {
-    console.log("PARETO: Problems connecting to Mongo: " + err)
+    const error = ErrorHandler.backendErrorList('b15');
+    error.systemMessage = err.message? err.message: err;
+    console.log(JSON.stringify(error));
 });
 
 
@@ -136,9 +145,6 @@ const dbName = 'pareto';
 const PARETO_SCORE_MINIMUM = 100000; 	//minimum score to get intel
 const PARETO_RANK_GRANULARIZED_LIMIT = 10; 		//how far down to go through ranks until separating by tiers
 
-const ErrorHandler = require('./error-handler.js');
-
-
 controller.getParetoCoinMarket = function (callback) {
     let url = 'https://pro-api.coinmarketcap.com/v1';
 
@@ -158,7 +164,9 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
 
     if (web3.utils.isAddress(address) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
 
@@ -191,8 +199,9 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
                     if (amount > 0) {
                         callback(null, amount)
                     } else {
-
-                        callback(ErrorHandler.zeroParetoBalanceMessage)
+                        const error = ErrorHandler.backendErrorList('b7');
+                        error.address = address;
+                        callback(error);
 
                     } //end
 
@@ -208,7 +217,6 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
             callback(err);
         });//end promise related to balance //end promise related to block height
     } //end address validation
-
 };
 
 controller.postContent = function (req, callback) {
@@ -218,7 +226,9 @@ controller.postContent = function (req, callback) {
     //exposed endpoint to write content to database
     if (web3.utils.isAddress(req.user) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
 
@@ -355,19 +365,25 @@ controller.startwatchNewIntel = function () {
                                     }
                                 })
                                     .catch(e => {
-                                        console.log(e);
+                                        const error = ErrorHandler.backendErrorList('b22');
+                                        error.systemMessage = e.message? e.message: e;
+                                        console.log(JSON.stringify(error));
                                     });
 
                             }
                         });
 
                     } catch (e) {
-                        console.log(e);
+                        const error = ErrorHandler.backendErrorList('b18');
+                        error.systemMessage = e.message? e.message: e;
+                        console.log(JSON.stringify(error));
                     }
                 }
             });
         } catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b18');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     }).on('error', err => {
@@ -394,14 +410,15 @@ controller.startwatchReward = function (intel, intelAddress) {
             ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, rewardData, {upsert: true, new: true},
                 function (err, r) {
                     if (err) {
-                        console.error('unable to write to db because: ', err);
+                        const error = ErrorHandler.backendErrorList('b19');
+                        error.systemMessage = e.message? e.message: e;
+                        console.log(JSON.stringify(error));
                     } else {
                         ParetoContent.findOne({id: intelIndex}, (err, intel) => {
                             if (intel) {
                                 const {address} = intel;
                                 ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, {receiver: address}, {},
-                                    function (err, r) {
-                                    }
+                                    function (err, r) { }
                                 );
                             }
                         });
@@ -419,7 +436,9 @@ controller.startwatchReward = function (intel, intelAddress) {
             );
 
         } catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b19');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     }).on('error', err => {
@@ -448,18 +467,22 @@ controller.startwatchDistribute = function (intel, intelAddress) {
                 }
             })
                 .catch(e => {
-                    console.log(e);
+                    const error = ErrorHandler.backendErrorList('b21');
+                    error.systemMessage = e.message? e.message: e;
+                    console.log(JSON.stringify(error));
                 });
 
 
         } catch (e) {
-            console.log(e);
+            const error = ErrorHandler.backendErrorList('b21');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
         }
 
     }).on('error', err => {
         console.log(err);
     });
-}
+};
 
 
 controller.startWatchApprove = function () {
@@ -477,7 +500,9 @@ controller.startWatchApprove = function () {
                     controller.SendInfoWebsocket({address: r.address, transaction: r});
                 } else {
                     if (err) {
-                        console.log(err);
+                        const error = ErrorHandler.backendErrorList('b21');
+                        error.systemMessage = err.message? err.message: err;
+                        console.log(JSON.stringify(error));
                     }
                 }
 
@@ -575,7 +600,7 @@ controller.SendInfoWebsocket = function (data) {
                     if (client.user && client.user.user == data.address) {
                         controller.retrieveAddress(client.user.user, function (err, result) {
                             if (!err) {
-                                if (client.readyState === WebSocket.OPEN) {
+                                if (client.readyState === WebSocket.OPEN && client.isAlive) {
                                     client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
@@ -601,7 +626,7 @@ controller.SendInfoWebsocket = function (data) {
                              */
                             controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                                 if (!err) {
-                                    if (client.readyState === WebSocket.OPEN) {
+                                    if (client.readyState === WebSocket.OPEN && client.isAlive) {
                                         client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                     }
                                 }
@@ -610,7 +635,9 @@ controller.SendInfoWebsocket = function (data) {
                     }
                 }
             } catch (e) {
-                console.log(e);
+                const error = ErrorHandler.backendErrorList('b14');
+                error.systemMessage = e.message? e.message: e;
+                console.log(JSON.stringify(error));
             }
         });
     }
@@ -658,7 +685,9 @@ controller.updateIntelReward = function (intelIndex, txHash, sender) {
                 }
             })
                 .catch(e => {
-                    console.log(e);
+                    const error = ErrorHandler.backendErrorList('b19');
+                    error.systemMessage = e.message? e.message: e;
+                    console.log(JSON.stringify(error));
                 });
         }
     })
@@ -707,9 +736,9 @@ controller.addExponentAprox = function (addresses, scores, blockHeight, callback
     })
 };
 
-controller.getAddressesWithSlug = async function (aliasArray){
-    let profiles = await ParetoProfile.find({ aliasSlug: { $in : aliasArray}}).exec();
-    if(profiles.length > 0){
+controller.getAddressesWithSlug = async function (aliasArray) {
+    let profiles = await ParetoProfile.find({aliasSlug: {$in: aliasArray}}).exec();
+    if (profiles.length > 0) {
         return profiles.map(profile => profile.address);
     }
     return [];
@@ -759,19 +788,19 @@ controller.validateQuery = async function (query) {
             let addresses = await controller.getAddressesWithSlug(data2);
 
             let allAddresses = [...data, ...addresses];
-            if(allAddresses.length > 0) {
+            if (allAddresses.length > 0) {
                 array.push({address: {$in: allAddresses}});
             }
 
         } catch (e) {
             console.log(e)
         }
-    } else if(query.alias){
+    } else if (query.alias) {
         try {
             data = query.alias.split(',');
 
             let addresses = await controller.getAddressesWithSlug(data);
-            if(addresses.length > 0) {
+            if (addresses.length > 0) {
                 array.push({address: {$in: addresses}});
             }
         } catch (e) {
@@ -795,7 +824,7 @@ controller.validateQuery = async function (query) {
             let addresses = await controller.getAddressesWithSlug(data2);
 
             let allAddresses = [...data, ...addresses];
-            if(allAddresses.length > 0) {
+            if (allAddresses.length > 0) {
                 array.push({address: {$nin: allAddresses}});
             }
 
@@ -805,8 +834,7 @@ controller.validateQuery = async function (query) {
 
     }
     return array;
-
-}
+};
 
 controller.slugify = function (string) {
     const a = 'àáäâãåèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
@@ -827,7 +855,9 @@ controller.getQueryContentByUser = function (address, intel, callback) {
 
     if (web3.utils.isAddress(address) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
 
@@ -1120,7 +1150,9 @@ controller.retrieveAddress = function (address, callback) {
 
     if (web3.utils.isAddress(address) == false) {
         if (callback && typeof callback === "function") {
-            callback(ErrorHandler.invalidAddressMessage);
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
         }
     } else {
         controller.retrieveAddressRankWithRedis([address], true, function (error, results) {
@@ -1166,16 +1198,16 @@ controller.updateUser = async function (address, userinfo, callback) {
                 existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
 
                 let counter = 0;
-                while (existingAliasSlug && counter < 10){
-                    if(existingAliasSlug.address !== address){
+                while (existingAliasSlug && counter < 10) {
+                    if (existingAliasSlug.address !== address) {
                         let positionDash = profile.aliasSlug.indexOf('-');
-                        if ( positionDash >= 0 && profile.aliasSlug.substring(profile.aliasSlug.length-1) !== '-') {
+                        if (positionDash >= 0 && profile.aliasSlug.substring(profile.aliasSlug.length - 1) !== '-') {
                             profile.aliasSlug = profile.aliasSlug.replace('-', '');
-                        }else {
+                        } else {
                             profile.aliasSlug = profile.aliasSlug + '-';
                         }
                         existingAliasSlug = await controller.retrieveProfileWithAliasSlug(profile.aliasSlug);
-                    }else{
+                    } else {
                         existingAliasSlug = null;
                     }
                     counter++;
@@ -1204,7 +1236,7 @@ controller.getUserInfo = async function (address, callback) {
 
     if (web3.utils.isAddress(fixaddress) == false) {
         let profile = await ParetoProfile.findOne({aliasSlug: address}).exec();
-        if(!profile) profile = await ParetoProfile.findOne({alias: address}).exec();
+        if (!profile) profile = await ParetoProfile.findOne({alias: address}).exec();
 
         if (profile) {
             controller.retrieveAddressRankWithRedis([profile.address], true, function (error, rankings) {
@@ -1264,7 +1296,7 @@ controller.getContentByCurrentUser = async function (req, callback) {
 
     if (!isAddress) {
         let profileFound = await ParetoProfile.findOne({aliasSlug: address}).exec();
-        if(!profileFound) profileFound = await ParetoProfile.findOne({alias: address}).exec();
+        if (!profileFound) profileFound = await ParetoProfile.findOne({alias: address}).exec();
         if (profileFound) address = profileFound.address;
         isAddress = web3.utils.isAddress(address) === true;
     }
@@ -1378,12 +1410,16 @@ controller.getScoreAndSaveRedis = function (callback) {
                     callback(null, result)
                 });
                 job.on('failed', (err) => {
-                    callback(err)
+                    const error = ErrorHandler.backendErrorList('b5');
+                    error.systemMessage = err.message? err.message: err;
+                    callback(error);
                 });
             });
 
-    } catch (e) {
-        callback(e);
+    } catch (err) {
+        const error = ErrorHandler.backendErrorList('b5');
+        error.systemMessage = err.message? err.message: err;
+        return callback(error);
     }
 
 };
@@ -1396,7 +1432,7 @@ controller.getScoreAndSaveRedis = function (callback) {
 controller.sign = function (params, callback) {
 
     if (!params.data || !params.data.length || !params.data[0].value) {
-        return callback(ErrorHandler.signatureFailedMessage)
+        return callback(ErrorHandler.backendErrorList('b1'))
     } else {
 
 
@@ -1457,7 +1493,7 @@ controller.sign = function (params, callback) {
 
         } else {
             if (callback && typeof callback === "function") {
-                callback(ErrorHandler.signatureFailedMessage);
+                callback(ErrorHandler.backendErrorList('b2'));
             }
         }
     }
@@ -1499,9 +1535,11 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
                     {$project: {diff: {$abs: {$subtract: [parseFloat(q), '$score']}}, doc: '$$ROOT'}},
                     {$sort: {diff: 1}},
                     {$limit: 1}
-                ]).exec(function (e, r) {
-                    if (e || r.length === 0 || !r[0].doc || !r[0].doc.address) {
-                        callback(e)
+                ]).exec(function (err, r) {
+                    if (err || r.length === 0 || !r[0].doc || !r[0].doc.address) {
+                        const error = ErrorHandler.backendErrorList('b4');
+                        error.systemMessage = err.message? err.message: err;
+                        return callback(err);
                     } else {
                         controller.retrieveAddressRankWithRedis([r[0].doc.address], true, function (error, rankings) {
                             if (error) {
@@ -1669,6 +1707,8 @@ controller.retrieveRanksWithRedis = function (rank, limit, page, attempts, callb
     multi.exec(function (err, results) {
 
         if (err) {
+            const error = ErrorHandler.backendErrorList('b4');
+            error.systemMessage = err.message? err.message: err;
             return callback(err);
         }
 
@@ -1717,7 +1757,10 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
         if ((!results || results.length === 0 || (!results[0] && results.length === 1)) && attempts) {
             ParetoAddress.find({address: {$in: addressess}}, function (err, result) {
                 if (!err && (!result || (result && !result.length))) {
-                    callback(ErrorHandler.addressNotFound)
+                    const error = ErrorHandler.backendErrorList('b3');
+                    error.systemMessage = err.message? err.message: err;
+                    error.address = addressess;
+                    callback(error);
                 } else {
                     controller.getScoreAndSaveRedis(function (err, result) {
                         if (err) {
@@ -1732,7 +1775,10 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
         } else {
             if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
                 // hopefully, users without pareto shouldn't get here now.
-                callback(ErrorHandler.addressNotFound)
+                const error = ErrorHandler.backendErrorList('b3');
+                error.systemMessage = err.message? err.message: err;
+                error.address = addressess;
+                callback(error);
             } else {
                 const multi = redisClient.multi();
                 for (let i = 0; i < results.length; i = i + 1) {
@@ -1742,7 +1788,10 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
                 }
                 multi.exec(function (err, results) {
                     if (err) {
-                        return callback(err);
+                        const error = ErrorHandler.backendErrorList('b4');
+                        error.systemMessage = err.message? err.message: err;
+                        error.address = addressess;
+                        return callback(error);
                     }
                     // return the cached ranking
                     return callback(null, results);
