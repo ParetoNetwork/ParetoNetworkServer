@@ -54,7 +54,7 @@ export default class ContentService {
   }
 
   static getTransactions(params, onSuccess, onError) {
-    return http.get("/v1/transaction", {params})
+    return http.get("/v1/transaction", params)
       .then(res => {
         if (res.data.success) {
           return onSuccess(res.data.data);
@@ -65,6 +65,7 @@ export default class ContentService {
   }
 
   static postTransactions(params, onSucess, onError) {
+    console.log(params);
     http.post("/v1/transaction", params)
       .then(res => {
       });
@@ -380,6 +381,7 @@ export default class ContentService {
       const gasSendReward = await Intel.methods
         .sendReward(content.intel, content.depositAmount)
         .estimateGas({from: content.rewarder_address});
+
       await Intel.methods
         .sendReward(content.intel, content.depositAmount)
         .send({
@@ -388,12 +390,23 @@ export default class ContentService {
           gasPrice: content.gasPrice
         })
         .on("transactionHash", hash => {
-          events.editTransaction({hash: content.txHash, key: 'status', value: 2});
-          let params = {
-            txHash: content.txHash,
-            txRewardHash: hash
-          };
-          this.postTransactions(params);
+
+          if (withIncreasedApproval) {
+            events.editTransaction({hash: content.txHash, key: 'status', value: 2});
+            let params = {
+              txHash: content.txHash,
+              txRewardHash: hash
+            };
+            this.postTransactions(params);
+          } else {
+            content.txHash = hash;
+            content.txRewardHash = hash;
+            content.status = 2;
+            content.address = content.rewarder_address;
+            events.addTransaction(content);
+
+            this.postTransactions(content);
+          }
 
           waitForReceipt(hash, receipt => {
             if (ContentService.ledgerNanoEngine) {
@@ -428,6 +441,7 @@ export default class ContentService {
     }
   }
 
+  //Activates when an user wants to make a reward to an intel
   static async rewardIntel(content, signData, events, onSuccess, onError) {
     try {
       await this.Setup(signData);
@@ -443,32 +457,49 @@ export default class ContentService {
         Intel_Contract_Schema,
         content.intelAddress
       );
+
       let gasPrice = await web3.eth.getGasPrice();
 
       const rewarder_address = accounts[0];
       const depositAmount = web3.utils.toWei(content.tokenAmount.toString(), "ether");
 
-      let gasApprove = await ParetoTokenInstance.methods
-        .increaseApproval(Intel.options.address, depositAmount)
-        .estimateGas({from: rewarder_address});
-
       let userAllowance = 0;
 
+      let params = {
+        address: rewarder_address,
+        intel: content.ID,
+        amount: content.tokenAmount,
+        event: 'reward',
+        intelAddress: content.intelAddress,
+        status: 0,
+        clicked: true,
+        dateCreated: new Date()
+      };
+
+      //This will calculate the user allowance, which the first time, by default, is 0
       await ParetoTokenInstance.methods
-      .allowance(Intel.options.address, content.intelAddress).call().then(res => {
-          userAllowance = res;
+        .allowance(Intel.options.address, content.intelAddress).call().then(res => {
           console.log(res);
-          if(userAllowance < depositAmount){
-            userIncreaseApproval()
-          }else {
-
+          userAllowance = res;
+          if (userAllowance < depositAmount) {
+            userIncreaseApproval(params);
+          } else {
+            params.depositAmount = depositAmount;
+            params.gasPrice = gasPrice;
+            ContentService.sendReward(false, Intel, params, events, onSuccess, onError);
           }
-      });
+        });
 
-      console.log(userAllowance);
+      //Does the increase approval for an user if the allowance is less than the token amount
+      async function userIncreaseApproval(params) {
 
-      async function userIncreaseApproval(){
         let increaseApprovalTotal = 10000000000;
+
+        //Calculates the gas for the increase approval transaction
+        let gasApprove = await ParetoTokenInstance.methods
+          .increaseApproval(Intel.options.address, increaseApprovalTotal)
+          .estimateGas({from: rewarder_address});
+
         await ParetoTokenInstance.methods
           .increaseApproval(Intel.options.address, increaseApprovalTotal)
           .send({
@@ -477,22 +508,15 @@ export default class ContentService {
             gasPrice
           })
           .on("transactionHash", hash => {
-            let params = {
-              address: rewarder_address,
-              txHash: hash,
-              intel: content.ID,
-              amount: content.tokenAmount,
-              event: 'reward',
-              intelAddress: content.intelAddress,
-              status: 0,
-              clicked: true,
-              dateCreated: new Date()
-            };
 
+            //The transaction will be send to vuex and the database
             var txHash = hash;
+            params.txHash = txHash;
             events.addTransaction(params);
-            this.postTransactions(params);
+            console.log(params);
+            ContentService.postTransactions(params);
 
+            //Wait for the transaction to be complete
             waitForReceipt(hash, async receipt => {
               events.toastTransaction({
                 group: 'notification',
@@ -503,11 +527,11 @@ export default class ContentService {
               });
               events.editTransaction({hash: hash, key: 'status', value: 1});
 
-              ContentService.sendReward(false , Intel, {
+              ContentService.sendReward(true, Intel, {
                 intel: content.ID,
                 depositAmount: depositAmount,
                 txHash: txHash,
-                rewarder_address: rewarder_address,
+                rewarder_address,
                 gasPrice: gasPrice
               }, events, onSuccess, onError);
             });
