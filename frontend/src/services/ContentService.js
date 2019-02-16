@@ -399,6 +399,7 @@ export default class ContentService {
             };
             this.postTransactions(params);
           } else {
+
             content.txHash = hash;
             content.txRewardHash = hash;
             content.status = 2;
@@ -424,6 +425,7 @@ export default class ContentService {
           onError(error);
         });
     } catch (e) {
+      console.log(e);
       let params = {
         txHash: content.txHash,
         status: 4
@@ -466,7 +468,7 @@ export default class ContentService {
       let userAllowance = 0;
 
       let params = {
-        address: rewarder_address,
+        rewarder_address,
         intel: content.ID,
         amount: content.tokenAmount,
         event: 'reward',
@@ -477,12 +479,14 @@ export default class ContentService {
       };
 
       //This will calculate the user allowance, which the first time, by default, is 0
+
       await ParetoTokenInstance.methods
-        .allowance(Intel.options.address, content.intelAddress).call().then(res => {
-          console.log(res);
+        .allowance(rewarder_address, Intel.options.address).call().then(async res => {
+
           userAllowance = res;
           if (userAllowance < depositAmount) {
-            userIncreaseApproval(params);
+            await userIncreaseApproval().then(res => {
+            });
           } else {
             params.depositAmount = depositAmount;
             params.gasPrice = gasPrice;
@@ -491,9 +495,11 @@ export default class ContentService {
         });
 
       //Does the increase approval for an user if the allowance is less than the token amount
-      async function userIncreaseApproval(params) {
+      async function userIncreaseApproval() {
+        console.log(gasPrice)
 
-        let increaseApprovalTotal = 10000000000;
+        let totalTokensToApprove = 10000000000;
+        let increaseApprovalTotal = web3.utils.toWei(totalTokensToApprove.toString(), "ether");
 
         //Calculates the gas for the increase approval transaction
         let gasApprove = await ParetoTokenInstance.methods
