@@ -214,7 +214,6 @@ export default class ContentService {
 
   static async sendCreate(withIncreaseApproval, content, events, onSuccess, onError) {
     try {
-      debugger;
       let gasCreateIntel = await Intel.methods
         .create(
           content.provider_address,
@@ -239,6 +238,7 @@ export default class ContentService {
           gasPrice: content.gasPrice
         })
         .on("transactionHash", hash => {
+
           if(withIncreaseApproval){
             events.editTransaction({hash: content.txHash, key: 'status', value: 2});
             let params = {
@@ -251,7 +251,7 @@ export default class ContentService {
             content.txHash = hash;
             content.txRewardHash = hash;
             content.status = 2;
-            content.address = params.address;
+            content.address = content.address;
             events.addTransaction(content);
 
             ContentService.postTransactions(content);
@@ -273,6 +273,7 @@ export default class ContentService {
           });
         })
         .on("error", err => {
+          console.log(err);
           if (ContentService.ledgerNanoEngine) {
             ContentService.ledgerNanoEngine.stop();
           }
@@ -338,14 +339,11 @@ export default class ContentService {
       const depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
       const desiredReward = depositAmount;
 
-      let gasApprove = await ParetoTokenInstance.methods
-        .increaseApproval(Intel.options.address, depositAmount)
-        .estimateGas({from: provider_address});
-
       let userAllowance = 0;
 
       await ParetoTokenInstance.methods
         .allowance(serverData.address, Intel.options.address).call().then(async res => {
+          console.log(res);
           userAllowance = res;
 
           if(userAllowance < depositAmount){
@@ -353,10 +351,13 @@ export default class ContentService {
           }else{
             params.depositAmount = depositAmount;
             params.gasPrice = gasPrice;
+            params.provider_address = provider_address;
+            params.desiredReward = desiredReward;
+            params._ttl = _ttl;
 
             ContentService.uploadContent(serverData, async res => {
               params.intel = res.content.Intel_ID;
-              ContentService.sendCreate(false, Intel, params, events, onSuccess, onError);
+              ContentService.sendCreate(false, params, events, onSuccess, onError);
             });
           }
         });
@@ -369,6 +370,10 @@ export default class ContentService {
 
             let totalTokensToApprove = 10000000000;
             let increaseApprovalTotal = web3.utils.toWei(totalTokensToApprove.toString(), "ether");
+
+            let gasApprove = await ParetoTokenInstance.methods
+              .increaseApproval(Intel.options.address, increaseApprovalTotal)
+              .estimateGas({from: provider_address});
 
             await ParetoTokenInstance.methods
               .increaseApproval(Intel.options.address, increaseApprovalTotal)
@@ -395,6 +400,7 @@ export default class ContentService {
                     duration: 10000,
                     text: 'Second transaction ready, complete it'
                   });
+
                   const newContent = {
                     provider_address,
                     depositAmount,
@@ -414,8 +420,6 @@ export default class ContentService {
               });
           });
       }
-
-
     });
   }
 

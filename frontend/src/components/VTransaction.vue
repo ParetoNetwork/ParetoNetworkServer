@@ -48,16 +48,10 @@
                 return temp.format("MMMM Do, YYYY");
             }
         },
-        watch: {
-            'transaction.clicked' : function (valNew, valOld) {
-                this.loadingTransaction();
-            }
-        },
         mounted : function(){
             let newId = this.transaction.txHash + '-span';
             this.clicked = this.transaction.clicked;
             this.loadingEffect = document.getElementById(newId);
-            this.loadingTransaction();
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
@@ -85,7 +79,6 @@
                 }
 
                 if(!this.transaction.clicked) {
-                    this.loadingTransaction();
                     this.clicked = true;
                     this.$set(this.transaction, 'clicked', true);
 
@@ -129,26 +122,6 @@
             },
             dateStringFormat(date) {
                 return new Date(date);
-            },
-            loadingTransaction(){
-                let points = 0;
-                if(this.transaction.clicked && this.transaction.status < 3){
-                    let updateTitle = setInterval(()=>{
-                        if(points < 4){
-                            this.loadingEffect.innerHTML  = '.' + this.loadingEffect.innerHTML;
-                        }
-                        else{
-                            this.loadingEffect.innerHTML = '';
-                            points = 0;
-                        }
-                        points++;
-
-                        if(this.transaction.status > 2){
-                            clearInterval(updateTitle);
-                            this.loadingEffect.innerHTML = '';
-                        }
-                    }, 200);
-                }
             },
             statusColor(status){
                 let click = this.clicked || this.transaction.clicked;

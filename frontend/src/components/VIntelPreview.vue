@@ -12,7 +12,7 @@
             <div class="cursor-pointer intel-preview"
                     v-bind:class="{ 'col-8 col-lg-7' : !eventRow , 'col-12 p-0': eventRow }">
                 <router-link
-                        tag="h1"
+                        tag="a"
                         :to="intelRoute(intel)"
                         class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</router-link>
                 <div class="row mt-2">

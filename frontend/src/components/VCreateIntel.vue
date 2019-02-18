@@ -9,7 +9,7 @@
                         <label class="pareto-label" style="padding-left: 10px"><b>NEW INTEL</b></label>
                     </div>
                     <div class="col-md-6 col-lg-4 p-1 mb-4 mb-md-2">
-                        <p class="create-input text-user-content"> {{blockChainAddress}} </p>
+                        <p class="create-input text-user-content"> {{blockChainAddress || 'Address'}} </p>
                     </div>
                     <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
                         <input type="number" v-model="tokens" class="create-input" step="0.000000001" required>
