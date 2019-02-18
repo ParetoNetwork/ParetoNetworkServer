@@ -53,7 +53,7 @@
                 <div class="wrapper font-body-regular">
                     <div class="desc-block">
                         <div class="desc-block__title">
-                            <span class="number">1</span>
+                            <span class="number" style="color: #6abe49">1</span>
                             <h3>Submit actionable financial intel</h3>
                         </div>
 
@@ -74,7 +74,7 @@
                     </div>
                     <div class="desc-block">
                         <div class="desc-block__title">
-                            <span class="number">2</span>
+                            <span class="number" style="color: #6abe49">2</span>
                             <h3>Pareto Network distributes the intel to investors.</h3>
                         </div>
 
@@ -94,7 +94,7 @@
                     </div>
                     <div class="desc-block">
                         <div class="desc-block__title">
-                            <span class="number">3</span>
+                            <span class="number" style="color: #6abe49">3</span>
                             <h3>Intel providers are rewarded based on the quality of their information</h3>
                         </div>
 
@@ -911,7 +911,7 @@
 
 <style scoped>
     .main {
-        color: black;
+        color: white;
     }
 
     .padding-main {

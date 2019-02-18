@@ -2,6 +2,7 @@ import axios from 'axios';
 import http from "./HttpService";
 import Web3 from "web3";
 import authService from "./authService"
+import errorService from "./errorService";
 
 let web3;
 let provider;
@@ -27,49 +28,52 @@ export default class ContentService {
     }
   };
 
-  static uploadContent(content, onSuccess, onError) {
-    http
-      .post("/v1/content", content)
-      .then(res => {
-        if (res.data.success) {
-          return onSuccess(res.data.data);
-        } else {
-          return onError(res.data.message);
-        }
-      })
-      .catch(error => {
-        return onError(error);
-      });
-  }
+    static uploadContent(content, onSuccess, onError) {
+        http
+            .post("/v1/content", content)
+            .then(res => {
+                if (res.data.success) {
+                    return onSuccess(res.data.data);
+                } else {
+                    return onError(errorService.sendErrorMessage('f15', res.data.message));
+                }
+            })
+            .catch(error => {
+                return onError(error);
+            });
+    }
 
-  static getParetoInfo(onSuccess, onError) {
-    http.get("/v1/coinmarket-pareto")
-      .then(res => {
-        if (res.data.success) {
-          return onSuccess(res.data.data.data.PARETO);
-        } else {
-          return onError('Could not retrieve data from server');
-        }
-      })
-  }
+    static getParetoInfo(onSuccess, onError) {
+        http.get("/v1/coinmarket-pareto")
+            .then(res => {
+                if (res.data.success) {
+                    return onSuccess(res.data.data.data.PARETO);
+                } else {
+                    return onError(errorService.sendErrorMessage('f16', 'Could not retrieve data from server'));
+                }
+            })
+    }
 
-  static getTransactions(params, onSuccess, onError) {
-    return http.get("/v1/transaction", params)
-      .then(res => {
-        if (res.data.success) {
-          return onSuccess(res.data.data);
-        } else {
-          return onError('Could not retrieve data from server');
-        }
-      });
-  }
+    static getTransactions(params, onSuccess, onError) {
+        return http.get("/v1/transaction", {params})
+            .then(res => {
+                if (res.data.success) {
+                    return onSuccess(res.data.data);
+                } else {
+                    return onError(errorService.sendErrorMessage('f6', res.data.message));
+                }
+            });
+    }
 
-  static postTransactions(params, onSucess, onError) {
-    console.log(params);
-    http.post("/v1/transaction", params)
-      .then(res => {
-      });
-  }
+    static postTransactions(params, onSucess, onError) {
+        http.post("/v1/transaction", params)
+            .then(
+                res => {
+                if(res.data.message || !res.data.success){
+                    errorService.sendErrorMessage('f18', res.data.message);
+                }
+            });
+    }
 
   static async getStimatedGasPrice(OnSuccess, OnError) {
     let provider;
@@ -204,7 +208,7 @@ export default class ContentService {
         }
       }
     } catch (e) {
-      return onError(e);
+      return onError(errorService.sendErrorMessage('f20', e));
     }
   }
 
@@ -273,7 +277,8 @@ export default class ContentService {
             ContentService.ledgerNanoEngine.stop();
           }
           events.editTransaction({hash: content.txHash, key: 'status', value: 4});
-          onError(err.message || err);
+
+          onError( errorService.sendErrorMessage('f19', err.message || err) );
         });
 
     } catch (e) {
@@ -290,7 +295,7 @@ export default class ContentService {
         title: 'Error:',
         type: 'error',
         duration: 10000,
-        text: 'Transaction Failed'
+        text: errorService.sendErrorMessage('f19', e)
       });
     }
   }
@@ -299,19 +304,19 @@ export default class ContentService {
     try {
       await this.Setup(signData);
     } catch (e) {
-      return onError(e);
+      return onError( errorService.sendErrorMessage('f35', e));
     }
     //console.log(tokenAmount);
 
     if (tokenAmount === null) {
       let error = "No Pareto Amount. Transaction cancelled";
-      onError(error);
+      onError(errorService.sendErrorMessage('f33', error));
       return;
     }
 
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
-        onError("Err getting accounts");
+        onError(errorService.sendErrorMessage('f34', err));
         return;
       }
 
@@ -404,7 +409,8 @@ export default class ContentService {
                 });
               })
               .on("error", err => {
-                onError(err.message || err);
+                let error = err.message || err;
+                onError(errorService.sendErrorMessage('f19', error));
               });
           });
       }
@@ -458,7 +464,7 @@ export default class ContentService {
             ContentService.ledgerNanoEngine.stop();
           }
           events.editTransaction({hash: content.txHash, key: 'status', value: 4});
-          onError(error);
+          onError( errorService.sendErrorMessage('f21', error));
         });
     } catch (e) {
       console.log(e);
@@ -474,7 +480,7 @@ export default class ContentService {
         title: 'Error:',
         type: 'error',
         duration: 10000,
-        text: 'Transaction Failed'
+        text: errorService.sendErrorMessage('f21', e)
       });
     }
   }
@@ -484,11 +490,11 @@ export default class ContentService {
     try {
       await this.Setup(signData);
     } catch (e) {
-      return onError(e)
+      return onError( errorService.sendErrorMessage('f35', e));
     }
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
-        onError("Err getting accounts");
+        onError(errorService.sendErrorMessage('f34', err));
         return;
       }
       Intel = new web3.eth.Contract(
@@ -592,12 +598,12 @@ export default class ContentService {
         content.intelAddress
       );
     } catch (e) {
-      return onError(e);
+      return onError( errorService.sendErrorMessage('f35', e));
     }
 
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
-        onError("Err getting accounts");
+        onError(errorService.sendErrorMessage('f34', err));
         return;
       }
       const distributor = accounts[0];
@@ -650,10 +656,10 @@ export default class ContentService {
             if (ContentService.ledgerNanoEngine) {
               ContentService.ledgerNanoEngine.stop();
             }
-            onError(error);
+            onError(errorService.sendErrorMessage('f22', error));
           });
       } catch (e) {
-        onError(e);
+        onError(errorService.sendErrorMessage('f22', e));
       }
     });
   }

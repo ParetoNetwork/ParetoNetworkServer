@@ -1,4 +1,5 @@
 import http from './HttpService';
+import errorService from "./errorService";
 
 export default class dashboardService {
 
@@ -16,10 +17,10 @@ export default class dashboardService {
                 if (response.success)
                     return onSuccess(response.data);
                 else
-                    return onError(response.message);
+                    return onError(errorService.sendErrorMessage('f24', response.message));
 
             }).catch(error => {
-                return onError(error);
+                return onError(errorService.sendErrorMessage('f24', error));
             });
         }
     }
@@ -29,10 +30,10 @@ export default class dashboardService {
             if (res.data.success) {
                 return onSuccess(res.data.data);
             } else {
-                return onError(res.data.message);
+                return onError(errorService.sendErrorMessage('f25', res.data.message));
             }
         }).catch(error => {
-            return onError(error);
+            return onError(errorService.sendErrorMessage('f25', error));
         });
     }
 
@@ -41,10 +42,10 @@ export default class dashboardService {
             if (res.data.success) {
                 return onSuccess(res.data.data);
             } else {
-                return onError(res.data.message);
+                return onError(errorService.sendErrorMessage('f26', res.data.message));
             }
         }).catch(error => {
-            return onError(error)
+            return onError(errorService.sendErrorMessage('f26', error));
         });
     }
 
@@ -61,10 +62,10 @@ export default class dashboardService {
             if (res.data.success) {
                 return onSuccess(res.data.data);
             } else {
-                return onError(res.data.message);
+                return onError(errorService.sendErrorMessage('f27', res.data.message));
             }
         }).catch(error => {
-            return onError(error)
+            return onError(errorService.sendErrorMessage('f27', error));
         });
     }
 }

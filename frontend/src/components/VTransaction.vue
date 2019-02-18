@@ -1,44 +1,19 @@
 <template>
-    <div class="text-left">
-        <div class="row p-0 cursor-pointer" @click="clickTransaction()">
-            <div class="col-12 col-lg-7 p-0">
-                <h1 class="title" v-line-clamp="2">{{transactionStatus(transaction.status)}}
-                    <span v-bind:id="transaction.txHash + '-span'"> </span>
-                    <span v-show="transaction.status < 3 && !clicked">
-                        <i class="fa fa-exclamation-circle" style="color: red"></i>
-                    </span>
-                </h1>
-            </div>
-            <div class="col-12 col-lg-5 p-0">
-                <div class="text-center">
-                    <h1> {{transaction.event}} </h1>
+    <div class="text-center position-relative pl-1">
+        <div class="dot" :class="statusColor(transaction.status)"></div>
+        <div class="row pl-1 ml-2 mr-0 py-3 cursor-pointer border-bottom text-content" style="border-bottom-color: black !important;">
+            <div class="col-4 px-0 text-left" @click="clickTransaction()" >
+                <div class="position-relative" >
+                    {{transaction.event}}
                 </div>
             </div>
-        </div>
-        <div class="row border-bottom">
-            <div class="col-md col-xs ellipsis text-left">
-                <a class="text-primary" :href="etherscanUrl + '/tx/' + (transaction.txRewardHash || transaction.txHash)"
-                   target="_blank">
-                    <i class="fa fa-th-large" style="color: #000; margin: 5px;"></i>
-                    txid: {{transaction.txHash.substring(0,10)}}
-                </a>
+            <div class="col-4 px-0" @click="clickTransaction()" >
+                <p>  {{transaction.amount}} </p>
             </div>
-            <div class="col-md col-xs-4 ellipsis" style="text-align: center;">
-                <a style="color: #000;"
-                   :href="etherscanUrl + '/tx/' + (transaction.txRewardHash || transaction.txHash)"
-                   target="_blank">
-                    <i class="fa fa-calendar" style="color: #000;"></i>&nbsp;
-                    <span class="text-dashboard">
-                        <b>{{ dateStringFormat(transaction.dateCreated)| moment("from", "now") }}</b>
-                    </span>
-                </a>
-            </div>
-            <div class="col-md col-xs">
-                <p class="text-right text-secondary ellipsis" style="margin-right: 5px;"><img
-                        src="../assets/images/LogoMarkColor.svg" width="20px" alt="">
-                    <b> {{transaction.amount}}</b>
-                </p>
-            </div>
+            <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
+               target="_blank" class="col-4 px-0 pl-1">
+                <p class="ellipsis">  {{transaction.txHash}} </p>
+            </a>
         </div>
     </div>
 </template>
@@ -83,18 +58,28 @@
             this.clicked = this.transaction.clicked;
             this.loadingEffect = document.getElementById(newId);
             this.loadingTransaction();
-
         },
         methods: {
             ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
             clickTransaction: function(){
                 if(this.transaction.status >= 3) {
+
+                    let transactionText = 'This transaction was already completed';
+                    let title = 'Transaction Completed';
+                    let type = 'warning';
+
+                    if(this.transaction.status === 4){
+                        transactionText = 'This transaction failed';
+                        title = ' Transaction Failed';
+                        type = 'error';
+                    }
+
                     this.$notify({
                         group: 'notification',
-                        type: 'warning',
-                        title: 'Transaction Completed',
+                        type: type,
+                        title: title,
                         duration: 10000,
-                        text: 'This transaction was already completed'
+                        text: transactionText
                     });
                     return;
                 }
@@ -145,7 +130,7 @@
             dateStringFormat(date) {
                 return new Date(date);
             },
-            loadingTransaction: function(){
+            loadingTransaction(){
                 let points = 0;
                 if(this.transaction.clicked && this.transaction.status < 3){
                     let updateTitle = setInterval(()=>{
@@ -165,19 +150,13 @@
                     }, 200);
                 }
             },
-            transactionStatus: function (status) {
-                switch (status) {
-                    case 0:
-                        return 'Pending Approval';
-                    case 1:
-                        return 'Approved';
-                    case 2:
-                        return 'Pending Transaction';
-                    case 3:
-                        return 'Completed';
-                    case 4:
-                        return 'Rejected';
-                }
+            statusColor(status){
+                let click = this.clicked || this.transaction.clicked;
+                return {
+                    'red-background' : status == 4 || status < 3 && !click,
+                    'green-background' : status == 3,
+                    'yellow-background' : status < 3 && click
+                };
             }
         }
     }

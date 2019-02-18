@@ -144,7 +144,11 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
         var rankCalculation = 0;
 
         if(web3.utils.isAddress(address) == false){
-            if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+            if(callback && typeof callback === "function") {
+                const error = ErrorHandler.backendErrorList('b7');
+                error.address = address;
+                callback(error);
+            }
         } else {
 
             //ethereum servers suck, give them 5ms to breath
@@ -253,7 +257,9 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
                                 ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions,
                                     function(err, r){
                                         //c
-                                        callback(ErrorHandler.zeroParetoBalanceMessage)
+                                        const error = ErrorHandler.backendErrorList('b7');
+                                        error.address = address;
+                                        callback(error);
                                     } //end function
                                 );
                             }
@@ -567,7 +573,13 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
 
                         } catch (e) {
                             //console.log(e);
-                            if(callback && typeof callback === "function") { callback(e); }
+                            if(callback && typeof callback === "function")
+                            {
+                                const error = ErrorHandler.backendErrorList('b8');
+                                error.systemMessage = e;
+                                error.address = address;
+                                callback(error);
+                            }
                         }
 
 
@@ -585,7 +597,11 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         if(callback && typeof callback === "function") { callback(err); }
                     });
             }, function (error) {
-                callback(error);
+                const err = ErrorHandler.backendErrorList('b8');
+                err.systemMessage = error;
+                err.address = address;
+
+                callback(err);
             }).catch(function (err) {
                 callback(err);
             });
@@ -617,7 +633,11 @@ workerController.getBalance = async function(address, blockHeightFixed, callback
     var blockHeight = 0;
 
     if(web3.utils.isAddress(address) == false){
-        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+        if(callback && typeof callback === "function") {
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
+        }
     } else {
 
         //console.log(address);
@@ -650,7 +670,9 @@ workerController.getBalance = async function(address, blockHeightFixed, callback
                         callback(null,amount)
                     } else {
 
-                        callback(ErrorHandler.zeroParetoBalanceMessage)
+                        const error = ErrorHandler.backendErrorList('b7');
+                        error.address = address;
+                        callback(error);
 
                     } //end
 
@@ -675,7 +697,11 @@ workerController.retrieveAddress = function(address, callback){
     address = address.toLowerCase();
 
     if(web3.utils.isAddress(address) == false){
-        if(callback && typeof callback === "function") { callback(ErrorHandler.invalidAddressMessage); }
+        if(callback && typeof callback === "function") {
+            const error = ErrorHandler.backendErrorList('b6');
+            error.address = address;
+            callback(error);
+        }
     } else {
         workerController.retrieveAddressRankWithRedis([address],true,function (error, results) {
             if(error) {callback(error)}
@@ -691,8 +717,6 @@ workerController.retrieveAddresses = function(addresses, callback){
         else { callback(null, results)}
     });
 };
-
-
 
 /**
  * This function will calculate the weightedBlock and then recalculate the new score for all address.
@@ -1009,7 +1033,7 @@ workerController.getScoreAndSaveRedis = function(callback){
             deleteAddress =  values[0].map( d=> {return d.address});
         }
         let COUNT = 20.0;
-        let maxRank = results[results.length-1].rank + 2;
+        let maxRank =(results[results.length-1].rank? results[results.length-1].rank : 0)+2;
         const avr = parseFloat(results.length)/COUNT;
         const total = (avr<=1)?results.length:results.length-1;
         let ini = 0.0;
@@ -1021,7 +1045,7 @@ workerController.getScoreAndSaveRedis = function(callback){
                 const data = {
                     address : result.addresses.address,
                     score : result.addresses.score,
-                    block : result.addresses.block,
+                    block : result.addresses.block? result.addresses.block: 0,
                     tokens : result.addresses.tokens
                 };
                 data.rank = result.rank + 1;
