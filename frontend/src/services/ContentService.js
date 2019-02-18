@@ -86,98 +86,6 @@ export default class ContentService {
     gasPrice ? OnSuccess(gasPrice) : OnError('There was a problem fetching the current recommended gas price');
   }
 
-  static async createIntel(serverData, tokenAmount, signData, events, onSuccess, onError) {
-    try {
-      await this.Setup(signData);
-    } catch (e) {
-      return onError(e);
-    }
-    //console.log(tokenAmount);
-
-    if (tokenAmount === null) {
-      let error = "No Pareto Amount. Transaction cancelled";
-      onError(error);
-      return;
-    }
-
-    web3.eth.getAccounts(async (err, accounts) => {
-      if (err) {
-        onError("Err getting accounts");
-        return;
-      }
-
-      let gasPrice = await web3.eth.getGasPrice();
-      const provider_address = accounts[0];
-
-      const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
-
-
-      const depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
-      const desiredReward = depositAmount;
-
-      let gasApprove = await ParetoTokenInstance.methods
-        .increaseApproval(Intel.options.address, depositAmount)
-        .estimateGas({from: provider_address});
-
-      ContentService.uploadContent(
-        serverData,
-        async res => {
-          await ParetoTokenInstance.methods
-            .increaseApproval(Intel.options.address, depositAmount)
-            .send({
-              from: provider_address,
-              gas: gasApprove,
-              gasPrice
-            })
-            .once("transactionHash", hash => {
-              let params = {
-                intelAddress: Intel.options.address,
-                address: serverData.address,
-                txHash: hash,
-                intel: res.content.Intel_ID,
-                amount: tokenAmount,
-                event: 'create',
-                status: 0,
-                clicked: true,
-                dateCreated: new Date()
-              };
-
-              var txHash = hash;
-
-              events.addTransaction(params);
-              this.postTransactions(params);
-
-              waitForReceipt(hash, async receipt => {
-                serverData.approveHash = txHash;
-                events.editTransaction({hash: hash, key: 'status', value: 1});
-
-                events.toastTransaction({
-                  group: 'notification',
-                  title: 'Event Ready',
-                  type: 'warning',
-                  duration: 10000,
-                  text: 'Second transaction ready, complete it'
-                });
-                const newContent = {
-                  provider_address,
-                  depositAmount,
-                  desiredReward,
-                  _ttl,
-                  txHash: txHash,
-                  intel: res.content.Intel_ID,
-                  gasPrice: gasPrice
-                };
-
-                this.sendCreate(newContent, events, onSuccess, onError);
-              });
-            })
-            .on("error", err => {
-              onError(err.message || err);
-            });
-        });
-    });
-  }
-
   static async pendingTransactionApproval(content, signData, events, onSuccess, onError) {
     try {
       await this.Setup(signData);
@@ -296,11 +204,11 @@ export default class ContentService {
         }
       }
     } catch (e) {
-      return onError(e)
+      return onError(e);
     }
   }
 
-  static async sendCreate(content, events, onSuccess, onError) {
+  static async sendCreate(withIncreaseApproval, content, events, onSuccess, onError) {
     try {
       let gasCreateIntel = await Intel.methods
         .create(
@@ -326,13 +234,23 @@ export default class ContentService {
           gasPrice: content.gasPrice
         })
         .on("transactionHash", hash => {
-          events.editTransaction({hash: content.txHash, key: 'status', value: 2});
+          if(withIncreaseApproval){
+            events.editTransaction({hash: content.txHash, key: 'status', value: 2});
+            let params = {
+              txHash: content.txHash,
+              txRewardHash: hash
+            };
 
-          let params = {
-            txHash: content.txHash,
-            txRewardHash: hash
-          };
-          this.postTransactions(params);
+            ContentService.postTransactions(params);
+          }else{
+            content.txHash = hash;
+            content.txRewardHash = hash;
+            content.status = 2;
+            content.address = params.address;
+            events.addTransaction(content);
+
+            ContentService.postTransactions(content);
+          }
 
           waitForReceipt(hash, receipt => {
             if (ContentService.ledgerNanoEngine) {
@@ -345,7 +263,7 @@ export default class ContentService {
               txHash: content.txHash,
               status: 3
             };
-            this.postTransactions(params);
+            ContentService.postTransactions(params);
             onSuccess({success: true, res: content});
           });
         })
@@ -358,6 +276,7 @@ export default class ContentService {
         });
 
     } catch (e) {
+      console.log(e);
       let params = {
         txHash: content.txHash,
         status: 4
@@ -375,6 +294,123 @@ export default class ContentService {
     }
   }
 
+  static async createIntel(serverData, tokenAmount, signData, events, onSuccess, onError) {
+    try {
+      await this.Setup(signData);
+    } catch (e) {
+      return onError(e);
+    }
+    //console.log(tokenAmount);
+
+    if (tokenAmount === null) {
+      let error = "No Pareto Amount. Transaction cancelled";
+      onError(error);
+      return;
+    }
+
+    web3.eth.getAccounts(async (err, accounts) => {
+      if (err) {
+        onError("Err getting accounts");
+        return;
+      }
+
+      let gasPrice = await web3.eth.getGasPrice();
+      const provider_address = accounts[0];
+
+      const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
+
+      let params = {
+        intelAddress: Intel.options.address,
+        address: serverData.address,
+        amount: tokenAmount,
+        event: 'create',
+        status: 0,
+        clicked: true,
+        dateCreated: new Date()
+      };
+
+      const depositAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
+      const desiredReward = depositAmount;
+
+      let gasApprove = await ParetoTokenInstance.methods
+        .increaseApproval(Intel.options.address, depositAmount)
+        .estimateGas({from: provider_address});
+
+      let userAllowance = 0;
+
+      await ParetoTokenInstance.methods
+        .allowance(serverData.address, Intel.options.address).call().then(async res => {
+          userAllowance = res;
+
+          if(userAllowance < depositAmount){
+            await userIncreaseApproval();
+          }else{
+            params.depositAmount = depositAmount;
+            params.gasPrice = gasPrice;
+
+            ContentService.uploadContent(serverData, async res => {
+              params.intel = res.content.Intel_ID;
+              ContentService.sendCreate(false, Intel, params, events, onSuccess, onError);
+            });
+          }
+        });
+
+      async function userIncreaseApproval(){
+        ContentService.uploadContent(
+          serverData,
+          async res => {
+            params.intel = res.content.Intel_ID;
+
+            let totalTokensToApprove = 10000000000;
+            let increaseApprovalTotal = web3.utils.toWei(totalTokensToApprove.toString(), "ether");
+
+            await ParetoTokenInstance.methods
+              .increaseApproval(Intel.options.address, increaseApprovalTotal)
+              .send({
+                from: provider_address,
+                gas: gasApprove,
+                gasPrice
+              })
+              .once("transactionHash", hash => {
+                var txHash = hash;
+
+                params.txHash = hash;
+                events.addTransaction(params);
+                ContentService.postTransactions(params);
+
+                waitForReceipt(hash, async receipt => {
+                  serverData.approveHash = txHash;
+                  events.editTransaction({hash: hash, key: 'status', value: 1});
+
+                  events.toastTransaction({
+                    group: 'notification',
+                    title: 'Event Ready',
+                    type: 'warning',
+                    duration: 10000,
+                    text: 'Second transaction ready, complete it'
+                  });
+                  const newContent = {
+                    provider_address,
+                    depositAmount,
+                    desiredReward,
+                    _ttl,
+                    txHash: txHash,
+                    intel: res.content.Intel_ID,
+                    gasPrice: gasPrice
+                  };
+
+                  ContentService.sendCreate(newContent, events, onSuccess, onError);
+                });
+              })
+              .on("error", err => {
+                onError(err.message || err);
+              });
+          });
+      }
+
+
+    });
+  }
 
   static async sendReward(withIncreasedApproval, Intel, content, events, onSuccess, onError) {
     try {
@@ -399,7 +435,6 @@ export default class ContentService {
             };
             this.postTransactions(params);
           } else {
-
             content.txHash = hash;
             content.txRewardHash = hash;
             content.status = 2;
@@ -496,7 +531,6 @@ export default class ContentService {
 
       //Does the increase approval for an user if the allowance is less than the token amount
       async function userIncreaseApproval() {
-        console.log(gasPrice)
 
         let totalTokensToApprove = 10000000000;
         let increaseApprovalTotal = web3.utils.toWei(totalTokensToApprove.toString(), "ether");
