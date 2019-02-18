@@ -176,7 +176,7 @@ export default class ContentService {
                     gasPrice: gasPrice
                   };
 
-                  this.sendCreate(content, events, onSuccess, onError);
+                  this.sendCreate(true, content, events, onSuccess, onError);
                 });
                 break;
               case 1:
@@ -189,7 +189,7 @@ export default class ContentService {
                   intel: content.intel,
                   gasPrice: gasPrice
                 };
-                this.sendCreate(content, events, onSuccess, onError);
+                this.sendCreate(true, content, events, onSuccess, onError);
                 break;
               case 2:
                 waitForReceipt(content.txHash, receipt => {
@@ -210,6 +210,7 @@ export default class ContentService {
 
   static async sendCreate(withIncreaseApproval, content, events, onSuccess, onError) {
     try {
+      debugger;
       let gasCreateIntel = await Intel.methods
         .create(
           content.provider_address,
@@ -399,7 +400,7 @@ export default class ContentService {
                     gasPrice: gasPrice
                   };
 
-                  ContentService.sendCreate(newContent, events, onSuccess, onError);
+                  ContentService.sendCreate(true, newContent, events, onSuccess, onError);
                 });
               })
               .on("error", err => {
