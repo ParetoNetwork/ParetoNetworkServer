@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 
 var paretoAddressSchema = new Schema({
 	address : String,
+	lastApprovedAddress : String,
 	rank 	: Number,
 	score 	: Number,
     lastRank 	: Number,

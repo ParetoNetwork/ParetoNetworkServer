@@ -781,7 +781,10 @@ workerController.aproxAllScoreRanking = async function(callback){
                     if(data.status == 0){
                         web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
                             if(receipt){
-                                ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: (data.event == 'distribute')? 3:1 }, { multi: false }, function (err, data) {
+                                ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: (data.event == 'distribute')? 3:1 }, { multi: false }, function (err, r) {
+                                    if(data.event != 'distribute' && r){
+                                        ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {});
+                                    }
                                 });
                             }
                         });
@@ -1021,6 +1024,7 @@ workerController.getScoreAndSaveRedis = function(callback){
                     "block" : "$block",
                     "lastScore" : "$lastScore",
                     "lastRank" : "$lastRank",
+                    "lastApprovedAddress" : "$lastApprovedAddress",
                     "tokens" : "$tokens"
                 }
             }}).unwind({
@@ -1048,6 +1052,9 @@ workerController.getScoreAndSaveRedis = function(callback){
                     block : result.addresses.block? result.addresses.block: 0,
                     tokens : result.addresses.tokens
                 };
+                if(result.addresses.lastApprovedAddress){
+                    data.approved = result.addresses.lastApprovedAddress;
+                }
                 data.rank = result.rank + 1;
                 data.lscore = '=';
                 data.lrank = '=';
