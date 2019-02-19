@@ -3,7 +3,7 @@
         <div class="container-fluid px-lg-5">
             <notifications group="auth" position="bottom right"/>
             <div class="row m-0 pt-5" style="min-height: 100vh; width: 100%;">
-                <div class="col-md-5 col-lg-2 mb-5 mt-2 m-sm-0">
+                <div class="col-md-5 col-lg-2 mb-5 mt-2 m-sm-0 p-0 pr-2">
                     <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
                     <VProfile v-else :addressProfile="address" :profileObject="user" :can-edit="true"></VProfile>
                     <div class="mt-4">
