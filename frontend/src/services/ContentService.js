@@ -304,6 +304,8 @@ export default class ContentService {
                         }
                         break;
                 }
+            } else {
+                return onError(errorService.sendErrorMessage('f36', e));
             }
         } catch (e) {
             return onError(errorService.sendErrorMessage('f20', e));
