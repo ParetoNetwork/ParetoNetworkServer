@@ -497,6 +497,7 @@ controller.startWatchApprove = function () {
         if (blockNumber != null) {
             ParetoTransaction.findOneAndUpdate({txHash: txHash}, {status: 1, block: blockNumber}, function (err, r) {
                 if (!err && r) {
+                    console.log(r);
                     ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
                         controller.getScoreAndSaveRedis(function (err, r) {  })
                     });
@@ -528,7 +529,7 @@ controller.startwatchIntel = function () {
         } else {
             let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
             if (!data.length) {
-                results = [Intel_Contract_Schema.networks[ETH_NETWORK].address];
+                results.push(Intel_Contract_Schema.networks[ETH_NETWORK].address);
             }
             for (let i = 0; i < results.length; i = i + 1) {
                 const intelAddress = results[i];

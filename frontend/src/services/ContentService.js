@@ -341,26 +341,31 @@ export default class ContentService {
 
             let userAllowance = 0;
 
-            await ParetoTokenInstance.methods
+            //Compares last used contract address to current using contract address
+            //if not the same, compares the user allowance
+            if(serverData.lastApproved === serverData.address){
+                directlyCreateIntel();
+            }else{
+                await ParetoTokenInstance.methods
                 .allowance(serverData.address, Intel.options.address).call().then(async res => {
-                    console.log(res);
                     userAllowance = res;
 
-                    if(userAllowance < depositAmount){
-                        await userIncreaseApproval();
-                    }else{
-                        params.depositAmount = depositAmount;
-                        params.gasPrice = gasPrice;
-                        params.provider_address = provider_address;
-                        params.desiredReward = desiredReward;
-                        params._ttl = _ttl;
-
-                        ContentService.uploadContent(serverData, async res => {
-                            params.intel = res.content.Intel_ID;
-                            ContentService.sendCreate(false, params, events, onSuccess, onError);
-                        });
-                    }
+                    (userAllowance < depositAmount)?  await userIncreaseApproval() : directlyCreateIntel();
                 });
+            }
+
+            function directlyCreateIntel(){
+                params.depositAmount = depositAmount;
+                params.gasPrice = gasPrice;
+                params.provider_address = provider_address;
+                params.desiredReward = desiredReward;
+                params._ttl = _ttl;
+
+                ContentService.uploadContent(serverData, async res => {
+                    params.intel = res.content.Intel_ID;
+                    ContentService.sendCreate(false, params, events, onSuccess, onError);
+                });
+            }
 
             async function userIncreaseApproval(){
                 ContentService.uploadContent(
@@ -425,13 +430,14 @@ export default class ContentService {
 
     static async sendReward(withIncreasedApproval, Intel, content, events, onSuccess, onError) {
         try {
+            debugger;
             const gasSendReward = await Intel.methods
                 .sendReward(content.intel, content.depositAmount)
-                .estimateGas({from: content.rewarder_address});
+                .estimateGas({from: content.address});
             await Intel.methods
                 .sendReward(content.intel, content.depositAmount)
                 .send({
-                    from: content.rewarder_address,
+                    from: content.address,
                     gas: gasSendReward,
                     gasPrice: content.gasPrice
                 })
@@ -448,7 +454,6 @@ export default class ContentService {
                         content.txHash = hash;
                         content.txRewardHash = hash;
                         content.status = 2;
-                        content.address = content.rewarder_address;
                         events.addTransaction(content);
 
                         this.postTransactions(content);
@@ -524,11 +529,23 @@ export default class ContentService {
                 dateCreated: new Date()
             };
 
-            console.log(signData);
+            //Compares last used contract address to current using contract address
+            //if not the same, compares the user allowance
+            if(content.lastApproved === content.intelAddress){
+                directlyCreateReward();
+            }else{
+                await ParetoTokenInstance.methods
+                    .allowance(content.intelAddress, Intel.options.address).call().then(async res => {
+                        userAllowance = res;
+                        (userAllowance < depositAmount)?  await userIncreaseApproval() : directlyCreateReward();
+                    });
+            }
 
-            //This will calculate the user allowance, which the first time, by default, is 0
-            await userIncreaseApproval().then(res => {
-            });
+            function directlyCreateReward(){
+                params.depositAmount = depositAmount;
+                params.gasPrice = gasPrice;
+                ContentService.sendReward(false, Intel, params, events, onSuccess, onError);
+            }
 
             //Does the increase approval for an user if the allowance is less than the token amount
             async function userIncreaseApproval() {
@@ -572,7 +589,7 @@ export default class ContentService {
                                 intel: content.ID,
                                 depositAmount: depositAmount,
                                 txHash: txHash,
-                                rewarder_address,
+                                address: rewarder_address,
                                 gasPrice: gasPrice
                             }, events, onSuccess, onError);
                         });
