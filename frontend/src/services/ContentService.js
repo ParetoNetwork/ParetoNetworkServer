@@ -109,9 +109,14 @@ export default class ContentService {
                 onError(errorService.sendErrorMessage('f34', err));
                 return;
             }
+            const provider_address = accounts[0];
+            if (serverData.address.toLowerCase()!==provider_address.toLowerCase()){
+                onError(errorService.sendErrorMessage('f36', err));
+                return;
+            }
 
             let gasPrice = await web3.eth.getGasPrice();
-            const provider_address = accounts[0];
+
 
             const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
 
@@ -446,13 +451,17 @@ export default class ContentService {
                 onError(errorService.sendErrorMessage('f34', err));
                 return;
             }
+            const rewarder_address = accounts[0];
+            if (content.address.toLowerCase()!==rewarder_address.toLowerCase()){
+                onError(errorService.sendErrorMessage('f36', err));
+                return;
+            }
             Intel = new web3.eth.Contract(
                 Intel_Contract_Schema,
                 content.intelAddress
             );
             let gasPrice = await web3.eth.getGasPrice();
 
-            const rewarder_address = accounts[0];
             const depositAmount = web3.utils.toWei(content.tokenAmount.toString(), "ether");
             let gasApprove = await ParetoTokenInstance.methods
                 .increaseApproval(Intel.options.address, depositAmount)
