@@ -89,7 +89,7 @@ export default class ContentService {
 
         gasPrice ? OnSuccess(gasPrice) : OnError('There was a problem fetching the current recommended gas price');
     }
-
+    
     static async pendingTransactionApproval(content, signData, events, onSuccess, onError) {
         try {
             await this.Setup(signData);
@@ -206,6 +206,8 @@ export default class ContentService {
                         }
                         break;
                 }
+            } else {
+                return onError(errorService.sendErrorMessage('f36', e));
             }
         } catch (e) {
             return onError(errorService.sendErrorMessage('f20', e));
@@ -322,7 +324,12 @@ export default class ContentService {
             }
 
             let gasPrice = await web3.eth.getGasPrice();
+            
             const provider_address = accounts[0];
+            if (serverData.address.toLowerCase()!==provider_address.toLowerCase()){
+                onError(errorService.sendErrorMessage('f36', err));
+                return;
+            }
 
             const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
 
@@ -347,7 +354,7 @@ export default class ContentService {
                 directlyCreateIntel();
             }else{
                 await ParetoTokenInstance.methods
-                .allowance(serverData.address, Intel.options.address).call().then(async res => {
+                .allowance(provider_address, Intel.options.address).call().then(async res => {
                     userAllowance = res;
 
                     (userAllowance < depositAmount)?  await userIncreaseApproval() : directlyCreateIntel();
@@ -430,10 +437,10 @@ export default class ContentService {
 
     static async sendReward(withIncreasedApproval, Intel, content, events, onSuccess, onError) {
         try {
-            debugger;
             const gasSendReward = await Intel.methods
                 .sendReward(content.intel, content.depositAmount)
                 .estimateGas({from: content.address});
+
             await Intel.methods
                 .sendReward(content.intel, content.depositAmount)
                 .send({
@@ -506,6 +513,12 @@ export default class ContentService {
                 onError(errorService.sendErrorMessage('f34', err));
                 return;
             }
+            const rewarder_address = accounts[0];
+            if (content.address.toLowerCase()!== rewarder_address.toLowerCase()){
+                onError(errorService.sendErrorMessage('f36', err));
+                return;
+            }
+
             Intel = new web3.eth.Contract(
                 Intel_Contract_Schema,
                 content.intelAddress
@@ -513,7 +526,6 @@ export default class ContentService {
 
             let gasPrice = await web3.eth.getGasPrice();
 
-            const rewarder_address = accounts[0];
             const depositAmount = web3.utils.toWei(content.tokenAmount.toString(), "ether");
 
             let userAllowance = 0;
@@ -535,12 +547,14 @@ export default class ContentService {
                 directlyCreateReward();
             }else{
                 await ParetoTokenInstance.methods
-                    .allowance(content.intelAddress, Intel.options.address).call().then(async res => {
+                    .allowance(rewarder_address, Intel.options.address).call().then(async res => {
                         userAllowance = res;
+                        console.log(userAllowance);
                         (userAllowance < depositAmount)?  await userIncreaseApproval() : directlyCreateReward();
                     });
             }
 
+            //Calls the reward function if the user last contract matches or if the user has the allowance
             function directlyCreateReward(){
                 params.depositAmount = depositAmount;
                 params.gasPrice = gasPrice;
