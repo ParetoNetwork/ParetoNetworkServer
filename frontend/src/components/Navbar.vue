@@ -77,6 +77,7 @@
         mounted: function () {
             this.colorNav = $('#gradient')
             DashboardService.getAddress(res => {
+                this.setLastApprovedAddress(res.approved);
                 this.$store.dispatch({
                     type: 'login',
                     address: {address: res},
@@ -189,7 +190,8 @@
                 loginVuex: 'login',
                 loadingLogin: 'loadingLogin',
                 stopLogin: 'stopLogin',
-                logoutVuex: 'logout'
+                logoutVuex: 'logout',
+                setLastApprovedAddress: 'setLastApprovedAddress'
             })
         }
     }

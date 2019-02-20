@@ -137,7 +137,7 @@ const store = new Vuex.Store({
             state.showModalEditProfile = open;
         }, deleteTransaction(state, txHash) {
             state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
-        }, lastApprovedAddress(state, contractAddress){
+        }, setLastApprovedAddress(state, contractAddress){
             state.userLastApprovedContractAddress = contractAddress;
         }
     },

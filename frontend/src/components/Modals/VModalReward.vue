@@ -50,7 +50,7 @@
     export default {
         name: "VModalReward",
         computed: {
-            ...mapState(["signType", "pathId" , "showModalReward", "intelReward", "myTokens"])
+            ...mapState(["signType", "pathId" , "showModalReward", "intelReward", "myTokens", "userLastApprovedContractAddress"])
         },
         data: function () {
             return{
@@ -108,8 +108,10 @@
                     return;
                 }
 
+                let lastApproved = this.userLastApprovedContractAddress;
+
                 ContentService.rewardIntel(
-                    {ID, tokenAmount, intelAddress},
+                    {ID, tokenAmount, intelAddress, lastApproved},
                     {signType: this.signType, pathId: this.pathId},
                     {
                         addTransaction: this.addTransaction,
