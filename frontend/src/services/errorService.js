@@ -226,6 +226,12 @@ export default class errorService {
             description: 'Setup Provider Error',
             userMessage: 'Could not initialize your current provider',
             priority: 2
+        },
+        f36: {
+            code: 'f36',
+            description: 'Current user does not match wallet account',
+            userMessage: 'Current user does not match wallet account',
+            priority: 2
         }
     };
 }
