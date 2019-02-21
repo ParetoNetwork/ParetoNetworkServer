@@ -497,6 +497,10 @@ controller.startWatchApprove = function () {
         if (blockNumber != null) {
             ParetoTransaction.findOneAndUpdate({txHash: txHash}, {status: 1, block: blockNumber}, function (err, r) {
                 if (!err && r) {
+                    console.log(r);
+                    ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
+                        controller.getScoreAndSaveRedis(function (err, r) {  })
+                    });
                     controller.SendInfoWebsocket({address: r.address, transaction: r});
                 } else {
                     if (err) {
@@ -511,6 +515,9 @@ controller.startWatchApprove = function () {
     });
 }
 
+
+
+
 /**
  * Watch Intel events. Support watch rewards for old Intel address
  */
@@ -522,7 +529,7 @@ controller.startwatchIntel = function () {
         } else {
             let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
             if (!data.length) {
-                results = [Intel_Contract_Schema.networks[ETH_NETWORK].address];
+                results.push(Intel_Contract_Schema.networks[ETH_NETWORK].address);
             }
             for (let i = 0; i < results.length; i = i + 1) {
                 const intelAddress = results[i];
@@ -1249,6 +1256,7 @@ controller.getUserInfo = async function (address, callback) {
                         'rank': ranking.rank,
                         'score': ranking.score,
                         'tokens': ranking.tokens,
+                        'lastApprovedAddress': ranking.approved,
                         'alias': profile.alias,
                         'aliasSlug': profile.aliasSlug,
                         'biography': profile.biography,
@@ -1274,6 +1282,7 @@ controller.getUserInfo = async function (address, callback) {
                         'rank': ranking.rank,
                         'score': ranking.score,
                         'tokens': ranking.tokens,
+                        'lastApprovedAddress': ranking.approved,
                         'alias': profile.alias,
                         'aliasSlug': profile.aliasSlug,
                         'biography': profile.biography,

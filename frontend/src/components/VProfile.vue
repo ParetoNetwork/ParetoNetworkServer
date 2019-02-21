@@ -58,7 +58,7 @@
             </div>
         </div>
         <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
-            <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mr-xl-4" :to="leaderboards(profile.address)" style="min-width: 80px">
+            <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mb-2 mr-xl-4" :to="leaderboards(profile.address)" style="min-width: 80px">
                 <p class="subtitle-user-content">
                     <ICountUp
                             :startVal="countUp.startVal"
@@ -70,7 +70,7 @@
                 </p>
                 <p> My Rank </p>
             </router-link>
-            <router-link tag="div" class="cursor-pointer border p-2"
+            <router-link tag="div" class="cursor-pointer border mb-2 p-2"
                          :to="leaderboards(profile.address)" style="min-width: 80px">
                 <div class="mb-1">
                     <i class="fa fa-star green-color fa-lg"></i>

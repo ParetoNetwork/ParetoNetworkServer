@@ -200,7 +200,7 @@
             bodyFunction: function () {
                 return content;
             },
-            ...mapState(["madeLogin", "ws", "signType", "pathId"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
         },
         mounted: function () {
             $('#intel-body-input').summernote({
@@ -245,7 +245,7 @@
                 this.$store.state.makingRequest = true;
 
                 ContentService.createIntel(
-                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress},
+                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress, lastApproved: this.userLastApprovedContractAddress},
                     this.tokens,
                     {signType: this.signType, pathId: this.pathId},
                     {

@@ -40,24 +40,25 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 const store = new Vuex.Store({
     state: {
-        isLogged: false,
         address: null,
+        currentDistributes: [],
+        intelReward : {},
+        isLogged: false,
+        userLastApprovedContractAddress: '',//This variable is needed so we when to increase approval of the user
+        madeLogin: JSON.parse(window.localStorage.getItem('logged')),
+        makingLogin: false,
+        makingRequest: false,
+        myTokens : 0,
+        pathId: (window.localStorage.getItem('pathId')) || '',
+        pendingTransactions: [],
+        requestFinish: false,
         showModalSign: false,
         showModalLoginOptions: false,
         showModalLedgerNano: false,
         showModalReward: false,
         showModalEditProfile : false,
-        makingLogin: false,
-        makingRequest: false,
-        requestFinish: false,
-        madeLogin: JSON.parse(window.localStorage.getItem('logged')),
         signType: (window.localStorage.getItem('signType')) || 'Metamask',
-        pathId: (window.localStorage.getItem('pathId')) || '',
-        ws: null,
-        pendingTransactions: [],
-        currentDistributes: [],
-        intelReward : {},
-        myTokens : 0
+        ws: null
     },
     mutations: {
         addReward(state, data){
@@ -136,6 +137,8 @@ const store = new Vuex.Store({
             state.showModalEditProfile = open;
         }, deleteTransaction(state, txHash) {
             state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
+        }, setLastApprovedAddress(state, contractAddress){
+            state.userLastApprovedContractAddress = contractAddress;
         }
     },
     actions: {
