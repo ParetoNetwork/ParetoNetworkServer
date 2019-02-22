@@ -1,6 +1,11 @@
 <template>
     <div v-if="profile.address" class="pareto-blue-dark text-center text-lg-left">
 
+        <div v-if="onboardingPicture"
+             class="thumb profile-pic cursor-pointer"
+             style="width: 100px; height: 100px;"
+             v-bind:style="{ backgroundImage: 'url( ' + onboardingPicture}">
+        </div>
         <div v-if="canEdit" class="thumb profile-pic cursor-pointer" @click="openInput()">
             <div data-v-514e8c24="" class="thumb" id="wrapper"
                  v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
@@ -12,7 +17,8 @@
             </div>
             <input type="file" class="d-none" id="file" ref="file" v-on:change="updatePicture()"/>
         </div>
-        <router-link v-if="!canEdit" tag="div" class="thumb profile-pic cursor-pointer"
+
+        <router-link v-if="!canEdit && !onboardingPicture" tag="div" class="thumb profile-pic cursor-pointer"
                      v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                      :to="creatorRoute(profile.aliasSlug || profile.address)"
         ></router-link>
@@ -57,8 +63,8 @@
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
-            <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mb-2 mr-xl-4" :to="leaderboards(profile.address)" style="min-width: 80px">
+        <div class="row justify-content-center justify-content-lg-between text-center mt-4">
+            <router-link tag="div" class="cursor-pointer border p-2 mb-2" :to="leaderboards(profile.address)" style="min-width: 80px">
                 <p class="subtitle-user-content">
                     <ICountUp
                             :startVal="countUp.startVal"
@@ -85,6 +91,7 @@
                         @ready="onReady"/>
                 <span v-else> 0 </span>
             </router-link>
+            <div></div>
         </div>
         <!--<button class="btn btn-success-pareto mt-5">-->
         <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
@@ -111,7 +118,7 @@
         name: "VProfile",
         mixins: [countUpMixin],
         props: [
-            'addressProfile', 'profileObject', 'canEdit'
+            'addressProfile', 'profileObject', 'canEdit', 'onboardingPicture'
         ],
         components: {
             ICountUp,

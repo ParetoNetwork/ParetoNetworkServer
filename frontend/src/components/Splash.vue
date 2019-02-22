@@ -113,6 +113,7 @@
         <ModalSignIn v-if="showModalSign"></ModalSignIn>
         <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
         <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
+        <ModalSplashOnboarding></ModalSplashOnboarding>
     </div>
 </template>
 
@@ -126,6 +127,7 @@
     import LoginOptions from './Modals/VLoginOptions';
     import ModalSignIn from './VModalManualSigIn';
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
+    import ModalSplashOnboarding from "./Modals/VModalSplashOnboarding";
 
     import VideoMp4 from "../assets/download/Pareto-Introduction.mp4";
     import VideoWebm from "../assets/download/Pareto-Introduction.webm";
@@ -133,7 +135,7 @@
 
     export default {
         name: 'SplashDashboard',
-        components: {ModalLedgerNano, LoginOptions, ModalSignIn, VFab, VParticles},
+        components: {ModalLedgerNano, LoginOptions, ModalSignIn, VFab, VParticles, ModalSplashOnboarding},
         computed: {...mapState([
                 'makingLogin',
                 'showModalSign',
