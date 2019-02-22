@@ -2,7 +2,12 @@
     <div class="text-left pl-1">
         <div class="row pb-3 border-bottom" :class="{'ml-2 mr-0 py-2': eventRow}" style="border-bottom-color: black !important;">
             <div v-if="!eventRow" v-bind:class="{ 'col-4 col-md-4 col-lg-2' : !eventRow }">
-                <router-link tag="div" class="thumb profile-pic cursor-pointer ml-2" style="width: 50px; height: 50px"
+                <div v-if="onboardingPicture"
+                     class="thumb profile-pic cursor-pointer ml-2"
+                     style="width: 50px; height: 50px"
+                     v-bind:style="{ backgroundImage: 'url( ' + onboardingPicture}">
+                </div>
+                <router-link v-else tag="div" class="thumb profile-pic cursor-pointer ml-2" style="width: 50px; height: 50px"
                              v-bind:style="{
                                 backgroundImage: 'url( ' + loadProfileImage(intel.createdBy.profilePic, intel.createdBy.address)
                              }"
@@ -14,9 +19,9 @@
                 <router-link
                         tag="h1"
                         :to="intelRoute(intel)"
-                        class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</router-link>
+                        class="subtitle-intel text-user-content" v-line-clamp="1">{{intel.title|| 'No title'}}</router-link>
                 <div class="row mt-2">
-                    <div v-if="!eventRow" class="col-12 col-md-12 col-lg-5">
+                    <div v-if="!eventRow" class="col-12 col-md-12 col-lg-5 ellipsis">
                         <a v-bind:href="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)" target="_blank" class="text-user ellipsis ">Disclosed by:
                             <b>
                                 {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}}
@@ -24,7 +29,7 @@
                         </a>
                     </div>
                     <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                       target="_blank" class="col-6 col-md-6" :class="{'col-lg-6': eventRow, 'col-lg-4': !eventRow}">
+                       target="_blank" class="col-6 col-md-6 ellipsis" :class="{'col-lg-6': eventRow, 'col-lg-4': !eventRow}">
                         <p>
                             <font-awesome-icon class="green-color" :icon="['fas', 'calendar']" />
                             {{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
@@ -68,7 +73,7 @@
     export default {
         name: "VIntelPreview",
         props: [
-            'user', 'intel', 'eventRow'
+            'user', 'intel', 'eventRow', 'onboardingPicture'
         ],
         mixins: [countUpMixin],
         components: {
@@ -88,6 +93,7 @@
             }
         },
         mounted(){
+          console.log(this.onboardingPicture)
         },
         methods: {
             creatorRoute(address) {

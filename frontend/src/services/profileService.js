@@ -112,6 +112,7 @@ export default class profileService {
 
     //Returns profile image url or gravatar generated image using the address
     static getProfileImage(path, pic, profileAddress) {
+        console.log(path+pic);
         if (pic) return path + pic;
 
         //replaces not numeric hex characters: IdenticonJs only generates images based on numbers
