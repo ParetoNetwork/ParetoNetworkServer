@@ -8,11 +8,49 @@
       :body-bg-variant="'dark'">
 
     <b-container @click.prevent>
-      <div class="mr-5">
-        <Navbar class="mr-5"></Navbar>
-
-      </div>
-      <div class="row m-0" style="width: 100%; padding-top: 105px" @click.prevent>
+      <span class="cursor-pointer" @click="cancelClick()">
+        <i class="fa fa-window-close fa-2x"
+         style="position: absolute; right: 0; top: 0;"></i>
+      </span>
+      <nav class="navbar navbar-expand-lg navbar-dark font-weight-bold font-body text-white">
+        <router-link tag="a" class="navbar-brand" to="/"><img
+            src="../../assets/images/LogoReverse.svg"
+            width="150"
+            class="d-inline-block align-top"
+            alt=""></router-link>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
+          <ul class="navbar-nav ">
+            <li class="nav-item mx-lg-4">
+              <router-link tag="a" class="nav-link" :active-class="'active'" to="/intel" exact>Intel
+              </router-link>
+            </li>
+            <li class="nav-item mx-lg-4">
+              <router-link tag="a" class="nav-link" :active-class="'active'" to="/leaderboards">Leaderboards
+              </router-link>
+            </li>
+            <li class="nav-item mx-lg-4">
+              <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
+            </li>
+            <li class="nav-item dropdown mx-lg-4 active">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-user mr-1">&nbsp;</i>
+                <span>SIGN IN</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" style="font-size: 11px"
+                   aria-labelledby="navbarDropdown">
+                <a v-if="user.address" class="dropdown-item" href="#"><a style="color: black;" v-bind:href="etherscan+'/address/'+user.address" target="_blank">{{user.address}} <i class="fa fa-external-link-alt"></i></a></a>
+                <a class="dropdown-item" href="#">Logout</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="row m-0" style="width: 100%" @click.prevent>
         <div class="col-md-6 col-lg-2 mb-5 mt-2 m-sm-0 p-0 order-2 order-lg-1">
           <VProfile :profileObject="user" :onboardingPicture="onboarding"></VProfile>
           <div class="mt-4">
@@ -64,7 +102,7 @@
                   INTEL
                 </div>
               </div>
-              <div class="pr-lg-2" id="myfeed">
+              <div class="pr-lg-2" id="myOnboardingfeed">
                 <ul>
                   <div class="text-left border-0 py-2" v-for="row of content">
                     <VIntelPreview @click.prevent
@@ -80,6 +118,11 @@
           </div>
         </div>
       </div>
+      <button class="button button--transparent button--login"
+              style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px; float: right"
+              @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
+                                                                         class="fa fa-spinner fa-spin"></span>
+      </button>
     </b-container>
   </b-modal>
 </template>
@@ -91,13 +134,29 @@
   import VIntelPreview from '../VIntelPreview';
   import randomPerson from '../../assets/images/random_person.png';
 
+  import {mapMutations, mapState} from 'vuex';
+
+  import LoginOptions from './VLoginOptions';
+  import ModalSignIn from '../VModalManualSigIn';
+  import ModalLedgerNano from "./VModalLedgerNano";
+
+  import {information} from '../../utils/onboardingInfo';
+
   export default {
-    components: {Navbar, VProfile, VTransaction, VIntelPreview},
+    computed: {...mapState([
+        'makingLogin',
+        'showModalSign',
+        'showModalLoginOptions',
+        'showModalLedgerNano']
+      )},
+    components: {Navbar, VProfile, VTransaction, VIntelPreview, ModalLedgerNano, LoginOptions, ModalSignIn},
     name: 'VModalSplashOnboarding',
     data(){
       return {
+        information: information,
         content: [
         ],
+        etherscan: window.localStorage.getItem('etherscan'),
         onboarding: require('../../assets/images/random_person.png'),
         transactions: [
           {status: 2, event: 'create', amount: '5000', txHash: '0xFETYIGUJS', clicked: true},
@@ -122,27 +181,19 @@
     },
     mounted(){
       this.$refs.modalOnboarding.show();
-
-      for(let i=0; i<3; i++){
-        this.content.push(
-          {
-            title: 'TLRY short inminent, 10 days to cover, 50% move',
-            dateCreated: new Date(),
-            txHash: '0xFETYIGUJS',
-            block: 10000,
-            blockAgo: '5769',
-            createdBy: this.user,
-            intelAddress: '0xFETYIGUJS',
-            address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
-            expires: new Date(),
-            reward: 1000
-          }
-        );
-      }
+      this.content = information.content;
+      this.transactions = information.transactions;
+      this.user = information.user;
     },
     methods: {
+      ...mapMutations(
+        ['login', 'loadingLogin', 'stopLogin']
+      ),
       cancelClick(){
-        console.log('nope');
+        this.$refs.modalOnboarding.hide();
+      },
+      showModal () {
+        this.$store.state.showModalLoginOptions = true;
       }
     }
   }

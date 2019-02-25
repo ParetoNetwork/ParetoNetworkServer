@@ -1,6 +1,5 @@
 <template>
     <div v-if="profile.address" class="pareto-blue-dark text-center text-lg-left">
-
         <div v-if="onboardingPicture"
              class="thumb profile-pic cursor-pointer"
              style="width: 100px; height: 100px;"

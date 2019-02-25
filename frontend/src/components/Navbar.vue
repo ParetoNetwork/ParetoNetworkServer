@@ -75,7 +75,7 @@
         name: 'Navbar',
         components: {ModalLedgerNano},
         mounted: function () {
-            this.colorNav = $('#gradient')
+            this.colorNav = $('#gradient');
             DashboardService.getAddress(res => {
                 this.setLastApprovedAddress(res.approved);
                 this.$store.dispatch({
@@ -101,17 +101,8 @@
                   },1);
               }
             },
-            logged(value){
-                if(value) {
-                    DashboardService.getAddress(res => {
-                        this.$store.dispatch({
-                            type: 'login',
-                            address: {address: res},
-                        });
-                    }, () => {
-
-                    });
-                }
+            address : function (old, newVal) {
+              console.log(old, newVal)
             }
         },
         data: function () {
