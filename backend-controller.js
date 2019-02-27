@@ -896,7 +896,6 @@ controller.getQueryContentByUser = function (address, intel, callback) {
 
                             //2a. get total rank where score > 0
                             ParetoAddress.estimatedDocumentCount({score: {$gte: 0}}, async (err, count) => {
-                                var count = count;
 
                                 //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
                                 if (result.rank == null) {
@@ -976,8 +975,7 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                                     blockDelay,
                                     timeDelay
                                 };
-
-                                return callback(null, CONTENT_DELAY, {
+                                let returnQuery = {
                                     $and: [
                                         {
                                             $or: [
@@ -1004,7 +1002,12 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                                                 {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
                                             ]
                                         }]
-                                });
+                                };
+                                if(percentile>=0.15){
+                                    returnQuery.$and.push({expires: {$lte : (new Date()).getTime()+86400}, validated: true});
+                                }
+
+                                return callback(null, CONTENT_DELAY, returnQuery);
                             });
                         }, function (error) {
                             callback(error);
@@ -1268,6 +1271,7 @@ controller.getUserInfo = async function (address, callback) {
             callback(new Error('Invalid Address or alias'));
         }
     } else {
+
         controller.retrieveAddressRankWithRedis([address], true, function (error, rankings) {
             if (error) {
                 callback(error)
@@ -1283,6 +1287,7 @@ controller.getUserInfo = async function (address, callback) {
                         'score': ranking.score,
                         'tokens': ranking.tokens,
                         'lastApprovedAddress': ranking.approved,
+                        'maxRank': ranking.rankings,
                         'alias': profile.alias,
                         'aliasSlug': profile.aliasSlug,
                         'biography': profile.biography,
@@ -1797,6 +1802,7 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
                         multi.hgetall(results[i].rank + "");
                     }
                 }
+                multi.hgetall("maxRank");
                 multi.exec(function (err, results) {
                     if (err) {
                         const error = ErrorHandler.backendErrorList('b4');
@@ -1805,6 +1811,8 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
                         return callback(error);
                     }
                     // return the cached ranking
+                    const maxrank = results[results.length-1];
+                    results = results.slice(0,-1).map(it =>{it.maxrank = maxrank; return it });
                     return callback(null, results);
                 });
             }
