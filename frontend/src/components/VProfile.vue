@@ -61,15 +61,18 @@
                      <span class="text-user-content">
                     <b> <p> Score needed: </p> </b>
                      </span>
-
-                    <ICountUp
-                            :startVal="countUp.startVal"
-                            :endVal="parseFloat(profile.minScore - profile.score)"
-                            :decimals="decimalsLength(profile.minScore - profile.score)"
-                            :duration="randomNumber(3,6)"
-                            :options="countUp.options"
-                            @ready="onReady"/>
-
+                    <Span class="mb-1">
+                        <i class="fa fa-star green-color"></i>
+                        <Span class="mb-1 p-2">
+                           <ICountUp
+                                :startVal="countUp.startVal"
+                                :endVal="parseFloat(profile.minScore - profile.score)"
+                                :decimals="decimalsLength(profile.minScore - profile.score)"
+                                :duration="randomNumber(3,6)"
+                                :options="countUp.options"
+                                @ready="onReady"/>
+                        </Span>
+                    </Span>
 
                 </div>
             </div>
@@ -87,7 +90,7 @@
                 </p>
                 <p> My Rank </p>
             </router-link>
-            <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mb-2 mr-xl-4"
+            <router-link tag="div" class="cursor-pointer border p-2   mb-2 "
                          :to="leaderboards(profile.address)" style="min-width: 80px">
                 <div class="mb-1">
                     <i class="fa fa-star green-color fa-lg"></i>
