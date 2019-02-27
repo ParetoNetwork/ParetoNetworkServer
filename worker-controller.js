@@ -1074,6 +1074,7 @@ workerController.getScoreAndSaveRedis = function(callback){
                 multi.hmset("address"+data.address+ "", rank );
             }
             multi.hmset("maxRank", {rank: maxRank} );
+            multi.hmset("minScore", {score: results[ Math.max(Math.floor(maxRank*0.15)-1,0)].addresses.score} );
             promises.push(new Promise( (resolve, reject)=>{
                 multi.exec(function(errors, results) {
                     if(errors){

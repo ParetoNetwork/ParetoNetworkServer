@@ -56,6 +56,23 @@
                     </a>
                 </div>
             </div>
+            <div v-if="profile.minScore && (profile.minScore - profile.score > 0)" class="row cursor-pointer mt-3">
+                <div class="ml-0 col px-0">
+                     <span class="text-user-content">
+                    <b> <p> Score needed: </p> </b>
+                     </span>
+
+                    <ICountUp
+                            :startVal="countUp.startVal"
+                            :endVal="parseFloat(profile.minScore - profile.score)"
+                            :decimals="decimalsLength(profile.minScore - profile.score)"
+                            :duration="randomNumber(3,6)"
+                            :options="countUp.options"
+                            @ready="onReady"/>
+
+
+                </div>
+            </div>
         </div>
         <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
             <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mb-2 mr-xl-4" :to="leaderboards(profile.address)" style="min-width: 80px">
@@ -70,7 +87,7 @@
                 </p>
                 <p> My Rank </p>
             </router-link>
-            <router-link tag="div" class="cursor-pointer border mb-2 p-2"
+            <router-link tag="div" class="cursor-pointer border p-2 mr-5 mr-lg-2 mb-2 mr-xl-4"
                          :to="leaderboards(profile.address)" style="min-width: 80px">
                 <div class="mb-1">
                     <i class="fa fa-star green-color fa-lg"></i>

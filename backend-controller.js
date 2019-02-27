@@ -1004,7 +1004,7 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                                         }]
                                 };
                                 if(percentile>=0.15){
-                                    returnQuery.$and.push({expires: {$lte : (new Date()).getTime()+86400}, validated: true});
+                                    returnQuery.$and.push({expires: {$lte : ((new Date()).getTime()/1000)+86400}, validated: true});
                                 }
 
                                 return callback(null, CONTENT_DELAY, returnQuery);
@@ -1260,6 +1260,8 @@ controller.getUserInfo = async function (address, callback) {
                         'score': ranking.score,
                         'tokens': ranking.tokens,
                         'lastApprovedAddress': ranking.approved,
+                        'maxRank': ranking.maxRank,
+                        'minScore': ranking.minScore,
                         'alias': profile.alias,
                         'aliasSlug': profile.aliasSlug,
                         'biography': profile.biography,
@@ -1287,7 +1289,8 @@ controller.getUserInfo = async function (address, callback) {
                         'score': ranking.score,
                         'tokens': ranking.tokens,
                         'lastApprovedAddress': ranking.approved,
-                        'maxRank': ranking.rankings,
+                        'maxRank': ranking.maxRank,
+                        'minScore': ranking.minScore,
                         'alias': profile.alias,
                         'aliasSlug': profile.aliasSlug,
                         'biography': profile.biography,
@@ -1803,6 +1806,7 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
                     }
                 }
                 multi.hgetall("maxRank");
+                multi.hgetall("minScore");
                 multi.exec(function (err, results) {
                     if (err) {
                         const error = ErrorHandler.backendErrorList('b4');
@@ -1811,8 +1815,14 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
                         return callback(error);
                     }
                     // return the cached ranking
-                    const maxrank = results[results.length-1];
-                    results = results.slice(0,-1).map(it =>{it.maxrank = maxrank; return it });
+                    const maxRank = results[results.length-2];
+                    const minScore = results[results.length-1];
+
+                    results = results.slice(0,-2);
+                    if(maxRank && minScore){
+                        results = results.map(it =>{it.maxRank = maxRank.rank; it.minScore = minScore.score; return it });
+                    }
+
                     return callback(null, results);
                 });
             }
