@@ -55,6 +55,7 @@ const store = new Vuex.Store({
         showModalSign: false,
         showModalLoginOptions: false,
         showModalLedgerNano: false,
+        showModalOnboarding: true,
         showModalReward: false,
         showModalEditProfile : false,
         signType: (window.localStorage.getItem('signType')) || 'Metamask',

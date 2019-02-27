@@ -1,130 +1,57 @@
 <template>
-  <b-modal
-      ref="modalOnboarding"
-      centered
-      hide-header
-      hide-footer
-      size="lg"
-      :body-bg-variant="'dark'">
+  <div class="onboarding-modal">
+    <b-modal
+        @hidden="cancelClick"
+        ref="modalOnboarding"
+        centered
+        hide-header
+        hide-footer
+        size="lg"
+        :body-bg-variant="'dark'">
 
-    <b-container @click.prevent>
-      <span class="cursor-pointer" @click="cancelClick()">
-        <i class="fa fa-window-close fa-2x"
-         style="position: absolute; right: 0; top: 0;"></i>
-      </span>
-      <nav class="navbar navbar-expand-lg navbar-dark font-weight-bold font-body text-white">
-        <router-link tag="a" class="navbar-brand" to="/"><img
-            src="../../assets/images/LogoReverse.svg"
-            width="150"
-            class="d-inline-block align-top"
-            alt=""></router-link>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
-          <ul class="navbar-nav ">
-            <li class="nav-item mx-lg-4">
-              <router-link tag="a" class="nav-link" :active-class="'active'" to="/intel" exact>Intel
-              </router-link>
-            </li>
-            <li class="nav-item mx-lg-4">
-              <router-link tag="a" class="nav-link" :active-class="'active'" to="/leaderboards">Leaderboards
-              </router-link>
-            </li>
-            <li class="nav-item mx-lg-4">
-              <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
-            </li>
-            <li class="nav-item dropdown mx-lg-4 active">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-user mr-1">&nbsp;</i>
-                <span>SIGN IN</span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-right" style="font-size: 11px"
-                   aria-labelledby="navbarDropdown">
-                <a v-if="user.address" class="dropdown-item" href="#"><a style="color: black;" v-bind:href="etherscan+'/address/'+user.address" target="_blank">{{user.address}} <i class="fa fa-external-link-alt"></i></a></a>
-                <a class="dropdown-item" href="#">Logout</a>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </nav>
-      <div class="row m-0" style="width: 100%" @click.prevent>
-        <div class="col-md-6 col-lg-2 mb-5 mt-2 m-sm-0 p-0 order-2 order-lg-1">
-          <VProfile :profileObject="user" :onboardingPicture="onboarding"></VProfile>
-          <div class="mt-4">
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-2 px-0 mb-3 order-3 order-lg-2">
-          <div class="intel-container">
-            <div class="mb-3 mb-md-1 px-1">
-              <div class="p-2 pt-4">
-                <div class="text-left title-content p-1">
-                  <b>EVENTS</b>
-                </div>
-                <button v-if="false" class="btn btn-success-pareto button-margin">POST
-                  NEW INTEL
-                </button>
-              </div>
-              <div class="row mx-0 text-center text-content">
-                <div class="col-4">
-                  EVENT
-                </div>
-                <div class="col-4">
-                  AMOUNT
-                </div>
-                <div class="col-4">
-                  TX ID
-                </div>
-              </div>
-              <div class="scrollable p-1" id="mypost">
-                <ul>
-                  <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions">
-                    <VTransaction :transaction="tx"></VTransaction>
-                  </li>
-                </ul>
+      <b-container>
+        <div class="position-relative">
+          <div class="row m-0" style="width: 100%">
+            <div class="col-md-6 col-lg-5 my-5">
+              <div class="mt-4">
+                <img src="../../assets/images/LogoReverse.svg" width="200px" class="my-5" alt="">
+                <p class="my-5 p-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
+                  has
+                  been the industry's standard dummy text </p>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="col-md-12 mb-md-3 mb-lg-0 col-lg-8 px-1 order-1 order-lg-3">
-          <div class="intel-container">
-            <div class="px-2 py-4 text-left">
-              <b class="title-content">
-                MY INTEL FEED
-              </b>
-              <div class="row text-content mt-4">
-                <div class="col-4 col-md-4 col-lg-2">
-                  CONTRIBUTOR
-                </div>
-                <div class="col-8 col-lg-7">
-                  INTEL
-                </div>
-              </div>
-              <div class="pr-lg-2" id="myOnboardingfeed">
-                <ul>
-                  <div class="text-left border-0 py-2" v-for="row of content">
-                    <VIntelPreview @click.prevent
-                        :user="user"
-                        :intel="row"
-                        :eventRow="false"
-                        :onboardingPicture="onboarding">
-                    </VIntelPreview>
+            <div class="col-md-6 col-lg-7 px-0 intel-container">
+              <div class="d-flex justify-content-center h-100">
+                <div class="d-flex flex-column justify-content-around px-5 py-3">
+                  <div></div>
+                  <div class="px-5 py-4 text-left">
+                    <h1 class="mb-3"><b>Title Goes Here </b></h1>
+                    <p>
+                      Lorem psum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+                      industry's standard lorem dummy text Ipsum is simply
+                      text of the printing and typesetting orgyd dummy text aorem Ipsum is simply dummy text of the
+                      printing
+                      and typesetting industry.
+                      Lorem Ipsum has been the industry's standard dummy text
+                    </p>
                   </div>
-                </ul>
+                  <button class="btn btn-dark-primary-pareto button--login mx-auto"
+                          style="font-size: 18px; width: 400px; max-width: 80%"
+                          @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
+                                                                                     class="fa fa-spinner fa-spin"></span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+          <span class="cursor-pointer" @click="cancelClick()">
+            <i class="fa fa-window-close fa-2x"
+               style="position: absolute; right: 0; top: 0;"></i>
+          </span>
         </div>
-      </div>
-      <button class="button button--transparent button--login"
-              style="font-size: 18px; background-color:rgb(107, 194, 123); width:200px; float: right"
-              @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
-                                                                         class="fa fa-spinner fa-spin"></span>
-      </button>
-    </b-container>
-  </b-modal>
+      </b-container>
+    </b-modal>
+  </div>
 </template>
 
 <script>
@@ -143,43 +70,28 @@
   import {information} from '../../utils/onboardingInfo';
 
   export default {
-    computed: {...mapState([
+    computed: {
+      ...mapState([
         'makingLogin',
         'showModalSign',
         'showModalLoginOptions',
-        'showModalLedgerNano']
-      )},
+        'showModalLedgerNano',
+        'showModalOnboarding']
+      )
+    },
     components: {Navbar, VProfile, VTransaction, VIntelPreview, ModalLedgerNano, LoginOptions, ModalSignIn},
     name: 'VModalSplashOnboarding',
-    data(){
+    data() {
       return {
         information: information,
-        content: [
-        ],
+        content: [],
         etherscan: window.localStorage.getItem('etherscan'),
         onboarding: require('../../assets/images/random_person.png'),
-        transactions: [
-          {status: 2, event: 'create', amount: '5000', txHash: '0xFETYIGUJS', clicked: true},
-          {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-          {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-          {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-          {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-          {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-          {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'}
-        ],
-        user: {
-          address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
-          alias: 'Michael Smith',
-          biography: 'Market-Proven AI and ML Trading Specialist',
-          rank: 107,
-          score: 881345,
-          tokens: 50000,
-          aliasSlug: '',
-          profilePic: 'random_person'
-        },
+        transactions: [],
+        user: {}
       }
     },
-    mounted(){
+    mounted() {
       this.$refs.modalOnboarding.show();
       this.content = information.content;
       this.transactions = information.transactions;
@@ -189,14 +101,19 @@
       ...mapMutations(
         ['login', 'loadingLogin', 'stopLogin']
       ),
-      cancelClick(){
-        this.$refs.modalOnboarding.hide();
+      cancelClick() {
+        this.$refs.modalOnboarding.show();
+        this.$store.state.showModalOnboarding = false;
       },
-      showModal () {
+      showModal() {
+        this.$store.state.showModalOnboarding = false;
         this.$store.state.showModalLoginOptions = true;
       }
     }
   }
 </script>
 <style>
+  .onboarding-modal .modal-body, .onboarding-modal .container {
+    padding: 0;
+  }
 </style>
