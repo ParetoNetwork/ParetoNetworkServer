@@ -1,6 +1,7 @@
 import http from './HttpService';
 import environment from '../utils/environment';
 import Identicon from 'identicon.js';
+import errorService from "./errorService";
 
 export default class profileService {
 
@@ -10,10 +11,10 @@ export default class profileService {
                 if(res.data.success){
                     return onSuccess(res.data);
                 }else{
-                    return onError(res.data);
+                    return onError(errorService.sendErrorMessage('f28', res.data.message));
                 }
             }).catch(error => {
-            return onError(error);
+            return onError(errorService.sendErrorMessage('f28', error));
         });
     }
 
@@ -27,7 +28,11 @@ export default class profileService {
         } else {
             return http.get('/v1/userinfo', profile).then(res => {
                 this.getProfile.profile = res.data.data;
-                return onSuccess(res.data.data);
+
+                if(res.data.data)
+                    return onSuccess(res.data.data);
+                else
+                    return onError( errorService.sendErrorMessage('f5', res.data.message));
             }).catch(error => {
                 return onError(error);
             });
@@ -74,10 +79,12 @@ export default class profileService {
                     if (onFinish) onFinish();
                 }).catch(error => {
                     if (onFinish) onFinish();
+                    errorService.sendErrorMessage('f30', error);
                 });
             }
         }).catch(error => {
             if (onFinish) onFinish();
+            errorService.sendErrorMessage('f30', error);
         });
     }
 
@@ -91,9 +98,14 @@ export default class profileService {
         } else {
             http.get('/v1/userinfo/' + address).then(res => {
                 if (!address) this.getSpecificProfile.profile = res.data.data;
-                return onSuccess(res.data.data);
+
+                if(res.data.data){
+                    return onSuccess(res.data.data);
+                } else {
+                    return onError(errorService.sendErrorMessage('f29', res.data.message));
+                }
             }).catch(error => {
-                return onError(error);
+                return onError(errorService.sendErrorMessage('f29', error));
             });
         }
     }
@@ -109,9 +121,13 @@ export default class profileService {
 
     static uploadProfilePic(form, onSuccess, onError) {
         http.post('/upload-profile', form).then(res => {
-            onSuccess(res.data.data.profile_pic);
+            if(res.data.data.profile_pic){
+                onSuccess(res.data.data.profile_pic);
+            }else{
+                onError(errorService.sendErrorMessage('f31', res.data.message));
+            }
         }).catch(error => {
-            onError(error);
+            onError(errorService.sendErrorMessage('f31', error));
         });
     }
 }

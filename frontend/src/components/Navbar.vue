@@ -66,7 +66,10 @@
     import 'jquery';
     import authService from '../services/authService';
     import DashboardService from '../services/dashboardService';
+    import errorService from '../services/errorService';
+
     import ModalLedgerNano from "./Modals/VModalLedgerNano";
+
 
     export default {
         name: 'Navbar',
@@ -74,6 +77,7 @@
         mounted: function () {
             this.colorNav = $('#gradient')
             DashboardService.getAddress(res => {
+                this.setLastApprovedAddress(res.approved);
                 this.$store.dispatch({
                     type: 'login',
                     address: {address: res},
@@ -155,12 +159,13 @@
                 }, error => {
                     this.stopLogin();
                     let errorText= error.message? error.message : error;
+
                     this.$notify({
                         group: 'notification',
                         type: 'error',
                         duration: 10000,
                         title: 'Login',
-                        text: errorText });
+                        text: errorService.sendErrorMessage('f1', errorText) });
                 });
             },
             logout: function () {
@@ -185,7 +190,8 @@
                 loginVuex: 'login',
                 loadingLogin: 'loadingLogin',
                 stopLogin: 'stopLogin',
-                logoutVuex: 'logout'
+                logoutVuex: 'logout',
+                setLastApprovedAddress: 'setLastApprovedAddress'
             })
         }
     }

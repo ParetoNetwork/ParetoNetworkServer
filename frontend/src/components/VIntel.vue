@@ -3,7 +3,7 @@
         <div class="container-fluid px-lg-5">
             <notifications group="auth" position="bottom right"/>
             <div class="row m-0 pt-5" style="min-height: 100vh; width: 100%;">
-                <div class="col-md-5 col-lg-2 mb-5 mt-2 m-sm-0">
+                <div class="col-md-5 col-lg-2 mb-5 mt-2 m-sm-0 p-0 pr-2">
                     <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
                     <VProfile v-else :addressProfile="address" :profileObject="user" :can-edit="true"></VProfile>
                     <div class="mt-4">
@@ -24,9 +24,8 @@
 <script>
     import dashboardService from "../services/dashboardService";
     import profileService from "../services/profileService";
-    import moment from "moment";
     import AuthService from "../services/authService";
-    import ContentService from "../services/ContentService";
+
     import ICountUp from "vue-countup-v2";
 
     import VIntelFeed from "./VIntelFeed.vue";
@@ -36,14 +35,12 @@
     import {countUpMixin} from "../mixins/countUp";
 
     import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
-    import VShimmerUser from "./Shimmer/IntelView/VShimmerUser";
     import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
     import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
     import VProfile from "./VProfile";
-    import VIntelButtonAction from "./Events/VIntelButtonAction";
-    import VIntelPreview from "./VIntelPreview";
     import VEventFeed from "./VEventFeed";
+    import errorService from "../services/errorService";
 
     export default {
         name: "VIntel",
@@ -51,14 +48,11 @@
         components: {
             ICountUp,
             VProfile,
-            VShimmerUser,
+            VIntelFeed,
+            VEventFeed,
             VShimmerMyPost,
             VShimmerFeed,
-            VShimmerUserProfile,
-            VIntelFeed,
-            VIntelButtonAction,
-            VIntelPreview,
-            VEventFeed
+            VShimmerUserProfile
         },
         data: function () {
             return {
@@ -66,10 +60,6 @@
                 loading: true,
                 block: 0,
                 tokenAmount: 1,
-                moment: moment,
-                alias: "",
-                bio: "",
-                picture: "",
                 paretoAddress: window.localStorage.getItem('paretoAddress'),
                 baseURL: environment.baseURL,
                 etherscanUrl: window.localStorage.getItem('etherscan'),
@@ -82,29 +72,16 @@
                 updateContentVar: 0
             };
         },
-        filters: {
-            date: function formatDate(date) {
-                const temp = moment(date);
-                return temp.format("MMMM Do, YYYY");
-            }
-        },
         mounted: function () {
             this.main();
         },
         computed: {
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions"]),
+            ...mapState(["madeLogin", "ws", "signType", "pathId"]),
         },
         methods: {
             ...mapMutations(["intelEnter", "iniWs"]),
-            ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
             creatorRoute(address) {
                 return '/intel/' + address + '/';
-            },
-            goToIntelPage: function () {
-                window.location = '/#/create';
-            },
-            leaderboards(address) {
-                return '/leaderboards' + '?address=' + address;
             },
             loadAddress: function () {
                 return dashboardService.getAddress(
@@ -147,6 +124,7 @@
                             }
                         }
                     } catch (e) {
+                        errorService.sendErrorMessage('f32', e);
                         console.log(e);
                     }
                 };
@@ -166,22 +144,11 @@
                 return profileService.getProfile(
                     res => {
                         this.user = res;
-                        this.alias = res.alias;
-                        this.bio = res.biography;
                     },
-                    () => {
+                    error => {
+                        console.log('Could not retrieve profile')
                     }
                 );
-            },
-            loadProfileImage: function (pic, profileAddress) {
-                let path = this.baseURL + "/profile-image?image=";
-                return profileService.getProfileImage(path, pic, profileAddress);
-            },
-            openInput: function () {
-                document.getElementById("file").click();
-            },
-            randomNumber: function (min = 1, max = 3) {
-                return Math.floor(Math.random() * (max - min + 1) + min);
             },
             requestCall: function () {
                 Promise.all([
@@ -190,48 +157,6 @@
                 ]).then(values => {
                     this.$store.state.makingRequest = false;
                 });
-            },
-            showModal() {
-                this.$refs.myModalRef.show();
-            },
-            updatePicture: function () {
-                let file = this.$refs.file.files[0];
-                let formData = new FormData();
-                formData.append("file", file);
-                profileService.uploadProfilePic(formData, res => {
-                    this.user.profile_pic = res;
-                });
-            },
-            updateProfile() {
-                const profile = {
-                    alias: this.alias,
-                    biography: this.bio
-                };
-                profileService.updateProfile(
-                    profile,
-                    res => {
-                        this.user = res.data;
-
-                        this.$refs.myModalRef.hide();
-                        this.$notify({
-                            group: 'notification',
-                            type: 'success',
-                            duration: 10000,
-                            title: 'Login',
-                            text: 'Profile Updated Successfully!'
-                        });
-                    },
-                    error => {
-                        let errorText = error.message ? error.message : error;
-                        this.$notify({
-                            group: 'notification',
-                            type: 'error',
-                            duration: 10000,
-                            title: 'Login',
-                            text: errorText
-                        });
-                    }
-                );
             },
             main: function () {
                 profileService.updateConfig(res => {
