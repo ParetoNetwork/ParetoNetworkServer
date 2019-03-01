@@ -68,6 +68,7 @@ const store = new Vuex.Store({
         },
         login(state, data){
             state.isLogged = true;
+            state.madeLogin = JSON.parse(window.localStorage.getItem('logged')),
             state.address = data.address.address || data.address;
             state.user = data.address;
             state.showModalSign = false;

@@ -5,7 +5,7 @@
              style="width: 100px; height: 100px;"
              v-bind:style="{ backgroundImage: 'url( ' + onboardingPicture}">
         </div>
-        <div v-if="canEdit" class="thumb profile-pic cursor-pointer" @click="openInput()">
+        <div v-if="canEdit && !onboardingPicture" class="thumb profile-pic cursor-pointer" @click="openInput()">
             <div data-v-514e8c24="" class="thumb" id="wrapper"
                  v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                  style="width: 100px; height: 100px;">
