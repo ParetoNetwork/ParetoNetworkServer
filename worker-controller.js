@@ -784,6 +784,12 @@ workerController.aproxAllScoreRanking = async function(callback){
                                 ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: (data.event == 'distribute')? 3:1 }, { multi: false }, function (err, r) {
                                     if(data.event != 'distribute' && r){
                                         ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {});
+                                    }else{
+
+                                        if(data.event == 'distribute' && r){
+                                            ParetoContent.findOneAndUpdate({id: r.intel}, { distributed: true, txHashDistribute: data.txHash}, function (err, r) {})
+                                        }
+
                                     }
                                 });
                             }
