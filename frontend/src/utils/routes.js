@@ -1,4 +1,3 @@
-import Splash from '../components/Splash';
 import Vintel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';

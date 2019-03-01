@@ -34,7 +34,6 @@
 
 <script>
     import Navbar from './components/Navbar.vue';
-    import SplashDashboard from './components/Splash.vue';
     import VFab from './components/VFab.vue';
     import VBottomNav from './components/VBottomNav';
     import Auth from "./services/authService";
@@ -46,7 +45,6 @@
         name: 'App',
         components: {
             Navbar,
-            SplashDashboard,
             VBottomNav,
             VModalReward
         },
