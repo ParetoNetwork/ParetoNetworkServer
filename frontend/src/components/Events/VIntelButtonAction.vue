@@ -111,7 +111,7 @@
                 let transactionPending = false;
 
                 this.pendingTransactions.forEach( tx => {
-                    if(tx.status < 3 && tx.event === 'reward'){
+                    if(tx.status < 3 && tx.event === 'reward' && tx.clicked){
                         transactionPending = true;
                     }
                 });
