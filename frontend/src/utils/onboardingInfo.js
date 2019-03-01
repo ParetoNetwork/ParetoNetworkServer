@@ -75,19 +75,19 @@ const information = (function () {
       }
     ],
     transactions: [
-      {status: 2, event: 'create', amount: '5000', txHash: '0xFETYIGUJS', clicked: true},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'},
-      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS'}
+      {status: 2, event: 'create', amount: '5000', txHash: '0xFETYIGUJS1', clicked: true},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS2'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS3'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS4'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS5'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS6'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS7'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS8'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS9'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS10'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS11'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS12'},
+      {status: 3, event: 'create', amount: '5000', txHash: '0xFETYIGUJS13'}
     ],
     user: user
   }

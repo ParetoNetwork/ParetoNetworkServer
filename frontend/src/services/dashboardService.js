@@ -3,7 +3,7 @@ import errorService from "./errorService";
 
 export default class dashboardService {
 
-  static getAddress(onSuccess, onError, fromNavbar) {
+  static getAddress(onSuccess, onError, logginUnnecessary) {
     if (this.getAddress.address) {
       return onSuccess(this.getAddress.address);
     } else {
@@ -15,13 +15,13 @@ export default class dashboardService {
 
         if (response.success) {
           return onSuccess(response.data);
-        } else if (fromNavbar) {
+        } else if (logginUnnecessary) {
           return onError('');
         } else {
           return onError(errorService.sendErrorMessage('f24', response.message));
         }
       }).catch(error => {
-        if (fromNavbar) {
+        if (logginUnnecessary) {
           return onError('');
         } else {
           return onError(errorService.sendErrorMessage('f24', error));

@@ -25,10 +25,10 @@
             </b-row>
           </b-form-radio-group>
           <b-row class="m-2 mt-4">
-            <b-button style="background-color: rgb(107, 194, 123)" variant="success" :disabled="!selected"
+            <b-button class="btn btn-dark-primary-pareto" :disabled="!selected"
                       @click="checkLoginOption(selected)"> Login
             </b-button>
-            <b-button class="ml-2" variant="danger" @click="onClosedModal()"> Cancel</b-button>
+            <b-button class="btn btn-dark-secondary-pareto ml-2" @click="onClosedModal()"> Cancel</b-button>
           </b-row>
         </b-form-group>
       </b-container>

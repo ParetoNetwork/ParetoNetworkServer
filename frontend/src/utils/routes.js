@@ -11,14 +11,7 @@ import VScoreCalculator from '../components/VScoreCalculator';
 
 const routes = [
     {
-        path: '/', component: Splash, beforeEnter: (to, from, next) => {
-            // ...
-            AuthService.auth(() => {
-                next('/intel');
-            }, () => {
-                next();
-            });
-        }
+      path: '/', component: Vintel
     },
     {
         path: '*',

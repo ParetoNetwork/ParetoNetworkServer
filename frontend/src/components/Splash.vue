@@ -187,7 +187,8 @@
         video: {
           src: this.supportsVideoType(),
           type: ''
-        }, information: information,
+        },
+        information: information,
         content: [],
         etherscan: window.localStorage.getItem('etherscan'),
         onboarding: require('../assets/images/random_person.png'),
@@ -227,7 +228,6 @@
         this.$store.state.showModalLoginOptions = true;
       },
       showModalSplash(){
-        console.log('oye')
         this.$store.state.showModalOnboarding = true;
       },
       hideModal() {
