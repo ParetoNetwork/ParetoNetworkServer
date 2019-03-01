@@ -137,7 +137,8 @@
       login: function () {
         this.loadingLogin();
         authService.signSplash(data => {
-          this.$router.push({path: '/intel'});
+          this.$router.push('/intel');
+          this.$router.go();
           this.collapseContent();
           authService.postSign(
             res => {
@@ -165,6 +166,7 @@
           this.logoutVuex();
           this.collapseContent();
           this.$router.push('/');
+          this.$router.go();
         }, error => {
           let errorText = error.message ? error.message : error;
           this.$notify({

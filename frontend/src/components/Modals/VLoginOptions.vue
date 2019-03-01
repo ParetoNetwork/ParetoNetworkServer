@@ -78,6 +78,7 @@
         authService.signSplash(data => {
           this.collapseContent();
           this.$router.push(this.redirectRoute || '/intel');
+          this.$router.go();
           authService.postSign(
             res => {
               this.$store.dispatch({

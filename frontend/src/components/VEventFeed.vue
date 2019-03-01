@@ -1,5 +1,5 @@
 <template>
-  <div class="intel-container" style="margin: 5px -15px">
+  <div class="intel-container">
     <VShimmerMyPost v-if="!loadAllContent"></VShimmerMyPost>
     <div v-else class="mb-3 mb-md-1 px-1">
       <div class="p-2 pt-4">

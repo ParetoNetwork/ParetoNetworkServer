@@ -5,16 +5,18 @@
       </div>
       <notifications group="auth" position="bottom right"/>
       <div class="row m-0 pt-5" style="width: 100%;">
-        <div class="col-md-5 col-lg-2 mb-5 mt-2 m-sm-0 p-0 pr-2">
+        <div class="col-md-6 col-lg-2 mb-5 mt-2 m-sm-0 p-0 order-2 order-lg-1">
           <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
           <VProfile v-else :addressProfile="user.address" :profileObject="user" :can-edit="true"
                     :onboardingPicture="onboarding"></VProfile>
           <div class="mt-4">
-            <VEventFeed v-if="primalLoad" :user="user" :defaultTransactions="information.transactions"></VEventFeed>
-            <VShimmerMyPost v-else></VShimmerMyPost>
           </div>
         </div>
-        <div class="col-md-7 px-0 px-md-3 mb-3">
+        <div class="col-md-6 col-lg-3 px-0 mb-3 order-3 order-lg-2">
+          <VEventFeed v-if="primalLoad" :user="user" :defaultTransactions="information.transactions"></VEventFeed>
+          <VShimmerMyPost v-else></VShimmerMyPost>
+        </div>
+        <div class="col-md-12 mb-md-3 mb-lg-0 col-lg-7 px-1 order-1 order-lg-3">
           <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
                       :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
           <VShimmerFeed v-else></VShimmerFeed>
@@ -104,13 +106,6 @@
         this.user = information.user;
         this.onboarding = require('../assets/images/random_person.png');
       });
-    },
-    watch: {
-      'address': function (old, newv) {
-        console.log(old, newv);
-        this.user.address = this.address;
-        this.requestCall();
-      }
     },
     computed: {
       ...mapState([
@@ -208,8 +203,7 @@
       },
       requestCall: function () {
         Promise.all([
-          this.loadProfile(),
-          this.loadAddress()
+          this.loadProfile()
         ]).then(values => {
           this.$store.state.makingRequest = false;
         });
