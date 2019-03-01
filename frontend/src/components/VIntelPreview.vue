@@ -35,7 +35,7 @@
                             {{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
                         </p>
                     </a>
-                    <div class="col-6 col-md-6" :class="{'col-lg-6': eventRow, 'col-lg-3': !eventRow}">
+                    <div class="col-6 col-md-6 text-center" :class="{'col-lg-6': eventRow, 'col-lg-3': !eventRow}">
                         <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
                            target="_blank">
                             <i class="fa fa-th-large green-color mr-2"></i>

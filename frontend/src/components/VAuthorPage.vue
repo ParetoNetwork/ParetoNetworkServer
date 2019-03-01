@@ -2,10 +2,10 @@
     <div class="main wrapp pareto-blue-dark">
         <div class="container-fluid px-lg-5">
             <div class="row m-0 pt-5" style="min-height: 100vh; width: 100%;">
-                <div class="col-md-5 mb-5 mt-2 m-sm-0">
+                <div class="col-md-4 mb-5 mt-2 m-sm-0">
                     <VProfile :addressProfile="address"></VProfile>
                 </div>
-                <div class="col-md-7 px-0 px-md-3 mb-3">
+                <div class="col-md-8 px-0 px-md-3 mb-3">
                     <VIntelFeed :user="user" :fetchAddress="address" :address="true" :title="title"></VIntelFeed>
                 </div>
             </div>
