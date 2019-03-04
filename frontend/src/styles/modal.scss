@@ -9,4 +9,30 @@
   font-size: 13px;
 }
 
+#myOnboardingfeed{
+  height: 600px;
+}
+
+@media (min-width: 1200px) {
+  .modal-lg {
+    max-width: 1100px;
+    margin: 50px auto;
+  }
+
+  #myOnboardingfeed{
+    height: 400px;
+  }
+}
+@media (max-width: 1200px){
+  .modal-lg {
+    max-width: 800px !important;
+  }
+}
+
+@media (max-width: 450px){
+  .modal-lg {
+    max-width: 350px;
+    margin: 50px auto;
+  }
+}
 

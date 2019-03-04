@@ -45,11 +45,12 @@ export default class authService {
             if(res.data.success){
               return onSuccess(res.data.data);
             }else{
-              return onError(errorService.sendErrorMessage('f12', res.data.message));
+              //const errorInvok = errorService.sendErrorMessage('f12', res.data.message);
+              return onError('');
             }
         }).catch(error => {
-            return onError(errorService.sendErrorMessage('f12', error));
-
+            //const errorInvok = errorService.sendErrorMessage('f12', error);
+            return onError('');
         });
         try {
             profileService.updateConfig();
