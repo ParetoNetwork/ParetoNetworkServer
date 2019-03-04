@@ -50,7 +50,7 @@ redisClient = redis.createClient(
     REDIS_URL
 );
 redisClient.on("connect", function () {
-    console.log("PARETO: Success connecting to Redis on worker")
+    console.log("PARETO: Success connecting to Redis on worker");
 });
 redisClient.on("error", function (err) {
     console.log("PARETO: Problems connecting to Redis on worker"+ err );
@@ -821,100 +821,104 @@ workerController.aproxAllScoreRanking = async function(callback){
 }
 
 
+workerController.processData = async function (txObjects, address, blockHeight, callback) {
+    const bulkop=[];
+    const scores=[];
+    const addressesExponent=[];
+    let arrayAddress = [];
+    if(!address){
+        const addresses = {};
+        for(let i = 0; i < txObjects.length; i++){
+            addresses["0x" + txObjects[i].topics[1].substring(26)]=1;
+            addresses["0x" + txObjects[i].topics[2].substring(26)]=1;
+        }
+        arrayAddress = Object.keys(addresses);
+
+    }else{
+        arrayAddress = [address];
+    }
+    console.log("address count here: " + arrayAddress.length);
+    let errors = null;
+    for (let i=0; i< arrayAddress.length; i++){
+        const address = arrayAddress[i];
+        await workerController.generateScore(blockHeight,address,0,function (err, result) {
+            if(!err ){
+                if (result.tokens == 0) {
+                    result.score = 0;
+                }
+                scores.push(result);
+                addressesExponent.push(address);
+            }else{
+                errors = err;
+            }
+        })
+    }
+    await workerController.addExponent(addressesExponent, scores, blockHeight, function (err, results) {
+        if(!err ){
+
+            for (let t=0; t<results.length; t=t+1){
+                let result = results[t];
+                var dbValues = {
+                    bonus : result.bonus,
+                    tokens : result.tokens,
+                    score : result.score,
+                    block: result.block };
+                if(!isNaN(dbValues.score)){
+                    bulkop.push({updateOne:{ filter: {address : addressesExponent[t]}, update: dbValues}});
+                }
+            }
+            console.log("bulk count here: " + bulkop.length);
+            if (bulkop.length> 0){
+                ParetoAddress.bulkWrite(bulkop).then(
+                    function (r) {
+
+                        callback(null, {lastBlock: blockHeight} );
+                    }
+                ).catch(function (err) {
+                    callback({message: "Could not write"}, {} );
+                });
+            }else{
+                callback(errors, {} );
+            }
+        }else{
+            callback(err, {} );
+        }
+
+    });
+
+
+};
+
 /**
  * This function will calculate the real socre based in the last 7200 blocks (10 minuts aprox)
  * @param callback
  */
 workerController.realAllScoreRanking = async function(callback){
-
+    const multi = redisClient.multi();
+    multi.hgetall("lastBlock");
+    const  data = await  multi.exec();
     web3.eth.getBlock('latest')
         .then(function(res) {
             const blockHeight = res.number;
+            let CURRENT_SCORE_BLOCK_AGO = (data && data.length && data[0].block)? data[0].block : (blockHeight-SCORE_BLOCK_AGO);
 
             return web3.eth.getPastLogs({
-                fromBlock: "0x" + ((blockHeight-SCORE_BLOCK_AGO).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
+                fromBlock: "0x" + ((CURRENT_SCORE_BLOCK_AGO).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
                 toBlock: 'latest',
                 address: PARETO_CONTRACT_ADDRESS,
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
             }).then(function (txObjects){
-
-
-                const processData = async function () {
-                    const addresses = {};
-
-                    for(let i = 0; i < txObjects.length; i++){
-                        addresses["0x" + txObjects[i].topics[1].substring(26)]=1;
-                        addresses["0x" + txObjects[i].topics[2].substring(26)]=1;
-                    }
-                    const bulkop=[];
-                    const scores=[];
-                    const addressesExponent=[];
-                    const arrayAddress = Object.keys(addresses);
-                    console.log("address count here: " + arrayAddress.length);
-                    for (let i=0; i< arrayAddress.length; i++){
-                        const address = arrayAddress[i];
-                        await workerController.generateScore(blockHeight,address,0,function (err, result) {
-                            if(!err ){
-                                if (result.tokens == 0) {
-                                    result.score = 0;
-                                }
-                                scores.push(result);
-                                addressesExponent.push(address);
-                            }
-                        })
-                    }
-                    await workerController.addExponent(addressesExponent, scores, blockHeight, function (err, results) {
-                        if(!err ){
-
-                            for (let t=0; t<results.length; t=t+1){
-                                let result = results[t];
-                                var dbValues = {
-                                    bonus : result.bonus,
-                                    tokens : result.tokens,
-                                    score : result.score,
-                                    block: result.block };
-                                if(!isNaN(dbValues.score)){
-                                    bulkop.push({updateOne:{ filter: {address : addressesExponent[t]}, update: dbValues}});
-                                }
-                            }
-                            console.log("bulk count here: " + bulkop.length);
-                            if (bulkop.length> 0){
-                                ParetoAddress.bulkWrite(bulkop).then(
-                                    function (r) {
-                                        callback(null, {} );
-                                    }
-                                ).catch(function (err) {
-                                    console.log(err);
-                                    callback(null, {} );
-                                });
-                            }else{
-                                callback(null, {} );
-                            }
-                        }else{
-                            callback(null, {} );
-                        }
-
-                    });
-
-
-                };
-
-                processData();
-
+                workerController.processData(txObjects, null,blockHeight, callback);
             }, function (error) {
-                console.log(error);
-                callback(null, {} );
+                callback(error, {} );
             }).catch(function (err) {
-                console.log(err);
-                callback(null, {} );
+                callback(err, {} );
             });
 
         }, function (error) {
-            console.log(error);
-            callback(null, {} );
+            callback(error, {} );
         }).catch(function (err) {
-        console.log(err);
-        callback(null, {} );
+        callback(err, {} );
     });
 
 }
@@ -1280,7 +1284,7 @@ const start = async () => {
 
         queue.process('clock-job-score', 4, (job, done) => {
             workerController.updateFromLastIntel();
-            workerController.realAllScoreRanking(function(err, result){
+            workerController.realAllScoreRanking(function(err, resultScore){
                 if(err){
                     done(err );
                 }else{
@@ -1288,6 +1292,9 @@ const start = async () => {
                         if(err){
                             done(err );
                         }else{
+                            const multi = redisClient.multi();
+                            multi.hmset("lastBlock", {block: resultScore} );
+                            multi.exec(function(e, r) {});
                             done(null, 'Sucessfully updated');
                         }
 
@@ -1302,15 +1309,36 @@ const start = async () => {
             workerController.getScoreAndSaveSnapshot(done);
         });
 
-        queue.process('controller-job-save', 2, (job, done) => {
-            workerController.getScoreAndSaveRedis (function(err, result){
-                if(err){
-                    done(err );
-                }else{
-                    done(null, result);
-                }
+        queue.process('controller-job-save', 3, (job, done) => {
+            if(job.data.address){
+                console.log('force calculate real score ' + job.data.address);
+                web3.eth.getBlock('latest')
+                    .then(function (res) {
+                        workerController.processData(null, job.data.address, res.number, function (err, result) {
+                            workerController.getScoreAndSaveRedis (function(err, result){
+                                if(err){
+                                    done(err );
+                                }else{
+                                    done(null, result);
+                                }
 
-            });
+                            });
+                        })
+                    })
+                    .catch(e =>{
+                        done(e );
+                    });
+            } else{
+                workerController.getScoreAndSaveRedis (function(err, result){
+                    if(err){
+                        done(err );
+                    }else{
+                        done(null, result);
+                    }
+
+                });
+            }
+
         });
 
         queue.process('controller-job-score', 2, (job, done) => {
