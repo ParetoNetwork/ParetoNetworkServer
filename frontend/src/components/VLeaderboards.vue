@@ -300,7 +300,7 @@
                     this.loading = false;
                     this.infiniteScrollFunction();
                     this.randomFlash();
-                });
+                }, true);
             }, getLeaderboard: function (withParam) {//withParam means a manual search
                 this.$store.state.makingRequest = true;
                 this.busy = true;

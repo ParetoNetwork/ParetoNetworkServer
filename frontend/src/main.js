@@ -55,6 +55,7 @@ const store = new Vuex.Store({
         showModalSign: false,
         showModalLoginOptions: false,
         showModalLedgerNano: false,
+        showModalOnboarding: true,
         showModalReward: false,
         showModalEditProfile : false,
         signType: (window.localStorage.getItem('signType')) || 'Metamask',
@@ -67,7 +68,8 @@ const store = new Vuex.Store({
         },
         login(state, data){
             state.isLogged = true;
-            state.address = data.address.address;
+            state.madeLogin = JSON.parse(window.localStorage.getItem('logged')),
+            state.address = data.address.address || data.address;
             state.user = data.address;
             state.showModalSign = false;
             state.showModalLoginOptions = false;
