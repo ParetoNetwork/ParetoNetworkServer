@@ -15,9 +15,7 @@
             <div class="col-md-6 col-lg-5 my-5">
               <div class="mt-4">
                 <img src="../../assets/images/LogoReverse.svg" width="200px" class="my-5" alt="">
-                <p class="my-5 p-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
-                  has
-                  been the industry's standard dummy text </p>
+                <p class="my-5 p-3">Current, reputable & actionable intel for traders and investors.</p>
               </div>
             </div>
             <div class="col-md-6 col-lg-7 px-0 intel-container">
@@ -25,14 +23,9 @@
                 <div class="d-flex flex-column justify-content-around px-5 py-3">
                   <div></div>
                   <div class="px-5 py-4 text-left">
-                    <h1 class="mb-3"><b>Title Goes Here </b></h1>
+                    <h1 class="mb-3"><b>Post. Trade. Earn.</b></h1>
                     <p>
-                      Lorem psum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-                      industry's standard lorem dummy text Ipsum is simply
-                      text of the printing and typesetting orgyd dummy text aorem Ipsum is simply dummy text of the
-                      printing
-                      and typesetting industry.
-                      Lorem Ipsum has been the industry's standard dummy text
+                      The first true peer-to-peer intel marketplace. Purchase access today.
                     </p>
                   </div>
                   <button class="btn btn-dark-primary-pareto button--login mx-auto"
