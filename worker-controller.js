@@ -878,7 +878,7 @@ workerController.processData = async function (txObjects, address, blockHeight, 
                     callback({message: "Could not write"}, {} );
                 });
             }else{
-                callback(errors, {} );
+                callback(errors, {lastBlock: blockHeight} );
             }
         }else{
             callback(err, {} );
@@ -896,29 +896,29 @@ workerController.processData = async function (txObjects, address, blockHeight, 
 workerController.realAllScoreRanking = async function(callback){
     const multi = redisClient.multi();
     multi.hgetall("lastBlock");
-    const  data = await  multi.exec();
-    web3.eth.getBlock('latest')
-        .then(function(res) {
-            const blockHeight = res.number;
-            let CURRENT_SCORE_BLOCK_AGO = (data && data.length && data[0].block)? data[0].block : (blockHeight-SCORE_BLOCK_AGO);
+    multi.exec((err, data)=>{
+        web3.eth.getBlock('latest')
+            .then(function(res) {
+                const blockHeight = res.number;
+                let CURRENT_SCORE_BLOCK_AGO = (data && data.length && data[0].block && !isNaN(parseInt(data[0].block)))? data[0].block : (blockHeight-SCORE_BLOCK_AGO);
+                return web3.eth.getPastLogs({
+                    fromBlock: "0x" + ((CURRENT_SCORE_BLOCK_AGO).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
+                    toBlock: 'latest',
+                    address: PARETO_CONTRACT_ADDRESS,
+                    topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
+                }).then(function (txObjects){
+                    workerController.processData(txObjects, null,blockHeight, callback);
+                }, function (error) {
+                    callback(error, {} );
+                }).catch(function (err) {
+                    callback(err, {} );
+                });
 
-            return web3.eth.getPastLogs({
-                fromBlock: "0x" + ((CURRENT_SCORE_BLOCK_AGO).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
-                toBlock: 'latest',
-                address: PARETO_CONTRACT_ADDRESS,
-                topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
-            }).then(function (txObjects){
-                workerController.processData(txObjects, null,blockHeight, callback);
             }, function (error) {
                 callback(error, {} );
             }).catch(function (err) {
-                callback(err, {} );
-            });
-
-        }, function (error) {
-            callback(error, {} );
-        }).catch(function (err) {
-        callback(err, {} );
+            callback(err, {} );
+        });
     });
 
 }
@@ -1292,9 +1292,11 @@ const start = async () => {
                         if(err){
                             done(err );
                         }else{
-                            const multi = redisClient.multi();
-                            multi.hmset("lastBlock", {block: resultScore} );
-                            multi.exec(function(e, r) {});
+                            if (resultScore.lastBlock){
+                                const multi = redisClient.multi();
+                                multi.hmset("lastBlock", {block: resultScore.lastBlock} );
+                                multi.exec(function(e, r) {});
+                            }
                             done(null, 'Sucessfully updated');
                         }
 
