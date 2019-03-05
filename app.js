@@ -46,7 +46,7 @@ const newRedis = require("redis");
 const rateLimiter = new RateLimiterRedis({
     redis: controller.redisClient,
     keyPrefix: 'middleware',
-    points: 25, // 10 requests
+    points: 100, // 10 requests
     duration: 1, // per 1 second by IP
     blockDuration: 120 // 2 minutes block
 });
