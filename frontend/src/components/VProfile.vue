@@ -62,8 +62,8 @@
         </div>
       </div>
     </div>
-    <div class="row justify-content-center justify-content-lg-between text-center mt-4">
-      <router-link tag="div" class="cursor-pointer border p-2 mb-2" :to="leaderboards(profile.address)"
+    <div class="row justify-content-center justify-content-lg-start text-center mt-4">
+      <router-link tag="div" class="cursor-pointer border mr-3 p-2 mb-2" :to="leaderboards(profile.address)"
                    style="min-width: 80px">
         <p class="subtitle-user-content">
           <ICountUp
