@@ -9,40 +9,39 @@
         size="lg"
         :body-bg-variant="'dark'">
 
-      <b-container>
-        <div class="position-relative">
-          <div class="row m-0" style="width: 100%">
-            <div class="col-md-6 col-lg-5 my-5">
-              <div class="mt-4">
-                <img src="../../assets/images/LogoReverse.svg" width="200px" class="my-5" alt="">
-                <p class="my-5 p-3">Current, reputable & actionable intel for traders and investors.</p>
-              </div>
-            </div>
-            <div class="col-md-6 col-lg-7 px-0 intel-container">
-              <div class="d-flex justify-content-center h-100">
-                <div class="d-flex flex-column justify-content-around px-5 py-3">
-                  <div></div>
-                  <div class="px-5 py-4 text-left">
-                    <h1 class="mb-3"><b>Post. Trade. Earn.</b></h1>
-                    <p>
-                      The first true peer-to-peer intel marketplace. Purchase access today.
-                    </p>
-                  </div>
-                  <button class="btn btn-dark-primary-pareto button--login mx-auto"
-                          style="font-size: 18px; width: 400px; max-width: 80%"
-                          @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
-                                                                                     class="fa fa-spinner fa-spin"></span>
-                  </button>
+        <div class="row h-100">
+          <div class="col-lg-7 order-lg-2 px-0 intel-container">
+            <div class="d-flex justify-content-center h-100">
+              <div class="d-flex flex-column justify-content-around">
+                <div></div>
+                <div class="p-5 text-left">
+                  <h1 class="mb-3 title-content" style="font-size: 30px"><b>Post. Trade. Earn.</b></h1>
+                  <p>
+                    The first true peer-to-peer intel marketplace. Purchase access today.
+                  </p>
                 </div>
+                <button class="btn btn-dark-primary-pareto button--login mx-auto"
+                        style="font-size: 18px; width: 400px; max-width: 80%"
+                        @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
+                                                                                   class="fa fa-spinner fa-spin"></span>
+                </button>
               </div>
             </div>
           </div>
-          <span class="cursor-pointer" @click="cancelClick()">
+          <div class="col-lg-5 order-lg-1">
+            <div class="d-flex justify-content-center h-100">
+              <div class="d-flex flex-column justify-content-around">
+                <div class="d-none d-md-block"></div>
+                <img src="../../assets/images/LogoReverse.svg" width="200px" style="margin: 0 auto" alt="">
+                <p class="p-3 d-none d-md-block">Current, reputable & actionable intel for traders and investors.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="cursor-pointer" @click="cancelClick()">
             <i class="fa fa-window-close fa-2x"
                style="position: absolute; right: 0; top: 0;"></i>
           </span>
-        </div>
-      </b-container>
     </b-modal>
   </div>
 </template>
@@ -106,7 +105,19 @@
   }
 </script>
 <style>
-  .onboarding-modal .modal-body, .onboarding-modal .container {
+  .onboarding-modal .modal-content {
+    height: 80vh;
+  }
+
+  .onboarding-modal .modal-body{
     padding: 0;
   }
+
+  @media (min-width: 500px) {
+    .onboarding-modal .modal-content {
+      max-width: 1000px;
+      max-height: 600px;
+    }
+  }
+
 </style>
