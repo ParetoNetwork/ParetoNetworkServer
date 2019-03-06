@@ -1032,6 +1032,7 @@ controller.getAllAvailableContent = async function (req, callback) {
 
             const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate('createdBy').exec();
             let newResults = [];
+
             allResults.forEach(function (entry) {
                 /*
 
