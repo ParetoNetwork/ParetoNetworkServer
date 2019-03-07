@@ -356,7 +356,7 @@ controller.startwatchNewIntel = function () {
                                         }, {status: 3})];
                                 Promise.all(promises).then(values => {
                                     if (values.length > 1) {
-                                        controller.getScoreAndSaveRedis((err, result) => {
+                                        controller.getScoreAndSaveRedis(null, (err, result) => {
                                             controller.SendInfoWebsocket({
                                                 address: data.address,
                                                 transaction: values[1]
@@ -499,7 +499,7 @@ controller.startWatchApprove = function () {
                 if (!err && r) {
                     console.log(r);
                     ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
-                        controller.getScoreAndSaveRedis(function (err, r) {  })
+                        controller.getScoreAndSaveRedis(null, function (err, r) {  })
                     });
                     controller.SendInfoWebsocket({address: r.address, transaction: r});
                 } else {
@@ -583,7 +583,7 @@ controller.updateAddressReward = function (event, token) {
             //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
 
             updateQuery.exec().then(function (r) {
-                controller.getScoreAndSaveRedis(function (err, result) {
+                controller.getScoreAndSaveRedis(null, function (err, result) {
                     if (!err) {
                         controller.SendInfoWebsocket({address: addressToUpdate});
                     } else {
@@ -1032,6 +1032,7 @@ controller.getAllAvailableContent = async function (req, callback) {
 
             const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate('createdBy').exec();
             let newResults = [];
+
             allResults.forEach(function (entry) {
                 /*
 
@@ -1403,11 +1404,12 @@ controller.updateScore = function (address, callback) {
 
 };
 
-controller.getScoreAndSaveRedis = function (callback) {
+controller.getScoreAndSaveRedis = function (address, callback) {
     try {
         const job = queue
             .create('controller-job-save', {
                 type: 'save-redis',
+                address: address
             })
             .removeOnComplete(true)
             .save((error) => {
@@ -1493,6 +1495,7 @@ controller.sign = function (params, callback) {
             // JSON web token for the owner that expires in 24 hours.
             controller.getBalance(owner, 0, function (err, count) {
                 if (!err) {
+                    controller.getScoreAndSaveRedis(owner, (e, r)=>{});
                     callback(null, {token: jwt.sign({user: owner}, 'Pareto', {expiresIn: "5y"})});
                 } else {
                     callback(err);
@@ -1728,7 +1731,7 @@ controller.retrieveRanksWithRedis = function (rank, limit, page, attempts, callb
             if (results && results[results.length - 1] && !isNaN(results[results.length - 1].rank) && results[results.length - 1].rank < queryRank + (page * limit)) {
                 return callback(null, []);
             }
-            controller.getScoreAndSaveRedis(function (err, result) {
+            controller.getScoreAndSaveRedis(null, function (err, result) {
                 if (err) {
                     return callback(err);
                 } else {
@@ -1773,7 +1776,7 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
                     error.address = addressess;
                     callback(error);
                 } else {
-                    controller.getScoreAndSaveRedis(function (err, result) {
+                    controller.getScoreAndSaveRedis(null, function (err, result) {
                         if (err) {
                             return callback(err);
                         } else {
