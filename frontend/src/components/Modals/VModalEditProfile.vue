@@ -5,8 +5,7 @@
             hide-footer
             ref="myModalRef"
             title="Edit Profile"
-            @hide="onClosedModal"
-    >
+            @hide="onClosedModal">
         <div class="d-block text-center pt-5">
             <form action="">
                 <div class="input-group mb-3 create-input-space">
@@ -20,7 +19,7 @@
                     <b class="pareto-subtitle create-content-text title-user-content ml-3 mb-2">
                         Current Alias Slug
                     </b>
-                    <input v-model="user.aliasSlug || alias" type="text" class="readonly-input create-content-text text-user-content" id="alias-slug"
+                    <input v-model="aliasSlug || user.aliasSlug" type="text" class="readonly-input create-content-text text-user-content" id="alias-slug"
                            aria-describedby="basic-addon3" onkeydown="event.preventDefault()" readonly>
                 </div>
                 <div class="input-group mb-3 mt-5 create-input-space">
@@ -88,7 +87,7 @@
                 profileService.updateProfile(
                     profile,
                     res => {
-                        this.$emit('profileEdit', res.data)
+                        this.$emit('profileEdit', res.data);
 
                         this.onClosedModal();
                         this.$notify({

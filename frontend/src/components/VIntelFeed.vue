@@ -1,5 +1,5 @@
 <template>
-  <div class="intel-container">
+  <div class="intel-container h-100">
     <div v-if="!loading" class="px-3 pl-xl-5 py-4 text-left">
       <b class="title-content">
         MY INTEL FEED
