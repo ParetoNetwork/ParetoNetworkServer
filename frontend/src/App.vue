@@ -144,6 +144,7 @@
         -moz-osx-font-smoothing: grayscale;
         text-align: center;
         background: $dark-blue-pareto;
+        height: 100vh;
     }
 
     body {

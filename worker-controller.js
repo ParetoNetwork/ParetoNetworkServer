@@ -900,7 +900,7 @@ workerController.realAllScoreRanking = async function(callback){
         web3.eth.getBlock('latest')
             .then(function(res) {
                 const blockHeight = res.number;
-                let CURRENT_SCORE_BLOCK_AGO = (data && data.length && data[0].block && !isNaN(parseInt(data[0].block)))? data[0].block : (blockHeight-SCORE_BLOCK_AGO);
+                let CURRENT_SCORE_BLOCK_AGO = (data && data.length && data[0] && data[0].block && !isNaN(parseInt(data[0].block)))? data[0].block : (blockHeight-SCORE_BLOCK_AGO);
                 return web3.eth.getPastLogs({
                     fromBlock: "0x" + ((CURRENT_SCORE_BLOCK_AGO).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
                     toBlock: 'latest',

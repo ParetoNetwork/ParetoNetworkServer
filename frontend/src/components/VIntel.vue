@@ -1,10 +1,10 @@
 <template>
   <div class="main wrapp pareto-blue-dark">
-    <div class="container-fluid px-lg-5">
+    <div class="container-fluid position-relative px-lg-5">
       <div class="blocking-content" v-if="!loggedUser" v-on:click="showModalSplash()">
       </div>
       <notifications group="auth" position="bottom right"/>
-      <div class="row m-0 pt-5" style="width: 100%;">
+      <div class="row m-0 pt-3" style="width: 100%;">
         <div class="col-md-4 col-lg-2 mb-5 mt-2 m-sm-0 order-2 order-md-1 order-xl-1">
           <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
           <VProfile v-else :addressProfile="user.address" :profileObject="user" :can-edit="true"
@@ -12,7 +12,7 @@
           <div class="mt-4">
           </div>
         </div>
-        <div class="offset-md-4 offset-xl-0 col-md-8 col-lg-3 px-0 mb-3 order-3 order-xl-2">
+        <div class="col-md-8 col-lg-3 px-0 mb-3 order-3 order-xl-2">
           <VEventFeed v-if="primalLoad" :user="user" :defaultTransactions="information.transactions"></VEventFeed>
           <VShimmerMyPost v-else></VShimmerMyPost>
         </div>
