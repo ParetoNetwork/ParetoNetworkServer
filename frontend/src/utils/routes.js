@@ -1,4 +1,3 @@
-import Splash from '../components/Splash';
 import Vintel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
@@ -11,14 +10,7 @@ import VScoreCalculator from '../components/VScoreCalculator';
 
 const routes = [
     {
-        path: '/', component: Splash, beforeEnter: (to, from, next) => {
-            // ...
-            AuthService.auth(() => {
-                next('/intel');
-            }, () => {
-                next();
-            });
-        }
+      path: '/', component: Vintel
     },
     {
         path: '*',
