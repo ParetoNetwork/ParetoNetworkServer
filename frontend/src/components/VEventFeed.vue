@@ -1,9 +1,9 @@
 <template>
-  <div class="intel-container h-100">
+  <div class="intel-container">
     <VShimmerMyPost v-if="!loadAllContent"></VShimmerMyPost>
     <div v-else class="mb-3 mb-md-1 px-1">
       <div class="p-2 pt-4">
-        <div class="text-left title-content p-1">
+        <div class="text-left title-content">
           <b>EVENTS</b>
         </div>
         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
