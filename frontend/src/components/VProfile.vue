@@ -1,5 +1,5 @@
 <template>
-  <div v-if="profile.address" class="pareto-blue-dark text-center text-lg-left">
+  <div v-if="profile.address" class="pt-md-2 pt-lg-0 pareto-blue-dark text-center text-lg-left">
     <div v-if="onboardingPicture"
          class="thumb profile-pic cursor-pointer"
          style="width: 100px; height: 100px;"
@@ -21,15 +21,15 @@
                  v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                  :to="creatorRoute(profile.aliasSlug || profile.address)"
     ></router-link>
-    <div class="mt-4">
+    <div class="mt-1 mt-xl-4">
       <p class="subtitle-user-content"><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
-      <p class="text-user-content mt-2" :class="{'cursor-pointer' : !!canEdit}" @click="openEditProfileModal()">
+      <p class="text-user-content mt-1 mt-xl-2" :class="{'cursor-pointer' : !!canEdit}" @click="openEditProfileModal()">
                 <span v-if="canEdit">
                     <i class="fa fa-edit green-color" style="margin-left: -15px"></i>
                 </span>
         {{profile.biography || 'No Bio to show'}}
       </p>
-      <div class="row cursor-pointer mt-3">
+      <div class="row cursor-pointer mt-1 mt-xl-3">
         <div class="ml-0 col ellipsis">
           <i class="fa fa-book green-color" style="margin-left: -15px"></i>
           <router-link tag="span" :to="creatorRoute(profile.aliasSlug || profile.address)"
@@ -37,7 +37,7 @@
           </router-link>
         </div>
       </div>
-      <div class="row cursor-pointer mt-3">
+      <div class="row cursor-pointer mt-1 mt-xl-3">
         <div class="ml-0 col px-0">
           <img src="../assets/images/LogoMarkColor.svg"
                width="15px"
@@ -62,7 +62,7 @@
         </div>
       </div>
     </div>
-    <div class="row justify-content-center justify-content-lg-start text-center mt-4">
+    <div class="row justify-content-center justify-content-lg-start text-center mt-1 mt-xl-4">
       <router-link tag="div" class="cursor-pointer border mr-3 p-2 mb-2" :to="leaderboards(profile.address)"
                    style="min-width: 80px">
         <p class="subtitle-user-content">
