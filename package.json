@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node backend.js",
     "test": "mocha test/*.js  --timeout 150000 --exit",
-    "build": "npm run-script --prefix frontend build && rm -rf public && mv frontend/dist/ public && cp -R frontend/src/assets/download/ public/download",
+    "build": "yarn install --cwd frontend && npm run-script --prefix frontend build && rm -rf public && mv frontend/dist/ public && cp -R frontend/src/assets/download/ public/download",
     "serve": "npm run-script --prefix frontend serve",
     "docs": "git submodule update --force --init --recursive && rm -rf api-docs && cp -R docs/. api-docs/ && rm -rf api-docs/.git && rm  api-docs/.gitignore"
   },
