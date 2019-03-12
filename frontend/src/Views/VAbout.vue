@@ -818,8 +818,8 @@
 </template>
 
 <script>
-    import VParticles from './VParticles.vue';
-    import ModalSignIn from "./VModalManualSigIn";
+    import VParticles from '../components/VParticles.vue';
+    import ModalSignIn from "../components/Modals/VModalManualSigIn";
     import {mapState} from 'vuex';
 
     export default {

@@ -1,11 +1,11 @@
-import Vintel from '../components/VIntel';
-import VAbout from '../components/VAbout';
-import VLeaderboards from '../components/VLeaderboards';
-import VCreateIntel from '../components/VCreateIntel';
+import Vintel from '../Views/VIntel';
+import VAbout from '../Views/VAbout';
+import VLeaderboards from '../Views/VLeaderboards';
+import VCreateIntel from '../Views/VCreateIntel';
 import VueRouter from 'vue-router';
 import AuthService from '../services/authService';
-import VAuthorPage from '../components/VAuthorPage';
-import VIntelDetail from '../components/VIntelDetail';
+import VAuthorPage from '../Views/VAuthorPage';
+import VIntelDetail from '../Views/VIntelDetail';
 import VScoreCalculator from '../components/VScoreCalculator';
 
 const routes = [

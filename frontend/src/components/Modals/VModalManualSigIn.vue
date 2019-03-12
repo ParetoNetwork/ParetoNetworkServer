@@ -47,7 +47,7 @@
 <script>
   /* eslint-disable */
   import 'jquery'
-  import Auth from '../services/authService';
+  import Auth from '../../services/authService';
   import {mapState, mapMutations} from 'vuex';
 
   export default {

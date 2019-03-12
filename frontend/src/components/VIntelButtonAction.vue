@@ -4,7 +4,7 @@
                class="btn btn-dark-primary-pareto mx-auto px-4"
                :disabled="pendingRowTransactions(intel) || user.address === intel.address"
                @click="openRewardModal()">
-            <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
+            <img src="../assets/images/LogoMarkDark.png" width="20px" alt="">
             {{ intel.reward }}
         </button>
         <b-btn
@@ -30,8 +30,8 @@
 
 <script>
     import {mapMutations, mapState} from "vuex";
-    import ContentService from "../../services/ContentService";
-    import VModalReward from "../Modals/VModalReward";
+    import ContentService from "../services/ContentService";
+    import VModalReward from "./Modals/VModalReward";
 
     export default {
         name: "VIntelButtonAction",

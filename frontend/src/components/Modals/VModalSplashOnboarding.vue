@@ -56,7 +56,7 @@
   import {mapMutations, mapState} from 'vuex';
 
   import LoginOptions from './VLoginOptions';
-  import ModalSignIn from '../VModalManualSigIn';
+  import ModalSignIn from './VModalManualSigIn';
   import ModalLedgerNano from "./VModalLedgerNano";
 
   import {information} from '../../utils/onboardingInfo';

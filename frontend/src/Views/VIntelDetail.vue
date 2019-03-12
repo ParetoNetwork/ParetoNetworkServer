@@ -61,13 +61,13 @@
     import AuthService from "../services/authService";
     import environment from '../utils/environment';
 
-    import VProfile from "./VProfile.vue";
+    import VProfile from "../components/VProfile.vue";
 
-    import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
-    import VShimmerIntelInformation from "./Shimmer/IntelDetailView/VShimmerIntelInformation";
-    import VIntelButtonAction from "./Events/VIntelButtonAction";
+    import VShimmerUserProfile from "../components/Shimmer/IntelDetailView/VShimmerUserProfile";
+    import VShimmerIntelInformation from "../components/Shimmer/IntelDetailView/VShimmerIntelInformation";
+    import VIntelButtonAction from "../components/VIntelButtonAction";
 
-    import VModalReward from "./Modals/VModalReward";
+    import VModalReward from "../components/Modals/VModalReward";
 
     export default {
         name: 'VIntelDetail',

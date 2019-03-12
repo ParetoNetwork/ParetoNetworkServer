@@ -65,7 +65,7 @@
     import moment from "moment";
 
     import profileService from "../services/profileService";
-    import VIntelButtonAction from "./Events/VIntelButtonAction";
+    import VIntelButtonAction from "./VIntelButtonAction";
     import environment from "../utils/environment";
 
     import {countUpMixin} from "../mixins/countUp";

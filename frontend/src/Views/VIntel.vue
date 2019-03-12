@@ -37,24 +37,24 @@
 
   import ICountUp from "vue-countup-v2";
 
-  import VIntelFeed from "./VIntelFeed.vue";
+  import VIntelFeed from "../components/VIntelFeed.vue";
   import {mapMutations, mapState, mapActions} from "vuex";
   import environment from "../utils/environment";
 
   import {countUpMixin} from "../mixins/countUp";
 
-  import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
-  import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
-  import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
+  import VShimmerUserProfile from "../components/Shimmer/IntelDetailView/VShimmerUserProfile";
+  import VShimmerMyPost from "../components/Shimmer/IntelView/VShimmerMyPost";
+  import VShimmerFeed from "../components/Shimmer/IntelView/VShimmerFeed";
 
-  import VProfile from "./VProfile";
-  import VEventFeed from "./VEventFeed";
+  import VProfile from "../components/VProfile";
+  import VEventFeed from "../components/VEventFeed";
   import errorService from "../services/errorService";
 
-  import LoginOptions from './Modals/VLoginOptions';
-  import ModalSignIn from './VModalManualSigIn';
-  import ModalLedgerNano from "./Modals/VModalLedgerNano";
-  import ModalSplashOnboarding from "./Modals/VModalSplashOnboarding";
+  import LoginOptions from '../components/Modals/VLoginOptions';
+  import ModalSignIn from '../components/Modals/VModalManualSigIn';
+  import ModalLedgerNano from "../components/Modals/VModalLedgerNano";
+  import ModalSplashOnboarding from "../components/Modals/VModalSplashOnboarding";
 
   import {information} from '../utils/onboardingInfo';
 

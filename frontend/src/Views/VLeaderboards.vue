@@ -157,13 +157,13 @@
     import Auth from '../services/authService';
     import Profile from '../services/profileService';
     import {mapMutations, mapState} from 'vuex';
-    import ModalSignIn from './VModalManualSigIn';
+    import ModalSignIn from '../components/Modals/VModalManualSigIn';
 
     import ICountUp from 'vue-countup-v2';
     import infiniteScroll from 'vue-infinite-scroll';
-    import LoginOptions from "./Modals/VLoginOptions";
-    import ModalLedgerNano from "./Modals/VModalLedgerNano";
-    import VShimmerLeaderboard from "./Shimmer/LeaderboardView/VShimmerLeaderboard";
+    import LoginOptions from "../components/Modals/VLoginOptions";
+    import ModalLedgerNano from "../components/Modals/VModalLedgerNano";
+    import VShimmerLeaderboard from "../components/Shimmer/LeaderboardView/VShimmerLeaderboard";
 
     import {countUpMixin} from '../mixins/countUp';
     import errorService from "../services/errorService";

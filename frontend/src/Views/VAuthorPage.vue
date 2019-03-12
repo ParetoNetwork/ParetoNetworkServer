@@ -14,8 +14,8 @@
 </template>
 
 <script>
-    import VIntelFeed from  './VIntelFeed';
-    import VProfile from  './VProfile';
+    import VIntelFeed from '../components/VIntelFeed';
+    import VProfile from '../components/VProfile';
     import profileService from "../services/profileService";
 
     export default {

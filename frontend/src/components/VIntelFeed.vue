@@ -38,7 +38,7 @@
 
   import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
-  import VIntelButtonAction from "./Events/VIntelButtonAction";
+  import VIntelButtonAction from "./VIntelButtonAction";
   import VModalReward from "./Modals/VModalReward";
   import VIntelPreview from "./VIntelPreview";
   import errorService from "../services/errorService";

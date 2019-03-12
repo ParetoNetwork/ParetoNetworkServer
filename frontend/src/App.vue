@@ -34,7 +34,6 @@
 
 <script>
     import Navbar from './components/Navbar.vue';
-    import VFab from './components/VFab.vue';
     import VBottomNav from './components/VBottomNav';
     import Auth from "./services/authService";
     import {mapMutations, mapState} from 'vuex';
