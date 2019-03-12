@@ -18,19 +18,17 @@ const information = (function () {
     rank: 107,
     score: 881345,
     tokens: 50000,
-    aliasSlug: '',
-    profilePic: 'random_person'
+    aliasSlug: ''
   };
 
   const demoIntelProviderB = {
-    address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+    address: '0xf70D7AC257e9e1E7340dCD74b22D321b301Ce7F3',
     alias: '80/20 Capital Research',
     biography: 'Become a member to access Market-Proven trading intel. Post, trade, earn.',
     rank: 107,
     score: 881345,
     tokens: 50000,
-    aliasSlug: '',
-    profilePic: 'random_person'
+    aliasSlug: ''
   };
 
   return {
