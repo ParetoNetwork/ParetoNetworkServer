@@ -18,9 +18,9 @@
             <div class="dark-shine border thick-medium-lines my-3 mx-auto mx-lg-1" style="min-width: 150px"></div>
             <div class="dark-shine border mt-3 medium-lines mx-auto mx-lg-1" style="min-width: 150px"></div>
         </div>
-        <div class="row justify-content-center justify-content-lg-start m-0 text-center mt-4">
-            <div class="dark-shine small-box border p-2"></div>
-            <div class="dark-shine small-box border ml-5 ml-lg-2 ml-xl-4 p-2"></div>
+        <div class="row mx-0 justify-content-center justify-content-lg-start text-center mt-4">
+            <div class="dark-shine small-box border mr-3 p-2 mb-2"></div>
+            <div class="dark-shine small-box border mb-2 p-2"></div>
         </div>
     </div>
 </template>

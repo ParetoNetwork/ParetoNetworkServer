@@ -910,10 +910,6 @@
 </script>
 
 <style scoped>
-    .main {
-        color: white;
-    }
-
     .padding-main {
         padding-left: 136px;
         padding-right: 50px;
