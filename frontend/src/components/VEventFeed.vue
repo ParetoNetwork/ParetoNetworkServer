@@ -3,7 +3,7 @@
     <VShimmerMyPost v-if="!loadAllContent"></VShimmerMyPost>
     <div v-else class="mb-3 mb-md-1 px-1">
       <div class="p-2 pt-4">
-        <div class="text-left title-content p-1">
+        <div class="text-left title-content">
           <b>EVENTS</b>
         </div>
         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
@@ -21,7 +21,7 @@
           TX ID
         </div>
       </div>
-      <div class="scrollable p-1" id="mypost" v-on:scroll="scrollMyPost()">
+      <div class="scrollable p-2" id="mypost" v-on:scroll="scrollMyPost()">
         <ul v-if="transactions.length">
           <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
             <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo"

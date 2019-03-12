@@ -166,6 +166,26 @@ li,
   }
 }
 
+@media (min-width: 768px ){
+  #mypost {
+    max-height: 27vh;
+  }
+
+  #myfeed{
+    max-height: 70vh;
+  }
+}
+
+@media (min-width: 1200px) {
+  #mypost {
+    max-height: 70vh;
+  }
+
+  #myfeed {
+     max-height: 70vh;
+   }
+}
+
 .pareto-subtitle {
   color: white;
 }

@@ -1,10 +1,10 @@
 <template>
   <div class="intel-container">
-    <div v-if="!loading" class="px-3 pl-xl-5 py-4 text-left">
+    <div v-if="!loading" class="p-2 pt-4 text-left">
       <b class="title-content">
         MY INTEL FEED
       </b>
-      <div class="row text-content mt-4">
+      <div class="row text-content">
         <div class="col-4 col-md-4 col-lg-2">
           CONTRIBUTOR
         </div>
