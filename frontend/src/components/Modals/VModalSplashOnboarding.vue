@@ -51,7 +51,6 @@
   import VProfile from '../VProfile';
   import VTransaction from '../VTransaction';
   import VIntelPreview from '../VIntelPreview';
-  import randomPerson from '../../assets/images/random_person.png';
 
   import {mapMutations, mapState} from 'vuex';
 
@@ -78,7 +77,7 @@
         information: information,
         content: [],
         etherscan: window.localStorage.getItem('etherscan'),
-        onboarding: require('../../assets/images/random_person.png'),
+        onboarding: require('../../assets/images/user_placeholder.png'),
         transactions: [],
         user: {}
       }

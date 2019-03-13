@@ -1,6 +1,7 @@
 {
-  "name": "ParetoNetworkFront",
-  "version": "0.1.0",
+  "name": "ParetoNetworkCLIENT",
+  "version": "2.0.0",
+  "description": "The reference implementation of the Pareto Network user interface.",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --open",

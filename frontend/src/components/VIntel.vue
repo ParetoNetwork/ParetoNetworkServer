@@ -104,7 +104,7 @@
         this.primalLoad = true;
 
         this.user = information.user;
-        this.onboarding = require('../assets/images/random_person.png');
+        //this.onboarding = require('../assets/images/user_placeholder.png');
       });
     },
     computed: {

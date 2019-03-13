@@ -16,7 +16,7 @@
         <ul>
           <li class="text-left border-0 py-2" :key="row._id"
               v-for="row of myFeed.content">
-            <VIntelPreview :user="user" :intel="row" :eventRow="false" :onboardingPicture="onboardingPicture"></VIntelPreview>
+            <VIntelPreview :user="user" :intel="row" :eventRow="false"></VIntelPreview>
           </li>
         </ul>
       </div>

@@ -10,7 +10,7 @@
                  <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
             </div>
             <div class="col" style="text-align: right;">
-                <div class="text-user-content" style="font-size: 10px;">
+                <div class="text-user-content" style="font-size: 9px; padding-top: 3px;">
                     <a v-bind:href="etherscanUrl+'/address/0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2'"
                        target="_blank" alt="Pareto Network Foundation Donation address">
                         0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2
@@ -93,7 +93,7 @@
     .hiden-navbar-bottom {
         font-size: 10px;
         background: #000211;
-        height: 40px;
+        height: 24px;
         width: 100%;
         position: fixed !important;
         transition: height 300ms;
