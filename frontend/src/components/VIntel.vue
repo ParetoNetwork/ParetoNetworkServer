@@ -147,7 +147,6 @@
         return (number + "").length > 12 ? number.toExponential(5) : number;
       },
       overrideOnMessage() {
-        let wsa = this.ws;
         this.ws.onmessage = (data) => {
           try {
             const info = JSON.parse(data.data);
@@ -172,12 +171,11 @@
         };
       },
       socketConnection() {
-        let params = {rank: this.rank, limit: 100, page: this.page};
+        let params = {rank: this.user.rank, limit: 100, page: this.user.page};
         if (!this.ws) {
           this.iniWs();
-          let wss = this.ws;
-          this.ws.onopen = function open() {
-            wss.send(JSON.stringify(params));
+          this.ws.onopen = () => {
+              this.ws.send(JSON.stringify(params));
           };
         }
         this.overrideOnMessage();
@@ -218,6 +216,7 @@
           AuthService.postSign(
             (res) => {
               this.primalLoad = true;
+              this.socketConnection();
               this.requestCall();
             },
             () => {
