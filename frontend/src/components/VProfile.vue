@@ -65,7 +65,7 @@
     <div class="row justify-content-center justify-content-lg-start text-center mt-1 mt-xl-4">
       <router-link tag="div" class="cursor-pointer border mr-3 p-2 mb-2" :to="leaderboards(profile.address)"
                    style="min-width: 80px">
-        <p class="subtitle-user-content">
+
           <ICountUp
               :startVal="countUp.startVal"
               :endVal="parseFloat(profile.rank)"
@@ -73,14 +73,11 @@
               :duration="randomNumber(3,6)"
               :options="countUp.options"
               @ready="onReady"/>
-        </p>
-        <p> My Rank </p>
+
+        <p>Rank  <i class="fa fa-globe"></i></p>
       </router-link>
       <router-link tag="div" class="cursor-pointer border mb-2 p-2"
                    :to="leaderboards(profile.address)" style="min-width: 80px">
-        <div class="mb-1">
-          <i class="fa fa-star green-color fa-lg"></i>
-        </div>
         <ICountUp
             v-if="profile.score"
             :startVal="countUp.startVal"
@@ -90,6 +87,9 @@
             :options="countUp.options"
             @ready="onReady"/>
         <span v-else> 0 </span>
+        <div class="mb-1">
+          Score <i class="fa fa-star fa-lg" style="color: #fca130;"></i>
+        </div>
       </router-link>
       <div></div>
     </div>

@@ -1,7 +1,7 @@
 {
-  "name": "Pareto-Ranking",
-  "version": "1.0.0",
-  "description": "PARETO",
+  "name": "ParetoNetworkSERVER",
+  "version": "2.0.0",
+  "description": "The server for coordinating containers for the Pareto Network Sentinels.",
   "scripts": {
     "start": "node backend.js",
     "test": "mocha test/*.js  --timeout 150000 --exit",
