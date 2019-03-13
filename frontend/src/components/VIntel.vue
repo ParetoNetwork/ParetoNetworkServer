@@ -147,9 +147,9 @@
         return (number + "").length > 12 ? number.toExponential(5) : number;
       },
       overrideOnMessage() {
-        let wsa = this.ws;
         this.ws.onmessage = (data) => {
           try {
+            console.log(data);
             const info = JSON.parse(data.data);
             if (info.data.address) {
               this.user.score = info.data.score;
@@ -172,12 +172,14 @@
         };
       },
       socketConnection() {
-        let params = {rank: this.rank, limit: 100, page: this.page};
+        let params = {rank: this.user.rank, limit: 100, page: this.user.page};
         if (!this.ws) {
           this.iniWs();
           let wss = this.ws;
-          this.ws.onopen = function open() {
+          this.ws.onopen = () => {
+            console.log(JSON.stringify(params));
             wss.send(JSON.stringify(params));
+            this.ws.send('hola')
           };
         }
         this.overrideOnMessage();
@@ -218,6 +220,7 @@
           AuthService.postSign(
             (res) => {
               this.primalLoad = true;
+              this.socketConnection();
               this.requestCall();
             },
             () => {
