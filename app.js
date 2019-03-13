@@ -1,5 +1,5 @@
 "use strict";
-
+require('events').EventEmitter.defaultMaxListeners = 0;
 var express = require('express');
 var secure = {};
 const cors = require('cors');
@@ -706,8 +706,8 @@ WEb socket in order to keep fronted updated
 app.initializeWebSocket = function(server){
 
     const WebSocket = require('ws');
-    var WebSocketServer = WebSocket.Server,
-        wss = new WebSocketServer({
+    const http = require('http');
+     const  wss = new WebSocket.Server({
             verifyClient: function (info, cb) {
 
                 var token = info.req.headers.cookie.split('authorization=')[1];
@@ -715,7 +715,6 @@ app.initializeWebSocket = function(server){
                     cb(false, 401, 'Unauthorized');
                 else {
                     jwt.verify(token, 'Pareto', function (err, decoded) {
-                        console.log(decoded)
                         if (err) {
                             cb(false, 401, 'Unauthorized')
                         } else {
@@ -734,7 +733,6 @@ app.initializeWebSocket = function(server){
     function noop() {}
 
     function heartbeat() {
-        console.log('lo que sea')
         this.isAlive = true;
     }
 
@@ -743,15 +741,15 @@ app.initializeWebSocket = function(server){
      */
     wss.on('connection', function connection(ws, req) {
         console.log('connection');
-      console.log('message');
-      ws.info = {};
+          //prevent websocket closing from crashing the server
+      ws.on('close', () => {console.log('close')})
+      ws.on('error', (error) => {console.log(error)})
+      ws.on('message', function incoming(message) {
+          ws.info = JSON.parse(message);
+      });
         ws.isAlive = true;
         ws.on('pong', heartbeat);
         ws.user = req.user;
-        ws.on('message', function (message) {
-            console.log('wefwefwefwe');
-            ws.info = JSON.parse(message);
-        });
     });
     controller.wss = wss;
     controller.WebSocket = WebSocket;
@@ -759,7 +757,6 @@ app.initializeWebSocket = function(server){
      * Validates if the connection is alive and sends info each minute,
      */
     cron.schedule("*/30 * * * * *", function() {
-        console.log('doing ch')
         try{
             wss.clients.forEach(function each(client) {
                 if (client.isAlive === false) return client.terminate();

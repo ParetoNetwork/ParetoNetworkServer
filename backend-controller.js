@@ -607,7 +607,7 @@ controller.SendInfoWebsocket = function (data) {
                     if (client.user && client.user.user == data.address) {
                         controller.retrieveAddress(client.user.user, function (err, result) {
                             if (!err) {
-                                if (client.readyState === WebSocket.OPEN && client.isAlive) {
+                                if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
                                     client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                 }
                             }
@@ -633,7 +633,7 @@ controller.SendInfoWebsocket = function (data) {
                              */
                             controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
                                 if (!err) {
-                                    if (client.readyState === WebSocket.OPEN && client.isAlive) {
+                                    if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
                                         client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                                     }
                                 }
