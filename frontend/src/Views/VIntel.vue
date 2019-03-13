@@ -218,6 +218,7 @@
           AuthService.postSign(
             (res) => {
               this.primalLoad = true;
+              this.socketConnection();
               this.requestCall();
             },
             () => {
