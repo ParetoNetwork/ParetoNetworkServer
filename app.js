@@ -715,6 +715,7 @@ app.initializeWebSocket = function(server){
                     cb(false, 401, 'Unauthorized');
                 else {
                     jwt.verify(token, 'Pareto', function (err, decoded) {
+                        console.log(decoded)
                         if (err) {
                             cb(false, 401, 'Unauthorized')
                         } else {
@@ -733,6 +734,7 @@ app.initializeWebSocket = function(server){
     function noop() {}
 
     function heartbeat() {
+        console.log('lo que sea')
         this.isAlive = true;
     }
 
@@ -741,10 +743,13 @@ app.initializeWebSocket = function(server){
      */
     wss.on('connection', function connection(ws, req) {
         console.log('connection');
+      console.log('message');
+      ws.info = {};
         ws.isAlive = true;
         ws.on('pong', heartbeat);
         ws.user = req.user;
         ws.on('message', function (message) {
+            console.log('wefwefwefwe');
             ws.info = JSON.parse(message);
         });
     });
@@ -754,6 +759,7 @@ app.initializeWebSocket = function(server){
      * Validates if the connection is alive and sends info each minute,
      */
     cron.schedule("*/30 * * * * *", function() {
+        console.log('doing ch')
         try{
             wss.clients.forEach(function each(client) {
                 if (client.isAlive === false) return client.terminate();
