@@ -36,13 +36,15 @@
                             </div>
                         </div>
                         <div class="row">
-                            <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
-                               target="_blank" class="col-6 col-md-6 ellipsis" :class="{'col-lg-6': eventRow, 'col-lg-6': !eventRow}">
-                                <p>
-                                    <font-awesome-icon class="green-color" :icon="['fas', 'calendar']" />
-                                    {{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
-                                </p>
-                            </a>
+                            <div class="col-6 col-md-6 ellipsis" :class="{'col-lg-6': eventRow, 'col-lg-6': !eventRow}">
+                                <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
+                                   target="_blank">
+                                    <p>
+                                        <font-awesome-icon class="green-color" :icon="['fas', 'calendar']" />
+                                        {{ dateStringFormat(intel.dateCreated)| moment("from", "now") }}
+                                    </p>
+                                </a>
+                            </div>
                             <div class="col-6 text-center" :class="{'col-lg-6': eventRow, 'col-lg-6': !eventRow}">
                                 <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
                                    target="_blank">
@@ -64,7 +66,7 @@
                 <div class="text-center text-xl-right mt-2 mt-xl-0">
                     <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
                     <p v-if="intel.totalReward>0" class="text-center text-xl-right mt-2 ellipsis mr-4">
-                        <font-awesome-icon class="green-color" :icon="['fas', 'plus-square']" />&nbsp;
+                        <font-awesome-icon class="green-color" :icon="['fas', 'coins']" />&nbsp;
                         <ICountUp
                                 :startVal="0"
                                 :endVal="parseFloat(intel.totalReward)"

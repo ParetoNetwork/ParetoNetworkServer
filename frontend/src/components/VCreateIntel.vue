@@ -3,6 +3,11 @@
         <notifications group="auth" position="bottom right"/>
         <div class="container main wrapp pb-5"
              style="min-height: 100vh;">
+            <div class="col-12 col-xl-5 my-3 my-md-0">
+                <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
+                <VProfile v-else :addressProfile="user.address" :profileObject="user" :can-edit="true"
+                          :onboardingPicture="onboarding"></VProfile>
+            </div>
             <div class="mt-5 p-1 text-left">
                 <div class="row mb-md-4">
                     <div class="col-12 p-1">

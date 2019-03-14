@@ -15,10 +15,6 @@
                                 </div>
                             </div>
                             <div class="row text-content m-0">
-                                <p class="text-right ellipsis mr-4">
-                                    <font-awesome-icon class="green-color" :icon="['fas', 'plus-square']" />&nbsp;
-                                    {{ intel.totalReward }}
-                                </p>
                                 <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
                                    target="_blank" class="mr-4">
                                     <i class="fa fa-th-large green-color mr-2"></i>
@@ -45,6 +41,10 @@
                 </div>
                 <div class="col-12 mb-4 col-lg-1">
                     <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
+                    <p v-if="intel.totalReward>0" class="text-right ellipsis mr-4">
+                        <font-awesome-icon class="green-color" :icon="['fas', 'coins']" />&nbsp;
+                        {{ intel.totalReward }}
+                    </p>
                 </div>
             </div>
         </div>
