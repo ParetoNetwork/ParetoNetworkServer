@@ -16,7 +16,7 @@
                             </div>
                             <div class="row text-content m-0">
                                 <p class="text-right ellipsis mr-4">
-                                    <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
+                                    <font-awesome-icon class="green-color" :icon="['fas', 'plus-square']" />&nbsp;
                                     {{ intel.totalReward }}
                                 </p>
                                 <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
