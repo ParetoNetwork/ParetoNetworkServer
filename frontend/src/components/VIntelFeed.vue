@@ -2,16 +2,16 @@
   <div class="intel-container">
     <div v-if="!loading" class="p-2 pt-4 text-left">
       <b class="title-content">
-        MY INTEL FEED
+        Intel Feed
       </b>
-      <div class="row text-content">
+      <!-- <div class="row text-content">
         <div class="col-4 col-md-4 col-lg-2">
           CONTRIBUTOR
         </div>
         <div class="col-8 col-md-8 col-lg-10 pl-lg-3">
           INTEL
         </div>
-      </div>
+      </div> -->
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
           <li class="text-left border-0 py-2" :key="row._id"
