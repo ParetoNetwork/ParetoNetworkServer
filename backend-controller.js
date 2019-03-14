@@ -292,7 +292,14 @@ controller.getTransaction = function (data, callback) {
     const limit = parseInt(data.query.limit) || 100;
     const skip = limit * (data.query.page || 0);
 
-    ParetoTransaction.find(query).sort({dateCreated: -1}).skip(skip).limit(limit).exec(callback);
+    ParetoTransaction.find(query).sort({dateCreated: -1}).skip(skip).limit(limit).populate({
+        path: 'intelData',
+        populate: {
+            path: 'createdBy'
+            , select: 'address alias aliasSlug profilePic'
+        }
+        , select: 'id block address title'
+    }).exec(callback);
 };
 
 controller.watchTransaction = function (data, callback) {
