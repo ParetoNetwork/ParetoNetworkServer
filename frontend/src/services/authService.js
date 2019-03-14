@@ -39,6 +39,8 @@ export default class authService {
     }
 
     static auth(onSuccess, onError) {
+
+      console.log('peticion')
         http.get('/v1/auth', {
             dataType: 'json'
         }).then(res => {
