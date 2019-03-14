@@ -4,13 +4,13 @@
     <div v-else class="mb-3 mb-md-1 px-1">
       <div class="pt-4" style="padding-left: 0.5rem;">
         <div class="text-left title-content">
-          <b>EVENTS</b>
+          <b>Member Activity</b>
         </div>
         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
           NEW INTEL
         </button>
       </div>
-      <div class="row mx-0 text-center text-content">
+      <!-- <div class="row mx-0 text-center text-content">
         <div class="col-4">
           EVENT
         </div>
@@ -20,7 +20,7 @@
         <div class="col-4">
           TX ID
         </div>
-      </div>
+      </div> -->
       <div class="scrollable p-2" id="mypost" v-on:scroll="scrollMyPost()">
         <ul v-if="transactions.length">
           <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
