@@ -7,12 +7,16 @@
                     {{transaction.event}}
                 </div>
             </div>
-            <div class="col-4 px-0" @click="clickTransaction()" >
-                <p>  {{transaction.amount}} </p>
+            <div class="col-4 px-0 text-left" @click="clickTransaction()" >
+                <p class="ellipsis"><font-awesome-icon class="green-color" :icon="['fas', 'coins']" />  {{transaction.amount}} </p>
             </div>
             <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
-               target="_blank" class="col-4 px-0 pl-1">
-                <p class="ellipsis">  {{transaction.txHash}} </p>
+               target="_blank" class="col-3 px-0 pl-1">
+                <p class="ellipsis">  {{transaction.txHash}}</p>
+            </a>
+            <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
+               target="_blank" class="col-1 px-0 pl-1">
+                <i class="fa fa-external-link-alt green-color"></i>
             </a>
         </div>
     </div>

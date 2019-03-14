@@ -4,7 +4,7 @@
     <div v-else class="mb-3 mb-md-1 px-1">
       <div class="pt-4" style="padding-left: 0.5rem;">
         <div class="text-left title-content">
-          <b>EVENTS</b>
+          <b>Member Activity</b>
         </div>
         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
           NEW INTEL
