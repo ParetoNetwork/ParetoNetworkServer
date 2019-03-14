@@ -2,7 +2,7 @@
   <div class="intel-container">
     <div v-if="!loading" class="p-2 pt-4 text-left">
       <b class="title-content">
-        INTEL FEED
+        Intel Feed
       </b>
       <!-- <div class="row text-content">
         <div class="col-4 col-md-4 col-lg-2">

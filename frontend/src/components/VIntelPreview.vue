@@ -1,7 +1,7 @@
 <template>
     <div class="text-left pl-1">
         <div class="row pb-3 border-bottom" :class="{'ml-2 mr-0 py-2': eventRow}" style="border-bottom-color: black !important;">
-            <div class="col-lg-9">
+            <div class="col-md-10 col-lg-9">
                 <div class="row">
                     <div v-if="!eventRow" v-bind:class="{ 'col-2 col-md-2 col-lg-2' : !eventRow }">
                         <div v-if="onboardingPicture"
