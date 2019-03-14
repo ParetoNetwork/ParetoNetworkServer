@@ -210,6 +210,7 @@
         profileService.updateConfig(res => {
           this.etherscanUrl = window.localStorage.getItem('etherscan')
         });
+        debugger
         this.$store.state.makingRequest = true;
         if (!this.madeLogin) {
           this.intelEnter();
