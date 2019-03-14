@@ -73,6 +73,7 @@ li,
   border: 0px;
   background-color: $light-blue-pareto;
   color: white;
+  height: 100%;
 }
 
 .title {
@@ -168,22 +169,12 @@ li,
 
 @media (min-width: 768px ){
   #mypost {
-    max-height: 27vh;
+    max-height: 20vh;
   }
 
   #myfeed{
     max-height: 70vh;
   }
-}
-
-@media (min-width: 1200px) {
-  #mypost {
-    max-height: 70vh;
-  }
-
-  #myfeed {
-     max-height: 70vh;
-   }
 }
 
 .pareto-subtitle {
