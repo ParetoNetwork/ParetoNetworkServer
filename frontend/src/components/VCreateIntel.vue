@@ -1,7 +1,6 @@
 <template>
-    <div class="pareto-blue-dark">
-        <notifications group="auth" position="bottom right"/>
-        <div class="container main wrapp pb-5"
+    <div class="main wrapp pareto-blue-dark">
+        <div class="container-fluid px-lg-5"
              style="min-height: 100vh;">
             <div class="mt-5 p-1 text-left">
                 <div class="row mb-md-4">
