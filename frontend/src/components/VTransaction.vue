@@ -1,23 +1,21 @@
 <template>
     <div class="text-center position-relative pl-1">
-        <div class="dot" :class="statusColor(transaction.status)"></div>
         <div class="row pl-1 ml-2 mr-0 py-3 cursor-pointer border-bottom text-content" style="border-bottom-color: black !important;">
             <div class="col-4 px-0 text-left" @click="clickTransaction()" >
-                <div class="position-relative" >
-                    {{transaction.event}}
-                </div>
+                <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
+                   target="_blank" class="col-1 px-0 pl-1">
+                    <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']" :class="statusColor(transaction.status)"></font-awesome-icon>
+                    <font-awesome-icon v-else-if="transaction.event === 'reward'" :icon="['fas', 'coins']" :class="statusColor(transaction.status)"></font-awesome-icon>
+                    {{transaction.amount}}
+                </a>
             </div>
-            <div class="col-4 px-0 text-left" @click="clickTransaction()" >
-                <p class="ellipsis"><font-awesome-icon class="green-color" :icon="['fas', 'coins']" />  {{transaction.amount}} </p>
-            </div>
-            <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
-               target="_blank" class="col-3 px-0 pl-1">
-                <p class="ellipsis">  {{transaction.txHash}}</p>
+            <div class="col-1 text-left"><font-awesome-icon :icon="['fas', 'arrow-alt-circle-right']" :class="statusColor(transaction.status)"></font-awesome-icon></div>
+            <!-- <div class="col-4 px-0 text-left" @click="clickTransaction()" > -->
+            <p class="col-6 px-0 pl-1 ellipsis">
+            <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash" target="_blank">
+                {{ transaction.txHash }}
             </a>
-            <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
-               target="_blank" class="col-1 px-0 pl-1">
-                <i class="fa fa-external-link-alt green-color"></i>
-            </a>
+            </p>
         </div>
     </div>
 </template>
