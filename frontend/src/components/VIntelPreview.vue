@@ -21,7 +21,7 @@
                         <router-link
                                 tag="h1"
                                 :to="intelRoute(intel)"
-                                class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</router-link>
+                                class="subtitle-intel text-user-content" v-line-clamp="1">{{intel.title|| 'No title'}}</router-link>
                         <div class="row">
                             <div v-if="!eventRow" class="col-12 col-md-12 ellipsis">
                                 <!-- <a v-bind:href="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)" class="text-user ellipsis ">Disclosed by:
