@@ -1,18 +1,17 @@
 <template>
     <div class="text-center position-relative">
-        <div class="row ml-0 mr-0 py-3 cursor-pointer border-bottom text-content" style="border-bottom-color: black !important;">
+        <div class="row ml-0 mr-0 py-3 cursor-pointer border-bottom text-content" style="border-bottom-color: black !important;" @click="clickTransaction()" >
             <div class="col-1 px-0">
                 <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']" :class="statusColor(transaction.status)"></font-awesome-icon>
                 <font-awesome-icon v-else-if="transaction.event === 'reward'" :icon="['fas', 'coins']" :class="statusColor(transaction.status)"></font-awesome-icon>
             </div>
-            <div class="col-3 px-0 text-left" @click="clickTransaction()" >
+            <div class="col-3 px-0 text-left">
                 <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
                    target="_blank" class="col-2 px-0 pl-1">
                     {{transaction.amount}}
                 </a>
             </div>
             <div class="col-1 text-left"><font-awesome-icon :icon="['fas', 'arrow-alt-circle-right']" :class="statusColor(transaction.status)"></font-awesome-icon></div>
-            <!-- <div class="col-4 px-0 text-left" @click="clickTransaction()" > -->
             <p class="col-6 px-0 pl-1 ellipsis">
             <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash" target="_blank">
                 {{ transaction.intelData.title }}
