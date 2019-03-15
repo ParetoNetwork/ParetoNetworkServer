@@ -2,7 +2,7 @@
   <div class="intel-container">
     <VShimmerMyPost v-if="!loadAllContent"></VShimmerMyPost>
     <div v-else class="mb-3 mb-md-1">
-      <div class="pt-4" style="padding-left: 0.5rem;">
+      <div class="pt-1" style="padding-left: 0.5rem;">
         <div class="text-left title-content">
           <b>Member Activity</b>
         </div>
