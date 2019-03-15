@@ -1,6 +1,6 @@
 <template>
     <div class="text-center position-relative">
-        <div class="row ml-0 mr-0 py-3 cursor-pointer border-bottom text-content" style="border-bottom-color: black !important;">
+        <div class="row ml-0 mr-0 py-2 cursor-pointer border-bottom text-content" style="border-bottom-color: black !important;">
             <div class="col-1 px-0" @click="clickTransaction()" >
                 <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']" :class="statusColor(transaction.status)"></font-awesome-icon>
                 <font-awesome-icon v-else-if="transaction.event === 'reward'" :icon="['fas', 'coins']" :class="statusColor(transaction.status)"></font-awesome-icon>
