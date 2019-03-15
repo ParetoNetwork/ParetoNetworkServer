@@ -5,18 +5,18 @@
       </div>
       <notifications group="auth" position="bottom right"/>
       <div class="row m-0 pt-4 pt-lg-2" style="width: 100%;">
-        <div class="col-md-4 col-lg-5 order-2 order-md-1 order-xl-1 row m-0 p-xl-0">
-          <div class="col-12 col-xl-5 my-3 my-md-0">
+        <div class="col-md-4 col-lg-2 order-2 order-md-1 order-xl-1 row m-0 p-xl-0">
+          <div class="col-12 my-3 my-md-0">
             <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
             <VProfile v-else :addressProfile="user.address" :profileObject="user" :can-edit="true"
                       :onboardingPicture="onboarding"></VProfile>
           </div>
-          <div class="col-12 col-xl-7 px-0">
+          <div class="col-12 px-0">
             <VEventFeed v-if="primalLoad" :user="user" :defaultTransactions="information.transactions"></VEventFeed>
             <VShimmerMyPost v-else></VShimmerMyPost>
           </div>
         </div>
-        <div class="col-md-8 col-lg-7 px-1 order-1 order-md-2 order-xl-3">
+        <div class="col-md-8 col-lg-7 px-2 order-1 order-md-2 order-xl-3">
           <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
                       :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
           <VShimmerFeed v-else></VShimmerFeed>
@@ -94,6 +94,18 @@
         }
       };
     },
+    computed: {
+      ...mapState([
+        'address',
+        'ws',
+        'signType',
+        'pathId',
+        'makingLogin',
+        'showModalSign',
+        'showModalLoginOptions',
+        'showModalLedgerNano',
+        'showModalOnboarding']),
+    },
     mounted: function () {
       AuthService.auth(() => {
         this.main();
@@ -106,18 +118,6 @@
         this.user = information.user;
         //this.onboarding = require('../assets/images/user_placeholder.png');
       });
-    },
-    computed: {
-      ...mapState([
-        'address',
-        'ws',
-        'signType',
-        'pathId',
-        'makingLogin',
-        'showModalSign',
-        'showModalLoginOptions',
-        'showModalLedgerNano',
-        'showModalOnboarding']),
     },
     methods: {
       ...mapMutations(["intelEnter", "iniWs"]),
