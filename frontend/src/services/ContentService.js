@@ -243,17 +243,13 @@ export default class ContentService {
 
           if (withIncreaseApproval) {
             events.editTransaction({hash: content.txHash, key: 'status', value: 2});
-            let params = {
-              txHash: content.txHash,
-              txRewardHash: hash
-            };
+            content.txRewardHash = hash;
 
             ContentService.postTransactions(params);
           } else {
             content.txHash = hash;
             content.txRewardHash = hash;
             content.status = 2;
-            content.address = content.address;
             events.addTransaction(content);
 
             ContentService.postTransactions(content);
@@ -399,7 +395,6 @@ export default class ContentService {
 
                 params.txHash = hash;
                 events.addTransaction(params);
-                ContentService.postTransactions(params);
 
                 waitForReceipt(hash, async receipt => {
                   serverData.approveHash = txHash;
@@ -452,11 +447,9 @@ export default class ContentService {
 
           if (withIncreasedApproval) {
             events.editTransaction({hash: content.txHash, key: 'status', value: 2});
-            let params = {
-              txHash: content.txHash,
-              txRewardHash: hash
-            };
-            this.postTransactions(params);
+            content.txRewardHash = hash;
+
+            this.postTransactions(content);
           } else {
             content.txHash = hash;
             content.txRewardHash = hash;
@@ -475,7 +468,7 @@ export default class ContentService {
           });
         })
         .on("error", error => {
-          console.log(error);
+
           if (ContentService.ledgerNanoEngine) {
             ContentService.ledgerNanoEngine.stop();
           }
@@ -483,7 +476,6 @@ export default class ContentService {
           onError(errorService.sendErrorMessage('f21', error));
         });
     } catch (e) {
-      console.log(e);
       let params = {
         txHash: content.txHash,
         status: 4
@@ -549,7 +541,6 @@ export default class ContentService {
         await ParetoTokenInstance.methods
           .allowance(rewarder_address, Intel.options.address).call().then(async res => {
             userAllowance = res;
-            console.log(userAllowance);
             (userAllowance < depositAmount) ? await userIncreaseApproval() : directlyCreateReward();
           });
       }
@@ -585,8 +576,6 @@ export default class ContentService {
             var txHash = hash;
             params.txHash = txHash;
             events.addTransaction(params);
-            console.log(params);
-            ContentService.postTransactions(params);
 
             //Wait for the transaction to be complete
             waitForReceipt(hash, async receipt => {
