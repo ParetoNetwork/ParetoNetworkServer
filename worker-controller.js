@@ -803,6 +803,13 @@ workerController.aproxAllScoreRanking = async function(callback){
                                 }
 
                             });
+                            web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
+                                if(receipt){
+                                    ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txRewardHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
+                                    });
+                                }
+
+                            });
                         }
                     }
                 })
