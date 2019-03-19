@@ -127,8 +127,10 @@
 
         this.transactions = [];
         this.myContent = [];
+        this.restartTransactions();
 
         this.loadAllContent = false;
+
         this.loadRequest(true).then( ()=> {
           this.limit = currentLimit;
           this.page = currentPage;
@@ -136,7 +138,7 @@
       }
     },
     methods: {
-      ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+      ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction", "restartTransactions"]),
       ...mapMutations(["addDistribute"]),
       //Loads the pendingTransactions state
       getTransactions: function () {
