@@ -357,10 +357,9 @@ controller.startwatchNewIntel = function () {
                                 let promises = [ParetoAddress.findOneAndUpdate({address: data.address}, {tokens: count})
                                     , ParetoTransaction.findOneAndUpdate(
                                         {
-                                            txRewardHash: null,
                                             intel: event.returnValues.intelID,
                                             event: 'create'
-                                        }, {status: 3})];
+                                        }, {status: 3, txHash: event.transactionHash})];
                                 Promise.all(promises).then(values => {
                                     if (values.length > 1) {
                                         controller.getScoreAndSaveRedis(null, (err, result) => {
@@ -413,7 +412,6 @@ controller.startwatchReward = function (intel, intelAddress) {
                 block: event.blockNumber,
                 amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
             };
-
             ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, rewardData, {upsert: true, new: true},
                 function (err, r) {
                     if (err) {
@@ -437,7 +435,11 @@ controller.startwatchReward = function (intel, intelAddress) {
                                 callback(err);
                             }
                         });
-                        controller.updateIntelReward(intelIndex, event.transactionHash, event.returnValues.sender.toLowerCase());
+                        web3.eth.getTransaction(event.transactionHash).then(function (txObject){
+                            const nonce = txObject.nonce;
+                            controller.updateIntelReward(intelIndex, event.transactionHash, nonce,event.returnValues.sender.toLowerCase());
+                        }).catch(function (err) {console.log(err)  });
+
                     }
                 }
             );
@@ -457,28 +459,36 @@ controller.startwatchDistribute = function (intel, intelAddress) {
     intel.events.RewardDistributed().on('data', event => {
         try {
             const intelIndex = parseInt(event.returnValues.intelIndex);
+            web3.eth.getTransaction(event.transactionHash).then(function (txObject){
+                const nonce = txObject.nonce;
+                const txHash = event.transactionHash;
+                const sender = event.returnValues.distributor.toLowerCase();
+                let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {
+                    distributed: true,
+                    txHashDistribute: event.transactionHash
+                })
+                    , ParetoTransaction.findOneAndUpdate(
+                        {  $or: [{txHash: txHash},
+                                { address: sender, nonce: nonce}]}, {
+                        status: 3,
+                        txRewardHash: txHash,
+                        txHash: txHash
+                    })];
+                Promise.all(promises).then(values => {
+                    if (controller.wss && values.length > 1) {
+                        controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
+                    } else {
+                        console.log('no wss');
+                    }
+                })
+                    .catch(e => {
+                        const error = ErrorHandler.backendErrorList('b21');
+                        error.systemMessage = e.message? e.message: e;
+                        console.log(JSON.stringify(error));
+                    });
 
-            let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {
-                distributed: true,
-                txHashDistribute: event.transactionHash
-            })
-                , ParetoTransaction.findOneAndUpdate({txHash: event.transactionHash}, {
-                    status: 3,
-                    txRewardHash: event.transactionHash
-                })];
-            Promise.all(promises).then(values => {
-                if (controller.wss && values.length > 1) {
-                    controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
-                } else {
-                    console.log('no wss');
-                }
-            })
-                .catch(e => {
-                    const error = ErrorHandler.backendErrorList('b21');
-                    error.systemMessage = e.message? e.message: e;
-                    console.log(JSON.stringify(error));
-                });
 
+            }).catch(function (err) {console.log(err)  });
 
         } catch (e) {
             const error = ErrorHandler.backendErrorList('b21');
@@ -499,25 +509,37 @@ controller.startWatchApprove = function () {
             address: PARETO_CONTRACT_ADDRESS,
             topics: ['0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925', null, null]
         }).on('data', function (log) {
-        const txHash = log.transactionHash;
-        const blockNumber = log.blockNumber;
-        if (blockNumber != null) {
-            ParetoTransaction.findOneAndUpdate({txHash: txHash}, {status: 1, block: blockNumber}, function (err, r) {
-                if (!err && r) {
-                    console.log(r);
-                    ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
-                        controller.getScoreAndSaveRedis(null, function (err, r) {  })
-                    });
-                    controller.SendInfoWebsocket({address: r.address, transaction: r});
-                } else {
-                    if (err) {
-                        const error = ErrorHandler.backendErrorList('b21');
-                        error.systemMessage = err.message? err.message: err;
-                        console.log(JSON.stringify(error));
-                    }
-                }
 
-            })
+        const blockNumber = log.blockNumber;
+        const sender = ["0x" + log.topics[1].substring(26)];
+        const txHash = log.transactionHash;
+
+        if (blockNumber != null) {
+            web3.eth.getTransaction(txHash).then(function (txObject){
+                const nonce = txObject.nonce;
+                ParetoTransaction.findOneAndUpdate(
+                    {  $or: [{txHash: txHash},
+                            { address: sender, nonce: nonce}]}
+                    , {status: 1, block: blockNumber, txHash: txHash}, function (err, r) {
+                        if (!err && r) {
+                            console.log(r);
+                            ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
+                                controller.getScoreAndSaveRedis(null, function (err, r) {  })
+                            });
+                            controller.SendInfoWebsocket({address: r.address, transaction: r});
+                        } else {
+                            if (err) {
+                                const error = ErrorHandler.backendErrorList('b21');
+                                error.systemMessage = err.message? err.message: err;
+                                console.log(JSON.stringify(error));
+                            }
+                        }
+
+                    })
+
+
+            }).catch(function (err) {console.log(err)  });
+
         }
     });
 }
@@ -663,7 +685,7 @@ controller.SendInfoWebsocket = function (data) {
  * @param intelIndex
  * @param txHash
  */
-controller.updateIntelReward = function (intelIndex, txHash, sender) {
+controller.updateIntelReward = function (intelIndex, txHash, nonce, sender) {
     let agg = [{$match: {'intelId': intelIndex}},
         {
             $group: {
@@ -686,15 +708,21 @@ controller.updateIntelReward = function (intelIndex, txHash, sender) {
 
     ];
     ParetoReward.aggregate(agg).exec(function (err, r) {
+        console.log('Pareto aggregate')
+        console.log(r);
         if (r.length > 0) {
             const reward = r[0].reward;
             let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
                 , ParetoTransaction.findOneAndUpdate({
-                    $or: [{txRewardHash: txHash},
-                        {txRewardHash: null, address: sender, intel: intelIndex, event: 'reward'}]
-                }, {status: 3, txRewardHash: txHash})];
+                    $or: [{txRewardHash: txHash},{txHash: txHash},
+                        { address: sender, intel: intelIndex, event: 'reward', nonce: nonce}]
+                }, {status: 3, txRewardHash: txHash, txHash: txHash})];
             Promise.all(promises).then(values => {
+              console.log('Pareto aggregate Promise')
+              console.log(values);
                 if (values.length > 1 && controller.wss) {
+                  console.log('Pareto aggregate Promise If')
+                  console.log(values);
                     controller.SendInfoWebsocket({address: values[1].address, transaction: values[1]});
                 }
             })
