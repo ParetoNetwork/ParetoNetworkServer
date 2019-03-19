@@ -49,7 +49,7 @@
   export default {
     name: "VEventFeed",
     props: [
-      'user', 'defaultTransactions'
+      'updateHash', 'user', 'defaultTransactions'
     ],
     data: function () {
       return {
@@ -117,6 +117,12 @@
           }
         });
       },
+      updateContent: function (uC) {
+        console.log(uC);
+        this.transactions = [];
+        this.myContent = [];
+        this.loadRequest();
+      }
     },
     methods: {
       ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
