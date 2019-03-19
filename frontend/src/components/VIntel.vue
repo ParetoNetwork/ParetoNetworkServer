@@ -151,17 +151,13 @@
         this.ws.onmessage = (data) => {
           try {
             const info = JSON.parse(data.data);
-            console.log(data.data);
+
             if (info.data.address) {
               this.user.score = info.data.score;
               this.user.rank = info.data.rank;
               this.user.tokens = info.data.tokens;
               // this.user.block = info.data.block;
               this.block = info.data.block;
-            }
-
-            if(info.data.transaction){
-              console.log(info.data.transaction);
             }
 
             if (info.data.action) {
