@@ -150,6 +150,7 @@
         this.ws.onmessage = (data) => {
           try {
             const info = JSON.parse(data.data);
+            console.log(info);
             if (info.data.address) {
               this.user.score = info.data.score;
               this.user.rank = info.data.rank;
