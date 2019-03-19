@@ -753,7 +753,6 @@ app.initializeWebSocket = function (server) {
     })
     ws.on('message', function incoming(message) {
       ws.info = JSON.parse(message);
-      console.log(ws.info);
     });
     ws.isAlive = true;
     ws.on('pong', heartbeat);

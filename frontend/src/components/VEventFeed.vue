@@ -117,11 +117,22 @@
           }
         });
       },
-      updateContent: function (uC) {
-        console.log(uC);
+      //Loads websocket hash from intel, restarts all the transactions but saves the current limit and page
+      updateHash: function (uC) {
+        let currentLimit = this.limit + 10;
+        let currentPage = this.page + 1;
+
+        this.limit = this.limit*this.page;
+        this.page = 0;
+
         this.transactions = [];
         this.myContent = [];
-        this.loadRequest();
+
+        this.loadAllContent = false;
+        this.loadRequest(true).then( ()=> {
+          this.limit = currentLimit;
+          this.page = currentPage;
+        });
       }
     },
     methods: {
@@ -169,8 +180,8 @@
           }
         );
       },
-      loadRequest: function () {
-        Promise.all([
+      loadRequest: function (resetTransactions) {
+        return Promise.all([
           this.getTransactions(),
           this.loadMyContent()
         ]).then(values => {

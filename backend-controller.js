@@ -400,8 +400,6 @@ controller.startwatchNewIntel = function () {
 
 controller.startwatchReward = function (intel, intelAddress) {
   intel.events.Reward().on('data', event => {
-    console.log('line 403')
-    console.log(event);
     try {
       const intelIndex = parseInt(event.returnValues.intelIndex);
       const rewardData = {
@@ -416,15 +414,11 @@ controller.startwatchReward = function (intel, intelAddress) {
       };
       ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, rewardData, {upsert: true, new: true},
         function (err, r) {
-          console.log(err, r);
           if (err) {
             const error = ErrorHandler.backendErrorList('b19');
             error.systemMessage = err.message ? err.message : err;
-            console.log(JSON.stringify(error));
           } else {
             ParetoContent.findOne({id: intelIndex}, (err, intel) => {
-              console.log('line 425')
-              console.log(err, r);
               if (intel) {
                 const {address} = intel;
                 ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, {receiver: address}, {},
@@ -435,8 +429,6 @@ controller.startwatchReward = function (intel, intelAddress) {
             });
 
             controller.getBalance(event.returnValues.sender.toLowerCase(), 0, function (err, count) {
-              console.log('line 437')
-              console.log(err);
               if (!err) {
                 controller.updateAddressReward(event, count);
               } else {
