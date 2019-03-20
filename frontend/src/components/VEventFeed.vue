@@ -1,8 +1,8 @@
 <template>
   <div class="intel-container">
     <VShimmerMyPost v-if="!loadAllContent"></VShimmerMyPost>
-    <div v-else class="mb-3 mb-md-1 px-1">
-      <div class="pt-4" style="padding-left: 0.5rem;">
+    <div v-else class="mb-3 mb-md-1">
+      <div class="pt-1" style="padding-left: 0.5rem;">
         <div class="text-left title-content">
           <b>Member Activity</b>
         </div>
@@ -49,7 +49,7 @@
   export default {
     name: "VEventFeed",
     props: [
-      'user', 'defaultTransactions'
+      'updateHash', 'user', 'defaultTransactions'
     ],
     data: function () {
       return {
@@ -117,9 +117,28 @@
           }
         });
       },
+      //Loads websocket hash from intel, restarts all the transactions but saves the current limit and page
+      updateHash: function (uC) {
+        let currentLimit = this.limit + 10;
+        let currentPage = this.page + 1;
+
+        this.limit = this.limit*this.page;
+        this.page = 0;
+
+        this.transactions = [];
+        this.myContent = [];
+        this.restartTransactions();
+
+        this.loadAllContent = false;
+
+        this.loadRequest(true).then( ()=> {
+          this.limit = currentLimit;
+          this.page = currentPage;
+        });
+      }
     },
     methods: {
-      ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+      ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction", "restartTransactions"]),
       ...mapMutations(["addDistribute"]),
       //Loads the pendingTransactions state
       getTransactions: function () {
@@ -163,8 +182,8 @@
           }
         );
       },
-      loadRequest: function () {
-        Promise.all([
+      loadRequest: function (resetTransactions) {
+        return Promise.all([
           this.getTransactions(),
           this.loadMyContent()
         ]).then(values => {

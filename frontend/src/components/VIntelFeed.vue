@@ -1,6 +1,6 @@
 <template>
   <div class="intel-container">
-    <div v-if="!loading" class="p-2 pt-4 text-left">
+    <div v-if="!loading" class="p-2 pt-1 text-left">
       <b class="title-content">
         Intel Feed
       </b>
