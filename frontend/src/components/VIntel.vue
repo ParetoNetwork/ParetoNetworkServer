@@ -16,7 +16,7 @@
             <VShimmerMyPost v-else></VShimmerMyPost>
           </div>
         </div>
-        <div class="col-md-4 col-lg-6 px-2 order-1 order-md-2 order-xl-3">
+        <div class="col-md-6 col-lg-6 px-2 order-1 order-md-2 order-xl-3">
           <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
                       :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
           <VShimmerFeed v-else></VShimmerFeed>
