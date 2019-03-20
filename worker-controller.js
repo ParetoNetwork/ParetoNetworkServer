@@ -129,7 +129,7 @@ workerController.endConnections= function(){
 const dbName = 'pareto';
 
 /*system constants*/
-const PARETO_SCORE_MINIMUM 					=			100000; 	//minimum score to get intel
+const PARETO_SCORE_MINIMUM 					=			100000;  	//minimum score to get intel
 const PARETO_RANK_GRANULARIZED_LIMIT 		= 			10; 		//how far down to go through ranks until separating by tiers
 
 const ErrorHandler = require('./error-handler.js');
