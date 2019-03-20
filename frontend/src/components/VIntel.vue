@@ -12,7 +12,7 @@
                       :onboardingPicture="onboarding"></VProfile>
           </div>
           <div class="col-12 px-0">
-            <VEventFeed v-if="primalLoad" :user="user" :defaultTransactions="information.transactions"></VEventFeed>
+            <VEventFeed v-if="primalLoad" :user="user" :updateHash="updateHash" :defaultTransactions="information.transactions"></VEventFeed>
             <VShimmerMyPost v-else></VShimmerMyPost>
           </div>
         </div>
@@ -87,6 +87,7 @@
         onboarding: false,
         tokenAmount: 1,
         updateContentVar: 0,
+        updateHash: 0,
         user: {
           rank: 0,
           score: 0,
@@ -150,6 +151,7 @@
         this.ws.onmessage = (data) => {
           try {
             const info = JSON.parse(data.data);
+
             if (info.data.address) {
               this.user.score = info.data.score;
               this.user.rank = info.data.rank;
@@ -157,11 +159,15 @@
               // this.user.block = info.data.block;
               this.block = info.data.block;
             }
+
             if (info.data.action) {
               switch (info.data.action) {
-                case 'updateContent': {
+                case 'updateContent':
                   this.updateContentVar++;
-                }
+                  break;
+                case 'updateHash' :
+                  this.updateHash++;
+                  break;
               }
             }
           } catch (e) {
