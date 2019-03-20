@@ -344,10 +344,9 @@ export default class ContentService {
       const desiredReward = depositAmount;
 
       let userAllowance = 0;
-
       //Compares last used contract address to current using contract address
       //if not the same, compares the user allowance
-      if (serverData.lastApproved === Intel.options.address) {
+      if (serverData.lastApproved.toLowerCase() === Intel.options.address.toLowerCase()) {
         directlyCreateIntel();
       } else {
         await ParetoTokenInstance.methods
@@ -406,8 +405,6 @@ export default class ContentService {
                       console.log(err);
                   });
                 var txHash = hash;
-
-
 
                 waitForReceipt(hash, async receipt => {
                   serverData.approveHash = txHash;
