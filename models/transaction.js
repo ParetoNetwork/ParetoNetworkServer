@@ -7,6 +7,7 @@ var paretoTransactionSchema = new Schema({
     intel 	: Number,
     event 	: String,
     amount	: Number,
+    nonce	: Number,
     status	: { type: Number, default: 0 },
     block	:   Number,
     txRewardHash: String,
