@@ -530,7 +530,6 @@ controller.startWatchApprove = function () {
           }
           , {status: 1, block: blockNumber, txHash: txHash}, function (err, r) {
             if (!err && r) {
-              console.log(r);
               ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
                 controller.getScoreAndSaveRedis(null, function (err, r) {
                 })

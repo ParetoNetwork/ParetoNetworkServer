@@ -1234,7 +1234,7 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 };
 
 workerController.updateTransactionByNonce = function (txHash, sender, status){
-    web3.eth.getTransaction(event.transactionHash).then(function (txObject){
+    web3.eth.getTransaction(txHash).then(function (txObject){
 
         const nonce = txObject.nonce;
         ParetoTransaction.findOneAndUpdate(
@@ -1245,7 +1245,7 @@ workerController.updateTransactionByNonce = function (txHash, sender, status){
                 txHash: txHash
             }).then(values => {
         }).catch(e => {
-            const error = ErrorHandler.backendErrorList('b21');
+            const error = ErrorHandler.backendErrorList('b23');
             error.systemMessage = e.message? e.message: e;
             console.log(JSON.stringify(error));
         });
@@ -1268,7 +1268,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const sender = event.returnValues.intelProvider.toLowerCase();
                 workerController.updateTransactionByNonce(txHash, sender,3);
             }catch (e) {
-                const error = ErrorHandler.backendErrorList('b21');
+                const error = ErrorHandler.backendErrorList('b18');
                 error.systemMessage = e.message? e.message: e;
                 console.log(JSON.stringify(error));
             }
@@ -1285,7 +1285,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const sender = event.returnValues.sender.toLowerCase();
                 workerController.updateTransactionByNonce(txHash, sender,3);
             }catch (e) {
-                const error = ErrorHandler.backendErrorList('b21');
+                const error = ErrorHandler.backendErrorList('b19');
                 error.systemMessage = e.message? e.message: e;
                 console.log(JSON.stringify(error));
             }
@@ -1300,7 +1300,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const event = events[i];
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.distributor.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,1);
+                workerController.updateTransactionByNonce(txHash, sender,3);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b21');
                 error.systemMessage = e.message? e.message: e;
