@@ -241,23 +241,20 @@ export default class ContentService {
         })
         .on("transactionHash", hash => {
 
-          if (withIncreaseApproval) {
-            events.editTransaction({hash: content.txHash, key: 'status', value: 2});
-            let params = {
-              txHash: content.txHash,
-              txRewardHash: hash
-            };
 
-            ContentService.postTransactions(params);
-          } else {
-            content.txHash = hash;
-            content.txRewardHash = hash;
-            content.status = 2;
-            content.address = content.address;
-            events.addTransaction(content);
+            web3.eth.getTransaction(hash).then( (txObject)=>{
+                const  nonce = txObject.nonce;
+                content.txHash = hash;
+                content.txRewardHash = hash;
+                content.status = 2;
+                content.nonce = nonce;
+                events.addTransaction(content);
+                ContentService.postTransactions(content);
+            }).catch(function (err) {
+                console.log(err);
+            });
 
-            ContentService.postTransactions(content);
-          }
+
 
           waitForReceipt(hash, receipt => {
             if (ContentService.ledgerNanoEngine) {
@@ -347,10 +344,9 @@ export default class ContentService {
       const desiredReward = depositAmount;
 
       let userAllowance = 0;
-
       //Compares last used contract address to current using contract address
       //if not the same, compares the user allowance
-      if (serverData.lastApproved === Intel.options.address) {
+      if (serverData.lastApproved.toLowerCase() === Intel.options.address.toLowerCase()) {
         directlyCreateIntel();
       } else {
         await ParetoTokenInstance.methods
@@ -395,11 +391,20 @@ export default class ContentService {
                 gasPrice
               })
               .once("transactionHash", hash => {
-                var txHash = hash;
+                  web3.eth.getTransaction(hash).then( (txObject)=>{
+                      const content = {};
+                      const  nonce = txObject.nonce;
+                      content.txHash = hash;
+                      content.status = 0;
+                      content.event = "approve";
+                      content.nonce = nonce;
+                      events.addTransaction(content);
 
-                params.txHash = hash;
-                events.addTransaction(params);
-                ContentService.postTransactions(params);
+                      ContentService.postTransactions(content);
+                  }).catch(function (err) {
+                      console.log(err);
+                  });
+                var txHash = hash;
 
                 waitForReceipt(hash, async receipt => {
                   serverData.approveHash = txHash;
@@ -450,21 +455,19 @@ export default class ContentService {
         })
         .on("transactionHash", hash => {
 
-          if (withIncreasedApproval) {
-            events.editTransaction({hash: content.txHash, key: 'status', value: 2});
-            let params = {
-              txHash: content.txHash,
-              txRewardHash: hash
-            };
-            this.postTransactions(params);
-          } else {
-            content.txHash = hash;
-            content.txRewardHash = hash;
-            content.status = 2;
-            events.addTransaction(content);
+            web3.eth.getTransaction(hash).then( (txObject)=>{
+               const  nonce = txObject.nonce;
+                content.txHash = hash;
+                content.txRewardHash = hash;
+                content.status = 2;
+                content.nonce = nonce;
+                events.addTransaction(content);
 
-            this.postTransactions(content);
-          }
+                ContentService.postTransactions(content);
+            }).catch(function (err) {
+                console.log(err);
+            });
+
 
           waitForReceipt(hash, receipt => {
             if (ContentService.ledgerNanoEngine) {
@@ -475,7 +478,7 @@ export default class ContentService {
           });
         })
         .on("error", error => {
-          console.log(error);
+
           if (ContentService.ledgerNanoEngine) {
             ContentService.ledgerNanoEngine.stop();
           }
@@ -483,7 +486,6 @@ export default class ContentService {
           onError(errorService.sendErrorMessage('f21', error));
         });
     } catch (e) {
-      console.log(e);
       let params = {
         txHash: content.txHash,
         status: 4
@@ -549,7 +551,6 @@ export default class ContentService {
         await ParetoTokenInstance.methods
           .allowance(rewarder_address, Intel.options.address).call().then(async res => {
             userAllowance = res;
-            console.log(userAllowance);
             (userAllowance < depositAmount) ? await userIncreaseApproval() : directlyCreateReward();
           });
       }
@@ -581,12 +582,22 @@ export default class ContentService {
           })
           .on("transactionHash", hash => {
 
+            web3.eth.getTransaction(hash).then( (txObject)=>{
+                  const content = {};
+                  const  nonce = txObject.nonce;
+                  content.txHash = hash;
+                  content.status = 0;
+                  content.event = "approve";
+                  content.nonce = nonce;
+                  events.addTransaction(content);
+
+                  ContentService.postTransactions(content);
+              }).catch(function (err) {
+                  console.log(err);
+              });
             //The transaction will be send to vuex and the database
             var txHash = hash;
             params.txHash = txHash;
-            events.addTransaction(params);
-            console.log(params);
-            ContentService.postTransactions(params);
 
             //Wait for the transaction to be complete
             waitForReceipt(hash, async receipt => {
@@ -656,19 +667,27 @@ export default class ContentService {
             gasPrice
           })
           .on("transactionHash", hash => {
-            let params = {
-              address: distributor,
-              txHash: hash,
-              intel: content.ID,
-              amount: 0,
-              event: 'distribute',
-              intelAddress: content.intelAddress,
-              status: 0,
-              clicked: true,
-              dateCreated: new Date()
-            };
 
-            this.postTransactions(params);
+
+              web3.eth.getTransaction(hash).then( (txObject)=>{
+                  const  nonce = txObject.nonce;
+                  let params = {
+                      address: distributor,
+                      txHash: hash,
+                      intel: content.ID,
+                      amount: 0,
+                      event: 'distribute',
+                      intelAddress: content.intelAddress,
+                      status: 0,
+                      nonce: nonce,
+                      clicked: true,
+                      dateCreated: new Date()
+                  };
+
+                  ContentService.postTransactions(params);
+              }).catch(function (err) {
+                  console.log(err);
+              });
 
             waitForReceipt(hash, receipt => {
               if (ContentService.ledgerNanoEngine) {

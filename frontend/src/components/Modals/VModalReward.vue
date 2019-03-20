@@ -31,11 +31,11 @@
                     type="number">
             </b-form-input>
             <b-row class="m-2 mt-4 d-flex justify-content-center">
-                <b-button class="mr-2" variant="danger" @click="hideModal()"> Cancel</b-button>
-                <b-button :disabled="!hardwareAvailable || parseFloat(tokenAmount) <= 0 || parseFloat(myTokens)< parseFloat(tokenAmount)"
-                          style="background-color: rgb(107, 194, 123)" variant="success"
+                <button class="btn btn-darker-secondary-pareto" @click="hideModal()"> Cancel</button>
+                <button
+                    class="btn btn-dark-primary-pareto" :disabled="!hardwareAvailable || parseFloat(tokenAmount) <= 0 || parseFloat(myTokens)< parseFloat(tokenAmount)"
                           @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
-                </b-button>
+                </button>
             </b-row>
         </b-container>
     </b-modal>
