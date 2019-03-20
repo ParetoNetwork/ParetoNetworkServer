@@ -1,7 +1,7 @@
 <template>
     <div class="text-left pl-1">
         <div class="row pb-3 border-bottom" :class="{'ml-2 mr-0 py-2': eventRow}" style="border-bottom-color: black !important;">
-            <div class="col-md-10 col-lg-9">
+            <div class="col-md-12 col-lg-9">
                 <div class="row">
                     <div v-if="!eventRow" v-bind:class="{ 'col-2 col-md-2 col-lg-2' : !eventRow }">
                         <div v-if="onboardingPicture"
@@ -17,11 +17,11 @@
                         ></router-link>
                     </div>
                     <div class="cursor-pointer intel-preview"
-                            v-bind:class="{ 'col-10 col-lg-10' : !eventRow , 'col-10 p-0': eventRow }">
+                            v-bind:class="{ 'col-10 col-md-10 col-lg-10' : !eventRow , 'col-10 p-0': eventRow }">
                         <router-link
                                 tag="h1"
                                 :to="intelRoute(intel)"
-                                class="subtitle-intel text-user-content" v-line-clamp="2">{{intel.title|| 'No title'}}</router-link>
+                                class="subtitle-intel text-user-content" v-line-clamp="1">{{intel.title|| 'No title'}}</router-link>
                         <div class="row">
                             <div v-if="!eventRow" class="col-12 col-md-12 ellipsis">
                                 <!-- <a v-bind:href="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)" class="text-user ellipsis ">Disclosed by:
@@ -65,7 +65,7 @@
             <div v-if="!eventRow" v-bind:class="{ 'col-12 col-md-12 col-lg-3' : !eventRow , 'col-12 col-lg-5': eventRow }">
                 <div class="text-center text-xl-right mt-2 mt-xl-0">
                     <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
-                    <p v-if="intel.totalReward>0" class="text-center text-xl-right mt-2 ellipsis mr-4">
+                    <p v-if="intel.totalReward>0" class="text-center text-xl-right ellipsis mt-2 mr-4">
                         <font-awesome-icon class="green-color" :icon="['fas', 'coins']" />&nbsp;
                         <ICountUp
                                 :startVal="0"

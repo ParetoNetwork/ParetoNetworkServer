@@ -283,7 +283,7 @@
                 let row = document.getElementsByClassName("table-row-highlight")[0];
                 if (row) this.row = row;
 
-                if (this.updated == 2 && this.address) {
+                if (this.updated === 2 && this.address) {
                     this.scrollBack();
                 }
             });
