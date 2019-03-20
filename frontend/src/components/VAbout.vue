@@ -1,6 +1,6 @@
 <template>
-    <div class="main">
-        <div class="container-fluid ">
+    <div class="main" style="background-color: white;">
+        <div class="container-fluid">
             <div class="row gradient">
                 <div class="col-12 col-lg-6 mb-lg-0 mb-4">
                     <img style="width: 400px; max-width: 100%;" src="../assets/images/LogoReverse.svg" alt="">
@@ -436,7 +436,7 @@
                     <h3 class="pre-title font-header">Team</h3>
                 </div>
 
-                <div class="team-members font-body-regular">
+                <div class="team-members font-body-regular" style="color: #679ab4;">
 
                     <div class="section-title">
                         <h4 class="title font-header">Board of Trustees</h4>
@@ -910,10 +910,6 @@
 </script>
 
 <style scoped>
-    .main {
-        color: white;
-    }
-
     .padding-main {
         padding-left: 136px;
         padding-right: 50px;

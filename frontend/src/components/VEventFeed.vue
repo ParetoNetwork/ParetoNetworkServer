@@ -1,16 +1,16 @@
 <template>
   <div class="intel-container">
     <VShimmerMyPost v-if="!loadAllContent"></VShimmerMyPost>
-    <div v-else class="mb-3 mb-md-1 px-1">
-      <div class="p-2 pt-4">
-        <div class="text-left title-content p-1">
-          <b>EVENTS</b>
+    <div v-else class="mb-3 mb-md-1">
+      <div class="pt-1" style="padding-left: 0.5rem;">
+        <div class="text-left title-content">
+          <b>Member Activity</b>
         </div>
         <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
           NEW INTEL
         </button>
       </div>
-      <div class="row mx-0 text-center text-content">
+      <!-- <div class="row mx-0 text-center text-content">
         <div class="col-4">
           EVENT
         </div>
@@ -20,13 +20,15 @@
         <div class="col-4">
           TX ID
         </div>
-      </div>
-      <div class="scrollable p-1" id="mypost" v-on:scroll="scrollMyPost()">
+      </div> -->
+      <div class="scrollable p-2" id="mypost" v-on:scroll="scrollMyPost()">
         <ul v-if="transactions.length">
           <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
+            <!--<div style="background-color: black; z-index: 0; width: 60%;">&nbsp;</div>-->
             <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo"
                            :eventRow="true"></VIntelPreview>
             <VTransaction v-if="!tx.intelInfo" :transaction="tx"></VTransaction>
+
           </li>
         </ul>
         <span v-else> No data to display </span>
@@ -47,7 +49,7 @@
   export default {
     name: "VEventFeed",
     props: [
-      'user', 'defaultTransactions'
+      'updateHash', 'user', 'defaultTransactions'
     ],
     data: function () {
       return {
@@ -115,9 +117,28 @@
           }
         });
       },
+      //Loads websocket hash from intel, restarts all the transactions but saves the current limit and page
+      updateHash: function (uC) {
+        let currentLimit = this.limit + 10;
+        let currentPage = this.page + 1;
+
+        this.limit = this.limit*this.page;
+        this.page = 0;
+
+        this.transactions = [];
+        this.myContent = [];
+        this.restartTransactions();
+
+        this.loadAllContent = false;
+
+        this.loadRequest(true).then( ()=> {
+          this.limit = currentLimit;
+          this.page = currentPage;
+        });
+      }
     },
     methods: {
-      ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
+      ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction", "restartTransactions"]),
       ...mapMutations(["addDistribute"]),
       //Loads the pendingTransactions state
       getTransactions: function () {
@@ -161,8 +182,8 @@
           }
         );
       },
-      loadRequest: function () {
-        Promise.all([
+      loadRequest: function (resetTransactions) {
+        return Promise.all([
           this.getTransactions(),
           this.loadMyContent()
         ]).then(values => {

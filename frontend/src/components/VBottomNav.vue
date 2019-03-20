@@ -1,15 +1,22 @@
 <template>
-    <div class="navbar hiden-navbar-bottom d-flex font-body py-0" style="opacity: 0">
-        <div class="col-md col-xs" style="text-align: left;">
-            <a class="mr-3" href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
-            <!-- <div class="mr-3"> PARETO PRICE: {{paretoUSD}} </div>
-             <div class="mr-3"> RECOMMENDED ETHEREUM GAS PRICE: {{recommendedGasPrice}} gwei </div>
-              <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
-             <div class="mr-3"> STATUS: CONNECTED </div>
-             <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
-        </div>
-        <div class="col-md col-xs" style="text-align: right;">
-            <div class="row" style="text-align: right;">
+    <div class="navbar hiden-navbar-bottom d-flex font-body py-0 container-fluid">
+        <div class="row">
+            <div style="text-align: left;">
+                <a href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
+                <!-- <div class="mr-3"> PARETO PRICE: {{paretoUSD}} </div>
+                 <div class="mr-3"> RECOMMENDED ETHEREUM GAS PRICE: {{recommendedGasPrice}} gwei </div>
+                  <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
+                 <div class="mr-3"> STATUS: CONNECTED </div>
+                 <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
+            </div>
+            <div class="col" style="text-align: right;">
+                <div class="text-user-content" style="font-size: 9px; padding-top: 3px;">
+                    <a v-bind:href="etherscanUrl+'/address/0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2'"
+                       target="_blank" alt="Pareto Network Foundation Donation address">
+                        0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2
+                        <i class="fa fa-external-link-alt green-color"></i>
+                    </a>
+                </div>
                 <!--
                 <div class="mr-3"> CONTACT </div>
                 <div class="mr-3"> TERMS OF USE </div>
@@ -32,6 +39,7 @@
         name: 'VBottomNav',
         data: function () {
             return{
+                etherscanUrl: window.localStorage.getItem('etherscan'),
                 paretoUSD: '',
                 recommendedGasPrice: ''
             }
@@ -85,7 +93,7 @@
     .hiden-navbar-bottom {
         font-size: 10px;
         background: #000211;
-        height: 40px;
+        height: 24px;
         width: 100%;
         position: fixed !important;
         transition: height 300ms;

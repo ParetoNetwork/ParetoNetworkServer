@@ -1,11 +1,11 @@
 <template>
-  <div v-if="profile.address" class="pareto-blue-dark text-center text-lg-left">
+  <div v-if="profile.address" class="pt-md-2 pt-lg-0 pb-3 pareto-blue-dark text-center text-lg-left">
     <div v-if="onboardingPicture"
          class="thumb profile-pic cursor-pointer"
          style="width: 100px; height: 100px;"
          v-bind:style="{ backgroundImage: 'url( ' + onboardingPicture}">
     </div>
-    <div v-if="canEdit && !onboardingPicture" class="thumb profile-pic cursor-pointer" @click="openInput()">
+    <div v-if="canEdit && !onboardingPicture" class="thumb cursor-pointer" @click="openInput()">
       <div data-v-514e8c24="" class="thumb" id="wrapper"
            v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
            style="width: 100px; height: 100px;">
@@ -21,15 +21,15 @@
                  v-bind:style="{ backgroundImage: 'url( ' + loadProfileImage(profile.profile_pic, profile.address)}"
                  :to="creatorRoute(profile.aliasSlug || profile.address)"
     ></router-link>
-    <div class="mt-4">
+    <div class="mt-1">
       <p class="subtitle-user-content"><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
-      <p class="text-user-content mt-2" :class="{'cursor-pointer' : !!canEdit}" @click="openEditProfileModal()">
+      <p class="text-user-content mt-1 mt-xl-1" :class="{'cursor-pointer' : !!canEdit}" @click="openEditProfileModal()">
                 <span v-if="canEdit">
                     <i class="fa fa-edit green-color" style="margin-left: -15px"></i>
                 </span>
         {{profile.biography || 'No Bio to show'}}
       </p>
-      <div class="row cursor-pointer mt-3">
+      <div class="row cursor-pointer mt-1 mt-xl-1">
         <div class="ml-0 col ellipsis">
           <i class="fa fa-book green-color" style="margin-left: -15px"></i>
           <router-link tag="span" :to="creatorRoute(profile.aliasSlug || profile.address)"
@@ -37,7 +37,7 @@
           </router-link>
         </div>
       </div>
-      <div class="row cursor-pointer mt-3">
+      <div class="row cursor-pointer mt-1 mt-xl-1">
         <div class="ml-0 col px-0">
           <img src="../assets/images/LogoMarkColor.svg"
                width="15px"
@@ -82,10 +82,10 @@
             </div>
         </div>
     </div>
-    <div class="row justify-content-center justify-content-lg-start text-center mt-4">
+    <div class="row justify-content-center justify-content-lg-start text-center mt-1 mt-xl-1">
       <router-link tag="div" class="cursor-pointer border mr-3 p-2 mb-2" :to="leaderboards(profile.address)"
                    style="min-width: 80px">
-        <p class="subtitle-user-content">
+
           <ICountUp
               :startVal="countUp.startVal"
               :endVal="parseFloat(profile.rank)"
@@ -93,14 +93,11 @@
               :duration="randomNumber(3,6)"
               :options="countUp.options"
               @ready="onReady"/>
-        </p>
-        <p> My Rank </p>
+
+        <p>Rank  <i class="fa fa-globe"></i></p>
       </router-link>
       <router-link tag="div" class="cursor-pointer border mb-2 p-2"
                    :to="leaderboards(profile.address)" style="min-width: 80px">
-        <div class="mb-1">
-          <i class="fa fa-star green-color fa-lg"></i>
-        </div>
         <ICountUp
             v-if="profile.score"
             :startVal="countUp.startVal"
@@ -110,6 +107,9 @@
             :options="countUp.options"
             @ready="onReady"/>
         <span v-else> 0 </span>
+        <div class="mb-1">
+          Score <i class="fa fa-star fa-lg" style="color: #fca130;"></i>
+        </div>
       </router-link>
       <div></div>
     </div>

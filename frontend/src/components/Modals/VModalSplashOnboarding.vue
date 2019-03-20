@@ -9,39 +9,39 @@
         size="lg"
         :body-bg-variant="'dark'">
 
-        <div class="row h-100">
-          <div class="col-lg-7 order-lg-2 px-0 intel-container">
-            <div class="d-flex justify-content-center h-100">
-              <div class="d-flex flex-column justify-content-around">
-                <div></div>
-                <div class="p-5 text-left">
-                  <h1 class="mb-3 title-content" style="font-size: 30px"><b>Post. Trade. Earn.</b></h1>
-                  <p>
-                    The first true peer-to-peer intel marketplace. Purchase access today.
-                  </p>
-                </div>
-                <button class="btn btn-dark-primary-pareto button--login mx-auto"
-                        style="font-size: 18px; width: 400px; max-width: 80%"
-                        @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
-                                                                                   class="fa fa-spinner fa-spin"></span>
-                </button>
+      <div class="row h-100 position-relative">
+        <div class="col-lg-7 order-lg-2 px-0 intel-container">
+          <div class="d-flex justify-content-center h-100">
+            <div class="d-flex flex-column justify-content-around">
+              <div></div>
+              <div class="p-5 text-left">
+                <h1 class="mb-3 title-content" style="font-size: 30px"><b>Post. Trade. Earn.</b></h1>
+                <p>
+                  The first true peer-to-peer intel marketplace. Purchase access today.
+                </p>
               </div>
+              <button class="btn btn-dark-primary-pareto button--login mx-auto"
+                      style="font-size: 18px; width: 400px; max-width: 80%"
+                      @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
+                                                                                 class="fa fa-spinner fa-spin"></span>
+              </button>
             </div>
           </div>
-          <div class="col-lg-5 order-lg-1">
-            <div class="d-flex justify-content-center h-100">
-              <div class="d-flex flex-column justify-content-around">
-                <div class="d-none d-md-block"></div>
-                <img src="../../assets/images/LogoReverse.svg" width="200px" style="margin: 0 auto" alt="">
-                <p class="p-3 d-none d-md-block">Current, reputable & actionable intel for traders and investors.</p>
-              </div>
+        </div>
+        <div class="col-lg-5 order-lg-1">
+          <div class="d-flex justify-content-center h-100">
+            <div class="d-flex flex-column justify-content-around">
+              <div class="d-none d-md-block"></div>
+              <img src="../../assets/images/LogoReverse.svg" width="200px" style="margin: 0 auto" alt="">
+              <p class="p-3 d-none d-md-block">Current, reputable & actionable intel for traders and investors.</p>
             </div>
           </div>
         </div>
         <span class="cursor-pointer" @click="cancelClick()">
-            <i class="fa fa-window-close fa-2x"
-               style="position: absolute; right: 0; top: 0;"></i>
-          </span>
+        <i class="fa fa-window-close fa-2x"
+           style="position: absolute; right: 0; top: 0;"></i>
+      </span>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -51,7 +51,6 @@
   import VProfile from '../VProfile';
   import VTransaction from '../VTransaction';
   import VIntelPreview from '../VIntelPreview';
-  import randomPerson from '../../assets/images/random_person.png';
 
   import {mapMutations, mapState} from 'vuex';
 
@@ -78,7 +77,7 @@
         information: information,
         content: [],
         etherscan: window.localStorage.getItem('etherscan'),
-        onboarding: require('../../assets/images/random_person.png'),
+        onboarding: require('../../assets/images/user_placeholder.png'),
         transactions: [],
         user: {}
       }
@@ -105,11 +104,16 @@
   }
 </script>
 <style>
+
+  .modal-dialog {
+    padding: 30px;
+  }
+
   .onboarding-modal .modal-content {
     height: 80vh;
   }
 
-  .onboarding-modal .modal-body{
+  .onboarding-modal .modal-body {
     padding: 0;
   }
 

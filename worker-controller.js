@@ -803,6 +803,13 @@ workerController.aproxAllScoreRanking = async function(callback){
                                 }
 
                             });
+                            web3.eth.getTransactionReceipt(data.txHash, function (err, receipt) {
+                                if(receipt){
+                                    ParetoTransaction.findOneAndUpdate({ txRewardHash: data.txRewardHash, status: 2}, {status: 3}, { multi: false }, function (err, data) {
+                                    });
+                                }
+
+                            });
                         }
                     }
                 })
@@ -900,9 +907,16 @@ workerController.realAllScoreRanking = async function(callback){
         web3.eth.getBlock('latest')
             .then(function(res) {
                 const blockHeight = res.number;
-                let CURRENT_SCORE_BLOCK_AGO = (data && data.length && data[0].block && !isNaN(parseInt(data[0].block)))? data[0].block : (blockHeight-SCORE_BLOCK_AGO);
+                let CURRENT_SCORE_BLOCK_AGO = (data && data.length && data[0] && data[0].block && !isNaN(parseInt(data[0].block)))? data[0].block : (blockHeight-SCORE_BLOCK_AGO);
+                try{
+                    workerController.updateFromLastIntel(CURRENT_SCORE_BLOCK_AGO);
+                }catch (e) {
+                    const error = ErrorHandler.backendErrorList('b21');
+                    error.systemMessage = e.message? e.message: e;
+                    console.log(JSON.stringify(error));
+                }
                 return web3.eth.getPastLogs({
-                    fromBlock: "0x" + ((CURRENT_SCORE_BLOCK_AGO).toString(16)),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
+                    fromBlock: web3.utils.toHex(CURRENT_SCORE_BLOCK_AGO),//'0x501331', //CONTRACT_CREATION_BLOCK_HEX,
                     toBlock: 'latest',
                     address: PARETO_CONTRACT_ADDRESS,
                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null, null] //hopefully no topic address is necessary
@@ -1220,42 +1234,81 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 
 };
 
+workerController.updateTransactionByNonce = function (txHash, sender, status){
+    web3.eth.getTransaction(txHash).then(function (txObject){
 
-workerController.updateFromLastIntel =  function(){
-    ParetoContent.aggregate([
-        {
-            $group: {
-                _id: null,
-                lastBlock: {$max: "$block"}
-            }
-        }
-    ]).exec(function(err, results) {
-        if (err) {
-            callback(err);
-        }
-        else {
-            if(results.length > 0){
-                const lastBlock = results[0].lastBlock;
-                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
-                intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
-                    // console.log(events);
-                    if(err){ console.log(err); return;}
-                    for (let i=0;i<events.length;i=i+1){
-                        try{
-                            const event = events[i];
-                            const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
-                            const expiry_time = event.returnValues.ttl;
-                            ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
-                            });
-                        }catch (e) {
-                            console.log(e);
-                        }
-                    }
+        const nonce = txObject.nonce;
+        ParetoTransaction.findOneAndUpdate(
+            {  $or: [{txHash: txHash},
+                    { address: sender, nonce: nonce}]}, {
+                status: status,
+                txRewardHash: txHash,
+                txHash: txHash
+            }).then(values => {
+        }).catch(e => {
+            const error = ErrorHandler.backendErrorList('b23');
+            error.systemMessage = e.message? e.message: e;
+            console.log(JSON.stringify(error));
+        });
+    }).catch(function (err) {console.log(err)  });
+};
 
+workerController.updateFromLastIntel =  function(lastBlock){
+    const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
+    intel.getPastEvents('NewIntel',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+        // console.log(events);
+        if(err){ console.log(err); return;}
+        for (let i=0;i<events.length;i=i+1){
+            try{
+                const event = events[i];
+                const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
+                const expiry_time = event.returnValues.ttl;
+                ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                 });
+                const txHash = event.transactionHash;
+                const sender = event.returnValues.intelProvider.toLowerCase();
+                workerController.updateTransactionByNonce(txHash, sender,3);
+            }catch (e) {
+                const error = ErrorHandler.backendErrorList('b18');
+                error.systemMessage = e.message? e.message: e;
+                console.log(JSON.stringify(error));
             }
-
         }
+
+    });
+    intel.getPastEvents('Reward',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+        // console.log(events);
+        if(err){ console.log(err); return;}
+        for (let i=0;i<events.length;i=i+1){
+            try{
+                const event = events[i];
+                const txHash = event.transactionHash;
+                const sender = event.returnValues.sender.toLowerCase();
+                workerController.updateTransactionByNonce(txHash, sender,3);
+            }catch (e) {
+                const error = ErrorHandler.backendErrorList('b19');
+                error.systemMessage = e.message? e.message: e;
+                console.log(JSON.stringify(error));
+            }
+        }
+
+    });
+    intel.getPastEvents('RewardDistributed',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+        // console.log(events);
+        if(err){ console.log(err); return;}
+        for (let i=0;i<events.length;i=i+1){
+            try{
+                const event = events[i];
+                const txHash = event.transactionHash;
+                const sender = event.returnValues.distributor.toLowerCase();
+                workerController.updateTransactionByNonce(txHash, sender,3);
+            }catch (e) {
+                const error = ErrorHandler.backendErrorList('b21');
+                error.systemMessage = e.message? e.message: e;
+                console.log(JSON.stringify(error));
+            }
+        }
+
     });
 };
 
@@ -1284,7 +1337,6 @@ const start = async () => {
         });
 
         queue.process('clock-job-score', 4, (job, done) => {
-            workerController.updateFromLastIntel();
             workerController.realAllScoreRanking(function(err, resultScore){
                 if(err){
                     done(err );
