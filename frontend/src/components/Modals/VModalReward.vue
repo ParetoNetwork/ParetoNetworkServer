@@ -34,7 +34,7 @@
                 <button class="btn btn-darker-secondary-pareto" @click="hideModal()"> Cancel</button>
                 <button
                     class="btn btn-dark-primary-pareto" :disabled="!hardwareAvailable || parseFloat(tokenAmount) <= 0 || parseFloat(myTokens)< parseFloat(tokenAmount)"
-                          @click="rewardIntel(rewardId, tokenAmount, intelAddress)"> Confirm
+                          @click="rewardIntel(title, rewardId, tokenAmount, intelAddress)"> Confirm
                 </button>
             </b-row>
         </b-container>
@@ -54,6 +54,7 @@
         },
         data: function () {
             return{
+                title: '',
                 rewardId: '',
                 intelAddress: '',
                 tokenAmount: 1,
@@ -63,6 +64,7 @@
         mounted: function(){
             this.$refs.modalReward.show();
             this.rewardId = this.intelReward.id;
+            this.title = this.intelReward.title;
             this.intelAddress = this.intelReward.intelAddress;
             this.tokenAmount = Math.min(this.myTokens, this.intelReward.reward);
             this.isAvailable();
@@ -94,7 +96,7 @@
             onClosedModal: function () {
                 this.openModalReward(false);
             },
-            rewardIntel: function (ID, tokenAmount, intelAddress) {
+            rewardIntel: function (title, ID, tokenAmount, intelAddress) {
                 this.hideModal();
                 if (!tokenAmount) {
                     this.$notify({
@@ -111,7 +113,7 @@
                 let lastApproved = this.userLastApprovedContractAddress;
 
                 ContentService.rewardIntel(
-                    {ID, tokenAmount, intelAddress, lastApproved, address: this.address},
+                    {title, ID, tokenAmount, intelAddress, lastApproved, address: this.address},
                     {signType: this.signType, pathId: this.pathId},
                     {
                         addTransaction: this.addTransaction,
