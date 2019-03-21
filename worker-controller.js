@@ -1233,7 +1233,7 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 
 };
 
-workerController.updateTransactionByNonce = function (txHash, sender, status){
+workerController.updateTransactionByNonce = function (txHash, sender, status, event, intel){
     web3.eth.getTransaction(txHash).then(function (txObject){
 
         const nonce = txObject.nonce;
@@ -1242,8 +1242,12 @@ workerController.updateTransactionByNonce = function (txHash, sender, status){
                     { address: sender, nonce: nonce}]}, {
                 status: status,
                 txRewardHash: txHash,
-                txHash: txHash
-            }).then(values => {
+                address: sender,
+                nonce: nonce,
+                txHash: txHash,
+                event: event,
+                intel: intel,
+            },{upsert: true, new: true}).then(values => {
         }).catch(e => {
             const error = ErrorHandler.backendErrorList('b23');
             error.systemMessage = e.message? e.message: e;
@@ -1266,7 +1270,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 });
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.intelProvider.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3);
+                workerController.updateTransactionByNonce(txHash, sender,3, 'create',parseInt(event.returnValues.intelID));
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b18');
                 error.systemMessage = e.message? e.message: e;
@@ -1283,7 +1287,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const event = events[i];
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.sender.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3);
+                workerController.updateTransactionByNonce(txHash, sender,3, 'reward',parseInt(event.returnValues.intelIndex));
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b19');
                 error.systemMessage = e.message? e.message: e;
@@ -1300,7 +1304,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const event = events[i];
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.distributor.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3);
+                workerController.updateTransactionByNonce(txHash, sender,3,'distribute',parseInt(event.returnValues.intelIndex));
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b21');
                 error.systemMessage = e.message? e.message: e;
