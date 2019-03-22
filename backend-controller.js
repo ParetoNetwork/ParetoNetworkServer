@@ -90,6 +90,35 @@ controller.startW3WebSocket = function () {
 };
 
 /**
+ * Get a wallet provider to make transactions
+ * @return {{engine: Web3ProviderEngine, web3: Web3}}
+ */
+controller.getWalletProvider = function () {
+    const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
+    const ProviderEngine = require('web3-provider-engine');
+    const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
+    const Wallet = require('ethereumjs-wallet');
+    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DT_ORACLE_SYS, "base64").toString("ascii"), "hex"));
+    const engine = new ProviderEngine();
+    engine.addProvider(new HookedWalletSubprovider({
+        getAccounts: function(cb){
+            cb(null, [ myWallet.getAddressString()]);
+        },
+        getPrivateKey: function(address, cb){
+            if (address !== myWallet.getAddressString()) {
+                cb(new Error('Account not found'))
+            } else {
+                cb(null, myWallet.getPrivateKey())
+            }
+        }
+    }));
+    engine.addProvider(new WsSubprovider({rpcUrl:  WEB3_WEBSOCKET_URL}));
+    engine.start();
+    return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
+};
+
+
+/**
  *
  * Db Initialization
  */
@@ -1881,16 +1910,110 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
  *
  */
 
-controller.makeDeposit = async function(callback){
-  const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
-  
+
+/**
+ * For now is a dummy purchase
+ * @param address the new Created address front end.
+ * @param data data to make a purchase
+ * @param callback
+ */
+controller.purchase= function(address, data, callback){
+    controller.makeDeposit(address, 2, 0.02,callback);
+}
+
+/**
+ *
+ * @param address ToAddress
+ * @param amount  amount of pareto that will send to address
+ * @param eth    amount of eth that will send to address
+ * @param callback
+ * @return {Promise<void>}
+ */
+controller.makeDeposit = async function(address, amount, eth, callback){
+  const  walletProvider = controller.getWalletProvider();
   try{
-    const result = await IntelInstance.methods.makeDeposit().call();
+
+      const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
+      const Pareto_Address = process.env.CRED_PARETOCONTRACT;
+      const web3 = walletProvider.web3;
+      const wallet = walletProvider.wallet;
+      const ParetoTokenInstance  = new web3.eth.Contract( Pareto_Token_Schema.abi, Pareto_Address);
+      let amountPareto = web3.utils.toWei(amount.toString(), "ether");
+      let amountEther = web3.utils.toWei(eth.toString(), "ether");
+      let gasPrice = await web3.eth.getGasPrice();
+      let gasApprove = await web3.eth.estimateGas({
+          to:address,
+          from: wallet.getAddressString(),
+          value: amountEther});
+      web3.eth.sendTransaction({
+          to:address,
+          from: wallet.getAddressString(),
+          value: amountEther,
+          gas: gasApprove,
+          gasPrice: gasPrice  * 1.3
+      }).once('transactionHash', function(hash){
+          controller.waitForReceipt(hash,async  (err, receipt)=>{
+            if(err){
+              if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+               return  callback(err);
+            }
+              let gasApprove = await ParetoTokenInstance.methods
+                  .transfer(address, amountPareto)
+                  .estimateGas({from: wallet.getAddressString()});
+              ParetoTokenInstance.methods
+                  .transfer(address, amountPareto)
+                  .send({
+                      from: wallet.getAddressString(),
+                      gas: gasApprove,
+                      gasPrice: gasPrice  * 1.3
+                  })
+                  .once('transactionHash', function(hash){
+                    console.log(hash);
+                      controller.waitForReceipt(hash,async  (err, receipt)=> {
+                          if(err){
+                              if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                              return  callback(err);
+                          }
+                          if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                          callback(null, receipt);
+                      })
+                  })
+                  .once('error', (err)=>{
+                      if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                      callback(err);
+                  });
+          })
+      })
+      .once('error', function(err){
+          if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+          callback(err);
+      });
 
   }catch (e) {
-
+    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+    callback(e);
   }
 };
+
+controller.waitForReceipt = function (hash, cb) {
+    web3.eth.getTransactionReceipt(hash, function (err, receipt) {
+        if (err) {
+            cb(err);
+        }
+
+        if (receipt !== null) {
+            // Transaction went through
+            if (cb) {
+                cb(null, receipt);
+            }
+        } else {
+            // Try again in 1 second
+            setTimeout(function () {
+                controller.waitForReceipt(hash, cb);
+            }, 1000);
+        }
+    });
+}
 
 controller.getAllIntel = async function (callback) {
   const IntelInstance = new web3.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);

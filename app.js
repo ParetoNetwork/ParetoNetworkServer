@@ -261,6 +261,20 @@ app.get('/v1/balance', function (req, res) {
   });
 });
 
+
+app.post('/v1/purchase', function (req, res) {
+    let address = req.body.address;
+    controller.purchase(address, req.body.data,  function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+
+});
+
 //get info about your address
 app.post('/v1/addresses', function (req, res) {
   controller.retrieveAddresses(req.body.addresses, function (err, results) {
