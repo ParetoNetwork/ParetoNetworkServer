@@ -297,12 +297,15 @@ app.post('/v1/config_basic', function (req, res) {
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
-  res.status(200).json(ErrorHandler.getSuccess({
+  const showshoppingcart = process.env.SHOW_SHOPPING_CART
+
+    res.status(200).json(ErrorHandler.getSuccess({
     netWorkId: netWorkId,
     intelAddress: intel.networks[netWorkId].address,
     paretoAddress: pcontract,
     psignversion: psignversion,
-    exponentBlock: exponentBlock
+    exponentBlock: exponentBlock,
+    showshoppingcart: showshoppingcart,
   }));
 });
 
@@ -313,14 +316,17 @@ app.post('/v1/config', function (req, res) {
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
-  res.status(200).json(ErrorHandler.getSuccess({
+  const showshoppingcart = process.env.SHOW_SHOPPING_CART;
+
+    res.status(200).json(ErrorHandler.getSuccess({
     intel: intel.abi,
     pareto: pareto.abi,
     netWorkId: netWorkId,
     intelAddress: intel.networks[netWorkId].address,
     paretoAddress: pcontract,
     psignversion: psignversion,
-    exponentBlock: exponentBlock
+    exponentBlock: exponentBlock,
+    showshoppingcart: showshoppingcart
   }));
 });
 
