@@ -76,6 +76,7 @@ export default class profileService {
                         window.localStorage.setItem('psignversion', res.data.psignversion);
                         window.localStorage.setItem('intelc', JSON.stringify(res.data.intel));
                         window.localStorage.setItem('paretoc', JSON.stringify(res.data.pareto));
+                        window.localStorage.setItem('showshoppingcart', JSON.stringify(res.data.showshoppingcart));
                     }
                     if (onFinish) onFinish();
                 }).catch(error => {

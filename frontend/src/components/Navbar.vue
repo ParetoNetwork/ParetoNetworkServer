@@ -20,6 +20,10 @@
       <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
         <ul class="navbar-nav ">
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
+            <router-link v-if="show_shopping" tag="a" class="nav-link" :active-class="'active'" to="/products" exact>Products
+            </router-link>
+          </li>
+          <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/intel" exact>Intel
             </router-link>
           </li>
@@ -70,7 +74,7 @@
   import authService from '../services/authService';
   import DashboardService from '../services/dashboardService';
   import errorService from '../services/errorService';
-
+  import Profile from '../services/profileService';
   import ModalLedgerNano from "./Modals/VModalLedgerNano";
 
 
@@ -87,6 +91,9 @@
           address: {address: res},
         });
       }, () => {}, true);
+      Profile.updateConfig(res => {
+          this.show_shopping = window.localStorage.getItem('showshoppingcart')
+      });
     },
     watch: {
       loadingNav(value) {
@@ -110,7 +117,8 @@
         etherscan: window.localStorage.getItem('etherscan'),
         loading: false,
         finish: false,
-        colorNav: {}
+        colorNav: {},
+        show_shopping: window.localStorage.getItem('showshoppingcart')
       };
     },
     computed: {

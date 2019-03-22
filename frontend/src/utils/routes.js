@@ -1,3 +1,5 @@
+import Vintel from '../components/VIntel';
+import VProducts from '../components/VProducts'
 import VIntel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
@@ -45,7 +47,7 @@ const router = new VueRouter(
 
 router.beforeEach((to, from, next) => {
     // ...
-    const publicPages = ['/', '/leaderboards', '/about'];
+    const publicPages = ['/', '/leaderboards', '/about', '/products'];
     const authRequired = !publicPages.includes(to.path);
     AuthService.auth(() => {
         next();
