@@ -230,7 +230,13 @@ errorHandler.backendErrorList = function(code){
         description: 'Error updating ParetoTransaction',
         userMessage: '',
         priority: 1
-      }
+      },
+        b23: {
+            code: 'b23',
+            description: 'Error getting Nonce',
+            userMessage: '',
+            priority: 1
+        }
     };
     return error[code];
 };

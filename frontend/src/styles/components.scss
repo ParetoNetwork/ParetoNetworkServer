@@ -51,15 +51,15 @@ li,
 }
 
 .green-background{
-  background: #6aba82;
+  color: #6aba82;
 }
 
 .yellow-background{
-  background: yellow;
+  color: yellow;
 }
 
 .red-background{
-  background: red;
+  color: red;
 }
 
 .icon-mini {
@@ -73,6 +73,7 @@ li,
   border: 0px;
   background-color: $light-blue-pareto;
   color: white;
+  height: 100%;
 }
 
 .title {
@@ -168,22 +169,28 @@ li,
 
 @media (min-width: 768px ){
   #mypost {
-    max-height: 27vh;
+    max-height: 33vh;
   }
 
   #myfeed{
-    max-height: 70vh;
+    max-height: 75vh;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 901px ){
   #mypost {
-    max-height: 70vh;
+    max-height: 35vh;
   }
 
-  #myfeed {
-     max-height: 70vh;
-   }
+  #myfeed{
+    max-height: 80vh;
+  }
+}
+
+@media (min-width: 991px ){
+  #mypost {
+    max-height: 38vh;
+  }
 }
 
 .pareto-subtitle {

@@ -1,7 +1,7 @@
 {
-  "name": "Pareto-Ranking",
-  "version": "1.0.0",
-  "description": "PARETO",
+  "name": "ParetoNetworkSERVER",
+  "version": "2.0.0",
+  "description": "The server for coordinating containers for the Pareto Network Sentinels.",
   "scripts": {
     "start": "node backend.js",
     "test": "mocha test/*.js  --timeout 150000 --exit",
@@ -57,7 +57,7 @@
     "vue-line-clamp": "^1.2.4",
     "vue-meta": "^1.5.6",
     "web3": "^1.0.0-beta.29",
-    "ws": "^6.0.0"
+    "ws": "^6.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

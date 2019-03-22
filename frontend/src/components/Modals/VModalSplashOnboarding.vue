@@ -25,6 +25,10 @@
                       @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
                                                                                  class="fa fa-spinner fa-spin"></span>
               </button>
+              <button class="btn btn-dark-secondary-pareto button--login mx-auto"
+                      style="font-size: 18px; width: 400px; max-width: 80%"
+                      @click="purchasePriorityAccess"><b v-if="!makingLogin">Buy Priority Access</b>
+              </button>
             </div>
           </div>
         </div>
@@ -51,7 +55,6 @@
   import VProfile from '../VProfile';
   import VTransaction from '../VTransaction';
   import VIntelPreview from '../VIntelPreview';
-  import randomPerson from '../../assets/images/random_person.png';
 
   import {mapMutations, mapState} from 'vuex';
 
@@ -78,7 +81,7 @@
         information: information,
         content: [],
         etherscan: window.localStorage.getItem('etherscan'),
-        onboarding: require('../../assets/images/random_person.png'),
+        onboarding: require('../../assets/images/user_placeholder.png'),
         transactions: [],
         user: {}
       }
@@ -91,7 +94,7 @@
     },
     methods: {
       ...mapMutations(
-        ['login', 'loadingLogin', 'stopLogin']
+        ['login', 'loadingLogin', 'stopLogin', 'openCloseModal']
       ),
       cancelClick() {
         this.$refs.modalOnboarding.show();
@@ -100,6 +103,9 @@
       showModal() {
         this.$store.state.showModalOnboarding = false;
         this.$store.state.showModalLoginOptions = true;
+      },
+      purchasePriorityAccess(){
+        this.$router.push(`purchase`);
       }
     }
   }

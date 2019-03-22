@@ -549,6 +549,7 @@ export default class ContentService {
         await ParetoTokenInstance.methods
           .allowance(rewarder_address, Intel.options.address).call().then(async res => {
             userAllowance = res;
+            console.log(userAllowance);
             (userAllowance < depositAmount) ? await userIncreaseApproval() : directlyCreateReward();
           });
       }
@@ -584,6 +585,7 @@ export default class ContentService {
             var txHash = hash;
             params.txHash = txHash;
             events.addTransaction(params);
+            console.log(params);
             ContentService.postTransactions(params);
 
             //Wait for the transaction to be complete
@@ -743,7 +745,7 @@ export default class ContentService {
       window.localStorage.getItem('paretoAddress')
     );
     if (typeof provider !== "undefined") {
-      return;
+      return {provider, web3, Intel, ParetoTokenInstance};
     }
   }
 }
