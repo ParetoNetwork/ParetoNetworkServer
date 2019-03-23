@@ -60,7 +60,8 @@ const store = new Vuex.Store({
     showModalReward: false,
     showModalEditProfile: false,
     signType: (window.localStorage.getItem('signType')) || 'Metamask',
-    ws: null
+    ws: null,
+    shoppingCart: [],
   },
   mutations: {
     addReward(state, data) {

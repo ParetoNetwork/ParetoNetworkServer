@@ -4,7 +4,7 @@
       <div>
           <h1>Products</h1>
           <div class='products'>
-              <div v-for='product in productsData' track-by='$index' :class="'product'">
+              <div v-for='(product, index) in productsData'  :class="'product'">
                   <div class='image' @click='viewProduct(product)' v-bind:style='{ backgroundImage: "url(" +  product.image + ")" }' style='background-size: cover; background-position: center;'></div>
                   <div class='name'>{{ product.product }}</div>
                   <div class='description'>{{ product.description }}</div>
@@ -34,6 +34,9 @@
 </template>
 
 <script>
+
+    import { mapActions, mapState } from 'vuex';
+
     export default {
         name: 'VProductsList',
         mounted: function () {
@@ -48,7 +51,10 @@
                 }
             });
         },
-        props: ['productsData', 'cart', 'tax', 'cartSubTotal', 'cartTotal'],
+        computed: {
+            ...mapState(['CartTotal', 'cartSubtotal', 'taxShop', 'shoppingCart'])
+        },
+        props: ['productsData'],
 
         data: function () {
             return {
@@ -61,15 +67,18 @@
         },
 
         methods: {
+            ...mapActions(["addsubtotaltocart", "addQuantityToCart", "addsubtotaltocart"]),
+
             addToCart: function (product) {
                 var found = false;
 
-                for (var i = 0; i < this.cart.length; i++) {
-
-                    if (this.cart[i].sku === product.sku) {
-                        var newProduct = this.cart[i];
+               /* for (var i = 0; i < this.shoppingCart.length; i++) {
+                    console.log(this.shoppingCart.length)
+                    if (this.shoppingCart[i].sku === product.sku) {
+                        var newProduct = this.shoppingCart[i];
                         newProduct.quantity = newProduct.quantity + 1;
-                        this.cart.$set(i, newProduct);
+                        //this.cart.$set(i, newProduct);
+                        this.$store.dispatch('addQuantityToCart', i, newProduct);
                         //console.log("DUPLICATE",  this.cart[i].product + "'s quantity is now: " + this.cart[i].quantity);
                         found = true;
                         break;
@@ -78,12 +87,23 @@
 
                 if (!found) {
                     product.quantity = 1;
-                    this.cart.push(product);
-                }
+                    this.$store.dispatch('addToCart', product);
 
-                this.cartSubTotal = this.cartSubTotal + product.price;
-                this.cartTotal = this.cartSubTotal + (this.tax * this.cartSubTotal);
-                this.checkoutBool = true;
+                }*/
+                let cart = [];
+                if(window.localStorage.getItem('ShoppingCart')){
+                    cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
+                    product.quantity = 1
+                    cart.push(product)
+                }else{
+                     product.quantity = 1
+                    cart.push(product)
+                }
+                this.$store.dispatch('addToCart', product);
+
+
+                window.localStorage.setItem('ShoppingCart', JSON.stringify(cart));
+                //this.checkoutBool = true;
             },
 
             modalAddToCart: function (modalData) {
