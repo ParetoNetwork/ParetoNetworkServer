@@ -3,8 +3,8 @@
   <div class="main-wrapper">
     <div class="header"><h1>Products</h1></div>
     <div id="vue">
-      <VProductsCart :cart="cart" :cart-sub-total="cartSubTotal" :tax="tax" :cart-total="cartTotal" :checkout-bool="checkoutBool"></VProductsCart>
-      <VProductsList :cart="cart" :cart-sub-total="cartSubTotal" :tax="tax" :cart-total="cartTotal" :products-data="productsData"></VProductsList>
+      <VProductsCart :cart="cart" :checkout-bool="checkoutBool"></VProductsCart>
+      <VProductsList :cart="cart" :products-data="productsData"></VProductsList>
       <VProductsCheckout v-if="checkoutBool" :cart="cart" :tax="tax" :cart-sub-total="cartSubTotal" :cart-total="cartTotal" :products-data="productsData" :total-with-tax="totalWithTax"></VProductsCheckout>
     </div>
   </div>
@@ -285,7 +285,7 @@
       .cart {
         position: fixed;
         right: 0em;
-        top: 30px;
+        top: 100px;
         text-align: right;
         background: rgba(0,0,0,0.85);
         color: white;
