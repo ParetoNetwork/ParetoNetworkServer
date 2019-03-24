@@ -359,7 +359,12 @@ controller.startwatchNewIntel = function () {
                     {
                       intel: event.returnValues.intelID,
                       event: 'create'
-                    }, {status: 3, txHash: event.transactionHash})];
+                    }, {status: 3,
+                            txHash: event.transactionHash,
+                            event: 'create',
+                            intel: parseInt(event.returnValues.intelID),
+                            address: data.address
+                        },{upsert: true, new: true})];
                 Promise.all(promises).then(values => {
                   if (values.length > 1) {
                     controller.getScoreAndSaveRedis(null, (err, result) => {
@@ -476,8 +481,12 @@ controller.startwatchDistribute = function (intel, intelAddress) {
             }, {
               status: 3,
               txRewardHash: txHash,
-              txHash: txHash
-            })];
+              txHash: txHash,
+              address: sender,
+              nonce: nonce,
+              event: 'distribute',
+              intel: intelIndex,
+            },{upsert: true, new: true})];
         Promise.all(promises).then(values => {
           if (controller.wss && values.length > 1) {
             controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
@@ -722,7 +731,14 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender) {
         , ParetoTransaction.findOneAndUpdate({
           $or: [{txRewardHash: txHash}, {txHash: txHash},
             {address: sender, intel: intelIndex, event: 'reward', nonce: nonce}]
-        }, {status: 3, txRewardHash: txHash, txHash: txHash})];
+        }, {status: 3,
+              txRewardHash: txHash,
+              txHash: txHash,
+              nonce: nonce,
+              event: 'reward',
+              address: sender,
+              intel: intelIndex
+        },{upsert: true, new: true})];
       Promise.all(promises).then(values => {
         if (values.length > 1 && controller.wss) {
           controller.SendInfoWebsocket({address: values[1].address, transaction: values[1]});

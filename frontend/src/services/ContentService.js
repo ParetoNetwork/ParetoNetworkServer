@@ -120,7 +120,7 @@ export default class ContentService {
                   });
                   events.editTransaction({hash: content.txHash, key: 'status', value: 1});
 
-                  ContentService.sendReward(true, Intel, {
+                  ContentService.sendReward(null,true, Intel, {
                     intel: content.intel,
                     depositAmount: depositAmount,
                     txHash: content.txHash,
@@ -131,7 +131,7 @@ export default class ContentService {
                 break;
               }
               case 1: {
-                ContentService.sendReward(true, Intel, {
+                ContentService.sendReward(null, true, Intel, {
                   intel: content.intel,
                   depositAmount: depositAmount,
                   txHash: content.txHash,
@@ -180,7 +180,7 @@ export default class ContentService {
                     gasPrice: gasPrice
                   };
 
-                  this.sendCreate(true, content, events, onSuccess, onError);
+                  this.sendCreate(null, true, content, events, onSuccess, onError);
                 });
                 break;
               case 1:
@@ -193,7 +193,7 @@ export default class ContentService {
                   intel: content.intel,
                   gasPrice: gasPrice
                 };
-                this.sendCreate(true, content, events, onSuccess, onError);
+                this.sendCreate(null, true, content, events, onSuccess, onError);
                 break;
               case 2:
                 waitForReceipt(content.txHash, receipt => {
@@ -214,7 +214,7 @@ export default class ContentService {
     }
   }
 
-  static async sendCreate(withIncreaseApproval, content, events, onSuccess, onError) {
+  static async sendCreate(title, withIncreaseApproval, content, events, onSuccess, onError) {
     try {
       let gasCreateIntel = await Intel.methods
         .create(
@@ -248,6 +248,9 @@ export default class ContentService {
                 content.txRewardHash = hash;
                 content.status = 2;
                 content.nonce = nonce;
+                if(title){
+                    content.intelData = {title: title};
+                }
                 events.addTransaction(content);
                 ContentService.postTransactions(content);
             }).catch(function (err) {
@@ -366,7 +369,7 @@ export default class ContentService {
 
         ContentService.uploadContent(serverData, async res => {
           params.intel = res.content.Intel_ID;
-          ContentService.sendCreate(false, params, events, onSuccess, onError);
+          ContentService.sendCreate(serverData.title, false, params, events, onSuccess, onError);
         });
       }
 
@@ -398,6 +401,9 @@ export default class ContentService {
                       content.status = 0;
                       content.event = "approve";
                       content.nonce = nonce;
+                      if(serverData.title){
+                          content.intelData = {title: serverData.title};
+                      }
                       events.addTransaction(content);
 
                       ContentService.postTransactions(content);
@@ -428,7 +434,7 @@ export default class ContentService {
                     gasPrice: gasPrice
                   };
 
-                  ContentService.sendCreate(true, newContent, events, onSuccess, onError);
+                  ContentService.sendCreate(serverData.title, true, newContent, events, onSuccess, onError);
                 });
               })
               .on("error", err => {
@@ -440,7 +446,7 @@ export default class ContentService {
     });
   }
 
-  static async sendReward(withIncreasedApproval, Intel, content, events, onSuccess, onError) {
+  static async sendReward(title, withIncreasedApproval, Intel, content, events, onSuccess, onError) {
     try {
       const gasSendReward = await Intel.methods
         .sendReward(content.intel, content.depositAmount)
@@ -461,6 +467,9 @@ export default class ContentService {
                 content.txRewardHash = hash;
                 content.status = 2;
                 content.nonce = nonce;
+                if(title){
+                    content.intelData = {title: title}
+                }
                 events.addTransaction(content);
 
                 ContentService.postTransactions(content);
@@ -559,7 +568,7 @@ export default class ContentService {
       function directlyCreateReward() {
         params.depositAmount = depositAmount;
         params.gasPrice = gasPrice;
-        ContentService.sendReward(false, Intel, params, events, onSuccess, onError);
+        ContentService.sendReward(content.title, false, Intel, params, events, onSuccess, onError);
       }
 
       //Does the increase approval for an user if the allowance is less than the token amount
@@ -583,15 +592,16 @@ export default class ContentService {
           .on("transactionHash", hash => {
 
             web3.eth.getTransaction(hash).then( (txObject)=>{
-                  const content = {};
+                  const param = {};
                   const  nonce = txObject.nonce;
-                  content.txHash = hash;
-                  content.status = 0;
-                  content.event = "approve";
-                  content.nonce = nonce;
-                  events.addTransaction(content);
+                  param.txHash = hash;
+                  param.status = 0;
+                  param.event = "approve";
+                  param.nonce = nonce;
+                  param.intelData = {title: content.title};
+                  events.addTransaction(param);
 
-                  ContentService.postTransactions(content);
+                  ContentService.postTransactions(param);
               }).catch(function (err) {
                   console.log(err);
               });
@@ -610,7 +620,7 @@ export default class ContentService {
               });
               events.editTransaction({hash: hash, key: 'status', value: 1});
 
-              ContentService.sendReward(true, Intel, {
+              ContentService.sendReward(content.title, true, Intel, {
                 intel: content.ID,
                 depositAmount: depositAmount,
                 txHash: txHash,
@@ -655,6 +665,7 @@ export default class ContentService {
           event: 'distribute',
           status: 0,
           clicked: true,
+          intelData: {title: content.title} ,
           dateCreated: new Date()
         });
 

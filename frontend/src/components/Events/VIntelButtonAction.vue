@@ -72,7 +72,7 @@
         }
 
         ContentService.distributeRewards(
-          {ID: intel.id, intelAddress: intel.intelAddress},
+          {title: intel.title, ID: intel.id, intelAddress: intel.intelAddress},
           {signType: this.signType, pathId: this.pathId},
           {
             addDistribute: this.addDistribute
