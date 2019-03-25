@@ -236,6 +236,12 @@ errorHandler.backendErrorList = function(code){
             description: 'Error getting Nonce',
             userMessage: '',
             priority: 1
+        },
+        b24: {
+            code: 'b24',
+            description: 'Cannot update score with deposit balance',
+            userMessage: '',
+            priority: 1
         }
     };
     return error[code];
