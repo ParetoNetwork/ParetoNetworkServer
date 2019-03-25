@@ -452,7 +452,7 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                     toBlock: 'latest',
                     address: PARETO_CONTRACT_ADDRESS,
                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
-                }).then(function (txObjects){
+                }).then(async function (txObjects){
                     //console.log(txObjects);
                     for(i = 0; i < txObjects.length; i++){
 
@@ -493,7 +493,9 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                             var i = 0;
                             var removableIndex = 0;
                             //sorts down to remaining transactions, since we already know the total and the system block height
-                            const amountBn = Decimal(amount);
+
+                            let amountBn = Decimal(amount);
+
                             while(i < transactions.length){
                                 // Should allow zero too
                                 if(parseFloat(transactions[i][1] ) <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
@@ -559,7 +561,24 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                                 multiple = multiple.sub(1);
                             }
 
+                            try{
+                                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
+                                const intelBalance  = await intel.methods
+                                    .getParetoBalance(address).call();
+                                const intelBalanceEther = web3.utils.fromWei(intelBalance.toString(), 'ether');
+                                amount = parseFloat(amount) + parseFloat(intelBalanceEther);
+                                amountBn = Decimal(amount.toString());
+                            }catch (e) {
+                                const error = ErrorHandler.backendErrorList('b24');
+                                error.systemMessage = e;
+                                error.address = address;
+                                console.log(error);
+                            }
+
                             var score = parseFloat(amountBn.mul(multiple)); //if multiple is less than 1, make it at least 1. ie 0.4 = 1.4
+
+
+
                             var bonus = parseFloat(blockHeightDifference.div(divisor)) ;
 
 
