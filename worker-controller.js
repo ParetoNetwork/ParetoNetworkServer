@@ -468,7 +468,6 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                         //can be float
                         quantityEth = Decimal(quantityEth);
-
                         //basically pushes
                         if(blockNumber in outgoing)
                         {
@@ -479,6 +478,27 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         }
 
                     }//end for
+
+                    try{
+                        const transactionHash = txObjects.map(it=>{return it.transactionHash});
+                        const rewardDeposit =  await ParetoReward.find({sender: address, txHash: { $nin: transactionHash }}).distinct('txHash');
+                        for(i = 0; i < rewardDeposit.length; i++){
+                            blockNumber = rewardDeposit[i].block+ "";
+                            quantityEth = rewardDeposit[i].amount + "";
+                            if(blockNumber in outgoing)
+                            {
+                                outgoing[blockNumber] = outgoing[blockNumber].add(quantityEth);
+                            }
+                            else {
+                                outgoing[blockNumber] = quantityEth;
+                            }
+                        }
+                    }catch (e) {
+                        const error = ErrorHandler.backendErrorList('b25');
+                        error.systemMessage = e;
+                        error.address = address;
+                        console.log(error);
+                    }
 
                     var transactions = Object.entries(incoming)
                         .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, val.mul(Decimal(-1))])))

@@ -242,6 +242,12 @@ errorHandler.backendErrorList = function(code){
             description: 'Cannot update score with deposit balance',
             userMessage: '',
             priority: 1
+        },
+        b25: {
+            code: 'b25',
+            description: 'Cannot update Reward transaction based on Deposit',
+            userMessage: '',
+            priority: 1
         }
     };
     return error[code];
