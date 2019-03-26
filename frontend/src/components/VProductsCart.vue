@@ -1,7 +1,7 @@
 
 <template>
     <div>
-        <div class="cart">
+        <div class="cart" @click="go_to_checkout">
             <span class="cart-size"> {{ cartSize }} </span><i class="fa fa-shopping-cart"></i>
         </div>
     </div>
@@ -26,6 +26,9 @@
         },
         methods: {
             ...mapActions(["addToCart"]),
+            go_to_checkout: function(){
+                this.$router.push({ path: '/checkout' })
+            }
         },
         data: {
                 cart: []
@@ -38,7 +41,7 @@
                 if(this.cart.length > 0){
                     for (var i = 0; i < this.cart.length; i++) {
                         console.log(this.shoppingCart[i].quantity)
-                        cartSize += this.cart[i].quantity;
+                        cartSize += 1;
                     }
                 }else{
                     cartSize = 0;

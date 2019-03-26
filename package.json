@@ -48,6 +48,7 @@
     "redoc": "^2.0.0-alpha.25",
     "request-promise": "4.2.2",
     "ssl-express-www": "^3.0.3",
+    "stripe": "^6.28.0",
     "throng": "4.0.0",
     "truffle-hdwallet-provider": "0.0.6",
     "uglify-es": "^3.3.9",

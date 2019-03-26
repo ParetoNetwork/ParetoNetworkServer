@@ -60,6 +60,9 @@ redisClient.on("error", function (e) {
   console.log(JSON.stringify(error));
 });
 
+//stripe
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || constants.STRIPE_SECRET_KEY;
+const stripe = require("stripe")(STRIPE_SECRET_KEY);
 
 /**
  * Web3 Initialization
@@ -1687,6 +1690,19 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
   }
 };
+
+
+controller.listProducts = async function (callback) {
+    
+    stripe.products.list(
+        {},
+        function(err, products) {
+            
+            callback(err, products);
+            // asynchronously called
+        }
+    );
+}
 
 /**
  *
