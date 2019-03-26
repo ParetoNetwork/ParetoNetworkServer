@@ -5,10 +5,10 @@
           <h1>Products</h1>
           <div class='products'>
               <div v-for='(product, index) in productsData'  :class="'product'">
-                  <div class='image' @click='viewProduct(product)' v-bind:style='{ backgroundImage: "url(" +  product.image + ")" }' style='background-size: cover; background-position: center;'></div>
-                  <div class='name'>{{ product.product }}</div>
+                  <div class='image' @click='viewProduct(product)' v-bind:style='{ backgroundImage: "url(" +  product.skus.data[0].image + ")" }' style='background-size: cover; background-position: center;'></div>
+                  <div class='name'>{{ product.skus.data[0].attributes.name }}</div>
                   <div class='description'>{{ product.description }}</div>
-                  <div class='price'>{{ product.price}}</div>
+                  <div class='price'>$ {{ product.skus.data[0].price}}</div>
                   <button @click='addToCart(product)'>Add to Cart</button><br><br></div>
           </div>
           <div class='modalWrapper' v-show='showModal'>
@@ -41,6 +41,8 @@
         name: 'VProductsList',
         mounted: function () {
             var self = this;
+            
+
             document.addEventListener("keydown", function (e) {
                 if (self.showModal && e.keyCode == 37) {
                     self.changeProductInModal("prev");
@@ -71,39 +73,31 @@
 
             addToCart: function (product) {
                 var found = false;
-
-               /* for (var i = 0; i < this.shoppingCart.length; i++) {
-                    console.log(this.shoppingCart.length)
-                    if (this.shoppingCart[i].sku === product.sku) {
-                        var newProduct = this.shoppingCart[i];
-                        newProduct.quantity = newProduct.quantity + 1;
-                        //this.cart.$set(i, newProduct);
-                        this.$store.dispatch('addQuantityToCart', i, newProduct);
-                        //console.log("DUPLICATE",  this.cart[i].product + "'s quantity is now: " + this.cart[i].quantity);
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    product.quantity = 1;
-                    this.$store.dispatch('addToCart', product);
-
-                }*/
                 let cart = [];
+                var found = false
                 if(window.localStorage.getItem('ShoppingCart')){
                     cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
+                    
+                     for (var i = 0; i < this.shoppingCart.length; i++){
+                        
+                        if(cart[i].id === product.id){
+                            product.quantity = product.quantity + 1
+                            cart[i] = product
+                            found = true;
+                            break;
+                        }
+                    }
+
+                }if(!found){
                     product.quantity = 1
                     cart.push(product)
-                }else{
-                     product.quantity = 1
-                    cart.push(product)
+                    this.$store.dispatch('addToCart', product);
                 }
-                this.$store.dispatch('addToCart', product);
+                
 
 
                 window.localStorage.setItem('ShoppingCart', JSON.stringify(cart));
-                //this.checkoutBool = true;
+                
             },
 
             modalAddToCart: function (modalData) {
@@ -117,10 +111,7 @@
             },
 
             viewProduct: function (product) {
-                var self = this;
-                //self.modalData = product;
-                self.modalData = (JSON.parse(JSON.stringify(product)));
-                self.showModal = true;
+               // router.push({ path: 'home' })
             },
 
             changeProductInModal: function (direction) {

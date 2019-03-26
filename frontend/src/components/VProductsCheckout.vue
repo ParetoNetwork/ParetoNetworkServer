@@ -1,27 +1,40 @@
 <template>
-    <div>
+<div class="main-wrapper">
+    <div class="header"><h1>Products</h1></div>
+    <div id="vue">
+    
         <h1>Checkout Area</h1>
         <div class="checkout-area">
             <span> {{ cart | cartSize }} </span><i class="fa fa-shopping-cart"></i>
             <table>
                 <thead>
                 <tr>
+                    <th></th>
+                    <th></th>
                     <th class="align-center">SKU</th>
                     <th>Name</th>
-                    <th>Description</th>
-                    <th class="align-right">Amount</th>
+                    
+                    <th class="align-left">Amount</th>
                     <th class="align-right">Price</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="product in cart" track-by="$index">
-                    <td class="align-center">{{ product.sku }}</td>
-                    <td>{{ product.product }}</td>
-                    <td>{{ product.description }}</td>
-                    <td class="align-right">{{ cart[$index].quantity }}</td>
-                    <td class="align-right">{{ product.price | currency }}</td>
+                <tr v-for="product in cart">
+                    <td><button @click="removeProduct(product)"> X </button></td>
+                    <td><img class="image" :src="product.skus.data[0].image"></td>
+                    <td class="align-center">{{ product.skus.data[0].id }}</td>
+                    <td>{{ product.skus.data[0].attributes.name }}</td>
+                    
+                    <td class="align-right">
+                        <div class="qty_number">
+                            <input type="text" :value='product.quantity'>
+                            <div class="inc button"><span>+</span></div>
+                            <div class="dec button"><span>-</span></div>
+                        </div>
+                    </td>
+                    <td class="align-right"> $ {{ product.skus.data[0].price}}</td>
                 </tr>
-                <button @click="removeProduct(product)"> X </button>
+                
                 <tr>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
@@ -29,43 +42,33 @@
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
                 </tr>
+                
                 <tr>
                     <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="align-right">Subtotal:</td>
-                    <td class="align-right"><h4 v-if="cartSubTotal != 0"> {{ cartSubTotal | currency }} </h4></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="align-right">Tax:</td>
-                    <td class="align-right"><h4 v-if="cartSubTotal != 0"> {{ cartTotal - cartSubTotal | currency }} </h4></td>
-                </tr>
-                <tr>
                     <td></td>
                     <td></td>
                     <td></td>
                     <td class="align-right vert-bottom">Total:</td>
-                    <td class="align-right vert-bottom"><h2 v-if="cartSubTotal != 0"> {{ cartTotal | currency }} </h2></td>
+                    <td class="align-right vert-bottom"><h2>$ {{ getCartTotal }} </h2></td>
                 </tr>
                 </tbody>
             </table>
-            <button v-show="cartSubTotal" @click="checkoutModal()">Checkout</button></div>
+            <button  @click="checkoutModal()">Checkout</button></div>
         <div class='modalWrapper' v-show='showModal'>
             <div class='overlay' @click='hideModal()'></div>
             <div class='modal checkout'>
                 <i class='close fa fa-times' @click='hideModal()'></i>
                 <h1>Checkout</h1>
                 <div>We accept: <i class='fa fa-stripe'></i> <i class='fa fa-cc-visa'></i> <i class='fa fa-cc-mastercard'></i> <i class='fa fa-cc-amex'></i> <i class='fa fa-cc-discover'></i></div><br>
-                <h3> Subtotal: {{ cartSubTotal | currency }} </h3>
-                <h1> Tax: {{ cartTotal - cartSubTotal | currency }} </h1>
-                <h1> Total: {{ cartTotal | currency }} </h1>
+                
+                <h1> Total: {{ getCartTotal }} </h1>
                 <br><div>This is where our payment processor goes</div>
             </div>
         </div>
     </div>
+     
+     
+       </div>
 </template>
 
 <script>
@@ -73,11 +76,17 @@
 
     export default {
         name: "VProductCheckout",
-        props: ['cart', 'cartSize', 'cartSubTotal', 'tax', 'cartTotal'],
-
+        created: function(){
+            this.cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
+        },        
         data: function() {
             return {
-                showModal: false
+                showModal: false,
+                cartTotal: 0,
+                cartSubTotal: 0,
+                cart: [],
+                currency: ''
+
             }
         },
 
@@ -101,6 +110,22 @@
                 }
 
                 return cartSize;
+            }
+        },
+         computed: {
+            
+            getCartTotal: function () {
+                
+              var total = 0;
+                if(this.cart.length > 0){
+                    for (var i = 0; i < this.cart.length; i++) {
+                       
+                        total += this.cart[i].quantity * this.cart[i].skus.data[0].price;
+                    }
+                }else{
+                    total = 0;
+                }
+                return total;
             }
         },
 
@@ -143,4 +168,58 @@
 
     }
 </script>
+
+<style scoped>
+
+.checkout-area table tr{
+    margin-bottom: 20px;
+}
+    .qty_number {
+    position: relative;
+    border: none;
+    width: 131px;
+    margin-top: 0px;
+}
+
+.qty_number input {
+    border: 0;
+        border-right-color: currentcolor;
+        border-right-style: none;
+        border-right-width: 0px;
+        border-left-color: currentcolor;
+        border-left-style: none;
+        border-left-width: 0px;
+    width: 71px;
+    height: 30px;
+    text-align: center;
+    border-left: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+    margin: auto;
+    display: table;
+    padding: 3px;
+}
+
+
+.qty_number .button.inc {
+    right: 0;
+    left: inherit;
+}
+.qty_number .button {
+    cursor: pointer;
+    width: 30px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    left: 0;
+    text-align: center;
+    height: 30px;
+line-height: 25px;
+}
+
+.image{
+    width: 80px;
+}
+</style>
+
 
