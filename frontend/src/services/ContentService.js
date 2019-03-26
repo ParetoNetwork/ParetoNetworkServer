@@ -240,22 +240,28 @@ export default class ContentService {
           gasPrice: content.gasPrice
         })
         .on("transactionHash", hash => {
+            content.txHash = hash;
+            content.txRewardHash = hash;
+            content.status = 2;
+            if(title){
+                content.intelData = {title: title};
+            }
+            events.addTransaction(content);
+            ContentService.postTransactions(content);
 
-
-            web3.eth.getTransaction(hash).then( (txObject)=>{
-                const  nonce = txObject.nonce;
-                content.txHash = hash;
-                content.txRewardHash = hash;
-                content.status = 2;
-                content.nonce = nonce;
-                if(title){
-                    content.intelData = {title: title};
+            waitForNonce(hash,( txObject)=>{
+                if(txObject){
+                    const  nonce = txObject.nonce;
+                    content.txHash = hash;
+                    content.txRewardHash = hash;
+                    content.status =  txObject.blockNumber? 3 :  2;
+                    content.nonce = nonce;
+                    if(title){
+                        content.intelData = {title: title};
+                    }
+                    ContentService.postTransactions(content);
                 }
-                events.addTransaction(content);
-                ContentService.postTransactions(content);
-            }).catch(function (err) {
-                console.log(err);
-            });
+             });
 
 
 
@@ -394,22 +400,31 @@ export default class ContentService {
                 gasPrice
               })
               .once("transactionHash", hash => {
-                  web3.eth.getTransaction(hash).then( (txObject)=>{
-                      const content = {};
-                      const  nonce = txObject.nonce;
-                      content.txHash = hash;
-                      content.status = 0;
-                      content.event = "approve";
-                      content.nonce = nonce;
-                      if(serverData.title){
-                          content.intelData = {title: serverData.title};
-                      }
-                      events.addTransaction(content);
+                  const data = {};
+                  data.txHash = hash;
+                  data.status = 0;
+                  data.event = "approve";
+                  if(serverData.title){
+                      data.intelData = {title: serverData.title};
+                  }
+                  events.addTransaction(data);
 
-                      ContentService.postTransactions(content);
-                  }).catch(function (err) {
-                      console.log(err);
-                  });
+                  ContentService.postTransactions(content);
+                  waitForNonce(hash,  (txObject)=>{
+                      if(txObject){
+                          const content = {};
+                          const  nonce = txObject.nonce;
+                          content.txHash = hash;
+                          content.status = txObject.blockNumber? 1 :  0;
+                          content.event = "approve";
+                          content.nonce = nonce;
+                          if(serverData.title){
+                              content.intelData = {title: serverData.title};
+                          }
+
+                          ContentService.postTransactions(content);
+                      }
+                      });
                 var txHash = hash;
 
                 waitForReceipt(hash, async receipt => {
@@ -461,23 +476,27 @@ export default class ContentService {
         })
         .on("transactionHash", hash => {
 
-            web3.eth.getTransaction(hash).then( (txObject)=>{
-               const  nonce = txObject.nonce;
-                content.txHash = hash;
-                content.txRewardHash = hash;
-                content.status = 2;
-                content.nonce = nonce;
-                if(title){
-                    content.intelData = {title: title}
+            content.txHash = hash;
+            content.txRewardHash = hash;
+            content.status = 2;
+            if(title){
+                content.intelData = {title: title}
+            }
+            events.addTransaction(content);
+            ContentService.postTransactions(content);
+            waitForNonce(hash, (txObject)=>{
+                if(txObject){
+                    const  nonce = txObject.nonce;
+                    content.txHash = hash;
+                    content.txRewardHash = hash;
+                    content.status = txObject.blockNumber? 3 :  2;
+                    content.nonce = nonce;
+                    if(title){
+                        content.intelData = {title: title}
+                    }
+                    ContentService.postTransactions(content);
                 }
-                events.addTransaction(content);
-
-                ContentService.postTransactions(content);
-            }).catch(function (err) {
-                console.log(err);
-            });
-
-
+                }) ;
           waitForReceipt(hash, receipt => {
             if (ContentService.ledgerNanoEngine) {
               ContentService.ledgerNanoEngine.stop();
@@ -591,20 +610,28 @@ export default class ContentService {
           })
           .on("transactionHash", hash => {
 
-            web3.eth.getTransaction(hash).then( (txObject)=>{
-                  const param = {};
-                  const  nonce = txObject.nonce;
-                  param.txHash = hash;
-                  param.status = 0;
-                  param.event = "approve";
-                  param.nonce = nonce;
-                  param.intelData = {title: content.title};
-                  events.addTransaction(param);
+              const data = {};
+              data.txHash = hash;
+              data.status = 0;
+              data.event = "approve";
+              data.intelData = {title: content.title};
+              events.addTransaction(data);
 
-                  ContentService.postTransactions(param);
-              }).catch(function (err) {
-                  console.log(err);
-              });
+              ContentService.postTransactions(data);
+
+               waitForNonce(hash, (txObject)=>{
+                   if(txObject){
+                       const param = {};
+                       const  nonce = txObject.nonce;
+                       param.txHash = hash;
+                       param.status = txObject.blockNumber? 1 :  0;
+                       param.event = "approve";
+                       param.nonce = nonce;
+                       param.intelData = {title: content.title};
+
+                       ContentService.postTransactions(param);
+                   }
+               });
             //The transaction will be send to vuex and the database
             var txHash = hash;
             params.txHash = txHash;
@@ -800,4 +827,25 @@ function waitForReceipt(hash, cb) {
       }, 1000);
     }
   });
+}
+
+
+function waitForNonce(hash, cb) {
+    web3.eth.getTransaction(hash, function (err, txObject) {
+        if (err) {
+            error(err);
+        }
+
+        if (txObject !== null) {
+            // Transaction went through
+            if (cb) {
+                cb(txObject);
+            }
+        } else {
+            // Try again in 1 second
+            setTimeout(function () {
+                waitForNonce(hash, cb);
+            }, 400);
+        }
+    });
 }
