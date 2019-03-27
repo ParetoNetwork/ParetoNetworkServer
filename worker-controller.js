@@ -1283,7 +1283,7 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 
 };
 
-workerController.updateTransactionByNonce = function (txHash, sender, status, event, intel,amount){
+workerController.updateTransactionByNonce = function (txHash, sender, status, event, intel,amount, block){
     web3.eth.getTransaction(txHash).then(function (txObject){
         const nonce = txObject.nonce;
         const toUpdate = {
@@ -1292,6 +1292,7 @@ workerController.updateTransactionByNonce = function (txHash, sender, status, ev
             address: sender,
             nonce: nonce,
             amount: amount,
+            block: block,
             txHash: txHash,
             event: event,
         }
@@ -1320,8 +1321,9 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                 });
                 const txHash = event.transactionHash;
+                const block = event.blockNumber;
                 const sender = event.returnValues.intelProvider.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3, 'create',parseInt(event.returnValues.intelID),initialBalance);
+                workerController.updateTransactionByNonce(txHash, sender,3, 'create',parseInt(event.returnValues.intelID),initialBalance, block);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b18');
                 error.systemMessage = e.message? e.message: e;
@@ -1339,7 +1341,8 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const txHash = event.transactionHash;
                 const amount =  parseFloat(web3.utils.fromWei(event.returnValues.rewardAmount, 'ether'));
                 const sender = event.returnValues.sender.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3, 'reward',parseInt(event.returnValues.intelIndex),amount);
+                const block = event.blockNumber;
+                workerController.updateTransactionByNonce(txHash, sender,3, 'reward',parseInt(event.returnValues.intelIndex),amount, block);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b19');
                 error.systemMessage = e.message? e.message: e;
@@ -1357,7 +1360,8 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.distributor.toLowerCase();
                 const amount =  parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether'));
-                workerController.updateTransactionByNonce(txHash, sender,3,'distribute',parseInt(event.returnValues.intelIndex),amount);
+                const block = event.blockNumber;
+                workerController.updateTransactionByNonce(txHash, sender,3,'distribute',parseInt(event.returnValues.intelIndex),amount, block);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b21');
                 error.systemMessage = e.message? e.message: e;
@@ -1375,7 +1379,8 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.from.toLowerCase();
                 const amount =  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether'));
-                workerController.updateTransactionByNonce(txHash, sender,3,'deposited',0,amount);
+                const block = event.blockNumber;
+                workerController.updateTransactionByNonce(txHash, sender,3,'deposited',0,amount, block);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b21');
                 error.systemMessage = e.message? e.message: e;
