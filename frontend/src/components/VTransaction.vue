@@ -149,13 +149,19 @@
           const style = {
               "border-bottom-color": "black !important"
           };
-          if (transaction.intelData && transaction.intelData.reward){
-              const  blue = Math.min((transaction.amount/transaction.intelData.reward)*100,100);
-              const darkBlue =  100-blue;
-              console.log(darkBlue)
-              if(darkBlue!=100 && darkBlue!=0){
-                  style.background = 'linear-gradient(90deg, #679ab4 '+blue+'%, #1f344f '+darkBlue+'%)';
+          if (transaction.event === 'reward' && transaction.status === 3 && transaction.intelData && transaction.intelData.reward){
+              let blue =Math.min(((transaction.amount|| 0)/transaction.intelData.reward)*100,100);
+              if (transaction.minBlock && transaction.block){
+                  if(transaction.block > transaction.minBlock){
+                      blue = blue*(transaction.block - transaction.minBlock)/transaction.exponentBlock;
+                  }else{
+                      blue=0;
+                  }
+              }else{
+                  blue=0;
               }
+              const darkBlue =  100-blue;
+              style.background = 'linear-gradient(90deg, #679ab4 '+blue+'%, '+blue+'% , #1f344f '+darkBlue+'%)';
 
           }
 

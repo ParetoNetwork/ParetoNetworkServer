@@ -12,7 +12,7 @@
                       :onboardingPicture="onboarding"></VProfile>
           </div>
           <div class="col-12 px-0">
-            <VEventFeed v-if="primalLoad" :user="user" :updateHash="updateHash" :defaultTransactions="information.transactions"></VEventFeed>
+            <VEventFeed v-if="primalLoad" :user="user" :updateHash="updateHash" :defaultTransactions="information.transactions" :block="block"></VEventFeed>
             <VShimmerMyPost v-else></VShimmerMyPost>
           </div>
         </div>
@@ -156,7 +156,7 @@
               this.user.score = info.data.score;
               this.user.rank = info.data.rank;
               this.user.tokens = info.data.tokens;
-              // this.user.block = info.data.block;
+              //this.user.block = info.data.block;
               this.block = info.data.block;
             }
 
@@ -190,6 +190,7 @@
         return profileService.getProfile(
           res => {
             this.user = res;
+            this.block = res.block;
           },
           error => {
             console.log('Could not retrieve profile')

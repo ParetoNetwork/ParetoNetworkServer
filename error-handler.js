@@ -248,7 +248,19 @@ errorHandler.backendErrorList = function(code){
             description: 'Cannot update Reward transaction based on Deposit',
             userMessage: '',
             priority: 1
-        }
+        },
+        b26: {
+            code: 'b26',
+            description: 'Error watching Deposited',
+            userMessage: '',
+            priority: 1
+        },
+        b27: {
+            code: 'b27',
+            description: 'Cannot exclude deposit transaction in score formula',
+            userMessage: '',
+            priority: 1
+        },
     };
     return error[code];
 };

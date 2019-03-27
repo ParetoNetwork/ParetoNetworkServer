@@ -478,7 +478,17 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         }
 
                     }//end for
-
+                    try{
+                        const depositTransactions = await ParetoTransaction.find({address: address, event: 'deposited'});
+                        if(depositTransactions.length){
+                            txObjects = txObjects.filter(it=> !depositTransactions.includes( it.transactionHash) );
+                        }
+                    }catch (e) {
+                        const error = ErrorHandler.backendErrorList('b27');
+                        error.systemMessage = e;
+                        error.address = address;
+                        console.log(error);
+                    }
                     try{
                         const transactionHash = txObjects.map(it=>{return it.transactionHash});
                         const rewardDeposit =  await ParetoReward.find({sender: address, txHash: { $nin: transactionHash }}).distinct('txHash');
@@ -1273,21 +1283,22 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 
 };
 
-workerController.updateTransactionByNonce = function (txHash, sender, status, event, intel){
+workerController.updateTransactionByNonce = function (txHash, sender, status, event, intel,amount){
     web3.eth.getTransaction(txHash).then(function (txObject){
-
         const nonce = txObject.nonce;
+        const toUpdate = {
+            status: status,
+            txRewardHash: txHash,
+            address: sender,
+            nonce: nonce,
+            amount: amount,
+            txHash: txHash,
+            event: event,
+        }
+        if(intel){ toUpdate.intel= intel; }
         ParetoTransaction.findOneAndUpdate(
             {  $or: [{txHash: txHash},
-                    { address: sender, nonce: nonce}]}, {
-                status: status,
-                txRewardHash: txHash,
-                address: sender,
-                nonce: nonce,
-                txHash: txHash,
-                event: event,
-                intel: intel,
-            },{upsert: true, new: true}).then(values => {
+                    { address: sender, nonce: nonce}]}, toUpdate,{upsert: true, new: true}).then(values => {
         }).catch(e => {
             const error = ErrorHandler.backendErrorList('b23');
             error.systemMessage = e.message? e.message: e;
@@ -1310,7 +1321,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 });
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.intelProvider.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3, 'create',parseInt(event.returnValues.intelID));
+                workerController.updateTransactionByNonce(txHash, sender,3, 'create',parseInt(event.returnValues.intelID),initialBalance);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b18');
                 error.systemMessage = e.message? e.message: e;
@@ -1326,8 +1337,9 @@ workerController.updateFromLastIntel =  function(lastBlock){
             try{
                 const event = events[i];
                 const txHash = event.transactionHash;
+                const amount =  parseFloat(web3.utils.fromWei(event.returnValues.rewardAmount, 'ether'));
                 const sender = event.returnValues.sender.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3, 'reward',parseInt(event.returnValues.intelIndex));
+                workerController.updateTransactionByNonce(txHash, sender,3, 'reward',parseInt(event.returnValues.intelIndex),amount);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b19');
                 error.systemMessage = e.message? e.message: e;
@@ -1344,7 +1356,26 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const event = events[i];
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.distributor.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3,'distribute',parseInt(event.returnValues.intelIndex));
+                const amount =  parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether'));
+                workerController.updateTransactionByNonce(txHash, sender,3,'distribute',parseInt(event.returnValues.intelIndex),amount);
+            }catch (e) {
+                const error = ErrorHandler.backendErrorList('b21');
+                error.systemMessage = e.message? e.message: e;
+                console.log(JSON.stringify(error));
+            }
+        }
+
+    });
+    intel.getPastEvents('Deposited',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+        // console.log(events);
+        if(err){ console.log(err); return;}
+        for (let i=0;i<events.length;i=i+1){
+            try{
+                const event = events[i];
+                const txHash = event.transactionHash;
+                const sender = event.returnValues.from.toLowerCase();
+                const amount =  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether'));
+                workerController.updateTransactionByNonce(txHash, sender,3,'deposited',0,amount);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b21');
                 error.systemMessage = e.message? e.message: e;
