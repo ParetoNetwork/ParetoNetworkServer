@@ -1,31 +1,31 @@
 <template>
   <div class="text-center position-relative">
-    <div class="row ml-0 mr-0 py-2 cursor-pointer border-bottom text-content"
-         style="border-bottom-color: black !important;">
-      <div class="col-1 px-0" @click="clickTransaction()">
-        <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']"
-                           :class="statusColor(transaction.status)"></font-awesome-icon>
-        <font-awesome-icon v-else-if="transaction.event === 'reward'" :icon="['fas', 'coins']"
-                           :class="statusColor(transaction.status)"></font-awesome-icon>
+      <div class="row ml-0 mr-0 py-2 cursor-pointer border-bottom text-content" :style="getProgress(transaction)">
+        <div class="col-1 px-0" @click="clickTransaction()">
+          <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']"
+                             :class="statusColor(transaction.status)"></font-awesome-icon>
+          <font-awesome-icon v-else-if="transaction.event === 'reward'" :icon="['fas', 'coins']"
+                             :class="statusColor(transaction.status)"></font-awesome-icon>
+        </div>
+        <div class="col-3 px-0 text-left">
+          <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
+             target="_blank" class="col-2 px-0 pl-1">
+            {{transaction.amount}}
+          </a>
+        </div>
+        <div class="col-1 text-left" @click="clickTransaction()">
+          <font-awesome-icon :icon="['fas', 'arrow-alt-circle-right']"
+                             :class="statusColor(transaction.status)"></font-awesome-icon>
+        </div>
+        <p class="col-5 px-0 pl-1 ellipsis">
+          <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash" target="_blank">
+            {{ intelTitle(transaction) }}
+          </a>
+          <!-- use intelData.address / transaction.txHash to pass into IntelDetail view to force it to load this object -->
+        </p>
       </div>
-      <div class="col-3 px-0 text-left">
-        <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
-           target="_blank" class="col-2 px-0 pl-1">
-          {{transaction.amount}}
-        </a>
-      </div>
-      <div class="col-1 text-left" @click="clickTransaction()">
-        <font-awesome-icon :icon="['fas', 'arrow-alt-circle-right']"
-                           :class="statusColor(transaction.status)"></font-awesome-icon>
-      </div>
-      <p class="col-5 px-0 pl-1 ellipsis">
-        <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash" target="_blank">
-          {{ intelTitle(transaction) }}
-        </a>
-        <!-- use intelData.address / transaction.txHash to pass into IntelDetail view to force it to load this object -->
-      </p>
     </div>
-  </div>
+
 </template>
 
 <script>
@@ -144,6 +144,22 @@
           'green-background': status == 3,
           'yellow-background': status < 3 && click
         };
+      },
+      getProgress(transaction) {
+          const style = {
+              "border-bottom-color": "black !important"
+          };
+          if (transaction.intelData && transaction.intelData.reward){
+              const  blue = Math.min((transaction.amount/transaction.intelData.reward)*100,100);
+              const darkBlue =  100-blue;
+              console.log(darkBlue)
+              if(darkBlue!=100 && darkBlue!=0){
+                  style.background = 'linear-gradient(90deg, #679ab4 '+blue+'%, #1f344f '+darkBlue+'%)';
+              }
+
+          }
+
+          return style;
       }
     }
   }

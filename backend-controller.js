@@ -298,7 +298,7 @@ controller.getTransaction = function (data, callback) {
       path: 'createdBy'
       , select: 'address alias aliasSlug profilePic'
     }
-    , select: 'id block address title'
+    , select: 'id block address title reward'
   }).exec(callback);
 };
 
