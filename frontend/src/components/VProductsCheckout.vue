@@ -19,7 +19,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="product in cart">
+                <tr v-for="(product, key) in cart">
                     <td><button @click="removeProduct(product)"> X </button></td>
                     <td><img class="image" :src="product.skus.data[0].image"></td>
                     <td class="align-center">{{ product.skus.data[0].id }}</td>
@@ -28,8 +28,8 @@
                     <td class="align-right">
                         <div class="qty_number">
                             <input type="text" :value='product.quantity'>
-                            <div class="inc button"><span>+</span></div>
-                            <div class="dec button"><span>-</span></div>
+                            <div class="inc button" @click="addQuantity(product, key)"><span>+</span></div>
+                            <div class="dec button" @click="deductQuantity(product, key)"><span>-</span></div>
                         </div>
                     </td>
                     <td class="align-right"> $ {{ product.skus.data[0].price}}</td>
@@ -53,26 +53,36 @@
                 </tr>
                 </tbody>
             </table>
-            <button  @click="checkoutModal()">Checkout</button></div>
-        <div class='modalWrapper' v-show='showModal'>
-            <div class='overlay' @click='hideModal()'></div>
-            <div class='modal checkout'>
-                <i class='close fa fa-times' @click='hideModal()'></i>
-                <h1>Checkout</h1>
-                <div>We accept: <i class='fa fa-stripe'></i> <i class='fa fa-cc-visa'></i> <i class='fa fa-cc-mastercard'></i> <i class='fa fa-cc-amex'></i> <i class='fa fa-cc-discover'></i></div><br>
-                
-                <h1> Total: {{ getCartTotal }} </h1>
-                <br><div>This is where our payment processor goes</div>
+            <div>
+                <VueStripeCheckout
+                    ref="checkoutRef"
+                    :image="image"
+                    :name="name"
+                    :description="description"
+                    :currency="currency"
+                    :amount="getCartTotal * 100"
+                    :allow-remember-me="false"
+                    @done="done"
+                    @opened="opened"
+                    @closed="closed"
+                    @canceled="canceled"
+                    ></VueStripeCheckout>
+                <button @click="checkout">Pay ${{getCartTotal}} {{currency}}</button>
             </div>
-        </div>
-    </div>
-     
+            
+        
      
        </div>
+        </div>
+        </div>
 </template>
 
 <script>
     /* eslint-disable */
+
+
+import VueStripeCheckout from 'vue-stripe-checkout';
+import ProductService from '.././services/productService'
 
     export default {
         name: "VProductCheckout",
@@ -85,7 +95,11 @@
                 cartTotal: 0,
                 cartSubTotal: 0,
                 cart: [],
-                currency: ''
+                image: 'https://i.imgur.com/HhqxVCW.jpg',
+                name: 'Pareto',
+                description: 'Pareto Products',
+                currency: 'USD',
+                
 
             }
         },
@@ -130,6 +144,31 @@
         },
 
         methods: {
+            async checkout () {
+            
+            ProductService.createOrder(this.cart, 
+                res => {
+                    console.log(res)     
+                },error => {
+
+                }
+            );
+
+            const { token, args } = await this.$refs.checkoutRef.open();
+            },
+            done ({token, args}) {
+                console.log(token)
+                console.log(args)
+            },
+            opened () {
+            // do stuff 
+            },
+            closed () {
+            // do stuff 
+            },
+            canceled () {
+            // do stuff 
+            },
             removeProduct: function(product) {
                 this.cart.$remove(product);
                 this.cartSubTotal = this.cartSubTotal - (product.price * product.quantity);
@@ -139,7 +178,12 @@
                     this.checkoutBool = false;
                 }
             },
+            addQuantity: function(product, key){
+                
+            },
+            deductQuantity: function(product, key){
 
+            },
             checkoutModal: function() {
                 var self = this;
                 self.showModal = true;
@@ -214,12 +258,40 @@
     left: 0;
     text-align: center;
     height: 30px;
-line-height: 25px;
-}
+    line-height: 25px;
+    }
 
-.image{
-    width: 80px;
-}
+    .image{
+        width: 80px;
+    }
+
+    .StripeElement {
+    box-sizing: border-box;
+
+    height: 40px;
+
+    padding: 10px 12px;
+
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: white;
+
+    box-shadow: 0 1px 3px 0 #e6ebf1;
+    -webkit-transition: box-shadow 150ms ease;
+    transition: box-shadow 150ms ease;
+    }
+
+    .StripeElement--focus {
+    box-shadow: 0 1px 3px 0 #cfd7df;
+    }
+
+    .StripeElement--invalid {
+    border-color: #fa755a;
+    }
+
+    .StripeElement--webkit-autofill {
+    background-color: #fefde5 !important;
+    }
 </style>
 
 
