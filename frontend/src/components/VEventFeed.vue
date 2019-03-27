@@ -49,7 +49,7 @@
   export default {
     name: "VEventFeed",
     props: [
-      'updateHash', 'user', 'defaultTransactions'
+      'updateHash', 'user', 'defaultTransactions', 'block'
     ],
     data: function () {
       return {
@@ -199,6 +199,11 @@
             this.isLoadingScroll = false;
 
             this.transactions.forEach(tx => {
+                const exponentBlock =  parseFloat(localStorage.getItem("exponentBlock")) || block;
+                // tx.minBlock = block - exponentBlock;
+                // tx.exponentBlock =  exponentBlock;
+                this.$set(tx, 'minBlock', this.block - exponentBlock);
+                this.$set(tx, 'exponentBlock', exponentBlock);
               if ((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2) {
                 this.myContent.forEach(item => {
                   if (item.id == tx.intel) {

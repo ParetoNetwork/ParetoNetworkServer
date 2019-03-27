@@ -61,6 +61,7 @@ export default class profileService {
 
             }
             window.localStorage.setItem('etherscan', etherscan);
+            window.localStorage.setItem('exponentBlock', res.data.exponentBlock);
 
             if (res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
                 || res.data.paretoAddress !== window.localStorage.getItem('paretoAddress')
