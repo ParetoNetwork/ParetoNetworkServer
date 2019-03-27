@@ -1704,6 +1704,30 @@ controller.listProducts = async function (callback) {
     );
 }
 
+controller.createOrder = async function (order_cart, callback) {
+
+    let products_ar = []
+    for(var product of order_cart) {
+        products_ar.push(
+           {
+               type: 'sku',
+               parent: product.skus.data[0].id,
+               product: quantity
+           }
+       )
+    }
+    
+    const order = stripe.orders.create({
+        currency: 'usd',
+        items: products_ar
+        
+     });
+     callback(order, order);
+      
+}
+
+
+
 /**
  *
  * *********** Functions with Redis ************

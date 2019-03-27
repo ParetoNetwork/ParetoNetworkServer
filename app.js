@@ -681,6 +681,19 @@ app.get('/v1/listproducts', function (req, res) {
     });
 });
 
+app.post('/v1/createorder', function (req, res) {
+    
+    controller.createOrder(req , function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+
+
 
 app.use('/public/static/', expressStaticGzip('/public/static/', {
   customCompressions: [{

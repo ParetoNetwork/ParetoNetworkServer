@@ -23,6 +23,8 @@ import {fab} from '@fortawesome/free-brands-svg-icons';
 
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueStripeCheckout from 'vue-stripe-checkout';
 library.add(fas, fab);
 
 dom.watch();
@@ -38,6 +40,10 @@ Vue.use(require('vue-moment'));
 
 Vue.use(Meta);
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+
+
+
+Vue.use(VueStripeCheckout, 'pk_test_jS8zqmveZASyLevO12H7VaH5');
 
 const store = new Vuex.Store({
   state: {
