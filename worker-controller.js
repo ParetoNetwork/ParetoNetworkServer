@@ -515,6 +515,19 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                             //sorts down to remaining transactions, since we already know the total and the system block height
 
                             let amountBn = Decimal(amount);
+                            try{
+                                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
+                                const intelBalance  = await intel.methods
+                                    .getParetoBalance(address).call();
+                                const intelBalanceEther = web3.utils.fromWei(intelBalance.toString(), 'ether');
+                                amount = parseFloat(amount) + parseFloat(intelBalanceEther);
+                                amountBn = Decimal(amount.toString());
+                            }catch (e) {
+                                const error = ErrorHandler.backendErrorList('b24');
+                                error.systemMessage = e;
+                                error.address = address;
+                                console.log(error);
+                            }
 
                             while(i < transactions.length){
                                 // Should allow zero too
@@ -581,19 +594,7 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                                 multiple = multiple.sub(1);
                             }
 
-                            try{
-                                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
-                                const intelBalance  = await intel.methods
-                                    .getParetoBalance(address).call();
-                                const intelBalanceEther = web3.utils.fromWei(intelBalance.toString(), 'ether');
-                                amount = parseFloat(amount) + parseFloat(intelBalanceEther);
-                                amountBn = Decimal(amount.toString());
-                            }catch (e) {
-                                const error = ErrorHandler.backendErrorList('b24');
-                                error.systemMessage = e;
-                                error.address = address;
-                                console.log(error);
-                            }
+
 
                             var score = parseFloat(amountBn.mul(multiple)); //if multiple is less than 1, make it at least 1. ie 0.4 = 1.4
 
