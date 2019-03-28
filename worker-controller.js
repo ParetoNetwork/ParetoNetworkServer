@@ -452,7 +452,7 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                     toBlock: 'latest',
                     address: PARETO_CONTRACT_ADDRESS,
                     topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', addressPadded, null]
-                }).then(function (txObjects){
+                }).then(async function (txObjects){
                     //console.log(txObjects);
                     for(i = 0; i < txObjects.length; i++){
 
@@ -468,7 +468,6 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         var quantityEth = web3.utils.fromWei(quantityWei, 'ether'); //takes a string.
                         //can be float
                         quantityEth = Decimal(quantityEth);
-
                         //basically pushes
                         if(blockNumber in outgoing)
                         {
@@ -479,6 +478,37 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         }
 
                     }//end for
+                    try{
+                        const depositTransactions = await ParetoTransaction.find({address: address, event: 'deposited'});
+                        if(depositTransactions.length){
+                            txObjects = txObjects.filter(it=> !depositTransactions.includes( it.transactionHash) );
+                        }
+                    }catch (e) {
+                        const error = ErrorHandler.backendErrorList('b27');
+                        error.systemMessage = e;
+                        error.address = address;
+                        console.log(error);
+                    }
+                    try{
+                        const transactionHash = txObjects.map(it=>{return it.transactionHash});
+                        const rewardDeposit =  await ParetoReward.find({sender: address, txHash: { $nin: transactionHash }}).distinct('txHash');
+                        for(i = 0; i < rewardDeposit.length; i++){
+                            blockNumber = rewardDeposit[i].block+ "";
+                            quantityEth = rewardDeposit[i].amount + "";
+                            if(blockNumber in outgoing)
+                            {
+                                outgoing[blockNumber] = outgoing[blockNumber].add(quantityEth);
+                            }
+                            else {
+                                outgoing[blockNumber] = quantityEth;
+                            }
+                        }
+                    }catch (e) {
+                        const error = ErrorHandler.backendErrorList('b25');
+                        error.systemMessage = e;
+                        error.address = address;
+                        console.log(error);
+                    }
 
                     var transactions = Object.entries(incoming)
                         .concat(Object.entries(outgoing).map(([ts, val]) => ([ts, val.mul(Decimal(-1))])))
@@ -493,7 +523,22 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                             var i = 0;
                             var removableIndex = 0;
                             //sorts down to remaining transactions, since we already know the total and the system block height
-                            const amountBn = Decimal(amount);
+
+                            let amountBn = Decimal(amount);
+                            try{
+                                const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
+                                const intelBalance  = await intel.methods
+                                    .getParetoBalance(address).call();
+                                const intelBalanceEther = web3.utils.fromWei(intelBalance.toString(), 'ether');
+                                amount = parseFloat(amount) + parseFloat(intelBalanceEther);
+                                amountBn = Decimal(amount.toString());
+                            }catch (e) {
+                                const error = ErrorHandler.backendErrorList('b24');
+                                error.systemMessage = e;
+                                error.address = address;
+                                console.log(error);
+                            }
+
                             while(i < transactions.length){
                                 // Should allow zero too
                                 if(parseFloat(transactions[i][1] ) <= 0 && i+1 < transactions.length /*&& transactions[i+1] !== 'undefined'*/){
@@ -559,7 +604,12 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                                 multiple = multiple.sub(1);
                             }
 
+
+
                             var score = parseFloat(amountBn.mul(multiple)); //if multiple is less than 1, make it at least 1. ie 0.4 = 1.4
+
+
+
                             var bonus = parseFloat(blockHeightDifference.div(divisor)) ;
 
 
@@ -1233,21 +1283,23 @@ workerController.retrieveAddressRankWithRedis = function(addressess, attempts, c
 
 };
 
-workerController.updateTransactionByNonce = function (txHash, sender, status, event, intel){
+workerController.updateTransactionByNonce = function (txHash, sender, status, event, intel,amount, block){
     web3.eth.getTransaction(txHash).then(function (txObject){
-
         const nonce = txObject.nonce;
+        const toUpdate = {
+            status: status,
+            txRewardHash: txHash,
+            address: sender,
+            nonce: nonce,
+            amount: amount,
+            block: block,
+            txHash: txHash,
+            event: event,
+        }
+        if(intel){ toUpdate.intel= intel; }
         ParetoTransaction.findOneAndUpdate(
             {  $or: [{txHash: txHash},
-                    { address: sender, nonce: nonce}]}, {
-                status: status,
-                txRewardHash: txHash,
-                address: sender,
-                nonce: nonce,
-                txHash: txHash,
-                event: event,
-                intel: intel,
-            },{upsert: true, new: true}).then(values => {
+                    { address: sender, nonce: nonce}]}, toUpdate,{upsert: true, new: true}).then(values => {
         }).catch(e => {
             const error = ErrorHandler.backendErrorList('b23');
             error.systemMessage = e.message? e.message: e;
@@ -1269,8 +1321,9 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                 });
                 const txHash = event.transactionHash;
+                const block = event.blockNumber;
                 const sender = event.returnValues.intelProvider.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3, 'create',parseInt(event.returnValues.intelID));
+                workerController.updateTransactionByNonce(txHash, sender,3, 'create',parseInt(event.returnValues.intelID),initialBalance, block);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b18');
                 error.systemMessage = e.message? e.message: e;
@@ -1286,8 +1339,10 @@ workerController.updateFromLastIntel =  function(lastBlock){
             try{
                 const event = events[i];
                 const txHash = event.transactionHash;
+                const amount =  parseFloat(web3.utils.fromWei(event.returnValues.rewardAmount, 'ether'));
                 const sender = event.returnValues.sender.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3, 'reward',parseInt(event.returnValues.intelIndex));
+                const block = event.blockNumber;
+                workerController.updateTransactionByNonce(txHash, sender,3, 'reward',parseInt(event.returnValues.intelIndex),amount, block);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b19');
                 error.systemMessage = e.message? e.message: e;
@@ -1304,7 +1359,28 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const event = events[i];
                 const txHash = event.transactionHash;
                 const sender = event.returnValues.distributor.toLowerCase();
-                workerController.updateTransactionByNonce(txHash, sender,3,'distribute',parseInt(event.returnValues.intelIndex));
+                const amount =  parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether'));
+                const block = event.blockNumber;
+                workerController.updateTransactionByNonce(txHash, sender,3,'distribute',parseInt(event.returnValues.intelIndex),amount, block);
+            }catch (e) {
+                const error = ErrorHandler.backendErrorList('b21');
+                error.systemMessage = e.message? e.message: e;
+                console.log(JSON.stringify(error));
+            }
+        }
+
+    });
+    intel.getPastEvents('Deposited',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+        // console.log(events);
+        if(err){ console.log(err); return;}
+        for (let i=0;i<events.length;i=i+1){
+            try{
+                const event = events[i];
+                const txHash = event.transactionHash;
+                const sender = event.returnValues.from.toLowerCase();
+                const amount =  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether'));
+                const block = event.blockNumber;
+                workerController.updateTransactionByNonce(txHash, sender,3,'deposited',0,amount, block);
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b21');
                 error.systemMessage = e.message? e.message: e;
