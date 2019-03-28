@@ -2,34 +2,14 @@
 
   <template>
       <div>
-          <h1>Products</h1>
           <div class='products'>
               <div v-for='(product, index) in productsData'  :class="'product'">
                   <div class='image' @click='viewProduct(product)' v-bind:style='{ backgroundImage: "url(" +  product.skus.data[0].image + ")" }' style='background-size: cover; background-position: center;'></div>
                   <div class='name'>{{ product.skus.data[0].attributes.name }}</div>
-                  <div class='description'>{{ product.description }}</div>
-                  <div class='price'>$ {{ product.skus.data[0].price}}</div>
+                  <div class='price'>$ {{ product.skus.data[0].price / 100}}</div>
                   <button @click='addToCart(product)'>Add to Cart</button><br><br></div>
           </div>
-          <div class='modalWrapper' v-show='showModal'>
-              <div class='prevProduct' @click='changeProductInModal("prev")'><i class='fa fa-angle-left'></i></div>
-              <div class='nextProduct' @click='changeProductInModal("next")'><i class='fa fa-angle-right'></i></div>
-              <div class='overlay' @click='hideModal()'></div>
-              <div class='modal'>
-                  <i class='close fa fa-times' @click='hideModal()'></i>
-                  <div class='imageWrapper'><div class='image' v-bind:style='{ backgroundImage: "url(" +  modalData.image + ")" }' style='background-size: cover; background-position: center;' v-on:mouseover='imageMouseOver($event)' v-on:mousemove='imageMouseMove($event)' v-on:mouseout='imageMouseOut($event)'></div></div>
-                  <div class='additionalImages' v-if='modalData.images'>
-                      <div v-for='image in modalData.images' class='additionalImage' v-bind:style='{ backgroundImage: "url(" + image.image + ")" }' style='background-size: cover; background-position: center;' @click='changeImage(image.image)'></div>
-                  </div>
-                  <div class='name'>{{ modalData.product }}</div>
-                  <div class='description'>{{ modalData.description }}</div>
-                  <div class='details'>{{ modalData.details }}</div>
-                  <h3 class='price'>{{ modalData.price  }}</h3>
-                  <label for='modalAmount'>QTY</label>
-                  <input id='modalAmount' value='modalAmount' v-model='modalAmount' class='amount' @keyup.enter='modalAddToCart(modalData), hideModal()'/>
-                  <button @click='modalAddToCart(modalData), hideModal()'>Add to Cart</button>
-              </div>
-          </div>
+
       </div>
 </template>
 

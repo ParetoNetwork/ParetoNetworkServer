@@ -22,7 +22,8 @@
     created: function(){
       productService.listProducts(
         res => {
-          this.productsData =  res.data
+
+          this.productsData =  res.data.data
         },
         error => {
 

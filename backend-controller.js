@@ -35,6 +35,7 @@ const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //
 //const CONTRACT_CREATION_BLOCK_INT = 4953750;
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
 const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
+const PROVISIONAL_EMAIL = process.env.PROVISIONAL_EMAIL
 const REDIS_URL = process.env.REDIS_URL || constants.REDIS_URL;
 const queue = kue.createQueue({
   redis: REDIS_URL,
@@ -1707,23 +1708,47 @@ controller.listProducts = async function (callback) {
 controller.createOrder = async function (order_cart, callback) {
 
     let products_ar = []
+
     for(var product of order_cart) {
         products_ar.push(
            {
                type: 'sku',
                parent: product.skus.data[0].id,
-               product: quantity
+               quantity: product.quantity
            }
        )
     }
     
     const order = stripe.orders.create({
         currency: 'usd',
+        email: PROVISIONAL_EMAIL,
         items: products_ar
         
      });
-     callback(order, order);
-      
+
+    order.then(function (result) {
+        callback(result, result);
+    });
+
+
+}
+
+controller.payment = async function (params, callback) {
+
+    var token = params.token;
+    var order_id = params.order;
+    var email = params.email;
+
+    stripe.orders.update(order_id, {
+        email: email
+    });
+
+
+    stripe.orders.pay(order_id, {
+        source: token,
+    })
+
+
 }
 
 
