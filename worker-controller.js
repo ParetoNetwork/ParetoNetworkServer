@@ -158,12 +158,13 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
                 .then(function(res) {
                     blockHeight = res.number;
 
-                    workerController.generateScore(blockHeight, address,blockHeightFixed, function (err, result) {
+                    workerController.generateScore(blockHeight, address,blockHeightFixed, async function (err, result) {
                         if(err){return callback(err)}
                         else{
 
                             if(result.tokens!==0){
-                                workerController.addExponent([address],[result],blockHeight, function (err, results){
+                                const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
+                                workerController.addExponent([address],[result],blockHeight,desiredRewards, function (err, results){
 
                                     if(err){return callback(err)}
                                     else {
@@ -319,10 +320,13 @@ workerController.addExponentAprox =  function(addresses, scores,  blockHeight,ca
     })
 };
 
-workerController.addExponent = async function(addresses, scores, blockHeight,callback){
+workerController.addExponent = async function(addresses, scores, blockHeight, desiredRewards,callback){
 
     let promises =[];
-
+    let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
+         data[""+it.id] = it;
+        return data;
+    }, {});
     return ParetoContent.find({'validated': true }).distinct('intelAddress').exec(function(err, results) {
         if (err) {
             callback(err);
@@ -330,7 +334,7 @@ workerController.addExponent = async function(addresses, scores, blockHeight,cal
         else {
             let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
             if (!data.length) {
-                results = [ Intel_Contract_Schema.networks[ETH_NETWORK].address];
+                results = results.push(Intel_Contract_Schema.networks[ETH_NETWORK].address);
             }
             for (let i = 0; i < results.length; i = i + 1) {
                 try{
@@ -343,25 +347,29 @@ workerController.addExponent = async function(addresses, scores, blockHeight,cal
             }
             return Promise.all(promises).then(values => {
                 let rewards={};
+                let totalDesired={};
                 let total=0;
                 for (let i = 0; i < values.length; i = i + 1) {
                     total=total+values[i].length;
                     for (let j = 0; j < values[i].length; j = j + 1) {
                         try{
                             const sender = values[i][j].returnValues.sender.toLowerCase();
+                            const amount = parseFloat(web3.utils.fromWei(values[i][j].returnValues.rewardAmount, 'ether'));
+                            const intelIndex = values[i][j].returnValues.intelIndex+"";
                             if(!rewards[sender]){
                                 rewards[sender] = 0;
+                                totalDesired[sender] = 0;
                             }
-                            rewards[sender]=rewards[sender]+1;
+                            rewards[sender]=rewards[sender]+Math.min(amount/intelDesiredRewards[intelIndex].reward,1);
+                            totalDesired[sender] = totalDesired[sender] + 1;
                         }catch (e) { console.log(e) }
                     }
                 }
-                const M = total/2;
                 for (let i = 0; i < addresses.length; i = i + 1) {
                     try{
                         const address = addresses[i].toLowerCase();
                         if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-                            const V = (1 + (rewards[address] / M) / 2);
+                            const V = (1 + (rewards[address] / totalDesired[address]) );
                             scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
                         }
                     }catch (e) { console.log(e) }
@@ -910,7 +918,8 @@ workerController.processData = async function (txObjects, address, blockHeight, 
             }
         })
     }
-    await workerController.addExponent(addressesExponent, scores, blockHeight, function (err, results) {
+    const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
+    await workerController.addExponent(addressesExponent, scores, blockHeight,desiredRewards, function (err, results) {
         if(!err ){
 
             for (let t=0; t<results.length; t=t+1){
