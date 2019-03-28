@@ -298,7 +298,7 @@ controller.getTransaction = function (data, callback) {
       path: 'createdBy'
       , select: 'address alias aliasSlug profilePic'
     }
-    , select: 'id block address title'
+    , select: 'id block address title reward'
   }).exec(callback);
 };
 
@@ -362,6 +362,8 @@ controller.startwatchNewIntel = function () {
                     }, {status: 3,
                             txHash: event.transactionHash,
                             event: 'create',
+                            block: event.blockNumber,
+                            amount:  initialBalance,
                             intel: parseInt(event.returnValues.intelID),
                             address: data.address
                         },{upsert: true, new: true})];
@@ -437,12 +439,12 @@ controller.startwatchReward = function (intel, intelAddress) {
               if (!err) {
                 controller.updateAddressReward(event, count);
               } else {
-                callback(err);
+                  console.log(err)
               }
             });
             web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
               const nonce = txObject.nonce;
-              controller.updateIntelReward(intelIndex, event.transactionHash, nonce, event.returnValues.sender.toLowerCase());
+              controller.updateIntelReward(intelIndex, event.transactionHash, nonce, event.returnValues.sender.toLowerCase(), rewardData.block, rewardData.amount);
             }).catch(function (err) {
               console.log(err)
             });
@@ -483,6 +485,8 @@ controller.startwatchDistribute = function (intel, intelAddress) {
               txRewardHash: txHash,
               txHash: txHash,
               address: sender,
+              block: event.blockNumber,
+              amount:  parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether')),
               nonce: nonce,
               event: 'distribute',
               intel: intelIndex,
@@ -516,6 +520,59 @@ controller.startwatchDistribute = function (intel, intelAddress) {
   });
 };
 
+controller.startwatchDeposit= function (intel) {
+  try{
+      intel.events.Deposited().on('data', event => {
+          try {
+
+              web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
+                  const nonce = txObject.nonce;
+                  const txHash = event.transactionHash;
+                  const sender = event.returnValues.from.toLowerCase();
+                  ParetoTransaction.findOneAndUpdate(
+                      {
+                          $or: [{txHash: txHash},
+                              {address: sender, nonce: nonce}]
+                      }, {
+                          status: 3,
+                          txRewardHash: txHash,
+                          txHash: txHash,
+                          block: event.blockNumber,
+                          amount:  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether')),
+                          address: sender,
+                          nonce: nonce,
+                          event: 'deposited',
+                      },{upsert: true, new: true}).then(value => {
+                      if (controller.wss && value) {
+                          controller.SendInfoWebsocket({address: value.address, transaction: value});
+                      } else {
+                          console.log('no wss');
+                      }
+                  }).catch(e => {
+                      const error = ErrorHandler.backendErrorList('b26');
+                      error.systemMessage = e.message ? e.message : e;
+                      console.log(JSON.stringify(error));
+                  });
+              }).catch(function (e) {
+                  const error = ErrorHandler.backendErrorList('b26');
+                  error.systemMessage = e.message ? e.message : e;
+                  console.log(JSON.stringify(error));
+              });
+
+          } catch (e) {
+              const error = ErrorHandler.backendErrorList('b26');
+              error.systemMessage = e.message ? e.message : e;
+              console.log(JSON.stringify(error));
+          }
+
+      }).on('error', err => {
+          console.log(err);
+      });
+  }catch (e) {
+      //only new intel contract has Deposited events.
+  }
+
+};
 
 controller.startWatchApprove = function () {
   web3_events.eth.subscribe('logs',
@@ -582,6 +639,7 @@ controller.startwatchIntel = function () {
         const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
         controller.startwatchReward(intel, intelAddress);
         controller.startwatchDistribute(intel, intelAddress);
+        controller.startwatchDeposit(intel);
       }
 
     }
@@ -702,7 +760,7 @@ controller.SendInfoWebsocket = function (data) {
  * @param intelIndex
  * @param txHash
  */
-controller.updateIntelReward = function (intelIndex, txHash, nonce, sender) {
+controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, block, amount) {
   let agg = [{$match: {'intelId': intelIndex}},
     {
       $group: {
@@ -735,6 +793,8 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender) {
               txRewardHash: txHash,
               txHash: txHash,
               nonce: nonce,
+              block: block,
+              amount:  amount,
               event: 'reward',
               address: sender,
               intel: intelIndex
@@ -1310,6 +1370,7 @@ controller.getUserInfo = async function (address, callback) {
             'rank': ranking.rank,
             'score': ranking.score,
             'tokens': ranking.tokens,
+            'block': ranking.block,
             'lastApprovedAddress': ranking.approved,
             'alias': profile.alias,
             'aliasSlug': profile.aliasSlug,
@@ -1336,6 +1397,7 @@ controller.getUserInfo = async function (address, callback) {
             'rank': ranking.rank,
             'score': ranking.score,
             'tokens': ranking.tokens,
+            'block': ranking.block,
             'lastApprovedAddress': ranking.approved,
             'alias': profile.alias,
             'aliasSlug': profile.aliasSlug,
