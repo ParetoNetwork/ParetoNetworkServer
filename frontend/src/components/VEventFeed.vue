@@ -135,7 +135,14 @@
           this.limit = currentLimit;
           this.page = currentPage;
         });
-      }
+      },
+        block: function (block) {
+            this.transactions.forEach(tx => {
+                const exponentBlock =  parseFloat(localStorage.getItem("exponentBlock")) || block;
+                this.$set(tx, 'minBlock', block - exponentBlock);
+                this.$set(tx, 'exponentBlock', exponentBlock);
+            });
+        }
     },
     methods: {
       ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction", "restartTransactions"]),
@@ -199,9 +206,7 @@
             this.isLoadingScroll = false;
 
             this.transactions.forEach(tx => {
-                const exponentBlock =  parseFloat(localStorage.getItem("exponentBlock")) || block;
-                // tx.minBlock = block - exponentBlock;
-                // tx.exponentBlock =  exponentBlock;
+                const exponentBlock =  parseFloat(localStorage.getItem("exponentBlock")) || this.block;
                 this.$set(tx, 'minBlock', this.block - exponentBlock);
                 this.$set(tx, 'exponentBlock', exponentBlock);
               if ((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2) {
