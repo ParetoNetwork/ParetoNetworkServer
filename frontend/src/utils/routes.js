@@ -1,6 +1,7 @@
 import Vintel from '../components/VIntel';
 import VProducts from '../components/VProducts'
 import VProductsCheckout from '../components/VProductsCheckout'
+import VProductsPayment from '../components/VProductsPayment'
 import VIntel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
@@ -36,6 +37,7 @@ const routes = [
     {path: '/create', component: VCreateIntel},
     {path: '/products', component: VProducts},
     {path: '/checkout', component: VProductsCheckout},
+    {path: '/payment', component: VProductsPayment},
 ];
 
 const router = new VueRouter(

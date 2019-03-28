@@ -297,7 +297,8 @@ app.post('/v1/config_basic', function (req, res) {
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
-  const showshoppingcart = process.env.SHOW_SHOPPING_CART
+  const showshoppingcart = process.env.SHOW_SHOPPING_CART;
+  const public_key_stripe = process.env.PK_STRIPE;
 
     res.status(200).json(ErrorHandler.getSuccess({
     netWorkId: netWorkId,
@@ -306,6 +307,7 @@ app.post('/v1/config_basic', function (req, res) {
     psignversion: psignversion,
     exponentBlock: exponentBlock,
     showshoppingcart: showshoppingcart,
+    public_key_stripe: public_key_stripe
   }));
 });
 
@@ -683,7 +685,7 @@ app.get('/v1/listproducts', function (req, res) {
 
 app.post('/v1/createorder', function (req, res) {
     
-    controller.createOrder(req , function (err, result) {
+    controller.createOrder(req.body , function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
@@ -692,6 +694,16 @@ app.post('/v1/createorder', function (req, res) {
     });
 });
 
+app.post('/v1/payment', function (req, res) {
+
+    controller.payment(req.body , function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
 
 
 

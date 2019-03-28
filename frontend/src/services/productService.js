@@ -20,10 +20,24 @@ export default class productService {
     static createOrder(order ,onSuccess, onError) {
         http.post('/v1/createorder', order).then(
             res => {
-                if(res.data.success){
+                if(res){
                     return onSuccess(res.data);
                 }else{
-                    return onError(errorService.sendErrorMessage('f28', res.data.message));
+                    return onError(errorService.sendErrorMessage('f28', res));
+                }
+            }).catch(error => {
+            return onError(errorService.sendErrorMessage('f28', error));
+        });
+    }
+
+    static payOrder(token, order , user_email ,onSuccess, onError) {
+        var params = {token: token, order: order, email: user_email}
+        http.post('/v1/payment', params).then(
+            res => {
+                if(res){
+                    return onSuccess(res.data);
+                }else{
+                    return onError(errorService.sendErrorMessage('f28', res));
                 }
             }).catch(error => {
             return onError(errorService.sendErrorMessage('f28', error));

@@ -27,12 +27,12 @@
                     
                     <td class="align-right">
                         <div class="qty_number">
-                            <input type="text" :value='product.quantity'>
+                            <input type="text" :value='product.quantity' >
                             <div class="inc button" @click="addQuantity(product, key)"><span>+</span></div>
                             <div class="dec button" @click="deductQuantity(product, key)"><span>-</span></div>
                         </div>
                     </td>
-                    <td class="align-right"> $ {{ product.skus.data[0].price}}</td>
+                    <td class="align-right"> $ {{ product.skus.data[0].price / 100}}</td>
                 </tr>
                 
                 <tr>
@@ -41,54 +41,32 @@
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
-                </tr>
-                
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="align-right vert-bottom">Total:</td>
-                    <td class="align-right vert-bottom"><h2>$ {{ getCartTotal }} </h2></td>
                 </tr>
                 </tbody>
             </table>
-            <div>
-                <VueStripeCheckout
-                    ref="checkoutRef"
-                    :image="image"
-                    :name="name"
-                    :description="description"
-                    :currency="currency"
-                    :amount="getCartTotal * 100"
-                    :allow-remember-me="false"
-                    @done="done"
-                    @opened="opened"
-                    @closed="closed"
-                    @canceled="canceled"
-                    ></VueStripeCheckout>
-                <button @click="checkout">Pay ${{getCartTotal}} {{currency}}</button>
-            </div>
-            
-        
-     
-       </div>
+
+                <div @click="checkout">
+                    <button>Checkout</button>
+                </div>
+
         </div>
-        </div>
+    </div>
+</div>
 </template>
 
 <script>
     /* eslint-disable */
 
 
-import VueStripeCheckout from 'vue-stripe-checkout';
-import ProductService from '.././services/productService'
+
+    import ProductService from '.././services/productService'
 
     export default {
         name: "VProductCheckout",
         created: function(){
             this.cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
-        },        
+        },
+
         data: function() {
             return {
                 showModal: false,
@@ -99,6 +77,7 @@ import ProductService from '.././services/productService'
                 name: 'Pareto',
                 description: 'Pareto Products',
                 currency: 'USD',
+                order_id: ''
                 
 
             }
@@ -144,31 +123,24 @@ import ProductService from '.././services/productService'
         },
 
         methods: {
+
             async checkout () {
-            
-            ProductService.createOrder(this.cart, 
-                res => {
-                    console.log(res)     
-                },error => {
 
-                }
-            );
+                ProductService.createOrder(this.cart,
+                    res => {
 
-            const { token, args } = await this.$refs.checkoutRef.open();
+                        this.order_id = res.message.id;
+                        window.localStorage.setItem('order_id', res.message.id);
+                        this.$router.push({path: '/payment', query: { order_id: res.message.id }})
+
+                    },error => {
+                        alert("Error on create order")
+                    }
+                );
+
+
             },
-            done ({token, args}) {
-                console.log(token)
-                console.log(args)
-            },
-            opened () {
-            // do stuff 
-            },
-            closed () {
-            // do stuff 
-            },
-            canceled () {
-            // do stuff 
-            },
+
             removeProduct: function(product) {
                 this.cart.$remove(product);
                 this.cartSubTotal = this.cartSubTotal - (product.price * product.quantity);

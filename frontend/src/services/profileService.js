@@ -61,6 +61,8 @@ export default class profileService {
 
             }
             window.localStorage.setItem('etherscan', etherscan);
+            window.localStorage.setItem('public_key_stripe', JSON.stringify(res.data.public_key_stripe));
+            window.localStorage.setItem('showshoppingcart', JSON.stringify(res.data.showshoppingcart));
             window.localStorage.setItem('exponentBlock', res.data.exponentBlock);
 
             if (res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
@@ -76,7 +78,7 @@ export default class profileService {
                         window.localStorage.setItem('psignversion', res.data.psignversion);
                         window.localStorage.setItem('intelc', JSON.stringify(res.data.intel));
                         window.localStorage.setItem('paretoc', JSON.stringify(res.data.pareto));
-                        window.localStorage.setItem('showshoppingcart', JSON.stringify(res.data.showshoppingcart));
+
                     }
                     if (onFinish) onFinish();
                 }).catch(error => {
