@@ -3,36 +3,45 @@
   <div class="main-wrapper">
     <div class="header"><h1>Products</h1></div>
     <div id="vue">
-      <VProductsCart :cart="cart" :checkout-bool="checkoutBool"></VProductsCart>
-      <VProductsList :cart="cart" :products-data="productsData"></VProductsList>
-      <VProductsCheckout v-if="checkoutBool" :cart="cart" :tax="tax" :cart-sub-total="cartSubTotal" :cart-total="cartTotal" :products-data="productsData" :total-with-tax="totalWithTax"></VProductsCheckout>
+      <VProductsList :cart="cart" :products-data="productsdata" :products-data-list="productsDatalist"></VProductsList>
     </div>
   </div>
 
 </template>
 
 <script>
-  import VProductsCart from './VProductsCart.vue';
   import VProductsList from './VProductsList'
   import productService from '.././services/productService'
-  import VProductsCheckout from './VProductsCheckout'
 
   export default {
     name: 'VProducts',
     created: function(){
+
+      productService.getProducts(
+              res => {
+
+                this.productsdata =  res.data.data
+              },
+              error => {
+
+              }
+      )
       productService.listProducts(
         res => {
 
-          this.productsData =  res.data.data
+          this.productsDatalist =  res.data.data
         },
         error => {
 
         }
       )
+
+
     },
     data: function () {
       return {
         productsData: [],
+        productsDatalist: [],
         checkoutBool: false,
         cart: [],
         cartSubTotal: 0,
@@ -41,7 +50,7 @@
       }
     },
     components: {
-      VProductsCart, VProductsList, VProductsCheckout
+       VProductsList
     },
 
     //intercept the checkout request dispatch
@@ -182,9 +191,9 @@
 
       h1 {
         position: absolute;
-        text-align: center;
+        text-align: left;
         top: 66%;
-        left: 50%;
+        right: 50%;
         transform: translate(-50%, -50%);
         color: white;
         font-size: 3em;
@@ -196,7 +205,8 @@
       margin: 0 auto;
       padding: 9.5em;
       text-align: center;
-      background: #040f1e;
+      background: #fff;
+      color: black;
 
       .cart {
         position: fixed;
@@ -204,7 +214,7 @@
         top: 100px;
         text-align: right;
         background: rgba(0,0,0,0.85);
-        color: white;
+        color: black;
         z-index: 10;
         display: flex;
 
@@ -314,7 +324,7 @@
             margin-bottom: 0.5em;
             position: relative;
             overflow: hidden;
-            cursor: pointer;
+
             transition: box-shadow 0.25s;
 
             @media(max-width: $mobile) {
@@ -322,43 +332,9 @@
               height: 100vw;
             }
 
-            &:before {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0,0,0,0.5);
-              opacity: 0;
-              transition: all 0.25s;
-            }
 
-            &:after {
-              content: "\f00e";
-              font-family: "FontAwesome";
-              position: absolute;
-              top: 250%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              font-size: 5em;
-              color: white;
-              pointer-events: none;
-              text-shadow: 0 0 5px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.5);
-              transition: all 0.25s;
-            }
 
-            &:hover {
-              box-shadow: 0 12px 15px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
 
-              &:before {
-                opacity: 1;
-              }
-
-              &:after {
-                top: 50%;
-              }
-            }
           }
 
           .name {
@@ -366,8 +342,9 @@
             font-size: 1.25em;
           }
 
-          .description {
+          .desc {
             font-style: italic;
+            min-height: 100px;
           }
 
           .price {
@@ -536,7 +513,11 @@
     }
   }
 
-
+  .cart{
+    font-size: 17px;
+    padding-top: 6px;
+    cursor: pointer;
+  }
 
 
 </style>

@@ -19,8 +19,8 @@
 
       <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
         <ul class="navbar-nav ">
-          <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
-            <router-link v-if="show_shopping" tag="a" class="nav-link" :active-class="'active'" to="/products" exact>Products
+          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
+            <router-link tag="a" class="nav-link" :active-class="'active'" to="/products" exact>Products
             </router-link>
           </li>
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
@@ -33,6 +33,9 @@
           </li>
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
+          </li>
+          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
+            <VProductsCart :cart="cart"></VProductsCart>
           </li>
           <li class="nav-item dropdown mx-lg-4 active">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -76,11 +79,12 @@
   import errorService from '../services/errorService';
   import Profile from '../services/profileService';
   import ModalLedgerNano from "./Modals/VModalLedgerNano";
+  import VProductsCart from "./VProductsCart"
 
 
   export default {
     name: 'Navbar',
-    components: {ModalLedgerNano},
+    components: {ModalLedgerNano, VProductsCart},
     mounted: function () {
       this.colorNav = $('#gradient');
 
@@ -91,9 +95,7 @@
           address: {address: res},
         });
       }, () => {}, true);
-      Profile.updateConfig(res => {
-          this.show_shopping = window.localStorage.getItem('showshoppingcart')
-      });
+    console.log(this.show_shopping === "1")
     },
     watch: {
       loadingNav(value) {
@@ -126,6 +128,10 @@
         // map this.count to store.state.count
         'isLogged', 'address', 'showModalSign'
       ]),
+      showshopping(){
+
+        return this.show_shopping == true;
+      },
       loadingNav() {
         return this.$store.state.makingRequest;
       },

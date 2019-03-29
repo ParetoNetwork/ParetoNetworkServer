@@ -22,7 +22,7 @@
                     this.$store.dispatch('addToCart', cart[i]);
                 }
              }
-             console.log(this.shoppingCart)
+
         },
         methods: {
             ...mapActions(["addToCart"]),
