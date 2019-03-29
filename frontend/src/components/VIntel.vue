@@ -81,7 +81,7 @@
         etherscanUrl: window.localStorage.getItem('etherscan'),
         information: '',
         loading: true,
-        loggedUser: false,
+        loggedUser: true,
         paretoAddress: window.localStorage.getItem('paretoAddress'),
         primalLoad: false,
         onboarding: false,
