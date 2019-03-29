@@ -1,31 +1,38 @@
 <template>
     <div class="d-inline-block">
         <button v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-                class="btn btn-dark-primary-pareto mx-auto px-4"
+                class="btn mx-auto px-4"
                 :disabled="pendingRowTransactions(intel) || user.address === intel.address"
-                v-bind:class="{pulsate: pendingRowTransactions(intel)}"
+                v-bind:class="{pulsate: pendingRowTransactions(intel),
+                'btn-dark-primary-pareto': !(pendingRowTransactions(intel) || user.address === intel.address),
+                'btn-dark-grey-primary-pareto': (pendingRowTransactions(intel) || user.address === intel.address)}"
                 @click="openRewardModal()">
             <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
             {{ intel.reward }}
         </button>
-        <b-btn
-                v-if="user.address === intel.address &&
+        <button
+                v-if="
                     intel.intelAddress &&
                     signType != 'Manual' &&
                     intel.expires < Math.round(new Date().getTime() / 1000) &&
                     !intel.distributed"
-                :disabled="clickedCollect"
-                class="btn-dark-primary-pareto mx-auto px-4"
+                :disabled="clickedCollect ||  user.address !== intel.address"
+                class="btn btn-dark-primary-pareto mx-auto px-4"
                 v-bind:class="{pulsate: clickedCollect}"
                 @click="distribute(intel)">
-            COLLECT
-        </b-btn>
-        <a v-if="user.address === intel.address && intel.distributed"
+            <i v-if="user.address === intel.address" class="fa fa-exchange-alt left"></i>
+            <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
+            {{ intel.reward }}
+        </button>
+        <a v-if="intel.distributed"
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
+           :disabled="user.address !== intel.address"
            target="_blank">
-            <b-btn class="cursor-pointer btn-dark-primary-pareto mx-auto px-4">
-                <i class="fa fa-external-link-alt"></i> SENT
-            </b-btn>
+            <button class="btn cursor-pointer btn-dark-grey-primary-pareto mx-auto px-4">
+                <i v-if="user.address === intel.address" class="fa fa-external-link-alt left"></i>
+                <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
+                {{ intel.reward }}
+            </button>
         </a>
     </div>
 </template>
@@ -128,6 +135,13 @@
         -webkit-animation: pulsate 3s ease-out;
         -webkit-animation-iteration-count: infinite;
         opacity: 0.5;
+    }
+
+    .left {
+        margin-right: 5px;
+        padding-top: 2px;
+        font-size: 16px;
+
     }
 
     @-webkit-keyframes pulsate {
