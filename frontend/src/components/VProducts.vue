@@ -3,7 +3,7 @@
   <div class="main-wrapper">
     <div class="header"><h1>Products</h1></div>
     <div id="vue">
-      <VProductsList :cart="cart" :products-data="productsdata" :products-data-list="productsDatalist"></VProductsList>
+      <VProductsList :cart="cart" :products-data-list="productsDatalist"></VProductsList>
     </div>
   </div>
 
@@ -17,19 +17,11 @@
     name: 'VProducts',
     created: function(){
 
-      productService.getProducts(
-              res => {
 
-                this.productsdata =  res.data.data
-              },
-              error => {
-
-              }
-      )
       productService.listProducts(
         res => {
 
-          this.productsDatalist =  res.data.data
+          this.productsDatalist =  res.data
         },
         error => {
 

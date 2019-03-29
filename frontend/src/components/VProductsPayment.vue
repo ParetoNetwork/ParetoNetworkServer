@@ -191,7 +191,7 @@
 
                 ProductService.payOrder(token.id, order_id, this.user_email)
             },
-            async checkout () {
+            checkout () {
 
                 ProductService.createOrder(this.cart,
                     res => {
@@ -203,7 +203,7 @@
                     }
                 );
 
-                const { token, args } = await this.$refs.checkoutRef.open();
+
             },
             done ({token, args}) {
 
