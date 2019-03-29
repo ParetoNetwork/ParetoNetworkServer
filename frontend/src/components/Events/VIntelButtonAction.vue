@@ -17,8 +17,10 @@
                     intel.expires < Math.round(new Date().getTime() / 1000) &&
                     !intel.distributed"
                 :disabled="clickedCollect ||  user.address !== intel.address"
-                class="btn btn-dark-primary-pareto mx-auto px-4"
-                v-bind:class="{pulsate: clickedCollect}"
+                class="btn  mx-auto px-4"
+                v-bind:class="{pulsate: clickedCollect,
+                  'btn-dark-primary-pareto': user.address === intel.address,
+                'btn-dark-grey-primary-pareto':  user.address !== intel.address}"
                 @click="distribute(intel)">
             <i v-if="user.address === intel.address" class="fa fa-exchange-alt left"></i>
             <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
