@@ -162,6 +162,17 @@ const ErrorHandler = require('./error-handler.js');
   res.end();
 });*/
 
+app.get('/v1/listproducts', function (req, res) {
+    //res.sendFile(path.join(__dirname + '/sitemap.xml'));
+    controller.listProducts(function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
 app.get('/sitemap.xml', function (req, res) {
   res.sendFile(path.join(__dirname + '/sitemap.xml'));
 });
@@ -672,9 +683,11 @@ app.post('/v1/updatescores', function (req, res) {
 
 
 
-app.get('/v1/listproducts', function (req, res) {
+
+
+app.get('/v1/getproducts', function (req, res) {
     //res.sendFile(path.join(__dirname + '/sitemap.xml'));
-    controller.listProducts(function (err, result) {
+    controller.getProducts(function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {

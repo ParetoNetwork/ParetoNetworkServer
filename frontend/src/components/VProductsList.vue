@@ -3,11 +3,13 @@
   <template>
       <div>
           <div class='products'>
-              <div v-for='(product, index) in productsData'  :class="'product'">
-                  <div class='image' @click='viewProduct(product)' v-bind:style='{ backgroundImage: "url(" +  product.skus.data[0].image + ")" }' style='background-size: cover; background-position: center;'></div>
-                  <div class='name'>{{ product.skus.data[0].attributes.name }}</div>
-                  <div class='price'>$ {{ product.skus.data[0].price / 100}}</div>
-                  <button @click='addToCart(product)'>Add to Cart</button><br><br></div>
+              <div v-for='(product, index) in productsDataList'  :class="'product'">
+                <div v-if="active_product(product)">
+                  <div class='name'>{{ productsData[index].name }}</div>
+                  <div class='desc'>{{ productsData[index].description }}</div>
+                  <div class='price'>$ {{ product.price / 100}}</div>
+                  <button @click='addToCart(productsData[index], index)'>Add to Cart</button><br><br></div>
+              </div>
           </div>
 
       </div>
@@ -20,6 +22,8 @@
     export default {
         name: 'VProductsList',
         mounted: function () {
+
+
             var self = this;
             
 
@@ -32,11 +36,14 @@
                     self.hideModal();
                 }
             });
+            console.log(this.productsData)
+
         },
         computed: {
-            ...mapState(['CartTotal', 'cartSubtotal', 'taxShop', 'shoppingCart'])
+            ...mapState(['CartTotal', 'cartSubtotal', 'taxShop', 'shoppingCart']),
+
         },
-        props: ['productsData'],
+        props: ['products-data', 'products-data-list'],
 
         data: function () {
             return {
@@ -50,9 +57,11 @@
 
         methods: {
             ...mapActions(["addsubtotaltocart", "addQuantityToCart", "addsubtotaltocart"]),
+            active_product(product){
+                return product.active === true
+            },
+            addToCart: function (product, index) {
 
-            addToCart: function (product) {
-                var found = false;
                 let cart = [];
                 var found = false
                 if(window.localStorage.getItem('ShoppingCart')){
@@ -61,15 +70,18 @@
                      for (var i = 0; i < this.shoppingCart.length; i++){
                         
                         if(cart[i].id === product.id){
-                            product.quantity = product.quantity + 1
-                            cart[i] = product
+                            product.quantity = cart[i].quantity + 1;
+                            cart[i] = product;
                             found = true;
                             break;
                         }
                     }
 
                 }if(!found){
-                    product.quantity = 1
+                    product.quantity = 1;
+                    product.skus = []
+                    product.skus.data = []
+                    product.skus.data = JSON.stringify(this.productsDataList[index]);
                     cart.push(product)
                     this.$store.dispatch('addToCart', product);
                 }
@@ -88,10 +100,6 @@
                 }
 
                 self.modalAmount = 1;
-            },
-
-            viewProduct: function (product) {
-               // router.push({ path: 'home' })
             },
 
             changeProductInModal: function (direction) {
@@ -123,6 +131,8 @@
                         self.viewProduct(this.productsData[i]);
                     }
                 }
+
+
             },
 
             hideModal: function () {

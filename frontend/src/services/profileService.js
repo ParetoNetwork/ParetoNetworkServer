@@ -61,9 +61,9 @@ export default class profileService {
 
             }
             window.localStorage.setItem('etherscan', etherscan);
-            window.localStorage.setItem('public_key_stripe', JSON.stringify(res.data.public_key_stripe));
-            window.localStorage.setItem('showshoppingcart', JSON.stringify(res.data.showshoppingcart));
             window.localStorage.setItem('exponentBlock', res.data.exponentBlock);
+            window.localStorage.setItem('public_key_stripe', res.data.public_key_stripe);
+            window.localStorage.setItem('showshoppingcart', res.data.showshoppingcart);
 
             if (res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
                 || res.data.paretoAddress !== window.localStorage.getItem('paretoAddress')

@@ -1,28 +1,27 @@
 <template>
 <div class="main-wrapper">
-    <div class="header"><h1>Products</h1></div>
+    <div class="header"><h1>Your cart</h1></div>
     <div id="vue">
     
-        <h1>Checkout Area</h1>
+
         <div class="checkout-area">
             <span> {{ cart | cartSize }} </span><i class="fa fa-shopping-cart"></i>
             <table>
                 <thead>
                 <tr>
-                    <th></th>
-                    <th></th>
-                    <th class="align-center">SKU</th>
+                    <th class="align-left">Product</th>
                     <th>Name</th>
-                    
                     <th class="align-left">Amount</th>
                     <th class="align-right">Price</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr v-for="(product, key) in cart">
-                    <td><button @click="removeProduct(product)"> X </button></td>
-                    <td><img class="image" :src="product.skus.data[0].image"></td>
-                    <td class="align-center">{{ product.skus.data[0].id }}</td>
+                    <td class="align-left">
+                        <img class="image" :src="product.skus.data[0].image">
+                        {{ product.skus.data[0].id }}
+                    </td>
                     <td>{{ product.skus.data[0].attributes.name }}</td>
                     
                     <td class="align-right">
@@ -33,20 +32,21 @@
                         </div>
                     </td>
                     <td class="align-right"> $ {{ product.skus.data[0].price / 100}}</td>
+                    <td><button @click="removeProduct(product)"> X </button></td>
                 </tr>
                 
-                <tr>
+                <tr class="total-cart">
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
+                    <td>Total</td>
+                    <td>${{getCartTotal/100}}</td>
                 </tr>
                 </tbody>
             </table>
 
-                <div @click="checkout">
-                    <button>Checkout</button>
+                <div @click="checkout" class="align-rigth">
+                    <button>PROCEED TO CHECKOUT</button>
                 </div>
 
         </div>
@@ -151,7 +151,14 @@
                 }
             },
             addQuantity: function(product, key){
+
+                this.cart[key].quantity = this.cart[key].quantity + 1;
+                this.updateCart(this.cart)
+
                 
+            },
+            updateCart: function(cart){
+                window.localStorage.setItem('ShoppingCart', JSON.stringify(cart));
             },
             deductQuantity: function(product, key){
 
@@ -187,6 +194,10 @@
 
 <style scoped>
 
+.align-rigth{
+    text-align: right;
+}
+
 .checkout-area table tr{
     margin-bottom: 20px;
 }
@@ -196,7 +207,11 @@
     width: 131px;
     margin-top: 0px;
 }
-
+.total-cart{
+    font-size: 17px;
+    border-bottom: none;
+    font-weight: bold;
+}
 .qty_number input {
     border: 0;
         border-right-color: currentcolor;
@@ -222,19 +237,23 @@
 }
 .qty_number .button {
     cursor: pointer;
-    width: 30px;
+    width: 28px;
     position: absolute;
     top: 0;
     bottom: 0;
     margin: auto;
+    border: 1px solid #000;
     left: 0;
     text-align: center;
-    height: 30px;
-    line-height: 25px;
+    height: 29px;
+    line-height: 28px;
+    color: #000;
+    border-radius: 0px;
     }
 
     .image{
-        width: 80px;
+        width: 120px;
+        margin-right: 20px;
     }
 
     .StripeElement {
@@ -259,6 +278,15 @@
 
     .StripeElement--invalid {
     border-color: #fa755a;
+    }
+
+    thead tr{
+        border-bottom: 1px solid #b4b4b4;
+        border-top: 1px solid #b4b4b4;
+        font-size: 17px;
+    }
+    tbody tr{
+        border-bottom: 1px solid #b4b4b4;
     }
 
     .StripeElement--webkit-autofill {

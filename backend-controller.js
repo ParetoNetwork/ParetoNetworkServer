@@ -1695,7 +1695,7 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
 controller.listProducts = async function (callback) {
     
-    stripe.products.list(
+    stripe.skus.list(
         {},
         function(err, products) {
             
@@ -1703,6 +1703,22 @@ controller.listProducts = async function (callback) {
             // asynchronously called
         }
     );
+
+
+}
+
+controller.getProducts = async function (callback) {
+
+    stripe.products.list(
+        {},
+        function(err, products) {
+
+            callback(err, products);
+            // asynchronously called
+        }
+    );
+
+
 }
 
 controller.createOrder = async function (order_cart, callback) {
