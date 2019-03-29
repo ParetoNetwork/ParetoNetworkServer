@@ -771,9 +771,6 @@ app.initializeWebSocket = function (server) {
     try {
       wss.clients.forEach(function each(client) {
         if (client.isAlive === false) return client.terminate();
-        console.log( client.isAlive);
-        client.isAlive = false;
-        client.ping(noop);
         if (client.readyState === WebSocket.OPEN) {
           // Validate if the user is subscribed a set of information
           if (client.info && client.user) {
@@ -788,13 +785,11 @@ app.initializeWebSocket = function (server) {
             /**
              * Send ranking
              */
-            console.log( " find");
-              console.log(client.user.user);
             controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
               if (!err) {
-                  console.log( "getInfo");
                 if (client.readyState === WebSocket.OPEN && client.isAlive) {
-                    console.log( "sendInfo");
+                    client.isAlive = false;
+                    client.ping(noop);
                   client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                 }
               }
@@ -802,9 +797,9 @@ app.initializeWebSocket = function (server) {
 
             controller.retrieveAddress(client.user.user, function (err, result) {
               if (!err) {
-                  console.log( "getInfo2");
                 if (client.readyState === WebSocket.OPEN && client.isAlive) {
-                    console.log( "sendInfo2");
+                    client.isAlive = false;
+                    client.ping(noop);
                   client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                 }
               }
