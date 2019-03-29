@@ -19,10 +19,10 @@
                 <tbody>
                 <tr v-for="(product, key) in cart">
                     <td class="align-left">
-                        <img class="image" :src="product.skus.data[0].image">
-                        {{ product.skus.data[0].id }}
+
+                        {{ product.id }}
                     </td>
-                    <td>{{ product.skus.data[0].attributes.name }}</td>
+                    <td>{{ product.name }}</td>
                     
                     <td class="align-right">
                         <div class="qty_number">
@@ -31,7 +31,7 @@
                             <div class="dec button" @click="deductQuantity(product, key)"><span>-</span></div>
                         </div>
                     </td>
-                    <td class="align-right"> $ {{ product.skus.data[0].price / 100}}</td>
+                    <td class="align-right"> $ {{ product.price / 100}}</td>
                     <td><button @click="removeProduct(product)"> X </button></td>
                 </tr>
                 
@@ -113,7 +113,7 @@
                 if(this.cart.length > 0){
                     for (var i = 0; i < this.cart.length; i++) {
                        
-                        total += this.cart[i].quantity * this.cart[i].skus.data[0].price;
+                        total += this.cart[i].quantity * this.cart[i].price;
                     }
                 }else{
                     total = 0;
@@ -124,7 +124,7 @@
 
         methods: {
 
-            async checkout () {
+            checkout () {
 
                 ProductService.createOrder(this.cart,
                     res => {

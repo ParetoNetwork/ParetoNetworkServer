@@ -4,12 +4,12 @@
       <div>
           <div class='products'>
               <div v-for='(product, index) in productsDataList'  :class="'product'">
-                <div v-if="active_product(product)">
-                  <div class='name'>{{ productsData[index].name }}</div>
-                  <div class='desc'>{{ productsData[index].description }}</div>
-                  <div class='price'>$ {{ product.price / 100}}</div>
-                  <button @click='addToCart(productsData[index], index)'>Add to Cart</button><br><br></div>
-              </div>
+
+                  <div class='name'>{{ product.name }}</div>
+                  <div class='desc'>{{product.description }}</div>
+                  <div class='price'>$ {{product.price}}</div>
+                  <button @click='addToCart(product, index)'>Add to Cart</button><br><br></div>
+
           </div>
 
       </div>
@@ -43,7 +43,7 @@
             ...mapState(['CartTotal', 'cartSubtotal', 'taxShop', 'shoppingCart']),
 
         },
-        props: ['products-data', 'products-data-list'],
+        props: [ 'products-data-list'],
 
         data: function () {
             return {
@@ -79,9 +79,7 @@
 
                 }if(!found){
                     product.quantity = 1;
-                    product.skus = []
-                    product.skus.data = []
-                    product.skus.data = JSON.stringify(this.productsDataList[index]);
+
                     cart.push(product)
                     this.$store.dispatch('addToCart', product);
                 }

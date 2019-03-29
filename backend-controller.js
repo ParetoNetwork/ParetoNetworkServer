@@ -1694,27 +1694,41 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
 
 controller.listProducts = async function (callback) {
-    
-    stripe.skus.list(
-        {},
-        function(err, products) {
-            
-            callback(err, products);
-            // asynchronously called
-        }
-    );
 
+    let skus;
+    await stripe.skus.list(
+        {active: true},
+        function(err, response) {
 
-}
+            if(err){
+                callback(err, null);
+                return;
+            }
+            skus = response.data;
 
-controller.getProducts = async function (callback) {
+            //once i have the skus, i need the products
+            stripe.products.list(
+                {active: true},
+                function(err, response) {
 
-    stripe.products.list(
-        {},
-        function(err, products) {
-
-            callback(err, products);
-            // asynchronously called
+                    if(err){
+                        callback(err, null);
+                        return;
+                    }
+                    for( var i = 0; i < skus.length; i++ ){
+                        for(var p = 0; p < response.data.length; p++){
+                            //i need to add the product to the sku
+                            var product = response.data[p];
+                            if(product.id === skus[i].product){
+                                skus[i].name = product.name;
+                                skus[i].description = product.description;
+                                continue;
+                            }
+                        }
+                    }
+                    callback(null, skus);
+                }
+            );
         }
     );
 
@@ -1729,7 +1743,7 @@ controller.createOrder = async function (order_cart, callback) {
         products_ar.push(
            {
                type: 'sku',
-               parent: product.skus.data[0].id,
+               parent: product.id,
                quantity: product.quantity
            }
        )
