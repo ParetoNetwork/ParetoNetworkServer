@@ -19,12 +19,12 @@ export default class ContentService {
 
   static networks = {
     1: {
-      https: "https://mainnet.infura.io/QWMgExFuGzhpu2jUr6Pq",
-      wss: "wss://mainnet.infura.io:443/ws"
+      https: "https://mainnet.infura.io/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd",
+      wss: "wss://mainnet.infura.io/ws/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd"
     },
     3: {
-      https: "https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq",
-      wss: "wss://ropsten.infura.io/ws"
+      https: "https://ropsten.infura.io/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd",
+      wss: "wss://ropsten.infura.io/ws/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd"
     }
   };
 
