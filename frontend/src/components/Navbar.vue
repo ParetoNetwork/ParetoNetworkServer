@@ -19,7 +19,7 @@
 
       <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
         <ul class="navbar-nav ">
-          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
+          <li class="nav-item mx-lg-4" v-if="show_shopping" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/products" exact>Products
             </router-link>
           </li>
@@ -95,7 +95,6 @@
           address: {address: res},
         });
       }, () => {}, true);
-    console.log(this.show_shopping === "1")
     },
     watch: {
       loadingNav(value) {
@@ -128,10 +127,6 @@
         // map this.count to store.state.count
         'isLogged', 'address', 'showModalSign'
       ]),
-      showshopping(){
-
-        return this.show_shopping == true;
-      },
       loadingNav() {
         return this.$store.state.makingRequest;
       },
