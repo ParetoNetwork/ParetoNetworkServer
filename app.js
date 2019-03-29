@@ -354,6 +354,41 @@ app.post('/v1/error-log', function (req, res) {
   res.status(200).json(ErrorHandler.getSuccess({}))
 });
 
+
+app.get('/v1/getproducts', function (req, res) {
+    //res.sendFile(path.join(__dirname + '/sitemap.xml'));
+    controller.getProducts(function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+app.post('/v1/createorder', function (req, res) {
+
+    controller.createOrder(req.body , function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+app.post('/v1/payment', function (req, res) {
+
+    controller.payment(req.body , function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+
 /********* AUTHENTICATED v1 APIs *********/
 
 app.use(function (req, res, next) {
@@ -680,44 +715,6 @@ app.post('/v1/updatescores', function (req, res) {
     });
   }
 });
-
-
-
-
-
-app.get('/v1/getproducts', function (req, res) {
-    //res.sendFile(path.join(__dirname + '/sitemap.xml'));
-    controller.getProducts(function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
-
-app.post('/v1/createorder', function (req, res) {
-    
-    controller.createOrder(req.body , function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
-
-app.post('/v1/payment', function (req, res) {
-
-    controller.payment(req.body , function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
-
 
 
 app.use('/public/static/', expressStaticGzip('/public/static/', {
