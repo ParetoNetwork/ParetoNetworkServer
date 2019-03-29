@@ -239,5 +239,11 @@ export default class errorService {
             userMessage: 'The current network does not match provider network',
             priority: 2
         },
+        f38: {
+            code: 'f38',
+            description: 'Error saving the signed keys',
+            userMessage: 'An error occurred while trying to save the signed keys',
+            priority: 2
+        }
     };
 }

@@ -40,6 +40,36 @@ export default class profileService {
 
     }
 
+    //Generates signed keys and sends them to the server
+    static generateAndSendSignedKeys(onSuccess, onError) {
+        const cachedProfile = this.getProfile.profile;
+        const LibSignal = require('../../libsignal-protocol');
+        const KeyHelper = window.libsignal.KeyHelper;
+        const registrationId = KeyHelper.generateRegistrationId();
+        KeyHelper.generateIdentityKeyPair().then(function(identityKeyPair) {
+           console.log("generateIdentityKeyPair", identityKeyPair);
+        });
+
+        KeyHelper.generatePreKey(keyId).then(function(preKey) {
+            console.log("generatePreKey", preKey);
+            //store.storePreKey(preKey.keyId, preKey.keyPair);
+        });
+
+        KeyHelper.generateSignedPreKey(identityKeyPair, keyId).then(function(signedPreKey) {
+            console.log("generateSignedPreKey", signedPreKey);
+            //store.storeSignedPreKey(signedPreKey.keyId, signedPreKey.keyPair);
+        });
+
+        return http.post('/v1/keys', {}).then(res => {
+            res = res.data;
+
+            if(res.data.data)
+                return onSuccess(res.data.data);
+            else
+                return onError( errorService.sendErrorMessage('f37', res.data.message));
+        });
+    }
+
     static updateConfig(onFinish) {
         http.post('/v1/config_basic', {}).then(res => {
             res = res.data;

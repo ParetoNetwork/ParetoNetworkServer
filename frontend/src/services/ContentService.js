@@ -300,7 +300,7 @@ export default class ContentService {
 
             let params = {
               txHash: content.txHash,
-                txRewardHash: content.txHash,
+              txRewardHash: content.txHash,
               status: 3
             };
             ContentService.postTransactions(params);
@@ -320,7 +320,7 @@ export default class ContentService {
       console.log(e);
       let params = {
         txHash: content.txHash,
-          txRewardHash: content.txHash,
+        txRewardHash: content.txHash,
         status: 4
       };
       this.postTransactions(params);
@@ -340,7 +340,7 @@ export default class ContentService {
     try {
       await this.Setup(signData);
     } catch (e) {
-        return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
+      return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
     }
     //console.log(tokenAmount);
 

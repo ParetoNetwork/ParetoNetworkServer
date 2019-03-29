@@ -57,6 +57,11 @@ export default class authService {
         }catch (e) {
             console.log(e)
         }
+        try {
+            profileService.generateAndSendSignedKeys();
+        }catch (e) {
+            console.log(e)
+        }
     }
 
     static signParetoServer(msgParams, from, result, onSuccess, onError){
