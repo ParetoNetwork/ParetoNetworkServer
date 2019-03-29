@@ -12,7 +12,8 @@
                       :onboardingPicture="onboarding"></VProfile>
           </div>
           <div class="col-12 px-0">
-            <VEventFeed v-if="primalLoad" :user="user" :updateHash="updateHash" :defaultTransactions="information.transactions" :block="block"></VEventFeed>
+            <VEventFeed v-if="primalLoad" :user="user" :updateHash="updateHash"
+                        :defaultTransactions="information.transactions" :block="block"></VEventFeed>
             <VShimmerMyPost v-else></VShimmerMyPost>
           </div>
         </div>
@@ -31,35 +32,35 @@
 </template>
 
 <script>
-  import dashboardService from "../services/dashboardService";
-  import profileService from "../services/profileService";
-  import AuthService from "../services/authService";
+  import dashboardService from '../services/dashboardService';
+  import profileService from '../services/profileService';
+  import AuthService from '../services/authService';
 
-  import ICountUp from "vue-countup-v2";
+  import ICountUp from 'vue-countup-v2';
 
-  import VIntelFeed from "./VIntelFeed.vue";
-  import {mapMutations, mapState, mapActions} from "vuex";
-  import environment from "../utils/environment";
+  import VIntelFeed from './VIntelFeed.vue';
+  import {mapMutations, mapState} from 'vuex';
+  import environment from '../utils/environment';
 
-  import {countUpMixin} from "../mixins/countUp";
+  import {countUpMixin} from '../mixins/countUp';
 
-  import VShimmerUserProfile from "./Shimmer/IntelDetailView/VShimmerUserProfile";
-  import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
-  import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
+  import VShimmerUserProfile from './Shimmer/IntelDetailView/VShimmerUserProfile';
+  import VShimmerMyPost from './Shimmer/IntelView/VShimmerMyPost';
+  import VShimmerFeed from './Shimmer/IntelView/VShimmerFeed';
 
-  import VProfile from "./VProfile";
-  import VEventFeed from "./VEventFeed";
-  import errorService from "../services/errorService";
+  import VProfile from './VProfile';
+  import VEventFeed from './VEventFeed';
+  import errorService from '../services/errorService';
 
   import LoginOptions from './Modals/VLoginOptions';
   import ModalSignIn from './VModalManualSigIn';
-  import ModalLedgerNano from "./Modals/VModalLedgerNano";
-  import ModalSplashOnboarding from "./Modals/VModalSplashOnboarding";
+  import ModalLedgerNano from './Modals/VModalLedgerNano';
+  import ModalSplashOnboarding from './Modals/VModalSplashOnboarding';
 
   import {information} from '../utils/onboardingInfo';
 
   export default {
-    name: "VIntel",
+    name: 'VIntel',
     mixins: [countUpMixin],
     components: {
       ICountUp,
@@ -81,7 +82,7 @@
         etherscanUrl: window.localStorage.getItem('etherscan'),
         information: '',
         loading: true,
-        loggedUser: true,
+        loggedUser: false,
         paretoAddress: window.localStorage.getItem('paretoAddress'),
         primalLoad: false,
         onboarding: false,
@@ -105,7 +106,7 @@
         'showModalSign',
         'showModalLoginOptions',
         'showModalLedgerNano',
-        'showModalOnboarding']),
+        'showModalOnboarding'])
     },
     mounted: function () {
       AuthService.auth(() => {
@@ -121,31 +122,31 @@
       });
     },
     methods: {
-      ...mapMutations(["intelEnter", "iniWs"]),
+      ...mapMutations(['intelEnter', 'iniWs']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
       },
       loadAddress: function () {
         if (!this.user.address) {
           return dashboardService.getAddress(
-            res => {
-              this.user.address = res;
-            },
-            error => {
-              let errorText = error.message ? error.message : error;
-              this.$notify({
-                group: 'notification',
-                type: 'error',
-                duration: 10000,
-                title: 'Login',
-                text: errorText
-              });
-            }
+                  res => {
+                    this.user.address = res;
+                  },
+                  error => {
+                    let errorText = error.message ? error.message : error;
+                    this.$notify({
+                      group: 'notification',
+                      type: 'error',
+                      duration: 10000,
+                      title: 'Login',
+                      text: errorText
+                    });
+                  }
           );
         }
       },
       numberToScientificNotation(number) {
-        return (number + "").length > 12 ? number.toExponential(5) : number;
+        return (number + '').length > 12 ? number.toExponential(5) : number;
       },
       overrideOnMessage() {
         this.ws.onmessage = (data) => {
@@ -166,6 +167,9 @@
                   this.updateContentVar++;
                   break;
                 case 'updateHash' :
+                  if (info.data.data.event === 'reward') {
+                    this.user.rankUpdated = true;
+                  }
                   this.updateHash++;
                   break;
               }
@@ -181,20 +185,20 @@
         if (!this.ws) {
           this.iniWs();
           this.ws.onopen = () => {
-              this.ws.send(JSON.stringify(params));
+            this.ws.send(JSON.stringify(params));
           };
         }
         this.overrideOnMessage();
       },
       loadProfile: function () {
         return profileService.getProfile(
-          res => {
-            this.user = res;
-            this.block = res.block;
-          },
-          error => {
-            console.log('Could not retrieve profile')
-          }
+                res => {
+                  this.user = res;
+                  this.block = res.block;
+                },
+                error => {
+                  console.log('Could not retrieve profile');
+                }
         );
       },
       showModal() {
@@ -204,7 +208,7 @@
         this.$store.state.showModalOnboarding = true;
       },
       hideModal() {
-        this.$refs.loginOptions.hide()
+        this.$refs.loginOptions.hide();
       },
       requestCall: function () {
         Promise.all([
@@ -215,22 +219,22 @@
       },
       main: function () {
         profileService.updateConfig(res => {
-          this.etherscanUrl = window.localStorage.getItem('etherscan')
+          this.etherscanUrl = window.localStorage.getItem('etherscan');
         });
         this.$store.state.makingRequest = true;
         if (!this.madeLogin) {
           this.intelEnter();
           AuthService.postSign(
-            (res) => {
-              this.primalLoad = true;
-              this.socketConnection();
-              this.requestCall();
-            },
-            () => {
-              this.primalLoad = true;
-              this.socketConnection();
-              this.requestCall();
-            }
+                  (res) => {
+                    this.primalLoad = true;
+                    this.socketConnection();
+                    this.requestCall();
+                  },
+                  () => {
+                    this.primalLoad = true;
+                    this.socketConnection();
+                    this.requestCall();
+                  }
           );
         } else {
           this.primalLoad = true;
