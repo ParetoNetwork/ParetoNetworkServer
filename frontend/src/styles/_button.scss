@@ -29,6 +29,15 @@
   width: 120px;
 }
 
+.btn-dark-grey-primary-pareto{
+  @extend .btn-pareto;
+  background-size: 200% auto;
+  background-image: linear-gradient(to right, #9C9C9C, #A8A8A8, #CECECE, #A8A8A8, #9C9C9C);
+  transition: 0.5s;
+  color: $dark-blue-pareto;
+  width: 120px;
+}
+
 .btn-dark-secondary-pareto{
   @extend .btn-pareto;
    background: $light-blue-pareto;
@@ -42,7 +51,7 @@
    color: #6aba82;
  }
 
- .btn-dark-primary-pareto, .btn-dark-secondary-pareto, .btn-darker-secondary-pareto {
+ .btn-dark-primary-pareto, .btn-dark-secondary-pareto, .btn-darker-secondary-pareto, .btn-dark-grey-primary-pareto {
    &:hover {
      color: #ffffff;
      background-position: right center;
