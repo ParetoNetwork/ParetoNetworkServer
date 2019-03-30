@@ -790,7 +790,7 @@ app.initializeWebSocket = function (server) {
              */
             controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
               if (!err) {
-                if (client.readyState === WebSocket.OPEN && client.isAlive) {
+                if (client.readyState === WebSocket.OPEN) {
                   client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                 }
               }
@@ -798,7 +798,7 @@ app.initializeWebSocket = function (server) {
 
             controller.retrieveAddress(client.user.user, function (err, result) {
               if (!err) {
-                if (client.readyState === WebSocket.OPEN && client.isAlive) {
+                if (client.readyState === WebSocket.OPEN) {
                   client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                 }
               }
