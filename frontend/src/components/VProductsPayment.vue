@@ -16,8 +16,10 @@
                 <input type="email" placeholder="example@example.com" v-model="user_email" required>
             </div>
 
+
                 <form action="/charge" method="post" id="payment-form">
                     <div class="form-row">
+                        <input id="cardholder-name" type="text">
 
                         <label for="card-element">
                             Credit or debit card
@@ -29,8 +31,10 @@
                         <!-- Used to display form errors. -->
                         <div id="card-errors" role="alert"></div>
                     </div>
+                    <button id="card-button" :data-secret="client_secret">
+                        Submit Payment
+                    </button>
 
-                    <button>Submit Payment</button>
                 </form>
 
 
@@ -52,6 +56,7 @@
             this.cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
             if (this.$route.query.order_id){
                 this.order_id = this.$route.query.order_id;
+                this.client_secret = this.$route.query.client_secret;
             }else {
                 this.$router.push('/')
             }
@@ -61,7 +66,9 @@
 
             // Create a Stripe client.
             var pk_stripe = window.localStorage.getItem('public_key_stripe');
-            var stripe = Stripe(pk_stripe);
+            var stripe = Stripe(pk_stripe, {
+                betas: ['payment_intent_beta_3']
+            });
 
             // Create an instance of Elements.
             var elements = stripe.elements();
@@ -85,13 +92,13 @@
             };
 
             // Create an instance of the card Element.
-            var card = elements.create('card', {style: style});
+            var cardElement = elements.create('card', {style: style});
 
             // Add an instance of the card Element into the `card-element` <div>.
-            card.mount('#card-element');
+            cardElement.mount('#card-element');
 
             // Handle real-time validation errors from the card Element.
-            card.addEventListener('change', function(event) {
+            cardElement.addEventListener('change', function(event) {
                 var displayError = document.getElementById('card-errors');
                 if (event.error) {
                     displayError.textContent = event.error.message;
@@ -109,7 +116,7 @@
                 if(self.user_email === ''){
                     alert("Email can't be blank")
                 }else{
-                    stripe.createToken(card).then(function(result) {
+                    stripe.createToken(cardElement).then(function(result) {
                         if (result.error) {
                             // Inform the user if there was an error.
                             var errorElement = document.getElementById('card-errors');
@@ -121,6 +128,28 @@
                         }
                     });
                 }
+            });
+
+            var cardholderName = document.getElementById('cardholder-name');
+            var cardButton = document.getElementById('card-button');
+            var clientSecret = cardButton.dataset.secret;
+
+            cardButton.addEventListener('click', function(ev) {
+                stripe.handleCardPayment(
+                    clientSecret, cardElement, {
+                        source_data: {
+                            owner: {name: cardholderName.value, email: self.user_email}
+                        }
+                    }
+                ).then(function(result) {
+                    if (result.error) {
+                       alert("error on payment")
+                    } else {
+
+                        alert("good job")
+                        // The payment has succeeded. Display a success message.
+                    }
+                });
             });
 
 // Submit the form with the token ID.
@@ -138,7 +167,8 @@
                 description: 'Pareto Products',
                 currency: 'USD',
                 order_id: '',
-                user_email: ''
+                user_email: '',
+                client_secret: ''
 
 
             }

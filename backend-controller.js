@@ -118,6 +118,7 @@ mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
+const Payment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
 
@@ -1693,6 +1694,15 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 };
 
 
+controller.event_payment = async function (event, callback) {
+    let charge = event;
+   if(charge.type === "charge.succeeded"){
+        var payment = new Payment({ email: charge.data[0].billing_details.email, order_id: charge.data[0].id });
+        payment.save();
+    }
+
+}
+
 controller.listProducts = async function (callback) {
 
     let skus;
@@ -1756,8 +1766,28 @@ controller.createOrder = async function (order_cart, callback) {
         
      });
 
+
+    let order_amount
     order.then(function (result) {
-        callback(result, result);
+
+        order_amount = result.amount
+
+
+            const paymentIntent =  stripe.paymentIntents.create({
+                amount: order_amount,
+                currency: 'usd',
+                payment_method_types: ['card'],
+            });
+
+
+
+            paymentIntent.then(function (resultint){
+
+                let response = {order: result, intent: resultint}
+                callback(response, resultint);
+
+            });
+
     });
 
 
