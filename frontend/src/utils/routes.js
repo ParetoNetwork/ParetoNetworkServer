@@ -52,7 +52,7 @@ const router = new VueRouter(
 
 router.beforeEach((to, from, next) => {
     // ...
-    const publicPages = ['/', '/leaderboards', '/about', '/products'];
+    const publicPages = ['/', '/leaderboards', '/about', '/products', '/checkout', '/payment'];
     const authRequired = !publicPages.includes(to.path);
     AuthService.auth(() => {
         next();
