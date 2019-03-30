@@ -34,8 +34,8 @@
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
           </li>
-          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
-            <VProductsCart :cart="cart"></VProductsCart>
+          <li class="nav-item mx-lg-4" v-if="show_shopping" v-on:click="collapseContent()">
+            <VProductsCart></VProductsCart>
           </li>
           <li class="nav-item dropdown mx-lg-4 active">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"

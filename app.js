@@ -388,6 +388,21 @@ app.post('/v1/payment', function (req, res) {
     });
 });
 
+app.post('/webhook', function(req, res) {
+    // Retrieve the request's body and parse it as JSON
+
+    controller.event_payment(req.body , function (err, res) {
+        if (err) {
+            res.status(200)
+        } else {
+            res.status(500)
+        }
+    });
+
+
+
+});
+
 
 /********* AUTHENTICATED v1 APIs *********/
 
