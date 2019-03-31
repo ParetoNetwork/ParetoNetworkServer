@@ -181,30 +181,6 @@ app.get('/profile-image', function (req, res) {
   });
 });
 
-app.get('/', function (req, res) {
-  //__dirname : It will resolve to your project folder.
-  res.sendFile(path.join(__dirname + '/public/splash.html')); //this will be dashboard
-});
-
-app.get('/about', function (req, res) {
-  res.sendFile(path.join(__dirname + '/public/about.html'));
-});
-
-app.get('/rank', function (req, res) {
-  //__dirname : It will resolve to your project folder.
-  res.sendFile(path.join(__dirname + '/public/rank.html'));
-});
-
-app.get('/dashboard', function (req, res) {
-  //__dirname : It will resolve to your project folder.
-  res.sendFile(path.join(__dirname + '/public/dashboard.html'));
-});
-
-app.get('/intel', function (req, res) {
-  res.sendFile(path.join(__dirname + '/public/intel.html'));
-});
-
-
 /********* UNAUTHENTICATED v1 APIs *********/
 
 app.post('/v1/sign', function (req, res) {

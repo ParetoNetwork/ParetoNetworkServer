@@ -79,7 +79,7 @@
       </router-link>
       <router-link tag="div" class="cursor-pointer border mb-2 p-2"
                    :to="leaderboards(profile.address)" style="min-width: 80px">
-                        <span :class="{'text-onRankUpdated' : profile.rankUpdated}">
+        <span :class="{'text-onRankUpdated' : profile.rankUpdated}">
 
                 <ICountUp
                         v-if="profile.score"
@@ -89,9 +89,10 @@
                         :duration="randomNumber(3,6)"
                         :options="countUp.options"
                         @ready="onReady"/>
-                                    </span>
+                <span v-else> 0 </span>
+        </span>
 
-        <span v-else> 0 </span>
+
         <div class="mb-1">
           Score <i class="fa fa-star fa-lg" style="color: #fca130;"></i>
         </div>

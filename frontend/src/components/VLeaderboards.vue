@@ -58,19 +58,20 @@
 
                                         <span :class="{'text-onRankUpdated' : scoreUpdated}">
 
-                                        <ICountUp
-                                                v-if="score"
-                                                :startVal="countUp.startVal"
-                                                :endVal="parseFloat(score)"
-                                                :decimals="decimalsLength(score + '')"
-                                                :duration="randomNumber(3,6)"
-                                                :options="countUp.options"
-                                                @ready="onReady"/>
+                                            <ICountUp
+                                                    v-if="score"
+                                                    :startVal="countUp.startVal"
+                                                    :endVal="parseFloat(score)"
+                                                    :decimals="decimalsLength(score + '')"
+                                                    :duration="randomNumber(3,6)"
+                                                    :options="countUp.options"
+                                                    @ready="onReady"/>
+                                            <span v-else>
+                                                0
+                                            </span>
                                         </span>
 
-                                        <span v-else>
-                                        0
-                                    </span>
+
                                     </div>
 
                                 </div>
