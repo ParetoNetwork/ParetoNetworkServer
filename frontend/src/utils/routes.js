@@ -1,4 +1,4 @@
-import Vintel from '../components/VIntel';
+import VIntel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
 import VCreateIntel from '../components/VCreateIntel';
@@ -10,7 +10,7 @@ import VScoreCalculator from '../components/VScoreCalculator';
 
 const routes = [
     {
-      path: '/', component: Vintel
+      path: '/', component: VIntel
     },
     {
         path: '*',
@@ -20,7 +20,7 @@ const routes = [
         path: '/intel/:address', component: VAuthorPage, name: 'VAuthorPage'
     },
     {
-        path: '/intel', component: Vintel
+        path: '/intel', component: VIntel
     },
     {
         path: '/intel/:alias/:id', component: VIntelDetail, name: 'VIntelDetail'
