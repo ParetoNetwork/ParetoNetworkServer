@@ -10,38 +10,32 @@
                         <div class="col-12 p-1">
                             <label class="pareto-label" style="padding-left: 10px"><b>NEW INTEL</b></label>
                         </div>
-                        <div class="col-md-6 col-lg-4 p-1 mb-4 mb-md-2">
-                            <p class="create-input text-user-content"> {{blockChainAddress}} </p>
+                        <div class="col-lg-9 p-1 mb-4 mb-md-0 create-input-space">
+                            <input id="intel-title-input"
+                                   type="text" class="create-input create-content-text title-user-content"
+                                   name="intel-title" v-model="title" placeholder="Example: Semi-conductor shipment from Taiwan registered to $OUTD" required>
+                            <span class="floating-label">
+                                <span v-if="formError.title && !title"> <i class="fa fa-exclamation-circle shake"
+                                                                                   style="color: red"></i></span>
+                            </span>
+
                         </div>
-                        <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
+                        <!-- <div class="col-md-3 col-lg-2 p-1 mb-4 mt-md-0 create-input-space">
                             <input type="number" v-model="tokens" class="create-input" step="0.000000001" required>
-                            <span class="floating-label">Pareto Amount
-                            <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake" style="color: red"></i> </span>
-                        </span>
-                        </div>
+                            <span class="floating-label">
+                                PRICE
+                                <span v-if="formError.tokens && !tokens"><i class="fa fa-exclamation-circle shake" style="color: red"></i> </span>
+                            </span>
+                        </div> -->
                     </div>
                     <div class="row mt-4 mt-md-2">
-                        <div v-show="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
+                        <div v-show="!isPreview" class="col-lg-9 font-body p-1 mt-4 mt-md-1">
                             <div class="flex-row intel-container text-user-content">
-                                <div class="group create-input-space">
-                                    <input id="intel-title-input"
-                                           type="text" class="create-input create-content-text title-user-content"
-                                           name="intel-title" v-model="title" required>
-                                    <span class="floating-label create-content-text title-user-content">
-                                    <b>Title </b>
-                                    <span v-if="formError.title && !title"> <i class="fa fa-exclamation-circle shake"
-                                                                               style="color: red"></i></span>
-                                </span>
-                                </div>
-                                <svg height="1" width="100%" class="px-3">
-                                    <line x1="0" y1="0" x2="100%" y2="0"
-                                          style="stroke:rgb(255,255,255);stroke-width:2"/>
-                                </svg>
                                 <textarea v-show="false"
                                           id="intel-body-input"
                                           name="editordata"
                                           v-model="body">
-                            </textarea>
+                                </textarea>
                                 <div v-if="intel.state !== 'empty'" class="d-flex justify-content-center">
                                     <label class="pareto-label"> {{intel.text}}
                                         <span v-if="intel.state === 'creating'">
@@ -209,7 +203,7 @@
         },
         mounted: function () {
             $('#intel-body-input').summernote({
-                placeholder: 'Content...',
+                placeholder: 'Explain the trade...',
                 height: '40vh', // set editor height
                 minHeight: null, // set minimum height of editor
                 maxHeight: null, // set maximum height of editor
@@ -480,4 +474,9 @@
         font-weight: bolder;
         padding-left: 10px;
     }
+
+    input::placeholder {
+        color: #adb5bd;
+    }
+
 </style>
