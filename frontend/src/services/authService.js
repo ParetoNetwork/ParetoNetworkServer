@@ -76,7 +76,8 @@ export default class authService {
                 logged = true;
                 return onSuccess(from);
             }else{
-                return onError(errorService.sendErrorMessage('f2', response.data.message));
+                errorService.sendErrorMessage('f2', response.data.message)
+                return onError(response.data.message);
             }
 
         }).catch(error => {
@@ -401,6 +402,9 @@ export default class authService {
                                try{
                                    provider.currentProvider.sendAsync({method,params,from}, (err, result) => {
                                        if(err || result.error){
+                                           if(result && result.error.message.indexOf("User denied message signature") >-1 ){
+                                               return;
+                                           }
                                            method = 'eth_signTypedData';
                                            versionMethod = 'v1';
                                            const msgParams = [
@@ -412,6 +416,9 @@ export default class authService {
                                            ];
                                            const params = [msgParams,from];
                                            provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                               if(result && result.error.message.indexOf("User denied message signature") >-1 ){
+                                                   return;
+                                               }
                                                resultfunction( versionMethod, msgParams,err, result)
                                            });
                                        }else{
@@ -430,6 +437,9 @@ export default class authService {
                                    ];
                                    params = [msgParams,from];
                                    provider.currentProvider.sendAsync({method,params, from}, (err, result) => {
+                                       if(result && result.error.message.indexOf("User denied message signature") >-1 ){
+                                           return;
+                                       }
                                        resultfunction( versionMethod, msgParams,err, result)
                                    });
                                }

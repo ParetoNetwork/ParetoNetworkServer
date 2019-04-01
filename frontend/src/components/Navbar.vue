@@ -157,7 +157,7 @@
             type: 'error',
             duration: 10000,
             title: 'Login',
-            text: errorService.sendErrorMessage('f1', errorText)
+            text: errorText
           });
         });
       },
