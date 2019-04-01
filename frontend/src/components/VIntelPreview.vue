@@ -65,7 +65,7 @@
             <div v-if="!eventRow" v-bind:class="{ 'col-12 col-md-12 col-lg-3' : !eventRow , 'col-12 col-lg-5': eventRow }">
                 <div class="text-center text-xl-right mt-2 mt-xl-0">
                     <VIntelButtonAction :user="user" :intel="intel"></VIntelButtonAction>
-                    <p v-if="intel.totalReward>0" class="text-center text-xl-right mt-2 ellipsis mr-4">
+                    <p v-if="intel.totalReward>0" class="text-center text-xl-right ellipsis mt-2 mr-4">
                         <font-awesome-icon class="green-color" :icon="['fas', 'coins']" />&nbsp;
                         <ICountUp
                                 :startVal="0"

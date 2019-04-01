@@ -16,8 +16,8 @@
               <div></div>
               <div class="p-5 text-left">
                 <h1 class="mb-3 title-content" style="font-size: 30px"><b>Post. Trade. Earn.</b></h1>
-                <p>
-                  The first true peer-to-peer intel marketplace. Purchase access today.
+                <p class="subtitle-user-content">
+                  The first true peer-to-peer intel marketplace.<br/>Sign in or Purchase access today.
                 </p>
               </div>
               <button class="btn btn-dark-primary-pareto button--login mx-auto"
@@ -33,7 +33,7 @@
             <div class="d-flex flex-column justify-content-around">
               <div class="d-none d-md-block"></div>
               <img src="../../assets/images/LogoReverse.svg" width="200px" style="margin: 0 auto" alt="">
-              <p class="p-3 d-none d-md-block">Current, reputable & actionable intel for traders and investors.</p>
+              <p class="p-3 d-none d-md-block subtitle-user-content">Current, reputable & actionable intel for traders and investors.</p>
             </div>
           </div>
         </div>

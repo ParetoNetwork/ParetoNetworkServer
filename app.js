@@ -181,30 +181,6 @@ app.get('/profile-image', function (req, res) {
   });
 });
 
-app.get('/', function (req, res) {
-  //__dirname : It will resolve to your project folder.
-  res.sendFile(path.join(__dirname + '/public/splash.html')); //this will be dashboard
-});
-
-app.get('/about', function (req, res) {
-  res.sendFile(path.join(__dirname + '/public/about.html'));
-});
-
-app.get('/rank', function (req, res) {
-  //__dirname : It will resolve to your project folder.
-  res.sendFile(path.join(__dirname + '/public/rank.html'));
-});
-
-app.get('/dashboard', function (req, res) {
-  //__dirname : It will resolve to your project folder.
-  res.sendFile(path.join(__dirname + '/public/dashboard.html'));
-});
-
-app.get('/intel', function (req, res) {
-  res.sendFile(path.join(__dirname + '/public/intel.html'));
-});
-
-
 /********* UNAUTHENTICATED v1 APIs *********/
 
 app.post('/v1/sign', function (req, res) {
@@ -320,11 +296,13 @@ app.post('/v1/config_basic', function (req, res) {
   const netWorkId = process.env.ETH_NETWORK;
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
+  const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
   res.status(200).json(ErrorHandler.getSuccess({
     netWorkId: netWorkId,
     intelAddress: intel.networks[netWorkId].address,
     paretoAddress: pcontract,
-    psignversion: psignversion
+    psignversion: psignversion,
+    exponentBlock: exponentBlock
   }));
 });
 
@@ -334,13 +312,15 @@ app.post('/v1/config', function (req, res) {
   const netWorkId = process.env.ETH_NETWORK;
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
+  const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
   res.status(200).json(ErrorHandler.getSuccess({
     intel: intel.abi,
     pareto: pareto.abi,
     netWorkId: netWorkId,
     intelAddress: intel.networks[netWorkId].address,
     paretoAddress: pcontract,
-    psignversion: psignversion
+    psignversion: psignversion,
+    exponentBlock: exponentBlock
   }));
 });
 
@@ -786,7 +766,7 @@ app.initializeWebSocket = function (server) {
              */
             controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
               if (!err) {
-                if (client.readyState === WebSocket.OPEN && client.isAlive) {
+                if (client.readyState === WebSocket.OPEN) {
                   client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                 }
               }
@@ -794,7 +774,7 @@ app.initializeWebSocket = function (server) {
 
             controller.retrieveAddress(client.user.user, function (err, result) {
               if (!err) {
-                if (client.readyState === WebSocket.OPEN && client.isAlive) {
+                if (client.readyState === WebSocket.OPEN) {
                   client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                 }
               }

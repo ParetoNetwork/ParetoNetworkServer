@@ -1,40 +1,51 @@
 <template>
-  <div class="d-inline-block">
-    <button v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-            class="btn btn-dark-primary-pareto mx-auto px-4"
-            :disabled="pendingRowTransactions(intel) || user.address === intel.address"
-            @click="openRewardModal()">
-      <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
-      {{ intel.reward }}
-    </button>
-    <b-btn
-        v-if="user.address === intel.address &&
+    <div class="d-inline-block">
+        <button v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
+                class="btn mx-auto px-4"
+                :disabled="pendingRowTransactions(intel) || user.address === intel.address"
+                v-bind:class="{pulsate: pendingRowTransactions(intel),
+                'btn-dark-primary-pareto': !(pendingRowTransactions(intel) || user.address === intel.address),
+                'btn-dark-grey-primary-pareto': (pendingRowTransactions(intel) || user.address === intel.address)}"
+                @click="openRewardModal()">
+            <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
+            {{ intel.reward }}
+        </button>
+        <button
+                v-if="
                     intel.intelAddress &&
                     signType != 'Manual' &&
                     intel.expires < Math.round(new Date().getTime() / 1000) &&
                     !intel.distributed"
-        :disabled="clickedCollect"
-        class="btn-dark-primary-pareto mx-auto px-4"
-        @click="distribute(intel)">
-      COLLECT
-    </b-btn>
-    <a v-if="user.address === intel.address && intel.distributed"
-       v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
-       target="_blank">
-      <b-btn class="cursor-pointer btn-dark-primary-pareto mx-auto px-4">
-        <i class="fa fa-external-link-alt"></i> SENT
-      </b-btn>
-    </a>
-  </div>
+                :disabled="clickedCollect ||  user.address !== intel.address"
+                class="btn  mx-auto px-4"
+                v-bind:class="{pulsate: clickedCollect,
+                  'btn-dark-primary-pareto': user.address === intel.address,
+                'btn-dark-grey-primary-pareto':  user.address !== intel.address}"
+                @click="distribute(intel)">
+            <i v-if="user.address === intel.address" class="fa fa-exchange-alt left"></i>
+            <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
+            {{ intel.reward }}
+        </button>
+        <a v-if="intel.distributed"
+           v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
+           :disabled="user.address !== intel.address"
+           target="_blank">
+            <button class="btn cursor-pointer btn-dark-grey-primary-pareto mx-auto px-4">
+                <i v-if="user.address === intel.address" class="fa fa-external-link-alt left"></i>
+                <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
+                {{ intel.reward }}
+            </button>
+        </a>
+    </div>
 </template>
 
 <script>
-  import {mapMutations, mapState} from "vuex";
-  import ContentService from "../../services/ContentService";
-  import VModalReward from "../Modals/VModalReward";
+  import {mapMutations, mapState} from 'vuex';
+  import ContentService from '../../services/ContentService';
+  import VModalReward from '../Modals/VModalReward';
 
   export default {
-    name: "VIntelButtonAction",
+    name: 'VIntelButtonAction',
     props: [
       'user', 'intel'
     ],
@@ -48,12 +59,12 @@
       };
     },
     computed: {
-      ...mapState(["ws", "signType", "pendingTransactions", "currentDistributes"])
+      ...mapState(['ws', 'signType', 'pendingTransactions', 'currentDistributes'])
     },
     mounted: function () {
     },
     methods: {
-      ...mapMutations(["openModalReward", "addReward", "addDistribute", "deleteDistribute"]),
+      ...mapMutations(['openModalReward', 'addReward', 'addDistribute', 'deleteDistribute']),
       distribute: function (intel) {
         this.clickedCollect = true;
 
@@ -66,13 +77,13 @@
             group: 'notification',
             type: 'warning',
             duration: 10000,
-            text: "The Intel was already Collected"
+            text: 'The Intel was already Collected'
           });
           return;
         }
 
         ContentService.distributeRewards(
-          {ID: intel.id, intelAddress: intel.intelAddress},
+          {title: intel.title, ID: intel.id, intelAddress: intel.intelAddress},
           {signType: this.signType, pathId: this.pathId},
           {
             addDistribute: this.addDistribute
@@ -116,11 +127,34 @@
           }
         });
         return transactionPending;
-      },
+      }
     }
-  }
+  };
 </script>
 
 <style scoped>
+    .pulsate {
+        -webkit-animation: pulsate 3s ease-out;
+        -webkit-animation-iteration-count: infinite;
+        opacity: 0.5;
+    }
 
+    .left {
+        margin-right: 5px;
+        padding-top: 2px;
+        font-size: 16px;
+
+    }
+
+    @-webkit-keyframes pulsate {
+        0% {
+            opacity: 0.5;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.5;
+        }
+    }
 </style>

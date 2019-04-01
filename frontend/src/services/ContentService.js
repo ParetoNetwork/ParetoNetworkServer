@@ -19,12 +19,12 @@ export default class ContentService {
 
   static networks = {
     1: {
-      https: "https://mainnet.infura.io/QWMgExFuGzhpu2jUr6Pq",
-      wss: "wss://mainnet.infura.io:443/ws"
+      https: "https://mainnet.infura.io/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd",
+      wss: "wss://mainnet.infura.io/ws/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd"
     },
     3: {
-      https: "https://ropsten.infura.io/QWMgExFuGzhpu2jUr6Pq",
-      wss: "wss://ropsten.infura.io/ws"
+      https: "https://ropsten.infura.io/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd",
+      wss: "wss://ropsten.infura.io/ws/v3/8f0be0e5fb5f470ebd4c1a9cfdcc77dd"
     }
   };
 
@@ -120,7 +120,7 @@ export default class ContentService {
                   });
                   events.editTransaction({hash: content.txHash, key: 'status', value: 1});
 
-                  ContentService.sendReward(true, Intel, {
+                  ContentService.sendReward(null,true, Intel, {
                     intel: content.intel,
                     depositAmount: depositAmount,
                     txHash: content.txHash,
@@ -131,7 +131,7 @@ export default class ContentService {
                 break;
               }
               case 1: {
-                ContentService.sendReward(true, Intel, {
+                ContentService.sendReward(null, true, Intel, {
                   intel: content.intel,
                   depositAmount: depositAmount,
                   txHash: content.txHash,
@@ -180,7 +180,7 @@ export default class ContentService {
                     gasPrice: gasPrice
                   };
 
-                  this.sendCreate(true, content, events, onSuccess, onError);
+                  this.sendCreate(null, true, content, events, onSuccess, onError);
                 });
                 break;
               case 1:
@@ -193,7 +193,7 @@ export default class ContentService {
                   intel: content.intel,
                   gasPrice: gasPrice
                 };
-                this.sendCreate(true, content, events, onSuccess, onError);
+                this.sendCreate(null, true, content, events, onSuccess, onError);
                 break;
               case 2:
                 waitForReceipt(content.txHash, receipt => {
@@ -214,7 +214,7 @@ export default class ContentService {
     }
   }
 
-  static async sendCreate(withIncreaseApproval, content, events, onSuccess, onError) {
+  static async sendCreate(title, withIncreaseApproval, content, events, onSuccess, onError) {
     try {
       let gasCreateIntel = await Intel.methods
         .create(
@@ -240,19 +240,28 @@ export default class ContentService {
           gasPrice: content.gasPrice
         })
         .on("transactionHash", hash => {
+            content.txHash = hash;
+            content.txRewardHash = hash;
+            content.status = 2;
+            if(title){
+                content.intelData = {title: title};
+            }
+            events.addTransaction(content);
+            ContentService.postTransactions(content);
 
-
-            web3.eth.getTransaction(hash).then( (txObject)=>{
-                const  nonce = txObject.nonce;
-                content.txHash = hash;
-                content.txRewardHash = hash;
-                content.status = 2;
-                content.nonce = nonce;
-                events.addTransaction(content);
-                ContentService.postTransactions(content);
-            }).catch(function (err) {
-                console.log(err);
-            });
+            waitForNonce(hash,( txObject)=>{
+                if(txObject){
+                    const  nonce = txObject.nonce;
+                    content.txHash = hash;
+                    content.txRewardHash = hash;
+                    content.status =  txObject.blockNumber? 3 :  2;
+                    content.nonce = nonce;
+                    if(title){
+                        content.intelData = {title: title};
+                    }
+                    ContentService.postTransactions(content);
+                }
+             });
 
 
 
@@ -366,7 +375,7 @@ export default class ContentService {
 
         ContentService.uploadContent(serverData, async res => {
           params.intel = res.content.Intel_ID;
-          ContentService.sendCreate(false, params, events, onSuccess, onError);
+          ContentService.sendCreate(serverData.title, false, params, events, onSuccess, onError);
         });
       }
 
@@ -391,19 +400,31 @@ export default class ContentService {
                 gasPrice
               })
               .once("transactionHash", hash => {
-                  web3.eth.getTransaction(hash).then( (txObject)=>{
-                      const content = {};
-                      const  nonce = txObject.nonce;
-                      content.txHash = hash;
-                      content.status = 0;
-                      content.event = "approve";
-                      content.nonce = nonce;
-                      events.addTransaction(content);
+                  const data = {};
+                  data.txHash = hash;
+                  data.status = 0;
+                  data.event = "approve";
+                  if(serverData.title){
+                      data.intelData = {title: serverData.title};
+                  }
+                  events.addTransaction(data);
 
-                      ContentService.postTransactions(content);
-                  }).catch(function (err) {
-                      console.log(err);
-                  });
+                  ContentService.postTransactions(content);
+                  waitForNonce(hash,  (txObject)=>{
+                      if(txObject){
+                          const content = {};
+                          const  nonce = txObject.nonce;
+                          content.txHash = hash;
+                          content.status = txObject.blockNumber? 1 :  0;
+                          content.event = "approve";
+                          content.nonce = nonce;
+                          if(serverData.title){
+                              content.intelData = {title: serverData.title};
+                          }
+
+                          ContentService.postTransactions(content);
+                      }
+                      });
                 var txHash = hash;
 
                 waitForReceipt(hash, async receipt => {
@@ -428,7 +449,7 @@ export default class ContentService {
                     gasPrice: gasPrice
                   };
 
-                  ContentService.sendCreate(true, newContent, events, onSuccess, onError);
+                  ContentService.sendCreate(serverData.title, true, newContent, events, onSuccess, onError);
                 });
               })
               .on("error", err => {
@@ -440,7 +461,7 @@ export default class ContentService {
     });
   }
 
-  static async sendReward(withIncreasedApproval, Intel, content, events, onSuccess, onError) {
+  static async sendReward(title, withIncreasedApproval, Intel, content, events, onSuccess, onError) {
     try {
       const gasSendReward = await Intel.methods
         .sendReward(content.intel, content.depositAmount)
@@ -455,20 +476,27 @@ export default class ContentService {
         })
         .on("transactionHash", hash => {
 
-            web3.eth.getTransaction(hash).then( (txObject)=>{
-               const  nonce = txObject.nonce;
-                content.txHash = hash;
-                content.txRewardHash = hash;
-                content.status = 2;
-                content.nonce = nonce;
-                events.addTransaction(content);
-
-                ContentService.postTransactions(content);
-            }).catch(function (err) {
-                console.log(err);
-            });
-
-
+            content.txHash = hash;
+            content.txRewardHash = hash;
+            content.status = 2;
+            if(title){
+                content.intelData = {title: title}
+            }
+            events.addTransaction(content);
+            ContentService.postTransactions(content);
+            waitForNonce(hash, (txObject)=>{
+                if(txObject){
+                    const  nonce = txObject.nonce;
+                    content.txHash = hash;
+                    content.txRewardHash = hash;
+                    content.status = txObject.blockNumber? 3 :  2;
+                    content.nonce = nonce;
+                    if(title){
+                        content.intelData = {title: title}
+                    }
+                    ContentService.postTransactions(content);
+                }
+                }) ;
           waitForReceipt(hash, receipt => {
             if (ContentService.ledgerNanoEngine) {
               ContentService.ledgerNanoEngine.stop();
@@ -559,7 +587,7 @@ export default class ContentService {
       function directlyCreateReward() {
         params.depositAmount = depositAmount;
         params.gasPrice = gasPrice;
-        ContentService.sendReward(false, Intel, params, events, onSuccess, onError);
+        ContentService.sendReward(content.title, false, Intel, params, events, onSuccess, onError);
       }
 
       //Does the increase approval for an user if the allowance is less than the token amount
@@ -582,19 +610,28 @@ export default class ContentService {
           })
           .on("transactionHash", hash => {
 
-            web3.eth.getTransaction(hash).then( (txObject)=>{
-                  const content = {};
-                  const  nonce = txObject.nonce;
-                  content.txHash = hash;
-                  content.status = 0;
-                  content.event = "approve";
-                  content.nonce = nonce;
-                  events.addTransaction(content);
+              const data = {};
+              data.txHash = hash;
+              data.status = 0;
+              data.event = "approve";
+              data.intelData = {title: content.title};
+              events.addTransaction(data);
 
-                  ContentService.postTransactions(content);
-              }).catch(function (err) {
-                  console.log(err);
-              });
+              ContentService.postTransactions(data);
+
+               waitForNonce(hash, (txObject)=>{
+                   if(txObject){
+                       const param = {};
+                       const  nonce = txObject.nonce;
+                       param.txHash = hash;
+                       param.status = txObject.blockNumber? 1 :  0;
+                       param.event = "approve";
+                       param.nonce = nonce;
+                       param.intelData = {title: content.title};
+
+                       ContentService.postTransactions(param);
+                   }
+               });
             //The transaction will be send to vuex and the database
             var txHash = hash;
             params.txHash = txHash;
@@ -610,7 +647,7 @@ export default class ContentService {
               });
               events.editTransaction({hash: hash, key: 'status', value: 1});
 
-              ContentService.sendReward(true, Intel, {
+              ContentService.sendReward(content.title, true, Intel, {
                 intel: content.ID,
                 depositAmount: depositAmount,
                 txHash: txHash,
@@ -655,6 +692,7 @@ export default class ContentService {
           event: 'distribute',
           status: 0,
           clicked: true,
+          intelData: {title: content.title} ,
           dateCreated: new Date()
         });
 
@@ -789,4 +827,25 @@ function waitForReceipt(hash, cb) {
       }, 1000);
     }
   });
+}
+
+
+function waitForNonce(hash, cb) {
+    web3.eth.getTransaction(hash, function (err, txObject) {
+        if (err) {
+            error(err);
+        }
+
+        if (txObject !== null) {
+            // Transaction went through
+            if (cb) {
+                cb(txObject);
+            }
+        } else {
+            // Try again in 1 second
+            setTimeout(function () {
+                waitForNonce(hash, cb);
+            }, 400);
+        }
+    });
 }

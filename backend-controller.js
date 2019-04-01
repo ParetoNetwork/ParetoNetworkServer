@@ -298,7 +298,7 @@ controller.getTransaction = function (data, callback) {
       path: 'createdBy'
       , select: 'address alias aliasSlug profilePic'
     }
-    , select: 'id block address title'
+    , select: 'id block address title reward'
   }).exec(callback);
 };
 
@@ -359,7 +359,14 @@ controller.startwatchNewIntel = function () {
                     {
                       intel: event.returnValues.intelID,
                       event: 'create'
-                    }, {status: 3, txHash: event.transactionHash})];
+                    }, {status: 3,
+                            txHash: event.transactionHash,
+                            event: 'create',
+                            block: event.blockNumber,
+                            amount:  initialBalance,
+                            intel: parseInt(event.returnValues.intelID),
+                            address: data.address
+                        },{upsert: true, new: true})];
                 Promise.all(promises).then(values => {
                   if (values.length > 1) {
                     controller.getScoreAndSaveRedis(null, (err, result) => {
@@ -432,12 +439,12 @@ controller.startwatchReward = function (intel, intelAddress) {
               if (!err) {
                 controller.updateAddressReward(event, count);
               } else {
-                callback(err);
+                  console.log(err)
               }
             });
             web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
               const nonce = txObject.nonce;
-              controller.updateIntelReward(intelIndex, event.transactionHash, nonce, event.returnValues.sender.toLowerCase());
+              controller.updateIntelReward(intelIndex, event.transactionHash, nonce, event.returnValues.sender.toLowerCase(), rewardData.block, rewardData.amount);
             }).catch(function (err) {
               console.log(err)
             });
@@ -476,8 +483,14 @@ controller.startwatchDistribute = function (intel, intelAddress) {
             }, {
               status: 3,
               txRewardHash: txHash,
-              txHash: txHash
-            })];
+              txHash: txHash,
+              address: sender,
+              block: event.blockNumber,
+              amount:  parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether')),
+              nonce: nonce,
+              event: 'distribute',
+              intel: intelIndex,
+            },{upsert: true, new: true})];
         Promise.all(promises).then(values => {
           if (controller.wss && values.length > 1) {
             controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
@@ -507,6 +520,59 @@ controller.startwatchDistribute = function (intel, intelAddress) {
   });
 };
 
+controller.startwatchDeposit= function (intel) {
+  try{
+      intel.events.Deposited().on('data', event => {
+          try {
+
+              web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
+                  const nonce = txObject.nonce;
+                  const txHash = event.transactionHash;
+                  const sender = event.returnValues.from.toLowerCase();
+                  ParetoTransaction.findOneAndUpdate(
+                      {
+                          $or: [{txHash: txHash},
+                              {address: sender, nonce: nonce}]
+                      }, {
+                          status: 3,
+                          txRewardHash: txHash,
+                          txHash: txHash,
+                          block: event.blockNumber,
+                          amount:  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether')),
+                          address: sender,
+                          nonce: nonce,
+                          event: 'deposited',
+                      },{upsert: true, new: true}).then(value => {
+                      if (controller.wss && value) {
+                          controller.SendInfoWebsocket({address: value.address, transaction: value});
+                      } else {
+                          console.log('no wss');
+                      }
+                  }).catch(e => {
+                      const error = ErrorHandler.backendErrorList('b26');
+                      error.systemMessage = e.message ? e.message : e;
+                      console.log(JSON.stringify(error));
+                  });
+              }).catch(function (e) {
+                  const error = ErrorHandler.backendErrorList('b26');
+                  error.systemMessage = e.message ? e.message : e;
+                  console.log(JSON.stringify(error));
+              });
+
+          } catch (e) {
+              const error = ErrorHandler.backendErrorList('b26');
+              error.systemMessage = e.message ? e.message : e;
+              console.log(JSON.stringify(error));
+          }
+
+      }).on('error', err => {
+          console.log(err);
+      });
+  }catch (e) {
+      //only new intel contract has Deposited events.
+  }
+
+};
 
 controller.startWatchApprove = function () {
   web3_events.eth.subscribe('logs',
@@ -573,6 +639,7 @@ controller.startwatchIntel = function () {
         const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
         controller.startwatchReward(intel, intelAddress);
         controller.startwatchDistribute(intel, intelAddress);
+        controller.startwatchDeposit(intel);
       }
 
     }
@@ -693,7 +760,7 @@ controller.SendInfoWebsocket = function (data) {
  * @param intelIndex
  * @param txHash
  */
-controller.updateIntelReward = function (intelIndex, txHash, nonce, sender) {
+controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, block, amount) {
   let agg = [{$match: {'intelId': intelIndex}},
     {
       $group: {
@@ -722,7 +789,16 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender) {
         , ParetoTransaction.findOneAndUpdate({
           $or: [{txRewardHash: txHash}, {txHash: txHash},
             {address: sender, intel: intelIndex, event: 'reward', nonce: nonce}]
-        }, {status: 3, txRewardHash: txHash, txHash: txHash})];
+        }, {status: 3,
+              txRewardHash: txHash,
+              txHash: txHash,
+              nonce: nonce,
+              block: block,
+              amount:  amount,
+              event: 'reward',
+              address: sender,
+              intel: intelIndex
+        },{upsert: true, new: true})];
       Promise.all(promises).then(values => {
         if (values.length > 1 && controller.wss) {
           controller.SendInfoWebsocket({address: values[1].address, transaction: values[1]});
@@ -1041,11 +1117,11 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                                         }]
                                 };
 
-                                if(percentile<=0.15){
-                                    returnQuery.$and.push({expires: {$lte : ((new Date()).getTime()/1000)+86400}, validated: true});
-                                }
+                                // if(percentile<0.85){
+                                //     returnQuery.$and.push({expires: {$lte : ((new Date()).getTime()/1000)+86400}, validated: true});
+                                // }
 
-                                return callback(null, CONTENT_DELAY, returnQuery);
+                                return callback(null, CONTENT_DELAY, returnQuery,percentile);
                             });
                         }, function (error) {
                             callback(error);
@@ -1064,7 +1140,7 @@ controller.getAllAvailableContent = async function (req, callback) {
 
   var limit = parseInt(req.query.limit || 100);
   var page = parseInt(req.query.page || 0);
-  controller.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind) {
+  controller.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
 
     if (error) return callback(error);
     try {
@@ -1113,6 +1189,12 @@ controller.getAllAvailableContent = async function (req, callback) {
             },
             contentDelay
           };
+          if(percentile <0.85){
+              if(data.expires > ((new Date()).getTime()/1000)+86400){
+                  data.title = "Classified" + controller.decodeData(data.title);
+                  data.body =  controller.decodeData(data.body);
+              }
+          }
 
           newResults.push(data);
 
@@ -1133,8 +1215,46 @@ controller.getAllAvailableContent = async function (req, callback) {
   });
 };
 
+controller.decodeData = function (data){
+  const TOKEN = "@7a8b9c";
+  const words = data.split(" ");
+  const shuffle = function (array) {
+
+        var currentIndex = array.length;
+        var temporaryValue, randomIndex;
+        while (0 !== currentIndex) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+
+    };
+  const randomWord =  function (length) {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < length; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+    };
+  const permutations = shuffle(Array.from(Array(words.length), (x, index)=>index+1)).slice(0,(words.length*0.5).toFixed());
+  return  words.map((it, index)=>{
+        if(permutations.includes(index)){
+          return TOKEN + randomWord(it.length) + TOKEN
+        }else{
+          return it;
+        }
+
+  }).join(' ');
+}
+
 controller.getContentByIntel = function (req, intel, callback) {
-  controller.getQueryContentByUser(req.user, intel, async function (error, contentDelay, queryFind) {
+  controller.getQueryContentByUser(req.user, intel, async function (error, contentDelay, queryFind, percentile) {
     if (error) return callback(error);
     try {
       if (mongoose.Types.ObjectId.isValid(intel)) {
@@ -1145,33 +1265,42 @@ controller.getContentByIntel = function (req, intel, callback) {
       const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).populate('createdBy').exec();
       if (allResults && allResults.length > 0) {
         const entry = allResults[0];
-        return callback(null, {
-          _id: entry._id,
-          blockAgo: Math.max(blockHeight - entry.block, 0),
-          block: entry.block,
-          title: entry.title,
-          address: entry.address,
-          body: entry.body,
-          expires: entry.expires,
-          dateCreated: entry.dateCreated,
-          txHash: entry.txHash,
-          totalReward: entry.totalReward || 0,
-          reward: entry.reward,
-          speed: entry.speed,
-          id: entry.id,
-          txHashDistribute: entry.txHashDistribute,
-          intelAddress: entry.intelAddress,
-          _v: entry._v,
-          distributed: entry.distributed,
-          createdBy: {
-            address: entry.createdBy.address,
-            alias: entry.createdBy.alias,
-            aliasSlug: entry.createdBy.aliasSlug,
-            biography: entry.createdBy.biography,
-            profilePic: entry.createdBy.profilePic
-          },
-          contentDelay: contentDelay
-        })
+        const data  = {
+            _id: entry._id,
+            blockAgo: Math.max(blockHeight - entry.block, 0),
+            block: entry.block,
+            title: entry.title,
+            address: entry.address,
+            body: entry.body,
+            expires: entry.expires,
+            dateCreated: entry.dateCreated,
+            txHash: entry.txHash,
+            totalReward: entry.totalReward || 0,
+            reward: entry.reward,
+            speed: entry.speed,
+            id: entry.id,
+            txHashDistribute: entry.txHashDistribute,
+            intelAddress: entry.intelAddress,
+            _v: entry._v,
+            distributed: entry.distributed,
+            createdBy: {
+                address: entry.createdBy.address,
+                alias: entry.createdBy.alias,
+                aliasSlug: entry.createdBy.aliasSlug,
+                biography: entry.createdBy.biography,
+                profilePic: entry.createdBy.profilePic
+            },
+            contentDelay: contentDelay
+        }
+
+          if(percentile <0.85){
+              if(data.expires > ((new Date()).getTime()/1000)+86400){
+                  data.title = "Classified" + controller.decodeData(data.title);
+                  data.body =  controller.decodeData(data.body);
+              }
+          }
+
+          return callback(null, data)
       } else {
         callback(null, {})
       }
@@ -1298,6 +1427,7 @@ controller.getUserInfo = async function (address, callback) {
                         'rank': ranking.rank,
                         'score': ranking.score,
                         'tokens': ranking.tokens,
+                        'block': ranking.block,
                         'lastApprovedAddress': ranking.approved,
                         'maxRank': ranking.maxRank,
                         'minScore': ranking.minScore,
@@ -1327,6 +1457,7 @@ controller.getUserInfo = async function (address, callback) {
                         'rank': ranking.rank,
                         'score': ranking.score,
                         'tokens': ranking.tokens,
+                        'block': ranking.block,
                         'lastApprovedAddress': ranking.approved,
                         'maxRank': ranking.maxRank,
                         'minScore': ranking.minScore,
