@@ -195,7 +195,7 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
                                         //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
 
                                         updateQuery.exec().then(function (r) {
-                                            ParetoAddress.estimatedDocumentCount({score: {$gt: 0}}, function (err, count) {
+                                            ParetoAddress.countDocuments({score: {$gt: 0}}, function (err, count) {
                                                 if (err) {
                                                     console.error('unable to finish db operation because: ', err);
                                                     if (callback && typeof callback === "function") {
@@ -1157,6 +1157,7 @@ workerController.getScoreAndSaveRedis = function(callback){
                 multi.hmset("address"+data.address+ "", rank );
             }
             multi.hmset("maxRank", {rank: maxRank} );
+            multi.hmset("minScore", {score: results[ Math.max(Math.floor(maxRank*0.15),0)].addresses.score} );
             promises.push(new Promise( (resolve, reject)=>{
                 multi.exec(function(errors, results) {
                     if(errors){
