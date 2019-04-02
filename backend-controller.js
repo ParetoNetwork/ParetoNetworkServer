@@ -1079,43 +1079,37 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                   blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
                 }
 
-                var blockHeightDelta = blockHeight - blockDelay;
 
-                const BLOCK_TIME = 12;
-                const timeDelay = blockDelay * 12;
 
-                                const CONTENT_DELAY = {
-                                    blockDelay,
-                                    timeDelay
-                                };
-                                let returnQuery = {
-                                    $and: [
-                                        {
-                                            $or: [
-                                                {
-                                                    block: {$lte: blockHeightDelta * 1},
-                                                    speed: 1,
-                                                    $or: [{validated: true}, {block: {$gt: 0}}]
-                                                },
-                                                {
-                                                    block: {$lte: blockHeightDelta * 50},
-                                                    speed: 2,
-                                                    $or: [{validated: true}, {block: {$gt: 0}}]
-                                                },
-                                                {
-                                                    block: {$lte: blockHeightDelta * 100},
-                                                    speed: 3,
-                                                    $or: [{validated: true}, {block: {$gt: 0}}]
-                                                },
-                                                {
-                                                    block: {$lte: blockHeightDelta * 150},
-                                                    speed: 4,
-                                                    $or: [{validated: true}, {block: {$gt: 0}}]
-                                                },
-                                                {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
-                                            ]
-                                        }]
-                                };
+                      const CONTENT_DELAY = [1,blockDelay,blockDelay*50,blockDelay*100,blockDelay*150];
+                      let returnQuery = {
+                          $and: [
+                              {
+                                  $or: [
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 1)},
+                                          speed: 1,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 50)},
+                                          speed: 2,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 100)},
+                                          speed: 3,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 150)},
+                                          speed: 4,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
+                                  ]
+                              }]
+                      };
 
                                 // if(percentile<0.85){
                                 //     returnQuery.$and.push({expires: {$lte : ((new Date()).getTime()/1000)+86400}, validated: true});
@@ -1187,7 +1181,10 @@ controller.getAllAvailableContent = async function (req, callback) {
               biography: entry.createdBy.biography,
               profilePic: entry.createdBy.profilePic
             },
-            contentDelay
+            contentDelay: {
+                blockDelay: contentDelay[entry.speed],
+                timeDelay: contentDelay[entry.speed]*12
+            }
           };
 
           if(percentile < 0 ){ //eventually it may be < 0.85
@@ -1291,7 +1288,10 @@ controller.getContentByIntel = function (req, intel, callback) {
                 biography: entry.createdBy.biography,
                 profilePic: entry.createdBy.profilePic
             },
-            contentDelay: contentDelay
+            contentDelay: {
+                blockDelay: contentDelay[entry.speed],
+                timeDelay: contentDelay[entry.speed]*12
+            }
         }
 
 
@@ -1952,7 +1952,7 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
       ParetoAddress.find({address: {$in: addressess}}, function (err, result) {
         if (!err && (!result || (result && !result.length))) {
           const error = ErrorHandler.backendErrorList('b3');
-          error.systemMessage = err.message ? err.message : err;
+          error.systemMessage = (err && err.message) ? err.message : err;
           error.address = addressess;
           callback(error);
         } else {
