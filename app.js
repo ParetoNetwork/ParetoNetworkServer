@@ -355,6 +355,24 @@ app.post('/v1/error-log', function (req, res) {
 });
 
 
+
+    app.post('/webhook', function(req, res) {
+        // Retrieve the request's body and parse it as JSON
+
+        controller.event_payment(req.body , function (err, result) {
+            if (err) {
+                res.status(200).json(ErrorHandler.getError(err));
+            } else {
+                res.status(200).json(ErrorHandler.getSuccess(result));
+            }
+        });
+
+
+
+    });
+
+
+
 app.get('/v1/getproducts', function (req, res) {
     //res.sendFile(path.join(__dirname + '/sitemap.xml'));
     controller.getProducts(function (err, result) {
@@ -388,20 +406,6 @@ app.post('/v1/payment', function (req, res) {
     });
 });
 
-app.post('/webhook', function(req, res) {
-    // Retrieve the request's body and parse it as JSON
-
-    controller.event_payment(req.body , function (err, res) {
-        if (err) {
-            res.status(200)
-        } else {
-            res.status(500)
-        }
-    });
-
-
-
-});
 
 
 /********* AUTHENTICATED v1 APIs *********/

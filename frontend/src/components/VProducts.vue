@@ -174,20 +174,19 @@
 
   .main-wrapper {
     .header {
-      position: relative;
+
       background: linear-gradient(to left, #16222A , #3A6073);
       background-size: cover;
       height: 18em;
       width: 100vw;
       box-shadow: inset -1px -3px 5px rgba(0,0,0,0.5), inset 1px 3px 5px rgba(0,0,0,0.5);
+      text-align: center;
 
       h1 {
-        position: absolute;
-        text-align: left;
-        top: 66%;
-        right: 50%;
-        transform: translate(-50%, -50%);
         color: white;
+        position: absolute;
+        left: 15%;
+        bottom: 50px;
         font-size: 3em;
         text-shadow: 1px 3px 5px rgba(0,0,0,0.5), -1px -3px 5px rgba(0,0,0,0.5);
       }

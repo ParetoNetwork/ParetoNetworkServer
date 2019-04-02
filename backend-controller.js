@@ -1695,12 +1695,13 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
 
 controller.event_payment = async function (event, callback) {
-    let charge = event;
+   let charge = event;
    if(charge.type === "charge.succeeded"){
-        var payment = new Payment({ email: charge.data[0].billing_details.email, order_id: charge.data[0].id });
-        payment.save();
+       Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.id },
+           function (err, payment) {
+             callback( err, payment)
+       });
     }
-
 }
 
 controller.listProducts = async function (callback) {
