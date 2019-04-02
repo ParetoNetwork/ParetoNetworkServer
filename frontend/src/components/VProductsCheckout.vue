@@ -26,13 +26,13 @@
                     
                     <td class="align-right">
                         <div class="qty_number">
-                            <input type="text" :value='product.quantity' >
+                            <input type="text" :value='product.quantity' readonly>
                             <div class="inc button" @click="addQuantity(product, key)"><span>+</span></div>
                             <div class="dec button" @click="deductQuantity(product, key)"><span>-</span></div>
                         </div>
                     </td>
                     <td class="align-right"> $ {{ product.price / 100}}</td>
-                    <td><button @click="removeProduct(product)"> X </button></td>
+                    <td><button @click="removeProduct(product, key)"> X </button></td>
                 </tr>
                 
                 <tr class="total-cart">
@@ -142,14 +142,9 @@
 
             },
 
-            removeProduct: function(product) {
-                this.cart.$remove(product);
-                this.cartSubTotal = this.cartSubTotal - (product.price * product.quantity);
-                this.cartTotal = this.cartSubTotal + (this.tax * this.cartSubTotal);
-
-                if(this.cart.length <= 0) {
-                    this.checkoutBool = false;
-                }
+            removeProduct: function(product, key) {
+                this.cart = this.cart[key].splice(key, 1)
+                this.updateCart(this.cart)
             },
             addQuantity: function(product, key){
 
@@ -224,8 +219,7 @@
     width: 71px;
     height: 30px;
     text-align: center;
-    border-left: 1px solid #aaa;
-    border-right: 1px solid #aaa;
+    border:none;
     margin: auto;
     display: table;
     padding: 3px;

@@ -1,42 +1,65 @@
 <template>
     <div class="main-wrapper">
-        <div class="header"><h1>Payment area</h1></div>
-        <div id="vue">
+        <div class="header"><h1>Payment</h1></div>
+        <div id="payment">
 
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="checkout-area">
 
-            <div class="checkout-area">
-                <span> {{ cart | cartSize }} </span><i class="fa fa-shopping-cart"></i>
+                            <span> {{ cart | cartSize }} </span><i class="fa fa-shopping-cart"></i>
 
-
-            </div>
-            <div class="align-left">
-                <label for="card-element">
-                    Email
-                </label>
-                <input type="email" placeholder="example@example.com" v-model="user_email" required>
-            </div>
-
-
-                <form action="/charge" method="post" id="payment-form">
-                    <div class="form-row">
-                        <input id="cardholder-name" type="text">
-
-                        <label for="card-element">
-                            Credit or debit card
-                        </label>
-                        <div id="card-element">
-                            <!-- A Stripe Element will be inserted here. -->
                         </div>
 
-                        <!-- Used to display form errors. -->
-                        <div id="card-errors" role="alert"></div>
                     </div>
-                    <button id="card-button" :data-secret="client_secret">
-                        Submit Payment
-                    </button>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-xs-12">
 
-                </form>
+                        <div class="form-group">
+                            <label for="cardholder-email">Email address</label>
+                            <input type="email" id="cardholder-email" placeholder="name@example.com" v-model="user_email" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardholder-name">Owner name</label>
+                            <input id="cardholder-name" type="text" placeholder="your name" class="form-control">
+                        </div>
 
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-xs-12">
+                        <form action="/charge" method="post" id="payment-form">
+
+
+                            <div class="form-group">
+                                <label for="card-element">
+                                    Credit or debit card
+                                </label>
+                                <div id="card-element">
+                                    <!-- A Stripe Element will be inserted here. -->
+                                </div>
+                            </div>
+
+                            <!-- Used to display form errors. -->
+                            <div id="card-errors" role="alert"></div>
+
+                            <button id="card-button" v-show="!waiting_payment" :data-secret="client_secret">
+                                Submit Payment
+                            </button>
+
+                            <div v-show="waiting_payment">
+
+                                <p>Waiting for payment approval. This may take a while</p>
+                                <div class="loader"></div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
 
             </div>
         </div>
@@ -131,22 +154,25 @@
             });
 
             var cardholderName = document.getElementById('cardholder-name');
+            var cardholderEmail = document.getElementById('cardholder-email');
             var cardButton = document.getElementById('card-button');
             var clientSecret = cardButton.dataset.secret;
 
             cardButton.addEventListener('click', function(ev) {
+                self.waiting_payment = true;
                 stripe.handleCardPayment(
                     clientSecret, cardElement, {
                         source_data: {
-                            owner: {name: cardholderName.value, email: self.user_email}
+                            owner: {name: cardholderName.value, email: cardholderEmail.value}
                         }
                     }
                 ).then(function(result) {
                     if (result.error) {
+                       self.waiting_payment = true;
                        alert("error on payment")
                     } else {
-
-                        alert("good job")
+                        window.localStorage.setItem('ShoppingCart', '');
+                        self.$router.push({path: '/thankyou-payment'});
                         // The payment has succeeded. Display a success message.
                     }
                 });
@@ -162,13 +188,11 @@
                 cartTotal: 0,
                 cartSubTotal: 0,
                 cart: [],
-                image: 'https://i.imgur.com/HhqxVCW.jpg',
-                name: 'Pareto',
-                description: 'Pareto Products',
                 currency: 'USD',
                 order_id: '',
                 user_email: '',
-                client_secret: ''
+                client_secret: '',
+                waiting_payment: false,
 
 
             }
@@ -292,7 +316,11 @@
 </script>
 
 <style scoped>
-
+#payment{
+    padding-top: 100px;
+    padding-bottom: 50px;
+    background-color: #fff;
+}
 
     .main-wrapper #vue {
 
@@ -313,27 +341,11 @@
         color: #a7a7a7;
     }
 
-    input {
-
-        width: 68%;
-        border-radius: 5px;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        height: 40px;
-        padding: 10px 12px;
-        border: 1px solid transparent;
-        border-radius: 4px;
-        background-color: white;
-        width: 46%;
-        -webkit-box-shadow: 0 1px 3px 0 #e6ebf1;
-        box-shadow: 0 1px 3px 0 #e6ebf1;
-        -webkit-transition: box-shadow 150ms ease;
-        -webkit-transition: -webkit-box-shadow 150ms ease;
-        transition: -webkit-box-shadow 150ms ease;
-        transition: box-shadow 150ms ease;
-        transition: box-shadow 150ms ease, -webkit-box-shadow 150ms ease;
-        text-align: left;
+    label{
+        display: inline-block;
+        color: black;
     }
+
 
     .checkout-area table tr{
         margin-bottom: 20px;
@@ -381,6 +393,10 @@
         line-height: 25px;
     }
 
+    p {
+        color: black;
+    }
+
     .image{
         width: 80px;
     }
@@ -413,7 +429,36 @@
 
     .StripeElement--webkit-autofill {
         background-color: #fefde5 !important;
+
+
     }
+
+.loader {
+    height: 4px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: #ddd;
+}
+.loader:before{
+    display: block;
+    position: absolute;
+    content: "";
+    left: -200px;
+    width: 200px;
+    height: 4px;
+    background-color: #2980b9;
+    animation: loading 2s linear infinite;
+}
+
+@keyframes loading {
+    from {left: -200px; width: 30%;}
+    50% {width: 30%;}
+    70% {width: 70%;}
+    80% { left: 50%;}
+    95% {left: 120%;}
+    to {left: 100%;}
+}
 </style>
 
 

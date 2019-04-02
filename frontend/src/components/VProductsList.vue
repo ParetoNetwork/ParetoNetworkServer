@@ -7,7 +7,7 @@
 
                   <div class='name'>{{ product.name }}</div>
                   <div class='desc'>{{product.description }}</div>
-                  <div class='price'>$ {{product.price}}</div>
+                  <div class='price'>$ {{product.price / 100}}</div>
                   <button @click='addToCart(product, index)'>Add to Cart</button><br><br></div>
 
           </div>
