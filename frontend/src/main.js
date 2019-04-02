@@ -21,7 +21,6 @@ import {library} from '@fortawesome/fontawesome-svg-core';
 import {fas} from '@fortawesome/free-solid-svg-icons';
 import {fab} from '@fortawesome/free-brands-svg-icons';
 
-import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 library.add(fas, fab);
@@ -149,7 +148,12 @@ const store = new Vuex.Store({
       state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
     }, setLastApprovedAddress(state, contractAddress) {
       state.userLastApprovedContractAddress = contractAddress;
+    },  addProductToCart(state, product){
+      state.shoppingCart.push(product)
+    }, resetCart(state){
+      state.shoppingCart = []
     }
+
   },
   actions: {
     login(context, address) {
@@ -167,6 +171,10 @@ const store = new Vuex.Store({
     },
     transactionComplete(context, txHash) {
       context.commit('deleteTransaction', txHash);
+    },addToCart(context, product){
+      context.commit('addProductToCart', product)
+    },resetShoppingCart(context){
+      context.commit('resetCart')
     }
   }
 });
