@@ -1189,12 +1189,14 @@ controller.getAllAvailableContent = async function (req, callback) {
             },
             contentDelay
           };
-          if(percentile <0.85){
-              if(data.expires > ((new Date()).getTime()/1000)+86400){
-                  data.title = "Classified" + controller.decodeData(data.title);
-                  data.body =  controller.decodeData(data.body);
-              }
-          }
+
+          // TODO: this is commented for now as we dont want to enabled it yet.  (see Git ticket #608)
+          // if(percentile <0.85){
+          //     if(data.expires > ((new Date()).getTime()/1000)+86400){
+          //         data.title = "Classified" + controller.decodeData(data.title);
+          //         data.body =  controller.decodeData(data.body);
+          //     }
+          // }
 
           newResults.push(data);
 
