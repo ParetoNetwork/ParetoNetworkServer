@@ -62,7 +62,7 @@
           </a>
         </div>
       </div>
-        <div v-if="profile.minScore && (profile.minScore - profile.score > 0)" class="row cursor-pointer mt-3">
+      <!--  <div v-if="profile.minScore && (profile.minScore - profile.score > 0)" class="row cursor-pointer mt-3">
             <div class="ml-0 col px-0">
                          <span class="text-user-content">
                         <b> <p> Score needed: </p> </b>
@@ -81,7 +81,7 @@
                         </Span>
 
             </div>
-        </div>
+        </div> -->
     </div>
     <div class="row justify-content-center justify-content-lg-start text-center mt-1 mt-xl-1">
       <router-link tag="div" class="cursor-pointer border mr-3 p-2 mb-2" :to="leaderboards(profile.address)"
