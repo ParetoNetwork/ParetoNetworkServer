@@ -118,6 +118,7 @@ mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
+const ParetoPayment = mongoose.model('payment');
 const Payment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
@@ -160,6 +161,160 @@ controller.getParetoCoinMarket = function (callback) {
       callback(error, JSON.parse(body));
     });
 };
+
+
+/**
+ *
+ *  Functions to Transfer pareto and Eth
+ *
+ */
+
+/**
+ * Get a wallet provider to make transactions
+ * @return {{engine: Web3ProviderEngine, web3: Web3}}
+ */
+controller.getWalletProvider = function () {
+    const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
+    const ProviderEngine = require('web3-provider-engine');
+    const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
+    const Wallet = require('ethereumjs-wallet');
+    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DT_ORACLE_SYS, "base64").toString("ascii"), "hex"));
+    const engine = new ProviderEngine();
+    engine.addProvider(new HookedWalletSubprovider({
+        getAccounts: function(cb){
+            cb(null, [ myWallet.getAddressString()]);
+        },
+        getPrivateKey: function(address, cb){
+            if (address !== myWallet.getAddressString()) {
+                cb(new Error('Account not found'))
+            } else {
+                cb(null, myWallet.getPrivateKey())
+            }
+        }
+    }));
+    engine.addProvider(new WsSubprovider({rpcUrl:  WEB3_WEBSOCKET_URL}));
+    engine.start();
+    return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
+};
+
+
+/**
+ * For now is a dummy purchase
+ * @param address the new Created address front end.
+ * @param callback
+ */
+controller.purchase= function(address, order_id, callback){
+    const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
+    ParetoPayment.find({order_id: order_id, processed: false}).sort({state: -1}).exec().then(function (r) {
+        if(r && r.length>0){
+            const payment = r[0];
+            if(payment.state > 0){
+                callback(null, {});
+            }else{
+                controller.makeTransaction(address, 2, ETH_DEPOSIT,callback);
+            }
+
+        }
+
+    }).catch(function (e) {
+        callback(e)
+    });
+
+}
+
+/**
+ *
+ * @param address ToAddress
+ * @param amount  amount of pareto that will send to address
+ * @param eth    amount of eth that will send to address
+ * @param callback
+ * @return {Promise<void>}
+ */
+controller.makeTransaction = async function(address, amount, eth, callback){
+    const  walletProvider = controller.getWalletProvider();
+    try{
+
+        const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
+        const Pareto_Address = process.env.CRED_PARETOCONTRACT;
+        const web3 = walletProvider.web3;
+        const wallet = walletProvider.wallet;
+        const ParetoTokenInstance  = new web3.eth.Contract( Pareto_Token_Schema.abi, Pareto_Address);
+        let amountPareto = web3.utils.toWei(amount.toString(), "ether");
+        let amountEther = web3.utils.toWei(eth.toString(), "ether");
+        let gasPrice = await web3.eth.getGasPrice();
+        let gasApprove = await web3.eth.estimateGas({
+            to:address,
+            from: wallet.getAddressString(),
+            value: amountEther});
+        web3.eth.sendTransaction({
+            to:address,
+            from: wallet.getAddressString(),
+            value: amountEther,
+            gas: gasApprove,
+            gasPrice: gasPrice  * 1.3
+        }).once('transactionHash', function(hash){
+            controller.waitForReceipt(hash,async  (err, receipt)=>{
+                if(err){
+                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                    return  callback(err);
+                }
+                let gasApprove = await ParetoTokenInstance.methods
+                    .transfer(address, amountPareto)
+                    .estimateGas({from: wallet.getAddressString()});
+                ParetoTokenInstance.methods
+                    .transfer(address, amountPareto)
+                    .send({
+                        from: wallet.getAddressString(),
+                        gas: gasApprove,
+                        gasPrice: gasPrice  * 1.3
+                    })
+                    .once('transactionHash', function(hash){
+                        console.log(hash);
+                        controller.waitForReceipt(hash,async  (err, receipt)=> {
+                            if(err){
+                                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                                return  callback(err);
+                            }
+                            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                            callback(null, receipt);
+                        })
+                    })
+                    .once('error', (err)=>{
+                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                        callback(err);
+                    });
+            })
+        })
+            .once('error', function(err){
+                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                callback(err);
+            });
+
+    }catch (e) {
+        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+        callback(e);
+    }
+};
+
+controller.waitForReceipt = function (hash, cb) {
+    web3.eth.getTransactionReceipt(hash, function (err, receipt) {
+        if (err) {
+            cb(err);
+        }
+
+        if (receipt !== null) {
+            // Transaction went through
+            if (cb) {
+                cb(null, receipt);
+            }
+        } else {
+            // Try again in 1 second
+            setTimeout(function () {
+                controller.waitForReceipt(hash, cb);
+            }, 1000);
+        }
+    });
+}
 
 controller.getBalance = async function (address, blockHeightFixed, callback) {
 
