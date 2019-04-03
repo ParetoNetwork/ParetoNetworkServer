@@ -19,7 +19,7 @@
 
       <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
         <ul class="navbar-nav ">
-          <li class="nav-item mx-lg-4" v-if="show_shopping" v-on:click="collapseContent()">
+          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/products" exact>Products
             </router-link>
           </li>
@@ -34,7 +34,7 @@
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
           </li>
-          <li class="nav-item mx-lg-4" v-if="show_shopping" v-on:click="collapseContent()">
+          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
             <VProductsCart></VProductsCart>
           </li>
           <li class="nav-item dropdown mx-lg-4 active">
@@ -77,9 +77,9 @@
   import authService from '../services/authService';
   import DashboardService from '../services/dashboardService';
   import errorService from '../services/errorService';
-  import Profile from '../services/profileService';
   import ModalLedgerNano from "./Modals/VModalLedgerNano";
   import VProductsCart from "./VProductsCart"
+  import ProductService from '.././services/productService'
 
 
   export default {
@@ -95,6 +95,10 @@
           address: {address: res},
         });
       }, () => {}, true);
+      ProductService.showShopping(res => {
+            console.log(res)
+          this.$store.dispatch('handleshowshopping', (res.data.showshoppingcart === "true"))
+      });
     },
     watch: {
       loadingNav(value) {
@@ -118,14 +122,13 @@
         etherscan: window.localStorage.getItem('etherscan'),
         loading: false,
         finish: false,
-        colorNav: {},
-        show_shopping: window.localStorage.getItem('showshoppingcart')
+        colorNav: {}
       };
     },
     computed: {
       ...mapState([
         // map this.count to store.state.count
-        'isLogged', 'address', 'showModalSign'
+        'isLogged', 'address', 'showModalSign', 'showshopping'
       ]),
       loadingNav() {
         return this.$store.state.makingRequest;

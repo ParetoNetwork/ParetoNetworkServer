@@ -371,7 +371,14 @@ app.post('/v1/error-log', function (req, res) {
 
     });
 
+app.post('/v1/showshoppingcar', function (req, res) {
 
+  const showshoppingcart = process.env.SHOW_SHOPPING_CART;
+
+  res.status(200).json(ErrorHandler.getSuccess({
+    showshoppingcart: showshoppingcart,
+  }));
+});
 
 app.get('/v1/getproducts', function (req, res) {
     //res.sendFile(path.join(__dirname + '/sitemap.xml'));

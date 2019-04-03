@@ -34,24 +34,14 @@
       return {
         productsData: [],
         productsDatalist: [],
-        checkoutBool: false,
         cart: [],
-        cartSubTotal: 0,
-        tax: 0.065,
-        cartTotal: 0
       }
     },
     components: {
        VProductsList
     },
 
-    //intercept the checkout request dispatch
-    //send it back down the chain
-    events: {
-      "checkoutRequest": function() {
-        vue.$broadcast("checkoutRequest");
-      }
-    }
+
   }
 </script>
 

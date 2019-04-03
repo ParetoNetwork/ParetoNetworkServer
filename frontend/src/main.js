@@ -65,6 +65,7 @@ const store = new Vuex.Store({
     signType: (window.localStorage.getItem('signType')) || 'Metamask',
     ws: null,
     shoppingCart: [],
+    showshopping: false
   },
   mutations: {
     addReward(state, data) {
@@ -152,6 +153,8 @@ const store = new Vuex.Store({
       state.shoppingCart.push(product)
     }, resetCart(state){
       state.shoppingCart = []
+    }, showshoppingcar(state, show){
+      state.showshopping = show
     }
 
   },
@@ -175,6 +178,8 @@ const store = new Vuex.Store({
       context.commit('addProductToCart', product)
     },resetShoppingCart(context){
       context.commit('resetCart')
+    },handleshowshopping(context, show){
+      context.commit('showshoppingcar', show)
     }
   }
 });

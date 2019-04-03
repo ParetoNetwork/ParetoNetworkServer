@@ -4,16 +4,7 @@
         <div id="payment">
 
             <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="checkout-area">
 
-                            <span> {{ cart | cartSize }} </span><i class="fa fa-shopping-cart"></i>
-
-                        </div>
-
-                    </div>
-                </div>
                 <div class="row justify-content-center">
                     <div class="col-md-6 col-xs-12">
 
@@ -168,10 +159,11 @@
                     }
                 ).then(function(result) {
                     if (result.error) {
-                       self.waiting_payment = true;
+                       self.waiting_payment = false;
                        alert("error on payment")
                     } else {
                         window.localStorage.setItem('ShoppingCart', '');
+                        self.$store.dispatch('resetShoppingCart');
                         self.$router.push({path: '/thankyou-payment'});
                         // The payment has succeeded. Display a success message.
                     }
@@ -195,29 +187,6 @@
                 waiting_payment: false,
 
 
-            }
-        },
-
-        filters: {
-            customPluralize: function(cart) {
-                var newName;
-
-                if(cart.quantity > 1) {
-                    newName = cart.product + "s";
-                    return newName;
-                }
-
-                return cart.product;
-            },
-
-            cartSize: function(cart) {
-                var cartSize = 0;
-
-                for (var i = 0; i < cart.length; i++) {
-                    cartSize += cart[i].quantity;
-                }
-
-                return cartSize;
             }
         },
         computed: {
@@ -259,18 +228,6 @@
 
 
             },
-            done ({token, args}) {
-
-            },
-            opened () {
-                // do stuff
-            },
-            closed () {
-                // do stuff
-            },
-            canceled () {
-                // do stuff
-            },
             removeProduct: function(product) {
                 this.cart.$remove(product);
                 this.cartSubTotal = this.cartSubTotal - (product.price * product.quantity);
@@ -286,29 +243,8 @@
             deductQuantity: function(product, key){
 
             },
-            checkoutModal: function() {
-                var self = this;
-                self.showModal = true;
 
-                console.log("CHECKOUT", self.cartTotal);
-
-            },
-
-            hideModal: function() {
-                //hide modal and empty modal data
-                var self = this;
-                self.showModal = false;
-            }
         },
-
-        //intercept the checkout request broadcast
-        //run our function
-        events: {
-            "checkoutRequest": function() {
-                var self = this;
-                self.checkoutModal();
-            }
-        }
 
 
 
@@ -317,7 +253,7 @@
 
 <style scoped>
 #payment{
-    padding-top: 100px;
+    padding-top: 120px;
     padding-bottom: 50px;
     background-color: #fff;
 }

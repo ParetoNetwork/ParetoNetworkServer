@@ -5,7 +5,7 @@
     
 
         <div class="checkout-area">
-            <span> {{ cart | cartSize }} </span><i class="fa fa-shopping-cart"></i>
+
             <table>
                 <thead>
                 <tr>
@@ -82,29 +82,6 @@
 
             }
         },
-
-        filters: {
-            customPluralize: function(cart) {
-                var newName;
-
-                if(cart.quantity > 1) {
-                    newName = cart.product + "s";
-                    return newName;
-                }
-
-                return cart.product;
-            },
-
-            cartSize: function(cart) {
-                var cartSize = 0;
-
-                for (var i = 0; i < cart.length; i++) {
-                    cartSize += cart[i].quantity;
-                }
-
-                return cartSize;
-            }
-        },
          computed: {
             
             getCartTotal: function () {
@@ -143,8 +120,16 @@
             },
 
             removeProduct: function(product, key) {
-                this.cart = this.cart[key].splice(key, 1)
+
+                this.cart.splice(key, 1);
                 this.updateCart(this.cart)
+
+                this.$store.dispatch('resetShoppingCart')
+                for (var i = 0; i < this.cart.length; i++) {
+
+                   this.$store.dispatch('addToCart', this.cart[i]);
+                }
+
             },
             addQuantity: function(product, key){
 
@@ -159,19 +144,7 @@
             deductQuantity: function(product, key){
 
             },
-            checkoutModal: function() {
-                var self = this;
-                self.showModal = true;
 
-                console.log("CHECKOUT", self.cartTotal);
-
-            },
-
-            hideModal: function() {
-                //hide modal and empty modal data
-                var self = this;
-                self.showModal = false;
-            }
         },
 
         //intercept the checkout request broadcast
