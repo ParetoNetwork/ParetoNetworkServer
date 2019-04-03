@@ -1,5 +1,5 @@
 <template>
-    <div class="text-left pl-1">
+    <div class="text-left pl-1" :style="getBorderLeft(intel.contentDelay)">
         <div class="row pb-3 border-bottom" :class="{'ml-2 mr-0 py-2': eventRow}"
              style="border-bottom-color: black !important;">
             <div class="col-md-12 col-lg-9">
@@ -141,7 +141,20 @@
       },
       randomNumber: function (min = 1, max = 3) {
         return Math.floor(Math.random() * (max - min + 1) + min);
-      }
+      },
+        getBorderLeft(delayData) {
+            switch(delayData.type ){
+                case 1:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "yellow !important"}
+                }
+                case 2:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "red !important"}
+                }
+            }
+
+
+            return {};
+        }
     }
   };
 </script>
