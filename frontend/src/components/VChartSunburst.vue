@@ -1,6 +1,7 @@
 <template>
-    <svg></svg>
-
+    <div id="d3-svg">
+        <svg></svg>
+    </div>
 </template>
 
 <script>
@@ -350,7 +351,7 @@
         var radius = Math.min(width, height) / 2;
         const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, 3));
         // Create primary <g> element
-        var g = d3.select('svg')
+        var g = d3.select('#d3-svg svg')
           .attr('width', width)
           .attr('height', height)
           .append('g')

@@ -22,8 +22,10 @@
                                 :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
+                <div class="col-md-3 col-lg-3 order-3">
+                    <VChartSunburst></VChartSunburst>
+                </div>
             </div>
-            <VChartSunburst></VChartSunburst>
         </div>
         <ModalSignIn v-if="showModalSign"></ModalSignIn>
         <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
