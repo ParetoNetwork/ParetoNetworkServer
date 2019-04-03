@@ -29,6 +29,8 @@ var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 var ETH_NETWORK = process.env.ETH_NETWORK;
 var PARETO_SIGN_VERSION = process.env.PARETO_SIGN_VERSION;
 var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
+var BLOCK_DELAY_YELLOW = process.env.BLOCK_DELAY_YELLOW || 1000;
+var BLOCK_DELAY_RED = process.env.BLOCK_DELAY_RED || 10;
 /*ways of writing contract creation block height*/
 //const CONTRACT_CREATION_BLOCK_HEX = '0x4B9696'; //need this in hex
 const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
@@ -1078,10 +1080,10 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                 } else {
                   blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
                 }
-
-
-
-                      const CONTENT_DELAY = [1,blockDelay,blockDelay*50,blockDelay*100,blockDelay*150];
+                const CONTENT_DELAY = {
+                  blockDelay: [1,blockDelay,blockDelay*50,blockDelay*100,blockDelay*150],
+                  blockHeight: blockHeight
+                };
                       let returnQuery = {
                           $and: [
                               {
@@ -1156,6 +1158,7 @@ controller.getAllAvailableContent = async function (req, callback) {
 
          */
         try {
+          let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
           let data = {
             _id: entry._id,
             blockAgo: Math.max(blockHeight - entry.block, 0),
@@ -1182,7 +1185,9 @@ controller.getAllAvailableContent = async function (req, callback) {
               profilePic: entry.createdBy.profilePic
             },
             contentDelay: {
-                blockDelay: contentDelay[entry.speed],
+                blockDelay: contentDelay.blockDelay[entry.speed],
+                type: (delayAgo > BLOCK_DELAY_YELLOW)? 0: (delayAgo > BLOCK_DELAY_RED)? 1: 2,
+                blockHeight: contentDelay.blockHeight,
                 timeDelay: contentDelay[entry.speed]*12
             }
           };
@@ -1263,6 +1268,7 @@ controller.getContentByIntel = function (req, intel, callback) {
       const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).populate('createdBy').exec();
       if (allResults && allResults.length > 0) {
         const entry = allResults[0];
+        let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
         const data  = {
             _id: entry._id,
             blockAgo: Math.max(blockHeight - entry.block, 0),
@@ -1289,10 +1295,12 @@ controller.getContentByIntel = function (req, intel, callback) {
                 profilePic: entry.createdBy.profilePic
             },
             contentDelay: {
-                blockDelay: contentDelay[entry.speed],
+                blockDelay: contentDelay.blockDelay[entry.speed],
+                type: (delayAgo > BLOCK_DELAY_YELLOW)? 0: (delayAgo > BLOCK_DELAY_RED)? 1: 2,
+                blockHeight: contentDelay.blockHeight,
                 timeDelay: contentDelay[entry.speed]*12
             }
-        }
+        };
 
 
           if(percentile < 0){
