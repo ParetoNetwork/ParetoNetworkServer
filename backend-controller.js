@@ -155,10 +155,12 @@ controller.getParetoCoinMarket = function (callback) {
   let url = 'https://pro-api.coinmarketcap.com/v1';
 
   request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
-    {headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY}},
+    {
+        headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY,
+                   'Content-Type' : 'application/json; charset=utf-8'}
+    },
     (error, res, body) => {
-      console.log(COIN_MARKET_API_KEY);
-      callback(error, JSON.parse(body));
+      callback(error, body);
     });
 };
 
@@ -203,15 +205,33 @@ controller.getWalletProvider = function () {
  * @param address the new Created address front end.
  * @param callback
  */
-controller.purchase= function(address, order_id, callback){
+controller.transactionFlow= function(address, order_id, callback){
     const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
-    ParetoPayment.find({order_id: order_id, processed: false}).sort({state: -1}).exec().then(function (r) {
-        if(r && r.length>0){
-            const payment = r[0];
+    ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
+        if(payment){
             if(payment.state > 0){
                 callback(null, {});
             }else{
-                controller.makeTransaction(address, 2, ETH_DEPOSIT,callback);
+                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {address: address, state: 1}).exec().then(function (r) {
+                     controller.getParetoCoinMarket((err, result)=>{
+                         if(err){
+                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
+                           return  callback(err);
+                         }
+                         const paretoAmount = payment.amount/result.data.quote.USD.price;
+                         console.log(paretoAmount);
+                         controller.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
+                             if(err){
+                                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
+                               return   callback(err);
+                             }
+                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 2, oracleTxHash: result.hash }).exec().then((r)=>{});
+                         });
+                     })
+                }).catch(function (e) {
+                    callback(e)
+                });
+
             }
 
         }
@@ -220,6 +240,26 @@ controller.purchase= function(address, order_id, callback){
         callback(e)
     });
 
+}
+
+
+controller.updateTransaction = function (body, callback) {
+
+    const data = {
+        txHash: body.txHash
+    };
+    const find = {
+        $or: [{order_id: body.order_id}, {address: body.address}],
+        processed: false
+    };
+    if (body.processed) {
+        data.processed = true;
+    }
+    ParetoPayment.findOneAndUpdate(find, data).exec().then((r) => {
+        callback(null, r);
+    }).catch(err => {
+        callback(null, err);
+    });
 }
 
 /**
@@ -269,14 +309,13 @@ controller.makeTransaction = async function(address, amount, eth, callback){
                         gasPrice: gasPrice  * 1.3
                     })
                     .once('transactionHash', function(hash){
-                        console.log(hash);
                         controller.waitForReceipt(hash,async  (err, receipt)=> {
                             if(err){
                                 if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
                                 return  callback(err);
                             }
                             if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                            callback(null, receipt);
+                            callback(null, {amount, eth, hash});
                         })
                     })
                     .once('error', (err)=>{

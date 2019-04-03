@@ -1,3 +1,6 @@
+import errorService from "./errorService";
+import http from "./HttpService";
+
 export default class PurchaseService {
 
     static networks = {
@@ -11,7 +14,7 @@ export default class PurchaseService {
         }
     };
 
-    static async generateAddress() {
+    static  generateAddress() {
         let pk = localStorage.getItem("privateKey");
 
         if (!pk) {
@@ -21,23 +24,24 @@ export default class PurchaseService {
         }
     }
 
-    static async makeDeposit(amount, callback ) {
-        const Intel_Contract_Schema = JSON.parse(window.localStorage.getItem('intelc'));
-        const Pareto_Token_Schema = JSON.parse(window.localStorage.getItem('paretoc'));
+    static async makeDeposit(amount, order_id, callback ) {
 
-        const Intel = new web3.eth.Contract(
-            Intel_Contract_Schema,
-            localStorage.getItem('intelAddress')
-        );
 
-        const ParetoTokenInstance = new web3.eth.Contract(
-            Pareto_Token_Schema,
-            localStorage.getItem('paretoAddress')
-        );
-
-        const  walletProvider = getWalletProvider();
+        const  walletProvider = PurchaseService.getWalletProvider();
         try {
             const web3 = walletProvider.web3;
+            const Intel_Contract_Schema = JSON.parse(window.localStorage.getItem('intelc'));
+            const Pareto_Token_Schema = JSON.parse(window.localStorage.getItem('paretoc'));
+
+            const Intel = new web3.eth.Contract(
+                Intel_Contract_Schema,
+                localStorage.getItem('intelAddress')
+            );
+
+            const ParetoTokenInstance = new web3.eth.Contract(
+                Pareto_Token_Schema,
+                localStorage.getItem('paretoAddress')
+            );
             const wallet = walletProvider.wallet;
             let amountPareto = web3.utils.toWei(amount.toString(), "ether");
             let gasPrice = await web3.eth.getGasPrice();
@@ -58,7 +62,7 @@ export default class PurchaseService {
                 })
                 .once("transactionHash", hash => {
                     console.log("Approve hash "+hash);
-                    waitForReceipt(hash, async receipt => {
+                    PurchaseService.waitForReceipt(web3, hash, async receipt => {
                         console.log("Receipt ");
                         let gasApprove = await Intel.methods
                             .makeDeposit(wallet.getAddressString(), amountPareto)
@@ -70,10 +74,16 @@ export default class PurchaseService {
                                 gas: gasApprove,
                                 gasPrice: gasPrice * 1.3
                             })
-                            .once("transactionHash", hash => {
+                            .once("transactionHash", async (hash) => {
                                 console.log("deposit hash "+hash);
-                                waitForReceipt(hash, async receipt => {
+                                try{
+                                    const r = await http.post("/v1/updateTransaction", {txHash: hash, order_id: order_id });
+                                } catch (e) { }
+                                PurchaseService.waitForReceipt(web3, hash, async receipt => {
                                     console.log("Receipt ");
+                                    try{
+                                        const r = await http.post("/v1/updateTransaction", {txHash: hash, order_id: order_id, processed: true });
+                                    } catch (e) { }
                                     if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
                                     callback(null, receipt);
                                 });
@@ -123,4 +133,45 @@ export default class PurchaseService {
         engine.start();
         return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
     };
+
+
+    static waitForReceipt(web3, hash, cb) {
+        web3.eth.getTransactionReceipt(hash, function (err, receipt) {
+            if (err) {
+                error(err);
+            }
+
+            if (receipt !== null) {
+                // Transaction went through
+                if (cb) {
+                    cb(receipt);
+                }
+            } else {
+                // Try again in 1 second
+                setTimeout(function () {
+                    PurchaseService.waitForReceipt(hash, cb);
+                }, 1000);
+            }
+        });
+    }
+
+
+    static async initTransactionFlow(order_id, onSuccess, onError){
+        PurchaseService.generateAddress();
+        try{
+
+            const res = await  http.post("/v1/maketransaction", {order_id: order_id, address: address });
+            const amount = res.data.data.amount;
+            const eth = res.data.data.eth;
+            console.log(res.data.data);
+            await PurchaseService.makeDeposit(amount, order_id, (err, response)=>{
+                if(err){ return onError(err)}
+                onSuccess(response);
+            })
+
+        }catch (e) {
+            onError(e);
+        }
+
+    }
 }
