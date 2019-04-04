@@ -2,7 +2,7 @@
   <div class="intel-container">
     <div v-if="!loading" class="p-2 pt-1 text-left">
       <b class="title-content">
-        Intel Feed
+        Intel Market
       </b>
       <!-- <div class="row text-content">
         <div class="col-4 col-md-4 col-lg-2">
@@ -14,7 +14,7 @@
       </div> -->
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
-          <li class="text-left border-0 py-2" :key="row._id"
+          <li class="text-left  py-2" :style="getBorderLeft(row.speed)" :key="row._id"
               v-for="row of myFeed.content">
             <VIntelPreview :user="user" :intel="row" :eventRow="false"></VIntelPreview>
           </li>
@@ -196,7 +196,26 @@
             });
           }
         );
-      }
+      },
+        getBorderLeft(speed) {
+            switch(speed){
+                case 1:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#c24e4e !important"}
+                }
+                case 2:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#ca9036 !important"}
+                }
+                case 3:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#6ac27e !important"}
+                }
+                case 4:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#294b83 !important"}
+                }
+            }
+
+
+            return {};
+        }
     }
   }
 </script>
