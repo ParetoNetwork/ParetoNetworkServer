@@ -481,7 +481,7 @@
             type: 'error',
             duration: 10000,
             title: 'Logout',
-            text: errorService.sendErrorMessage('f14', errorText)
+            text: errorText
           });
         });
       },

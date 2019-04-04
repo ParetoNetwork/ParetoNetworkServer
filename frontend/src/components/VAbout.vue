@@ -511,26 +511,6 @@
                         <div class="col-xs-12 col-sm-6 col-md-3">
                             <div class="team-member text-center">
                                 <figure class="team-member__image">
-                                    <img src="../assets/images/team-3.jpg" alt="" class="rounded-circle" width="85">
-                                </figure>
-                                <div class="d-flex flex-column">
-                                    <span class="name">Chris Eberle</span>
-                                    <span class="position">Chief of Content.</span>
-                                </div>
-                                <div class="mb-2">
-                                    <p>Syracuse Newhouse School BS, Harvard Business School Exec Ed | Facebook |
-                                        Federated Media | Meebo (Google) | AOL | 20 years in digital content development
-                                        and marketing. Writer, Speaker, Creator</p>
-                                </div>
-                                <div class="team-member__socials">
-                                    <a href="https://www.linkedin.com/in/creberle/" target="_blank"><i
-                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
-                                </div>
-                            </div> <!-- end team-member -->
-                        </div>
-                        <div class="col-xs-12 col-sm-6 col-md-3">
-                            <div class="team-member text-center">
-                                <figure class="team-member__image">
                                     <img src="../assets/images/team-willmclarren.jpg" alt="" class="rounded-circle" width="85">
                                 </figure>
                                 <div class="d-flex flex-column">
