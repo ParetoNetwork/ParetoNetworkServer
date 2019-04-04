@@ -327,7 +327,8 @@
         .range(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
     }, mounted() {
       console.log(d3)
-      this.makeSvg();
+      //this.makeSvg();
+      this.newSvg();
     },
     methods: {
       makeSvg() {
@@ -351,14 +352,13 @@
         var height = 500;
         var radius = Math.min(width, height) / 2;
         const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, 3));
-        // Create primary <g> element
+
         var g = d3.select('#d3-svg svg')
           .attr('width', width)
           .attr('height', height)
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-        // Data strucure
         var partition = d3.partition()
           .size([2 * Math.PI, radius]);
 
@@ -374,7 +374,6 @@
           .innerRadius(function (d) { return d.y0 })
           .outerRadius(function (d) { return d.y1 });
 
-        // Put it all together
         const path = g.selectAll('path')
           .data(root.descendants())
           .enter().append('path')
@@ -391,7 +390,6 @@
 
         var text = path.append("title")
           .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
-
 
         const label = g.append("g")
           .attr("pointer-events", "none")
@@ -479,6 +477,80 @@
         // const box = svg.getBBox();
         // document.body.removeChild(svg);
         // svg.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
+      },
+      newSvg(){
+        var nodeData = {
+          "name": "TOPICS", "children": [{
+            "name": "Topic A",
+            "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
+          }, {
+            "name": "Topic B",
+            "children": [{"name": "Sub B1", "size": 3}, {"name": "Sub B2", "size": 3}, {
+              "name": "Sub B3", "size": 3}]
+          }, {
+            "name": "Topic C",
+            "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
+          }]
+        };
+
+        var width = 500,
+          height = 500,
+          radius = (Math.min(width, height) / 2);
+        const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, 3));
+
+        var formatNumber = d3.format(",d");
+
+        var x = d3.scaleLinear()
+          .range([0, 2 * Math.PI]);
+
+        var y = d3.scaleSqrt()
+          .range([0, radius]);
+
+
+        var partition = d3.partition();
+
+
+        var root = d3.hierarchy(nodeData)
+          .sum(function (d) { return d.size});
+
+        var arc = d3.arc()
+          .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x0))); })
+          .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x1))); })
+          .innerRadius(function(d) { return Math.max(0, y(d.y0)); })
+          .outerRadius(function(d) { return Math.max(0, y(d.y1)); });
+
+
+        var svg = d3.select("#d3-svg svg")
+          .attr("width", width)
+          .attr("height", height)
+          .append("g")
+          .attr("transform", "translate(" + width / 2 + "," + (height / 2) + ")");
+
+        svg.selectAll("path")
+          .data(partition(root).descendants())
+          .enter().append("path")
+          .attr("display", function (d) { return d.depth ? null : "none"; })
+          .attr("d", arc)
+          .style('stroke', '#fff')
+          .style("fill", function(d) { return color((d.children ? d : d.parent).data.name); })
+          .on("click", click)
+          .append("title")
+          .text(function(d) { return d.data.name + "\n" + formatNumber(d.value); });
+
+        function click(d) {
+          svg.transition()
+            .duration(750)
+            .tween("scale", function() {
+              var xd = d3.interpolate(x.domain(), [d.x0, d.x1]),
+                yd = d3.interpolate(y.domain(), [d.y0, 1]),
+                yr = d3.interpolate(y.range(), [d.y0 ? 20 : 0, radius]);
+              return function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); };
+            })
+            .selectAll("path")
+            .attrTween("d", function(d) { return function() { return arc(d); }; });
+        }
+
+        d3.select(self.frameElement).style("height", height + "px");
       }
     }
   };

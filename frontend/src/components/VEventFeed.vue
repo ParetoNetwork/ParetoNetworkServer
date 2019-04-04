@@ -87,12 +87,12 @@
       }
     },
     mounted: function () {
-      if (this.defaultTransactions !== undefined && this.defaultTransactions.length > 0) {
-        this.loadAllContent = true;
-        this.transactions = this.defaultTransactions;
-      } else {
-        this.loadRequest();
-      }
+      // if (this.defaultTransactions !== undefined && this.defaultTransactions.length > 0) {
+      //   this.loadAllContent = true;
+      //   this.transactions = this.defaultTransactions;
+      // } else {
+      //   this.loadRequest();
+      // }
     },
     watch: {
       'pendingTransactions': function (newTransactions) {
