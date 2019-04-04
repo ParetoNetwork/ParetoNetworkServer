@@ -355,14 +355,14 @@ export default class ContentService {
       let userAllowance = 0;
       //Compares last used contract address to current using contract address
       //if not the same, compares the user allowance
-      if (serverData.lastApproved.toLowerCase() === Intel.options.address.toLowerCase()) {
+      if (serverData.lastApproved && (serverData.lastApproved.toLowerCase() === Intel.options.address.toLowerCase())) {
         directlyCreateIntel();
       } else {
         await ParetoTokenInstance.methods
           .allowance(provider_address, Intel.options.address).call().then(async res => {
-            userAllowance = res;
+            userAllowance = parseFloat(res) ;
 
-            (userAllowance < depositAmount) ? await userIncreaseApproval() : directlyCreateIntel();
+            (userAllowance < parseFloat(depositAmount)) ? await userIncreaseApproval() : directlyCreateIntel();
           });
       }
 
@@ -409,7 +409,7 @@ export default class ContentService {
                   }
                   events.addTransaction(data);
 
-                  ContentService.postTransactions(content);
+                  ContentService.postTransactions(data);
                   waitForNonce(hash,  (txObject)=>{
                       if(txObject){
                           const content = {};
@@ -573,17 +573,16 @@ export default class ContentService {
 
       //Compares last used contract address to current using contract address
       //if not the same, compares the user allowance
-      if (content.lastApproved === content.intelAddress) {
+      if (content.lastApproved && (content.lastApproved.toLowerCase() === content.intelAddress.toLowerCase())) {
         directlyCreateReward();
       } else {
         await ParetoTokenInstance.methods
           .allowance(rewarder_address, Intel.options.address).call().then(async res => {
-            userAllowance = res;
-            (userAllowance < depositAmount) ? await userIncreaseApproval() : directlyCreateReward();
+            userAllowance = parseFloat(res);
+            (userAllowance < parseFloat(depositAmount)) ? await userIncreaseApproval() : directlyCreateReward();
           });
       }
-
-      //Calls the reward function if the user last contract matches or if the user has the allowance
+        //Calls the reward function if the user last contract matches or if the user has the allowance
       function directlyCreateReward() {
         params.depositAmount = depositAmount;
         params.gasPrice = gasPrice;
