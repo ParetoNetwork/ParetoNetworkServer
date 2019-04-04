@@ -1902,7 +1902,7 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 controller.event_payment = async function (event, callback) {
    let charge = event;
    if(charge.type === "charge.succeeded"){
-       Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.id },
+       Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.payment_intent },
            function (err, payment) {
              callback( err, payment)
        });

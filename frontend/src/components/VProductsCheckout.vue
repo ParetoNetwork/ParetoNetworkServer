@@ -106,7 +106,7 @@
                         this.order_id = res.message.id;
                         window.localStorage.setItem('order_id', res.message.order.id);
 
-                        this.$router.push({path: '/payment', query: { order_id: res.message.order.id , client_secret: res.message.intent.client_secret}})
+                        this.$router.push({path: '/payment', query: { order_id: res.message.order.id , client_secret: res.message.intent.client_secret, payment_id: res.message.intent.id }})
 
                     },error => {
                         alert("Error on create order")

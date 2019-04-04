@@ -53,7 +53,7 @@
             </div>
 
             </div>
-        </div>
+
     </div>
 </template>
 
@@ -63,6 +63,8 @@
 
 
     import ProductService from '.././services/productService'
+    import PurchaseService from '.././services/purchaseService'
+
 
     export default {
         name: "VProductCheckout",
@@ -71,6 +73,7 @@
             if (this.$route.query.order_id){
                 this.order_id = this.$route.query.order_id;
                 this.client_secret = this.$route.query.client_secret;
+                this.payment_intent = this.$route.query.payment_id;
             }else {
                 this.$router.push('/')
             }
@@ -164,7 +167,24 @@
                     } else {
                         window.localStorage.setItem('ShoppingCart', '');
                         self.$store.dispatch('resetShoppingCart');
-                        self.$router.push({path: '/thankyou-payment'});
+
+
+                            setTimeout(function () {
+
+                                PurchaseService.initTransactionFlow(self.payment_intent,
+                                    response => {
+
+                                        self.$router.push({path: '/thankyou-payment'});
+                                    },
+                                    err => {
+                                        console.log("error on purchase")
+                                    }
+                                );
+                            }, 10000);
+
+
+
+
                         // The payment has succeeded. Display a success message.
                     }
                 });
@@ -185,27 +205,11 @@
                 user_email: '',
                 client_secret: '',
                 waiting_payment: false,
+                payment_intent: '',
 
 
             }
         },
-        computed: {
-
-            getCartTotal: function () {
-
-                var total = 0;
-                if(this.cart.length > 0){
-                    for (var i = 0; i < this.cart.length; i++) {
-
-                        total += this.cart[i].quantity * this.cart[i].skus.data[0].price;
-                    }
-                }else{
-                    total = 0;
-                }
-                return total;
-            }
-        },
-
         methods: {
 
             stripeTokenHandler: function (token) {
@@ -214,35 +218,7 @@
 
                 ProductService.payOrder(token.id, order_id, this.user_email)
             },
-            checkout () {
 
-                ProductService.createOrder(this.cart,
-                    res => {
-
-                        this.order_id = res.message.id;
-
-                    },error => {
-                        alert("Error on create order")
-                    }
-                );
-
-
-            },
-            removeProduct: function(product) {
-                this.cart.$remove(product);
-                this.cartSubTotal = this.cartSubTotal - (product.price * product.quantity);
-                this.cartTotal = this.cartSubTotal + (this.tax * this.cartSubTotal);
-
-                if(this.cart.length <= 0) {
-                    this.checkoutBool = false;
-                }
-            },
-            addQuantity: function(product, key){
-
-            },
-            deductQuantity: function(product, key){
-
-            },
 
         },
 
