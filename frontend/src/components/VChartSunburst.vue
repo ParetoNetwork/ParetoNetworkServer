@@ -326,6 +326,7 @@
         .scaleOrdinal()
         .range(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
     }, mounted() {
+      console.log(d3)
       this.makeSvg();
     },
     methods: {
@@ -374,13 +375,47 @@
           .outerRadius(function (d) { return d.y1 });
 
         // Put it all together
-        g.selectAll('path')
+        const path = g.selectAll('path')
           .data(root.descendants())
           .enter().append('path')
           .attr("display", function (d) { return d.depth ? null : "none"; })
           .attr("d", arc)
           .style('stroke', '#fff')
           .style("fill", function (d) { return color((d.children ? d : d.parent).data.name); });
+
+        var format = d3.format(",d")
+
+        path.filter(d => d.children)
+          .style("cursor", "pointer")
+          .on("click", clicked);
+
+        var text = path.append("title")
+          .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
+
+        g.append
+
+        const label = g.append("g")
+          .attr("pointer-events", "none")
+          .attr("text-anchor", "middle")
+          .style("user-select", "none")
+          .selectAll("text")
+          .data(root.descendants().slice(1))
+          .join("text")
+          .attr("dy", "0.35em")
+          .attr("fill-opacity", d => +labelVisible(d.current))
+          .attr("transform", d => labelTransform(d.current))
+          .text(d => d.data.name);
+
+        const parent = g.append("circle")
+          .datum(root)
+          .attr("r", radius)
+          .attr("fill", "none")
+          .attr("pointer-events", "all")
+          .on("click", clicked);
+
+        function clicked(p) {
+          console.log(p.data.name)
+        }
         // const data = this.data;
         // var width = 750;
         // var height = 600;
