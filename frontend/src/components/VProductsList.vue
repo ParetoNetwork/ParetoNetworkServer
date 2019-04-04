@@ -61,10 +61,10 @@
 
                 }if(!found){
                     product.quantity = 1;
-
                     cart.push(product)
-                    this.$store.dispatch('addToCart', product);
                 }
+
+                this.$store.dispatch('updateShoppingCart', cart);
 
                 window.localStorage.setItem('ShoppingCart', JSON.stringify(cart));
                 

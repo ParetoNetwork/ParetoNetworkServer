@@ -9,19 +9,15 @@
             <table>
                 <thead>
                 <tr>
-                    <th class="align-left">Product</th>
                     <th>Name</th>
                     <th class="align-left">Amount</th>
                     <th class="align-right">Price</th>
+                    <th class="align-right">Total</th>
                     <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr v-for="(product, key) in cart">
-                    <td class="align-left">
-
-                        {{ product.id }}
-                    </td>
                     <td>{{ product.name }}</td>
                     
                     <td class="align-right">
@@ -32,7 +28,8 @@
                         </div>
                     </td>
                     <td class="align-right"> $ {{ product.price / 100}}</td>
-                    <td><button @click="removeProduct(product, key)"> X </button></td>
+                    <td class="align-right"> $ {{ (product.price / 100)  * product.quantity}}</td>
+                    <td class="align-right"><button @click="removeProduct(product, key)"> X </button></td>
                 </tr>
                 
                 <tr class="total-cart">
@@ -140,9 +137,13 @@
             },
             updateCart: function(cart){
                 window.localStorage.setItem('ShoppingCart', JSON.stringify(cart));
+                this.$store.dispatch('updateShoppingCart', cart);
             },
             deductQuantity: function(product, key){
-
+                if(this.cart[key].quantity > 1){
+                    this.cart[key].quantity = this.cart[key].quantity - 1;
+                    this.updateCart(this.cart)
+                }
             },
 
         },

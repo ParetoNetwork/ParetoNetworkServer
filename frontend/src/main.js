@@ -155,6 +155,8 @@ const store = new Vuex.Store({
       state.shoppingCart = []
     }, showshoppingcar(state, show){
       state.showshopping = show
+    }, updateCart(state, cart){
+      state.shoppingCart = cart
     }
 
   },
@@ -180,6 +182,8 @@ const store = new Vuex.Store({
       context.commit('resetCart')
     },handleshowshopping(context, show){
       context.commit('showshoppingcar', show)
+    },updateShoppingCart(context, cart){
+      context.commit('updateCart', cart)
     }
   }
 });

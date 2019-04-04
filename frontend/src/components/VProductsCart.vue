@@ -37,11 +37,10 @@
              ...mapState(['shoppingCart']),
             cartSize: function () {
                 var cartSize = 0;
-                this.cart = this.shoppingCart
-                if(this.cart.length > 0){
+                this.cart = this.shoppingCart;
+                if(this.cart){
                     for (var i = 0; i < this.cart.length; i++) {
-                        console.log(this.shoppingCart[i].quantity)
-                        cartSize += 1;
+                        cartSize += this.shoppingCart[i].quantity;
                     }
                 }else{
                     cartSize = 0;
