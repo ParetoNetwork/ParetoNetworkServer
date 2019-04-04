@@ -29,8 +29,6 @@ var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 var ETH_NETWORK = process.env.ETH_NETWORK;
 var PARETO_SIGN_VERSION = process.env.PARETO_SIGN_VERSION;
 var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
-var BLOCK_DELAY_YELLOW = process.env.BLOCK_DELAY_YELLOW || 1000;
-var BLOCK_DELAY_RED = process.env.BLOCK_DELAY_RED || 10;
 /*ways of writing contract creation block height*/
 //const CONTRACT_CREATION_BLOCK_HEX = '0x4B9696'; //need this in hex
 const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
@@ -1186,7 +1184,6 @@ controller.getAllAvailableContent = async function (req, callback) {
             },
             contentDelay: {
                 blockDelay: contentDelay.blockDelay[entry.speed],
-                type: (delayAgo > BLOCK_DELAY_YELLOW)? 0: (delayAgo > BLOCK_DELAY_RED)? 1: 2,
                 blockHeight: contentDelay.blockHeight,
                 timeDelay: contentDelay[entry.speed]*12
             }
@@ -1296,7 +1293,6 @@ controller.getContentByIntel = function (req, intel, callback) {
             },
             contentDelay: {
                 blockDelay: contentDelay.blockDelay[entry.speed],
-                type: (delayAgo > BLOCK_DELAY_YELLOW)? 0: (delayAgo > BLOCK_DELAY_RED)? 1: 2,
                 blockHeight: contentDelay.blockHeight,
                 timeDelay: contentDelay[entry.speed]*12
             }

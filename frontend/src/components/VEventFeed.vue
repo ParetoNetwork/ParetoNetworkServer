@@ -23,10 +23,10 @@
       </div> -->
       <div class="scrollable p-2" id="mypost" v-on:scroll="scrollMyPost()">
         <ul v-if="transactions.length">
-          <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions" :key="tx.txHash">
-            <!--<div style="background-color: black; z-index: 0; width: 60%;">&nbsp;</div>-->
+          <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions.filter(it=> !it.intelInfo)" :key="tx.txHash">
+            <!--<div style="background-color: black; z-index: 0; width: 60%;">&nbsp;</div>
             <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo"
-                           :eventRow="true"></VIntelPreview>
+                           :eventRow="true"></VIntelPreview>-->
             <VTransaction v-if="!tx.intelInfo" :transaction="tx"></VTransaction>
 
           </li>
