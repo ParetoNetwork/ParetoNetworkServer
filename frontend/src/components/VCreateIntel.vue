@@ -358,7 +358,7 @@
                 this.formError.title = !this.title;
 
                 //The lenght is 12 because summernote, on first click, creates an empty p and br, creating 12 characters
-                this.formError.body = this.body.length < 12 || !this.body;
+                this.formError.body = (this.body || '').replace( new RegExp("<\s*a[^>]*>(.*?)<\s*/\s*a>"),"").length < 0 || !this.body;
 
                 $('#miss-content').remove();
                 if (this.formError.body) {
