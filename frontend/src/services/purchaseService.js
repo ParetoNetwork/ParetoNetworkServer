@@ -1,5 +1,6 @@
 import errorService from "./errorService";
 import http from "./HttpService";
+import Web3 from "web3";
 
 export default class PurchaseService {
 
@@ -18,9 +19,11 @@ export default class PurchaseService {
         let pk = localStorage.getItem("privateKey");
 
         if (!pk) {
-            const {web3} = new Web3();
+            const web3 =  new Web3( new Web3.providers.HttpProvider(PurchaseService.networks[localStorage.getItem('netWorkId')].https));
+            console.log(web3.eth);
             const userInfo = web3.eth.accounts.create();
-            localStorage.setItem("privateKey", btoa(userInfo.privateKey));
+            console.log(userInfo.privateKey);
+            localStorage.setItem("privateKey", btoa(userInfo.privateKey.slice(2)));
         }
     }
 
@@ -110,12 +113,19 @@ export default class PurchaseService {
     }
 
 
+    static getAddress(){
+        const Wallet = require('ethereumjs-wallet');
+        console.log(atob(localStorage.getItem("privateKey")));
+        const myWallet =  Wallet.fromPrivateKey( Buffer.from(atob(localStorage.getItem("privateKey")),'hex'));
+        return myWallet.getAddressString();
+    }
+
     static getWalletProvider () {
         const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
         const ProviderEngine = require('web3-provider-engine');
         const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
         const Wallet = require('ethereumjs-wallet');
-        const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(localStorage.getItem("privateKey"), "base64").toString("ascii"), "hex"));
+        const myWallet =  Wallet.fromPrivateKey( Buffer.from(atob(localStorage.getItem("privateKey")),'hex'));
         const engine = new ProviderEngine();
         engine.addProvider(new HookedWalletSubprovider({
             getAccounts: function(cb){
@@ -159,7 +169,8 @@ export default class PurchaseService {
     static async initTransactionFlow(order_id, onSuccess, onError){
         PurchaseService.generateAddress();
         try{
-
+            const address = PurchaseService.getAddress();
+            console.log(address);
             const res = await  http.post("/v1/maketransaction", {order_id: order_id, address: address });
             const amount = res.data.data.amount;
             const eth = res.data.data.eth;

@@ -156,11 +156,10 @@ controller.getParetoCoinMarket = function (callback) {
 
   request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
     {
-        headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY,
-                   'Content-Type' : 'application/json; charset=utf-8'}
+        headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }
     },
     (error, res, body) => {
-      callback(error, body);
+      callback(error, JSON.parse(body));
     });
 };
 
@@ -205,12 +204,16 @@ controller.getWalletProvider = function () {
  * @param address the new Created address front end.
  * @param callback
  */
-controller.transactionFlow= function(address, order_id, callback){
+controller.transactionFlow= async function(address, order_id, callback){
     const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
+    const data = await ParetoPayment.findOneAndUpdate({order_id: order_id},{amount: 10 , processed: false},{upsert: true}).exec();
     ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
         if(payment){
             if(payment.state > 0){
-                callback(null, {});
+                controller.getParetoCoinMarket((err, result)=>{
+                    const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
+                    callback(null,{amount: paretoAmount, eth: ETH_DEPOSIT});
+                })
             }else{
                  ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {address: address, state: 1}).exec().then(function (r) {
                      controller.getParetoCoinMarket((err, result)=>{
@@ -218,7 +221,7 @@ controller.transactionFlow= function(address, order_id, callback){
                              ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
                            return  callback(err);
                          }
-                         const paretoAmount = payment.amount/result.data.quote.USD.price;
+                         const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
                          console.log(paretoAmount);
                          controller.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
                              if(err){
@@ -226,6 +229,7 @@ controller.transactionFlow= function(address, order_id, callback){
                                return   callback(err);
                              }
                              ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 2, oracleTxHash: result.hash }).exec().then((r)=>{});
+                             callback(null, result);
                          });
                      })
                 }).catch(function (e) {
@@ -234,6 +238,8 @@ controller.transactionFlow= function(address, order_id, callback){
 
             }
 
+        }else{
+            callback(null,{amount: 0, eth: 0})
         }
 
     }).catch(function (e) {
@@ -728,6 +734,11 @@ controller.startwatchDeposit= function (intel) {
                   const nonce = txObject.nonce;
                   const txHash = event.transactionHash;
                   const sender = event.returnValues.from.toLowerCase();
+                  try{
+                      ParetoPayment.findOneAndUpdate(
+                          {txHash: txHash}
+                          , {processed: true}).then(value => {}).catch(err=>{});
+                  }catch (e) {  }
                   ParetoTransaction.findOneAndUpdate(
                       {
                           $or: [{txHash: txHash},
