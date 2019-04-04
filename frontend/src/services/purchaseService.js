@@ -115,13 +115,12 @@ export default class PurchaseService {
 
     static getAddress(){
         const Wallet = require('ethereumjs-wallet');
-        console.log(atob(localStorage.getItem("privateKey")));
         const myWallet =  Wallet.fromPrivateKey( Buffer.from(atob(localStorage.getItem("privateKey")),'hex'));
         return myWallet.getAddressString();
     }
 
     static getWalletProvider () {
-        const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
+        const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js');
         const ProviderEngine = require('web3-provider-engine');
         const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
         const Wallet = require('ethereumjs-wallet');
@@ -172,9 +171,9 @@ export default class PurchaseService {
             const address = PurchaseService.getAddress();
             console.log(address);
             const res = await  http.post("/v1/maketransaction", {order_id: order_id, address: address });
+            console.log(res.data.data);
             const amount = res.data.data.amount;
             const eth = res.data.data.eth;
-            console.log(res.data.data);
             await PurchaseService.makeDeposit(amount, order_id, (err, response)=>{
                 if(err){ return onError(err)}
                 onSuccess(response);
