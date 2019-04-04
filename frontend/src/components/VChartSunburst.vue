@@ -392,7 +392,6 @@
         var text = path.append("title")
           .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
 
-        g.append
 
         const label = g.append("g")
           .attr("pointer-events", "none")
@@ -401,7 +400,7 @@
           .selectAll("text")
           .data(root.descendants().slice(1))
           .join("text")
-          .attr("dy", "0.35em")
+          .attr("d", "0.35em")
           .attr("fill-opacity", d => +labelVisible(d.current))
           .attr("transform", d => labelTransform(d.current))
           .text(d => d.data.name);
@@ -414,7 +413,7 @@
           .on("click", clicked);
 
         function clicked(p) {
-          console.log(p.data.name)
+          console.log(p);
         }
         // const data = this.data;
         // var width = 750;
