@@ -1,7 +1,7 @@
 <template>
-    <div id="d3-svg">
-        <svg></svg>
-    </div>
+  <div id="d3-svg">
+    <svg></svg>
+  </div>
 </template>
 
 <script>
@@ -340,7 +340,8 @@
           }, {
             "name": "Topic B",
             "children": [{"name": "Sub B1", "size": 3}, {"name": "Sub B2", "size": 3}, {
-              "name": "Sub B3", "size": 3}]
+              "name": "Sub B3", "size": 3
+            }]
           }, {
             "name": "Topic C",
             "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
@@ -364,23 +365,37 @@
 
         // Find data root
         var root = d3.hierarchy(nodeData)
-          .sum(function (d) { return d.size});
+          .sum(function (d) {
+            return d.size
+          });
 
         // Size arcs
         partition(root);
         var arc = d3.arc()
-          .startAngle(function (d) { return d.x0 })
-          .endAngle(function (d) { return d.x1 })
-          .innerRadius(function (d) { return d.y0 })
-          .outerRadius(function (d) { return d.y1 });
+          .startAngle(function (d) {
+            return d.x0
+          })
+          .endAngle(function (d) {
+            return d.x1
+          })
+          .innerRadius(function (d) {
+            return d.y0
+          })
+          .outerRadius(function (d) {
+            return d.y1
+          });
 
         const path = g.selectAll('path')
           .data(root.descendants())
           .enter().append('path')
-          .attr("display", function (d) { return d.depth ? null : "none"; })
+          .attr("display", function (d) {
+            return d.depth ? null : "none";
+          })
           .attr("d", arc)
           .style('stroke', '#fff')
-          .style("fill", function (d) { return color((d.children ? d : d.parent).data.name); });
+          .style("fill", function (d) {
+            return color((d.children ? d : d.parent).data.name);
+          });
 
         var format = d3.format(",d")
 
@@ -413,6 +428,7 @@
         function clicked(p) {
           console.log(p);
         }
+
         // const data = this.data;
         // var width = 750;
         // var height = 600;
@@ -478,25 +494,33 @@
         // document.body.removeChild(svg);
         // svg.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
       },
-      newSvg(){
+      newSvg() {
         var nodeData = {
-          "name": "TOPICS", "children": [{
-            "name": "Topic A",
-            "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
-          }, {
-            "name": "Topic B",
-            "children": [{"name": "Sub B1", "size": 3}, {"name": "Sub B2", "size": 3}, {
-              "name": "Sub B3", "size": 3}]
-          }, {
-            "name": "Topic C",
-            "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
-          }]
+          "name": "TOPICS",
+          "children": [
+            {
+              "name": "Topic A",
+              "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
+            },
+            {
+              "name": "Topic B",
+              "children":
+                [{"name": "Sub B1", "size": 3}, {"name": "Sub B2", "size": 3}, {
+                "name": "Sub B3", "size": 3}]
+            }, {
+              "name": "Topic C",
+              "children":
+                [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
+            }]
         };
 
         var width = 500,
           height = 500,
           radius = (Math.min(width, height) / 2);
-        const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, 3));
+
+        console.log(d3.schemeCategory20b)
+        console.log(d3.scaleOrdinal(d3.schemeCategory20b))
+        const color = d3.scaleOrdinal(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
 
         var formatNumber = d3.format(",d");
 
@@ -509,9 +533,12 @@
 
         var partition = d3.partition();
 
-
         var root = d3.hierarchy(nodeData)
-          .sum(function (d) { return d.size});
+          .sum(function (d) {
+            return d.size
+          });
+
+        partition(root);
 
         var arc = d3.arc()
           .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x0))); })
@@ -526,16 +553,32 @@
           .append("g")
           .attr("transform", "translate(" + width / 2 + "," + (height / 2) + ")");
 
+
         svg.selectAll("path")
-          .data(partition(root).descendants())
-          .enter().append("path")
-          .attr("display", function (d) { return d.depth ? null : "none"; })
+          .data(root.descendants())
+          .enter().append('g').attr("class", "node").append('path')
           .attr("d", arc)
           .style('stroke', '#fff')
-          .style("fill", function(d) { return color((d.children ? d : d.parent).data.name); })
+          .style("fill", function (d) {
+            if(!d.parent) return '#000';
+            return color((d.children ? d : d.parent).data.name);
+          })
+          .style("cursor", function(d){
+            return d.children? "pointer": "default"
+          })
           .on("click", click)
-          .append("title")
-          .text(function(d) { return d.data.name + "\n" + formatNumber(d.value); });
+
+        svg.selectAll(".node")
+          .append("text")
+          .attr("transform", function(d) {
+            return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
+          .attr("dx", "-20") // radius margin
+          .attr("dy", ".5em") // rotation align
+          .style("cursor", function(d){
+            return d.children? "pointer": "default"
+          })
+          .text(function(d) { return d.parent ? d.data.name : "" })
+          .on("click", click)
 
         function click(d) {
           svg.transition()
@@ -546,8 +589,16 @@
                 yr = d3.interpolate(y.range(), [d.y0 ? 20 : 0, radius]);
               return function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); };
             })
-            .selectAll("path")
+            .selectAll(".node path")
             .attrTween("d", function(d) { return function() { return arc(d); }; });
+        }
+
+        function computeTextRotation(d) {
+          var angle = (d.x0 + d.x1);
+
+          // Avoid upside-down labels
+          return (angle < 120 || angle > 270) ? angle : angle + 180;  // labels as rims
+          //return (angle < 180) ? angle - 90 : angle + 90;  // labels as spokes
         }
 
         d3.select(self.frameElement).style("height", height + "px");
