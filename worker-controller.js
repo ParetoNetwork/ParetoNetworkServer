@@ -346,30 +346,38 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
                 }catch (e) { console.log(e) }
             }
             return Promise.all(promises).then(values => {
-                let rewards={};
-                let totalDesired={};
+                let lessRewards={};
                 let total=0;
                 for (let i = 0; i < values.length; i = i + 1) {
                     total=total+values[i].length;
                     for (let j = 0; j < values[i].length; j = j + 1) {
                         try{
                             const sender = values[i][j].returnValues.sender.toLowerCase();
+                            const block =  parseFloat(values[i][j].blockNumber);
                             const amount = parseFloat(web3.utils.fromWei(values[i][j].returnValues.rewardAmount, 'ether'));
                             const intelIndex = values[i][j].returnValues.intelIndex+"";
-                            if(!rewards[sender]){
-                                rewards[sender] = 0;
-                                totalDesired[sender] = 0;
+                            if(!lessRewards[sender]){
+                                lessRewards[sender]  = {};
+                                lessRewards[sender][intelIndex] = { block,amount };
+                            }else{
+                                if(block < lessRewards[sender][intelIndex].block  ){
+                                    lessRewards[sender][intelIndex] = { block,amount };
+                                }
                             }
-                            rewards[sender]=rewards[sender]+Math.min(amount/intelDesiredRewards[intelIndex].reward,1);
-                            totalDesired[sender] = totalDesired[sender] + 1;
                         }catch (e) { console.log(e) }
                     }
                 }
                 for (let i = 0; i < addresses.length; i = i + 1) {
                     try{
                         const address = addresses[i].toLowerCase();
-                        if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-                            const V = (1 + (rewards[address] / totalDesired[address]) );
+                        if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+                            let intels = Object.keys(lessRewards[address]);
+                            let rewards =   intels.reduce(function (reward, it) {
+                                return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
+                            }, 0);
+                            let totalDesired =intels.length;
+
+                            const V = (1 + (rewards / totalDesired) );
                             scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
                         }
                     }catch (e) { console.log(e) }
