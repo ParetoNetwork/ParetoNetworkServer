@@ -35,7 +35,6 @@ const START_CLOCK = process.env.START_CLOCK || 1;
 const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.00001;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 const SCORE_BLOCK_AGO = process.env.SCORE_BLOCK_AGO  || 200;
-
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
     require(modelsPath + '/' + file);
@@ -359,10 +358,12 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
                             if(!lessRewards[sender]){
                                 lessRewards[sender]  = {};
                                 lessRewards[sender][intelIndex] = { block,amount };
-                            }else{
-                                if(block < lessRewards[sender][intelIndex].block  ){
-                                    lessRewards[sender][intelIndex] = { block,amount };
-                                }
+                            }
+                            if(!lessRewards[sender][intelIndex]){
+                                lessRewards[sender][intelIndex] = { block,amount };
+                            }
+                            if(block < lessRewards[sender][intelIndex].block  ){
+                                lessRewards[sender][intelIndex] = { block,amount };
                             }
                         }catch (e) { console.log(e) }
                     }
@@ -849,7 +850,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                             if(receipt){
                                 ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: (data.event == 'distribute')? 3:1 }, { multi: false }, function (err, r) {
                                     if(data.event != 'distribute' && r){
-                                        ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {});
+                                        ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}, function (err, r) {});
                                     }else{
 
                                         if(data.event == 'distribute' && r){

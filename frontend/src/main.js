@@ -113,7 +113,10 @@ const store = new Vuex.Store({
     }, iniWs(state) {
       state.ws = new WebSocket(Environment.webSocketURL);
     }, addTransaction(state, item) {
-      state.pendingTransactions.unshift(item);
+      if( !state.pendingTransactions.map(it=>{return it.txHash}).includes(item.txHash)  ){
+          state.pendingTransactions.unshift(item);
+      }
+
     }, assignTransactions(state, transactions) {
       state.pendingTransactions = [...state.pendingTransactions, ...transactions];
     }, editTransaction(state, {hash, key, value}) {

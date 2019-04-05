@@ -594,9 +594,9 @@ controller.startWatchApprove = function () {
             $or: [{txHash: txHash},
               {address: sender, nonce: nonce}]
           }
-          , {status: 1, block: blockNumber, txHash: txHash}, function (err, r) {
+          , {status: 1, address: sender, block: blockNumber, txHash: txHash}, function (err, r) {
             if (!err && r) {
-              ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
+              ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}, function (err, r) {
                 controller.getScoreAndSaveRedis(null, function (err, r) {
                 })
               });
@@ -678,10 +678,6 @@ controller.updateAddressReward = function (event, token) {
         upsert: true,
         new: true //mongo uses returnNewDocument, mongo uses new
       };
-      // console.log({
-      //     addrees: dbQuery.address,
-      //     dbValues: dbValues
-      // });
       //should queue for writing later
       var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
       //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
@@ -817,30 +813,47 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, bloc
 /**
  *  addExponent using db instead of Ethereum network
  */
-controller.addExponentAprox = function (addresses, scores, blockHeight, callback) {
-  return ParetoReward.find({'block': {'$gt': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(function (err, values) {
+controller.addExponentAprox =  function (addresses, scores, blockHeight, callback) {
+  return ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(async function (err, values) {
+      const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
+      let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
+          data[""+it.id] = it;
+          return data;
+      }, {});
     if (err) {
       callback(err);
     } else {
-      let total = values.length;
-      let rewards = {};
+      let lessRewards = {};
       for (let j = 0; j < values.length; j = j + 1) {
         try {
           const sender = values[j].sender.toLowerCase();
-          if (!rewards[sender]) {
-            rewards[sender] = 0;
+          const block =  parseFloat(values[j].block);
+          const amount = parseFloat(values[j].amount);
+          const intelIndex = values[j].intelId;
+          if(!lessRewards[sender]){
+              lessRewards[sender]  = {};
+              lessRewards[sender][intelIndex] = { block,amount };
           }
-          rewards[sender] = rewards[sender] + 1;
+          if(!lessRewards[sender][intelIndex]){
+                lessRewards[sender][intelIndex] = { block,amount };
+            }
+          if(block < lessRewards[sender][intelIndex].block  ){
+              lessRewards[sender][intelIndex] = { block,amount };
+          }
         } catch (e) {
           console.log(e)
         }
       }
-      const M = total / 2;
       for (let i = 0; i < addresses.length; i = i + 1) {
         try {
           const address = addresses[i].toLowerCase();
-          if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-            const V = (1 + (rewards[address] / M) / 2);
+          if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+              let intels = Object.keys(lessRewards[address]);
+              let rewards =   intels.reduce(function (reward, it) {
+                  return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
+              }, 0);
+              let totalDesired =intels.length;
+            const V = (1 + (rewards / totalDesired));
             scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
 
           } else {
