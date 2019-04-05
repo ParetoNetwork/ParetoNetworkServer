@@ -1137,6 +1137,8 @@ workerController.getScoreAndSaveRedis = function(callback){
                 };
                 if(result.addresses.lastApprovedAddress){
                     data.approved = result.addresses.lastApprovedAddress;
+                }else{
+                    data.approved = '';
                 }
                 data.rank = result.rank + 1;
                 data.lscore = '=';
