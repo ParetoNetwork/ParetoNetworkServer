@@ -356,14 +356,13 @@ export default class ContentService {
       //Compares last used contract address to current using contract address
       //if not the same, compares the user allowance
       if (serverData.lastApproved && (serverData.lastApproved.toLowerCase() === Intel.options.address.toLowerCase())) {
-        directlyCreateIntel();
+          await ParetoTokenInstance.methods
+              .allowance(provider_address, Intel.options.address).call().then(async res => {
+                  userAllowance = parseFloat(res) ;
+                  (userAllowance < parseFloat(depositAmount)) ? await userIncreaseApproval() : directlyCreateIntel();
+              });
       } else {
-        await ParetoTokenInstance.methods
-          .allowance(provider_address, Intel.options.address).call().then(async res => {
-            userAllowance = parseFloat(res) ;
-
-            (userAllowance < parseFloat(depositAmount)) ? await userIncreaseApproval() : directlyCreateIntel();
-          });
+         await userIncreaseApproval();
       }
 
       function directlyCreateIntel() {
@@ -573,14 +572,15 @@ export default class ContentService {
 
       //Compares last used contract address to current using contract address
       //if not the same, compares the user allowance
+
       if (content.lastApproved && (content.lastApproved.toLowerCase() === content.intelAddress.toLowerCase())) {
-        directlyCreateReward();
+          await ParetoTokenInstance.methods
+              .allowance(rewarder_address, Intel.options.address).call().then(async res => {
+                  userAllowance = parseFloat(res);
+                  (userAllowance < parseFloat(depositAmount)) ? await userIncreaseApproval() : directlyCreateReward();
+              });
       } else {
-        await ParetoTokenInstance.methods
-          .allowance(rewarder_address, Intel.options.address).call().then(async res => {
-            userAllowance = parseFloat(res);
-            (userAllowance < parseFloat(depositAmount)) ? await userIncreaseApproval() : directlyCreateReward();
-          });
+          await userIncreaseApproval();
       }
         //Calls the reward function if the user last contract matches or if the user has the allowance
       function directlyCreateReward() {
