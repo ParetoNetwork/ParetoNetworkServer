@@ -322,191 +322,36 @@
       };
     },
     created() {
-      this.colourScale = d3
-        .scaleOrdinal()
-        .range(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
     }, mounted() {
-      console.log(d3)
-      //this.makeSvg();
-      this.newSvg();
+      this.sunschart();
     },
     methods: {
-      makeSvg() {
-        // JSON data
+      sunschart() {
         var nodeData = {
-          "name": "TOPICS", "children": [{
-            "name": "Topic A",
-            "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
-          }, {
-            "name": "Topic B",
-            "children": [{"name": "Sub B1", "size": 3}, {"name": "Sub B2", "size": 3}, {
-              "name": "Sub B3", "size": 3
-            }]
-          }, {
-            "name": "Topic C",
-            "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
-          }]
-        };
-
-        // Variables
-        var width = 500;
-        var height = 500;
-        var radius = Math.min(width, height) / 2;
-        const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, 3));
-
-        var g = d3.select('#d3-svg svg')
-          .attr('width', width)
-          .attr('height', height)
-          .append('g')
-          .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
-
-        var partition = d3.partition()
-          .size([2 * Math.PI, radius]);
-
-        // Find data root
-        var root = d3.hierarchy(nodeData)
-          .sum(function (d) {
-            return d.size
-          });
-
-        // Size arcs
-        partition(root);
-        var arc = d3.arc()
-          .startAngle(function (d) {
-            return d.x0
-          })
-          .endAngle(function (d) {
-            return d.x1
-          })
-          .innerRadius(function (d) {
-            return d.y0
-          })
-          .outerRadius(function (d) {
-            return d.y1
-          });
-
-        const path = g.selectAll('path')
-          .data(root.descendants())
-          .enter().append('path')
-          .attr("display", function (d) {
-            return d.depth ? null : "none";
-          })
-          .attr("d", arc)
-          .style('stroke', '#fff')
-          .style("fill", function (d) {
-            return color((d.children ? d : d.parent).data.name);
-          });
-
-        var format = d3.format(",d")
-
-        path.filter(d => d.children)
-          .style("cursor", "pointer")
-          .on("click", clicked);
-
-        var text = path.append("title")
-          .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
-
-        const label = g.append("g")
-          .attr("pointer-events", "none")
-          .attr("text-anchor", "middle")
-          .style("user-select", "none")
-          .selectAll("text")
-          .data(root.descendants().slice(1))
-          .join("text")
-          .attr("d", "0.35em")
-          .attr("fill-opacity", d => +labelVisible(d.current))
-          .attr("transform", d => labelTransform(d.current))
-          .text(d => d.data.name);
-
-        const parent = g.append("circle")
-          .datum(root)
-          .attr("r", radius)
-          .attr("fill", "none")
-          .attr("pointer-events", "all")
-          .on("click", clicked);
-
-        function clicked(p) {
-          console.log(p);
-        }
-
-        // const data = this.data;
-        // var width = 750;
-        // var height = 600;
-        // var radius = Math.min(width, height) / 2;
-        // const format = d3.format(',d');
-        //
-        // const root = partition(data);
-        // const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
-        // const svg = d3.select('body')
-        //   .append('svg')
-        //   .attr('width', width)
-        //   .attr('height', width)
-        //   .style('padding', '10px')
-        //   .style('font', '10px sans-serif')
-        //   .style('box-sizing', 'border-box');
-        //
-        // svg.append('g')
-        //   .attr('fill-opacity', 0.6)
-        //   .selectAll('path')
-        //   .data(root.descendants().filter(d => d.depth))
-        //   .enter().append('path')
-        //   .attr('fill', d => {
-        //     while (d.depth > 1) d = d.parent;
-        //     return color(d.data.name);
-        //   })
-        //   .attr('d', arc)
-        //   .append('title')
-        //   .text(d => `${d.ancestors().map(d => d.data.name).reverse().join('/')}\n${format(d.value)}`);
-        //
-        // svg.append('g')
-        //   .attr('pointer-events', 'none')
-        //   .attr('text-anchor', 'middle')
-        //   .selectAll('text')
-        //   .data(root.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
-        //   .enter().append('text')
-        //   .attr('transform', function (d) {
-        //     const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-        //     const y = (d.y0 + d.y1) / 2;
-        //     return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-        //   })
-        //   .attr('dy', '0.35em')
-        //   .text(d => d.data.name);
-        //
-        //
-        // const arc = d3.arc()
-        //   .startAngle(d => d.x0)
-        //   .endAngle(d => d.x1)
-        //   .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-        //   .padRadius(radius / 2)
-        //   .innerRadius(d => d.y0)
-        //   .outerRadius(d => d.y1 - 1);
-        //
-        // function partition(data) {
-        //   return d3.partition()
-        //     .size([2 * Math.PI, radius])
-        //     (d3.hierarchy(data)
-        //       .sum(d => d.value)
-        //       .sort((a, b) => b.value - a.value));
-        // }
-        //
-        // document.body.appendChild(svg);
-        // const box = svg.getBBox();
-        // document.body.removeChild(svg);
-        // svg.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
-      },
-      newSvg() {
-        var nodeData = {
-          "name": "TOPICS",
+          "name": "PARETO ACCOUNT",
           "children": [
             {
               "name": "Topic A",
-              "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
+              "children":
+                [
+                  {"name": "Sub A1",
+                    "size": 4,
+                    "children":
+                      [
+                        {"name": "Sub B1", "size": 3},
+                        {"name": "Sub B2", "size": 3},
+                        {"name": "Sub B3", "size": 3}
+                      ]}, {"name": "Sub A2", "size": 4}
+                ]
             },
             {
               "name": "Topic B",
               "children":
-                [{"name": "Sub B1", "size": 3}, {"name": "Sub B2", "size": 3}, {
-                "name": "Sub B3", "size": 3}]
+                [
+                  {"name": "Sub B1", "size": 3},
+                  {"name": "Sub B2", "size": 3},
+                  {"name": "Sub B3", "size": 3}
+                ]
             }, {
               "name": "Topic C",
               "children":
@@ -514,15 +359,12 @@
             }]
         };
 
-        var width = 500,
-          height = 500,
+        var width = 520,
+          height = 520,
           radius = (Math.min(width, height) / 2);
 
-        console.log(d3.schemeCategory20b)
-        console.log(d3.scaleOrdinal(d3.schemeCategory20b))
         const color = d3.scaleOrdinal(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
 
-        var formatNumber = d3.format(",d");
 
         var x = d3.scaleLinear()
           .range([0, 2 * Math.PI]);
@@ -540,68 +382,133 @@
 
         partition(root);
 
-        var arc = d3.arc()
-          .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x0))); })
-          .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x1))); })
-          .innerRadius(function(d) { return Math.max(0, y(d.y0)); })
-          .outerRadius(function(d) { return Math.max(0, y(d.y1)); });
+        root.each(d => d.current = d);
+        var format = d3.format(",d")
 
+        var arc = d3.arc()
+          .startAngle(function (d) {
+            return Math.max(0, Math.min(2 * Math.PI, x(d.x0)));
+          })
+          .endAngle(function (d) {
+            return Math.max(0, Math.min(2 * Math.PI, x(d.x1)));
+          })
+          .innerRadius(function (d) {
+            return Math.max(0, y(d.y0));
+          })
+          .outerRadius(function (d) {
+            return Math.max(0, y(d.y1));
+          });
 
         var svg = d3.select("#d3-svg svg")
           .attr("width", width)
-          .attr("height", height)
-          .append("g")
-          .attr("transform", "translate(" + width / 2 + "," + (height / 2) + ")");
+          .attr("height", height);
+
+        var g = svg.append("g")
+          .attr("transform", "translate(" + (width / 2 - 20) + "," + (height / 2) + ")");
+
+        let id = 0;
+
+       function linearGradient(d){
+         id++;
+         let newColor;
+         let secondGradient;
+         if (!d.parent) {
+           newColor = '#295087';
+           secondGradient = '#9ff677';
+         }else{
+           newColor = color((d.children ? d : d.parent).data.name);
+           secondGradient = 'black';
+         }
+
+         var gradient = svg.append("linearGradient")
+           .attr("id", "svgGradient" + id)
+           .attr("x1", "0%")
+           .attr("x2", "100%")
+           .attr("y1", "0%")
+           .attr("y2", "100%");
+
+         gradient.append("stop")
+           .attr('class', 'start')
+           .attr("offset", "30%")
+           .attr("stop-color", newColor)
+           .attr("stop-opacity", 1);
+
+         gradient.append("stop")
+           .attr('class', 'end')
+           .attr("offset", "100%")
+           .attr("stop-color", secondGradient)
+           .attr("stop-opacity", 1);
+
+         return   `url(#svgGradient${id})` ;
+       }
 
 
-        svg.selectAll("path")
+        const path = g.append("g")
+          .selectAll("path")
           .data(root.descendants())
           .enter().append('g').attr("class", "node").append('path')
           .attr("d", arc)
-          .style('stroke', '#fff')
-          .style("fill", function (d) {
-            if(!d.parent) return '#000';
-            return color((d.children ? d : d.parent).data.name);
+          .style('stroke', '#000')
+          .style("fill", d => linearGradient(d))
+          .style("cursor", function (d) {
+            return d.children ? "pointer" : "default"
           })
-          .style("cursor", function(d){
-            return d.children? "pointer": "default"
-          })
-          .on("click", click)
+          .on("click", click);
 
-        svg.selectAll(".node")
+        path.filter(d => d.children)
+          .style("cursor", "pointer")
+          .on("click", click);
+
+        g.selectAll(".node")
           .append("text")
-          .attr("transform", function(d) {
-            return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
+          .style("fill", "white")
+          .attr("transform", function (d) {
+            return "translate(" + arc.centroid(d) + ")";
+          })
           .attr("dx", "-20") // radius margin
           .attr("dy", ".5em") // rotation align
-          .style("cursor", function(d){
-            return d.children? "pointer": "default"
+          .attr("cursor", function (d) {
+            return d.children ? "pointer" : "default"
           })
-          .text(function(d) { return d.parent ? d.data.name : "" })
-          .on("click", click)
+          .text(function (d) {
+            return d.data.name;
+          });
 
         function click(d) {
+          const text = svg.selectAll("text");
+          text.transition().attr("opacity", 0);
+
           svg.transition()
             .duration(750)
-            .tween("scale", function() {
+            .tween("scale", function () {
               var xd = d3.interpolate(x.domain(), [d.x0, d.x1]),
                 yd = d3.interpolate(y.domain(), [d.y0, 1]),
                 yr = d3.interpolate(y.range(), [d.y0 ? 20 : 0, radius]);
-              return function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); };
+              return function (t) {
+                x.domain(xd(t));
+                y.domain(yd(t)).range(yr(t));
+              };
             })
             .selectAll(".node path")
-            .attrTween("d", function(d) { return function() { return arc(d); }; });
+            .attrTween("d", function (e) {
+              setTimeout(() => {
+                if (e.x0 >= d.x0 && e.x0 < (d.x1)) {
+                  const text = d3.select(this.parentNode).selectAll("text");
+                  const path = d3.select(this.parentNode).selectAll("path")._groups[0][0];
+
+                  text.transition().duration(750)
+                    .attr("opacity", 1)
+                    .attr("transform", function (d) {
+                      return "translate(" + arc.centroid(path.__data__) + ")";
+                    })
+                }
+              }, 750);
+              return function () {
+                return arc(e);
+              };
+            });
         }
 
-        function computeTextRotation(d) {
-          var angle = (d.x0 + d.x1);
-
-          // Avoid upside-down labels
-          return (angle < 120 || angle > 270) ? angle : angle + 180;  // labels as rims
-          //return (angle < 180) ? angle - 90 : angle + 90;  // labels as spokes
-        }
-
-        d3.select(self.frameElement).style("height", height + "px");
       }
     }
   };
