@@ -5,7 +5,7 @@
 
         <div class="checkout-area">
 
-            <table>
+            <table class="table table-responsive-lg position-relative">
                 <thead>
                 <tr>
                     <th>Name</th>

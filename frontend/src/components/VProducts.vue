@@ -187,7 +187,8 @@
 
     #vue {
       margin: 0 auto;
-      padding: 9.5em;
+      padding-top: 9.5em;
+      padding-bottom: 9.5em;
       text-align: center;
       background: #fff;
       color: black;
