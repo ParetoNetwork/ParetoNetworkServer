@@ -10,6 +10,8 @@ export default class errorService {
             }).catch(error => {
             console.log(error);
         });
+
+        console.log(errorState);
         return errorState.userMessage;
     }
 

@@ -1,27 +1,26 @@
 <template>
     <div class="main" style="background-color: white;">
         <div class="container-fluid">
-            <div class="row gradient">
-                <div class="col-12 col-lg-6 mb-lg-0 mb-4">
+            <div class="row pareto-blue-dark" style="padding: 110px 0 30px; position: relative; z-index: 1;">
+                <div class="col-12 col-lg-6 mb-lg-0 mb-4 order-md-last order-sm-last order-lg-first">
+                    <br/>
+                    <br/>
+                    <br/>
                     <img style="width: 400px; max-width: 100%;" src="../assets/images/LogoReverse.svg" alt="">
                     <h1 class="font-body padding-main text-left text-white mb-5">Current, reputable &
-                        actionable intel for traders and investors. <br/><br/> <h6>Event driven, alternative data source for capturing alpha.</h6></h1>
+                        actionable intel for traders and investors. <br/><br/> <h6>Event driven, alternative data source for capturing alpha. View the project <a href="https://github.com/ParetoNetwork/Pareto-Network-Roadmap/projects/1?fullscreen=true"
+                                                                                                                                                                  target="_blank">Roadmap</a></h6></h1>
                     <!-- <a href="download/Pareto-Brochure.pdf" class="mr-2 btn btn-primary" target="_blank">Brochure</a>
                     <a href="download/Pareto-Technical-White-Paper.pdf" class="mr-2 btn btn-primary" target="_blank">Whitepaper</a> -->
-                    <a href="https://blog.pareto.network/pareto-scores-your-ticket-to-vip-access-6d9aa92f846b" class="mr-2 btn btn-primary" target="_blank">PARETO Scores</a>
-                    <a href="https://blog.pareto.network/pareto-rewards-program-812fbe47af5" class="mr-2 btn btn-primary" target="_blank">Rewards</a>
-                    <a href="https://github.com/ParetoNetwork/Pareto-Network-Roadmap/projects/1?fullscreen=true"
-                       class="btn btn-primary" target="_blank">Roadmap</a>
+                   <!-- <a href="https://blog.pareto.network/pareto-scores-your-ticket-to-vip-access-6d9aa92f846b" class="mr-2 btn btn-primary" target="_blank">PARETO Scores</a>
+                    <a href="https://blog.pareto.network/pareto-rewards-program-812fbe47af5" class="mr-2 btn btn-primary" target="_blank">Rewards</a> -->
+
                 </div>
-                <!-- <div class="col-12 col-lg-6">
-                    <div class="video-box">
-                        <iframe width="100%" height="100%"
-                                src="https://www.youtube.com/embed/j6MFoSQkT7U?rel=0&amp;showinfo=0" frameborder="0"
-                                allowfullscreen></iframe>
-                    </div>
+                <div class="col-12 col-lg-6 order-md-first order-sm-first order-lg-last">
 
+                    <img style="width: 600px; max-width: 100%;" src="../assets/images/pareto-console.png" alt="">
 
-                </div> -->
+                </div>
             </div>
         </div>
 

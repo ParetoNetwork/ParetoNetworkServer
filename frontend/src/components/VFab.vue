@@ -1,5 +1,5 @@
 <template>
-    <a href="https://t.me/paretonetworkdiscussion" target="_blank" class="fab"> </a>
+    <a href="/checkout" class="floatingab"></a>
 </template>
 
 <script>
@@ -9,34 +9,39 @@
 </script>
 
 <style scoped>
-    .fab {
-        width: 70px;
-        height: 70px;
-        background-image:  url("../assets/images/telegram.png");
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover; 
+    .floatingab {
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
-        box-shadow: 0 6px 5px 0 #d8d8d8;
+        box-shadow: 0 3px 3px 0 #d8d8d8;
         transition: all 0.1s ease-in-out;
-
-        font-size: 50px;
-        color: white;
+        background-image: linear-gradient(to right, #6aba82, #85c568, #6aba82,  #85c568, #9ff677);
+        background-repeat: no-repeat;
+        background-size: cover;
+        font-size: 40px;
+        color: black;
         text-align: center;
-        line-height: 70px;
-
+        line-height: 60px;
         position: fixed;
-        z-index: 999;
+        z-index: 9999;
         right: 50px;
         bottom: 50px;
     }
 
-    .fab:hover {
+    .floatingab:before {
+        position: absolute;
+        font-family: 'FontAwesome';
+        top: 0;
+        left: 10px;
+        content: "\f07a";
+    }
+
+    .floatingab:hover {
         box-shadow: 0 6px 14px 0 #666;
     }
 
     @media (max-width: 812px) {
-        .fab {
+        .floatingab {
             right: 10px;
         }
     }

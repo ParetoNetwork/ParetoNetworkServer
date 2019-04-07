@@ -240,26 +240,35 @@ export default class ContentService {
           gasPrice: content.gasPrice
         })
         .on("transactionHash", hash => {
-            content.txHash = hash;
-            content.txRewardHash = hash;
-            content.status = 2;
-            if(title){
-                content.intelData = {title: title};
+
+            if(withIncreaseApproval){
+                content.txRewardHash = hash;
+                content.status = 2;
+                ContentService.postTransactions(content);
+                events.editTransaction({hash: content.txHash, key: 'status', value: 2});
+            }else{
+                content.txHash = hash;
+                content.txRewardHash = hash;
+                content.status = 2;
+                ContentService.postTransactions(content);
+                if(title){
+                    content.intelData = {title: title};
+                }
+                events.addTransaction(content);
             }
-            events.addTransaction(content);
-            ContentService.postTransactions(content);
+
+
 
             waitForNonce(hash,( txObject)=>{
                 if(txObject){
                     const  nonce = txObject.nonce;
-                    content.txHash = hash;
-                    content.txRewardHash = hash;
                     content.status =  txObject.blockNumber? 3 :  2;
                     content.nonce = nonce;
+                    ContentService.postTransactions(content);
                     if(title){
                         content.intelData = {title: title};
                     }
-                    ContentService.postTransactions(content);
+
                 }
              });
 
@@ -274,6 +283,7 @@ export default class ContentService {
 
             let params = {
               txHash: content.txHash,
+                txRewardHash: content.txHash,
               status: 3
             };
             ContentService.postTransactions(params);
@@ -294,6 +304,7 @@ export default class ContentService {
       console.log(e);
       let params = {
         txHash: content.txHash,
+          txRewardHash: content.txHash,
         status: 4
       };
       this.postTransactions(params);
@@ -402,13 +413,17 @@ export default class ContentService {
                   const data = {};
                   data.txHash = hash;
                   data.status = 0;
+                  data.address = provider_address;
+                  data.amount = tokenAmount;
+                  data.intelAddress = Intel.options.address;
                   data.event = "approve";
+                  ContentService.postTransactions(data);
                   if(serverData.title){
                       data.intelData = {title: serverData.title};
                   }
                   events.addTransaction(data);
 
-                  ContentService.postTransactions(data);
+
                   waitForNonce(hash,  (txObject)=>{
                       if(txObject){
                           const content = {};
@@ -416,6 +431,9 @@ export default class ContentService {
                           content.txHash = hash;
                           content.status = txObject.blockNumber? 1 :  0;
                           content.event = "approve";
+                          content.address = provider_address;
+                          content.intelAddress = Intel.options.address;
+                          content.amount = tokenAmount;
                           content.nonce = nonce;
                           if(serverData.title){
                               content.intelData = {title: serverData.title};
@@ -475,19 +493,26 @@ export default class ContentService {
         })
         .on("transactionHash", hash => {
 
-            content.txHash = hash;
-            content.txRewardHash = hash;
-            content.status = 2;
+
             if(title){
                 content.intelData = {title: title}
             }
-            events.addTransaction(content);
-            ContentService.postTransactions(content);
+            if(withIncreasedApproval){
+                content.txRewardHash = hash;
+                content.status = 2;
+                ContentService.postTransactions(content);
+                events.editTransaction({hash: content.txHash, key: 'status', value: 2});
+            }else{
+                content.txHash = hash;
+                content.txRewardHash = hash;
+                content.status = 2;
+                ContentService.postTransactions(content);
+                events.addTransaction(content);
+            }
+
             waitForNonce(hash, (txObject)=>{
                 if(txObject){
                     const  nonce = txObject.nonce;
-                    content.txHash = hash;
-                    content.txRewardHash = hash;
                     content.status = txObject.blockNumber? 3 :  2;
                     content.nonce = nonce;
                     if(title){
@@ -597,11 +622,11 @@ export default class ContentService {
 
         //Calculates the gas for the increase approval transaction
         let gasApprove = await ParetoTokenInstance.methods
-          .increaseApproval(Intel.options.address, increaseApprovalTotal)
+          .increaseApproval(content.intelAddress, increaseApprovalTotal)
           .estimateGas({from: rewarder_address});
 
         await ParetoTokenInstance.methods
-          .increaseApproval(Intel.options.address, increaseApprovalTotal)
+          .increaseApproval(content.intelAddress, increaseApprovalTotal)
           .send({
             from: rewarder_address,
             gas: gasApprove,
@@ -614,6 +639,10 @@ export default class ContentService {
               data.status = 0;
               data.event = "approve";
               data.intelData = {title: content.title};
+              data.intel  = content.ID;
+              data.amount = content.tokenAmount;
+              data.intelAddress = content.intelAddress;
+              data.address = rewarder_address;
               events.addTransaction(data);
 
               ContentService.postTransactions(data);
@@ -626,9 +655,14 @@ export default class ContentService {
                        param.status = txObject.blockNumber? 1 :  0;
                        param.event = "approve";
                        param.nonce = nonce;
+                       param.address = rewarder_address;
+                       param.intel  = content.ID;
+                       param.amount = content.tokenAmount;
+                       param.intelAddress = content.intelAddress;
+                       ContentService.postTransactions(param);
                        param.intelData = {title: content.title};
 
-                       ContentService.postTransactions(param);
+
                    }
                });
             //The transaction will be send to vuex and the database
