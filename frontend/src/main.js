@@ -21,8 +21,8 @@ import {library} from '@fortawesome/fontawesome-svg-core';
 import {fas} from '@fortawesome/free-solid-svg-icons';
 import {fab} from '@fortawesome/free-brands-svg-icons';
 
-import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 library.add(fas, fab);
 
 dom.watch();
@@ -38,6 +38,9 @@ Vue.use(require('vue-moment'));
 
 Vue.use(Meta);
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+
+
+
 
 const store = new Vuex.Store({
   state: {
@@ -60,7 +63,9 @@ const store = new Vuex.Store({
     showModalReward: false,
     showModalEditProfile: false,
     signType: (window.localStorage.getItem('signType')) || 'Metamask',
-    ws: null
+    ws: null,
+    shoppingCart: [],
+    showshopping: false
   },
   mutations: {
     addReward(state, data) {
@@ -113,7 +118,10 @@ const store = new Vuex.Store({
     }, iniWs(state) {
       state.ws = new WebSocket(Environment.webSocketURL);
     }, addTransaction(state, item) {
-      state.pendingTransactions.unshift(item);
+      if( !state.pendingTransactions.map(it=>{return it.txHash}).includes(item.txHash)  ){
+          state.pendingTransactions.unshift(item);
+      }
+
     }, assignTransactions(state, transactions) {
       state.pendingTransactions = [...state.pendingTransactions, ...transactions];
     }, editTransaction(state, {hash, key, value}) {
@@ -144,7 +152,16 @@ const store = new Vuex.Store({
       state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
     }, setLastApprovedAddress(state, contractAddress) {
       state.userLastApprovedContractAddress = contractAddress;
+    },  addProductToCart(state, product){
+      state.shoppingCart.push(product)
+    }, resetCart(state){
+      state.shoppingCart = []
+    }, showshoppingcar(state, show){
+      state.showshopping = show
+    }, updateCart(state, cart){
+      state.shoppingCart = cart
     }
+
   },
   actions: {
     login(context, address) {
@@ -162,6 +179,14 @@ const store = new Vuex.Store({
     },
     transactionComplete(context, txHash) {
       context.commit('deleteTransaction', txHash);
+    },addToCart(context, product){
+      context.commit('addProductToCart', product)
+    },resetShoppingCart(context){
+      context.commit('resetCart')
+    },handleshowshopping(context, show){
+      context.commit('showshoppingcar', show)
+    },updateShoppingCart(context, cart){
+      context.commit('updateCart', cart)
     }
   }
 });

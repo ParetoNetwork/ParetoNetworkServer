@@ -19,6 +19,10 @@
 
       <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
         <ul class="navbar-nav ">
+          <!-- <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
+            <router-link tag="a" class="nav-link" :active-class="'active'" to="/products" exact>Products
+            </router-link>
+          </li> -->
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/intel" exact>Intel
             </router-link>
@@ -70,13 +74,14 @@
   import authService from '../services/authService';
   import DashboardService from '../services/dashboardService';
   import errorService from '../services/errorService';
-
   import ModalLedgerNano from "./Modals/VModalLedgerNano";
+  import VProductsCart from "./VProductsCart"
+  import ProductService from '.././services/productService'
 
 
   export default {
     name: 'Navbar',
-    components: {ModalLedgerNano},
+    components: {ModalLedgerNano, VProductsCart},
     mounted: function () {
       this.colorNav = $('#gradient');
 
@@ -87,6 +92,10 @@
           address: {address: res},
         });
       }, () => {}, true);
+      ProductService.showShopping(res => {
+            console.log(res)
+          this.$store.dispatch('handleshowshopping', (res.data.showshoppingcart === "true"))
+      });
     },
     watch: {
       loadingNav(value) {
@@ -116,7 +125,7 @@
     computed: {
       ...mapState([
         // map this.count to store.state.count
-        'isLogged', 'address', 'showModalSign'
+        'isLogged', 'address', 'showModalSign', 'showshopping'
       ]),
       loadingNav() {
         return this.$store.state.makingRequest;
@@ -157,7 +166,7 @@
             type: 'error',
             duration: 10000,
             title: 'Login',
-            text: errorText
+            text: errorService.sendErrorMessage('f1', errorText)
           });
         });
       },

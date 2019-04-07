@@ -59,11 +59,15 @@
 
   import {information} from '../utils/onboardingInfo';
 
+  import VFab from './VFab';
+
+
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
       ICountUp,
+      VFab,
       VProfile,
       VIntelFeed,
       VEventFeed,
