@@ -1059,22 +1059,20 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
           console.log(e)
         }
       }
-      const M = total / 2;
-      for (let i = 0; i < addresses.length; i = i + 1) {
+    for (let i = 0; i < addresses.length; i = i + 1) {
         try {
-          const address = addresses[i].toLowerCase();
-          if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-              let intels = Object.keys(lessRewards[address]);
-              let rewards =   intels.reduce(function (reward, it) {
-                  return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
-              }, 0);
-              let totalDesired =intels.length;
-            const V = (1 + (rewards / totalDesired));
-            scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
-
-          } else {
-            scores[i].score = 0;
-          }
+            const address = addresses[i].toLowerCase();
+            if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+                let intels = Object.keys(lessRewards[address]);
+                let rewards =   intels.reduce(function (reward, it) {
+                    return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
+                }, 0);
+                let totalDesired =intels.length;
+                const V = (1 + (rewards / totalDesired));
+                scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
+              } else {
+                scores[i].score = 0;
+              }
         } catch (e) {
           console.log(e)
         }
@@ -1984,6 +1982,124 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
   }
 };
+
+controller.event_payment = async function (event, callback) {
+    let charge = event;
+    if(charge.type === "charge.succeeded"){
+        Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.payment_intent },
+            function (err, payment) {
+                callback( err, payment)
+            });
+    }
+}
+
+controller.listProducts = async function (callback) {
+
+    let skus;
+    await stripe.skus.list(
+        {active: true},
+        function(err, response) {
+
+            if(err){
+                callback(err, null);
+                return;
+            }
+            skus = response.data;
+
+            //once i have the skus, i need the products
+            stripe.products.list(
+                {active: true},
+                function(err, response) {
+
+                    if(err){
+                        callback(err, null);
+                        return;
+                    }
+                    for( var i = 0; i < skus.length; i++ ){
+                        for(var p = 0; p < response.data.length; p++){
+                            //i need to add the product to the sku
+                            var product = response.data[p];
+                            if(product.id === skus[i].product){
+                                skus[i].name = product.name;
+                                skus[i].description = product.description;
+                                continue;
+                            }
+                        }
+                    }
+                    callback(null, skus);
+                }
+            );
+        }
+    );
+
+
+}
+
+controller.createOrder = async function (order_cart, callback) {
+
+    let products_ar = []
+
+    for(var product of order_cart) {
+        products_ar.push(
+            {
+                type: 'sku',
+                parent: product.id,
+                quantity: product.quantity
+            }
+        )
+    }
+
+    const order = stripe.orders.create({
+        currency: 'usd',
+        email: PROVISIONAL_EMAIL,
+        items: products_ar
+
+    });
+
+
+    let order_amount
+    order.then(function (result) {
+
+        order_amount = result.amount
+
+
+        const paymentIntent =  stripe.paymentIntents.create({
+            amount: order_amount,
+            currency: 'usd',
+            payment_method_types: ['card'],
+        });
+
+
+
+        paymentIntent.then(function (resultint){
+
+            let response = {order: result, intent: resultint}
+            callback(response, resultint);
+
+        });
+
+    });
+
+
+}
+
+controller.payment = async function (params, callback) {
+
+    var token = params.token;
+    var order_id = params.order;
+    var email = params.email;
+
+    stripe.orders.update(order_id, {
+        email: email
+    });
+
+
+    stripe.orders.pay(order_id, {
+        source: token,
+    })
+
+
+}
 
 /**
  *
