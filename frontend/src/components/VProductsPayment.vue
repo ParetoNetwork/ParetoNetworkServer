@@ -1,6 +1,5 @@
 <template>
     <div class="main-wrapper">
-        <div class="header"><h1>Payment</h1></div>
         <div id="payment">
 
             <div class="container">

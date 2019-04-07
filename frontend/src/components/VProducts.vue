@@ -1,7 +1,6 @@
 <template>
 
   <div class="main-wrapper">
-    <div class="header"><h1>Products</h1></div>
     <div id="vue">
       <VProductsList :cart="cart" :products-data-list="productsDatalist"></VProductsList>
     </div>

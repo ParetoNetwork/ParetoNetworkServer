@@ -1,6 +1,5 @@
 <template>
 <div class="main-wrapper">
-    <div class="header"><h1>Your cart</h1></div>
     <div id="vue">
     
 
@@ -70,7 +69,7 @@
                 cartTotal: 0,
                 cartSubTotal: 0,
                 cart: [],
-                image: 'https://i.imgur.com/HhqxVCW.jpg',
+                image: '../assets/images/LogoMarkColor.svg',
                 name: 'Pareto',
                 description: 'Pareto Products',
                 currency: 'USD',

@@ -19,10 +19,10 @@
 
       <div class="collapse navbar-collapse justify-content-lg-end" id="navbarSupportedContent">
         <ul class="navbar-nav ">
-          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
+          <!-- <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/products" exact>Products
             </router-link>
-          </li>
+          </li> -->
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/intel" exact>Intel
             </router-link>
@@ -34,9 +34,9 @@
           <li class="nav-item mx-lg-4" v-on:click="collapseContent()">
             <router-link tag="a" class="nav-link" :active-class="'active'" to="/about">About</router-link>
           </li>
-          <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
+          <!-- <li class="nav-item mx-lg-4" v-if="showshopping" v-on:click="collapseContent()">
             <VProductsCart></VProductsCart>
-          </li>
+          </li> -->
           <li class="nav-item dropdown mx-lg-4 active">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
