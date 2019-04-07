@@ -78,3 +78,6 @@ images/*
 
 #heroku deployment file
 Procfile
+app.js.orig
+backend-controller.js.orig
+frontend/src/main.js.orig
