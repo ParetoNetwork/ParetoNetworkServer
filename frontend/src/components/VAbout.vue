@@ -3,6 +3,9 @@
         <div class="container-fluid">
             <div class="row pareto-blue-dark" style="padding: 110px 0 30px; position: relative; z-index: 1;">
                 <div class="col-12 col-lg-6 mb-lg-0 mb-4 order-md-last order-sm-last order-lg-first">
+                    <br/>
+                    <br/>
+                    <br/>
                     <img style="width: 400px; max-width: 100%;" src="../assets/images/LogoReverse.svg" alt="">
                     <h1 class="font-body padding-main text-left text-white mb-5">Current, reputable &
                         actionable intel for traders and investors. <br/><br/> <h6>Event driven, alternative data source for capturing alpha. View the project <a href="https://github.com/ParetoNetwork/Pareto-Network-Roadmap/projects/1?fullscreen=true"
@@ -15,7 +18,7 @@
                 </div>
                 <div class="col-12 col-lg-6 order-md-first order-sm-first order-lg-last">
 
-                    <img style="width: 500px; max-width: 100%;" src="../assets/images/pareto-console.png" alt="">
+                    <img style="width: 600px; max-width: 100%;" src="../assets/images/pareto-console.png" alt="">
 
                 </div>
             </div>
