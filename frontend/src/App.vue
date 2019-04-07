@@ -2,7 +2,7 @@
     <div id="app">
         <Navbar/>
         <router-view></router-view>
-        <!-- <VFab/> -->
+        <VFab/>
         <notifications group="notification" position="bottom left">
             <template slot="body" slot-scope="props">
                 <div

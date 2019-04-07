@@ -67,7 +67,7 @@
     mixins: [countUpMixin],
     components: {
       ICountUp,
-      /*VFab,*/
+      VFab,
       VProfile,
       VIntelFeed,
       VEventFeed,

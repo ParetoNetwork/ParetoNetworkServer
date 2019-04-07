@@ -3,6 +3,8 @@
   <div class="main-wrapper">
     <div id="vue">
       <VProductsList :cart="cart" :products-data-list="productsDatalist"></VProductsList>
+      <!-- <VProductsCart/>
+      <VProductsCheckout/> -->
     </div>
   </div>
 
@@ -10,6 +12,9 @@
 
 <script>
   import VProductsList from './VProductsList'
+  import VProductsCart from './VProductsCart'
+  import VProductsCheckout from './VProductsCheckout'
+
   import productService from '.././services/productService'
 
   export default {
@@ -37,7 +42,7 @@
       }
     },
     components: {
-       VProductsList
+       VProductsList, VProductsCart,VProductsCheckout
     },
 
 
@@ -45,7 +50,6 @@
 </script>
 
 <style lang="scss">
-  @import url(https://fonts.googleapis.com/css?family=Bitter:400,400italic,700);
 
   * {
     margin: 0;
