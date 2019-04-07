@@ -159,6 +159,7 @@ controller.getParetoCoinMarket = function (callback) {
         headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }
     },
     (error, res, body) => {
+      console.log(COIN_MARKET_API_KEY);
       callback(error, JSON.parse(body));
     });
 };
@@ -804,9 +805,9 @@ controller.startWatchApprove = function () {
             $or: [{txHash: txHash},
               {address: sender, nonce: nonce}]
           }
-          , {status: 1, block: blockNumber, txHash: txHash}, function (err, r) {
+          , {status: 1, address: sender, block: blockNumber, txHash: txHash}, function (err, r) {
             if (!err && r) {
-              ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
+              ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}, function (err, r) {
                 controller.getScoreAndSaveRedis(null, function (err, r) {
                 })
               });
@@ -1027,20 +1028,33 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, bloc
 /**
  *  addExponent using db instead of Ethereum network
  */
-controller.addExponentAprox = function (addresses, scores, blockHeight, callback) {
-  return ParetoReward.find({'block': {'$gt': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(function (err, values) {
+controller.addExponentAprox =  function (addresses, scores, blockHeight, callback) {
+  return ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(async function (err, values) {
+      const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
+      let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
+          data[""+it.id] = it;
+          return data;
+      }, {});
     if (err) {
       callback(err);
     } else {
-      let total = values.length;
-      let rewards = {};
+      let lessRewards = {};
       for (let j = 0; j < values.length; j = j + 1) {
         try {
           const sender = values[j].sender.toLowerCase();
-          if (!rewards[sender]) {
-            rewards[sender] = 0;
+          const block =  parseFloat(values[j].block);
+          const amount = parseFloat(values[j].amount);
+          const intelIndex = values[j].intelId;
+          if(!lessRewards[sender]){
+              lessRewards[sender]  = {};
+              lessRewards[sender][intelIndex] = { block,amount };
           }
-          rewards[sender] = rewards[sender] + 1;
+          if(!lessRewards[sender][intelIndex]){
+                lessRewards[sender][intelIndex] = { block,amount };
+            }
+          if(block < lessRewards[sender][intelIndex].block  ){
+              lessRewards[sender][intelIndex] = { block,amount };
+          }
         } catch (e) {
           console.log(e)
         }
@@ -1049,8 +1063,13 @@ controller.addExponentAprox = function (addresses, scores, blockHeight, callback
       for (let i = 0; i < addresses.length; i = i + 1) {
         try {
           const address = addresses[i].toLowerCase();
-          if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-            const V = (1 + (rewards[address] / M) / 2);
+          if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+              let intels = Object.keys(lessRewards[address]);
+              let rewards =   intels.reduce(function (reward, it) {
+                  return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
+              }, 0);
+              let totalDesired =intels.length;
+            const V = (1 + (rewards / totalDesired));
             scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
 
           } else {
@@ -1217,9 +1236,8 @@ controller.getQueryContentByUser = function (address, intel, callback) {
 
               //2. get percentile
 
-              //2a. get total rank where score > 0
-              ParetoAddress.estimatedDocumentCount({score: {$gte: 0}}, async (err, count) => {
-                var count = count;
+                            //2a. get total rank where score > 0
+                            ParetoAddress.countDocuments({score: {$gt: 0}}, async (err, count) => {
 
                 //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
                 if (result.rank == null) {
@@ -1289,51 +1307,50 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                 } else {
                   blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
                 }
-
-                var blockHeightDelta = blockHeight - blockDelay;
-
-                const BLOCK_TIME = 12;
-                const timeDelay = blockDelay * 12;
-
                 const CONTENT_DELAY = {
-                  blockDelay,
-                  timeDelay
+                  blockDelay: [1,blockDelay,blockDelay*50,blockDelay*100,blockDelay*150],
+                  blockHeight: blockHeight
                 };
+                      let returnQuery = {
+                          $and: [
+                              {
+                                  $or: [
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 1)},
+                                          speed: 1,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 50)},
+                                          speed: 2,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 100)},
+                                          speed: 3,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {
+                                          block: {$lte: (blockHeight - blockDelay * 150)},
+                                          speed: 4,
+                                          $or: [{validated: true}, {block: {$gt: 0}}]
+                                      },
+                                      {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
+                                  ]
+                              }]
+                      };
 
-                return callback(null, CONTENT_DELAY, {
-                  $and: [
-                    {
-                      $or: [
-                        {
-                          block: {$lte: blockHeightDelta * 1},
-                          speed: 1,
-                          $or: [{validated: true}, {block: {$gt: 0}}]
-                        },
-                        {
-                          block: {$lte: blockHeightDelta * 50},
-                          speed: 2,
-                          $or: [{validated: true}, {block: {$gt: 0}}]
-                        },
-                        {
-                          block: {$lte: blockHeightDelta * 100},
-                          speed: 3,
-                          $or: [{validated: true}, {block: {$gt: 0}}]
-                        },
-                        {
-                          block: {$lte: blockHeightDelta * 150},
-                          speed: 4,
-                          $or: [{validated: true}, {block: {$gt: 0}}]
-                        },
-                        {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
-                      ]
-                    }]
-                });
-              });
-            }, function (error) {
-              callback(error);
-            }).catch(function (err) {
-            callback(err);
-          });//end web3
+                                // if(percentile<0.85){
+                                //     returnQuery.$and.push({expires: {$lte : ((new Date()).getTime()/1000)+86400}, validated: true});
+                                // }
+
+                                return callback(null, CONTENT_DELAY, returnQuery,percentile);
+                            });
+                        }, function (error) {
+                            callback(error);
+                        }).catch(function (err) {
+                        callback(err);
+                    });//end web3
 
         }//end else
 
@@ -1346,7 +1363,7 @@ controller.getAllAvailableContent = async function (req, callback) {
 
   var limit = parseInt(req.query.limit || 100);
   var page = parseInt(req.query.page || 0);
-  controller.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind) {
+  controller.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
 
     if (error) return callback(error);
     try {
@@ -1368,6 +1385,7 @@ controller.getAllAvailableContent = async function (req, callback) {
 
          */
         try {
+          let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
           let data = {
             _id: entry._id,
             blockAgo: Math.max(blockHeight - entry.block, 0),
@@ -1393,8 +1411,19 @@ controller.getAllAvailableContent = async function (req, callback) {
               biography: entry.createdBy.biography,
               profilePic: entry.createdBy.profilePic
             },
-            contentDelay
+            contentDelay: {
+                blockDelay: contentDelay.blockDelay[entry.speed],
+                blockHeight: contentDelay.blockHeight,
+                timeDelay: contentDelay[entry.speed]*12
+            }
           };
+
+          if(percentile < 0 ){ //eventually it may be < 0.85
+               if(data.expires > ((new Date()).getTime()/1000)+86400){
+                   data.title = "Classified" + controller.decodeData(data.title);
+                   data.body =  controller.decodeData(data.body);
+               }
+          }
 
           newResults.push(data);
 
@@ -1415,8 +1444,46 @@ controller.getAllAvailableContent = async function (req, callback) {
   });
 };
 
+controller.decodeData = function (data){
+  const TOKEN = "@7a8b9c";
+  const words = data.split(" ");
+  const shuffle = function (array) {
+
+        var currentIndex = array.length;
+        var temporaryValue, randomIndex;
+        while (0 !== currentIndex) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+
+    };
+  const randomWord =  function (length) {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < length; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+    };
+  const permutations = shuffle(Array.from(Array(words.length), (x, index)=>index+1)).slice(0,(words.length*0.5).toFixed());
+  return  words.map((it, index)=>{
+        if(permutations.includes(index)){
+          return TOKEN + randomWord(it.length) + TOKEN
+        }else{
+          return it;
+        }
+
+  }).join(' ');
+}
+
 controller.getContentByIntel = function (req, intel, callback) {
-  controller.getQueryContentByUser(req.user, intel, async function (error, contentDelay, queryFind) {
+  controller.getQueryContentByUser(req.user, intel, async function (error, contentDelay, queryFind, percentile) {
     if (error) return callback(error);
     try {
       if (mongoose.Types.ObjectId.isValid(intel)) {
@@ -1427,33 +1494,48 @@ controller.getContentByIntel = function (req, intel, callback) {
       const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).populate('createdBy').exec();
       if (allResults && allResults.length > 0) {
         const entry = allResults[0];
-        return callback(null, {
-          _id: entry._id,
-          blockAgo: Math.max(blockHeight - entry.block, 0),
-          block: entry.block,
-          title: entry.title,
-          address: entry.address,
-          body: entry.body,
-          expires: entry.expires,
-          dateCreated: entry.dateCreated,
-          txHash: entry.txHash,
-          totalReward: entry.totalReward || 0,
-          reward: entry.reward,
-          speed: entry.speed,
-          id: entry.id,
-          txHashDistribute: entry.txHashDistribute,
-          intelAddress: entry.intelAddress,
-          _v: entry._v,
-          distributed: entry.distributed,
-          createdBy: {
-            address: entry.createdBy.address,
-            alias: entry.createdBy.alias,
-            aliasSlug: entry.createdBy.aliasSlug,
-            biography: entry.createdBy.biography,
-            profilePic: entry.createdBy.profilePic
-          },
-          contentDelay: contentDelay
-        })
+        let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
+        const data  = {
+            _id: entry._id,
+            blockAgo: Math.max(blockHeight - entry.block, 0),
+            block: entry.block,
+            title: entry.title,
+            address: entry.address,
+            body: entry.body,
+            expires: entry.expires,
+            dateCreated: entry.dateCreated,
+            txHash: entry.txHash,
+            totalReward: entry.totalReward || 0,
+            reward: entry.reward,
+            speed: entry.speed,
+            id: entry.id,
+            txHashDistribute: entry.txHashDistribute,
+            intelAddress: entry.intelAddress,
+            _v: entry._v,
+            distributed: entry.distributed,
+            createdBy: {
+                address: entry.createdBy.address,
+                alias: entry.createdBy.alias,
+                aliasSlug: entry.createdBy.aliasSlug,
+                biography: entry.createdBy.biography,
+                profilePic: entry.createdBy.profilePic
+            },
+            contentDelay: {
+                blockDelay: contentDelay.blockDelay[entry.speed],
+                blockHeight: contentDelay.blockHeight,
+                timeDelay: contentDelay[entry.speed]*12
+            }
+        };
+
+
+          if(percentile < 0){
+              if(data.expires > ((new Date()).getTime()/1000)+86400){
+                  data.title = "Classified" + controller.decodeData(data.title);
+                  data.body =  controller.decodeData(data.body);
+              }
+          }
+
+          return callback(null, data)
       } else {
         callback(null, {})
       }
@@ -1569,55 +1651,60 @@ controller.getUserInfo = async function (address, callback) {
     let profile = await ParetoProfile.findOne({aliasSlug: address}).exec();
     if (!profile) profile = await ParetoProfile.findOne({alias: address}).exec();
 
-    if (profile) {
-      controller.retrieveAddressRankWithRedis([profile.address], true, function (error, rankings) {
-        if (error) {
-          callback(error)
+        if (profile) {
+            controller.retrieveAddressRankWithRedis([profile.address], true, function (error, rankings) {
+                if (error) {
+                    callback(error)
+                } else {
+                    let ranking = rankings[0];
+                    callback(null, {
+                        'address': profile.address,
+                        'rank': ranking.rank,
+                        'score': ranking.score,
+                        'tokens': ranking.tokens,
+                        'block': ranking.block,
+                        'lastApprovedAddress': ranking.approved,
+                        'maxRank': ranking.maxRank,
+                        'minScore': ranking.minScore,
+                        'alias': profile.alias,
+                        'aliasSlug': profile.aliasSlug,
+                        'biography': profile.biography,
+                        "profile_pic": profile.profilePic
+                    });
+                }
+            });
         } else {
-          let ranking = rankings[0];
-          callback(null, {
-            'address': profile.address,
-            'rank': ranking.rank,
-            'score': ranking.score,
-            'tokens': ranking.tokens,
-            'block': ranking.block,
-            'lastApprovedAddress': ranking.approved,
-            'alias': profile.alias,
-            'aliasSlug': profile.aliasSlug,
-            'biography': profile.biography,
-            "profile_pic": profile.profilePic
-          });
+            callback(new Error('Invalid Address or alias'));
         }
-      });
     } else {
-      callback(new Error('Invalid Address or alias'));
-    }
-  } else {
-    controller.retrieveAddressRankWithRedis([address], true, function (error, rankings) {
-      if (error) {
-        callback(error)
-      } else {
-        controller.retrieveProfileWithRedis(address, function (error, profile) {
-          if (error) {
-            callback(error)
-          }
-          let ranking = rankings[0];
-          callback(null, {
-            'address': address,
-            'rank': ranking.rank,
-            'score': ranking.score,
-            'tokens': ranking.tokens,
-            'block': ranking.block,
-            'lastApprovedAddress': ranking.approved,
-            'alias': profile.alias,
-            'aliasSlug': profile.aliasSlug,
-            'biography': profile.biography,
-            "profile_pic": profile.profilePic
-          });
+
+        controller.retrieveAddressRankWithRedis([address], true, function (error, rankings) {
+            if (error) {
+                callback(error)
+            } else {
+                controller.retrieveProfileWithRedis(address, function (error, profile) {
+                    if (error) {
+                        callback(error)
+                    }
+                    let ranking = rankings[0];
+                    callback(null, {
+                        'address': address,
+                        'rank': ranking.rank,
+                        'score': ranking.score,
+                        'tokens': ranking.tokens,
+                        'block': ranking.block,
+                        'lastApprovedAddress': ranking.approved,
+                        'maxRank': ranking.maxRank,
+                        'minScore': ranking.minScore,
+                        'alias': profile.alias,
+                        'aliasSlug': profile.aliasSlug,
+                        'biography': profile.biography,
+                        "profile_pic": profile.profilePic
+                    });
+                });
+            }
         });
-      }
-    });
-  }
+    }
 
 };
 
@@ -1898,127 +1985,6 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
   }
 };
 
-
-controller.event_payment = async function (event, callback) {
-   let charge = event;
-   if(charge.type === "charge.succeeded"){
-       Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.payment_intent },
-           function (err, payment) {
-             callback( err, payment)
-       });
-    }
-}
-
-controller.listProducts = async function (callback) {
-
-    let skus;
-    await stripe.skus.list(
-        {active: true},
-        function(err, response) {
-
-            if(err){
-                callback(err, null);
-                return;
-            }
-            skus = response.data;
-
-            //once i have the skus, i need the products
-            stripe.products.list(
-                {active: true},
-                function(err, response) {
-
-                    if(err){
-                        callback(err, null);
-                        return;
-                    }
-                    for( var i = 0; i < skus.length; i++ ){
-                        for(var p = 0; p < response.data.length; p++){
-                            //i need to add the product to the sku
-                            var product = response.data[p];
-                            if(product.id === skus[i].product){
-                                skus[i].name = product.name;
-                                skus[i].description = product.description;
-                                continue;
-                            }
-                        }
-                    }
-                    callback(null, skus);
-                }
-            );
-        }
-    );
-
-
-}
-
-controller.createOrder = async function (order_cart, callback) {
-
-    let products_ar = []
-
-    for(var product of order_cart) {
-        products_ar.push(
-           {
-               type: 'sku',
-               parent: product.id,
-               quantity: product.quantity
-           }
-       )
-    }
-    
-    const order = stripe.orders.create({
-        currency: 'usd',
-        email: PROVISIONAL_EMAIL,
-        items: products_ar
-        
-     });
-
-
-    let order_amount
-    order.then(function (result) {
-
-        order_amount = result.amount
-
-
-            const paymentIntent =  stripe.paymentIntents.create({
-                amount: order_amount,
-                currency: 'usd',
-                payment_method_types: ['card'],
-            });
-
-
-
-            paymentIntent.then(function (resultint){
-
-                let response = {order: result, intent: resultint}
-                callback(response, resultint);
-
-            });
-
-    });
-
-
-}
-
-controller.payment = async function (params, callback) {
-
-    var token = params.token;
-    var order_id = params.order;
-    var email = params.email;
-
-    stripe.orders.update(order_id, {
-        email: email
-    });
-
-
-    stripe.orders.pay(order_id, {
-        source: token,
-    })
-
-
-}
-
-
-
 /**
  *
  * *********** Functions with Redis ************
@@ -2219,7 +2185,7 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
       ParetoAddress.find({address: {$in: addressess}}, function (err, result) {
         if (!err && (!result || (result && !result.length))) {
           const error = ErrorHandler.backendErrorList('b3');
-          error.systemMessage = err.message ? err.message : err;
+          error.systemMessage = (err && err.message) ? err.message : err;
           error.address = addressess;
           callback(error);
         } else {
@@ -2233,31 +2199,41 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
         }
       });
 
-    } else {
-      if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
-        // hopefully, users without pareto shouldn't get here now.
-        const error = ErrorHandler.backendErrorList('b3');
-        error.systemMessage = err.message ? err.message : err;
-        error.address = addressess;
-        callback(error);
-      } else {
-        const multi = redisClient.multi();
-        for (let i = 0; i < results.length; i = i + 1) {
-          if (results[i]) {
-            multi.hgetall(results[i].rank + "");
-          }
-        }
-        multi.exec(function (err, results) {
-          if (err) {
-            const error = ErrorHandler.backendErrorList('b4');
-            error.systemMessage = err.message ? err.message : err;
-            error.address = addressess;
-            return callback(error);
-          }
-          // return the cached ranking
-          return callback(null, results);
-        });
-      }
+        } else {
+            if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
+                // hopefully, users without pareto shouldn't get here now.
+                const error = ErrorHandler.backendErrorList('b3');
+                error.systemMessage = err.message? err.message: err;
+                error.address = addressess;
+                callback(error);
+            } else {
+                const multi = redisClient.multi();
+                for (let i = 0; i < results.length; i = i + 1) {
+                    if (results[i]) {
+                        multi.hgetall(results[i].rank + "");
+                    }
+                }
+                multi.hgetall("maxRank");
+                multi.hgetall("minScore");
+                multi.exec(function (err, results) {
+                    if (err) {
+                        const error = ErrorHandler.backendErrorList('b4');
+                        error.systemMessage = err.message? err.message: err;
+                        error.address = addressess;
+                        return callback(error);
+                    }
+                    // return the cached ranking
+                    const maxRank = results[results.length-2];
+                    const minScore = results[results.length-1];
+
+                    results = results.slice(0,-2);
+                    if(maxRank && minScore){
+                        results = results.map(it =>{it.maxRank = maxRank.rank; it.minScore = minScore.score; return it });
+                    }
+
+                    return callback(null, results);
+                });
+            }
 
     }
 
