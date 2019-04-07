@@ -62,6 +62,8 @@ export default class profileService {
             }
             window.localStorage.setItem('etherscan', etherscan);
             window.localStorage.setItem('exponentBlock', res.data.exponentBlock);
+            window.localStorage.setItem('public_key_stripe', res.data.public_key_stripe);
+            window.localStorage.setItem('showshoppingcart', res.data.showshoppingcart);
 
             if (res.success && (res.data.intelAddress !== window.localStorage.getItem('intelAddress')
                 || res.data.paretoAddress !== window.localStorage.getItem('paretoAddress')
@@ -76,6 +78,7 @@ export default class profileService {
                         window.localStorage.setItem('psignversion', res.data.psignversion);
                         window.localStorage.setItem('intelc', JSON.stringify(res.data.intel));
                         window.localStorage.setItem('paretoc', JSON.stringify(res.data.pareto));
+
                     }
                     if (onFinish) onFinish();
                 }).catch(error => {

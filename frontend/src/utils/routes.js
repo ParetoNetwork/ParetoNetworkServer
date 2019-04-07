@@ -1,3 +1,8 @@
+import Vintel from '../components/VIntel';
+import VProducts from '../components/VProducts'
+import VProductsCheckout from '../components/VProductsCheckout'
+import VProductsPayment from '../components/VProductsPayment'
+import VPaymentThankyou from '../components/VPaymentThankyou'
 import VIntel from '../components/VIntel';
 import VAbout from '../components/VAbout';
 import VLeaderboards from '../components/VLeaderboards';
@@ -31,6 +36,10 @@ const routes = [
     {path: '/about', component: VAbout},
     {path: '/leaderboards', component: VLeaderboards},
     {path: '/create', component: VCreateIntel},
+    {path: '/products', component: VProducts},
+    {path: '/checkout', component: VProductsCheckout},
+    {path: '/payment', component: VProductsPayment},
+    {path: '/thankyou-payment', component: VPaymentThankyou},
 ];
 
 const router = new VueRouter(
@@ -45,7 +54,7 @@ const router = new VueRouter(
 
 router.beforeEach((to, from, next) => {
     // ...
-    const publicPages = ['/', '/leaderboards', '/about'];
+    const publicPages = ['/', '/leaderboards', '/about', '/products', '/checkout', '/payment', '/thankyou-payment' ];
     const authRequired = !publicPages.includes(to.path);
     AuthService.auth(() => {
         next();

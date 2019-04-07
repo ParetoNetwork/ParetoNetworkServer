@@ -1,5 +1,5 @@
 <template>
-    <a href="https://t.me/paretonetworkdiscussion" target="_blank" class="fab"> </a>
+    <a href="/checkout" class="fab"> </a>
 </template>
 
 <script>
@@ -26,7 +26,7 @@
         line-height: 70px;
 
         position: fixed;
-        z-index: 999;
+        z-index: 9999;
         right: 50px;
         bottom: 50px;
     }
