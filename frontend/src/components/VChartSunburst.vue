@@ -153,7 +153,7 @@
           })
           .text(function (d) {
             if(d.data.size)
-            return 'Totals: ' + d.data.size;
+            return 'Reward: ' + d.data.size;
           })
           .attr("opacity", 0);
 
@@ -183,12 +183,14 @@
                   const sizeText = d3.select(this.parentNode).selectAll(".sizeText");
                   const path = d3.select(this.parentNode).selectAll("path")._groups[0][0];
 
+                  const sizeTransition = sizeText.transition().duration(750);
+
+                  sizeTransition.attr("transform", function (d) {
+                      return "translate(" + arc.centroid(path.__data__) + ")";
+                    });
+
                   if(d.parent){
-                    sizeText.transition().duration(750)
-                      .attr("opacity", 1)
-                      .attr("transform", function (d) {
-                        return "translate(" + arc.centroid(path.__data__) + ")";
-                      });
+                    sizeTransition.attr("opacity", 1)
                   }
 
                   text.transition().duration(750)
