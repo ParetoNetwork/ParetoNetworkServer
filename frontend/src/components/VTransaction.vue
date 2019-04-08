@@ -1,6 +1,6 @@
 <template>
   <div class="text-center position-relative">
-          <div class="row ml-0 mr-0 py-2 cursor-pointer border-bottom text-content" :style="getProgress(ini, mid, darkBlue)">
+          <div class="row ml-0 mr-0 py-2 cursor-pointer border-bottom text-content" :style="getProgress(ini, mid)">
             <div class="col-1 px-0" @click="clickTransaction()">
               <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']"
                                  :class="statusColor(transaction.status)"></font-awesome-icon>
@@ -158,7 +158,7 @@
                     this.blue=0;
                 }
                 if(this.blue> 50){
-                    this.ini = 99.5;
+                    this.mid = 99.5;
                 }
                 this.updateBlue()
 
@@ -167,15 +167,15 @@
         ,
         updateBlue() {
           if(this.blue<=50) {
-              if (this.ini < this.blue) {
-                  this.ini = this.ini + 0.5;
-                  this.mid = this.ini;
+              if (this.mid < this.blue) {
+                  this.mid = this.mid + 0.5;
+                  this.ini = this.mid - this.mid*0.05;
                   setTimeout(this.updateBlue, Math.random() * (50 - 10) + 10)
               }
           }else{
-              if (this.ini > this.blue) {
-                  this.ini = this.ini - 0.5;
-                  this.mid = this.ini;
+              if (this.mid > this.blue) {
+                  this.mid = this.mid - 0.5;
+                  this.ini = this.mid - this.mid*0.05;
                   setTimeout(this.updateBlue, Math.random() * (50 - 10) + 10)
               }
           }
@@ -191,15 +191,14 @@
           'yellow-background': status < 3 && click
         };
       },
-      getProgress(ini, mid, last) {
+      getProgress(ini, mid) {
           const style = {
               "border-bottom-color": "black !important"
           };
           if (this.transaction.event === 'reward' && this.transaction.status === 3 && this.transaction.intelData && this.transaction.intelData.reward) {
-              console.log('entró');
-              style.background = 'linear-gradient(90deg, #679ab4 ' + ini + '%, ' + mid + '% , #1f344f ' + last + '%)';
+              style.background = 'linear-gradient(90deg, #679ab4 ' +  ini + '%, #1f344f ' + mid + '% , #1f344f )';
           }
-          console.log('linear-gradient(90deg, #679ab4 ' + ini + '%, ' + mid + '% , #1f344f ' + last + '%)')
+
           return style;
       }
     }
