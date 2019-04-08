@@ -1,7 +1,7 @@
 <template>
     <div class="content position-relative marketplace-section">
         <div class="wide-title">
-            <h2 class="font-header">A true peer-to-peer content marketplace.</h2>
+            <h2 class="font-header">A true peer-to-peer intel market.</h2>
             <p class="subtitle font-body">The Pareto Network is the first real-time actionable intelligence platform for
                 investors. </p>
         </div>

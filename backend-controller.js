@@ -29,14 +29,13 @@ var WEB3_WEBSOCKET_URL = process.env.WEB3_WEBSOCKET_URL;
 var ETH_NETWORK = process.env.ETH_NETWORK;
 var PARETO_SIGN_VERSION = process.env.PARETO_SIGN_VERSION;
 var COIN_MARKET_API_KEY = process.env.COIN_MARKET_API_KEY;
-var BLOCK_DELAY_YELLOW = process.env.BLOCK_DELAY_YELLOW || 1000;
-var BLOCK_DELAY_RED = process.env.BLOCK_DELAY_RED || 10;
 /*ways of writing contract creation block height*/
 //const CONTRACT_CREATION_BLOCK_HEX = '0x4B9696'; //need this in hex
 const CONTRACT_CREATION_BLOCK_HEX = process.env.CONTRACT_CREATION_BLOCK_HEX;  //need this in hex
 //const CONTRACT_CREATION_BLOCK_INT = 4953750;
 const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
 const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
+const PROVISIONAL_EMAIL = process.env.PROVISIONAL_EMAIL
 const REDIS_URL = process.env.REDIS_URL || constants.REDIS_URL;
 const queue = kue.createQueue({
   redis: REDIS_URL,
@@ -62,6 +61,9 @@ redisClient.on("error", function (e) {
   console.log(JSON.stringify(error));
 });
 
+//stripe
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || constants.STRIPE_SECRET_KEY;
+const stripe = require("stripe")(STRIPE_SECRET_KEY);
 
 /**
  * Web3 Initialization
@@ -116,6 +118,8 @@ mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
+const ParetoPayment = mongoose.model('payment');
+const Payment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
 
@@ -151,12 +155,212 @@ controller.getParetoCoinMarket = function (callback) {
   let url = 'https://pro-api.coinmarketcap.com/v1';
 
   request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
-    {headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY}},
+    {
+        headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }
+    },
     (error, res, body) => {
       console.log(COIN_MARKET_API_KEY);
       callback(error, JSON.parse(body));
     });
 };
+
+
+/**
+ *
+ *  Functions to Transfer pareto and Eth
+ *
+ */
+
+/**
+ * Get a wallet provider to make transactions
+ * @return {{engine: Web3ProviderEngine, web3: Web3}}
+ */
+controller.getWalletProvider = function () {
+    const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
+    const ProviderEngine = require('web3-provider-engine');
+    const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
+    const Wallet = require('ethereumjs-wallet');
+    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DT_ORACLE_SYS, "base64").toString("ascii"), "hex"));
+    const engine = new ProviderEngine();
+    engine.addProvider(new HookedWalletSubprovider({
+        getAccounts: function(cb){
+            cb(null, [ myWallet.getAddressString()]);
+        },
+        getPrivateKey: function(address, cb){
+            if (address !== myWallet.getAddressString()) {
+                cb(new Error('Account not found'))
+            } else {
+                cb(null, myWallet.getPrivateKey())
+            }
+        }
+    }));
+    engine.addProvider(new WsSubprovider({rpcUrl:  WEB3_WEBSOCKET_URL}));
+    engine.start();
+    return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
+};
+
+
+/**
+ * For now is a dummy purchase
+ * @param address the new Created address front end.
+ * @param callback
+ */
+controller.transactionFlow= async function(address, order_id, callback){
+    const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
+    const data = await ParetoPayment.findOneAndUpdate({order_id: order_id},{amount: 10 , processed: false},{upsert: true}).exec();
+    ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
+        if(payment){
+            if(payment.state > 0){
+                controller.getParetoCoinMarket((err, result)=>{
+                    const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
+                    callback(null,{amount: paretoAmount, eth: ETH_DEPOSIT});
+                })
+            }else{
+                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {address: address, state: 1}).exec().then(function (r) {
+                     controller.getParetoCoinMarket((err, result)=>{
+                         if(err){
+                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
+                           return  callback(err);
+                         }
+                         const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
+                         console.log(paretoAmount);
+                         controller.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
+                             if(err){
+                                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
+                               return   callback(err);
+                             }
+                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 2, oracleTxHash: result.hash }).exec().then((r)=>{});
+                             callback(null, result);
+                         });
+                     })
+                }).catch(function (e) {
+                    callback(e)
+                });
+
+            }
+
+        }else{
+            callback(null,{amount: 0, eth: 0})
+        }
+
+    }).catch(function (e) {
+        callback(e)
+    });
+
+}
+
+
+controller.updateTransaction = function (body, callback) {
+
+    const data = {
+        txHash: body.txHash
+    };
+    const find = {
+        $or: [{order_id: body.order_id}, {address: body.address}],
+        processed: false
+    };
+    if (body.processed) {
+        data.processed = true;
+    }
+    ParetoPayment.findOneAndUpdate(find, data).exec().then((r) => {
+        callback(null, r);
+    }).catch(err => {
+        callback(null, err);
+    });
+}
+
+/**
+ *
+ * @param address ToAddress
+ * @param amount  amount of pareto that will send to address
+ * @param eth    amount of eth that will send to address
+ * @param callback
+ * @return {Promise<void>}
+ */
+controller.makeTransaction = async function(address, amount, eth, callback){
+    const  walletProvider = controller.getWalletProvider();
+    try{
+
+        const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
+        const Pareto_Address = process.env.CRED_PARETOCONTRACT;
+        const web3 = walletProvider.web3;
+        const wallet = walletProvider.wallet;
+        const ParetoTokenInstance  = new web3.eth.Contract( Pareto_Token_Schema.abi, Pareto_Address);
+        let amountPareto = web3.utils.toWei(amount.toString(), "ether");
+        let amountEther = web3.utils.toWei(eth.toString(), "ether");
+        let gasPrice = await web3.eth.getGasPrice();
+        let gasApprove = await web3.eth.estimateGas({
+            to:address,
+            from: wallet.getAddressString(),
+            value: amountEther});
+        web3.eth.sendTransaction({
+            to:address,
+            from: wallet.getAddressString(),
+            value: amountEther,
+            gas: gasApprove,
+            gasPrice: gasPrice  * 1.3
+        }).once('transactionHash', function(hash){
+            controller.waitForReceipt(hash,async  (err, receipt)=>{
+                if(err){
+                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                    return  callback(err);
+                }
+                let gasApprove = await ParetoTokenInstance.methods
+                    .transfer(address, amountPareto)
+                    .estimateGas({from: wallet.getAddressString()});
+                ParetoTokenInstance.methods
+                    .transfer(address, amountPareto)
+                    .send({
+                        from: wallet.getAddressString(),
+                        gas: gasApprove,
+                        gasPrice: gasPrice  * 1.3
+                    })
+                    .once('transactionHash', function(hash){
+                        controller.waitForReceipt(hash,async  (err, receipt)=> {
+                            if(err){
+                                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                                return  callback(err);
+                            }
+                            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                            callback(null, {amount, eth, hash});
+                        })
+                    })
+                    .once('error', (err)=>{
+                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                        callback(err);
+                    });
+            })
+        })
+            .once('error', function(err){
+                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                callback(err);
+            });
+
+    }catch (e) {
+        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+        callback(e);
+    }
+};
+
+controller.waitForReceipt = function (hash, cb) {
+    web3.eth.getTransactionReceipt(hash, function (err, receipt) {
+        if (err) {
+            cb(err);
+        }
+
+        if (receipt !== null) {
+            // Transaction went through
+            if (cb) {
+                cb(null, receipt);
+            }
+        } else {
+            // Try again in 1 second
+            setTimeout(function () {
+                controller.waitForReceipt(hash, cb);
+            }, 1000);
+        }
+    });
+}
 
 controller.getBalance = async function (address, blockHeightFixed, callback) {
 
@@ -531,6 +735,11 @@ controller.startwatchDeposit= function (intel) {
                   const nonce = txObject.nonce;
                   const txHash = event.transactionHash;
                   const sender = event.returnValues.from.toLowerCase();
+                  try{
+                      ParetoPayment.findOneAndUpdate(
+                          {txHash: txHash}
+                          , {processed: true}).then(value => {}).catch(err=>{});
+                  }catch (e) {  }
                   ParetoTransaction.findOneAndUpdate(
                       {
                           $or: [{txHash: txHash},
@@ -596,9 +805,9 @@ controller.startWatchApprove = function () {
             $or: [{txHash: txHash},
               {address: sender, nonce: nonce}]
           }
-          , {status: 1, block: blockNumber, txHash: txHash}, function (err, r) {
+          , {status: 1, address: sender, block: blockNumber, txHash: txHash}, function (err, r) {
             if (!err && r) {
-              ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {
+              ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}, function (err, r) {
                 controller.getScoreAndSaveRedis(null, function (err, r) {
                 })
               });
@@ -819,35 +1028,51 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, bloc
 /**
  *  addExponent using db instead of Ethereum network
  */
-controller.addExponentAprox = function (addresses, scores, blockHeight, callback) {
-  return ParetoReward.find({'block': {'$gt': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(function (err, values) {
+controller.addExponentAprox =  function (addresses, scores, blockHeight, callback) {
+  return ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(async function (err, values) {
+      const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
+      let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
+          data[""+it.id] = it;
+          return data;
+      }, {});
     if (err) {
       callback(err);
     } else {
-      let total = values.length;
-      let rewards = {};
+      let lessRewards = {};
       for (let j = 0; j < values.length; j = j + 1) {
         try {
           const sender = values[j].sender.toLowerCase();
-          if (!rewards[sender]) {
-            rewards[sender] = 0;
+          const block =  parseFloat(values[j].block);
+          const amount = parseFloat(values[j].amount);
+          const intelIndex = values[j].intelId;
+          if(!lessRewards[sender]){
+              lessRewards[sender]  = {};
+              lessRewards[sender][intelIndex] = { block,amount };
           }
-          rewards[sender] = rewards[sender] + 1;
+          if(!lessRewards[sender][intelIndex]){
+                lessRewards[sender][intelIndex] = { block,amount };
+            }
+          if(block < lessRewards[sender][intelIndex].block  ){
+              lessRewards[sender][intelIndex] = { block,amount };
+          }
         } catch (e) {
           console.log(e)
         }
       }
-      const M = total / 2;
-      for (let i = 0; i < addresses.length; i = i + 1) {
+    for (let i = 0; i < addresses.length; i = i + 1) {
         try {
-          const address = addresses[i].toLowerCase();
-          if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-            const V = (1 + (rewards[address] / M) / 2);
-            scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
-
-          } else {
-            scores[i].score = 0;
-          }
+            const address = addresses[i].toLowerCase();
+            if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+                let intels = Object.keys(lessRewards[address]);
+                let rewards =   intels.reduce(function (reward, it) {
+                    return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
+                }, 0);
+                let totalDesired =intels.length;
+                const V = (1 + (rewards / totalDesired));
+                scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
+              } else {
+                scores[i].score = 0;
+              }
         } catch (e) {
           console.log(e)
         }
@@ -1186,7 +1411,6 @@ controller.getAllAvailableContent = async function (req, callback) {
             },
             contentDelay: {
                 blockDelay: contentDelay.blockDelay[entry.speed],
-                type: (delayAgo > BLOCK_DELAY_YELLOW)? 0: (delayAgo > BLOCK_DELAY_RED)? 1: 2,
                 blockHeight: contentDelay.blockHeight,
                 timeDelay: contentDelay[entry.speed]*12
             }
@@ -1296,7 +1520,6 @@ controller.getContentByIntel = function (req, intel, callback) {
             },
             contentDelay: {
                 blockDelay: contentDelay.blockDelay[entry.speed],
-                type: (delayAgo > BLOCK_DELAY_YELLOW)? 0: (delayAgo > BLOCK_DELAY_RED)? 1: 2,
                 blockHeight: contentDelay.blockHeight,
                 timeDelay: contentDelay[entry.speed]*12
             }
@@ -1759,6 +1982,124 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
   }
 };
+
+controller.event_payment = async function (event, callback) {
+    let charge = event;
+    if(charge.type === "charge.succeeded"){
+        Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.payment_intent },
+            function (err, payment) {
+                callback( err, payment)
+            });
+    }
+}
+
+controller.listProducts = async function (callback) {
+
+    let skus;
+    await stripe.skus.list(
+        {active: true},
+        function(err, response) {
+
+            if(err){
+                callback(err, null);
+                return;
+            }
+            skus = response.data;
+
+            //once i have the skus, i need the products
+            stripe.products.list(
+                {active: true},
+                function(err, response) {
+
+                    if(err){
+                        callback(err, null);
+                        return;
+                    }
+                    for( var i = 0; i < skus.length; i++ ){
+                        for(var p = 0; p < response.data.length; p++){
+                            //i need to add the product to the sku
+                            var product = response.data[p];
+                            if(product.id === skus[i].product){
+                                skus[i].name = product.name;
+                                skus[i].description = product.description;
+                                continue;
+                            }
+                        }
+                    }
+                    callback(null, skus);
+                }
+            );
+        }
+    );
+
+
+}
+
+controller.createOrder = async function (order_cart, callback) {
+
+    let products_ar = []
+
+    for(var product of order_cart) {
+        products_ar.push(
+            {
+                type: 'sku',
+                parent: product.id,
+                quantity: product.quantity
+            }
+        )
+    }
+
+    const order = stripe.orders.create({
+        currency: 'usd',
+        email: PROVISIONAL_EMAIL,
+        items: products_ar
+
+    });
+
+
+    let order_amount
+    order.then(function (result) {
+
+        order_amount = result.amount
+
+
+        const paymentIntent =  stripe.paymentIntents.create({
+            amount: order_amount,
+            currency: 'usd',
+            payment_method_types: ['card'],
+        });
+
+
+
+        paymentIntent.then(function (resultint){
+
+            let response = {order: result, intent: resultint}
+            callback(response, resultint);
+
+        });
+
+    });
+
+
+}
+
+controller.payment = async function (params, callback) {
+
+    var token = params.token;
+    var order_id = params.order;
+    var email = params.email;
+
+    stripe.orders.update(order_id, {
+        email: email
+    });
+
+
+    stripe.orders.pay(order_id, {
+        source: token,
+    })
+
+
+}
 
 /**
  *

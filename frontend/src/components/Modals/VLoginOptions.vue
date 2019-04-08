@@ -95,7 +95,7 @@
             type: 'error',
             duration: 10000,
             title: 'Login',
-            text: errorText
+            text: errorService.sendErrorMessage('f1', errorText)
           });
 
           this.stopLogin();

@@ -63,12 +63,16 @@
   import {information} from '../utils/onboardingInfo';
   import VChartSunburst from './VChartSunburst';
 
+  import VFab from './VFab';
+
+
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
       VChartSunburst,
       ICountUp,
+      VFab,
       VProfile,
       VIntelFeed,
       VEventFeed,

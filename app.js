@@ -162,6 +162,17 @@ const ErrorHandler = require('./error-handler.js');
   res.end();
 });*/
 
+app.get('/v1/listproducts', function (req, res) {
+    //res.sendFile(path.join(__dirname + '/sitemap.xml'));
+    controller.listProducts(function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
 app.get('/sitemap.xml', function (req, res) {
   res.sendFile(path.join(__dirname + '/sitemap.xml'));
 });
@@ -297,12 +308,17 @@ app.post('/v1/config_basic', function (req, res) {
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
-  res.status(200).json(ErrorHandler.getSuccess({
+  const showshoppingcart = process.env.SHOW_SHOPPING_CART;
+  const public_key_stripe = process.env.PK_STRIPE;
+
+    res.status(200).json(ErrorHandler.getSuccess({
     netWorkId: netWorkId,
     intelAddress: intel.networks[netWorkId].address,
     paretoAddress: pcontract,
     psignversion: psignversion,
-    exponentBlock: exponentBlock
+    exponentBlock: exponentBlock,
+    showshoppingcart: showshoppingcart,
+    public_key_stripe: public_key_stripe
   }));
 });
 
@@ -313,14 +329,17 @@ app.post('/v1/config', function (req, res) {
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
-  res.status(200).json(ErrorHandler.getSuccess({
+  const showshoppingcart = process.env.SHOW_SHOPPING_CART;
+
+    res.status(200).json(ErrorHandler.getSuccess({
     intel: intel.abi,
     pareto: pareto.abi,
     netWorkId: netWorkId,
     intelAddress: intel.networks[netWorkId].address,
     paretoAddress: pcontract,
     psignversion: psignversion,
-    exponentBlock: exponentBlock
+    exponentBlock: exponentBlock,
+    showshoppingcart: showshoppingcart
   }));
 });
 
@@ -329,11 +348,115 @@ app.post('/v1/error-log', function (req, res) {
   if (req.body && req.body.errorState) {
     const error = req.body.errorState;
     error.systemMessage = req.body.error;
-    error.address = req.user
-    console.log(JSON.stringify(error));
+    if(!req.user){
+        try {
+            let authorization = req.cookies.authorization;
+            if (authorization.includes('Bearer')) {
+                authorization = authorization.replace('Bearer', '');
+            }
+            authorization = authorization.trim();
+
+            jwt.verify(authorization, 'Pareto', function (err, decoded) {
+                error.address = decoded.user;
+                console.log(JSON.stringify(error));
+            });
+        }catch (e) {
+            console.log(JSON.stringify(error));
+        }
+    }else{
+        error.address = req.user;
+        console.log(JSON.stringify(error));
+    }
+
   }
   res.status(200).json(ErrorHandler.getSuccess({}))
+
 });
+
+
+
+    app.post('/webhook', function(req, res) {
+        // Retrieve the request's body and parse it as JSON
+
+        controller.event_payment(req.body , function (err, result) {
+            if (err) {
+                res.status(200).json(ErrorHandler.getError(err));
+            } else {
+                res.status(200).json(ErrorHandler.getSuccess(result));
+            }
+        });
+
+
+
+    });
+
+app.post('/v1/showshoppingcar', function (req, res) {
+
+  const showshoppingcart = process.env.SHOW_SHOPPING_CART;
+
+  res.status(200).json(ErrorHandler.getSuccess({
+    showshoppingcart: showshoppingcart,
+  }));
+});
+
+app.get('/v1/getproducts', function (req, res) {
+    //res.sendFile(path.join(__dirname + '/sitemap.xml'));
+    controller.getProducts(function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+app.post('/v1/createorder', function (req, res) {
+
+    controller.createOrder(req.body , function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+app.post('/v1/payment', function (req, res) {
+
+    controller.payment(req.body , function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+
+app.post('/v1/maketransaction', function (req, res) {
+
+    controller.transactionFlow(req.body.address, req.body.order_id , function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+
+app.post('/v1/updateTransaction', function (req, res) {
+
+    controller.updateTransaction(req.body, function (err, result) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+    });
+});
+
+
 
 /********* AUTHENTICATED v1 APIs *********/
 

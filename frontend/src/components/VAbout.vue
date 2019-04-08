@@ -1,5 +1,33 @@
 <template>
     <div class="main" style="background-color: white;">
+        <div class="container-fluid">
+            <div class="row pareto-blue-dark" style="padding: 110px 0 30px; position: relative; z-index: 1;">
+                <div class="col-12 col-lg-6 mb-lg-0 mb-4 order-md-last order-sm-last order-lg-first">
+                    <br/>
+                    <br/>
+                    <br/>
+                    <img style="width: 400px; max-width: 100%;" src="../assets/images/LogoReverse.svg" alt="">
+                    <h1 class="font-body padding-main text-left text-white mb-5">Current, reputable &
+                        actionable intel for traders and investors. <br/><br/> <h6>Event driven, alternative data source for capturing alpha. View the project <a href="https://github.com/ParetoNetwork/Pareto-Network-Roadmap/projects/1?fullscreen=true"
+                                                                                                                                                                  target="_blank">Roadmap</a></h6></h1>
+                    <!-- <a href="download/Pareto-Brochure.pdf" class="mr-2 btn btn-primary" target="_blank">Brochure</a>
+                    <a href="download/Pareto-Technical-White-Paper.pdf" class="mr-2 btn btn-primary" target="_blank">Whitepaper</a> -->
+                   <!-- <a href="https://blog.pareto.network/pareto-scores-your-ticket-to-vip-access-6d9aa92f846b" class="mr-2 btn btn-primary" target="_blank">PARETO Scores</a>
+                    <a href="https://blog.pareto.network/pareto-rewards-program-812fbe47af5" class="mr-2 btn btn-primary" target="_blank">Rewards</a> -->
+
+                </div>
+                <div class="col-12 col-lg-6 order-md-first order-sm-first order-lg-last">
+
+                    <img style="width: 600px; max-width: 100%;" src="../assets/images/pareto-console.png" alt="">
+
+                </div>
+            </div>
+        </div>
+
+        <br/>
+        <br/>
+        <br/>
+        <br/>
         <br/>
         <VParticles/>
 
@@ -400,6 +428,278 @@
 
         -->
 
+        <section class="section zfix">
+            <div class="wrapper">
+
+                <div class="section-title">
+                    <h3 class="pre-title font-header">Team</h3>
+                </div>
+
+                <div class="team-members font-body-regular" style="color: #679ab4;">
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Board of Trustees</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center">
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-1.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name"> Eric Lamison-White</span>
+                                    <span class="position">Board of Trustees, Founding Member</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>UMBC, Bowie State BS | Cryptocurrency developer since 2013, Manager of Blockchain
+                                        Development Company, Former FDIC investigator, 8+ years of software development
+                                        and engineering management</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/eric-lamison-white-749873112/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-2.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Ted Lanpher</span>
+                                    <span class="position">Board of Trustees, Founding Member</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Yale BA, UVA MBA | IBM Satellite Business Systems | Experienced startup CEO and
+                                        entrepreneur in software apps, fintech, cybersecurity, enterprise blockchain
+                                        consulting</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/tedlanpher/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Organization</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center"> <!-- internal parnters/employees -->
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-chrisg.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Chris Gardner</span>
+                                    <span class="position">Product Manager.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>UC Berkeley Economics BA | Startup CEO | Marcus & Millichap Financial Analyst | Enthusiast of Decentralized Economic Models. At Pareto, Leading Content Operations, Building Partnerships and Conducting Asset Valuation Research</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/christopherwgardner/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-willmclarren.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Will McLellarn</span>
+                                    <span class="position">Product Marketing.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Stanford Economics BA | Goldman Sachs | Sumo | Behavioral Marketing Expert |
+                                        At Pareto Network, leading Product Marketing efforts, and contributing thematic content.</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/willmclellarn/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-chris.png" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Christopher Aguilar</span>
+                                    <span class="position">General Counsel.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Univ. of California Hasting JD, St. Mary's BA | 25 yrs as director, general
+                                        counsel and compliance officer in broker-dealer, asset management, and financial
+                                        services firms</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/christopheraguilar/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Partners</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center"> <!-- external partners -->
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-4.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Dr. Anna Becker</span>
+                                    <span class="position">Advisor | Lead Data Scientist.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Technion - Israel Institute of Technology PhD, A.I., MS, Comp Sci | Designer of
+                                        end-to-end multi-asset algorithmic trading platforms. 20 yrs. leadership in algo
+                                        development for hedge funds</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/drannabecker/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-6.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">John Heffernan</span>
+                                    <span class="position">Market Analyst.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Former CME Group Member | 25 yrs. financial services and wealth management. Open
+                                        pit and electronic trader in commodities, forex & derivatives on Chicago
+                                        exchanges handling $ Billions in contracts. Expert in exchange operations and
+                                        state of crypto trading technologies.</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/john-heffernan-b84b143/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h4 class="title font-header">Advisors</h4>
+                    </div>
+
+                    <div class="row justify-content-md-center"> <!-- advisors -->
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-7.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Ian Balina</span>
+                                    <span class="position">Advisor.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>George Washington MS, BS | Prominent voice and investor in cryptocurrencies,
+                                        prior work with IBM, Deloitte</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/ianbalina/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-8.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Henok (Hen) Tekle</span>
+                                    <span class="position">Advisor.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Angel investor and advisor for token projects through Hen Global. Prior
+                                        Compliance and IT Enterprise work with Goldman Sachs, Deutsche Bank, Deloitte,
+                                        Mayo Clinic</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/henglobal/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-brianyoung.jpg" alt="" class="rounded-circle"
+                                         width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Brian Young</span>
+                                    <span class="position">Advisor.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Blockchain and crypto architectural consultant for Fortune 500 companies,
+                                        Founder/CEO of Thor Technologies (acquired by Oracle), Expert in payments and
+                                        identity management.</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/blockchainanalyst/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="../assets/images/team-jonklein.jpg" alt="" class="rounded-circle" width="85">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Jon Klein</span>
+                                    <span class="position">Advisor.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Fmr. President of CNN/U.S. | Has successfully led both traditional and online companies (CNN, CBS News) into new frontiers while generating superior profits and major industry awards.</p>
+                                </div>
+                                <div class="team-member__socials">
+                                    <a href="https://www.linkedin.com/in/jon-klein-a2761327/" target="_blank"><i
+                                            class="fab fa-linkedin-in" aria-hidden="true" :style="{ color: '#0077b5' }"></i></a>
+                                </div>
+                            </div> <!-- end team-member -->
+                        </div>
+                    </div>
+                    <!--<div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="team-member text-center">
+                                <figure class="team-member__image">
+                                    <img src="images/large-logo-icon.png" alt="">
+                                </figure>
+                                <div class="d-flex flex-column">
+                                    <span class="name">Coin<span style="color: #51aaf1; display: inline-block;">Fabric</span>
+                                    <span class="position">ICO Advisor.</span>
+                                </div>
+                                <div class="mb-2">
+                                    <p>Coinfabric - We launch ICO's from A-Z</p>
+                                </div>
+                                <div class="team-member__socials">
+                                </div>
+                            </div>
+                        </div>-->
+                </div>
+            </div>
+        </section>
+
         <footer class="footer zfix">
             <div class="wrapper">
                 <div class="footer-top">
@@ -508,7 +808,16 @@
         mounted: function () {
             //this.move();
         },
-        methods: {
+        data: function () {
+            return {
+                team: [{
+                    name: 'Eric Lamison-White',
+                    position: 'Co-Founder & CEO.',
+                    description: 'UMBC, Bowie State BS | Cryptocurrency developer since 2013, Manager of Blockchain Development Company, Former FDIC investigator, 8+ years of software development and engineering management',
+                    linkedin: 'https://www.linkedin.com/in/eric-lamison-white-749873112/'
+                }]
+            };
+        }, methods: {
             move() {
                 const bottom_wave = Snap('#bottom-wave');
                 const b_w = Snap.select('.down-wave');

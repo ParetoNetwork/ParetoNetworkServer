@@ -35,7 +35,6 @@ const START_CLOCK = process.env.START_CLOCK || 1;
 const MIN_DELTA_SCORE = process.env.MIN_DELTA_SCORE || 0.00001;
 const REDIS_URL = process.env.REDIS_URL  || constants.REDIS_URL;
 const SCORE_BLOCK_AGO = process.env.SCORE_BLOCK_AGO  || 200;
-
 const modelsPath = path.resolve(__dirname, 'models');
 fs.readdirSync(modelsPath).forEach(file => {
     require(modelsPath + '/' + file);
@@ -346,30 +345,40 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
                 }catch (e) { console.log(e) }
             }
             return Promise.all(promises).then(values => {
-                let rewards={};
-                let totalDesired={};
+                let lessRewards={};
                 let total=0;
                 for (let i = 0; i < values.length; i = i + 1) {
                     total=total+values[i].length;
                     for (let j = 0; j < values[i].length; j = j + 1) {
                         try{
                             const sender = values[i][j].returnValues.sender.toLowerCase();
+                            const block =  parseFloat(values[i][j].blockNumber);
                             const amount = parseFloat(web3.utils.fromWei(values[i][j].returnValues.rewardAmount, 'ether'));
                             const intelIndex = values[i][j].returnValues.intelIndex+"";
-                            if(!rewards[sender]){
-                                rewards[sender] = 0;
-                                totalDesired[sender] = 0;
+                            if(!lessRewards[sender]){
+                                lessRewards[sender]  = {};
+                                lessRewards[sender][intelIndex] = { block,amount };
                             }
-                            rewards[sender]=rewards[sender]+Math.min(amount/intelDesiredRewards[intelIndex].reward,1);
-                            totalDesired[sender] = totalDesired[sender] + 1;
+                            if(!lessRewards[sender][intelIndex]){
+                                lessRewards[sender][intelIndex] = { block,amount };
+                            }
+                            if(block < lessRewards[sender][intelIndex].block  ){
+                                lessRewards[sender][intelIndex] = { block,amount };
+                            }
                         }catch (e) { console.log(e) }
                     }
                 }
                 for (let i = 0; i < addresses.length; i = i + 1) {
                     try{
                         const address = addresses[i].toLowerCase();
-                        if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-                            const V = (1 + (rewards[address] / totalDesired[address]) );
+                        if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+                            let intels = Object.keys(lessRewards[address]);
+                            let rewards =   intels.reduce(function (reward, it) {
+                                return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
+                            }, 0);
+                            let totalDesired =intels.length;
+
+                            const V = (1 + (rewards / totalDesired) );
                             scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
                         }
                     }catch (e) { console.log(e) }
@@ -841,7 +850,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                             if(receipt){
                                 ParetoTransaction.findOneAndUpdate({ txHash: data.txHash, status: 0}, {status: (data.event == 'distribute')? 3:1 }, { multi: false }, function (err, r) {
                                     if(data.event != 'distribute' && r){
-                                        ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: r.intelAddress}, function (err, r) {});
+                                        ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}, function (err, r) {});
                                     }else{
 
                                         if(data.event == 'distribute' && r){
@@ -1137,6 +1146,8 @@ workerController.getScoreAndSaveRedis = function(callback){
                 };
                 if(result.addresses.lastApprovedAddress){
                     data.approved = result.addresses.lastApprovedAddress;
+                }else{
+                    data.approved = '';
                 }
                 data.rank = result.rank + 1;
                 data.lscore = '=';

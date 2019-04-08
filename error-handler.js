@@ -155,7 +155,7 @@ errorHandler.backendErrorList = function(code){
       },
       b10: {
         code: 'b10',
-        description: 'Score aproximation failed',
+        description: 'Score approximation failed',
         userMessage: '',
         priority: 3
       },
