@@ -334,14 +334,16 @@
               "name": "Topic A",
               "children":
                 [
-                  {"name": "Sub A1",
+                  {
+                    "name": "Sub A1",
                     "size": 4,
                     "children":
                       [
                         {"name": "Sub B1", "size": 3},
                         {"name": "Sub B2", "size": 3},
                         {"name": "Sub B3", "size": 3}
-                      ]}, {"name": "Sub A2", "size": 4}
+                      ]
+                  }, {"name": "Sub A2", "size": 4}
                 ]
             },
             {
@@ -408,40 +410,39 @@
 
         let id = 0;
 
-       function linearGradient(d){
-         id++;
-         let newColor;
-         let secondGradient;
-         if (!d.parent) {
-           newColor = '#295087';
-           secondGradient = '#9ff677';
-         }else{
-           newColor = color((d.children ? d : d.parent).data.name);
-           secondGradient = 'black';
-         }
+        function linearGradient(d) {
+          id++;
+          let newColor;
+          let secondGradient;
+          if (!d.parent) {
+            newColor = '#295087';
+            secondGradient = '#9ff677';
+          } else {
+            newColor = color((d.children ? d : d.parent).data.name);
+            secondGradient = 'black';
+          }
 
-         var gradient = svg.append("linearGradient")
-           .attr("id", "svgGradient" + id)
-           .attr("x1", "0%")
-           .attr("x2", "100%")
-           .attr("y1", "0%")
-           .attr("y2", "100%");
+          var gradient = svg.append("linearGradient")
+            .attr("id", "svgGradient" + id)
+            .attr("x1", "0%")
+            .attr("x2", "100%")
+            .attr("y1", "0%")
+            .attr("y2", "100%");
 
-         gradient.append("stop")
-           .attr('class', 'start')
-           .attr("offset", "30%")
-           .attr("stop-color", newColor)
-           .attr("stop-opacity", 1);
+          gradient.append("stop")
+            .attr('class', 'start')
+            .attr("offset", "30%")
+            .attr("stop-color", newColor)
+            .attr("stop-opacity", 1);
 
-         gradient.append("stop")
-           .attr('class', 'end')
-           .attr("offset", "100%")
-           .attr("stop-color", secondGradient)
-           .attr("stop-opacity", 1);
+          gradient.append("stop")
+            .attr('class', 'end')
+            .attr("offset", "100%")
+            .attr("stop-color", secondGradient)
+            .attr("stop-opacity", 1);
 
-         return   `url(#svgGradient${id})` ;
-       }
-
+          return `url(#svgGradient${id})`;
+        }
 
         const path = g.append("g")
           .selectAll("path")
