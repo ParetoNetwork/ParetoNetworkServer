@@ -1065,10 +1065,10 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
             if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
                 let intels = Object.keys(lessRewards[address]);
                 let rewards =   intels.reduce(function (reward, it) {
-                    return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,1 );
+                    return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,2 );
                 }, 0);
                 let totalDesired =intels.length;
-                const V = (1 + (rewards / totalDesired));
+                const V = (1 + (rewards / (2*totalDesired)));
                 scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
               } else {
                 scores[i].score = 0;
