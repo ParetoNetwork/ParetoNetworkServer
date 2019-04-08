@@ -23,7 +23,7 @@
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
                 <div class="col-md-3 col-lg-3 order-3">
-                    <VChartSunburst></VChartSunburst>
+                    <VHandlerSunsburstChart :user="user"></VHandlerSunsburstChart>
                 </div>
             </div>
         </div>
@@ -64,12 +64,14 @@
   import VChartSunburst from './VChartSunburst';
 
   import VFab from './VFab';
+  import VHandlerSunsburstChart from "./VHandlerSunsburstChart";
 
 
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
+      VHandlerSunsburstChart,
       VChartSunburst,
       ICountUp,
       VFab,
@@ -127,32 +129,12 @@
         this.primalLoad = true;
 
         this.user = information.user;
-        //this.onboarding = require('../assets/images/user_placeholder.png');
       });
     },
     methods: {
       ...mapMutations(['intelEnter', 'iniWs']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
-      },
-      loadAddress: function () {
-        if (!this.user.address) {
-          return dashboardService.getAddress(
-            res => {
-              this.user.address = res;
-            },
-            error => {
-              let errorText = error.message ? error.message : error;
-              this.$notify({
-                group: 'notification',
-                type: 'error',
-                duration: 10000,
-                title: 'Login',
-                text: errorText
-              });
-            }
-          );
-        }
       },
       numberToScientificNotation(number) {
         return (number + '').length > 12 ? number.toExponential(5) : number;

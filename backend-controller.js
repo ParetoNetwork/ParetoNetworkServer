@@ -1777,11 +1777,21 @@ controller.getContentByCurrentUser = async function (req, callback) {
           }).catch(function (err) {
           callback(err);
         });
-
       }
     });
   }
+};
 
+controller.chartInformation = async function(req, callback){
+  let address = req.query.user || req.user;
+
+  try {
+    //Gets the first 10 intel from the user with the most reward given
+    let intelList = await ParetoContent.find({address: address}).sort({totalReward: -1}).limit(10).exec();
+    return callback(null, intelList);
+  } catch (e) {
+    return callback(e);
+  }
 };
 
 /**

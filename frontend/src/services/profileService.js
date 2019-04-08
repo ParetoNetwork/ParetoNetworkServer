@@ -20,9 +20,10 @@ export default class profileService {
 
     //Returns the current user profile, but if send a profile parameter (address), will return the query profile
     static getProfile(onSuccess, onError, profile = null) {
+      //Saves the last searched profile
         const cachedProfile = this.getProfile.profile;
 
-        //Saves the last searched profile
+        //No profile parameter, send the cached profile
         if (cachedProfile && !profile) {
             return onSuccess(cachedProfile);
         } else {
@@ -37,7 +38,17 @@ export default class profileService {
                 return onError(error);
             });
         }
+    }
 
+    static getChartInfo(onSuccess, onError){
+
+        return http.get('/v1/chart-info').then(res => {
+            if(res.data.success){
+              onSuccess(res.data.data);
+            } else {
+              onError(res.data.error);
+            }
+        });
     }
 
     static updateConfig(onFinish) {
