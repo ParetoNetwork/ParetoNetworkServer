@@ -19,8 +19,9 @@ export default class productService {
 
 
 
-    static createOrder(order ,onSuccess, onError) {
-        http.post('/v1/createorder', order).then(
+    static createOrder(order ,customerDetails,onSuccess, onError) {
+        let orderDetails = {order: order, customer: customerDetails}
+        http.post('/v1/createorder', orderDetails).then(
             res => {
                 if(res){
                     return onSuccess(res.data);
@@ -32,8 +33,8 @@ export default class productService {
         });
     }
 
-    static payOrder(token, order , user_email ,onSuccess, onError) {
-        var params = {token: token, order: order, email: user_email}
+    static payOrder(token, order , user_email, customer ,onSuccess, onError) {
+        var params = {token: token, order: order, email: user_email, customer_id: customer}
         http.post('/v1/payment', params).then(
             res => {
                 if(res){
