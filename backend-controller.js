@@ -584,7 +584,7 @@ controller.postContent = function (req, callback) {
 };
 
 controller.getKeysFromProfile = function (profile, callback) {
-  ParetoIntelKey.findOne({profile : body.profileId}, function (err, intelKey) {
+  ParetoIntelKey.findOne({address : body.address}, function (err, intelKey) {
     if (err) {
       if (callback && typeof callback === "function") {
         callback(err);
@@ -599,27 +599,33 @@ controller.getKeysFromProfile = function (profile, callback) {
 
 
 controller.saveKeys = function (body, callback) {
-  ParetoIntelKey.findOne({profile : body.profileId}, function (err, intelKey) {
-    if (! intelKey){
-      cb('Keys for profile dont exists.',null);
+  ParetoProfile.findOne({address : body.profile}, function (e, profile) {
+    if(! profile) {
+      callback('Invalid address', null);
     }else{
-      let IntelKey = new ParetoIntelKey({
-        keys: keys,
-        deviceId: deviceId,
-
+      ParetoIntelKey.findOne({profile : profile._id}, function (err, intelKey) {
+        if (intelKey){
+          callback('Keys for profile already exists.', null);
+        }else{
+          let IntelKey = new ParetoIntelKey({
+            keys: body.keys,
+            deviceId: body.deviceId,
+            profile: profile._id,
+          });
+          IntelKey.save((err, savedIntelKey) => {
+            if (err) {
+              if (callback && typeof callback === "function") {
+                callback(err);
+              }
+            } else {
+              if (callback && typeof callback === "function") {
+                callback(null, {INTEl_KEY_ID: savedIntelKey.id});
+              }
+            }
+          })
+        }; // end else
       });
-      IntelKey.save((err, savedIntelKey) => {
-        if (err) {
-          if (callback && typeof callback === "function") {
-            callback(err);
-          }
-        } else {
-          if (callback && typeof callback === "function") {
-            callback(null, {INTEl_KEY_ID: savedIntelKey.id});
-          }
-        }
-      })
-    }; // end else
+    }
   });
 };
 

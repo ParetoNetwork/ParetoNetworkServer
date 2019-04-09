@@ -199,6 +199,12 @@
                 res => {
                   this.user = res;
                   this.block = res.block;
+                  profileService.generateAndSendSignedKeys(success => {
+                    // TODO
+                  },
+                  error => {
+                    console.log(error);
+                  });
                 },
                 error => {
                   console.log('Could not retrieve profile');

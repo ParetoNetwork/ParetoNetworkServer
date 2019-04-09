@@ -775,13 +775,21 @@ app.post('/v1/updateuser', function (req, res) {
   });
 });
 
+app.post('/v1/getKeysFromProfile', function (req, res) {
+  if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
+    res.status(200).json(ErrorHandler.bodyMissingError())
+  } else {
+    // TODO
+  }
+});
+
 // save libsignal generated keys
 app.post('/v1/saveKeys', function (req, res) {
   if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
     res.status(200).json(ErrorHandler.bodyMissingError())
   } else {
     controller.saveKeys(req.body, function (err, result) {
-      if(error){
+      if(err){
         res.status(200).json(ErrorHandler.getError(err));
       }
       else{

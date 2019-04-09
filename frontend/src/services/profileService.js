@@ -42,7 +42,10 @@ export default class profileService {
 
     //Generates signed keys and sends them to the server
     static generateAndSendSignedKeys(onSuccess, onError) {
-        const cachedProfile = this.getProfile.profile;
+        const cachedProfileAddress = this.getProfile.profile.address;
+        if(! cachedProfileAddress){
+            onError(errorService.sendErrorMessage('f29', {}));
+        }
         const Proteus = require('proteus-hd');
         const base64js = require('base64-js');
         const preKeyId = Math.floor(Math.random() * 65535) + 0;  // TODO
@@ -54,14 +57,13 @@ export default class profileService {
         const encodedSerializedIdentity = base64js.fromByteArray(new Uint8Array(serializedIdentity));
         return http.post('/v1/saveKeys', {
             keys: prekeyBundle,
-            deviceId: 1, // TODO
-            profile: cachedProfile
+            deviceId: 0, // TODO
+            profile: cachedProfileAddress
         }).then(res => {
-            res = res.data;
             if(res.data.data)
                 return onSuccess(res.data.data);
             else
-                return onError( errorService.sendErrorMessage('f37', res.data.message));
+                return onError(errorService.sendErrorMessage('f37', res.data.message));
         });
     }
 
