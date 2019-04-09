@@ -1039,12 +1039,14 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
       callback(err);
     } else {
       let lessRewards = {};
+      let distincIntel = {};
       for (let j = 0; j < values.length; j = j + 1) {
         try {
           const sender = values[j].sender.toLowerCase();
           const block =  parseFloat(values[j].block);
           const amount = parseFloat(values[j].amount);
           const intelIndex = values[j].intelId;
+            distincIntel[intelIndex] = 1;
           if(!lessRewards[sender]){
               lessRewards[sender]  = {};
               lessRewards[sender][intelIndex] = { block,amount };
@@ -1059,6 +1061,7 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
           console.log(e)
         }
       }
+        let totalDesired =Object.keys(distincIntel).length;
     for (let i = 0; i < addresses.length; i = i + 1) {
         try {
             const address = addresses[i].toLowerCase();
@@ -1067,7 +1070,7 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
                 let rewards =   intels.reduce(function (reward, it) {
                     return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,2 );
                 }, 0);
-                let totalDesired =intels.length;
+
                 const V = (1 + (rewards / (2*totalDesired)));
                 scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
               } else {
@@ -2439,3 +2442,5 @@ controller.getContributorsByIntel = async function (Id, callback) {
   }
 
 }
+
+

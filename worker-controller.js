@@ -346,6 +346,7 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
             }
             return Promise.all(promises).then(values => {
                 let lessRewards={};
+                let distincIntel = {};
                 let total=0;
                 for (let i = 0; i < values.length; i = i + 1) {
                     total=total+values[i].length;
@@ -355,6 +356,7 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
                             const block =  parseFloat(values[i][j].blockNumber);
                             const amount = parseFloat(web3.utils.fromWei(values[i][j].returnValues.rewardAmount, 'ether'));
                             const intelIndex = values[i][j].returnValues.intelIndex+"";
+                            distincIntel[intelIndex] = 1;
                             if(!lessRewards[sender]){
                                 lessRewards[sender]  = {};
                                 lessRewards[sender][intelIndex] = { block,amount };
@@ -368,6 +370,7 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
                         }catch (e) { console.log(e) }
                     }
                 }
+                let totalDesired =Object.keys(distincIntel).length;
                 for (let i = 0; i < addresses.length; i = i + 1) {
                     try{
                         const address = addresses[i].toLowerCase();
@@ -376,7 +379,6 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
                             let rewards =   intels.reduce(function (reward, it) {
                                 return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,2 );
                             }, 0);
-                            let totalDesired =intels.length;
 
                             const V = (1 + (rewards / (2*totalDesired)) );
                             scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
