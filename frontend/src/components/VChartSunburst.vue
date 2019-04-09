@@ -137,7 +137,8 @@
           })
           .text(function (d) {
             return d.data.name;
-          });
+          })
+          .attr("opacity", d => textFits(d)? 1 :  0);
 
         g.selectAll(".node")
           .append("text")
@@ -155,7 +156,17 @@
             if(d.data.size)
             return 'Reward: ' + d.data.size;
           })
-          .attr("opacity", 0);
+          .attr("opacity", d => textFits(d)? 1 :  0);
+
+        function textFits(d) {
+          const CHAR_SPACE = 6;
+
+          const deltaAngle = x(d.x1) - x(d.x0);
+          const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
+          const perimeter = r * deltaAngle;
+
+          return d.data.name.length * CHAR_SPACE < perimeter;
+        }
 
         function click(d) {
           const text = svg.selectAll(".name");
@@ -179,8 +190,8 @@
             .attrTween("d", function (e) {
               setTimeout(() => {
                 if (e.x0 >= d.x0 && e.x0 < (d.x1)) {
-                  const text = d3.select(this.parentNode).selectAll(".name");
-                  const sizeText = d3.select(this.parentNode).selectAll(".sizeText");
+                  const text = d3.select(this.parentNode).selectAll(".name").attr("opacity", f => textFits(f)? 1 :  0);
+                  const sizeText = d3.select(this.parentNode).selectAll(".sizeText").attr("opacity", f => textFits(f)? 1 :  0);
                   const path = d3.select(this.parentNode).selectAll("path")._groups[0][0];
 
                   const sizeTransition = sizeText.transition().duration(750);
@@ -189,12 +200,7 @@
                       return "translate(" + arc.centroid(path.__data__) + ")";
                     });
 
-                  if(d.parent){
-                    sizeTransition.attr("opacity", 1)
-                  }
-
                   text.transition().duration(750)
-                    .attr("opacity", 1)
                     .attr("transform", function (d) {
                       return "translate(" + arc.centroid(path.__data__) + ")";
                     });

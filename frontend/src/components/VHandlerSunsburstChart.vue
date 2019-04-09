@@ -25,11 +25,14 @@
     methods: {
       getChartInformation(){
         profileService.getChartInfo(res =>{
+          console.log(res);
           this.nodeData.name = this.user.alias;
           res.forEach(intel => {
+            let children = intel.rewardList.map(reward => ({name: reward.profile.alias, size: reward.reward}));
             this.nodeData.children.push({
               name: intel.title,
-              size: intel.totalReward
+              size: intel.size,
+              children
             })
           });
         }, error => {
