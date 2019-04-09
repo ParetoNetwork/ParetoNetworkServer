@@ -775,6 +775,22 @@ app.post('/v1/updateuser', function (req, res) {
   });
 });
 
+// save libsignal generated keys
+app.post('/v1/saveKeys', function (req, res) {
+  if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
+    res.status(200).json(ErrorHandler.bodyMissingError())
+  } else {
+    controller.saveKeys(req.body, function (err, result) {
+      if(error){
+        res.status(200).json(ErrorHandler.getError(err));
+      }
+      else{
+        res.status(200).json(ErrorHandler.getSuccess(result));
+      }
+      return result;
+    });
+  }
+});
 
 /*
   This should be a cron job or background process using the 2nd concurrent worker

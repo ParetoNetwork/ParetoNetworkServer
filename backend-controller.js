@@ -123,6 +123,7 @@ const ParetoPayment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoAsset = mongoose.model('asset');
 const ParetoTransaction = mongoose.model('transaction');
+const ParetoIntelKey = mongoose.model('intel-key');
 
 function updateWithMongo() {
   //ParetoProfile.
@@ -582,6 +583,45 @@ controller.postContent = function (req, callback) {
 
 };
 
+controller.getKeysFromProfile = function (profile, callback) {
+  ParetoIntelKey.findOne({profile : body.profileId}, function (err, intelKey) {
+    if (err) {
+      if (callback && typeof callback === "function") {
+        callback(err);
+      }
+    } else {
+      if (callback && typeof callback === "function") {
+        callback(null, {KEY_DATA: intelKey}); // TODO
+      }
+    }
+  }).exec(callback);
+};
+
+
+controller.saveKeys = function (body, callback) {
+  ParetoIntelKey.findOne({profile : body.profileId}, function (err, intelKey) {
+    if (! intelKey){
+      cb('Keys for profile dont exists.',null);
+    }else{
+      let IntelKey = new ParetoIntelKey({
+        keys: keys,
+        deviceId: deviceId,
+
+      });
+      IntelKey.save((err, savedIntelKey) => {
+        if (err) {
+          if (callback && typeof callback === "function") {
+            callback(err);
+          }
+        } else {
+          if (callback && typeof callback === "function") {
+            callback(null, {INTEl_KEY_ID: savedIntelKey.id});
+          }
+        }
+      })
+    }; // end else
+  });
+};
 
 controller.getTransaction = function (data, callback) {
   const query = {address: data.user};
