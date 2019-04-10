@@ -28,6 +28,11 @@ export default class ContentService {
     }
   };
 
+    static networksType = {
+        1: "main",
+        3: "ropsten"
+    };
+
   static uploadContent(content, onSuccess, onError) {
     http
       .post("/v1/content", content)
@@ -291,7 +296,6 @@ export default class ContentService {
           });
         })
         .on("error", err => {
-          console.log(err);
           if (ContentService.ledgerNanoEngine) {
             ContentService.ledgerNanoEngine.stop();
           }
@@ -324,7 +328,7 @@ export default class ContentService {
     try {
       await this.Setup(signData);
     } catch (e) {
-      return onError(errorService.sendErrorMessage('f35', e));
+        return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
     }
     //console.log(tokenAmount);
 
@@ -560,7 +564,7 @@ export default class ContentService {
     try {
       await this.Setup(signData);
     } catch (e) {
-      return onError(errorService.sendErrorMessage('f35', e));
+        return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
     }
     web3.eth.getAccounts(async (err, accounts) => {
       if (err) {
@@ -704,7 +708,7 @@ export default class ContentService {
         content.intelAddress
       );
     } catch (e) {
-      return onError(errorService.sendErrorMessage('f35', e));
+      return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
     }
 
     web3.eth.getAccounts(async (err, accounts) => {
@@ -820,11 +824,16 @@ export default class ContentService {
           );
         }
         break;
+
+
       }
     }
 
-
     web3 = new Web3(provider);
+   const net = await web3.eth.net.getNetworkType();
+   if(net !== ContentService.networksType[window.localStorage.getItem('netWorkId')] ){
+       throw "invalid networkId";
+    }
     Intel = new web3.eth.Contract(
       Intel_Contract_Schema,
       window.localStorage.getItem('intelAddress')

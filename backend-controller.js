@@ -1087,15 +1087,17 @@ controller.addExponentAprox = function (addresses, scores, blockHeight, callback
       callback(err);
     } else {
       let lessRewards = {};
+      let distincIntel = {};
       for (let j = 0; j < values.length; j = j + 1) {
         try {
           const sender = values[j].sender.toLowerCase();
           const block = parseFloat(values[j].block);
           const amount = parseFloat(values[j].amount);
           const intelIndex = values[j].intelId;
-          if (!lessRewards[sender]) {
-            lessRewards[sender] = {};
-            lessRewards[sender][intelIndex] = {block, amount};
+            distincIntel[intelIndex] = 1;
+          if(!lessRewards[sender]){
+              lessRewards[sender]  = {};
+              lessRewards[sender][intelIndex] = { block,amount };
           }
           if (!lessRewards[sender][intelIndex]) {
             lessRewards[sender][intelIndex] = {block, amount};
@@ -1107,20 +1109,21 @@ controller.addExponentAprox = function (addresses, scores, blockHeight, callback
           console.log(e)
         }
       }
-      for (let i = 0; i < addresses.length; i = i + 1) {
+        let totalDesired =Object.keys(distincIntel).length;
+    for (let i = 0; i < addresses.length; i = i + 1) {
         try {
-          const address = addresses[i].toLowerCase();
-          if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-            let intels = Object.keys(lessRewards[address]);
-            let rewards = intels.reduce(function (reward, it) {
-              return reward + Math.min(lessRewards[address][it].amount / intelDesiredRewards[it].reward, 1);
-            }, 0);
-            let totalDesired = intels.length;
-            const V = (1 + (rewards / totalDesired));
-            scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
-          } else {
-            scores[i].score = 0;
-          }
+            const address = addresses[i].toLowerCase();
+            if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+                let intels = Object.keys(lessRewards[address]);
+                let rewards =   intels.reduce(function (reward, it) {
+                    return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,2 );
+                }, 0);
+
+                const V = (1 + (rewards / (2*totalDesired)));
+                scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
+              } else {
+                scores[i].score = 0;
+              }
         } catch (e) {
           console.log(e)
         }
@@ -1848,7 +1851,7 @@ controller.chartInformation = async function (req, callback) {
           let profile = await ParetoProfile.findOne({address: reward.sender}).exec() || {};
 
           if(!profile || !profile.alias){
-            profile.alias = 'No Alias';
+            profile.alias = profile.address || 'No Alias';
             profile.aliasSlug = 'No Slug';
           }
           return {profile: { alias: profile.alias, aliasSlug: profile.aliasSlug}, reward: reward.amount};
@@ -2530,3 +2533,5 @@ controller.getContributorsByIntel = async function (Id, callback) {
   }
 
 }
+
+

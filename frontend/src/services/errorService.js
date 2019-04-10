@@ -232,6 +232,12 @@ export default class errorService {
             description: 'Current user does not match wallet account',
             userMessage: 'Current user does not match wallet account',
             priority: 2
-        }
+        },
+        f37: {
+            code: 'f37',
+            description: 'Setup Provider Error',
+            userMessage: 'The current network does not match provider network',
+            priority: 2
+        },
     };
 }

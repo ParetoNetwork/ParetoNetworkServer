@@ -138,7 +138,8 @@
           .text(function (d) {
             return d.data.name;
           })
-          .attr("opacity", d => textFits(d)? 1 :  0);
+          .attr('display', d => textFits(d) ? null : 'none')
+          .on("click", click);
 
         g.selectAll(".node")
           .append("text")
@@ -149,14 +150,12 @@
           })
           .attr("dx", "-20") // radius margin
           .attr("dy", "20") // rotation align
-          .attr("cursor", function (d) {
-            return d.children ? "pointer" : "default"
-          })
+          .attr("cursor", "pointer")
           .text(function (d) {
-            if(d.data.size)
-            return 'Reward: ' + d.data.size;
+            if(d.data.reward)
+            return 'Reward: ' + d.data.reward;
           })
-          .attr("opacity", d => textFits(d)? 1 :  0);
+          .attr('display', d => textFits(d) ? null : 'none');
 
         function textFits(d) {
           const CHAR_SPACE = 6;
@@ -170,10 +169,10 @@
 
         function click(d) {
           const text = svg.selectAll(".name");
-          text.transition().attr("opacity", 0);
+          text.transition().attr("display", 'none');
 
           svg.selectAll(".sizeText")
-            .transition().attr("opacity", 0);
+            .transition().attr("display", 'none');
 
           svg.transition()
             .duration(750)
@@ -190,8 +189,8 @@
             .attrTween("d", function (e) {
               setTimeout(() => {
                 if (e.x0 >= d.x0 && e.x0 < (d.x1)) {
-                  const text = d3.select(this.parentNode).selectAll(".name").attr("opacity", f => textFits(f)? 1 :  0);
-                  const sizeText = d3.select(this.parentNode).selectAll(".sizeText").attr("opacity", f => textFits(f)? 1 :  0);
+                  const text = d3.select(this.parentNode).selectAll(".name").attr('display', d => textFits(d) ? null : 'none');
+                  const sizeText = d3.select(this.parentNode).selectAll(".sizeText").attr('display', d => textFits(d) ? null : 'none');
                   const path = d3.select(this.parentNode).selectAll("path")._groups[0][0];
 
                   const sizeTransition = sizeText.transition().duration(750);
