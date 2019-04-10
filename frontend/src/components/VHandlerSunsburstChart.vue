@@ -1,5 +1,5 @@
 <template>
-  <VChartSunburst v-if="nodeData.children.length > 0" :nodeData="nodeData"></VChartSunburst>
+  <VChartSunburst v-if="nodeData.children.length > 0" :nodeData="nodeData" :pos="pos"></VChartSunburst>
 </template>
 
 <script>
@@ -11,7 +11,7 @@
       VChartSunburst
     },
     props: [
-      "user"
+      "user", "pos"
     ],
     data(){
       return {

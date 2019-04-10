@@ -18,6 +18,8 @@
       };
     },
     mounted() {
+      var row = document.getElementById("chart-row").offsetWidth;
+      this.height = this.width = row;
       this.sunschart();
     },
     methods: {
@@ -28,15 +30,15 @@
           height = this.height,
           radius = (Math.min(width, height) / 2);
 
-        const color = d3.scaleOrdinal(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
-
+        let color;
+        //color = d3.scaleOrdinal(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
+        color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, nodeData.children.length + 1));
 
         var x = d3.scaleLinear()
           .range([0, 2 * Math.PI]);
 
         var y = d3.scaleSqrt()
           .range([0, radius]);
-
 
         var partition = d3.partition();
 
@@ -113,7 +115,10 @@
           .enter().append('g').attr("class", "node").append('path')
           .attr("d", arc)
           .style('stroke', '#000')
-          .style("fill", d => linearGradient(d))
+          .style("fill", function (d) {
+            return color((d.children ? d : d.parent).data.name);
+          })
+          .attr("fill-opacity", 1)
           .style("cursor", function (d) {
             return d.children ? "pointer" : "default"
           })

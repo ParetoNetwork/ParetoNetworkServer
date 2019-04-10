@@ -4,7 +4,7 @@
             <div class="blocking-content" v-if="!loggedUser" v-on:click="showModalSplash()">
             </div>
             <notifications group="auth" position="bottom right"/>
-            <div class="row m-0 pt-4 pt-lg-2" style="width: 100%;">
+            <div class="row m-0 pt-5 pt-lg-2" style="width: 100%;">
                 <div class="col-md-3 col-lg-2 order-2 order-md-1 order-xl-1 row m-0 p-xl-0">
                     <div class="col-12 my-3 my-md-0">
                         <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
@@ -22,7 +22,7 @@
                                 :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
-                <div class="col-md-3 col-lg-3 order-3">
+                <div class="col-md-3 col-lg-4 order-3 px-0 pb-5 py-3" id="chart-row">
                     <VHandlerSunsburstChart :user="user"></VHandlerSunsburstChart>
                 </div>
             </div>
