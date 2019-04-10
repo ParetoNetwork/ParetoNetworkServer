@@ -525,6 +525,17 @@ app.post('/v1/unsign', function (req, res) {
 
 });
 
+app.post('/v1/rewardsNeeded', function (req, res) {
+    controller.getRewardFromDesiredScore(req.user,  req.body.desiredScore, req.body.tokens || 0, function (err, result) {
+        if (err) {
+            console.log(err);
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(result));
+        }
+
+    });
+});
 
 app.get('/v1/summation', function (req, res) {
   res.setHeader('Content-Type', 'application/json');
