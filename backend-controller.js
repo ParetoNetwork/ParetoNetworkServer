@@ -123,7 +123,7 @@ const ParetoPayment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoAsset = mongoose.model('asset');
 const ParetoTransaction = mongoose.model('transaction');
-const ParetoIntelKey = mongoose.model('intel-key');
+const ParetoProfileKey = mongoose.model('profile-key');
 
 function updateWithMongo() {
   //ParetoProfile.
@@ -584,14 +584,14 @@ controller.postContent = function (req, callback) {
 };
 
 controller.getKeysFromProfile = function (profile, callback) {
-  ParetoIntelKey.findOne({address : body.address}, function (err, intelKey) {
+  ParetoProfileKey.findOne({address : body.address}, function (err, profileKey) {
     if (err) {
       if (callback && typeof callback === "function") {
         callback(err);
       }
     } else {
       if (callback && typeof callback === "function") {
-        callback(null, {KEY_DATA: intelKey}); // TODO
+        callback(null, {KEY_DATA: profileKey}); // TODO
       }
     }
   }).exec(callback);
@@ -603,23 +603,39 @@ controller.saveKeys = function (body, callback) {
     if(! profile) {
       callback('Invalid address', null);
     }else{
-      ParetoIntelKey.findOne({profile : profile._id}, function (err, intelKey) {
-        if (intelKey){
+      ParetoProfileKey.findOne({profile : profile._id}, function (err, profileKey) {
+        if (profileKey){
           callback('Keys for profile already exists.', null);
         }else{
-          let IntelKey = new ParetoIntelKey({
+          let ProfileKey = new ParetoProfileKey({
             keys: body.keys,
             deviceId: body.deviceId,
             profile: profile._id,
+            type: 'profile',
+            address: profile.address
           });
-          IntelKey.save((err, savedIntelKey) => {
+          ProfileKey.save((err, savedProfileKey) => {
             if (err) {
               if (callback && typeof callback === "function") {
                 callback(err);
               }
             } else {
               if (callback && typeof callback === "function") {
-                callback(null, {INTEl_KEY_ID: savedIntelKey.id});
+                let ServerProfileKey = new ParetoProfileKey({
+                  keys: body.keys,
+                  deviceId: body.deviceId,
+                  profile: profile._id,
+                  type: 'server',
+                  address: profile.address
+                });
+                ServerProfileKey.save((er, savedServerProfileKey) => {
+                  if (callback && typeof callback === "function") {
+                    callback(er);
+                  }
+                  else{
+                    callback(null, {PROFILE_KEY_ID: savedProfileKey.id, SERVER_KEY_ID: savedServerProfileKey._id});
+                  }
+                });
               }
             }
           })

@@ -1,12 +1,20 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var intelKeysSchema = new Schema({
-	profile  : { type: Schema.Types.ObjectId, ref: 'profile', unique : true },
+var profileKeysSchema = new Schema({
+	profile  : { type: Schema.Types.ObjectId, ref: 'profile'},
 	deviceId : Number,
+	address : String,
 	keys : Schema.Types.Mixed,
-}, { collection : 'intel-key' });
+	type: {
+		type: String,
+		enum: ['profile', 'server'],
+		default : 'profile'
+	}
+}, { collection : 'profile-key' });
 
-const IntelKey = mongoose.model('intel-key', intelKeysSchema);
+profileKeysSchema.index({ address: 1, type: 1 }, { unique: true });
 
-module.exports = IntelKey;
+const ProfileKey = mongoose.model('profile-key', profileKeysSchema);
+
+module.exports = ProfileKey;

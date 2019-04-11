@@ -60,8 +60,10 @@ export default class profileService {
             deviceId: 0, // TODO
             profile: cachedProfileAddress
         }).then(res => {
-            if(res.data.data)
+            if(res.data.data) {
+                window.localStorage.setItem('profileKeys', JSON.stringify(keys)); // TODO
                 return onSuccess(res.data.data);
+            }
             else
                 return onError(errorService.sendErrorMessage('f37', res.data.message));
         });
