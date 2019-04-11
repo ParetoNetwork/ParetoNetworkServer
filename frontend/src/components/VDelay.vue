@@ -1,9 +1,9 @@
 <template>
     <ul class="mt-sm-2 mt-md-0">
         <li class="row text-left p-0 m-0" :key="row"
-            v-for="row of speeds" style="line-height: 1; ">
+            v-for="row of speeds">
             <div class="cl-4 mr-1" :style="getColor(row)"> </div>
-            <p class="cl-8"> {{getTime(row)}} </p>
+            <p class="cl-8" style="font-size: 0.5em;"> {{getTime(row)}} </p>
         </li>
     </ul>
 </template>
@@ -51,7 +51,7 @@
                 const hours =  Math.floor((seconds%86400)/3600);
                 const min =  Math.floor(((seconds%86400)%3600)/60);
                 const secods = (((seconds%86400)/3600)/60)-min;
-                return (days<9?"0"+days:days) + ":"+(hours<9?"0"+hours:hours)+":"+ ":"+(min<9?"0"+min:min);//+":"+ ":"+secods;
+                return (days<9?"0"+days:days) + ":"+(hours<9?"0"+hours:hours)+":"+(min<9?"0"+min:min);//+":"+ ":"+seconds;
             }
         }
     }
