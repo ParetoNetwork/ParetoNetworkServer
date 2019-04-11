@@ -68,7 +68,8 @@
 
         var svg = d3.select("#d3-svg svg")
           .attr("width", width)
-          .attr("height", height);
+          .attr("height", height)
+          .style("font", "10px sans-serif");
 
         var g = svg.append("g")
           .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
@@ -114,7 +115,7 @@
           .data(root.descendants())
           .enter().append('g').attr("class", "node").append('path')
           .attr("d", arc)
-          .style('stroke', '#000')
+          .style('stroke', '#fff')
           .style("fill", function (d) {
             return color((d.children ? d : d.parent).data.name);
           })
@@ -131,7 +132,7 @@
         g.selectAll(".node")
           .append("text")
           .attr("class", "name")
-          .style("fill", "white")
+          .style("fill", "#000")
           .attr("transform", function (d) {
             return "translate(" + arc.centroid(d) + ")";
           })
@@ -149,7 +150,7 @@
         g.selectAll(".node")
           .append("text")
           .attr("class", "sizeText")
-          .style("fill", "white")
+          .style("fill", "#000")
           .attr("transform", function (d) {
             return "translate(" + arc.centroid(d) + ")";
           })
