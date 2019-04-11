@@ -14,15 +14,33 @@
     data() {
       return {
         height: 450,
-        width: 450
+        width: 450,
+        row: document.getElementById("chart-row").offsetWidth
       };
     },
     mounted() {
-      var row = document.getElementById("chart-row").offsetWidth;
-      this.height = this.width = row;
+      this.height = this.width = this.row;
       this.sunschart();
     },
     methods: {
+      responsivefy(svg) {
+        var container = d3.select(svg.node().parentNode),
+          width = parseInt(svg.style("width")),
+          height = parseInt(svg.style("height")),
+          aspect = width / height;
+
+        svg.attr("viewBox", "0 0 " + width + " " + height)
+          .attr("perserveAspectRatio", "xMinYMid")
+          .call(resize);
+
+        d3.select(window).on("resize." + container.attr("id"), resize);
+
+        function resize() {
+          var targetWidth = parseInt(container.style("width"));
+          svg.attr("width", targetWidth);
+          svg.attr("height", Math.round(targetWidth / aspect));
+        }
+      },
       sunschart() {
         const nodeData = this.nodeData;
 
@@ -68,7 +86,8 @@
 
         var svg = d3.select("#d3-svg svg")
           .attr("width", width)
-          .attr("height", height);
+          .attr("height", height)
+          .call(this.responsivefy);
 
         var g = svg.append("g")
           .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
@@ -118,7 +137,6 @@
           .style("fill", function (d) {
             return color((d.children ? d : d.parent).data.name);
           })
-          .attr("fill-opacity", 1)
           .style("cursor", function (d) {
             return d.children ? "pointer" : "default"
           })
@@ -215,6 +233,11 @@
               };
             });
         }
+      }
+    },
+    watch: {
+      row(val){
+        console.log(val)
       }
     }
   };
