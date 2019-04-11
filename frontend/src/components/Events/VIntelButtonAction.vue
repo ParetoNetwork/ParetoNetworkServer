@@ -31,7 +31,7 @@
            :disabled="user.address !== intel.address"
            target="_blank">
             <button class="btn cursor-pointer btn-dark-grey-primary-pareto mx-auto px-4">
-                <i v-if="user.address === intel.address" class="fa fa-external-link-alt left"></i>
+                <img v-if="user.address === intel.address"  class="left" style="width: 18px;" src="../../assets/images/etherscan.png" alt="">
                 <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
                 {{ intel.reward }}
             </button>
