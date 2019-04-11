@@ -2031,7 +2031,7 @@ controller.createOrder = async function (orderdetails, callback) {
     stripe.customers.list(
         { limit: 1, email: orderdetails.customer.email },
         function(err, customers) {
-            if(err){
+            if(customers.data.length === 0){
                 stripe.customers.create({
                     email: orderdetails.customer.email,
                 }, async function (err, customer) {
