@@ -1412,11 +1412,7 @@ controller.getAllAvailableContent = async function (req, callback) {
               biography: entry.createdBy.biography,
               profilePic: entry.createdBy.profilePic
             },
-            contentDelay: {
-                blockDelay: contentDelay.blockDelay[entry.speed],
-                blockHeight: contentDelay.blockHeight,
-                timeDelay: contentDelay[entry.speed]*12
-            }
+            contentDelay: contentDelay
           };
 
           if(percentile < 0 ){ //eventually it may be < 0.85
@@ -1521,11 +1517,7 @@ controller.getContentByIntel = function (req, intel, callback) {
                 biography: entry.createdBy.biography,
                 profilePic: entry.createdBy.profilePic
             },
-            contentDelay: {
-                blockDelay: contentDelay.blockDelay[entry.speed],
-                blockHeight: contentDelay.blockHeight,
-                timeDelay: contentDelay[entry.speed]*12
-            }
+            contentDelay: contentDelay
         };
 
 
