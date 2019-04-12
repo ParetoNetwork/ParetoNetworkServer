@@ -3,22 +3,43 @@
         <div id="payment">
 
             <div class="container">
-
+                <h4 class="align-left">3. Payment</h4>
+                <hr>
                 <div class="row justify-content-center">
-                    <div class="col-md-6 col-xs-12">
+                    <div class="col-md-4">
+                        <div class="card" style="width: 90%;">
+                            <div class="card-body">
+                                <h5 class="card-title">Resume</h5>
+                                <table class="table table-responsive-lg position-relative">
+                                    <thead>
+                                    <tr><td><b>Customer:</b></td><td> {{user_name}}</td></tr>
+                                    <tr><td style="border-top: none"><b>Email:</b></td><td style="border-top: none"> {{user_email}}</td></tr>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Amount</th>
 
-                        <div class="form-group">
-                            <label for="cardholder-email">Email address</label>
-                            <input type="email" id="cardholder-email" placeholder="name@example.com" v-model="user_email" required class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="cardholder-name">Owner name</label>
-                            <input id="cardholder-name" type="text" placeholder="your name" class="form-control">
-                        </div>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(product, key) in cart">
+                                        <td>{{ product.attributes.name }}</td>
 
+                                        <td>
+                                            {{product.quantity}}
+                                        </td>
+
+                                    </tr>
+
+                                    <tr class="total-cart">
+
+                                        <td>Total</td>
+                                        <td>${{getCartTotal/100}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="row justify-content-center">
                     <div class="col-md-6 col-xs-12">
                         <form action="/charge" method="post" id="payment-form">
 
@@ -69,10 +90,15 @@
         name: "VProductCheckout",
         created: function(){
             this.cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
-            if (this.$route.query.order_id){
-                this.order_id = this.$route.query.order_id;
-                this.client_secret = this.$route.query.client_secret;
-                this.payment_intent = this.$route.query.payment_id;
+            if (window.localStorage.getItem('order_id')){
+                this.order_id = window.localStorage.getItem('order_id');
+                this.client_secret = window.localStorage.getItem('client_secret');
+                this.payment_intent = window.localStorage.getItem('payment_id');
+                this.customer_id = window.localStorage.getItem('customer');
+                let customer_details = JSON.parse(window.localStorage.getItem('customer_details'));
+                this.user_email = customer_details.email;
+                this.user_name = customer_details.name;
+
             }else {
                 this.$router.push('/')
             }
@@ -146,8 +172,8 @@
                 }
             });
 
-            var cardholderName = document.getElementById('cardholder-name');
-            var cardholderEmail = document.getElementById('cardholder-email');
+            var cardholderName = this.user_name;
+            var cardholderEmail = this.user_email;
             var cardButton = document.getElementById('card-button');
             var clientSecret = cardButton.dataset.secret;
 
@@ -166,20 +192,28 @@
                     } else {
                         window.localStorage.setItem('ShoppingCart', '');
                         self.$store.dispatch('resetShoppingCart');
+                        window.localStorage.removeItem('order_id');
+                        window.localStorage.removeItem('client_secret');
+                        window.localStorage.removeItem('payment_id');
+                        window.localStorage.removeItem('customer');
+                        window.localStorage.removeItem('customer_details');
 
 
-                            setTimeout(function () {
+                        self.$router.push({path: '/thankyou-payment'});
 
-                                PurchaseService.initTransactionFlow(self.payment_intent,
-                                    response => {
 
-                                        self.$router.push({path: '/thankyou-payment'});
-                                    },
-                                    err => {
-                                        console.log("error on purchase")
-                                    }
-                                );
-                            }, 10000);
+                        /*  setTimeout(function () {
+
+                              PurchaseService.initTransactionFlow(self.payment_intent,
+                                  response => {
+
+                                      self.$router.push({path: '/thankyou-payment'});
+                                  },
+                                  err => {
+                                      console.log("error on purchase")
+                                  }
+                              );
+                          }, 10000);*/
 
 
 
@@ -193,6 +227,22 @@
 
 
         },
+        computed: {
+
+            getCartTotal: function () {
+
+                var total = 0;
+                if(this.cart.length > 0){
+                    for (var i = 0; i < this.cart.length; i++) {
+
+                        total += this.cart[i].quantity * this.cart[i].price;
+                    }
+                }else{
+                    total = 0;
+                }
+                return total;
+            }
+        },
         data: function() {
             return {
                 showModal: false,
@@ -202,9 +252,11 @@
                 currency: 'USD',
                 order_id: '',
                 user_email: '',
+                user_name: 'Dani',
                 client_secret: '',
                 waiting_payment: false,
                 payment_intent: '',
+                cus_customer_id: ''
 
 
             }
@@ -215,7 +267,7 @@
                 // Insert the token ID into the form so it gets submitted to the server
                 let order_id = window.localStorage.getItem('order_id');
 
-                ProductService.payOrder(token.id, order_id, this.user_email)
+                ProductService.payOrder(token.id, order_id, this.user_email, this.customer_id)
             },
 
 
@@ -227,10 +279,19 @@
 </script>
 
 <style scoped>
+
+    body{
+        color: black !important;
+    }
 #payment{
     padding-top: 120px;
     padding-bottom: 50px;
     background-color: #fff;
+    color: #000
+}
+
+#payment h4{
+    color: black;
 }
 
     .main-wrapper #vue {

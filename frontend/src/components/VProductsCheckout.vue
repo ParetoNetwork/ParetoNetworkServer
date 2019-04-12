@@ -3,8 +3,8 @@
     <div id="vue">
     
 
-        <div class="checkout-area">
-
+        <div class="container checkout-area">
+            <h4 class="align-left">1. Cart</h4>
             <table class="table table-responsive-lg position-relative">
                 <thead>
                 <tr>
@@ -17,32 +17,36 @@
                 </thead>
                 <tbody>
                 <tr v-for="(product, key) in cart">
-                    <td>{{ product.name }}</td>
+                    <td>{{ product.attributes.name }}</td>
                     
                     <td class="align-right">
                         <div class="qty_number">
-                            <input type="text" :value='product.quantity' readonly>
+                            <input type="number" :value='product.quantity' min="1" @change="changeAquantity($event.target.value ,key)">
                             <div class="inc button" @click="addQuantity(product, key)"><span>+</span></div>
                             <div class="dec button" @click="deductQuantity(product, key)"><span>-</span></div>
                         </div>
                     </td>
                     <td class="align-right"> $ {{ product.price / 100}}</td>
                     <td class="align-right"> $ {{ (product.price / 100)  * product.quantity}}</td>
-                    <td class="align-right"><button @click="removeProduct(product, key)"> X </button></td>
+                    <td class="align-right"><button class="remove-btn" @click="removeProduct(product, key)"> X </button></td>
                 </tr>
                 
                 <tr class="total-cart">
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>Total</td>
-                    <td>${{getCartTotal/100}}</td>
+
+                    <td class="align-right">Total</td>
+                    <td class="align-right">${{getCartTotal/100}}</td>
+                    <td></td>
                 </tr>
                 </tbody>
             </table>
 
-                <div @click="checkout" class="align-rigth">
-                    <button>PROCEED TO CHECKOUT</button>
+
+
+
+                <div class="align-rigth">
+                    <button v-if="getCartTotal > 0" @click="checkout">Next</button>
                 </div>
 
         </div>
@@ -53,10 +57,6 @@
 <script>
     /* eslint-disable */
 
-
-
-    import ProductService from '.././services/productService'
-
     export default {
         name: "VProductCheckout",
         created: function(){
@@ -65,17 +65,9 @@
 
         data: function() {
             return {
-                showModal: false,
-                cartTotal: 0,
-                cartSubTotal: 0,
                 cart: [],
-                image: '../assets/images/LogoMarkColor.svg',
-                name: 'Pareto',
-                description: 'Pareto Products',
                 currency: 'USD',
                 order_id: ''
-                
-
             }
         },
          computed: {
@@ -99,19 +91,7 @@
 
             checkout () {
 
-                ProductService.createOrder(this.cart,
-                    res => {
-
-                        this.order_id = res.message.id;
-                        window.localStorage.setItem('order_id', res.message.order.id);
-
-                        this.$router.push({path: '/payment', query: { order_id: res.message.order.id , client_secret: res.message.intent.client_secret, payment_id: res.message.intent.id }})
-
-                    },error => {
-                        alert("Error on create order")
-                    }
-                );
-
+               this.$router.push({path: '/customer-details'})
 
             },
 
@@ -134,6 +114,13 @@
 
                 
             },
+            changeAquantity: function(quantity, key){
+                if(quantity < 1){
+                    quantity = 1
+                }
+                this.cart[key].quantity = quantity;
+                this.updateCart(this.cart)
+            },
             updateCart: function(cart){
                 window.localStorage.setItem('ShoppingCart', JSON.stringify(cart));
                 this.$store.dispatch('updateShoppingCart', cart);
@@ -146,22 +133,16 @@
             },
 
         },
-
-        //intercept the checkout request broadcast
-        //run our function
-        events: {
-            "checkoutRequest": function() {
-                var self = this;
-                self.checkoutModal();
-            }
-        }
-
-
-
     }
 </script>
 
 <style scoped>
+
+    .remove-btn{
+        padding: 5px;
+        font-size: 12px;
+        margin: 0px;
+    }
 
 .align-rigth{
     text-align: right;
@@ -192,7 +173,7 @@
     width: 71px;
     height: 30px;
     text-align: center;
-    border:none;
+    border: 1px solid ;
     margin: auto;
     display: table;
     padding: 3px;
@@ -224,29 +205,7 @@
         margin-right: 20px;
     }
 
-    .StripeElement {
-    box-sizing: border-box;
 
-    height: 40px;
-
-    padding: 10px 12px;
-
-    border: 1px solid transparent;
-    border-radius: 4px;
-    background-color: white;
-
-    box-shadow: 0 1px 3px 0 #e6ebf1;
-    -webkit-transition: box-shadow 150ms ease;
-    transition: box-shadow 150ms ease;
-    }
-
-    .StripeElement--focus {
-    box-shadow: 0 1px 3px 0 #cfd7df;
-    }
-
-    .StripeElement--invalid {
-    border-color: #fa755a;
-    }
 
     thead tr{
         border-bottom: 1px solid #b4b4b4;
@@ -257,9 +216,7 @@
         border-bottom: 1px solid #b4b4b4;
     }
 
-    .StripeElement--webkit-autofill {
-    background-color: #fefde5 !important;
-    }
+
 </style>
 
 

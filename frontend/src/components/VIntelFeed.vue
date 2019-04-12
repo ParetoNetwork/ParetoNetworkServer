@@ -1,17 +1,25 @@
 <template>
   <div class="intel-container">
     <div v-if="!loading" class="p-2 pt-1 text-left">
-      <b class="title-content">
-        Intel Market
-      </b>
-      <!-- <div class="row text-content">
-        <div class="col-4 col-md-4 col-lg-2">
-          CONTRIBUTOR
+      <div class="row">
+        <div class="col-3 ">
+          <b class="title-content">
+            Intel Market
+          </b>
         </div>
-        <div class="col-8 col-md-8 col-lg-10 pl-lg-3">
-          INTEL
+        <div class="col-9 ">
+          <VDelay :contentDelay="myFeed.content[0].contentDelay"></VDelay>
         </div>
-      </div> -->
+
+      </div>
+    <!-- <div class="row text-content">
+      <div class="col-4 col-md-4 col-lg-2">
+        CONTRIBUTOR
+      </div>
+      <div class="col-8 col-md-8 col-lg-10 pl-lg-3">
+        INTEL
+      </div>
+    </div> -->
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
           <li class="text-left  py-2" :style="getBorderLeft(row.speed)" :key="row._id"
@@ -41,6 +49,7 @@
   import VIntelButtonAction from "./Events/VIntelButtonAction";
   import VModalReward from "./Modals/VModalReward";
   import VIntelPreview from "./VIntelPreview";
+  import VDelay from "./VDelay";
   import errorService from "../services/errorService";
 
   export default {
@@ -50,7 +59,8 @@
       VShimmerFeed,
       VIntelButtonAction,
       VModalReward,
-      VIntelPreview
+      VIntelPreview,
+        VDelay
     },
     props: [
       'updateContent', 'block', 'user', 'fetchAddress', 'title', 'defaultContent', 'onboardingPicture'

@@ -1460,11 +1460,7 @@ controller.getAllAvailableContent = async function (req, callback) {
               biography: entry.createdBy.biography,
               profilePic: entry.createdBy.profilePic
             },
-            contentDelay: {
-              blockDelay: contentDelay.blockDelay[entry.speed],
-              blockHeight: contentDelay.blockHeight,
-              timeDelay: contentDelay[entry.speed] * 12
-            }
+            contentDelay: contentDelay
           };
 
           if (percentile < 0) { //eventually it may be < 0.85
@@ -1544,36 +1540,32 @@ controller.getContentByIntel = function (req, intel, callback) {
       if (allResults && allResults.length > 0) {
         const entry = allResults[0];
         let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
-        const data = {
-          _id: entry._id,
-          blockAgo: Math.max(blockHeight - entry.block, 0),
-          block: entry.block,
-          title: entry.title,
-          address: entry.address,
-          body: entry.body,
-          expires: entry.expires,
-          dateCreated: entry.dateCreated,
-          txHash: entry.txHash,
-          totalReward: entry.totalReward || 0,
-          reward: entry.reward,
-          speed: entry.speed,
-          id: entry.id,
-          txHashDistribute: entry.txHashDistribute,
-          intelAddress: entry.intelAddress,
-          _v: entry._v,
-          distributed: entry.distributed,
-          createdBy: {
-            address: entry.createdBy.address,
-            alias: entry.createdBy.alias,
-            aliasSlug: entry.createdBy.aliasSlug,
-            biography: entry.createdBy.biography,
-            profilePic: entry.createdBy.profilePic
-          },
-          contentDelay: {
-            blockDelay: contentDelay.blockDelay[entry.speed],
-            blockHeight: contentDelay.blockHeight,
-            timeDelay: contentDelay[entry.speed] * 12
-          }
+        const data  = {
+            _id: entry._id,
+            blockAgo: Math.max(blockHeight - entry.block, 0),
+            block: entry.block,
+            title: entry.title,
+            address: entry.address,
+            body: entry.body,
+            expires: entry.expires,
+            dateCreated: entry.dateCreated,
+            txHash: entry.txHash,
+            totalReward: entry.totalReward || 0,
+            reward: entry.reward,
+            speed: entry.speed,
+            id: entry.id,
+            txHashDistribute: entry.txHashDistribute,
+            intelAddress: entry.intelAddress,
+            _v: entry._v,
+            distributed: entry.distributed,
+            createdBy: {
+                address: entry.createdBy.address,
+                alias: entry.createdBy.alias,
+                aliasSlug: entry.createdBy.aliasSlug,
+                biography: entry.createdBy.biography,
+                profilePic: entry.createdBy.profilePic
+            },
+            contentDelay: contentDelay
         };
 
 
@@ -2089,48 +2081,27 @@ controller.listProducts = async function (callback) {
   let skus;
   await stripe.skus.list(
     {active: true},
-    function (err, response) {
+    function(err, response) {
 
-      if (err) {
+      if(err){
         callback(err, null);
         return;
       }
       skus = response.data;
 
-      //once i have the skus, i need the products
-      stripe.products.list(
-        {active: true},
-        function (err, response) {
+      callback(null, skus);
 
-          if (err) {
-            callback(err, null);
-            return;
-          }
-          for (var i = 0; i < skus.length; i++) {
-            for (var p = 0; p < response.data.length; p++) {
-              //i need to add the product to the sku
-              var product = response.data[p];
-              if (product.id === skus[i].product) {
-                skus[i].name = product.name;
-                skus[i].description = product.description;
-                continue;
-              }
-            }
-          }
-          callback(null, skus);
-        }
-      );
+      //once i have the skus, i need the products
+
     }
   );
 
 
 }
 
-controller.createOrder = async function (order_cart, callback) {
-
-  let products_ar = []
-
-  for (var product of order_cart) {
+controller.createOrder = async function (orderdetails, callback) {
+  let products_ar = [];
+  for(var product of orderdetails.order) {
     products_ar.push(
       {
         type: 'sku',
@@ -2140,53 +2111,92 @@ controller.createOrder = async function (order_cart, callback) {
     )
   }
 
-  const order = stripe.orders.create({
-    currency: 'usd',
-    email: PROVISIONAL_EMAIL,
-    items: products_ar
+  stripe.customers.list(
+    { limit: 1, email: orderdetails.customer.email },
+    function(err, customers) {
+      if(err || customers.data.length === 0){
+        stripe.customers.create({
+          email: orderdetails.customer.email,
+        }, async function (err, customer) {
+          let customerObj = customer;
 
-  });
+          const order = stripe.orders.create({
+            currency: 'usd',
+            email: orderdetails.customer.email,
+            items: products_ar,
+            customer: customerObj.id
 
+          });
 
-  let order_amount
-  order.then(function (result) {
+          let order_amount
+          order.then(function (result) {
 
-    order_amount = result.amount
-
-
-    const paymentIntent = stripe.paymentIntents.create({
-      amount: order_amount,
-      currency: 'usd',
-      payment_method_types: ['card'],
-    });
-
-
-    paymentIntent.then(function (resultint) {
-
-      let response = {order: result, intent: resultint}
-      callback(response, resultint);
-
-    });
-
-  });
+            order_amount = result.amount
 
 
+            const paymentIntent =  stripe.paymentIntents.create({
+              amount: order_amount,
+              currency: 'usd',
+              payment_method_types: ['card'],
+            });
+
+            paymentIntent.then(function (resultint){
+
+              let response = {order: result, intent: resultint}
+              callback(response, resultint);
+
+            });
+
+          });
+        });
+      }else{
+
+        let customerObj = customers.data[0];
+
+        const order = stripe.orders.create({
+          currency: 'usd',
+          email: orderdetails.customer.email,
+          items: products_ar,
+          customer: customerObj.id
+
+        });
+
+        let order_amount
+        order.then(function (result) {
+
+          order_amount = result.amount
+
+
+          const paymentIntent =  stripe.paymentIntents.create({
+            amount: order_amount,
+            currency: 'usd',
+            payment_method_types: ['card'],
+          });
+
+          paymentIntent.then(function (resultint){
+
+            let response = {order: result, intent: resultint}
+            callback(response, resultint);
+
+          });
+
+        });
+
+      }
+    }
+  );
 }
 
 controller.payment = async function (params, callback) {
 
-  var token = params.token;
-  var order_id = params.order;
-  var email = params.email;
-
-  stripe.orders.update(order_id, {
-    email: email
-  });
+    var token = params.token;
+    var order_id = params.order;
+    var customer = params.customer_id;
 
 
-  stripe.orders.pay(order_id, {
-    source: token,
-  })
+    stripe.orders.pay(order_id, {
+        source: token,
+    })
 
 
 }
