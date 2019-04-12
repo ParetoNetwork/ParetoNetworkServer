@@ -137,10 +137,14 @@
           .style("fill", function (d) {
             return color((d.children ? d : d.parent).data.name);
           })
+          .attr("fill-opacity", 1)
           .style("cursor", function (d) {
             return d.children ? "pointer" : "default"
           })
           .on("click", click);
+
+        path.append("title")
+          .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
 
         path.filter(d => d.children)
           .style("cursor", "pointer")
