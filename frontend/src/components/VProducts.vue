@@ -129,9 +129,9 @@
 
   .checkout-area table {
     margin: 20px auto;
-    padding: 0.5em;
+
     width: 100%;
-    max-width: 90%;
+
     text-align: left;
 
     th, td {
@@ -329,7 +329,7 @@
 
           .desc {
             font-style: italic;
-            min-height: 100px;
+            min-height: 60px;
           }
 
           .price {
