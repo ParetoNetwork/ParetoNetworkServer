@@ -32,7 +32,7 @@
 
         let color;
         //color = d3.scaleOrdinal(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
-        color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, nodeData.children.length + 1));
+        color = d3.scaleOrdinal(["#a88fca", "#d78dce", "#fd95b5", "#feae95", "#edd38b", "#d0f5a3", "#9df8a8", "#83ebc8", "#83ebc8", "#95aae7"]);
 
         var x = d3.scaleLinear()
           .range([0, 2 * Math.PI]);
@@ -66,6 +66,11 @@
             return Math.max(0, y(d.y1));
           });
 
+        function arcVisible(d) {
+          return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
+        }
+
+
         var svg = d3.select("#d3-svg svg")
           .attr("width", width)
           .attr("height", height)
@@ -74,52 +79,17 @@
         var g = svg.append("g")
           .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
 
-        let id = 0;
-
-        function linearGradient(d) {
-          id++;
-          let newColor;
-          let secondGradient;
-          if (!d.parent) {
-            newColor = '#295087';
-            secondGradient = '#9ff677';
-          } else {
-            newColor = color((d.children ? d : d.parent).data.name);
-            secondGradient = 'black';
-          }
-
-          var gradient = svg.append("linearGradient")
-            .attr("id", "svgGradient" + id)
-            .attr("x1", "0%")
-            .attr("x2", "100%")
-            .attr("y1", "0%")
-            .attr("y2", "100%");
-
-          gradient.append("stop")
-            .attr('class', 'start')
-            .attr("offset", "30%")
-            .attr("stop-color", newColor)
-            .attr("stop-opacity", 1);
-
-          gradient.append("stop")
-            .attr('class', 'end')
-            .attr("offset", "100%")
-            .attr("stop-color", secondGradient)
-            .attr("stop-opacity", 1);
-
-          return `url(#svgGradient${id})`;
-        }
-
         const path = g.append("g")
           .selectAll("path")
           .data(root.descendants())
           .enter().append('g').attr("class", "node").append('path')
           .attr("d", arc)
-          .style('stroke', '#fff')
+          .style('stroke', '#ead6f3')
           .style("fill", function (d) {
             return color((d.children ? d : d.parent).data.name);
           })
-          .attr("fill-opacity", 1)
+          .attr("fill-opacity", d => d.children ? 0.8 : 1)
+          /*.attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0)*/
           .style("cursor", function (d) {
             return d.children ? "pointer" : "default"
           })
