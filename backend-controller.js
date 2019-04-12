@@ -1842,11 +1842,16 @@ controller.chartInformation = async function (req, callback) {
         const profileArray = await rewardList.map(async (reward) => {
           let profile = await ParetoProfile.findOne({address: reward.sender}).exec() || {};
 
-          if(!profile || !profile.alias){
-            profile.alias = profile.address || 'No Alias';
-            profile.aliasSlug = 'No Slug';
+          if(!profile.alias){
+            profile.alias = '';
+            profile.aliasSlug = '';
           }
-          return {profile: { alias: profile.alias, aliasSlug: profile.aliasSlug}, reward: reward.amount};
+          
+          if(!profile.address){
+            profile.address = 'No Address';
+          }
+
+          return {profile: { alias: profile.alias, aliasSlug: profile.aliasSlug, address: profile.address}, reward: reward.amount};
         });
 
         const profileList = await Promise.all(profileArray);

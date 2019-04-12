@@ -13,7 +13,7 @@
     props: [
       "user", "pos"
     ],
-    data(){
+    data() {
       return {
         nodeData: {
           name: '',
@@ -23,14 +23,24 @@
     },
     name: "VHandlerSunsburstChart",
     methods: {
-      getChartInformation(){
-        profileService.getChartInfo(res =>{
+      getChartInformation() {
+        profileService.getChartInfo(res => {
           this.nodeData.name = this.user.alias;
           res.forEach(intel => {
-            let children = intel.rewardList.map(reward => ({name: reward.profile.alias, size: reward.reward, reward: reward.reward}));
+            let children = intel.rewardList.map(reward => (
+                {
+                  type: 'profile',
+                  name: reward.profile.alias || reward.profile.address.substring(0, 5),
+                  slug: reward.profile.aliasSlug,
+                  address: reward.profile.address,
+                  size: reward.reward,
+                  reward: reward.reward
+                })
+            );
             this.nodeData.children.push({
               name: intel.title,
               reward: intel.size,
+              type: 'intel',
               children
             })
           });
@@ -40,7 +50,7 @@
       }
     },
     watch: {
-      user(){
+      user() {
         //Loads chart information when user props loads
         this.getChartInformation()
       }

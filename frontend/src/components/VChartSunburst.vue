@@ -20,7 +20,7 @@
     },
     mounted() {
       this.height = this.width = this.row;
-      this.sunschart();
+      this.sunschart(this.$router, this.$notify);
     },
     methods: {
       responsivefy(svg) {
@@ -41,7 +41,7 @@
           svg.attr("height", Math.round(targetWidth / aspect));
         }
       },
-      sunschart() {
+      sunschart(router, notify) {
         const nodeData = this.nodeData;
 
         var width = this.width,
@@ -68,31 +68,37 @@
         partition(root);
 
         root.each(d => d.current = d);
-        var format = d3.format(",d")
+        var format = d3.format(",d");
+
+        var r = 50;
+        var prof = 2;
 
         var arc = d3.arc()
           .startAngle(function (d) {
-            return Math.max(0, Math.min(2 * Math.PI, x(d.x0)));
+            return Math.min(2 * Math.PI, x(d.x0));
           })
           .endAngle(function (d) {
-            return Math.max(0, Math.min(2 * Math.PI, x(d.x1)));
+            return Math.min(2 * Math.PI, x(d.x1));
           })
           .innerRadius(function (d) {
-            return Math.max(0, y(d.y0));
+            if(d.depth === 0){
+              return 0
+            } else {
+              return r + (d.depth - 1) * (radius - r)/prof
+            }
           })
           .outerRadius(function (d) {
-            return Math.max(0, y(d.y1));
+            if(d.depth === 0){
+              return 50
+            } else {
+              return r + (d.depth) * (radius - r)/prof
+            }
           });
-
-        function arcVisible(d) {
-          return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
-        }
-
 
         var svg = d3.select("#d3-svg svg")
           .attr("width", width)
           .attr("height", height)
-          .style("font", "10px sans-serif")
+          .style("font", "9px sans-serif")
           .call(this.responsivefy);
 
         var g = svg.append("g")
@@ -105,6 +111,7 @@
           .attr("d", arc)
           .style('stroke', '#ead6f3')
           .style("fill", function (d) {
+            if(!d.parent) return '';
             return color((d.children ? d : d.parent).data.name);
           })
           .attr("fill-opacity", d => d.children ? 0.8 : 1)
@@ -112,14 +119,14 @@
           .style("cursor", function (d) {
             return d.children ? "pointer" : "default"
           })
-          .on("click", click);
+          .on("click", d => d.children? click(d) : redirect(d));
 
         path.append("title")
           .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
 
         path.filter(d => d.children)
           .style("cursor", "pointer")
-          .on("click", click);
+          .on("click", d => d.children? click(d) : redirect(d));
 
         g.selectAll(".node")
           .append("text")
@@ -134,10 +141,11 @@
             return d.children ? "pointer" : "default"
           })
           .text(function (d) {
+            console.log(d.data.name);
             return d.data.name;
           })
           .attr('display', d => textFits(d) ? null : 'none')
-          .on("click", click);
+          .on("click", d => d.children? click(d) : redirect(d));
 
         g.selectAll(".node")
           .append("text")
@@ -193,6 +201,7 @@
 
                   const sizeTransition = sizeText.transition().duration(750);
 
+                  //Transition for the size label (rewards)
                   sizeTransition.attr("transform", function (d) {
                       return "translate(" + arc.centroid(path.__data__) + ")";
                     });
@@ -207,6 +216,23 @@
                 return arc(e);
               };
             });
+        }
+
+        function redirect(d){
+          if(d.data.type === "profile"){
+            let param = d.data.slug || d.data.address;
+            if(param){
+              router.push('/intel/' + param);
+            } else {
+              notify({
+                group: 'notification',
+                type: 'error',
+                duration: 10000,
+                title: 'Redirection',
+                text: 'Could not redirect to user profile'
+              });
+            }
+          }
         }
       }
     },
