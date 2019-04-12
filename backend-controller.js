@@ -1985,11 +1985,17 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
 controller.event_payment = async function (event, callback) {
     let charge = event;
-    if(charge.type === "charge.succeeded"){
-        Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.payment_intent },
-            function (err, payment) {
-                callback( err, payment)
+    if(charge.type === "payment_intent.succeeded"){
+        await Payment.create({ email: charge.data.object.metadata.email_customer, order_id: charge.data.object.id },
+             function (err, payment) {
+
+
             });
+        await stripe.orders.update(charge.data.object.metadata.order_id, {
+            status: 'paid',
+
+        });
+        //callback(err, payment)
     }
 }
 
@@ -2017,6 +2023,26 @@ controller.listProducts = async function (callback) {
 }
 
 controller.createOrder = async function (orderdetails, callback) {
+
+    let customerObj = '';
+    await stripe.customers.list(
+        { limit: 1, email: orderdetails.customer.email },
+        function(err, customers) {
+            if(customers.data.length === 0){
+                stripe.customers.create({
+                    email: orderdetails.customer.email,
+                }, function (err, customer) {
+                    customerObj = customer;
+                });
+
+
+            }else{
+                   customerObj = customers.data[0];
+            }
+
+        }
+    );
+
     let products_ar = [];
     for(var product of orderdetails.order) {
         products_ar.push(
@@ -2028,98 +2054,44 @@ controller.createOrder = async function (orderdetails, callback) {
         )
     }
 
-    stripe.customers.list(
-        { limit: 1, email: orderdetails.customer.email },
-        function(err, customers) {
-            if(customers.data.length === 0){
-                stripe.customers.create({
-                    email: orderdetails.customer.email,
-                }, async function (err, customer) {
-                    let customerObj = customer;
+    const order = stripe.orders.create({
+        currency: 'usd',
+        email: orderdetails.customer.email,
+        items: products_ar,
+        customer: customerObj.id
 
-                    const order = stripe.orders.create({
-                        currency: 'usd',
-                        email: orderdetails.customer.email,
-                        items: products_ar,
-                        customer: customerObj.id
+    });
 
-                    });
+    let order_amount;
+    order.then(function (result) {
 
-                    let order_amount
-                    order.then(function (result) {
+        order_amount = result.amount;
+        let matadata_pi = {
+            order_id:  result.id,
+            email_customer: orderdetails.customer.email,
+        };
+        const paymentIntent =  stripe.paymentIntents.create({
+            amount: order_amount,
+            currency: 'usd',
+            payment_method_types: ['card'],
+            metadata: matadata_pi,
+            customer: customerObj.id
+        });
 
-                        order_amount = result.amount
+        paymentIntent.then(function (resultint){
 
+            let response = {order: result, intent: resultint}
+            callback(response, resultint);
 
-                        const paymentIntent =  stripe.paymentIntents.create({
-                            amount: order_amount,
-                            currency: 'usd',
-                            payment_method_types: ['card'],
-                        });
+        });
 
-                        paymentIntent.then(function (resultint){
+    });
 
-                            let response = {order: result, intent: resultint}
-                            callback(response, resultint);
-
-                        });
-
-                    });
-                });
-            }else{
-
-                let customerObj = customers.data[0];
-
-                const order = stripe.orders.create({
-                    currency: 'usd',
-                    email: orderdetails.customer.email,
-                    items: products_ar,
-                    customer: customerObj.id
-
-                });
-
-                let order_amount
-                order.then(function (result) {
-
-                    order_amount = result.amount
-
-
-                    const paymentIntent =  stripe.paymentIntents.create({
-                        amount: order_amount,
-                        currency: 'usd',
-                        payment_method_types: ['card'],
-                    });
-
-                    paymentIntent.then(function (resultint){
-
-                        let response = {order: result, intent: resultint}
-                        callback(response, resultint);
-
-                    });
-
-                });
-
-            }
-        }
-    );
 
 
 
 }
 
-controller.payment = async function (params, callback) {
-
-    var token = params.token;
-    var order_id = params.order;
-    var customer = params.customer_id;
-
-
-    stripe.orders.pay(order_id, {
-        source: token,
-    })
-
-
-}
 
 /**
  *
