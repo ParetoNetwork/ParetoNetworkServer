@@ -1,29 +1,29 @@
 <template>
   <div class="text-center position-relative">
-      <div class="row ml-0 mr-0 py-2 cursor-pointer border-bottom text-content" :style="getProgress(transaction)">
-        <div class="col-1 px-0" @click="clickTransaction()">
-          <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']"
-                             :class="statusColor(transaction.status)"></font-awesome-icon>
-          <font-awesome-icon v-else-if="transaction.event === 'reward'" :icon="['fas', 'coins']"
-                             :class="statusColor(transaction.status)"></font-awesome-icon>
-        </div>
-        <div class="col-3 px-0 text-left">
-          <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
-             target="_blank" class="col-2 px-0 pl-1">
-            {{transaction.amount}}
-          </a>
-        </div>
-        <div class="col-1 text-left" @click="clickTransaction()">
-          <font-awesome-icon :icon="['fas', 'arrow-alt-circle-right']"
-                             :class="statusColor(transaction.status)"></font-awesome-icon>
-        </div>
-        <p class="col-5 px-0 pl-1 ellipsis">
-          <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash" target="_blank">
-            {{ intelTitle(transaction) }}
-          </a>
-          <!-- use intelData.address / transaction.txHash to pass into IntelDetail view to force it to load this object -->
-        </p>
-      </div>
+          <div class="row ml-0 mr-0 py-2 cursor-pointer border-bottom text-content" :style="getProgress(ini, mid)">
+            <div class="col-1 px-0" @click="clickTransaction()">
+              <font-awesome-icon v-if="transaction.event === 'create'" :icon="['fas', 'seedling']"
+                                 :class="statusColor(transaction.status)"></font-awesome-icon>
+              <font-awesome-icon v-else-if="transaction.event === 'reward'" :icon="['fas', 'coins']"
+                                 :class="statusColor(transaction.status)"></font-awesome-icon>
+            </div>
+            <div class="col-3 px-0 text-left">
+              <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash"
+                 target="_blank" class="col-2 px-0 pl-1">
+                {{transaction.amount}}
+              </a>
+            </div>
+            <div class="col-1 text-left" @click="clickTransaction()">
+              <font-awesome-icon :icon="['fas', 'arrow-alt-circle-right']"
+                                 :class="statusColor(transaction.status)"></font-awesome-icon>
+            </div>
+            <p class="col-5 px-0 pl-1 ellipsis">
+              <a v-bind:href="etherscanUrl+'/tx/'+transaction.txHash" target="_blank">
+                {{ intelTitle(transaction) }}
+              </a>
+              <!-- use intelData.address / transaction.txHash to pass into IntelDetail view to force it to load this object -->
+            </p>
+          </div>
     </div>
 
 </template>
@@ -47,7 +47,11 @@
     },
     data: function () {
       return {
-        etherscanUrl: window.localStorage.getItem('etherscan'),
+        ini: 0,
+         mid: 0,
+        blue: 100,
+          darkBlue: 100,
+          etherscanUrl: window.localStorage.getItem('etherscan'),
         loadingEffect: {},
         clicked: false
       }
@@ -58,11 +62,18 @@
         return temp.format("MMMM Do, YYYY");
       }
     },
-    watch: {},
+    watch: {
+        transaction: function(tx){
+            if(this.ini ===0 ){
+                this.updateLinearGradient();
+             }
+        }
+    },
     mounted: function () {
       let newId = this.transaction.txHash + '-span';
       this.clicked = this.transaction.clicked;
       this.loadingEffect = document.getElementById(newId);
+      this.updateLinearGradient()
     },
     methods: {
       ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction"]),
@@ -134,6 +145,41 @@
       dateStringFormat(date) {
         return new Date(date);
       },
+        updateLinearGradient(){
+            if (this.transaction.event === 'reward' && this.transaction.status === 3 && this.transaction.intelData && this.transaction.intelData.reward){
+                this.blue =Math.min(((this.transaction.amount|| 0)/this.transaction.intelData.reward)*100,100);
+                if (this.transaction.minBlock && this.transaction.block){
+                    if(this.transaction.block > this.transaction.minBlock){
+                        this.blue = this.blue*(this.transaction.block - this.transaction.minBlock)/this.transaction.exponentBlock;
+                    }else{
+                        this.blue=0;
+                    }
+                }else{
+                    this.blue=0;
+                }
+                if(this.blue> 50){
+                    this.mid = 99.5;
+                }
+                this.updateBlue()
+
+            }
+        }
+        ,
+        updateBlue() {
+          if(this.blue<=50) {
+              if (this.mid < this.blue) {
+                  this.mid = this.mid + 0.5;
+                  this.ini = this.mid - this.mid*0.05;
+                  setTimeout(this.updateBlue, Math.random() * (50 - 10) + 10)
+              }
+          }else{
+              if (this.mid > this.blue) {
+                  this.mid = this.mid - 0.5;
+                  this.ini = this.mid - this.mid*0.05;
+                  setTimeout(this.updateBlue, Math.random() * (50 - 10) + 10)
+              }
+          }
+        },
       intelTitle(transaction){
         return transaction.intelData? transaction.intelData.title : transaction.txHash;
       },
@@ -145,24 +191,12 @@
           'yellow-background': status < 3 && click
         };
       },
-      getProgress(transaction) {
+      getProgress(ini, mid) {
           const style = {
               "border-bottom-color": "black !important"
           };
-          if (transaction.event === 'reward' && transaction.status === 3 && transaction.intelData && transaction.intelData.reward){
-              let blue =Math.min(((transaction.amount|| 0)/transaction.intelData.reward)*100,100);
-              if (transaction.minBlock && transaction.block){
-                  if(transaction.block > transaction.minBlock){
-                      blue = blue*(transaction.block - transaction.minBlock)/transaction.exponentBlock;
-                  }else{
-                      blue=0;
-                  }
-              }else{
-                  blue=0;
-              }
-              const darkBlue =  100-blue;
-              style.background = 'linear-gradient(90deg, #679ab4 '+blue+'%, '+blue+'% , #1f344f '+darkBlue+'%)';
-
+          if (this.transaction.event === 'reward' && this.transaction.status === 3 && this.transaction.intelData && this.transaction.intelData.reward) {
+              style.background = 'linear-gradient(90deg, #679ab4 ' +  ini + '%, #1f344f ' + mid + '% , #1f344f )';
           }
 
           return style;
@@ -171,5 +205,4 @@
   }
 </script>
 <style>
-
 </style>
