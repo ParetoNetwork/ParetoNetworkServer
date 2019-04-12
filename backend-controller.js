@@ -156,7 +156,7 @@ controller.getParetoCoinMarket = function (callback) {
 
   request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
     {
-        headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }
+      headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY}
     },
     (error, res, body) => {
       console.log(COIN_MARKET_API_KEY);
@@ -176,27 +176,27 @@ controller.getParetoCoinMarket = function (callback) {
  * @return {{engine: Web3ProviderEngine, web3: Web3}}
  */
 controller.getWalletProvider = function () {
-    const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
-    const ProviderEngine = require('web3-provider-engine');
-    const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
-    const Wallet = require('ethereumjs-wallet');
-    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DT_ORACLE_SYS, "base64").toString("ascii"), "hex"));
-    const engine = new ProviderEngine();
-    engine.addProvider(new HookedWalletSubprovider({
-        getAccounts: function(cb){
-            cb(null, [ myWallet.getAddressString()]);
-        },
-        getPrivateKey: function(address, cb){
-            if (address !== myWallet.getAddressString()) {
-                cb(new Error('Account not found'))
-            } else {
-                cb(null, myWallet.getPrivateKey())
-            }
-        }
-    }));
-    engine.addProvider(new WsSubprovider({rpcUrl:  WEB3_WEBSOCKET_URL}));
-    engine.start();
-    return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
+  const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
+  const ProviderEngine = require('web3-provider-engine');
+  const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
+  const Wallet = require('ethereumjs-wallet');
+  const myWallet = Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DT_ORACLE_SYS, "base64").toString("ascii"), "hex"));
+  const engine = new ProviderEngine();
+  engine.addProvider(new HookedWalletSubprovider({
+    getAccounts: function (cb) {
+      cb(null, [myWallet.getAddressString()]);
+    },
+    getPrivateKey: function (address, cb) {
+      if (address !== myWallet.getAddressString()) {
+        cb(new Error('Account not found'))
+      } else {
+        cb(null, myWallet.getPrivateKey())
+      }
+    }
+  }));
+  engine.addProvider(new WsSubprovider({rpcUrl: WEB3_WEBSOCKET_URL}));
+  engine.start();
+  return {engine: engine, web3: new Web3(engine), wallet: myWallet}
 };
 
 
@@ -205,68 +205,80 @@ controller.getWalletProvider = function () {
  * @param address the new Created address front end.
  * @param callback
  */
-controller.transactionFlow= async function(address, order_id, callback){
-    const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
-    const data = await ParetoPayment.findOneAndUpdate({order_id: order_id},{amount: 10 , processed: false},{upsert: true}).exec();
-    ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
-        if(payment){
-            if(payment.state > 0){
-                controller.getParetoCoinMarket((err, result)=>{
-                    const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
-                    callback(null,{amount: paretoAmount, eth: ETH_DEPOSIT});
-                })
-            }else{
-                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {address: address, state: 1}).exec().then(function (r) {
-                     controller.getParetoCoinMarket((err, result)=>{
-                         if(err){
-                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
-                           return  callback(err);
-                         }
-                         const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
-                         console.log(paretoAmount);
-                         controller.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
-                             if(err){
-                                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
-                               return   callback(err);
-                             }
-                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 2, oracleTxHash: result.hash }).exec().then((r)=>{});
-                             callback(null, result);
-                         });
-                     })
-                }).catch(function (e) {
-                    callback(e)
-                });
-
+controller.transactionFlow = async function (address, order_id, callback) {
+  const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
+  const data = await ParetoPayment.findOneAndUpdate({order_id: order_id}, {
+    amount: 10,
+    processed: false
+  }, {upsert: true}).exec();
+  ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
+    if (payment) {
+      if (payment.state > 0) {
+        controller.getParetoCoinMarket((err, result) => {
+          const paretoAmount = payment.amount / result.data.PARETO.quote.USD.price;
+          callback(null, {amount: paretoAmount, eth: ETH_DEPOSIT});
+        })
+      } else {
+        ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {
+          address: address,
+          state: 1
+        }).exec().then(function (r) {
+          controller.getParetoCoinMarket((err, result) => {
+            if (err) {
+              ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r) => {
+              });
+              return callback(err);
             }
+            const paretoAmount = payment.amount / result.data.PARETO.quote.USD.price;
+            console.log(paretoAmount);
+            controller.makeTransaction(address, paretoAmount, ETH_DEPOSIT, (err, result) => {
+              if (err) {
+                ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r) => {
+                });
+                return callback(err);
+              }
+              ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {
+                state: 2,
+                oracleTxHash: result.hash
+              }).exec().then((r) => {
+              });
+              callback(null, result);
+            });
+          })
+        }).catch(function (e) {
+          callback(e)
+        });
 
-        }else{
-            callback(null,{amount: 0, eth: 0})
-        }
+      }
 
-    }).catch(function (e) {
-        callback(e)
-    });
+    } else {
+      callback(null, {amount: 0, eth: 0})
+    }
+
+  }).catch(function (e) {
+    callback(e)
+  });
 
 }
 
 
 controller.updateTransaction = function (body, callback) {
 
-    const data = {
-        txHash: body.txHash
-    };
-    const find = {
-        $or: [{order_id: body.order_id}, {address: body.address}],
-        processed: false
-    };
-    if (body.processed) {
-        data.processed = true;
-    }
-    ParetoPayment.findOneAndUpdate(find, data).exec().then((r) => {
-        callback(null, r);
-    }).catch(err => {
-        callback(null, err);
-    });
+  const data = {
+    txHash: body.txHash
+  };
+  const find = {
+    $or: [{order_id: body.order_id}, {address: body.address}],
+    processed: false
+  };
+  if (body.processed) {
+    data.processed = true;
+  }
+  ParetoPayment.findOneAndUpdate(find, data).exec().then((r) => {
+    callback(null, r);
+  }).catch(err => {
+    callback(null, err);
+  });
 }
 
 /**
@@ -277,89 +289,120 @@ controller.updateTransaction = function (body, callback) {
  * @param callback
  * @return {Promise<void>}
  */
-controller.makeTransaction = async function(address, amount, eth, callback){
-    const  walletProvider = controller.getWalletProvider();
-    try{
+controller.makeTransaction = async function (address, amount, eth, callback) {
+  const walletProvider = controller.getWalletProvider();
+  try {
 
-        const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
-        const Pareto_Address = process.env.CRED_PARETOCONTRACT;
-        const web3 = walletProvider.web3;
-        const wallet = walletProvider.wallet;
-        const ParetoTokenInstance  = new web3.eth.Contract( Pareto_Token_Schema.abi, Pareto_Address);
-        let amountPareto = web3.utils.toWei(amount.toString(), "ether");
-        let amountEther = web3.utils.toWei(eth.toString(), "ether");
-        let gasPrice = await web3.eth.getGasPrice();
-        let gasApprove = await web3.eth.estimateGas({
-            to:address,
+    const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
+    const Pareto_Address = process.env.CRED_PARETOCONTRACT;
+    const web3 = walletProvider.web3;
+    const wallet = walletProvider.wallet;
+    const ParetoTokenInstance = new web3.eth.Contract(Pareto_Token_Schema.abi, Pareto_Address);
+    let amountPareto = web3.utils.toWei(amount.toString(), "ether");
+    let amountEther = web3.utils.toWei(eth.toString(), "ether");
+    let gasPrice = await web3.eth.getGasPrice();
+    let gasApprove = await web3.eth.estimateGas({
+      to: address,
+      from: wallet.getAddressString(),
+      value: amountEther
+    });
+    web3.eth.sendTransaction({
+      to: address,
+      from: wallet.getAddressString(),
+      value: amountEther,
+      gas: gasApprove,
+      gasPrice: gasPrice * 1.3
+    }).once('transactionHash', function (hash) {
+      controller.waitForReceipt(hash, async (err, receipt) => {
+        if (err) {
+          if (walletProvider.engine) {
+            try {
+              walletProvider.engine.stop();
+            } catch (e) {
+            }
+          }
+          return callback(err);
+        }
+        let gasApprove = await ParetoTokenInstance.methods
+          .transfer(address, amountPareto)
+          .estimateGas({from: wallet.getAddressString()});
+        ParetoTokenInstance.methods
+          .transfer(address, amountPareto)
+          .send({
             from: wallet.getAddressString(),
-            value: amountEther});
-        web3.eth.sendTransaction({
-            to:address,
-            from: wallet.getAddressString(),
-            value: amountEther,
             gas: gasApprove,
-            gasPrice: gasPrice  * 1.3
-        }).once('transactionHash', function(hash){
-            controller.waitForReceipt(hash,async  (err, receipt)=>{
-                if(err){
-                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                    return  callback(err);
+            gasPrice: gasPrice * 1.3
+          })
+          .once('transactionHash', function (hash) {
+            controller.waitForReceipt(hash, async (err, receipt) => {
+              if (err) {
+                if (walletProvider.engine) {
+                  try {
+                    walletProvider.engine.stop();
+                  } catch (e) {
+                  }
                 }
-                let gasApprove = await ParetoTokenInstance.methods
-                    .transfer(address, amountPareto)
-                    .estimateGas({from: wallet.getAddressString()});
-                ParetoTokenInstance.methods
-                    .transfer(address, amountPareto)
-                    .send({
-                        from: wallet.getAddressString(),
-                        gas: gasApprove,
-                        gasPrice: gasPrice  * 1.3
-                    })
-                    .once('transactionHash', function(hash){
-                        controller.waitForReceipt(hash,async  (err, receipt)=> {
-                            if(err){
-                                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                                return  callback(err);
-                            }
-                            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                            callback(null, {amount, eth, hash});
-                        })
-                    })
-                    .once('error', (err)=>{
-                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                        callback(err);
-                    });
+                return callback(err);
+              }
+              if (walletProvider.engine) {
+                try {
+                  walletProvider.engine.stop();
+                } catch (e) {
+                }
+              }
+              callback(null, {amount, eth, hash});
             })
-        })
-            .once('error', function(err){
-                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                callback(err);
-            });
+          })
+          .once('error', (err) => {
+            if (walletProvider.engine) {
+              try {
+                walletProvider.engine.stop();
+              } catch (e) {
+              }
+            }
+            callback(err);
+          });
+      })
+    })
+      .once('error', function (err) {
+        if (walletProvider.engine) {
+          try {
+            walletProvider.engine.stop();
+          } catch (e) {
+          }
+        }
+        callback(err);
+      });
 
-    }catch (e) {
-        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-        callback(e);
+  } catch (e) {
+    if (walletProvider.engine) {
+      try {
+        walletProvider.engine.stop();
+      } catch (e) {
+      }
     }
+    callback(e);
+  }
 };
 
 controller.waitForReceipt = function (hash, cb) {
-    web3.eth.getTransactionReceipt(hash, function (err, receipt) {
-        if (err) {
-            cb(err);
-        }
+  web3.eth.getTransactionReceipt(hash, function (err, receipt) {
+    if (err) {
+      cb(err);
+    }
 
-        if (receipt !== null) {
-            // Transaction went through
-            if (cb) {
-                cb(null, receipt);
-            }
-        } else {
-            // Try again in 1 second
-            setTimeout(function () {
-                controller.waitForReceipt(hash, cb);
-            }, 1000);
-        }
-    });
+    if (receipt !== null) {
+      // Transaction went through
+      if (cb) {
+        cb(null, receipt);
+      }
+    } else {
+      // Try again in 1 second
+      setTimeout(function () {
+        controller.waitForReceipt(hash, cb);
+      }, 1000);
+    }
+  });
 }
 
 controller.getBalance = async function (address, blockHeightFixed, callback) {
@@ -565,14 +608,15 @@ controller.startwatchNewIntel = function () {
                     {
                       intel: event.returnValues.intelID,
                       event: 'create'
-                    }, {status: 3,
-                            txHash: event.transactionHash,
-                            event: 'create',
-                            block: event.blockNumber,
-                            amount:  initialBalance,
-                            intel: parseInt(event.returnValues.intelID),
-                            address: data.address
-                        },{upsert: true, new: true})];
+                    }, {
+                      status: 3,
+                      txHash: event.transactionHash,
+                      event: 'create',
+                      block: event.blockNumber,
+                      amount: initialBalance,
+                      intel: parseInt(event.returnValues.intelID),
+                      address: data.address
+                    }, {upsert: true, new: true})];
                 Promise.all(promises).then(values => {
                   if (values.length > 1) {
                     controller.getScoreAndSaveRedis(null, (err, result) => {
@@ -645,7 +689,7 @@ controller.startwatchReward = function (intel, intelAddress) {
               if (!err) {
                 controller.updateAddressReward(event, count);
               } else {
-                  console.log(err)
+                console.log(err)
               }
             });
             web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
@@ -692,11 +736,11 @@ controller.startwatchDistribute = function (intel, intelAddress) {
               txHash: txHash,
               address: sender,
               block: event.blockNumber,
-              amount:  parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether')),
+              amount: parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether')),
               nonce: nonce,
               event: 'distribute',
               intel: intelIndex,
-            },{upsert: true, new: true})];
+            }, {upsert: true, new: true})];
         Promise.all(promises).then(values => {
           if (controller.wss && values.length > 1) {
             controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
@@ -726,61 +770,64 @@ controller.startwatchDistribute = function (intel, intelAddress) {
   });
 };
 
-controller.startwatchDeposit= function (intel) {
-  try{
-      intel.events.Deposited().on('data', event => {
+controller.startwatchDeposit = function (intel) {
+  try {
+    intel.events.Deposited().on('data', event => {
+      try {
+
+        web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
+          const nonce = txObject.nonce;
+          const txHash = event.transactionHash;
+          const sender = event.returnValues.from.toLowerCase();
           try {
-
-              web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
-                  const nonce = txObject.nonce;
-                  const txHash = event.transactionHash;
-                  const sender = event.returnValues.from.toLowerCase();
-                  try{
-                      ParetoPayment.findOneAndUpdate(
-                          {txHash: txHash}
-                          , {processed: true}).then(value => {}).catch(err=>{});
-                  }catch (e) {  }
-                  ParetoTransaction.findOneAndUpdate(
-                      {
-                          $or: [{txHash: txHash},
-                              {address: sender, nonce: nonce}]
-                      }, {
-                          status: 3,
-                          txRewardHash: txHash,
-                          txHash: txHash,
-                          block: event.blockNumber,
-                          amount:  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether')),
-                          address: sender,
-                          nonce: nonce,
-                          event: 'deposited',
-                      },{upsert: true, new: true}).then(value => {
-                      if (controller.wss && value) {
-                          controller.SendInfoWebsocket({address: value.address, transaction: value});
-                      } else {
-                          console.log('no wss');
-                      }
-                  }).catch(e => {
-                      const error = ErrorHandler.backendErrorList('b26');
-                      error.systemMessage = e.message ? e.message : e;
-                      console.log(JSON.stringify(error));
-                  });
-              }).catch(function (e) {
-                  const error = ErrorHandler.backendErrorList('b26');
-                  error.systemMessage = e.message ? e.message : e;
-                  console.log(JSON.stringify(error));
-              });
-
+            ParetoPayment.findOneAndUpdate(
+              {txHash: txHash}
+              , {processed: true}).then(value => {
+            }).catch(err => {
+            });
           } catch (e) {
-              const error = ErrorHandler.backendErrorList('b26');
-              error.systemMessage = e.message ? e.message : e;
-              console.log(JSON.stringify(error));
           }
+          ParetoTransaction.findOneAndUpdate(
+            {
+              $or: [{txHash: txHash},
+                {address: sender, nonce: nonce}]
+            }, {
+              status: 3,
+              txRewardHash: txHash,
+              txHash: txHash,
+              block: event.blockNumber,
+              amount: parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether')),
+              address: sender,
+              nonce: nonce,
+              event: 'deposited',
+            }, {upsert: true, new: true}).then(value => {
+            if (controller.wss && value) {
+              controller.SendInfoWebsocket({address: value.address, transaction: value});
+            } else {
+              console.log('no wss');
+            }
+          }).catch(e => {
+            const error = ErrorHandler.backendErrorList('b26');
+            error.systemMessage = e.message ? e.message : e;
+            console.log(JSON.stringify(error));
+          });
+        }).catch(function (e) {
+          const error = ErrorHandler.backendErrorList('b26');
+          error.systemMessage = e.message ? e.message : e;
+          console.log(JSON.stringify(error));
+        });
 
-      }).on('error', err => {
-          console.log(err);
-      });
-  }catch (e) {
-      //only new intel contract has Deposited events.
+      } catch (e) {
+        const error = ErrorHandler.backendErrorList('b26');
+        error.systemMessage = e.message ? e.message : e;
+        console.log(JSON.stringify(error));
+      }
+
+    }).on('error', err => {
+      console.log(err);
+    });
+  } catch (e) {
+    //only new intel contract has Deposited events.
   }
 
 };
@@ -1000,16 +1047,17 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, bloc
         , ParetoTransaction.findOneAndUpdate({
           $or: [{txRewardHash: txHash}, {txHash: txHash},
             {address: sender, intel: intelIndex, event: 'reward', nonce: nonce}]
-        }, {status: 3,
-              txRewardHash: txHash,
-              txHash: txHash,
-              nonce: nonce,
-              block: block,
-              amount:  amount,
-              event: 'reward',
-              address: sender,
-              intel: intelIndex
-        },{upsert: true, new: true})];
+        }, {
+          status: 3,
+          txRewardHash: txHash,
+          txHash: txHash,
+          nonce: nonce,
+          block: block,
+          amount: amount,
+          event: 'reward',
+          address: sender,
+          intel: intelIndex
+        }, {upsert: true, new: true})];
       Promise.all(promises).then(values => {
         if (values.length > 1 && controller.wss) {
           controller.SendInfoWebsocket({address: values[1].address, transaction: values[1]});
@@ -1028,13 +1076,13 @@ controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, bloc
 /**
  *  addExponent using db instead of Ethereum network
  */
-controller.addExponentAprox =  function (addresses, scores, blockHeight, callback) {
+controller.addExponentAprox = function (addresses, scores, blockHeight, callback) {
   return ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(async function (err, values) {
-      const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
-      let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
-          data[""+it.id] = it;
-          return data;
-      }, {});
+    const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO * 2}});
+    let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
+      data["" + it.id] = it;
+      return data;
+    }, {});
     if (err) {
       callback(err);
     } else {
@@ -1043,7 +1091,7 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
       for (let j = 0; j < values.length; j = j + 1) {
         try {
           const sender = values[j].sender.toLowerCase();
-          const block =  parseFloat(values[j].block);
+          const block = parseFloat(values[j].block);
           const amount = parseFloat(values[j].amount);
           const intelIndex = values[j].intelId;
             distincIntel[intelIndex] = 1;
@@ -1051,11 +1099,11 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
               lessRewards[sender]  = {};
               lessRewards[sender][intelIndex] = { block,amount };
           }
-          if(!lessRewards[sender][intelIndex]){
-                lessRewards[sender][intelIndex] = { block,amount };
-            }
-          if(block < lessRewards[sender][intelIndex].block  ){
-              lessRewards[sender][intelIndex] = { block,amount };
+          if (!lessRewards[sender][intelIndex]) {
+            lessRewards[sender][intelIndex] = {block, amount};
+          }
+          if (block < lessRewards[sender][intelIndex].block) {
+            lessRewards[sender][intelIndex] = {block, amount};
           }
         } catch (e) {
           console.log(e)
@@ -1237,8 +1285,8 @@ controller.getQueryContentByUser = function (address, intel, callback) {
 
               //2. get percentile
 
-                            //2a. get total rank where score > 0
-                            ParetoAddress.countDocuments({score: {$gt: 0}}, async (err, count) => {
+              //2a. get total rank where score > 0
+              ParetoAddress.countDocuments({score: {$gt: 0}}, async (err, count) => {
 
                 //and this is because we are using hardcoded ranks to begin with. fix by having proprietary high performance web3 server (parity in docker?), or by doing more efficient query which creates rank on the fly from group
                 if (result.rank == null) {
@@ -1309,49 +1357,49 @@ controller.getQueryContentByUser = function (address, intel, callback) {
                   blockDelay = PARETO_RANK_GRANULARIZED_LIMIT * 110;
                 }
                 const CONTENT_DELAY = {
-                  blockDelay: [1,blockDelay,blockDelay*50,blockDelay*100,blockDelay*150],
+                  blockDelay: [1, blockDelay, blockDelay * 50, blockDelay * 100, blockDelay * 150],
                   blockHeight: blockHeight
                 };
-                      let returnQuery = {
-                          $and: [
-                              {
-                                  $or: [
-                                      {
-                                          block: {$lte: (blockHeight - blockDelay * 1)},
-                                          speed: 1,
-                                          $or: [{validated: true}, {block: {$gt: 0}}]
-                                      },
-                                      {
-                                          block: {$lte: (blockHeight - blockDelay * 50)},
-                                          speed: 2,
-                                          $or: [{validated: true}, {block: {$gt: 0}}]
-                                      },
-                                      {
-                                          block: {$lte: (blockHeight - blockDelay * 100)},
-                                          speed: 3,
-                                          $or: [{validated: true}, {block: {$gt: 0}}]
-                                      },
-                                      {
-                                          block: {$lte: (blockHeight - blockDelay * 150)},
-                                          speed: 4,
-                                          $or: [{validated: true}, {block: {$gt: 0}}]
-                                      },
-                                      {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
-                                  ]
-                              }]
-                      };
+                let returnQuery = {
+                  $and: [
+                    {
+                      $or: [
+                        {
+                          block: {$lte: (blockHeight - blockDelay * 1)},
+                          speed: 1,
+                          $or: [{validated: true}, {block: {$gt: 0}}]
+                        },
+                        {
+                          block: {$lte: (blockHeight - blockDelay * 50)},
+                          speed: 2,
+                          $or: [{validated: true}, {block: {$gt: 0}}]
+                        },
+                        {
+                          block: {$lte: (blockHeight - blockDelay * 100)},
+                          speed: 3,
+                          $or: [{validated: true}, {block: {$gt: 0}}]
+                        },
+                        {
+                          block: {$lte: (blockHeight - blockDelay * 150)},
+                          speed: 4,
+                          $or: [{validated: true}, {block: {$gt: 0}}]
+                        },
+                        {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
+                      ]
+                    }]
+                };
 
-                                // if(percentile<0.85){
-                                //     returnQuery.$and.push({expires: {$lte : ((new Date()).getTime()/1000)+86400}, validated: true});
-                                // }
+                // if(percentile<0.85){
+                //     returnQuery.$and.push({expires: {$lte : ((new Date()).getTime()/1000)+86400}, validated: true});
+                // }
 
-                                return callback(null, CONTENT_DELAY, returnQuery,percentile);
-                            });
-                        }, function (error) {
-                            callback(error);
-                        }).catch(function (err) {
-                        callback(err);
-                    });//end web3
+                return callback(null, CONTENT_DELAY, returnQuery, percentile);
+              });
+            }, function (error) {
+              callback(error);
+            }).catch(function (err) {
+            callback(err);
+          });//end web3
 
         }//end else
 
@@ -1415,11 +1463,11 @@ controller.getAllAvailableContent = async function (req, callback) {
             contentDelay: contentDelay
           };
 
-          if(percentile < 0 ){ //eventually it may be < 0.85
-               if(data.expires > ((new Date()).getTime()/1000)+86400){
-                   data.title = "Classified" + controller.decodeData(data.title);
-                   data.body =  controller.decodeData(data.body);
-               }
+          if (percentile < 0) { //eventually it may be < 0.85
+            if (data.expires > ((new Date()).getTime() / 1000) + 86400) {
+              data.title = "Classified" + controller.decodeData(data.title);
+              data.body = controller.decodeData(data.body);
+            }
           }
 
           newResults.push(data);
@@ -1441,40 +1489,40 @@ controller.getAllAvailableContent = async function (req, callback) {
   });
 };
 
-controller.decodeData = function (data){
+controller.decodeData = function (data) {
   const TOKEN = "@7a8b9c";
   const words = data.split(" ");
   const shuffle = function (array) {
 
-        var currentIndex = array.length;
-        var temporaryValue, randomIndex;
-        while (0 !== currentIndex) {
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
-            temporaryValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = temporaryValue;
-        }
+    var currentIndex = array.length;
+    var temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
 
-        return array;
+    return array;
 
-    };
-  const randomWord =  function (length) {
-        var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  };
+  const randomWord = function (length) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        for (var i = 0; i < length; i++)
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
+    for (var i = 0; i < length; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-        return text;
-    };
-  const permutations = shuffle(Array.from(Array(words.length), (x, index)=>index+1)).slice(0,(words.length*0.5).toFixed());
-  return  words.map((it, index)=>{
-        if(permutations.includes(index)){
-          return TOKEN + randomWord(it.length) + TOKEN
-        }else{
-          return it;
-        }
+    return text;
+  };
+  const permutations = shuffle(Array.from(Array(words.length), (x, index) => index + 1)).slice(0, (words.length * 0.5).toFixed());
+  return words.map((it, index) => {
+    if (permutations.includes(index)) {
+      return TOKEN + randomWord(it.length) + TOKEN
+    } else {
+      return it;
+    }
 
   }).join(' ');
 }
@@ -1521,14 +1569,14 @@ controller.getContentByIntel = function (req, intel, callback) {
         };
 
 
-          if(percentile < 0){
-              if(data.expires > ((new Date()).getTime()/1000)+86400){
-                  data.title = "Classified" + controller.decodeData(data.title);
-                  data.body =  controller.decodeData(data.body);
-              }
+        if (percentile < 0) {
+          if (data.expires > ((new Date()).getTime() / 1000) + 86400) {
+            data.title = "Classified" + controller.decodeData(data.title);
+            data.body = controller.decodeData(data.body);
           }
+        }
 
-          return callback(null, data)
+        return callback(null, data)
       } else {
         callback(null, {})
       }
@@ -1644,60 +1692,60 @@ controller.getUserInfo = async function (address, callback) {
     let profile = await ParetoProfile.findOne({aliasSlug: address}).exec();
     if (!profile) profile = await ParetoProfile.findOne({alias: address}).exec();
 
-        if (profile) {
-            controller.retrieveAddressRankWithRedis([profile.address], true, function (error, rankings) {
-                if (error) {
-                    callback(error)
-                } else {
-                    let ranking = rankings[0];
-                    callback(null, {
-                        'address': profile.address,
-                        'rank': ranking.rank,
-                        'score': ranking.score,
-                        'tokens': ranking.tokens,
-                        'block': ranking.block,
-                        'lastApprovedAddress': ranking.approved,
-                        'maxRank': ranking.maxRank,
-                        'minScore': ranking.minScore,
-                        'alias': profile.alias,
-                        'aliasSlug': profile.aliasSlug,
-                        'biography': profile.biography,
-                        "profile_pic": profile.profilePic
-                    });
-                }
-            });
+    if (profile) {
+      controller.retrieveAddressRankWithRedis([profile.address], true, function (error, rankings) {
+        if (error) {
+          callback(error)
         } else {
-            callback(new Error('Invalid Address or alias'));
+          let ranking = rankings[0];
+          callback(null, {
+            'address': profile.address,
+            'rank': ranking.rank,
+            'score': ranking.score,
+            'tokens': ranking.tokens,
+            'block': ranking.block,
+            'lastApprovedAddress': ranking.approved,
+            'maxRank': ranking.maxRank,
+            'minScore': ranking.minScore,
+            'alias': profile.alias,
+            'aliasSlug': profile.aliasSlug,
+            'biography': profile.biography,
+            "profile_pic": profile.profilePic
+          });
         }
+      });
     } else {
-
-        controller.retrieveAddressRankWithRedis([address], true, function (error, rankings) {
-            if (error) {
-                callback(error)
-            } else {
-                controller.retrieveProfileWithRedis(address, function (error, profile) {
-                    if (error) {
-                        callback(error)
-                    }
-                    let ranking = rankings[0];
-                    callback(null, {
-                        'address': address,
-                        'rank': ranking.rank,
-                        'score': ranking.score,
-                        'tokens': ranking.tokens,
-                        'block': ranking.block,
-                        'lastApprovedAddress': ranking.approved,
-                        'maxRank': ranking.maxRank,
-                        'minScore': ranking.minScore,
-                        'alias': profile.alias,
-                        'aliasSlug': profile.aliasSlug,
-                        'biography': profile.biography,
-                        "profile_pic": profile.profilePic
-                    });
-                });
-            }
-        });
+      callback(new Error('Invalid Address or alias'));
     }
+  } else {
+
+    controller.retrieveAddressRankWithRedis([address], true, function (error, rankings) {
+      if (error) {
+        callback(error)
+      } else {
+        controller.retrieveProfileWithRedis(address, function (error, profile) {
+          if (error) {
+            callback(error)
+          }
+          let ranking = rankings[0];
+          callback(null, {
+            'address': address,
+            'rank': ranking.rank,
+            'score': ranking.score,
+            'tokens': ranking.tokens,
+            'block': ranking.block,
+            'lastApprovedAddress': ranking.approved,
+            'maxRank': ranking.maxRank,
+            'minScore': ranking.minScore,
+            'alias': profile.alias,
+            'aliasSlug': profile.aliasSlug,
+            'biography': profile.biography,
+            "profile_pic": profile.profilePic
+          });
+        });
+      }
+    });
+  }
 
 };
 
@@ -1772,11 +1820,51 @@ controller.getContentByCurrentUser = async function (req, callback) {
           }).catch(function (err) {
           callback(err);
         });
-
       }
     });
   }
+};
 
+controller.chartInformation = async function (req, callback) {
+  let address = req.query.user || req.user;
+  try {
+    //Gets the first 10 intel from the user with the most reward given
+    let intelListQuery = ParetoContent.find({address: address}).sort({totalReward: -1}).limit(10);
+
+    //Callback for intel list query
+    intelListQuery.exec(async function (err, intelList) {
+      intelList = intelList.map(async (intel) => {
+
+        //Finds the 10 highest the rewards for a given intel
+        let rewardList = await ParetoReward.find({intelId: intel.id}).sort({amount: -1}).limit(10).exec();
+
+        //Iterates all the rewards and find the reward profile
+        const profileArray = await rewardList.map(async (reward) => {
+          let profile = await ParetoProfile.findOne({address: reward.sender}).exec() || {};
+
+          if(!profile || !profile.alias){
+            profile.alias = profile.address || 'No Alias';
+            profile.aliasSlug = 'No Slug';
+          }
+          return {profile: { alias: profile.alias, aliasSlug: profile.aliasSlug}, reward: reward.amount};
+        });
+
+        const profileList = await Promise.all(profileArray);
+        return {
+          title: intel.title,
+          size: intel.totalReward,
+          rewardList: profileList
+        }
+      });
+
+      Promise.all(intelList).then(results => {
+        callback(null, results);
+      });
+    });
+
+  } catch (e) {
+    return callback(e);
+  }
 };
 
 /**
@@ -1979,127 +2067,124 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 };
 
 controller.event_payment = async function (event, callback) {
-    let charge = event;
-    if(charge.type === "charge.succeeded"){
-        Payment.create({ email: charge.data.object.billing_details.email, order_id: charge.data.object.payment_intent },
-            function (err, payment) {
-                callback( err, payment)
-            });
-    }
+  let charge = event;
+  if (charge.type === "charge.succeeded") {
+    Payment.create({email: charge.data.object.billing_details.email, order_id: charge.data.object.payment_intent},
+      function (err, payment) {
+        callback(err, payment)
+      });
+  }
 }
 
 controller.listProducts = async function (callback) {
 
-    let skus;
-    await stripe.skus.list(
-        {active: true},
-        function(err, response) {
+  let skus;
+  await stripe.skus.list(
+    {active: true},
+    function(err, response) {
 
-            if(err){
-                callback(err, null);
-                return;
-            }
-            skus = response.data;
+      if(err){
+        callback(err, null);
+        return;
+      }
+      skus = response.data;
 
-            callback(null, skus);
+      callback(null, skus);
 
-            //once i have the skus, i need the products
+      //once i have the skus, i need the products
 
-        }
-    );
+    }
+  );
 
 
 }
 
 controller.createOrder = async function (orderdetails, callback) {
-    let products_ar = [];
-    for(var product of orderdetails.order) {
-        products_ar.push(
-            {
-                type: 'sku',
-                parent: product.id,
-                quantity: product.quantity
-            }
-        )
+  let products_ar = [];
+  for(var product of orderdetails.order) {
+    products_ar.push(
+      {
+        type: 'sku',
+        parent: product.id,
+        quantity: product.quantity
+      }
+    )
+  }
+
+  stripe.customers.list(
+    { limit: 1, email: orderdetails.customer.email },
+    function(err, customers) {
+      if(err || customers.data.length === 0){
+        stripe.customers.create({
+          email: orderdetails.customer.email,
+        }, async function (err, customer) {
+          let customerObj = customer;
+
+          const order = stripe.orders.create({
+            currency: 'usd',
+            email: orderdetails.customer.email,
+            items: products_ar,
+            customer: customerObj.id
+
+          });
+
+          let order_amount
+          order.then(function (result) {
+
+            order_amount = result.amount
+
+
+            const paymentIntent =  stripe.paymentIntents.create({
+              amount: order_amount,
+              currency: 'usd',
+              payment_method_types: ['card'],
+            });
+
+            paymentIntent.then(function (resultint){
+
+              let response = {order: result, intent: resultint}
+              callback(response, resultint);
+
+            });
+
+          });
+        });
+      }else{
+
+        let customerObj = customers.data[0];
+
+        const order = stripe.orders.create({
+          currency: 'usd',
+          email: orderdetails.customer.email,
+          items: products_ar,
+          customer: customerObj.id
+
+        });
+
+        let order_amount
+        order.then(function (result) {
+
+          order_amount = result.amount
+
+
+          const paymentIntent =  stripe.paymentIntents.create({
+            amount: order_amount,
+            currency: 'usd',
+            payment_method_types: ['card'],
+          });
+
+          paymentIntent.then(function (resultint){
+
+            let response = {order: result, intent: resultint}
+            callback(response, resultint);
+
+          });
+
+        });
+
+      }
     }
-
-    stripe.customers.list(
-        { limit: 1, email: orderdetails.customer.email },
-        function(err, customers) {
-            if(err || customers.data.length === 0){
-                stripe.customers.create({
-                    email: orderdetails.customer.email,
-                }, async function (err, customer) {
-                    let customerObj = customer;
-
-                    const order = stripe.orders.create({
-                        currency: 'usd',
-                        email: orderdetails.customer.email,
-                        items: products_ar,
-                        customer: customerObj.id
-
-                    });
-
-                    let order_amount
-                    order.then(function (result) {
-
-                        order_amount = result.amount
-
-
-                        const paymentIntent =  stripe.paymentIntents.create({
-                            amount: order_amount,
-                            currency: 'usd',
-                            payment_method_types: ['card'],
-                        });
-
-                        paymentIntent.then(function (resultint){
-
-                            let response = {order: result, intent: resultint}
-                            callback(response, resultint);
-
-                        });
-
-                    });
-                });
-            }else{
-
-                let customerObj = customers.data[0];
-
-                const order = stripe.orders.create({
-                    currency: 'usd',
-                    email: orderdetails.customer.email,
-                    items: products_ar,
-                    customer: customerObj.id
-
-                });
-
-                let order_amount
-                order.then(function (result) {
-
-                    order_amount = result.amount
-
-
-                    const paymentIntent =  stripe.paymentIntents.create({
-                        amount: order_amount,
-                        currency: 'usd',
-                        payment_method_types: ['card'],
-                    });
-
-                    paymentIntent.then(function (resultint){
-
-                        let response = {order: result, intent: resultint}
-                        callback(response, resultint);
-
-                    });
-
-                });
-
-            }
-        }
-    );
-
-
-
+  );
 }
 
 controller.payment = async function (params, callback) {
@@ -2330,41 +2415,45 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
         }
       });
 
-        } else {
-            if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
-                // hopefully, users without pareto shouldn't get here now.
-                const error = ErrorHandler.backendErrorList('b3');
-                error.systemMessage = err.message? err.message: err;
-                error.address = addressess;
-                callback(error);
-            } else {
-                const multi = redisClient.multi();
-                for (let i = 0; i < results.length; i = i + 1) {
-                    if (results[i]) {
-                        multi.hgetall(results[i].rank + "");
-                    }
-                }
-                multi.hgetall("maxRank");
-                multi.hgetall("minScore");
-                multi.exec(function (err, results) {
-                    if (err) {
-                        const error = ErrorHandler.backendErrorList('b4');
-                        error.systemMessage = err.message? err.message: err;
-                        error.address = addressess;
-                        return callback(error);
-                    }
-                    // return the cached ranking
-                    const maxRank = results[results.length-2];
-                    const minScore = results[results.length-1];
+    } else {
+      if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
+        // hopefully, users without pareto shouldn't get here now.
+        const error = ErrorHandler.backendErrorList('b3');
+        error.systemMessage = err.message ? err.message : err;
+        error.address = addressess;
+        callback(error);
+      } else {
+        const multi = redisClient.multi();
+        for (let i = 0; i < results.length; i = i + 1) {
+          if (results[i]) {
+            multi.hgetall(results[i].rank + "");
+          }
+        }
+        multi.hgetall("maxRank");
+        multi.hgetall("minScore");
+        multi.exec(function (err, results) {
+          if (err) {
+            const error = ErrorHandler.backendErrorList('b4');
+            error.systemMessage = err.message ? err.message : err;
+            error.address = addressess;
+            return callback(error);
+          }
+          // return the cached ranking
+          const maxRank = results[results.length - 2];
+          const minScore = results[results.length - 1];
 
-                    results = results.slice(0,-2);
-                    if(maxRank && minScore){
-                        results = results.map(it =>{it.maxRank = maxRank.rank; it.minScore = minScore.score; return it });
-                    }
+          results = results.slice(0, -2);
+          if (maxRank && minScore) {
+            results = results.map(it => {
+              it.maxRank = maxRank.rank;
+              it.minScore = minScore.score;
+              return it
+            });
+          }
 
-                    return callback(null, results);
-                });
-            }
+          return callback(null, results);
+        });
+      }
 
     }
 
