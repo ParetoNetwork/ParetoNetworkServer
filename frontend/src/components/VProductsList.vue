@@ -1,12 +1,12 @@
 
 
   <template>
-      <div>
+      <div class="container">
           <div class='products'>
               <div v-for='(product, index) in productsDataList'  :class="'product'">
 
-                  <div class='name'>{{ product.name }}</div>
-                  <div class='desc'>{{product.description }}</div>
+                  <div class='name'>{{ product.attributes.name }}</div>
+                  <div class='desc'>{{product.attributes.description }}</div>
                   <div class='price'>$ {{product.price / 100}}</div>
                   <button @click='addToCart(product, index)'>Add to Cart</button><br><br></div>
 
