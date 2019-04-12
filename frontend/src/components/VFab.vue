@@ -1,11 +1,35 @@
 <template>
-    <a href="/checkout" class="floatingab"></a>
+    <a v-if="products_in" href="/checkout" class="floatingab"></a>
 </template>
 
 <script>
+
+    import { mapActions, mapState } from 'vuex';
+
     export default {
-        name: 'VFab'
+        name: 'VFab',
+        mounted: function(){
+
+            let cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
+
+            if (cart){
+                this.$store.dispatch('resetShoppingCart')
+                for (var i = 0; i < cart.length; i++) {
+
+                    this.$store.dispatch('addToCart', cart[i]);
+                }
+            }
+
+        },
+        computed: {
+            ...mapState(['shoppingCart']),
+            products_in: function () {
+                this.cart = this.shoppingCart;
+                return this.shoppingCart.length > 0;
+            }
+        }
     };
+
 </script>
 
 <style scoped>
