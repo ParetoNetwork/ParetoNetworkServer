@@ -119,24 +119,22 @@
           .style("cursor", function (d) {
             return d.children ? "pointer" : "default"
           })
-          .on("click", d => d.children? click(d) : redirect(d));
+          .on("click", d => click(d));
 
         path.append("title")
           .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
 
         path.filter(d => d.children)
           .style("cursor", "pointer")
-          .on("click", d => d.children? click(d) : redirect(d));
+          .on("click", d => click(d));
 
         g.selectAll(".node")
           .append("text")
           .attr("class", "name")
           .style("fill", "#000")
-          .attr("transform", function (d) {
-            return "translate(" + arc.centroid(d) + ")";
-          })
+          .attr("transform", d => labelTransform(d))
           .attr("dx", "-20") // radius margin
-          .attr("dy", ".5em") // rotation align
+          .attr("dy", ".35em") // rotation align
           .attr("cursor", function (d) {
             return d.children ? "pointer" : "default"
           })
@@ -145,15 +143,13 @@
             return d.data.name;
           })
           .attr('display', d => textFits(d) ? null : 'none')
-          .on("click", d => d.children? click(d) : redirect(d));
+          .on("click", d => click(d));
 
         g.selectAll(".node")
           .append("text")
           .attr("class", "sizeText")
           .style("fill", "#000")
-          .attr("transform", function (d) {
-            return "translate(" + arc.centroid(d) + ")";
-          })
+          .attr("transform", d => labelTransform(d))
           .attr("dx", "-20") // radius margin
           .attr("dy", "20") // rotation align
           .attr("cursor", "pointer")
@@ -202,20 +198,21 @@
                   const sizeTransition = sizeText.transition().duration(750);
 
                   //Transition for the size label (rewards)
-                  sizeTransition.attr("transform", function (d) {
-                      return "translate(" + arc.centroid(path.__data__) + ")";
-                    });
-
-                  text.transition().duration(750)
-                    .attr("transform", function (d) {
-                      return "translate(" + arc.centroid(path.__data__) + ")";
-                    });
+                  sizeTransition.attr("transform", labelTransform(path.__data__));
+                  text.transition().duration(750).attr("transform", labelTransform(path.__data__));
                 }
               }, 750);
               return function () {
                 return arc(e);
               };
             });
+        }
+
+        function labelTransform(d) {
+          const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+          const y = (d.y0 + d.y1) / 2 * radius;
+          //return `translate(${arc.centroid(d)}) rotate(${x-(90/2)})`;
+          return `translate(` + arc.centroid(d) + `)`;
         }
 
         function redirect(d){
