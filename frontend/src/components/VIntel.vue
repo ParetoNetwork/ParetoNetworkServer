@@ -110,7 +110,8 @@
         'showModalSign',
         'showModalLoginOptions',
         'showModalLedgerNano',
-        'showModalOnboarding'])
+        'showModalOnboarding',
+        'signalWs'])
     },
     mounted: function () {
       AuthService.auth(() => {
@@ -126,7 +127,7 @@
       });
     },
     methods: {
-      ...mapMutations(['intelEnter', 'iniWs']),
+      ...mapMutations(['intelEnter', 'iniWs', 'iniSignalWs']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
       },
@@ -199,15 +200,15 @@
                 res => {
                   this.user = res;
                   this.block = res.block;
-                  profileService.generateAndSendSignedKeys(success => {
-                    // TODO
+                  profileService.generateAndSendSignedKeys(response => {
+                    this.signalSocketMessage(response);
                   },
-                  error => {
-                    console.log(error);
+                  err => {
+                    console.log(err);
                   });
                 },
                 error => {
-                  console.log('Could not retrieve profile');
+                  console.log('Could not retrieve profile ', error);
                 }
         );
       },
@@ -250,6 +251,26 @@
           this.primalLoad = true;
           this.socketConnection();
           this.requestCall();
+        }
+      },
+      socketSignalConnection() {
+        if (!this.signalWs) {
+          this.iniSignalWs();
+        }
+      },
+      signalSocketMessage(params) {
+        this.socketSignalConnection();
+        let wss = this.signalWs;
+        this.signalWs.onopen = function open() {
+          wss.send(JSON.stringify({address: params.address}));
+        };
+        this.signalWs.onmessage = (response) => {
+          try {
+            const data = JSON.parse(response.data);
+            profileService.storeKeys(data);
+          } catch (e) {
+            console.log(e); // TODO
+          }
         }
       }
     }

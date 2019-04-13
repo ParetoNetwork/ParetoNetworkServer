@@ -583,8 +583,8 @@ controller.postContent = function (req, callback) {
 
 };
 
-controller.getKeysFromProfile = function (profile, callback) {
-  ParetoProfileKey.findOne({address : body.address}, function (err, profileKey) {
+controller.getKeysFromProfile = function (address, callback) {
+  ParetoProfileKey.findOne({address : address}, function (err, profileKey) {
     if (err) {
       if (callback && typeof callback === "function") {
         callback(err);
@@ -594,7 +594,7 @@ controller.getKeysFromProfile = function (profile, callback) {
         callback(null, {KEY_DATA: profileKey}); // TODO
       }
     }
-  }).exec(callback);
+  });
 };
 
 
@@ -611,7 +611,6 @@ controller.saveKeys = function (body, callback) {
             keys: body.keys,
             deviceId: body.deviceId,
             profile: profile._id,
-            type: 'profile',
             address: profile.address
           });
           ProfileKey.save((err, savedProfileKey) => {
@@ -621,21 +620,7 @@ controller.saveKeys = function (body, callback) {
               }
             } else {
               if (callback && typeof callback === "function") {
-                let ServerProfileKey = new ParetoProfileKey({
-                  keys: body.keys,
-                  deviceId: body.deviceId,
-                  profile: profile._id,
-                  type: 'server',
-                  address: profile.address
-                });
-                ServerProfileKey.save((er, savedServerProfileKey) => {
-                  if (callback && typeof callback === "function") {
-                    callback(er);
-                  }
-                  else{
-                    callback(null, {PROFILE_KEY_ID: savedProfileKey.id, SERVER_KEY_ID: savedServerProfileKey._id});
-                  }
-                });
+                callback(null, {PROFILE_KEY_ID: savedProfileKey.id, address: profile.address});
               }
             }
           })

@@ -65,7 +65,8 @@ const store = new Vuex.Store({
     signType: (window.localStorage.getItem('signType')) || 'Metamask',
     ws: null,
     shoppingCart: [],
-    showshopping: false
+    showshopping: false,
+    signalWs: null,
   },
   mutations: {
     addReward(state, data) {
@@ -117,6 +118,8 @@ const store = new Vuex.Store({
       state.makingLogin = false;
     }, iniWs(state) {
       state.ws = new WebSocket(Environment.webSocketURL);
+    }, iniSignalWs(state) {
+      state.signalWs = new WebSocket(Environment.signalWebSocketURL);
     }, addTransaction(state, item) {
       if( !state.pendingTransactions.map(it=>{return it.txHash}).includes(item.txHash)  ){
           state.pendingTransactions.unshift(item);

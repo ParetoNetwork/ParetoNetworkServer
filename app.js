@@ -951,4 +951,61 @@ app.initializeWebSocket = function (server) {
 
 }
 
+app.initializeLibSignalSocket = function (server) {
+  const WebSocket = require('ws');
+  const http = require('http');
+  const wss = new WebSocket.Server(server);
+
+  /**
+   * We need these functions in order to prevent issues with the sockets ‘alive’ status and improve performance.
+   */
+  function noop() {
+  }
+
+  function heartbeat() {
+    this.isAlive = true;
+  }
+
+  wss.on('connection', function connection(ws, req) {
+    ws.on('close', () => {
+      console.log('close libsignal websocket')
+    })
+    ws.on('error', (error) => {
+      console.log(error)
+    })
+    ws.on('message', function incoming(message) {
+      message = JSON.parse(message);
+
+      try {
+        controller.getKeysFromProfile(message.address, function (err, result) {
+          if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+
+          } else {
+            wss.clients.forEach(function each(client) {
+              if (client.isAlive === false) return client.terminate();
+              client.isAlive = false;
+              client.ping(noop);
+              if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({keys: result, address: message.address})); //TODO
+              }
+            });
+          }
+        });
+
+      }
+      catch(e){
+        const error = ErrorHandler.backendErrorList('b28');
+        error.systemMessage = e.message ? e.message : e;
+        console.log(JSON.stringify(error));
+      }
+    });
+
+    ws.isAlive = true;
+    ws.on('pong', heartbeat);
+    ws.user = req.user;
+  });
+
+}
+
 module.exports = {app: app, controller: controller};

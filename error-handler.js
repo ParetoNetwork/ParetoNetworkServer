@@ -261,6 +261,12 @@ errorHandler.backendErrorList = function(code){
             userMessage: '',
             priority: 1
         },
+        b28: {
+            code: 'b28',
+            description: 'Error initializing Pareto libsignal websocket',
+            userMessage: '',
+            priority: 1
+        } ,
     };
     return error[code];
 };

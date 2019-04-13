@@ -16,6 +16,7 @@ function start() {
     const app =  require('./app.js').app;
     const server = app.listen(process.env.PORT || 3000, function () {
         app.initializeWebSocket(server);
+        app.initializeLibSignalSocket({port: 8082});
         console.log('Pareto Network ranking app listening on port 3000!');
     });
 

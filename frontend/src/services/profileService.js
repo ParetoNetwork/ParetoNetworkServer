@@ -46,6 +46,11 @@ export default class profileService {
         if(! cachedProfileAddress){
             onError(errorService.sendErrorMessage('f29', {}));
         }
+        if (! localStorage.getItem("profileKeys") !== null) {
+            return onSuccess({
+                address: cachedProfileAddress
+            });
+        }
         const Proteus = require('proteus-hd');
         const base64js = require('base64-js');
         const preKeyId = Math.floor(Math.random() * 65535) + 0;  // TODO
@@ -61,12 +66,22 @@ export default class profileService {
             profile: cachedProfileAddress
         }).then(res => {
             if(res.data.data) {
-                window.localStorage.setItem('profileKeys', JSON.stringify(keys)); // TODO
+                window.localStorage.setItem('profileKeys', JSON.stringify(prekeyBundle)); // TODO
                 return onSuccess(res.data.data);
             }
             else
                 return onError(errorService.sendErrorMessage('f37', res.data.message));
         });
+    }
+
+    static storeKeys(keyData){
+        const cachedProfileAddress = this.getProfile.profile.address;
+        if(! cachedProfileAddress){
+            onError(errorService.sendErrorMessage('f29', {}));
+        }
+        if(cachedProfileAddress != keyData.address){
+            window.localStorage.setItem(keyData.address, JSON.stringify(keyData.keys));
+        }
     }
 
     static updateConfig(onFinish) {
