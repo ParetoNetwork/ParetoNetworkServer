@@ -1,6 +1,7 @@
 import errorService from "./errorService";
 import http from "./HttpService";
 import Web3 from "web3";
+import qs from "qs";
 
 export default class PurchaseService {
 
@@ -15,19 +16,20 @@ export default class PurchaseService {
         }
     };
 
-    static  generateAddress() {
+    static  generateAddress (charge_id, timestamp) {
         let pk = localStorage.getItem("privateKey");
 
         if (!pk) {
-            const web3 =  new Web3( new Web3.providers.HttpProvider(PurchaseService.networks[localStorage.getItem('netWorkId')].https));
-            console.log(web3.eth);
-            const userInfo = web3.eth.accounts.create();
-            console.log(userInfo.privateKey);
-            localStorage.setItem("privateKey", btoa(userInfo.privateKey.slice(2)));
+            const bip39 = require('bip39');
+            const hdkey = require('ethereumjs-wallet/hdkey');
+            const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(charge_id+timestamp));
+            const hdwallet = hdkey.fromMasterSeed(seed);
+            const wallet = hdwallet.derivePath(`m/44'/60'/0'/0`).deriveChild(0).getWallet() ;
+            localStorage.setItem("privateKey", btoa(wallet.getPrivateKey()));
         }
     }
 
-    static async makeDeposit(amount, order_id, callback ) {
+    static async makeDeposit( callback ) {
 
 
         const  walletProvider = PurchaseService.getWalletProvider();
@@ -46,7 +48,6 @@ export default class PurchaseService {
                 localStorage.getItem('paretoAddress')
             );
             const wallet = walletProvider.wallet;
-            let amountPareto = web3.utils.toWei(amount.toString(), "ether");
             let gasPrice = await web3.eth.getGasPrice();
 
             let totalTokensToApprove = 10000000000;
@@ -87,8 +88,8 @@ export default class PurchaseService {
                                     try{
                                         const r = await http.post("/v1/updateTransaction", {txHash: hash, order_id: order_id, processed: true });
                                     } catch (e) { }
-                                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                                    callback(null, receipt);
+                                    sign(walletProvider, callback)
+
                                 });
                             })
                             .once("error", err => {
@@ -112,6 +113,41 @@ export default class PurchaseService {
 
     }
 
+    static sign(walletProvider, callback){
+        const from = walletProvider.wallet.getAddressString();
+        const params = [walletProvider.web3.utils.toHex('Pareto'), from];
+        const method = 'personal_sign';
+        walletProvider.web3.sendAsync({method,params,from}, function(err, data) {
+            if(err){return callback(err)}
+            let jsonData = {
+                data: msgParams = [
+                    {
+                        type: 'string',
+                        name: 'Message',
+                        value: 'Pareto'
+                    }
+                ],
+                owner: from,
+                result: data.result
+            };
+
+            http.post('/v1/sign', qs.stringify(jsonData), {
+                headers: {
+                    'accept': 'application/json',
+                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                }
+            }).then(response => {
+                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                callback(null, response);
+
+            }).catch(error => {
+                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                callback(error);
+
+            });
+
+        });
+    }
 
     static getAddress(){
         const Wallet = require('ethereumjs-wallet');
@@ -165,21 +201,26 @@ export default class PurchaseService {
     }
 
 
-    static async initTransactionFlow(order_id, onSuccess, onError){
-        PurchaseService.generateAddress();
+    static async initTransactionFlow(order_id, charge_id,onSuccess, onError){
         try{
-            const address = PurchaseService.getAddress();
-            console.log(address);
-            const res = await  http.post("/v1/maketransaction", {order_id: order_id, address: address });
-            console.log(res.data.data);
-            const amount = res.data.data.amount;
-            const eth = res.data.data.eth;
-            await PurchaseService.makeDeposit(amount, order_id, (err, response)=>{
-                if(err){ return onError(err)}
-                onSuccess(response);
-            })
+            const res = await  http.post("/v1/getOrder", {order_id: order_id });
+            console.log(res);
+            if(res.data.success){
+                PurchaseService.generateAddress(charge_id, res.data.data.timestamp);
+                const address = PurchaseService.getAddress();
+                console.log(address);
+                await PurchaseService.makeDeposit( (err, response)=>{
+                    if(err){ return onError(err)}
+                    onSuccess(response);
+                })
+            }else{
+                setTimeout(function () {
+                    PurchaseService.initTransactionFlow(order_id, charge_id,onSuccess, onError);
+                }, 1000);
+            }
 
         }catch (e) {
+            console.log(e);
             onError(e);
         }
 

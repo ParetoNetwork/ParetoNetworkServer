@@ -277,6 +277,14 @@ controller.transactionFlow= async function(address, order_id, callback){
 
 }
 
+controller.generateAddress = function (charge_id, timestamp){
+    const bip39 = require('bip39');
+    const hdkey = require('ethereumjs-wallet/hdkey');
+    const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(charge_id+timestamp));
+    const hdwallet = hdkey.fromMasterSeed(seed);
+    return  hdwallet.derivePath(`m/44'/60'/0'/0` ).deriveChild(0).getWallet().getAddressString();
+}
+
 
 controller.updateTransaction = function (body, callback) {
 
@@ -295,6 +303,21 @@ controller.updateTransaction = function (body, callback) {
     }).catch(err => {
         callback(null, err);
     });
+}
+
+
+controller.getOrder = async function (order_id, callback){
+    try{
+        const order  = await ParetoPayment.findOne({order_id: order_id, processed: false}).exec();
+        if(order){
+            callback(null, order);
+        }else{
+            callback({});
+        }
+    }catch (e) {
+        callback(e);
+    }
+
 }
 
 /**
@@ -2056,9 +2079,16 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 controller.event_payment = async function (event, callback) {
     let charge = event;
     if(charge.type === "payment_intent.succeeded"){
-        await Payment.create({ email: charge.data.object.metadata.email_customer, order_id: charge.data.object.id },
+        const timestamp  = (new Date()).getTime();
+        await Payment.create({ email: charge.data.object.metadata.email_customer, order_id: charge.data.object.id , timestamp: timestamp},
              function (err, payment) {
-                 callback(err, payment)
+                    //Charge ID, charge.id?
+                 controller.transactionFlow(controller.generateAddress(charge.id ,timestamp) ,charge.data.object.id, function (error, result){
+                     if(error){console.log(error)}
+                     if(result){console.log(result)}
+                 });
+
+                 callback(err, payment);
             });
 
     }

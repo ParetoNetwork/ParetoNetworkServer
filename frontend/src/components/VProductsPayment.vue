@@ -188,9 +188,19 @@
                         window.localStorage.removeItem('payment_id');
                         window.localStorage.removeItem('customer');
                         window.localStorage.removeItem('customer_details');
+                        //Review charge_id, order_id
+                        PurchaseService.initTransactionFlow(result.charge_id, result.order_id,
+                            response => {
+
+                                self.$router.push({path: '/intel'});
+                            },
+                            err => {
+                                console.log("error on purchase")
+                            }
+                        );
 
 
-                        self.$router.push({path: '/thankyou-payment'});
+                       // self.$router.push({path: '/thankyou-payment'});
 
 
                         /*  setTimeout(function () {

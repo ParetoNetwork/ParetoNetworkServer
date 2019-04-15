@@ -422,9 +422,9 @@ app.post('/v1/createorder', function (req, res) {
 });
 
 
-app.post('/v1/maketransaction', function (req, res) {
 
-    controller.transactionFlow(req.body.address, req.body.order_id , function (err, result) {
+app.post('/v1/getOrder', function (req, res) {
+    controller.getOrder(req.body.order_id , function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {
