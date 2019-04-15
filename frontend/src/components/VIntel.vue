@@ -23,7 +23,7 @@
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
                 <div class="col-md-3 col-lg-4 order-3 px-0 pb-5 py-3" id="chart-row">
-                    <VHandlerSunsburstChart :user="user"></VHandlerSunsburstChart>
+                    <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData"></VHandlerSunsburstChart>
                 </div>
             </div>
         </div>
@@ -60,7 +60,8 @@
   import ModalLedgerNano from './Modals/VModalLedgerNano';
   import ModalSplashOnboarding from './Modals/VModalSplashOnboarding';
 
-  import {information} from '../utils/onboardingInfo';
+  import {information, sunsburstData} from '../utils/onboardingInfo';
+
   import VChartSunburst from './VChartSunburst';
 
   import VFab from './VFab';
@@ -92,6 +93,7 @@
         block: 0,
         etherscanUrl: window.localStorage.getItem('etherscan'),
         information: '',
+        sunsburstData: '',
         loading: true,
         loggedUser: false,
         paretoAddress: window.localStorage.getItem('paretoAddress'),
@@ -124,10 +126,11 @@
         this.main();
         this.loggedUser = true;
       }, () => {
+        // The user is not logged, so component loads the predefined information for the onboarding
         this.information = information;
+        this.sunsburstData = sunsburstData;
         this.loggedUser = false;
         this.primalLoad = true;
-
         this.user = information.user;
       });
     },

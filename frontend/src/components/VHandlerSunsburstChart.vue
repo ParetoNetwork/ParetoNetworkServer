@@ -11,7 +11,7 @@
       VChartSunburst
     },
     props: [
-      "user", "pos"
+      "user", "pos", "sunsburstData"
     ],
     data() {
       return {
@@ -22,9 +22,20 @@
       }
     },
     name: "VHandlerSunsburstChart",
+    mounted(){
+      console.log(this.sunsburstData)
+      if(this.sunsburstData){
+        this.nodeData = this.sunsburstData;
+      }
+      
+      if(this.user){
+        this.getChartInformation();
+      }
+    },
     methods: {
       getChartInformation() {
         profileService.getChartInfo(res => {
+          console.log(res);
           this.nodeData.name = this.user.alias;
           res.forEach(intel => {
             let children = intel.rewardList.map(reward => (
@@ -52,7 +63,7 @@
     watch: {
       user() {
         //Loads chart information when user props loads
-        this.getChartInformation()
+        this.getChartInformation();
       }
     }
   }
