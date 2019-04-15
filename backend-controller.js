@@ -2058,14 +2058,9 @@ controller.event_payment = async function (event, callback) {
     if(charge.type === "payment_intent.succeeded"){
         await Payment.create({ email: charge.data.object.metadata.email_customer, order_id: charge.data.object.id },
              function (err, payment) {
-
-
+                 callback(err, payment)
             });
-        await stripe.orders.update(charge.data.object.metadata.order_id, {
-            status: 'paid',
 
-        });
-        //callback(err, payment)
     }
 }
 
@@ -2092,9 +2087,57 @@ controller.listProducts = async function (callback) {
 
 }
 
-controller.createOrder = async function (orderdetails, callback) {
+controller.createOrder = function (orderdetails, callback) {
 
-    let customerObj = '';
+    this.create_customer(orderdetails, function (customerObj) {
+        let products_ar = [];
+        for(var product of orderdetails.order) {
+            products_ar.push(
+                {
+                    type: 'sku',
+                    parent: product.id,
+                    quantity: product.quantity
+                }
+            )
+        }
+
+        const order = stripe.orders.create({
+            currency: 'usd',
+            email: orderdetails.customer.email,
+            items: products_ar,
+            customer: customerObj.id
+
+        });
+
+        let order_amount;
+        order.then(function (result) {
+
+            order_amount = result.amount;
+            let matadata_pi = {
+                order_id:  result.id,
+                email_customer: orderdetails.customer.email,
+            };
+            const paymentIntent =  stripe.paymentIntents.create({
+                amount: order_amount,
+                currency: 'usd',
+                payment_method_types: ['card'],
+                metadata: matadata_pi,
+                customer: customerObj.id
+            });
+
+            paymentIntent.then(function (resultint){
+
+                let response = {order: result, intent: resultint}
+                callback(response, resultint);
+
+            });
+
+        });
+    });
+
+}
+
+controller.create_customer = async function(orderdetails, callback){
     await stripe.customers.list(
         { limit: 1, email: orderdetails.customer.email },
         function(err, customers) {
@@ -2102,64 +2145,16 @@ controller.createOrder = async function (orderdetails, callback) {
                 stripe.customers.create({
                     email: orderdetails.customer.email,
                 }, function (err, customer) {
-                    customerObj = customer;
+                    callback(customer);
                 });
 
 
             }else{
-                   customerObj = customers.data[0];
+                callback(customers.data[0]);
             }
 
         }
     );
-
-    let products_ar = [];
-    for(var product of orderdetails.order) {
-        products_ar.push(
-            {
-                type: 'sku',
-                parent: product.id,
-                quantity: product.quantity
-            }
-        )
-    }
-
-    const order = stripe.orders.create({
-        currency: 'usd',
-        email: orderdetails.customer.email,
-        items: products_ar,
-        customer: customerObj.id
-
-    });
-
-    let order_amount;
-    order.then(function (result) {
-
-        order_amount = result.amount;
-        let matadata_pi = {
-            order_id:  result.id,
-            email_customer: orderdetails.customer.email,
-        };
-        const paymentIntent =  stripe.paymentIntents.create({
-            amount: order_amount,
-            currency: 'usd',
-            payment_method_types: ['card'],
-            metadata: matadata_pi,
-            customer: customerObj.id
-        });
-
-        paymentIntent.then(function (resultint){
-
-            let response = {order: result, intent: resultint}
-            callback(response, resultint);
-
-        });
-
-    });
-
-
-
-
 }
 
 

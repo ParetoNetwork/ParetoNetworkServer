@@ -174,10 +174,13 @@
                         }
                     }
                 ).then(function(result) {
+                    let displayError = document.getElementById('card-errors');
                     if (result.error) {
                        self.waiting_payment = false;
-                       alert("error on payment")
+                       displayError.textContent = result.error.message;
+
                     } else {
+                        displayError.textContent = '';
                         window.localStorage.setItem('ShoppingCart', '');
                         self.$store.dispatch('resetShoppingCart');
                         window.localStorage.removeItem('order_id');
@@ -268,6 +271,9 @@
 #payment h4{
     color: black;
 }
+   #card-errors{
+       color: #e54144;
+   }
 
     .main-wrapper #vue {
 
