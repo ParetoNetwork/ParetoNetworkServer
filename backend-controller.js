@@ -597,6 +597,10 @@ controller.getKeysFromProfile = function (address, callback) {
   });
 };
 
+controller.getKeysForAllProfiles = function (address, callback) {
+  ParetoProfileKey.find({address: {$ne : address}}).select('address keys')
+      .exec(callback);
+};
 
 controller.saveKeys = function (body, callback) {
   ParetoProfile.findOne({address : body.profile}, function (e, profile) {

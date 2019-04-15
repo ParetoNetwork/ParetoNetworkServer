@@ -53,15 +53,15 @@ export default class profileService {
         }
         const Proteus = require('proteus-hd');
         const base64js = require('base64-js');
-        const preKeyId = Math.floor(Math.random() * 65535) + 0;  // TODO
-        const identity = Proteus.keys.IdentityKeyPair.new();
+        const preKeyId = Math.floor(Math.random() * 65535) + 0;
+        const identity = Proteus.keys.IdentityKeyPair.new();  // Public and Private KeyPair
         const preKey = Proteus.keys.PreKey.new(preKeyId);
-        const fingerprint = identity.public_key.fingerprint();
-        const prekeyBundle = Proteus.keys.PreKeyBundle.signed(identity, preKey);
+        const signedPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey)
+        /*const fingerprint = identity.public_key.fingerprint();
         const serializedIdentity = identity.serialise();
-        const encodedSerializedIdentity = base64js.fromByteArray(new Uint8Array(serializedIdentity));
+        const encodedSerializedIdentity = base64js.fromByteArray(new Uint8Array(serializedIdentity));*/
         return http.post('/v1/saveKeys', {
-            keys: prekeyBundle,
+            keys: signedPreKey,
             deviceId: 0, // TODO
             profile: cachedProfileAddress
         }).then(res => {
@@ -82,6 +82,25 @@ export default class profileService {
         if(cachedProfileAddress != keyData.address){
             window.localStorage.setItem(keyData.address, JSON.stringify(keyData.keys));
         }
+    }
+
+    static getKeysForAllProfiles(onSuccess, onError){
+        const cachedProfileAddress = this.getProfile.profile.address;
+        if(! cachedProfileAddress){
+            onError(errorService.sendErrorMessage('f29', {}));
+        }
+        return http.post('/v1/getAllKeys', {
+            profile: cachedProfileAddress
+        }).then(res => {
+            if(res.data.data) {
+                for (var i = 0; i < res.data.data.length; i++) {
+                    this.storeKeys(res.data.data[i]);
+                }
+                return onSuccess(res.data.data);
+            }
+            else
+                return onError(errorService.sendErrorMessage('f38', res.data.message));
+        });
     }
 
     static updateConfig(onFinish) {

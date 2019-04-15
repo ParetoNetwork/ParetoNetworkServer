@@ -7,7 +7,6 @@ var profileKeysSchema = new Schema({
 	address : String,
 	keys : Schema.Types.Mixed,
 	dateCreated: { type: Date, default: Date.now },
-
 }, { collection : 'profile-key' });
 
 profileKeysSchema.index({ address: 1 }, { unique: true });

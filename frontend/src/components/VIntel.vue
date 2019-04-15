@@ -201,7 +201,8 @@
                   this.user = res;
                   this.block = res.block;
                   profileService.generateAndSendSignedKeys(response => {
-                    this.signalSocketMessage(response);
+                    // this.signalSocketMessage(response);
+                    profileService.getKeysForAllProfiles(res => {}, er => {});
                   },
                   err => {
                     console.log(err);

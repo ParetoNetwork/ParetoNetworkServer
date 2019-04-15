@@ -775,11 +775,19 @@ app.post('/v1/updateuser', function (req, res) {
   });
 });
 
-app.post('/v1/getKeysFromProfile', function (req, res) {
+app.post('/v1/getAllKeys', function (req, res) {
   if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
     res.status(200).json(ErrorHandler.bodyMissingError())
   } else {
-    // TODO
+    controller.getKeysForAllProfiles(req.body.address, function (err, result) {
+      if(err){
+        res.status(200).json(ErrorHandler.getError(err));
+      }
+      else{
+        res.status(200).json(ErrorHandler.getSuccess(result));
+      }
+      return result;
+    });
   }
 });
 
