@@ -33,19 +33,6 @@ export default class productService {
         });
     }
 
-    static payOrder(token, order , user_email, customer ,onSuccess, onError) {
-        var params = {token: token, order: order, email: user_email, customer_id: customer}
-        http.post('/v1/payment', params).then(
-            res => {
-                if(res){
-                    return onSuccess(res.data);
-                }else{
-                    return onError(errorService.sendErrorMessage('f28', res));
-                }
-            }).catch(error => {
-            return onError(errorService.sendErrorMessage('f28', error));
-        });
-    }
 
     static showShopping(onSuccess, onError){
 
