@@ -159,7 +159,7 @@
           .attr("cursor", "pointer")
           .text(function (d) {
             if(d.data.reward)
-            return 'Reward: ' + d.data.reward;
+              return 'Reward: ' + d.data.reward;
           })
           .attr('display', d => textFits(d) ? null : 'none');
 
@@ -203,8 +203,8 @@
 
                   //Transition for the size label (rewards)
                   sizeTransition.attr("transform", function (d) {
-                      return "translate(" + arc.centroid(path.__data__) + ")";
-                    });
+                    return "translate(" + arc.centroid(path.__data__) + ")";
+                  });
 
                   text.transition().duration(750)
                     .attr("transform", function (d) {
