@@ -421,17 +421,6 @@ app.post('/v1/createorder', function (req, res) {
     });
 });
 
-app.post('/v1/payment', function (req, res) {
-
-    controller.payment(req.body , function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
-
 
 app.post('/v1/maketransaction', function (req, res) {
 
