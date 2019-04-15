@@ -175,12 +175,41 @@ controller.getParetoCoinMarket = function (callback) {
  * Get a wallet provider to make transactions
  * @return {{engine: Web3ProviderEngine, web3: Web3}}
  */
-controller.getWalletProvider = function () {
+controller.getParetoWalletProvider = function () {
     const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
     const ProviderEngine = require('web3-provider-engine');
     const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
     const Wallet = require('ethereumjs-wallet');
-    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DT_ORACLE_SYS, "base64").toString("ascii"), "hex"));
+    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DP_ORACLE_SYS, "base64").toString("ascii"), "hex"));
+    const engine = new ProviderEngine();
+    engine.addProvider(new HookedWalletSubprovider({
+        getAccounts: function(cb){
+            cb(null, [ myWallet.getAddressString()]);
+        },
+        getPrivateKey: function(address, cb){
+            if (address !== myWallet.getAddressString()) {
+                cb(new Error('Account not found'))
+            } else {
+                cb(null, myWallet.getPrivateKey())
+            }
+        }
+    }));
+    engine.addProvider(new WsSubprovider({rpcUrl:  WEB3_WEBSOCKET_URL}));
+    engine.start();
+    return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
+};
+
+
+/**
+ * Get a wallet provider to make transactions
+ * @return {{engine: Web3ProviderEngine, web3: Web3}}
+ */
+controller.getEthereumWalletProvider = function () {
+    const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
+    const ProviderEngine = require('web3-provider-engine');
+    const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
+    const Wallet = require('ethereumjs-wallet');
+    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DE_ORACLE_SYS, "base64").toString("ascii"), "hex"));
     const engine = new ProviderEngine();
     engine.addProvider(new HookedWalletSubprovider({
         getAccounts: function(cb){
@@ -207,7 +236,6 @@ controller.getWalletProvider = function () {
  */
 controller.transactionFlow= async function(address, order_id, callback){
     const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
-    const data = await ParetoPayment.findOneAndUpdate({order_id: order_id},{amount: 10 , processed: false},{upsert: true}).exec();
     ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
         if(payment){
             if(payment.state > 0){
@@ -273,73 +301,120 @@ controller.updateTransaction = function (body, callback) {
  *
  * @param address ToAddress
  * @param amount  amount of pareto that will send to address
- * @param eth    amount of eth that will send to address
+ * @param callback
+ * @return {Promise<void>}
+ */
+controller.makeParetoTransaction = async function(address, amount){
+    return new Promise(async function(resolve, reject) {
+        const  walletProvider = controller.getParetoWalletProvider();
+        try{
+
+            const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
+            const Pareto_Address = process.env.CRED_PARETOCONTRACT;
+            const web3 = walletProvider.web3;
+            const wallet = walletProvider.wallet;
+            const ParetoTokenInstance  = new web3.eth.Contract( Pareto_Token_Schema.abi, Pareto_Address);
+            let gasPrice = await web3.eth.getGasPrice();
+            let amountPareto = web3.utils.toWei(amount.toString(), "ether");
+            let gasApprove = await ParetoTokenInstance.methods
+                .transfer(address, amountPareto)
+                .estimateGas({from: wallet.getAddressString()});
+            ParetoTokenInstance.methods
+                .transfer(address, amountPareto)
+                .send({
+                    from: wallet.getAddressString(),
+                    gas: gasApprove,
+                    gasPrice: gasPrice  * 1.3
+                })
+                .once('transactionHash', function(hash){
+                    controller.waitForReceipt(hash,async  (err, receipt)=> {
+                        if(err){
+                            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                            return  reject(err);
+                        }
+                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                        resolve({amount, eth, hash});
+                    })
+                })
+                .once('error', (err)=>{
+                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                    reject(err);
+                });
+        }catch (e) {
+            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+            reject(e);
+        }
+    });
+
+};
+
+
+/**
+ *
+ * @param address ToAddress
+ * @param amount  amount of eth that will send to address
+ * @param callback
+ * @return {Promise<void>}
+ */
+controller.makeEthTransaction = async function(address, eth){
+    return new Promise(async function(resolve, reject) {
+        const  walletProvider = controller.getEthereumWalletProvider();
+        try{
+
+            const web3 = walletProvider.web3;
+            const wallet = walletProvider.wallet;
+            let amountEther = web3.utils.toWei(eth.toString(), "ether");
+            let gasPrice = await web3.eth.getGasPrice();
+            let gasApprove = await web3.eth.estimateGas({
+                to:address,
+                from: wallet.getAddressString(),
+                value: amountEther});
+            web3.eth.sendTransaction({
+                to:address,
+                from: wallet.getAddressString(),
+                value: amountEther,
+                gas: gasApprove,
+                gasPrice: gasPrice  * 1.3
+            }).once('transactionHash', function(hash){
+                controller.waitForReceipt(hash,async  (err, receipt)=>{
+                    if(err){
+                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                        return  reject(err);
+                    }
+                    resolve(receipt);
+
+                })
+            })
+                .once('error', function(err){
+                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                    reject(err);
+                });
+
+        }catch (e) {
+            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+            reject(e);
+        }
+    });
+
+
+};
+
+
+/**
+ *
+ * @param address ToAddress
+ * @param amount  amount of pareto that will send to address
+ * @param eth  amount of eth that will send to address
  * @param callback
  * @return {Promise<void>}
  */
 controller.makeTransaction = async function(address, amount, eth, callback){
-    const  walletProvider = controller.getWalletProvider();
-    try{
-
-        const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
-        const Pareto_Address = process.env.CRED_PARETOCONTRACT;
-        const web3 = walletProvider.web3;
-        const wallet = walletProvider.wallet;
-        const ParetoTokenInstance  = new web3.eth.Contract( Pareto_Token_Schema.abi, Pareto_Address);
-        let amountPareto = web3.utils.toWei(amount.toString(), "ether");
-        let amountEther = web3.utils.toWei(eth.toString(), "ether");
-        let gasPrice = await web3.eth.getGasPrice();
-        let gasApprove = await web3.eth.estimateGas({
-            to:address,
-            from: wallet.getAddressString(),
-            value: amountEther});
-        web3.eth.sendTransaction({
-            to:address,
-            from: wallet.getAddressString(),
-            value: amountEther,
-            gas: gasApprove,
-            gasPrice: gasPrice  * 1.3
-        }).once('transactionHash', function(hash){
-            controller.waitForReceipt(hash,async  (err, receipt)=>{
-                if(err){
-                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                    return  callback(err);
-                }
-                let gasApprove = await ParetoTokenInstance.methods
-                    .transfer(address, amountPareto)
-                    .estimateGas({from: wallet.getAddressString()});
-                ParetoTokenInstance.methods
-                    .transfer(address, amountPareto)
-                    .send({
-                        from: wallet.getAddressString(),
-                        gas: gasApprove,
-                        gasPrice: gasPrice  * 1.3
-                    })
-                    .once('transactionHash', function(hash){
-                        controller.waitForReceipt(hash,async  (err, receipt)=> {
-                            if(err){
-                                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                                return  callback(err);
-                            }
-                            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                            callback(null, {amount, eth, hash});
-                        })
-                    })
-                    .once('error', (err)=>{
-                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                        callback(err);
-                    });
-            })
-        })
-            .once('error', function(err){
-                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                callback(err);
-            });
-
-    }catch (e) {
-        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+    Promise.all([controller.makeParetoTransaction(address,amount),
+        controller.makeEthTransaction(address,eth)]).then( (r)=>{
+        callback(null, r[0]);
+    }).catch((e)=>{
         callback(e);
-    }
+    })
 };
 
 controller.waitForReceipt = function (hash, cb) {
