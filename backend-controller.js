@@ -1,3 +1,4 @@
+
 const https = require('https');
 const request = require('request');
 const kue = require('kue');
@@ -897,10 +898,10 @@ controller.startWatchApprove = function () {
       fromBlock: 'latest',
       address: PARETO_CONTRACT_ADDRESS,
       topics: ['0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925', null, null]
-    }).on('data', function (log) {
+    }).on('data', async function (log) {
 
     const blockNumber = log.blockNumber;
-    const sender = ["0x" + log.topics[1].substring(26)];
+    const sender = "0x" + log.topics[1].substring(26);
     const txHash = log.transactionHash;
 
     if (blockNumber != null) {
@@ -933,6 +934,43 @@ controller.startWatchApprove = function () {
         console.log(err)
       });
 
+      try{
+          const payment =  await ParetoPayment.findOne({address: sender, processed: false}).exec();
+          const  walletProvider = controller.getEthereumWalletProvider();
+
+          const Intel_Schema = require("./build/contracts/Intel.json");
+          const web3 = walletProvider.web3;
+          const wallet = walletProvider.wallet;
+          const Intel  = new web3.eth.Contract( Intel_Schema.abi, Intel_Schema.networks[ETH_NETWORK].address);
+          if(payment){
+              const paretoAmount = payment.paretoAmount;
+              console.log('ini deposit');
+              let amountPareto = web3.utils.toWei(paretoAmount.toString(), "ether");
+              let gasPrice = await web3.eth.getGasPrice();
+              let gasApprove = await Intel.methods
+                  .makeDeposit(sender, amountPareto)
+                  .estimateGas({from: wallet.getAddressString()});
+              await Intel.methods
+                  .makeDeposit(sender, amountPareto)
+                  .send({
+                      from: wallet.getAddressString(),
+                      gas: gasApprove,
+                      gasPrice: gasPrice * 1.3
+                  })
+                  .once("transactionHash", async (hash) => {
+                      console.log("deposit hash "+hash);
+                      try{
+                          const payment =  await ParetoPayment.findOneAndUpdate({address: sender, processed: false},{txHash: hash}).exec();
+                      } catch (e) { console.log(e)}
+                  })
+                  .once("error", err => {
+                      if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
+                      return callback(err);
+                  });
+          }
+      }catch (e) {
+          console.log(e);
+      }
     }
   });
 }

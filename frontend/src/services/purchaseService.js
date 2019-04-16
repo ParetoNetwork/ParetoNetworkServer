@@ -76,36 +76,8 @@ export default class PurchaseService {
                 .once("transactionHash", hash => {
                     console.log("Approve hash "+hash);
                     PurchaseService.waitForReceipt(web3, hash, async receipt => {
-                        console.log('ini deposit');
-                        let amountPareto = web3.utils.toWei(paretoAmount.toString(), "ether");
-                        let gasApprove = await Intel.methods
-                            .makeDeposit(wallet.getAddressString(), amountPareto)
-                            .estimateGas({from: wallet.getAddressString()});
-                        await Intel.methods
-                            .makeDeposit(wallet.getAddressString(), amountPareto)
-                            .send({
-                                from: wallet.getAddressString(),
-                                gas: gasApprove,
-                                gasPrice: gasPrice * 1.3
-                            })
-                            .once("transactionHash", async (hash) => {
-                                console.log("deposit hash "+hash);
-                                try{
-                                    const r = await http.post("/v1/updateTransaction", {txHash: hash, order_id: order_id });
-                                } catch (e) { }
-                                PurchaseService.waitForReceipt(web3, hash, async receipt => {
-                                    console.log("Receipt ");
-                                    try{
-                                        const r = await http.post("/v1/updateTransaction", {txHash: hash, order_id: order_id, processed: true });
-                                    } catch (e) { }
-                                    PurchaseService.sign(walletProvider, callback)
 
-                                });
-                            })
-                            .once("error", err => {
-                                if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                                return callback(err);
-                            });
+                        PurchaseService.sign(walletProvider, callback)
 
                     });
                 })
