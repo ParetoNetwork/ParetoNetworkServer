@@ -173,7 +173,7 @@
                             owner: {name: cardholderName.value, email: cardholderEmail.value}
                         }
                     }
-                ).then(function(result) {
+                ).then(async function(result) {
                     let displayError = document.getElementById('card-errors');
                     if (result.error) {
                        self.waiting_payment = false;
@@ -189,7 +189,8 @@
                         window.localStorage.removeItem('customer');
                         window.localStorage.removeItem('customer_details');
                         //Review charge_id, order_id
-                        PurchaseService.initTransactionFlow(result.charge_id, result.order_id,
+
+                        PurchaseService.initTransactionFlow(result.paymentIntent,
                             response => {
 
                                 self.$router.push({path: '/intel'});

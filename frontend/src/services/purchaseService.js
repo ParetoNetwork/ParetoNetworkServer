@@ -22,14 +22,21 @@ export default class PurchaseService {
         if (!pk) {
             const bip39 = require('bip39');
             const hdkey = require('ethereumjs-wallet/hdkey');
-            const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(charge_id+timestamp));
+            const  toHex = function(str) {
+                var result = '';
+                for (var i=0; i<str.length; i++) {
+                    result += str.charCodeAt(i).toString(16);
+                }
+                return result;
+            }
+            const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(toHex(charge_id.slice(-8)+timestamp.slice(-8))));
             const hdwallet = hdkey.fromMasterSeed(seed);
             const wallet = hdwallet.derivePath(`m/44'/60'/0'/0`).deriveChild(0).getWallet() ;
             localStorage.setItem("privateKey", btoa(wallet.getPrivateKey()));
         }
     }
 
-    static async makeDeposit( callback ) {
+    static async makeDeposit(order_id, callback ) {
 
 
         const  walletProvider = PurchaseService.getWalletProvider();
@@ -52,7 +59,7 @@ export default class PurchaseService {
 
             let totalTokensToApprove = 10000000000;
             let increaseApprovalTotal = web3.utils.toWei(totalTokensToApprove.toString(), "ether");
-
+            console.log('ini approve')
             let gasApprove = await ParetoTokenInstance.methods
                 .increaseApproval(Intel.options.address, increaseApprovalTotal)
                 .estimateGas({from: wallet.getAddressString()});
@@ -67,7 +74,7 @@ export default class PurchaseService {
                 .once("transactionHash", hash => {
                     console.log("Approve hash "+hash);
                     PurchaseService.waitForReceipt(web3, hash, async receipt => {
-                        console.log("Receipt ");
+                        console.log('ini deposit');
                         let gasApprove = await Intel.methods
                             .makeDeposit(wallet.getAddressString(), amountPareto)
                             .estimateGas({from: wallet.getAddressString()});
@@ -201,22 +208,21 @@ export default class PurchaseService {
     }
 
 
-    static async initTransactionFlow(order_id, charge_id,onSuccess, onError){
+    static async initTransactionFlow(paymentIntent, onSuccess, onError){
         try{
-            const res = await  http.post("/v1/getOrder", {order_id: order_id });
-            console.log(res);
-            if(res.data.success){
-                PurchaseService.generateAddress(charge_id, res.data.data.timestamp);
+            const res = await  http.post("/v1/getOrder", {order_id: paymentIntent.id });
+            if(res.data.success && res.data.data.timestamp && res.data.data.oracleTxHash){
+                PurchaseService.generateAddress(paymentIntent.client_secret,  res.data.data.timestamp);
                 const address = PurchaseService.getAddress();
                 console.log(address);
-                await PurchaseService.makeDeposit( (err, response)=>{
+                await PurchaseService.makeDeposit(paymentIntent.id  ,(err, response)=>{
                     if(err){ return onError(err)}
                     onSuccess(response);
                 })
             }else{
                 setTimeout(function () {
-                    PurchaseService.initTransactionFlow(order_id, charge_id,onSuccess, onError);
-                }, 1000);
+                    PurchaseService.initTransactionFlow(  paymentIntent,onSuccess, onError);
+                }, 1500);
             }
 
         }catch (e) {

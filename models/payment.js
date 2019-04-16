@@ -9,7 +9,7 @@ var commitSchema = new Schema({
     amount:  { type: Number, default: 0 },
     txHash:  String,
     address:  String,
-    timestamp: Number,
+    timestamp: String,
     oracleTxHash: String,
     date: { type: Date, default: Date.now },
 })

@@ -119,7 +119,6 @@ const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 const ParetoPayment = mongoose.model('payment');
-const Payment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
 
@@ -159,7 +158,6 @@ controller.getParetoCoinMarket = function (callback) {
         headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }
     },
     (error, res, body) => {
-      console.log(COIN_MARKET_API_KEY);
       callback(error, JSON.parse(body));
     });
 };
@@ -236,6 +234,7 @@ controller.getEthereumWalletProvider = function () {
  */
 controller.transactionFlow= async function(address, order_id, callback){
     const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
+    console.log(address);
     ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
         if(payment){
             if(payment.state > 0){
@@ -251,7 +250,6 @@ controller.transactionFlow= async function(address, order_id, callback){
                            return  callback(err);
                          }
                          const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
-                         console.log(paretoAmount);
                          controller.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
                              if(err){
                                  ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
@@ -272,6 +270,7 @@ controller.transactionFlow= async function(address, order_id, callback){
         }
 
     }).catch(function (e) {
+        console.log('findOne')
         callback(e)
     });
 
@@ -280,7 +279,14 @@ controller.transactionFlow= async function(address, order_id, callback){
 controller.generateAddress = function (charge_id, timestamp){
     const bip39 = require('bip39');
     const hdkey = require('ethereumjs-wallet/hdkey');
-    const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(charge_id+timestamp));
+    const  toHex = function(str) {
+        var result = '';
+        for (var i=0; i<str.length; i++) {
+            result += str.charCodeAt(i).toString(16);
+        }
+        return result;
+    }
+    const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(toHex(charge_id.slice(-8)+timestamp.slice(-8))));
     const hdwallet = hdkey.fromMasterSeed(seed);
     return  hdwallet.derivePath(`m/44'/60'/0'/0` ).deriveChild(0).getWallet().getAddressString();
 }
@@ -356,7 +362,7 @@ controller.makeParetoTransaction = async function(address, amount){
                             return  reject(err);
                         }
                         if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                        resolve({amount, eth, hash});
+                        resolve({amount,  hash});
                     })
                 })
                 .once('error', (err)=>{
@@ -2077,13 +2083,13 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 };
 
 controller.event_payment = async function (event, callback) {
-    let charge = event;
-    if(charge.type === "payment_intent.succeeded"){
-        const timestamp  = (new Date()).getTime();
-        await Payment.create({ email: charge.data.object.metadata.email_customer, order_id: charge.data.object.id , timestamp: timestamp},
+
+    if(event.type === "payment_intent.succeeded"){
+        const timestamp  = ((new Date()).getTime() + "");
+        await ParetoPayment.create({ email: event.data.object.metadata.email_customer, order_id: event.data.object.id , timestamp: timestamp, amount: event.data.object.amount/100},
              function (err, payment) {
                     //Charge ID, charge.id?
-                 controller.transactionFlow(controller.generateAddress(charge.id ,timestamp) ,charge.data.object.id, function (error, result){
+                 controller.transactionFlow(controller.generateAddress(event.data.object.client_secret ,timestamp) ,event.data.object.id, function (error, result){
                      if(error){console.log(error)}
                      if(result){console.log(result)}
                  });
