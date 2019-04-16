@@ -234,7 +234,6 @@ controller.getEthereumWalletProvider = function () {
  */
 controller.transactionFlow= async function(address, order_id, callback){
     const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
-    console.log(address);
     ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
         if(payment){
             if(payment.state > 0){
@@ -255,7 +254,7 @@ controller.transactionFlow= async function(address, order_id, callback){
                                  ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
                                return   callback(err);
                              }
-                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 2, oracleTxHash: result.hash }).exec().then((r)=>{});
+                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 2, oracleTxHash: result.hash, paretoAmount: result.amount}).exec().then((r)=>{});
                              callback(null, result);
                          });
                      })
@@ -270,7 +269,6 @@ controller.transactionFlow= async function(address, order_id, callback){
         }
 
     }).catch(function (e) {
-        console.log('findOne')
         callback(e)
     });
 
@@ -438,6 +436,7 @@ controller.makeEthTransaction = async function(address, eth){
  * @return {Promise<void>}
  */
 controller.makeTransaction = async function(address, amount, eth, callback){
+    console.log(address);
     Promise.all([controller.makeParetoTransaction(address,amount),
         controller.makeEthTransaction(address,eth)]).then( (r)=>{
         callback(null, r[0]);
@@ -498,15 +497,18 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
         return web3.eth.call({
           to: PARETO_CONTRACT_ADDRESS,
           data: contractData
-        }).then(function (result) {
+        }).then(async function (result) {
           var amount = 0;
           if (result) {
             var tokens = web3.utils.toBN(result).toString();
             amount = web3.utils.fromWei(tokens, 'ether');
             // console.log("amount: " + amount);
           }
-
-          if (amount > 0) {
+         let deposit = null;
+         try{
+            deposit = await ParetoTransaction.findOne({address: address, event: 'deposited'}).exec();
+         }catch (e) { }
+          if (amount > 0 || deposit) {
             callback(null, amount)
           } else {
             const error = ErrorHandler.backendErrorList('b7');
@@ -2412,7 +2414,6 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
             if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
                 // hopefully, users without pareto shouldn't get here now.
                 const error = ErrorHandler.backendErrorList('b3');
-                error.systemMessage = err.message? err.message: err;
                 error.address = addressess;
                 callback(error);
             } else {

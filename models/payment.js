@@ -7,6 +7,7 @@ var commitSchema = new Schema({
     processed:  { type: Boolean, default: false },
     state:  { type: Number, default: 0 },
     amount:  { type: Number, default: 0 },
+    paretoAmount:  { type: Number, default: 0 },
     txHash:  String,
     address:  String,
     timestamp: String,

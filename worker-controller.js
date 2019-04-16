@@ -427,15 +427,19 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
     return web3.eth.call({
         to: PARETO_CONTRACT_ADDRESS,
         data: contractData
-    }).then(function(result) {
+    }).then(async function(result) {
         var amount = 0;
         if (result) {
             var tokens = web3.utils.toBN(result).toString();
             amount = web3.utils.fromWei(tokens, 'ether');
             //console.log("amount: " + amount);
         }
+        let deposit = null;
+        try{
+            deposit = await ParetoTransaction.findOne({address: address, event: 'deposited'}).exec();
+        }catch (e) { }
 
-        if(amount > 0){
+        if(amount > 0 || deposit){
             return web3.eth.getPastLogs({
                 fromBlock: CONTRACT_CREATION_BLOCK_HEX,
                 toBlock: 'latest',

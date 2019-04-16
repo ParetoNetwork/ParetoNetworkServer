@@ -31,12 +31,14 @@ export default class PurchaseService {
             }
             const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(toHex(charge_id.slice(-8)+timestamp.slice(-8))));
             const hdwallet = hdkey.fromMasterSeed(seed);
-            const wallet = hdwallet.derivePath(`m/44'/60'/0'/0`).deriveChild(0).getWallet() ;
-            localStorage.setItem("privateKey", btoa(wallet.getPrivateKey()));
+            const wallet = hdwallet.derivePath(`m/44'/60'/0'/0` ).deriveChild(0).getWallet();
+            localStorage.setItem("privateKey", btoa(wallet.getPrivateKeyString().substring(2)));
+
+
         }
     }
 
-    static async makeDeposit(order_id, callback ) {
+    static async makeDeposit(order_id, paretoAmount,callback ) {
 
 
         const  walletProvider = PurchaseService.getWalletProvider();
@@ -75,6 +77,7 @@ export default class PurchaseService {
                     console.log("Approve hash "+hash);
                     PurchaseService.waitForReceipt(web3, hash, async receipt => {
                         console.log('ini deposit');
+                        let amountPareto = web3.utils.toWei(paretoAmount.toString(), "ether");
                         let gasApprove = await Intel.methods
                             .makeDeposit(wallet.getAddressString(), amountPareto)
                             .estimateGas({from: wallet.getAddressString()});
@@ -95,7 +98,7 @@ export default class PurchaseService {
                                     try{
                                         const r = await http.post("/v1/updateTransaction", {txHash: hash, order_id: order_id, processed: true });
                                     } catch (e) { }
-                                    sign(walletProvider, callback)
+                                    PurchaseService.sign(walletProvider, callback)
 
                                 });
                             })
@@ -113,6 +116,7 @@ export default class PurchaseService {
 
 
         }catch (e) {
+            console.log(e);
             if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
             callback(e);
         }
@@ -127,7 +131,7 @@ export default class PurchaseService {
         walletProvider.web3.sendAsync({method,params,from}, function(err, data) {
             if(err){return callback(err)}
             let jsonData = {
-                data: msgParams = [
+                data: [
                     {
                         type: 'string',
                         name: 'Message',
@@ -158,7 +162,7 @@ export default class PurchaseService {
 
     static getAddress(){
         const Wallet = require('ethereumjs-wallet');
-        const myWallet =  Wallet.fromPrivateKey( Buffer.from(atob(localStorage.getItem("privateKey")),'hex'));
+        const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(localStorage.getItem("privateKey"), "base64").toString("ascii"), "hex"));
         return myWallet.getAddressString();
     }
 
@@ -167,7 +171,7 @@ export default class PurchaseService {
         const ProviderEngine = require('web3-provider-engine');
         const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
         const Wallet = require('ethereumjs-wallet');
-        const myWallet =  Wallet.fromPrivateKey( Buffer.from(atob(localStorage.getItem("privateKey")),'hex'));
+        const myWallet =   Wallet.fromPrivateKey(new Buffer(Buffer.from(localStorage.getItem("privateKey"), "base64").toString("ascii"), "hex"));
         const engine = new ProviderEngine();
         engine.addProvider(new HookedWalletSubprovider({
             getAccounts: function(cb){
@@ -183,7 +187,14 @@ export default class PurchaseService {
         }));
         engine.addProvider(new WsSubprovider({rpcUrl:  PurchaseService.networks[localStorage.getItem('netWorkId')].wss}));
         engine.start();
-        return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
+        const web3 = new Web3(engine)
+        web3.constructor.prototype.sendAsync = function() {
+            engine.sendAsync.apply(engine, arguments);
+        };
+        web3.constructor.prototype.send = function() {
+            return engine.send.apply(engine, arguments);
+        };
+        return   { engine: engine, web3 : web3, wallet: myWallet }
     };
 
 
@@ -201,7 +212,7 @@ export default class PurchaseService {
             } else {
                 // Try again in 1 second
                 setTimeout(function () {
-                    PurchaseService.waitForReceipt(hash, cb);
+                    PurchaseService.waitForReceipt(web3, hash, cb);
                 }, 1000);
             }
         });
@@ -215,7 +226,7 @@ export default class PurchaseService {
                 PurchaseService.generateAddress(paymentIntent.client_secret,  res.data.data.timestamp);
                 const address = PurchaseService.getAddress();
                 console.log(address);
-                await PurchaseService.makeDeposit(paymentIntent.id  ,(err, response)=>{
+                await PurchaseService.makeDeposit(paymentIntent.id , res.data.data.paretoAmount ,(err, response)=>{
                     if(err){ return onError(err)}
                     onSuccess(response);
                 })
