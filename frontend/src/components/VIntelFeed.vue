@@ -86,7 +86,6 @@
       ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
     },
     beforeMount: function () {
-      console.log('holi')
       if (this.defaultContent !== undefined && this.defaultContent.length > 0){
         this.myFeed.content = this.defaultContent;
         this.loading = false;

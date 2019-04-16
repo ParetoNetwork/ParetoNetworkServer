@@ -23,11 +23,10 @@
     },
     name: "VHandlerSunsburstChart",
     mounted(){
-      console.log(this.sunsburstData)
       if(this.sunsburstData){
         this.nodeData = this.sunsburstData;
       }
-      
+
       if(this.user){
         this.getChartInformation();
       }
@@ -35,7 +34,11 @@
     methods: {
       getChartInformation() {
         profileService.getChartInfo(res => {
-          console.log(res);
+          this.nodeData = {
+            name: '',
+            children: []
+          };
+
           this.nodeData.name = this.user.alias;
           res.forEach(intel => {
             let children = intel.rewardList.map(reward => (
