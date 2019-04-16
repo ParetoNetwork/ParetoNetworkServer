@@ -157,18 +157,6 @@
                 event.preventDefault();
                 if(self.user_email === ''){
                     alert("Email can't be blank")
-                }else{
-                    stripe.createToken(cardElement).then(function(result) {
-                        if (result.error) {
-                            // Inform the user if there was an error.
-                            var errorElement = document.getElementById('card-errors');
-                            errorElement.textContent = result.error.message;
-                        } else {
-                            // Send the token to your server.
-
-                            self.stripeTokenHandler(result.token);
-                        }
-                    });
                 }
             });
 
@@ -186,10 +174,13 @@
                         }
                     }
                 ).then(function(result) {
+                    let displayError = document.getElementById('card-errors');
                     if (result.error) {
                        self.waiting_payment = false;
-                       alert("error on payment")
+                       displayError.textContent = result.error.message;
+
                     } else {
+                        displayError.textContent = '';
                         window.localStorage.setItem('ShoppingCart', '');
                         self.$store.dispatch('resetShoppingCart');
                         window.localStorage.removeItem('order_id');
@@ -252,7 +243,7 @@
                 currency: 'USD',
                 order_id: '',
                 user_email: '',
-                user_name: 'Dani',
+                user_name: '',
                 client_secret: '',
                 waiting_payment: false,
                 payment_intent: '',
@@ -261,19 +252,6 @@
 
             }
         },
-        methods: {
-
-            stripeTokenHandler: function (token) {
-                // Insert the token ID into the form so it gets submitted to the server
-                let order_id = window.localStorage.getItem('order_id');
-
-                ProductService.payOrder(token.id, order_id, this.user_email, this.customer_id)
-            },
-
-
-        },
-
-
 
     }
 </script>
@@ -293,6 +271,9 @@
 #payment h4{
     color: black;
 }
+   #card-errors{
+       color: #e54144;
+   }
 
     .main-wrapper #vue {
 
