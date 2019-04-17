@@ -974,7 +974,10 @@ app.initializeLibSignalSocket = function (server) {
     this.isAlive = true;
   }
 
+  var clients = {};
+
   wss.on('connection', function connection(ws, req) {
+
     ws.on('close', () => {
       console.log('close libsignal websocket')
     })
@@ -984,34 +987,30 @@ app.initializeLibSignalSocket = function (server) {
     ws.on('message', function incoming(message) {
       message = JSON.parse(message);
 
-      try {
-        controller.getKeysFromProfile(message.address, function (err, result) {
-          if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-
-          } else {
-            wss.clients.forEach(function each(client) {
-              if (client.isAlive === false) return client.terminate();
-              client.isAlive = false;
-              client.ping(noop);
-              if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({keys: result, address: message.address})); //TODO
-              }
-            });
-          }
-        });
-
+      if(message.type == "registration"){
+          clients[message.address] = ws;
+          console.log("Was register a new signal client (" + message.address + ")");
       }
-      catch(e){
-        const error = ErrorHandler.backendErrorList('b28');
-        error.systemMessage = e.message ? e.message : e;
-        console.log(JSON.stringify(error));
+      else if(message.type == "sendGroupKeys"){
+        var client = clients[message.toAddress];
+        var groupKeys = message.groupKeys;
+        if (client.isAlive === false) return client.terminate();
+        console.log("Sending group key from " + message.address + " to " + message.toAddress);
+        try {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({groupKeys: groupKeys, fromAddress: message.address}));
+          }
+        }
+        catch(e){
+          const error = ErrorHandler.backendErrorList('b28');
+          error.systemMessage = e.message ? e.message : e;
+          console.log(JSON.stringify(error));
+        }
       }
     });
 
     ws.isAlive = true;
     ws.on('pong', heartbeat);
-    ws.user = req.user;
   });
 
 }

@@ -193,20 +193,42 @@
             this.ws.send(JSON.stringify(params));
           };
         }
-        this.overrideOnMessage();
       },
       loadProfile: function () {
         return profileService.getProfile(
                 res => {
                   this.user = res;
                   this.block = res.block;
-                  profileService.generateAndSendSignedKeys(response => {
-                    // this.signalSocketMessage(response);
-                    profileService.getKeysForAllProfiles(res => {}, er => {});
-                  },
+                  profileService.generateAndSendSignedKeys(response => {},
                   err => {
                     console.log(err);
                   });
+                  profileService.getKeysForAllProfiles(res => {
+                      profileService.generateGroupKeys(
+                              (groupKeys) => {
+                                for (var user in res) {
+                                  // TODO encrypt group keys
+                                  if (!this.signalWs) {
+                                    this.iniSignalWs();
+                                  }
+                                  this.signalWs.onmessage = (response) => {
+                                    try {
+                                      const data = JSON.parse(response.data);
+                                      profileService.storeGroupKeys(data);
+                                    } catch (e) {}
+                                  }
+                                  if(this.signalWs.readyState === WebSocket.OPEN){
+                                    this.signalWs.send(JSON.stringify({
+                                      toAddress: res[user].address,
+                                      groupKeys: groupKeys,
+                                      type: "sendGroupKeys",
+                                      address: this.user.address,
+                                    }));
+                                  }
+                                }
+                              }
+                      );
+                  }, er => {});
                 },
                 error => {
                   console.log('Could not retrieve profile ', error);
@@ -241,17 +263,20 @@
                     this.primalLoad = true;
                     this.socketConnection();
                     this.requestCall();
+                    this.signalSocketMessage(res);
                   },
                   () => {
                     this.primalLoad = true;
                     this.socketConnection();
                     this.requestCall();
+                    this.signalSocketMessage();
                   }
           );
         } else {
           this.primalLoad = true;
           this.socketConnection();
           this.requestCall();
+          this.signalSocketMessage();
         }
       },
       socketSignalConnection() {
@@ -263,16 +288,8 @@
         this.socketSignalConnection();
         let wss = this.signalWs;
         this.signalWs.onopen = function open() {
-          wss.send(JSON.stringify({address: params.address}));
+          wss.send(JSON.stringify({address: params.address, type: 'registration'}));
         };
-        this.signalWs.onmessage = (response) => {
-          try {
-            const data = JSON.parse(response.data);
-            profileService.storeKeys(data);
-          } catch (e) {
-            console.log(e); // TODO
-          }
-        }
       }
     }
   };

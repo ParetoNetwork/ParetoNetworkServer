@@ -46,7 +46,7 @@ export default class profileService {
         if(! cachedProfileAddress){
             onError(errorService.sendErrorMessage('f29', {}));
         }
-        if (! localStorage.getItem("profileKeys") !== null) {
+        if (localStorage.getItem("profileKeys")) {
             return onSuccess({
                 address: cachedProfileAddress
             });
@@ -56,7 +56,7 @@ export default class profileService {
         const preKeyId = Math.floor(Math.random() * 65535) + 0;
         const identity = Proteus.keys.IdentityKeyPair.new();  // Public and Private KeyPair
         const preKey = Proteus.keys.PreKey.new(preKeyId);
-        const signedPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey)
+        const signedPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey);
         /*const fingerprint = identity.public_key.fingerprint();
         const serializedIdentity = identity.serialise();
         const encodedSerializedIdentity = base64js.fromByteArray(new Uint8Array(serializedIdentity));*/
@@ -66,7 +66,7 @@ export default class profileService {
             profile: cachedProfileAddress
         }).then(res => {
             if(res.data.data) {
-                window.localStorage.setItem('profileKeys', JSON.stringify(prekeyBundle)); // TODO
+                window.localStorage.setItem('profileKeys', JSON.stringify(signedPreKey));
                 return onSuccess(res.data.data);
             }
             else
@@ -84,13 +84,30 @@ export default class profileService {
         }
     }
 
+    static generateGroupKeys(success){
+        const Proteus = require('proteus-hd');
+        const base64js = require('base64-js');
+        const preKeyId = Math.floor(Math.random() * 65535) + 0;
+        const identity = Proteus.keys.IdentityKeyPair.new();  // Public and Private KeyPair
+        const preKey = Proteus.keys.PreKey.new(preKeyId);
+        const signedGroupPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey);
+        window.localStorage.setItem('groupKeys', JSON.stringify(signedGroupPreKey));
+        return success(signedGroupPreKey)
+    }
+
+    static storeGroupKeys(keyData){
+        if (! localStorage.getItem("groupKeys-" + keyData.fromAddress)) {
+            window.localStorage.setItem("groupKeys-" + keyData.fromAddress, JSON.stringify(keyData.toAddress));
+        }
+    }
+
     static getKeysForAllProfiles(onSuccess, onError){
         const cachedProfileAddress = this.getProfile.profile.address;
         if(! cachedProfileAddress){
             onError(errorService.sendErrorMessage('f29', {}));
         }
         return http.post('/v1/getAllKeys', {
-            profile: cachedProfileAddress
+            address: cachedProfileAddress
         }).then(res => {
             if(res.data.data) {
                 for (var i = 0; i < res.data.data.length; i++) {
