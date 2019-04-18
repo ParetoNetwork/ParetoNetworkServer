@@ -196,43 +196,98 @@
       },
       loadProfile: function () {
         return profileService.getProfile(
-                res => {
-                  this.user = res;
-                  this.block = res.block;
-                  profileService.generateAndSendSignedKeys(response => {},
-                  err => {
-                    console.log(err);
-                  });
-                  profileService.getKeysForAllProfiles(res => {
-                      profileService.generateGroupKeys(
-                              (groupKeys) => {
-                                for (var user in res) {
-                                  // TODO encrypt group keys
-                                  if (!this.signalWs) {
-                                    this.iniSignalWs();
-                                  }
-                                  this.signalWs.onmessage = (response) => {
-                                    try {
-                                      const data = JSON.parse(response.data);
-                                      profileService.storeGroupKeys(data);
-                                    } catch (e) {}
-                                  }
-                                  if(this.signalWs.readyState === WebSocket.OPEN){
-                                    this.signalWs.send(JSON.stringify({
-                                      toAddress: res[user].address,
-                                      groupKeys: groupKeys,
-                                      type: "sendGroupKeys",
-                                      address: this.user.address,
-                                    }));
-                                  }
-                                }
+          res => {
+            this.user = res;
+            this.block = res.block;
+            profileService.generateAndSendSignedKeys(response => {},
+            err => {
+              console.log(err);
+            });
+            profileService.getKeysForAllProfiles(res => {
+              profileService.generateGroupKeys(
+                (groupKeys) => {
+                  const Proteus = require('proteus-hd');
+                  const base64js = require('base64-js');
+                  for (var user in res) {
+                    if (!this.signalWs) {
+                      this.iniSignalWs();
+                    }
+                    const ident = Proteus.keys.IdentityKeyPair.deserialise(
+                            base64js.toByteArray(localStorage.getItem("identityKeys")).buffer
+                    );
+                    const preKey = Proteus.keys.PreKey.deserialise(
+                            base64js.toByteArray(localStorage.getItem("preKey")).buffer
+                    );
+                    const toBundleUser = Proteus.keys.PreKeyBundle.deserialise(
+                            base64js.toByteArray(localStorage.getItem(res[user].address)).buffer
+                    );
+                    this.signalWs.onmessage = (response) => {
+                      try {
+                        // class PreKeyStore
+                        class PreKeyStore extends Proteus.session.PreKeyStore {
+                          constructor(prekeys) {
+                            super();
+                            this.prekeys = prekeys;
+                          }
+
+                          get_prekey(prekey_id) {
+                            return new Promise((resolve, reject) => {
+                              resolve(this.prekeys[prekey_id]);
+                            });
+                          }
+
+                          remove(prekey_id) {
+                            return new Promise((resolve, reject) => {
+                              delete this.prekeys[prekey_id];
+                              resolve();
+                            });
+                          }
+                        }
+                        const store = new PreKeyStore([preKey]);
+                        // decrypt message
+                        const data = JSON.parse(response.data);
+                        const envelope = Proteus.message.Envelope.deserialise(
+                          base64js.toByteArray(data.groupKeys).buffer
+                        );
+                        Proteus.session.Session.init_from_message(ident, store, envelope)
+                        .then((msgArray) => {
+                          const [session, message] = msgArray;
+                          const data = JSON.parse(response.data);
+                          console.log("Decrypted Message", (new TextDecoder()).decode(message));
+                          profileService.storeGroupKeys(data);
+                        })
+                      } catch (e) {}
+                    }
+                    if(this.signalWs.readyState === WebSocket.OPEN){
+                      Proteus.session.Session.init_from_prekey(ident, toBundleUser)
+                      .then((session) => {
+                        var encryptedGroupKeys = null;
+                        // is valid libsignal session
+                        if(session.session_states[0].recv_chains.length === 1){
+                          encryptedGroupKeys = session.encrypt("Test Message").then( // Test Message TODO
+                              (envelope) => {
+                                const serializedEnv = envelope.serialise();
+                                const encodedSerializedEnv = base64js.fromByteArray(new Uint8Array(serializedEnv));
+                                this.signalWs.send(JSON.stringify({
+                                  toAddress: res[user].address,
+                                  // groupKeys: groupKeys, TODO
+                                  groupKeys: encodedSerializedEnv,
+                                  type: "sendGroupKeys",
+                                  address: this.user.address,
+                                }));
                               }
-                      );
-                  }, er => {});
-                },
-                error => {
-                  console.log('Could not retrieve profile ', error);
+                          );
+                        }
+                      });
+                    }
+                  }
                 }
+              );
+            }, er => {});
+          },
+          error => {
+            console.log('Could not retrieve profile ', error);
+          }
         );
       },
       showModal() {

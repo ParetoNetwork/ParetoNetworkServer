@@ -987,28 +987,36 @@ app.initializeLibSignalSocket = function (server) {
     ws.on('message', function incoming(message) {
       message = JSON.parse(message);
 
-      if(message.type == "registration"){
-          clients[message.address] = ws;
-          console.log("Was register a new signal client (" + message.address + ")");
+      if(message.type == "registration") {
+        clients[message.address] = ws;
+        console.log("Was register a new signal client (" + message.address + ")");
       }
       else if(message.type == "sendGroupKeys"){
-        var client = clients[message.toAddress];
-        var groupKeys = message.groupKeys;
-        if (client.isAlive === false) return client.terminate();
-        console.log("Sending group key from " + message.address + " to " + message.toAddress);
-        try {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({groupKeys: groupKeys, fromAddress: message.address}));
+        if(typeof clients[message.address] === 'undefined'){
+          clients[message.address] = ws;
+        }
+        if(typeof clients[message.toAddress] === 'undefined'){
+          console.log("The client " + message.toAddress + " don't exists.");
+        }
+        else{
+          var client = clients[message.toAddress];
+          var groupKeys = message.groupKeys;
+          if (client.isAlive === false) return client.terminate();
+          console.log("Sending group key from " + message.address + " to " + message.toAddress);
+          try {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({groupKeys: groupKeys, fromAddress: message.address}));
+            }
+          }
+          catch(e){
+            const error = ErrorHandler.backendErrorList('b28');
+            error.systemMessage = e.message ? e.message : e;
+            console.log(JSON.stringify(error));
           }
         }
-        catch(e){
-          const error = ErrorHandler.backendErrorList('b28');
-          error.systemMessage = e.message ? e.message : e;
-          console.log(JSON.stringify(error));
-        }
+
       }
     });
-
     ws.isAlive = true;
     ws.on('pong', heartbeat);
   });

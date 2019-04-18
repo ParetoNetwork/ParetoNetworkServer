@@ -46,27 +46,34 @@ export default class profileService {
         if(! cachedProfileAddress){
             onError(errorService.sendErrorMessage('f29', {}));
         }
-        if (localStorage.getItem("profileKeys")) {
+        if (localStorage.getItem("identityKeys")) {
             return onSuccess({
                 address: cachedProfileAddress
             });
         }
         const Proteus = require('proteus-hd');
         const base64js = require('base64-js');
-        const preKeyId = Math.floor(Math.random() * 65535) + 0;
+        const preKeyId = 0;
         const identity = Proteus.keys.IdentityKeyPair.new();  // Public and Private KeyPair
         const preKey = Proteus.keys.PreKey.new(preKeyId);
         const signedPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey);
-        /*const fingerprint = identity.public_key.fingerprint();
+        const fingerprint = identity.public_key.fingerprint();
         const serializedIdentity = identity.serialise();
-        const encodedSerializedIdentity = base64js.fromByteArray(new Uint8Array(serializedIdentity));*/
+        const encodedSerializedIdentity = base64js.fromByteArray(new Uint8Array(serializedIdentity));
+        const serializedPrekey = preKey.serialise();
+        const encodedSerializedPrekey = base64js.fromByteArray(new Uint8Array(serializedPrekey));
+        const serializedPrekeyBundle = signedPreKey .serialise();
+        const encodedSerializedPrekeyBundle = base64js.fromByteArray(new Uint8Array(serializedPrekeyBundle));
         return http.post('/v1/saveKeys', {
-            keys: signedPreKey,
+            keys: encodedSerializedPrekeyBundle,
             deviceId: 0, // TODO
             profile: cachedProfileAddress
         }).then(res => {
             if(res.data.data) {
-                window.localStorage.setItem('profileKeys', JSON.stringify(signedPreKey));
+                // window.localStorage.setItem('profileKeys', JSON.stringify(signedPreKey)); TODO
+                window.localStorage.setItem('identityKeys', encodedSerializedIdentity);
+                window.localStorage.setItem('preKey', encodedSerializedPrekey);
+                window.localStorage.setItem('preKeyBundle', encodedSerializedPrekeyBundle);
                 return onSuccess(res.data.data);
             }
             else
@@ -80,14 +87,14 @@ export default class profileService {
             onError(errorService.sendErrorMessage('f29', {}));
         }
         if(cachedProfileAddress != keyData.address){
-            window.localStorage.setItem(keyData.address, JSON.stringify(keyData.keys));
+            window.localStorage.setItem(keyData.address, keyData.keys);
         }
     }
 
     static generateGroupKeys(success){
         const Proteus = require('proteus-hd');
         const base64js = require('base64-js');
-        const preKeyId = Math.floor(Math.random() * 65535) + 0;
+        const preKeyId = 0;
         const identity = Proteus.keys.IdentityKeyPair.new();  // Public and Private KeyPair
         const preKey = Proteus.keys.PreKey.new(preKeyId);
         const signedGroupPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey);
