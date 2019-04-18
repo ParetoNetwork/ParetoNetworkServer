@@ -37,7 +37,6 @@ export default class profileService {
                 return onError(error);
             });
         }
-
     }
 
     //Generates signed keys and sends them to the server
@@ -70,7 +69,6 @@ export default class profileService {
             profile: cachedProfileAddress
         }).then(res => {
             if(res.data.data) {
-                // window.localStorage.setItem('profileKeys', JSON.stringify(signedPreKey)); TODO
                 window.localStorage.setItem('identityKeys', encodedSerializedIdentity);
                 window.localStorage.setItem('preKey', encodedSerializedPrekey);
                 window.localStorage.setItem('preKeyBundle', encodedSerializedPrekeyBundle);
@@ -92,19 +90,24 @@ export default class profileService {
     }
 
     static generateGroupKeys(success){
+        if (localStorage.getItem("groupKeys")) {
+            return success(localStorage.getItem("groupKeys"));
+        }
         const Proteus = require('proteus-hd');
         const base64js = require('base64-js');
         const preKeyId = 0;
         const identity = Proteus.keys.IdentityKeyPair.new();  // Public and Private KeyPair
         const preKey = Proteus.keys.PreKey.new(preKeyId);
         const signedGroupPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey);
-        window.localStorage.setItem('groupKeys', JSON.stringify(signedGroupPreKey));
-        return success(signedGroupPreKey)
+        const serializedPrekeyBundle = signedGroupPreKey .serialise();
+        const encodedSerializedPrekeyBundle = base64js.fromByteArray(new Uint8Array(serializedPrekeyBundle));
+        window.localStorage.setItem('groupKeys', encodedSerializedPrekeyBundle);
+        return success(encodedSerializedPrekeyBundle)
     }
 
     static storeGroupKeys(keyData){
         if (! localStorage.getItem("groupKeys-" + keyData.fromAddress)) {
-            window.localStorage.setItem("groupKeys-" + keyData.fromAddress, JSON.stringify(keyData.toAddress));
+            window.localStorage.setItem("groupKeys-" + keyData.fromAddress, keyData.groupKeys);
         }
     }
 

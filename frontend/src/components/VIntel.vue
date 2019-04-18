@@ -253,7 +253,8 @@
                         .then((msgArray) => {
                           const [session, message] = msgArray;
                           const data = JSON.parse(response.data);
-                          console.log("Decrypted Message", (new TextDecoder()).decode(message));
+                          const serialicedBundleKey = (new TextDecoder()).decode(message);
+                          data.groupKeys = serialicedBundleKey;
                           profileService.storeGroupKeys(data);
                         })
                       } catch (e) {}
@@ -264,13 +265,12 @@
                         var encryptedGroupKeys = null;
                         // is valid libsignal session
                         if(session.session_states[0].recv_chains.length === 1){
-                          encryptedGroupKeys = session.encrypt("Test Message").then( // Test Message TODO
+                          encryptedGroupKeys = session.encrypt(groupKeys).then(
                               (envelope) => {
                                 const serializedEnv = envelope.serialise();
                                 const encodedSerializedEnv = base64js.fromByteArray(new Uint8Array(serializedEnv));
                                 this.signalWs.send(JSON.stringify({
                                   toAddress: res[user].address,
-                                  // groupKeys: groupKeys, TODO
                                   groupKeys: encodedSerializedEnv,
                                   type: "sendGroupKeys",
                                   address: this.user.address,
