@@ -85,7 +85,6 @@
     import ProductService from '.././services/productService'
     import PurchaseService from '.././services/purchaseService'
 
-
     export default {
         name: "VProductCheckout",
         created: function(){
@@ -173,7 +172,7 @@
                             owner: {name: cardholderName.value, email: cardholderEmail.value}
                         }
                     }
-                ).then(function(result) {
+                ).then(async function(result) {
                     let displayError = document.getElementById('card-errors');
                     if (result.error) {
                        self.waiting_payment = false;
@@ -188,9 +187,24 @@
                         window.localStorage.removeItem('payment_id');
                         window.localStorage.removeItem('customer');
                         window.localStorage.removeItem('customer_details');
+                        //Review charge_id, order_id
+
+                        PurchaseService.initTransactionFlow(result.paymentIntent,
+                            res => {
+                                self.$store.dispatch({
+                                    type: 'login',
+                                    address: {address: res.address, dataSign: {signType: 'Purchase', pathId: ''}},
+                                });
+                                self.$router.push({path: '/intel'});
+                            },
+                            err => {
+                            console.log(err);
+                                console.log("error on purchase")
+                            }
+                        );
 
 
-                        self.$router.push({path: '/thankyou-payment'});
+                       // self.$router.push({path: '/thankyou-payment'});
 
 
                         /*  setTimeout(function () {
