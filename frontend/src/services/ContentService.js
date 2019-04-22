@@ -33,6 +33,22 @@ export default class ContentService {
         3: "ropsten"
     };
 
+  static getGroupKeys(){
+    var keys = {};
+    const Proteus = require('proteus-hd');
+    const base64js = require('base64-js');
+    for (var i = 0; i < localStorage.length; i++){
+      if(localStorage.key(i).startsWith('groupKeys-')){
+        const key = localStorage.key(i).replace("groupKeys-", "");
+        const value = localStorage.getItem(localStorage.key(i));
+        keys[key] = Proteus.keys.PreKeyBundle.deserialise(
+            base64js.toByteArray(value).buffer
+        );
+      }
+    }
+    return keys;
+  }
+
   static uploadContent(content, onSuccess, onError) {
     http
       .post("/v1/content", content)

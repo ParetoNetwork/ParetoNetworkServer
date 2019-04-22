@@ -153,14 +153,14 @@
     import ContentService from '../services/ContentService';
 
     import VProfile from "./VProfile.vue";
-    import {mapState, mapActions} from "vuex";
+    import {mapState, mapActions, mapMutations} from "vuex";
 
     require('summernote/dist/summernote-bs4.css');
     require('summernote');
 
     export default {
         name: 'VCreateIntel',
-      components: {VProfile},
+        components: {VProfile},
         data: function () {
             return {
                 nextRoute: {
@@ -207,7 +207,7 @@
             bodyFunction: function () {
                 return content;
             },
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress", "signalWs"])
         },
         mounted: function () {
             ContentService.getAssets(r=>{
@@ -252,6 +252,7 @@
             this.address();
         },
         methods: {
+            ...mapMutations(['iniSignalWs']),
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             address: function () {
                 DashboardService.getAddress(res => {
@@ -273,6 +274,19 @@
                     assets= assets.map(it=> {return it._id} )
                 }
 
+                if (!this.signalWs) {
+                    this.iniSignalWs();
+                }
+
+                this.signalWs.onmessage = (response) => {
+                  try {
+                    console.log(response); // TODO
+                  }
+                  catch(e){
+                    console.log(e);
+                  }
+                }
+
                 ContentService.createIntel(
                     {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress,
                         lastApproved: this.userLastApprovedContractAddress,
@@ -286,6 +300,7 @@
                         toastTransaction: this.$notify
                     },
                     (res) => {
+
                         const intelId = res.res.intel;
 
                         this.$store.state.makingRequest = false;
@@ -302,6 +317,30 @@
 
                         this.redirectAfterCreateIntel(intelId);
 
+                        const Proteus = require('proteus-hd');
+                        const base64js = require('base64-js');
+
+                        const ident = Proteus.keys.IdentityKeyPair.deserialise(
+                            base64js.toByteArray(localStorage.getItem("groupKeys")).buffer
+                        );
+
+                        const groupKeys = ContentService.getGroupKeys();
+                        for (const address in groupKeys) {
+                            const toBundleUser = groupKeys[address];
+                            Proteus.session.Session.init_from_prekey(ident, toBundleUser)
+                                .then((session) => {
+                                    var stringIntel = JSON.stringify({block: this.block, title: this.title, body: this.body, address: this.blockChainAddress, lastApproved: this.userLastApprovedContractAddress});
+                                    var encryptedIntel = session.encrypt(stringIntel).then(
+                                        (envelope) => {
+                                            this.signalWs.send(JSON.stringify({
+                                                toAddress: address,
+                                                intel: encryptedIntel,
+                                                type: "sendIntel",
+                                                address: this.blockChainAddress,
+                                            }));
+                                        });
+                                });
+                        }
                         //this.$router.push('/intel');
                     }, (err) => {
                         if (err.includes('Transaction was not mined within')) {
