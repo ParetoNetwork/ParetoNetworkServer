@@ -230,7 +230,7 @@ controller.getEthereumWalletProvider = function () {
 
 /**
  * For now is a dummy purchase
- * @param address the new Created address front end.
+ * @param address the new Created address front enfd.
  * @param callback
  */
 controller.transactionFlow= async function(address, order_id, callback){
@@ -506,10 +506,12 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
             // console.log("amount: " + amount);
           }
          let deposit = null;
+         let payment = null;
          try{
             deposit = await ParetoTransaction.findOne({address: address, event: 'deposited'}).exec();
+             payment = await ParetoPayment.findOne({address: address, state: 2}).exec();
          }catch (e) { }
-          if (amount > 0 || deposit) {
+          if (amount > 0 || deposit || payment) {
             callback(null, amount)
           } else {
             const error = ErrorHandler.backendErrorList('b7');

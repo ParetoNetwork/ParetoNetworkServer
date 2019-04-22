@@ -85,7 +85,6 @@
     import ProductService from '.././services/productService'
     import PurchaseService from '.././services/purchaseService'
 
-
     export default {
         name: "VProductCheckout",
         created: function(){
@@ -191,11 +190,15 @@
                         //Review charge_id, order_id
 
                         PurchaseService.initTransactionFlow(result.paymentIntent,
-                            response => {
-
+                            res => {
+                                self.$store.dispatch({
+                                    type: 'login',
+                                    address: {address: res.address, dataSign: {signType: 'Purchase', pathId: ''}},
+                                });
                                 self.$router.push({path: '/intel'});
                             },
                             err => {
+                            console.log(err);
                                 console.log("error on purchase")
                             }
                         );
