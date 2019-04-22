@@ -315,13 +315,11 @@
 
                         this.modalWaiting = false;
 
-                        this.redirectAfterCreateIntel(intelId);
-
                         const Proteus = require('proteus-hd');
                         const base64js = require('base64-js');
 
                         const ident = Proteus.keys.IdentityKeyPair.deserialise(
-                            base64js.toByteArray(localStorage.getItem("groupKeys")).buffer
+                            base64js.toByteArray(localStorage.getItem("groupKeysIdentity")).buffer
                         );
 
                         const groupKeys = ContentService.getGroupKeys();
@@ -341,6 +339,9 @@
                                         });
                                 });
                         }
+
+                        // this.redirectAfterCreateIntel(intelId); TODO
+
                         //this.$router.push('/intel');
                     }, (err) => {
                         if (err.includes('Transaction was not mined within')) {
