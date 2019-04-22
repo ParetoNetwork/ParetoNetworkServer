@@ -1247,7 +1247,7 @@ controller.slugify = function (string) {
     .replace(/\-\-+/g, '-') // Replace multiple - with single -
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '') // Trim - from end of text
-}
+};
 
 controller.getQueryContentByUser = function (address, intel, callback) {
 
@@ -1866,9 +1866,97 @@ controller.chartInformation = async function (req, callback) {
         callback(null, results);
       });
     });
-
   } catch (e) {
     return callback(e);
+  }
+};
+
+controller.chartInfo = async function(req, callback){
+  let address = req.query.user || req.user;
+
+  try {
+    req.query.limit = 500;
+    req.query.page = 0;
+
+    // Gets all available content for the current user using the same query as the intel market view
+    controller.getAllAvailableContent(req, async function (err, result) {
+      if (err) {
+        return callback(err);
+      } else {
+        let authorsIntel = {};
+        let authorsKeys;
+        let authorsOrders;
+
+        //Parse all the results
+        result.forEach( intel => {
+          //Creates an object of authors based on their keys
+          if (!authorsIntel[intel.createdBy.address]) {
+            authorsIntel[intel.createdBy.address] = {
+              address: intel.createdBy.address || 'No Address',
+              alias: intel.createdBy.alias || 'No Address',
+              aliasSlug: intel.createdBy.aliasSlug || 'No Alias',
+              intels : [],
+              rewards: 0
+            };
+          }
+
+          //Adds an intel to an author
+          authorsIntel[intel.createdBy.address].intels.push({
+            title: intel.title,
+            address: intel.address,
+            reward: intel.reward,
+            id: intel.id
+          });
+          authorsIntel[intel.createdBy.address].rewards += intel.reward;
+        });
+
+        //Converts the authors object to an array
+        authorsOrders = Object.keys(authorsIntel).map( author => {
+          return authorsIntel[author];
+        });
+
+        //Sorts the array based on reward quantity
+        authorsOrders.sort((a, b) => (a.rewards < b.rewards) ? 1 : -1);
+
+        //Filter and map the authors, choosing the first 4 authors (already sorted)
+        //and takes 5 intels from the author
+        authorsOrders = authorsOrders.reduce((array, author, index) => {
+          if(index < 5 && author.address !== address){
+            let intelNumber = Math.min(5, author.intels.length);
+            let intelList = [];
+            for (let index = 0; index < intelNumber; index++){
+              intelList.push(author.intels[index]);
+            }
+            author.intels = intelList;
+
+            array.push(author);
+          }
+          return array;
+        }, []);
+
+        authorsKeys = authorsOrders.map( author => author.address);
+
+        //Gets the reward list based on the addresses
+        let rewards = await ParetoReward.find( { receiver: { $in: authorsKeys}});
+
+        console.log(authorsKeys)
+
+        authorsOrders = authorsOrders.map( author => {
+          author.intels.forEach( (intel) => {
+            intel.rewards = rewards.filter((reward, index) => {
+              return reward.intelId === intel.id;
+            });
+          });
+          return author;
+        });
+
+        //console.log(rewards);
+        return callback(null, authorsOrders);
+      }
+    });
+
+  } catch (e) {
+    console.log(e);
   }
 };
 
@@ -2603,5 +2691,3 @@ controller.getRewardFromDesiredScore = function (address,  desiredScore, tokens,
             })
         })
 }
-
-

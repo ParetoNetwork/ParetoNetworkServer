@@ -654,7 +654,7 @@ app.get('/v1/ranking', function (req, res) {
 
 //Get the sunsburst chart information
 app.get('/v1/chart-info', function (req, res) {
-  controller.chartInformation(req, function (err, results) {
+  controller.chartInfo(req, function (err, results) {
     if(err){
       res.status(200).json(ErrorHandler.getError(err));
     } else {

@@ -34,30 +34,42 @@
     methods: {
       getChartInformation() {
         profileService.getChartInfo(res => {
+          console.log(res);
           this.nodeData = {
             name: '',
             children: []
           };
 
-          this.nodeData.name = this.user.alias;
-          res.forEach(intel => {
-            let children = intel.rewardList.map(reward => (
-                {
-                  type: 'profile',
-                  name: reward.profile.alias || reward.profile.address.substring(0, 5),
-                  slug: reward.profile.aliasSlug,
-                  address: reward.profile.address,
-                  size: reward.reward,
-                  reward: reward.reward
-                })
-            );
-            this.nodeData.children.push({
-              name: intel.title,
-              reward: intel.size,
-              type: 'intel',
-              children
-            })
+          res.forEach(profile => {
+            profile.name = profile.alias || profile.address;
+            profile.children = profile.intels.map( intel => {
+              intel.name = intel.title.substring(0, 10);
+              intel.size = 4;
+              return intel;
+              // intel.children = intel.rewards.forEach( res )
+            });
           });
+
+          this.nodeData.children = res;
+          console.log(this.nodeData);
+          // res.forEach(intel => {
+          //   let children = intel.rewardList.map(reward => (
+          //       {
+          //         type: 'profile',
+          //         name: reward.profile.alias || reward.profile.address.substring(0, 5),
+          //         slug: reward.profile.aliasSlug,
+          //         address: reward.profile.address,
+          //         size: reward.reward,
+          //         reward: reward.reward
+          //       })
+          //   );
+          //   this.nodeData.children.push({
+          //     name: intel.title,
+          //     reward: intel.size,
+          //     type: 'intel',
+          //     children
+          //   })
+          // });
         }, error => {
 
         });
@@ -66,7 +78,7 @@
     watch: {
       user() {
         //Loads chart information when user props loads
-        this.getChartInformation();
+        //this.getChartInformation();
       }
     }
   }
