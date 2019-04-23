@@ -71,7 +71,7 @@
         var format = d3.format(",d");
 
         var r = 50;
-        var prof = 2;
+        var prof = 3;
 
         var arc = d3.arc()
           .startAngle(function (d) {
@@ -80,20 +80,8 @@
           .endAngle(function (d) {
             return Math.min(2 * Math.PI, x(d.x1));
           })
-          .innerRadius(function (d) {
-            if(d.depth === 0){
-              return 0
-            } else {
-              return r + (d.depth - 1) * (radius - r)/prof
-            }
-          })
-          .outerRadius(function (d) {
-            if(d.depth === 0){
-              return 50
-            } else {
-              return r + (d.depth) * (radius - r)/prof
-            }
-          });
+          .innerRadius(d => d.y0 * radius)
+          .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1))
 
         var svg = d3.select("#d3-svg svg")
           .attr("width", width)
@@ -168,49 +156,77 @@
           return d.data.name.length * CHAR_SPACE < perimeter;
         }
 
-        function click(d) {
+        function click(p) {
           const text = svg.selectAll(".name");
           text.transition().attr("display", 'none');
 
-          svg.selectAll(".sizeText")
-            .transition().attr("display", 'none');
+          root.each(d => d.target = {
+            x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+            x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+            y0: Math.max(0, d.y0 - p.depth),
+            y1: Math.max(0, d.y1 - p.depth)
+          });
 
-          svg.transition()
-            .duration(750)
-            .tween("scale", function () {
-              var xd = d3.interpolate(x.domain(), [d.x0, d.x1]),
-                yd = d3.interpolate(y.domain(), [d.y0, 1]),
-                yr = d3.interpolate(y.range(), [d.y0 ? 20 : 0, radius]);
-              return function (t) {
-                x.domain(xd(t));
-                y.domain(yd(t)).range(yr(t));
-              };
+          const t = g.transition().duration(750);
+
+          // Transition the data on all arcs, even the ones that aren’t visible,
+          // so that if this transition is interrupted, entering arcs will start
+          // the next transition from the desired position.
+          path.transition(t)
+            .tween("data", d => {
+              const i = d3.interpolate(d.current, d.target);
+              return t => d.current = i(t);
             })
-            .selectAll(".node path")
-            .attrTween("d", function (e) {
-              setTimeout(() => {
-                if (e.x0 >= d.x0 && e.x0 < (d.x1)) {
-                  const text = d3.select(this.parentNode).selectAll(".name").attr('display', d => textFits(d) ? null : 'none');
-                  const sizeText = d3.select(this.parentNode).selectAll(".sizeText").attr('display', d => textFits(d) ? null : 'none');
-                  const path = d3.select(this.parentNode).selectAll("path")._groups[0][0];
+            .filter(function(d) {
+              return +this.getAttribute("fill-opacity") || arcVisible(d.target);
+            })
+            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
+            .attrTween("d", d => () => arc(d.current));
 
-                  const sizeTransition = sizeText.transition().duration(750);
-
-                  //Transition for the size label (rewards)
-                  sizeTransition.attr("transform", labelTransform(path.__data__));
-                  text.transition().duration(750).attr("transform", labelTransform(path.__data__));
-                }
-              }, 750);
-              return function () {
-                return arc(e);
-              };
-            });
+          // svg.selectAll(".sizeText")
+          //   .transition().attr("display", 'none');
+          //
+          // svg.transition()
+          //   .duration(750)
+          //   .tween("scale", function () {
+          //     var xd = d3.interpolate(x.domain(), [d.x0, d.x1]),
+          //       yd = d3.interpolate(y.domain(), [d.y0, 1]),
+          //       yr = d3.interpolate(y.range(), [d.y0 ? 20 : 0, radius]);
+          //     return function (t) {
+          //       x.domain(xd(t));
+          //       y.domain(yd(t)).range(yr(t));
+          //     };
+          //   })
+          //   .selectAll(".node path")
+          //   .attrTween("d", function (e) {
+          //     setTimeout(() => {
+          //       if (e.x0 >= d.x0 && e.x0 < (d.x1)) {
+          //         const text = d3.select(this.parentNode).selectAll(".name").attr('display', d => textFits(d) ? null : 'none');
+          //         const sizeText = d3.select(this.parentNode).selectAll(".sizeText").attr('display', d => textFits(d) ? null : 'none');
+          //         const path = d3.select(this.parentNode).selectAll("path")._groups[0][0];
+          //
+          //         const sizeTransition = sizeText.transition().duration(750);
+          //
+          //         //Transition for the size label (rewards)
+          //         sizeTransition.attr("transform", labelTransform(path.__data__));
+          //         text.transition().duration(750).attr("transform", labelTransform(path.__data__));
+          //       }
+          //     }, 750);
+          //     return function () {
+          //       return arc(e);
+          //     };
+          //   });
         }
 
         function labelTransform(d) {
           const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
           return `translate(` + arc.centroid(d) + `)`;
         }
+
+        function arcVisible(d) {
+          return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
+        }
+
 
         function redirect(d){
           if(d.data.type === "profile"){

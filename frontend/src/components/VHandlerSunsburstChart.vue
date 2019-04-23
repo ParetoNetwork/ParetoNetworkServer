@@ -34,7 +34,6 @@
     methods: {
       getChartInformation() {
         profileService.getChartInfo(res => {
-          console.log(res);
           this.nodeData = {
             name: '',
             children: []
@@ -45,6 +44,9 @@
             profile.children = profile.intels.map( intel => {
               intel.name = intel.title.substring(0, 10);
               intel.size = 4;
+
+              intel.children = (intel.rewards.length > 0)? intel.rewards.map( r => ({name: r.intelAddress.substring(0, 10), reward: r.amount})) : [];
+              // console.log()
               return intel;
               // intel.children = intel.rewards.forEach( res )
             });
