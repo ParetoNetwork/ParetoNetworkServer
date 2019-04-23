@@ -370,12 +370,27 @@
               this.rank = 1;
               this.page = 0;
               this.getLeaderboard();
+              // let  type = "address";
+              // try{
+              //     const amount = parseInt(this.routeParams.value);
+              //     if(!isNaN(amount)){
+              //         if(this.routeParams.value.toString().indexOf(".") >-1|| this.routeParams.value.toString().indexOf(",") > -1){
+              //             type = "score"
+              //         } else{
+              //             type = "rank"
+              //         }
+              //     }
+              //
+              // }catch (e) {
+              //
+              // }
+
               this.$notify({
                 group: 'notification',
                 type: 'error',
                 duration: 10000,
                 title: 'Leaderboard',
-                text: 'The parameter doesn\'t exist'
+                text: 'Couldn\'t find any results matching the given '+ this.routeParams.param
               });
               return;
             }
@@ -414,7 +429,6 @@
         if (this.leader[0].rank < 100) minimunLimit = this.leader[0].rank - 1;
 
         this.socketParams = {rank: rank, limit: 100, page: 0};
-
         LeaderboardService.getLeaderboard({rank: rank, limit: minimunLimit, page: 0}, res => {
           this.$store.state.makingRequest = false;
           this.busy = false;
@@ -440,32 +454,35 @@
       },
       //If route has params Ex: leaderbord?rank=123, this method will show the values over the current user rank
       leaderFromUrlParams(route) {
-        let routeSplit = route.fullPath.split('?')[1];
-        try {
-          if (routeSplit) {
-            let params = routeSplit.split('=');
-            if (this.routeParams.valids.indexOf(params[0]) >= 0) {
-              this.routeParams.param = params[0];
-              this.routeParams.value = params[1].split(/[^a-z0-9,.+]+/gi)[0];
+        let array = route.fullPath.split('?');
+        if(array.length>1){
+            let routeSplit = array[1];
+            try {
+                if (routeSplit) {
+                    let params = routeSplit.split('=');
+                    if (this.routeParams.valids.indexOf(params[0]) >= 0) {
+                        this.routeParams.param = params[0];
+                        this.routeParams.value = params[1].split(/[^a-z0-9,.+]+/gi)[0];
+                        if (this.routeParams.param === 'q' && (this.routeParams.value.indexOf(',') >= 0 || this.routeParams.value.indexOf('.') >= 0))
+                            this.routeParams.param = 'score';
 
-              if (this.routeParams.param === 'q' && (this.routeParams.value.indexOf(',') >= 0 || this.routeParams.value.indexOf('.') >= 0))
-                this.routeParams.param = 'score';
-
-              if (this.routeParams.param === 'score') this.routeParams.value = this.routeParams.value.split(',').join('');
-            } else {
-              this.$notify({
-                group: 'notification',
-                type: 'error',
-                duration: 10000,
-                title: 'Leaderboard',
-                text: 'Url parameter not found'
-              });
+                        if (this.routeParams.param === 'score') this.routeParams.value = this.routeParams.value.split(',').join('.');
+                    } else {
+                        this.$notify({
+                            group: 'notification',
+                            type: 'error',
+                            duration: 10000,
+                            title: 'Leaderboard',
+                            text: params[0] + ' is not a valid parameter, only rank, address, score or q are allowed.'
+                        });
+                    }
+                }
+            } catch (e) {
+                console.log(e);
+                errorService.sendErrorMessage('f10', e);
             }
-          }
-        } catch (e) {
-          console.log(e);
-          errorService.sendErrorMessage('f10', e);
         }
+
       },
       authLogin() {
         if (this.madeLogin) {
@@ -511,7 +528,7 @@
       },//This method reload the leader according to the address or rank of the button search
       changeRoute: function (value) {
         let paramType = '';
-        if (value.split(/[^a-z]+/g).length > 2) {
+        if ( isNaN(parseFloat(value))) {
           paramType = 'address';
         } else if (value.indexOf('.') >= 0 || value.indexOf(',') >= 0) {
           paramType = 'score';
@@ -545,7 +562,7 @@
         if (symbol === '-') return 'fa fa-chevron-down historical-down';
       },
       infiniteScrollFunction: function () {
-        if (!this.loading) this.getLeaderboard();
+        if (!this.loading) this.getLeaderboard(this.leader.length==0);
       },
       onScroll: function () {
 
@@ -706,7 +723,6 @@
       },
       init: function (profile) {
         this.loading = false;
-
         if (this.routeParams.param) {
           this[this.routeParams.param] = this.routeParams.value;
           this.busy = true;
