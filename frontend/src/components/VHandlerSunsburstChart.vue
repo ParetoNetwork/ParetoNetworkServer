@@ -53,7 +53,6 @@
           });
 
           this.nodeData.children = res;
-          console.log(this.nodeData);
           // res.forEach(intel => {
           //   let children = intel.rewardList.map(reward => (
           //       {

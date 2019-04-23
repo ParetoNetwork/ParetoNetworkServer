@@ -2040,18 +2040,25 @@ controller.chartInfo = async function(req, callback){
         authorsKeys = authorsOrders.map( author => author.address);
 
         //Gets the reward list based on the addresses
-        let rewards = await ParetoReward.find( { receiver: { $in: authorsKeys}});
+        let rewards = await ParetoReward.find({ receiver: { $in: authorsKeys}});
 
-        console.log(authorsKeys)
-
+        let rewarderList = [];
         authorsOrders = authorsOrders.map( author => {
-          author.intels.forEach( (intel) => {
-            intel.rewards = rewards.filter((reward, index) => {
+          author.intels.forEach( intel => {
+            intel.rewards = rewards.filter( reward => {
+              if (reward.intelId === intel.id) rewarderList.push(reward);
               return reward.intelId === intel.id;
             });
           });
           return author;
         });
+
+        rewarderList = rewarderList.map( r => r.sender);
+
+        let profiles = await ParetoReward.find( { receiver: { $in: authorsKeys}});
+
+
+
 
         //console.log(rewards);
         return callback(null, authorsOrders);

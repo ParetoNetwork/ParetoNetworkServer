@@ -91,7 +91,7 @@
           .attr("d", d => arc(d.current));
 
         path.append("title")
-          .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
+          .text(d => `${d.ancestors().map(d => d.data.name).reverse().join(" ")}\n${format(d.value)}`);
 
         path.filter(d => d.children)
           .style("cursor", "pointer")
@@ -115,8 +115,6 @@
           .attr("fill", "none")
           .attr("pointer-events", "all")
           .on("click", click);
-
-
 
         function textFits(d) {
           const CHAR_SPACE = 6;
@@ -196,7 +194,6 @@
     },
     watch: {
       row(val){
-        console.log(val)
       }
     }
   };
