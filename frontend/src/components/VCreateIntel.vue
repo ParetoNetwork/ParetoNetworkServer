@@ -278,15 +278,6 @@
                     this.iniSignalWs();
                 }
 
-                this.signalWs.onmessage = (response) => {
-                  try {
-                    console.log(response); // TODO
-                  }
-                  catch(e){
-                    console.log(e);
-                  }
-                }
-
                 ContentService.createIntel(
                     {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress,
                         lastApproved: this.userLastApprovedContractAddress,

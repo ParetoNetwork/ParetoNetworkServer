@@ -215,12 +215,6 @@
                     const ident = Proteus.keys.IdentityKeyPair.deserialise(
                             base64js.toByteArray(localStorage.getItem("identityKeys")).buffer
                     );
-                    const preKey = Proteus.keys.PreKey.deserialise(
-                            base64js.toByteArray(localStorage.getItem("preKey")).buffer
-                    );
-                    const toBundleUser = Proteus.keys.PreKeyBundle.deserialise(
-                            base64js.toByteArray(localStorage.getItem(res[user].address)).buffer
-                    );
                     this.signalWs.onmessage = (response) => {
                       try {
                         // class PreKeyStore
@@ -243,23 +237,54 @@
                             });
                           }
                         }
-                        const store = new PreKeyStore([preKey]);
                         // decrypt message
                         const data = JSON.parse(response.data);
-                        const envelope = Proteus.message.Envelope.deserialise(
-                          base64js.toByteArray(data.groupKeys).buffer
-                        );
-                        Proteus.session.Session.init_from_message(ident, store, envelope)
-                        .then((msgArray) => {
-                          const [session, message] = msgArray;
-                          const data = JSON.parse(response.data);
-                          const serialicedBundleKey = (new TextDecoder()).decode(message);
-                          data.groupKeys = serialicedBundleKey;
-                          profileService.storeGroupKeys(data);
-                        })
-                      } catch (e) {}
+                        if(data.type == 'sendIntel'){
+                          const identGroupKeys = Proteus.keys.IdentityKeyPair.deserialise(
+                                  base64js.toByteArray(localStorage.getItem("groupKeysIdentity")).buffer
+                          );
+                          const preKey = Proteus.keys.PreKey.deserialise(
+                                  base64js.toByteArray(localStorage.getItem("groupKeysPrekey")).buffer
+                          );
+                          const store = new PreKeyStore([preKey]);
+                          console.log("received intel", data.intel);
+                          const envelope = Proteus.message.Envelope.deserialise(
+                                  base64js.toByteArray(data.intel).buffer
+                          );
+                          Proteus.session.Session.init_from_message(identGroupKeys, store, envelope)
+                                  .then((msgArray) => {
+                                    const [session, message] = msgArray;
+                                    const intel = (new TextDecoder()).decode(message);
+                                    //TODO SHOW INTEL;
+                                    console.log(intel);
+                                  });
+                        }
+                        else if(data.type == 'sendGroupKeys'){
+                          const preKey = Proteus.keys.PreKey.deserialise(
+                                  base64js.toByteArray(localStorage.getItem("preKey")).buffer
+                          );
+
+                          const store = new PreKeyStore([preKey]);
+                          const envelope = Proteus.message.Envelope.deserialise(
+                                  base64js.toByteArray(data.groupKeys).buffer
+                          );
+                          Proteus.session.Session.init_from_message(ident, store, envelope)
+                                  .then((msgArray) => {
+                                    const [session, message] = msgArray;
+                                    const serialicedBundleKey = (new TextDecoder()).decode(message);
+                                    data.groupKeys = serialicedBundleKey;
+                                    profileService.storeGroupKeys(data);
+                                  });
+                        }
+
+                      } catch (e) {
+                        console.log(e);
+                      }
                     }
                     if(this.signalWs.readyState === WebSocket.OPEN){
+                      const toBundleUser = Proteus.keys.PreKeyBundle.deserialise(
+                              base64js.toByteArray(localStorage.getItem(res[user].address)).buffer
+                      );
                       Proteus.session.Session.init_from_prekey(ident, toBundleUser)
                       .then((session) => {
                         var encryptedGroupKeys = null;

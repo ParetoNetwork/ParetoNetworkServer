@@ -1005,7 +1005,7 @@ app.initializeLibSignalSocket = function (server) {
           console.log("Sending group key from " + message.address + " to " + message.toAddress);
           try {
             if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({groupKeys: groupKeys, fromAddress: message.address}));
+              client.send(JSON.stringify({groupKeys: groupKeys, fromAddress: message.address, type: 'sendGroupKeys'}));
             }
           }
           catch(e){
@@ -1029,7 +1029,7 @@ app.initializeLibSignalSocket = function (server) {
           console.log("Sending intel from " + message.address + " to " + message.toAddress);
           try {
             if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({intel: encryptedIntel, fromAddress: message.address}));
+              client.send(JSON.stringify({intel: encryptedIntel, fromAddress: message.address, type: 'sendIntel'}));
             }
           }
           catch(e){
