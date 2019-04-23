@@ -45,7 +45,7 @@
               intel.name = intel.title.substring(0, 10);
               intel.size = 4;
 
-              intel.children = (intel.rewards.length > 0)? intel.rewards.map( r => ({name: r.intelAddress.substring(0, 10), reward: r.amount})) : [];
+              intel.children = (intel.rewards.length > 0)? intel.rewards.map( r => ({name: r.intelAddress.substring(0, 10), reward: r.amount, size: 4})) : [];
               // console.log()
               return intel;
               // intel.children = intel.rewards.forEach( res )
