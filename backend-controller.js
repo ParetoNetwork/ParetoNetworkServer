@@ -2262,7 +2262,8 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
           }
         })
       } else {
-        controller.retrieveRanksWithRedis(1, limit, page, true, callback);
+        // controller.retrieveRanksWithRedis(1, limit, page, true, callback);
+          callback(null,[]);
       }
     }
 
