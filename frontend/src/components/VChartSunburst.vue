@@ -1,11 +1,12 @@
 <template>
-  <div id="d3-svg">
-    <svg></svg>
+  <div class="intel-container text-left">
+    <b class="title-content text-left px-3"> Trade Explorer </b>
+    <div id="d3-svg">
+      <svg></svg>
+    </div>
   </div>
 </template>
-
 <script>
-
   export default {
     name: 'VChartSunburst',
     props: [
@@ -13,8 +14,8 @@
     ],
     data() {
       return {
-        height: 450,
-        width: 450,
+        height: 250,
+        width: 250,
         row: document.getElementById("chart-row").offsetWidth
       };
     },
@@ -54,7 +55,6 @@
 
         var format = d3.format(",d");
 
-
         var root = d3.hierarchy(data)  // <-- 1
           .sum(function (d) { return d.size});
 
@@ -64,7 +64,7 @@
         partition(root);
 
         root.each(d => d.current = d);
-        var format = d3.format(",d")
+        var format = d3.format(",d");
 
         var arc = d3.arc()
           .startAngle(d => d.x0)
@@ -72,12 +72,13 @@
           .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
           .padRadius(radius * 1.5)
           .innerRadius(d => d.y0 * radius)
-          .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1))
+          .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
         const svg = d3.select("#d3-svg svg")
           .attr("width", width)
           .attr("height", height)
-          .style("font", "10px sans-serif");
+          .style("font", "10px sans-serif")
+          .call(this.responsivefy);
 
         const g = svg.append("g")
           .attr("transform", `translate(${width / 2},${width / 2})`);
