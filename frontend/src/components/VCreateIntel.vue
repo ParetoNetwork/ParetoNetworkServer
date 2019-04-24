@@ -188,7 +188,9 @@
                 modalToken: false,
                 modalWaiting: false,
                 modalCloseWarning: false,
-                isPreview: false
+                isPreview: false,
+                words: [],
+                assets: []
             };
         },
         updated: function () {
@@ -208,7 +210,12 @@
             ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
         },
         mounted: function () {
-            const words = ['AAPL','BNB', 'BTC'];
+            ContentService.getAssets(r=>{
+                this.assets = r;
+                this.words = r.map(it=>{return it.symbol.charAt(0).toUpperCase() + it.symbol.slice(1).toLowerCase() });
+            }, e=>{
+                console.log(e);
+            });
             $('#intel-body-input').summernote({
                 placeholder: 'Content...',
                 height: '40vh', // set editor height
@@ -230,15 +237,15 @@
                     air: []
                 },
                 hint: {
-                    words: words,
+                    words: this.words,
                     match: /\B\$(\w*)$/,
-                    search: function (keyword, callback) {
-                        callback(words.filter(item => {
-                            return (item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()).indexOf((keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase())) === 0;
+                    search:  (keyword, callback) =>{
+                        callback(this.words.filter(item => {
+                            return (item).indexOf((keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase())) === 0;
                         }));
                     },
                     content: (item)=>{
-                       return  '$'+item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
+                       return  '$'+item
                     }
                 }
             });
@@ -261,9 +268,15 @@
                 this.intelState('creating', 'Creating Intel, please wait');
 
                 this.$store.state.makingRequest = true;
+                let assets=  this.assets.filter( it => { it.symbol = it.symbol.charAt(0).toUpperCase() + it.symbol.slice(1).toLowerCase(); return  this.body.indexOf("$"+it.symbol) > -1 });
+                if(assets){
+                    assets= assets.map(it=> {return it._id} )
+                }
 
                 ContentService.createIntel(
-                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress, lastApproved: this.userLastApprovedContractAddress},
+                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress,
+                        lastApproved: this.userLastApprovedContractAddress,
+                        assets: assets },
                     this.tokens,
                     {signType: this.signType, pathId: this.pathId},
                     {

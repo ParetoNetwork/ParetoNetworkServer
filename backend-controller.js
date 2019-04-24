@@ -121,6 +121,7 @@ const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 const ParetoPayment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
+const ParetoAsset = mongoose.model('asset');
 const ParetoTransaction = mongoose.model('transaction');
 
 function updateWithMongo() {
@@ -559,6 +560,9 @@ controller.postContent = function (req, callback) {
       reward: req.body.reward || 1
 
     });
+    if(req.body.assets && req.body.assets.length){
+        Intel.assets = req.body.assets.map(it=>{return{ asset: mongoose.Types.ObjectId(it)}});
+    }
     Intel.save((err, savedIntel) => {
 
       if (err) {
@@ -1506,6 +1510,14 @@ controller.getQueryContentByUser = function (address, intel, callback) {
   } // end else for address validation
 };
 
+controller.getAssets = async function (callback){
+    try{
+        callback(null, await ParetoAsset.find({}).exec())
+    } catch (e) {
+        callback(e);
+    }
+};
+
 controller.getAllAvailableContent = async function (req, callback) {
 
   var limit = parseInt(req.query.limit || 100);
@@ -1517,7 +1529,7 @@ controller.getAllAvailableContent = async function (req, callback) {
       let newQuery = await controller.validateQuery(req.query);
       queryFind.$and = queryFind.$and.concat(newQuery);
 
-      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate('createdBy').exec();
+      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate([{ path: 'assets.asset'}, {path: 'createdBy'}]).exec();
       let newResults = [];
 
       allResults.forEach(function (entry) {
@@ -1551,6 +1563,7 @@ controller.getAllAvailableContent = async function (req, callback) {
             intelAddress: entry.intelAddress,
             _v: entry._v,
             distributed: entry.distributed,
+            assets: entry.assets,
             createdBy: {
               address: entry.createdBy.address,
               alias: entry.createdBy.alias,
@@ -1634,7 +1647,7 @@ controller.getContentByIntel = function (req, intel, callback) {
       } else {
         queryFind.$and = queryFind.$and.concat({txHash: intel})
       }
-      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).populate('createdBy').exec();
+      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).populate([{ path: 'assets.asset'}, {path: 'createdBy'}]).exec();
       if (allResults && allResults.length > 0) {
         const entry = allResults[0];
         let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
@@ -1656,6 +1669,7 @@ controller.getContentByIntel = function (req, intel, callback) {
             intelAddress: entry.intelAddress,
             _v: entry._v,
             distributed: entry.distributed,
+            assets: entry.assets,
             createdBy: {
                 address: entry.createdBy.address,
                 alias: entry.createdBy.alias,
@@ -1870,7 +1884,7 @@ controller.getContentByCurrentUser = async function (req, callback) {
     var query = ParetoContent.find({
       address: address,
       validated: true
-    }).sort({dateCreated: -1}).skip(limit * page).limit(limit).populate('createdBy');
+    }).sort({dateCreated: -1}).skip(limit * page).limit(limit).populate([{ path: 'assets.asset'}, {path: 'createdBy'}]);
 
     query.exec(function (err, results) {
       if (err) {
@@ -1901,6 +1915,7 @@ controller.getContentByCurrentUser = async function (req, callback) {
                 validated: entry.validated,
                 intelAddress: entry.intelAddress,
                 distributed: entry.distributed,
+                assets: entry.assets,
                 _v: entry._v,
                 createdBy: {
                   address: entry.createdBy.address,

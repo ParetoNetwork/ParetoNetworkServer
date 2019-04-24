@@ -259,6 +259,17 @@ app.post('/v1/addresses', function (req, res) {
   });
 });
 
+
+app.get('/v1/assets', function (req, res) {
+    controller.getAssets( function (err, results) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(results));
+        }
+    });
+});
+
 app.get("/getIntels", (req, res) => {
   controller.getAllIntel((err, response) => {
     if (err) {
