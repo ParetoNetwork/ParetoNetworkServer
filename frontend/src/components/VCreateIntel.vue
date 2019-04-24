@@ -14,7 +14,7 @@
                             <p class="create-input text-user-content"> {{blockChainAddress}} </p>
                         </div>
                         <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
-                            <input type="number" v-model="tokens" class="create-input" step="0.000000001" required>
+                            <input type="number" v-model="tokens" class="create-input mt-0" step="0.000000001" required>
                             <span class="floating-label">Pareto Amount
                             <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake" style="color: red"></i> </span>
                         </span>
@@ -208,6 +208,7 @@
             ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
         },
         mounted: function () {
+            const words = ['AAPL','BNB', 'BTC'];
             $('#intel-body-input').summernote({
                 placeholder: 'Content...',
                 height: '40vh', // set editor height
@@ -227,6 +228,18 @@
                     image: [],
                     link: [],
                     air: []
+                },
+                hint: {
+                    words: words,
+                    match: /\B\$(\w*)$/,
+                    search: function (keyword, callback) {
+                        callback(words.filter(item => {
+                            return (item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()).indexOf((keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase())) === 0;
+                        }));
+                    },
+                    content: (item)=>{
+                       return  '$'+item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
+                    }
                 }
             });
             this.address();
@@ -448,6 +461,10 @@
     }
 
     .note-toolbar.panel-heading a {
+        color: black;
+    }
+
+    .note-hint-item {
         color: black;
     }
 
