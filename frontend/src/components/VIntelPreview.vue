@@ -23,7 +23,7 @@
                         <router-link
                                 tag="h1"
                                 :to="intelRoute(intel)"
-                                class="subtitle-intel text-user-content redacted" v-line-clamp="1" v-html="convertToHideText(intel.title|| 'No title')">
+                                class="subtitle-intel text-user-content redacted" v-line-clamp="1" v-html="convertToHideText(intelTitle(intel))">
                         </router-link>
                         <div class="row">
                             <div v-if="!eventRow" class="col-12 col-md-12 ellipsis">
@@ -96,52 +96,67 @@
   import {countUpMixin} from '../mixins/countUp';
   import {convertToHideText} from '../utils/Utils';
 
-  export default {
-    name: 'VIntelPreview',
-    props: [
-      'user', 'intel', 'eventRow', 'onboardingPicture'
-    ],
-    mixins: [countUpMixin],
-    components: {
-      ICountUp,
-      VIntelButtonAction
-    },
-    data: function () {
-      return {
-        baseURL: environment.baseURL,
-        etherscanUrl: window.localStorage.getItem('etherscan')
-      };
-    },
-    filters: {
-      dateFilter: function formatDate(date) {
-        const temp = moment(date);
-        return temp.format('MMMM Do, YYYY');
-      }
-    },
-    mounted() {
-    },
-    methods: {
-      creatorRoute(address) {
-        return '/intel/' + address + '/';
-      },
-      dateStringFormat(date) {
-        return new Date(date);
-      },
-      convertToHideText: function (text) {
-        //console.log(text);
-        return convertToHideText(text);
-      },
-      intelRoute: function (intel) {
-        let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
-        return '/intel/' + (intel.createdBy.aliasSlug || intel.address) + '/' + param;
-      },
-      loadProfileImage: function (pic, profileAddress) {
-        let path = this.baseURL + '/profile-image?image=';
-        return profileService.getProfileImage(path, pic, profileAddress);
-      },
-      randomNumber: function (min = 1, max = 3) {
-        return Math.floor(Math.random() * (max - min + 1) + min);
-      }
+    export default {
+        name: "VIntelPreview",
+        props: [
+            'user', 'intel', 'eventRow', 'onboardingPicture'
+        ],
+        mixins: [countUpMixin],
+        components: {
+            ICountUp,
+            VIntelButtonAction,
+        },
+        data: function () {
+            return {
+                baseURL: environment.baseURL,
+                etherscanUrl: window.localStorage.getItem('etherscan'),
+            }
+        },
+        filters: {
+            dateFilter: function formatDate(date) {
+                const temp = moment(date);
+                return temp.format("MMMM Do, YYYY");
+            }
+        },
+        mounted(){
+        },
+        methods: {
+            intelTitle(intel){
+                if(intel.title){
+                    const CryptoJS = require("crypto-js");
+                    if(intel.createdBy.address == this.user.address){
+                        const decrypted = CryptoJS.AES.decrypt(intel.title, localStorage.getItem("groupKeys"));
+                        return decrypted.toString(CryptoJS.enc.Utf8);
+                    }else{
+                        const decrypted = CryptoJS.AES.decrypt(intel.title, localStorage.getItem("groupKeys-" + intel.createdBy.address));
+                        return decrypted.toString(CryptoJS.enc.Utf8);
+                    }
+                }else{
+                  return 'No title';
+                }
+            },
+            creatorRoute(address) {
+                return '/intel/' + address + '/';
+            },
+            dateStringFormat(date) {
+                return new Date(date);
+            },
+            intelRoute: function (intel) {
+                let param = (intel.txHash === '0x0') ? intel._id : intel.txHash;
+                return '/intel/' + (intel.createdBy.aliasSlug || intel.address) + '/' + param;
+            },
+            loadProfileImage: function (pic, profileAddress) {
+                let path = this.baseURL + "/profile-image?image=";
+                return profileService.getProfileImage(path, pic, profileAddress);
+            },
+            randomNumber: function (min = 1, max = 3) {
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            },
+            convertToHideText: function (text) {
+                //console.log(text);
+                return convertToHideText(text);
+            },
+        }
     }
   };
 </script>

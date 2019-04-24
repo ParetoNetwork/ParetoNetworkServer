@@ -93,22 +93,10 @@ export default class profileService {
         if (localStorage.getItem("groupKeys")) {
             return success(localStorage.getItem("groupKeys"));
         }
-        const Proteus = require('proteus-hd');
-        const base64js = require('base64-js');
-        const preKeyId = 0;
-        const identity = Proteus.keys.IdentityKeyPair.new();  // Public and Private KeyPair
-        const preKey = Proteus.keys.PreKey.new(preKeyId);
-        const serializedIdentity = identity.serialise();
-        const encodedSerializedIdentity = base64js.fromByteArray(new Uint8Array(serializedIdentity));
-        const serializedPrekey = preKey.serialise();
-        const encodedSerializedPrekey = base64js.fromByteArray(new Uint8Array(serializedPrekey));
-        const signedGroupPreKey = Proteus.keys.PreKeyBundle.signed(identity, preKey);
-        const serializedPrekeyBundle = signedGroupPreKey .serialise();
-        const encodedSerializedPrekeyBundle = base64js.fromByteArray(new Uint8Array(serializedPrekeyBundle));
-        window.localStorage.setItem('groupKeys', encodedSerializedPrekeyBundle);
-        window.localStorage.setItem('groupKeysIdentity', encodedSerializedIdentity);
-        window.localStorage.setItem('groupKeysPrekey', encodedSerializedPrekey);
-        return success(encodedSerializedPrekeyBundle)
+        const cryptoString = require('crypto-random-string');
+        const groupKeys = cryptoString(32);
+        window.localStorage.setItem('groupKeys', groupKeys);
+        return success(groupKeys)
     }
 
     static storeGroupKeys(keyData){

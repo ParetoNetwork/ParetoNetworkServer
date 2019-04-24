@@ -239,27 +239,7 @@
                         }
                         // decrypt message
                         const data = JSON.parse(response.data);
-                        if(data.type == 'sendIntel'){
-                          const identGroupKeys = Proteus.keys.IdentityKeyPair.deserialise(
-                                  base64js.toByteArray(localStorage.getItem("groupKeysIdentity")).buffer
-                          );
-                          const preKey = Proteus.keys.PreKey.deserialise(
-                                  base64js.toByteArray(localStorage.getItem("groupKeysPrekey")).buffer
-                          );
-                          const store = new PreKeyStore([preKey]);
-                          console.log("received intel", data.intel);
-                          const envelope = Proteus.message.Envelope.deserialise(
-                                  base64js.toByteArray(data.intel).buffer
-                          );
-                          Proteus.session.Session.init_from_message(identGroupKeys, store, envelope)
-                                  .then((msgArray) => {
-                                    const [session, message] = msgArray;
-                                    const intel = (new TextDecoder()).decode(message);
-                                    //TODO SHOW INTEL;
-                                    console.log(intel);
-                                  });
-                        }
-                        else if(data.type == 'sendGroupKeys'){
+                        if(data.type == 'sendGroupKeys'){
                           const preKey = Proteus.keys.PreKey.deserialise(
                                   base64js.toByteArray(localStorage.getItem("preKey")).buffer
                           );
@@ -269,12 +249,12 @@
                                   base64js.toByteArray(data.groupKeys).buffer
                           );
                           Proteus.session.Session.init_from_message(ident, store, envelope)
-                                  .then((msgArray) => {
-                                    const [session, message] = msgArray;
-                                    const serialicedBundleKey = (new TextDecoder()).decode(message);
-                                    data.groupKeys = serialicedBundleKey;
-                                    profileService.storeGroupKeys(data);
-                                  });
+                          .then((msgArray) => {
+                            const [session, message] = msgArray;
+                            const serialicedBundleKey = (new TextDecoder()).decode(message);
+                            data.groupKeys = serialicedBundleKey;
+                            profileService.storeGroupKeys(data);
+                          });
                         }
 
                       } catch (e) {

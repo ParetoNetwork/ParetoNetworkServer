@@ -1015,30 +1015,6 @@ app.initializeLibSignalSocket = function (server) {
           }
         }
       }
-      else if(message.type == "sendIntel") {
-        if (typeof clients[message.address] === 'undefined') {
-          clients[message.address] = ws;
-        }
-        if (typeof clients[message.toAddress] === 'undefined') {
-          console.log("The client " + message.toAddress + " don't exists.");
-        }
-        else{
-          var client = clients[message.toAddress];
-          var encryptedIntel = message.intel;
-          if (client.isAlive === false) return client.terminate();
-          console.log("Sending intel from " + message.address + " to " + message.toAddress);
-          try {
-            if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({intel: encryptedIntel, fromAddress: message.address, type: 'sendIntel'}));
-            }
-          }
-          catch(e){
-            const error = ErrorHandler.backendErrorList('b28');
-            error.systemMessage = e.message ? e.message : e;
-            console.log(JSON.stringify(error));
-          }
-        }
-      }
     });
     ws.isAlive = true;
     ws.on('pong', heartbeat);

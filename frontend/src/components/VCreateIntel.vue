@@ -153,7 +153,7 @@
     import ContentService from '../services/ContentService';
 
     import VProfile from "./VProfile.vue";
-    import {mapState, mapActions, mapMutations} from "vuex";
+    import {mapState, mapActions} from "vuex";
 
     require('summernote/dist/summernote-bs4.css');
     require('summernote');
@@ -207,7 +207,7 @@
             bodyFunction: function () {
                 return content;
             },
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress", "signalWs"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
         },
         mounted: function () {
             ContentService.getAssets(r=>{
@@ -252,7 +252,6 @@
             this.address();
         },
         methods: {
-            ...mapMutations(['iniSignalWs']),
             ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
             address: function () {
                 DashboardService.getAddress(res => {
@@ -274,12 +273,13 @@
                     assets= assets.map(it=> {return it._id} )
                 }
 
-                if (!this.signalWs) {
-                    this.iniSignalWs();
-                }
+
+                const CryptoJS = require("crypto-js");
+                const encryptedBody = CryptoJS.AES.encrypt(this.body, localStorage.getItem("groupKeys")).toString();
+                const encryptedTitle = CryptoJS.AES.encrypt(this.title, localStorage.getItem("groupKeys")).toString();
 
                 ContentService.createIntel(
-                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress,
+                    {block: this.block, title: encryptedTitle, body: encryptedBody, address: this.blockChainAddress,
                         lastApproved: this.userLastApprovedContractAddress,
                         assets: assets },
                     this.tokens,
@@ -306,32 +306,7 @@
 
                         this.modalWaiting = false;
 
-                        const Proteus = require('proteus-hd');
-                        const base64js = require('base64-js');
-
-                        const ident = Proteus.keys.IdentityKeyPair.deserialise(
-                            base64js.toByteArray(localStorage.getItem("groupKeysIdentity")).buffer
-                        );
-
-                        const groupKeys = ContentService.getGroupKeys();
-                        for (const address in groupKeys) {
-                            const toBundleUser = groupKeys[address];
-                            Proteus.session.Session.init_from_prekey(ident, toBundleUser)
-                                .then((session) => {
-                                    var stringIntel = JSON.stringify({block: this.block, title: this.title, body: this.body, address: this.blockChainAddress, lastApproved: this.userLastApprovedContractAddress});
-                                    var encryptedIntel = session.encrypt(stringIntel).then(
-                                        (envelope) => {
-                                            this.signalWs.send(JSON.stringify({
-                                                toAddress: address,
-                                                intel: encryptedIntel,
-                                                type: "sendIntel",
-                                                address: this.blockChainAddress,
-                                            }));
-                                        });
-                                });
-                        }
-
-                        // this.redirectAfterCreateIntel(intelId); TODO
+                        this.redirectAfterCreateIntel(intelId);
 
                         //this.$router.push('/intel');
                     }, (err) => {

@@ -11,7 +11,7 @@
                         <div v-else class="col-12 p-4">
                             <div class="row py-3 m-0">
                                 <div class="col-md-10 p-0 pr-1">
-                                    <p class="title-user-content redacted" v-html="convertToHideText(intel.title)"></p>
+                                    <p class="title-user-content redacted" v-html="convertToHideText(decryptedValue(intel, 'title'))"></p>
                                 </div>
                             </div>
                             <div class="row text-content m-0">
@@ -34,7 +34,7 @@
                                 </a>
                             </div>
                             <div class="text-group mt-4">
-                                <p class="intel-body text-user-content redacted" v-html="convertToHideText(intel.body)"></p>
+                                <p class="intel-body text-user-content redacted" v-html="convertToHideText(decryptedValue(intel, 'body'))"></p>
                             </div>
                         </div>
                     </div>
@@ -68,107 +68,122 @@
 
   import VModalReward from './Modals/VModalReward';
 
-  export default {
-    name: 'VIntelDetail',
-    mixins: [countUpMixin],
-    components: {
-      ICountUp,
-      VShimmerUserProfile,
-      VShimmerIntelInformation,
-      VProfile,
-      VIntelButtonAction,
-      VModalReward
-    },
-    computed: {
-      ...mapState(['ws', 'signType', 'pendingTransactions', 'showModalReward'])
-    },
-    data: function () {
-      return {
-        id: this.$route.params.id,
-        profileObject: true,
-        loading: true,
-        intel: {},
-        address: {},
-        etherscanUrl: window.localStorage.getItem('etherscan'),
-        profile: {
-          address: '',
-          alias: '',
-          biography: '',
-          rank: 1000
+    export default {
+        name: 'VIntelDetail',
+        mixins: [countUpMixin],
+        components: {
+            ICountUp,
+            VShimmerUserProfile,
+            VShimmerIntelInformation,
+            VProfile,
+            VIntelButtonAction,
+            VModalReward
         },
-        user: {},
-        baseURL: environment.baseURL
-      };
-    },
-    beforeMount: function () {
-      this.$store.state.makingRequest = true;
-      this.requestCall();
-    },
-    methods: {
-      ...mapMutations(['iniWs', 'openModalReward']),
-      ...mapActions(['addTransaction', 'transactionComplete', 'editTransaction']),
-      dateStringFormat(date) {
-        return new Date(date);
-      },
-      isAvailable() {
-        if (this.signType === 'LedgerNano') {
-          this.hardwareAvailable = false;
-          AuthService.doWhenIsConnected(() => {
-            this.hardwareAvailable = true;
-            AuthService.deleteWatchNano();
-          });
-        } else {
-          this.hardwareAvailable = true;
-        }
-      },
-      getIntel: function () {
-        return DashboardService.getIntel(this.id, res => {
-          this.getProfile(res.address);
-          this.intel = res;
-        }, error => {
-        });
-      },
-      convertToHideText: function (text) {
-        return convertToHideText(text);
-      },
-      getProfile: function (address) {
-        ProfileService.getSpecificProfile(address, res => {
-          this.profile = res;
-          this.loading = false;
-        }, error => {
-        });
-      },
-      getAddress: function () {
-        return DashboardService.getAddress(res => {
-          this.address = res;
-        }, () => {
-          alert(error);
-        });
-      },
-      socketConnection() {
-        let params = {rank: this.rank, limit: 100, page: this.page};
-        if (!this.ws) {
-          this.iniWs();
-          let wss = this.ws;
-          this.ws.onopen = function open() {
-            wss.send(JSON.stringify(params));
-          };
-        }
-        this.overrideOnMessage();
-      },
-      loadProfile: function () {
-        return ProfileService.getProfile(
-          res => {
-            this.user = res;
-          },
-          () => {
-          }
-        );
-      },
-      overrideOnMessage() {
-        this.ws.onmessage = (data) => {
-          try {
-            const info = JSON.parse(data.data);
+        computed: {
+            ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
+        },
+        data: function () {
+            return {
+                id: this.$route.params.id,
+                profileObject: true,
+                loading: true,
+                intel: {},
+                address: {},
+                etherscanUrl: window.localStorage.getItem('etherscan'),
+                profile: {
+                    address: '',
+                    alias: '',
+                    biography: '',
+                    rank: 1000
+                },
+                user: {},
+                baseURL: environment.baseURL
+            };
+        },
+        beforeMount: function () {
+            this.$store.state.makingRequest = true;
+            this.requestCall();
+        },
+        methods: {
+            ...mapMutations(["iniWs", "openModalReward"]),
+            ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
+            dateStringFormat(date) {
+                return new Date(date);
+            },
+            convertToHideText: function (text) {
+                return convertToHideText(text);
+            },
+            decryptedValue(intel, attr){
+                if(intel.title){
+                    const CryptoJS = require("crypto-js");
+                    if(intel.createdBy.address == this.user.address){
+                        const decrypted = CryptoJS.AES.decrypt(intel[attr], localStorage.getItem("groupKeys"));
+                        return decrypted.toString(CryptoJS.enc.Utf8);
+                    }else{
+                        const decrypted = CryptoJS.AES.decrypt(intel[attr], localStorage.getItem("groupKeys-" + intel.createdBy.address));
+                        return decrypted.toString(CryptoJS.enc.Utf8);
+                    }
+                }else{
+                    return '-';
+                }
+            },
+
+            isAvailable() {
+                if (this.signType === 'LedgerNano') {
+                    this.hardwareAvailable = false;
+                    AuthService.doWhenIsConnected(() => {
+                        this.hardwareAvailable = true;
+                        AuthService.deleteWatchNano();
+                    });
+                } else {
+                    this.hardwareAvailable = true;
+                }
+            },
+            getIntel: function () {
+                return DashboardService.getIntel(this.id, res => {
+                    this.getProfile(res.address);
+                    this.intel = res;
+                }, error => {
+                });
+            },
+            getProfile: function (address) {
+                ProfileService.getSpecificProfile(address, res => {
+                    this.profile = res;
+                    this.loading = false;
+                }, error => {
+                })
+            },
+            getAddress: function () {
+                return DashboardService.getAddress(res => {
+                    this.address = res;
+                }, () => {
+                    alert(error);
+                });
+            },
+            socketConnection() {
+                let params = {rank: this.rank, limit: 100, page: this.page};
+                if (!this.ws) {
+                    this.iniWs();
+                    let wss = this.ws;
+                    this.ws.onopen = function open() {
+                        wss.send(JSON.stringify(params));
+                    };
+                }
+                this.overrideOnMessage();
+            },
+            loadProfile: function () {
+                return ProfileService.getProfile(
+                    res => {
+                        this.user = res;
+                    },
+                    () => {
+                    }
+                );
+            },
+            overrideOnMessage() {
+                this.ws.onmessage = (data) => {
+                    try {
+                        const info = JSON.parse(data.data);
 
             if (info.data.address) {
               this.intel.blockAgo = info.data.block - this.intel.block;
