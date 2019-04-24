@@ -94,7 +94,7 @@ export default class profileService {
             return success(localStorage.getItem("groupKeys"));
         }
         const cryptoString = require('crypto-random-string');
-        const groupKeys = cryptoString(32);
+        const groupKeys = cryptoString(64); // number of characters of generated key
         window.localStorage.setItem('groupKeys', groupKeys);
         return success(groupKeys)
     }

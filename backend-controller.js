@@ -559,7 +559,7 @@ controller.postContent = function (req, callback) {
       txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
       speed: process.env.DEFAULT_SPEED || 1 , //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
       reward: req.body.reward || 1
-
+      encrypted: (req.body.hasOwnProperty('encrypted') ? req.body.encrypted : false)
     });
     if(req.body.assets && req.body.assets.length){
         Intel.assets = req.body.assets.map(it=>{return{ asset: mongoose.Types.ObjectId(it)}});
@@ -1612,6 +1612,7 @@ controller.getAllAvailableContent = async function (req, callback) {
             id: entry.id,
             txHashDistribute: entry.txHashDistribute,
             intelAddress: entry.intelAddress,
+            encrypted: entry.encrypted,
             _v: entry._v,
             distributed: entry.distributed,
             assets: entry.assets,
@@ -1716,6 +1717,7 @@ controller.getContentByIntel = function (req, intel, callback) {
             reward: entry.reward,
             speed: entry.speed,
             id: entry.id,
+            encrypted: entry.encrypted,
             txHashDistribute: entry.txHashDistribute,
             intelAddress: entry.intelAddress,
             _v: entry._v,
@@ -1964,6 +1966,7 @@ controller.getContentByCurrentUser = async function (req, callback) {
                 txHashDistribute: entry.txHashDistribute,
                 expires: entry.expires,
                 validated: entry.validated,
+                encrypted: entry.encrypted,
                 intelAddress: entry.intelAddress,
                 distributed: entry.distributed,
                 assets: entry.assets,

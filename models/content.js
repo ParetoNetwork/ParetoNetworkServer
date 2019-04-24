@@ -19,7 +19,8 @@ var paretoContentSchema = new Schema({
 	distributed: { type: Boolean, default: false },
 	validated: { type: Boolean, default: false },
 	assets:[{ asset: { type: mongoose.Schema.Types.ObjectId, ref: 'asset' }}],
-	expires: Number // time in Epoch 
+	encrypted: { type: Boolean, default: false },
+	expires: Number // time in Epoch
 
 }, { collection : 'content' , toObject : {virtuals:true},toJSON: { virtuals: true } });
 

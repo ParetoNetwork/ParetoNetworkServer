@@ -114,7 +114,10 @@
                 return convertToHideText(text);
             },
             decryptedValue(intel, attr){
-                if(intel.title){
+                if(! intel.encrypted && intel[attr]){
+                    return intel[attr];
+                }
+                else if(intel[attr] && intel.encrypted){
                     const CryptoJS = require("crypto-js");
                     if(intel.createdBy.address == this.user.address){
                         const decrypted = CryptoJS.AES.decrypt(intel[attr], localStorage.getItem("groupKeys"));
@@ -124,7 +127,7 @@
                         return decrypted.toString(CryptoJS.enc.Utf8);
                     }
                 }else{
-                    return '-';
+                    return 'No Value';
                 }
             },
 

@@ -122,7 +122,10 @@
         },
         methods: {
             intelTitle(intel){
-                if(intel.title){
+                if(! intel.encrypted && intel.title){
+                    return intel.title;
+                }
+                else if(intel.title && intel.encrypted){
                     const CryptoJS = require("crypto-js");
                     if(intel.createdBy.address == this.user.address){
                         const decrypted = CryptoJS.AES.decrypt(intel.title, localStorage.getItem("groupKeys"));

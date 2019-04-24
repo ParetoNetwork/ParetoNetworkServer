@@ -370,7 +370,8 @@
                         if(this.$route.path ===  '/create'){
                             this.$router.push(`intel/${intel.address}/${intel.txHash}`);
                         }
-                    });
+                    },
+                    err => {});
             },
             showModal() {
                 this.modalToken = true;
