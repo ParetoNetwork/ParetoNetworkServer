@@ -16,7 +16,8 @@
       return {
         height: 250,
         width: 250,
-        row: document.getElementById("chart-row").offsetWidth
+        row: document.getElementById("chart-row").offsetWidth,
+        root: null
       };
     },
     mounted() {
@@ -55,9 +56,12 @@
 
         var format = d3.format(",d");
 
-        var root = d3.hierarchy(data)  // <-- 1
-          .sum(function (d) { return d.size});
-
+        if(!this.root){
+            this.root = d3.hierarchy(data)  // <-- 1
+                .sum(function (d) { return d.size});
+        }else{
+            this.root.data(data).sum(function (d) { return d.size});
+        }
         var partition = d3.partition()  // <-- 1
           .size([2 * Math.PI, root.height + 1]);
 
@@ -195,6 +199,10 @@
     },
     watch: {
       row(val){
+      },
+        nodeData(){
+            this.height = this.width = this.row;
+            this.sunschart(this.$router, this.$notify);
       }
     }
   };

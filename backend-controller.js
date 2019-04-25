@@ -993,7 +993,7 @@ controller.startwatchIntel = function () {
   controller.startwatchNewIntel()
   ParetoContent.find({'validated': true}).distinct('intelAddress').exec(function (err, results) {
     if (err) {
-      callback(err);
+      console.log(err);
     } else {
       let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
       if (!data.length) {
@@ -1534,10 +1534,14 @@ controller.getAllAvailableContent = async function (req, callback) {
       let newQuery = await controller.validateQuery(req.query);
       queryFind.$and = queryFind.$and.concat(newQuery);
 
-      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate([{ path: 'assets.asset'}, {path: 'createdBy'}]).exec();
+      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit)
+          .populate([{ path: 'assets.asset', select:'symbol name -_id'},
+              {path: 'createdBy' , select: 'address alias aliasSlug biography profilePic -_id'},
+              {path: 'rewardsTransactions', select: 'amount sender', populate:{ path: 'profile', select: 'address alias aliasSlug -_id'} }]).exec();
       let newResults = [];
 
       allResults.forEach(function (entry) {
+          console.log(entry.rewardsTransactions);
         /*
 
          currently: force use of limit to keep json response smaller.
@@ -1569,6 +1573,13 @@ controller.getAllAvailableContent = async function (req, callback) {
             _v: entry._v,
             distributed: entry.distributed,
             assets: entry.assets,
+            rewardsTransactions: entry.rewardsTransactions.map(it=> {
+                return {amount: it.amount,
+                    address: it.sender,
+                    alias: it.profile? it.profile.alias: '',
+                    aliasSlug: it.profile? it.profile.aliasSlug: '',
+                }
+            }),
             createdBy: {
               address: entry.createdBy.address,
               alias: entry.createdBy.alias,
@@ -1652,7 +1663,10 @@ controller.getContentByIntel = function (req, intel, callback) {
       } else {
         queryFind.$and = queryFind.$and.concat({txHash: intel})
       }
-      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).populate([{ path: 'assets.asset'}, {path: 'createdBy'}]).exec();
+      const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1})
+          .populate([{ path: 'assets.asset', select:'symbol name -_id'},
+          {path: 'createdBy' , select: 'address alias aliasSlug biography profilePic -_id'},
+          {path: 'rewardsTransactions', select: 'amount sender', populate:{ path: 'profile', select: 'address alias aliasSlug -_id'} }]).exec();
       if (allResults && allResults.length > 0) {
         const entry = allResults[0];
         let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
@@ -1675,6 +1689,13 @@ controller.getContentByIntel = function (req, intel, callback) {
             _v: entry._v,
             distributed: entry.distributed,
             assets: entry.assets,
+            rewardsTransactions: entry.rewardsTransactions.map(it=> {
+                return {amount: it.amount,
+                    address: it.sender,
+                    alias: it.profile? it.profile.alias: '',
+                    aliasSlug: it.profile? it.profile.aliasSlug: '',
+                }
+            }),
             createdBy: {
                 address: entry.createdBy.address,
                 alias: entry.createdBy.alias,
@@ -1889,7 +1910,9 @@ controller.getContentByCurrentUser = async function (req, callback) {
     var query = ParetoContent.find({
       address: address,
       validated: true
-    }).sort({dateCreated: -1}).skip(limit * page).limit(limit).populate([{ path: 'assets.asset'}, {path: 'createdBy'}]);
+    }).sort({dateCreated: -1}).skip(limit * page).limit(limit).populate([{ path: 'assets.asset', select:'symbol name -_id'},
+        {path: 'createdBy' , select: 'address alias aliasSlug biography profilePic -_id'},
+        {path: 'rewardsTransactions', select: 'amount sender', populate:{ path: 'profile', select: 'address alias aliasSlug -_id'} }]);
 
     query.exec(function (err, results) {
       if (err) {
@@ -1921,6 +1944,13 @@ controller.getContentByCurrentUser = async function (req, callback) {
                 intelAddress: entry.intelAddress,
                 distributed: entry.distributed,
                 assets: entry.assets,
+                  rewardsTransactions: entry.rewardsTransactions.map(it=> {
+                      return {amount: it.amount,
+                          address: it.sender,
+                          alias: it.profile? it.profile.alias: '',
+                          aliasSlug: it.profile? it.profile.aliasSlug: '',
+                      }
+                  }),
                 _v: entry._v,
                 createdBy: {
                   address: entry.createdBy.address,

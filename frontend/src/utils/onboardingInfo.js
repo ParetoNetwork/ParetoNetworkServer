@@ -44,6 +44,7 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       },
       {
@@ -57,6 +58,7 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       },
       {
@@ -70,6 +72,7 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 90000
       },
       {
@@ -83,6 +86,7 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 40000
       },
       {
@@ -96,6 +100,7 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 70000
       },
       {
@@ -109,6 +114,7 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       }
     ],
