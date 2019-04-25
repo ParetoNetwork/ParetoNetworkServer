@@ -1541,7 +1541,6 @@ controller.getAllAvailableContent = async function (req, callback) {
       let newResults = [];
 
       allResults.forEach(function (entry) {
-          console.log(entry.rewardsTransactions);
         /*
 
          currently: force use of limit to keep json response smaller.

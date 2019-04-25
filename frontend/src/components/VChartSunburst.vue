@@ -44,6 +44,7 @@
         }
       },
       sunschart(router, notify) {
+          d3.selectAll("svg > *").remove();
         const data = this.nodeData;
 
         var width = this.width,
@@ -51,23 +52,22 @@
           radius = width / 6;
 
         let color;
+
         //color = d3.scaleOrdinal(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
         color = d3.scaleOrdinal(["#a88fca", "#d78dce", "#fd95b5", "#feae95", "#edd38b", "#d0f5a3", "#9df8a8", "#83ebc8", "#83ebc8", "#95aae7"]);
 
         var format = d3.format(",d");
 
-        if(!this.root){
+
             this.root = d3.hierarchy(data)  // <-- 1
                 .sum(function (d) { return d.size});
-        }else{
-            this.root.data(data).sum(function (d) { return d.size});
-        }
+
         var partition = d3.partition()  // <-- 1
-          .size([2 * Math.PI, root.height + 1]);
+          .size([2 * Math.PI, this.root.height + 1]);
 
-        partition(root);
+        partition(this.root);
 
-        root.each(d => d.current = d);
+        this.root.each(d => d.current = d);
         var format = d3.format(",d");
 
         var arc = d3.arc()
@@ -89,7 +89,7 @@
 
         const path = g.append("g")
           .selectAll("path")
-          .data(root.descendants().slice(1))
+          .data(this.root.descendants().slice(1))
           .join("path")
           .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.address); })
           .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 1 : 0.6) : 0)
@@ -107,7 +107,7 @@
           .attr("text-anchor", "middle")
           .style("user-select", "none")
           .selectAll("text")
-          .data(root.descendants().slice(1))
+          .data(this.root.descendants().slice(1))
           .join("text")
           .attr("dy", "0.35em")
           .attr("fill-opacity", d => +labelVisible(d.current))
@@ -115,7 +115,7 @@
           .text(d => d.data.name);
 
         const parent = g.append("circle")
-          .datum(root)
+          .datum(this.root)
           .attr("r", radius)
           .attr("fill", "none")
           .attr("pointer-events", "all")
@@ -131,6 +131,7 @@
           return d.data.name.length * CHAR_SPACE < perimeter;
         }
 
+        const root= this.root;
         function click(p) {
           parent.datum(p.parent || root);
 
@@ -201,6 +202,7 @@
       row(val){
       },
         nodeData(){
+          console.log(this.nodeData);
             this.height = this.width = this.row;
             this.sunschart(this.$router, this.$notify);
       }

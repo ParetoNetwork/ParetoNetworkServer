@@ -47,64 +47,39 @@
                       it[intel.address] = intel.createdBy;
                       it[intel.address].name = it[intel.address].aliasSlug || "No Alias";
                       it[intel.address].children = [];
+                      it[intel.address].reward = 0;
                   }
                   it[intel.address].children.push({
                       name: intel.title.substring(0, Math.min(intel.title.length, 10)),
                       title: intel.title,
-                      reward: intel.reward,
+                      reward: intel.totalReward,
                       id: intel.id,
-                      size: intel.reward,
-                      children: (intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r => ({name: r.aliasSlug || "No Alias", reward: r.amount, size: r.amount})) : []
+                      children: (intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r => ({name: r.aliasSlug || "No Alias", reward: r.amount})) : []
                   });
+                  it[intel.address].reward = it[intel.address].reward + intel.totalReward;
                   return it;
               } ,{});
 
-              this.nodeData.children =  Object.values( res);
+              function compare(a,b){
+                  return b.reward - a.reward;
+              }
+              const tnodes = Object.keys( res).length;
+              this.nodeData.children =  Object.values( res).sort(compare).slice(0, Math.min(4,tnodes)).map( (it, index)=>{
+                  const tnodes = it.children.length;
+                  it.children = it.children.sort(compare).slice(0, Math.min(10,tnodes)).map( (it, index)=>{
+                      const tnodes = it.children.length;
+                      it.children = it.children.sort(compare).slice(0, Math.min(10,tnodes)).map( (it, index)=>{
+                          it.size = index+1;
+                          return it
+                      } );
+
+                      it.size =  index+1;// it.children.reduce((it,item, index)=>{ console.log(item); return it + item.size},0);
+                      return it
+                  } );
+                  it.size =  index + 1;// it.children.reduce((it,item, index)=>{ return it + item.size},0);
+                  return it} );
           }
 
-
-        // profileService.getChartInfo(res => {
-        //   this.nodeData = {
-        //     name: '',
-        //     children: []
-        //   };
-        //
-        //   res.forEach(profile => {
-        //     profile.name = profile.alias || profile.address;
-        //     profile.children = profile.intels.map( intel => {
-        //       intel.name = intel.title.substring(0, 10);
-        //       intel.size = 4;
-        //
-        //       intel.children = (intel.rewards.length > 0)? intel.rewards.map( r => ({name: r.intelAddress.substring(0, 10), reward: r.amount, size: 4})) : [];
-        //       // console.log()
-        //       return intel;
-        //       // intel.children = intel.rewards.forEach( res )
-        //     });
-        //   });
-        //
-        //   this.nodeData.children = res;
-        //   // res.forEach(intel => {
-        //   //   let children = intel.rewardList.map(reward => (
-        //   //       {
-        //   //         type: 'profile',
-        //   //         name: reward.profile.alias || reward.profile.address.substring(0, 5),
-        //   //         slug: reward.profile.aliasSlug,
-        //   //         address: reward.profile.address,
-        //   //         size: reward.reward,
-        //   //         reward: reward.reward
-        //   //       })
-        //   //   );
-        //   //   this.nodeData.children.push({
-        //   //     name: intel.title,
-        //   //     reward: intel.size,
-        //   //     type: 'intel',
-        //   //     children
-        //   //   })
-        //   // });
-        // }, error => {
-        //
-        // });
-        //   }
 
 
       }
