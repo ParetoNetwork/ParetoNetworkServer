@@ -73,10 +73,12 @@
                           return it
                       } );
 
-                      it.size =  index+1;// it.children.reduce((it,item, index)=>{ console.log(item); return it + item.size},0);
+                      it.size =    it.children.reduce((it,item, index)=>{ console.log(item); return it + item.size},0);
+                      it.size =   it.size?   it.size: (index +1);
                       return it
                   } );
-                  it.size =  index + 1;// it.children.reduce((it,item, index)=>{ return it + item.size},0);
+                  it.size =  it.children.reduce((it,item, index)=>{ return it + item.size},0);
+                  it.size =   it.size?   it.size: (index +1);
                   return it} );
           }
 
