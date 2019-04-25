@@ -119,6 +119,7 @@ mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
+const ParetoCommit = mongoose.model('community_commit');
 const ParetoPayment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
@@ -2235,6 +2236,29 @@ controller.create_customer = async function(orderdetails, callback){
         }
     );
 }
+
+
+controller.report_weekly = async function(callback){
+
+    let last_week = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+    let commits =  await ParetoCommit.aggregate([
+        {   "$match" : { date : { $gte: last_week } } } ,
+        {   "$group" : {
+                    _id : { month: { $month: "$date" }, day: { $dayOfMonth: "$date" }, year: { $year: "$date" } },
+                    count: { $sum: 1 }
+                }
+            }
+        ]
+    ).exec();
+
+    let trasactions = await ParetoTransaction.find({
+        dateCreated: {
+            $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
+        }
+    });
+    callback(null, {commits: commits, transactions: trasactions.length});
+}
+
 
 
 /**

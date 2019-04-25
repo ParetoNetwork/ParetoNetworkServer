@@ -447,6 +447,19 @@ app.post('/v1/updateTransaction', function (req, res) {
 
 
 
+app.post('/v1/reportweekly', function (req, res) {
+
+  controller.report_weekly( function (err, result) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
+  });
+});
+
+
+
 /********* AUTHENTICATED v1 APIs *********/
 
 app.use(function (req, res, next) {
