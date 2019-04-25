@@ -1,7 +1,7 @@
 <template>
   <div class="intel-container text-left">
     <b class="title-content text-left px-3"> Trade Explorer </b>
-    <div id="d3-svg">
+    <div id="d3-sunsburst">
       <svg></svg>
     </div>
   </div>
@@ -74,7 +74,7 @@
           .innerRadius(d => d.y0 * radius)
           .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
-        const svg = d3.select("#d3-svg svg")
+        const svg = d3.select("#d3-sunsburst svg")
           .attr("width", width)
           .attr("height", height)
           .style("font", "10px sans-serif")

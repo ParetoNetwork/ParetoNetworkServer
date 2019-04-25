@@ -23,6 +23,7 @@
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
                 <div class="col-md-3 col-lg-4 order-3 px-0 pb-5 py-3" id="chart-row">
+                    <VStackedToGroupedBars></VStackedToGroupedBars>
                     <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData"></VHandlerSunsburstChart>
                 </div>
             </div>
@@ -62,7 +63,7 @@
 
   import {information, sunsburstData} from '../utils/onboardingInfo';
 
-  import VChartSunburst from './VChartSunburst';
+  import VStackedToGroupedBars from './VStackedToGroupedBars';
 
   import VFab from './VFab';
   import VHandlerSunsburstChart from "./VHandlerSunsburstChart";
@@ -73,7 +74,7 @@
     mixins: [countUpMixin],
     components: {
       VHandlerSunsburstChart,
-      VChartSunburst,
+      VStackedToGroupedBars,
       ICountUp,
       VFab,
       VProfile,
