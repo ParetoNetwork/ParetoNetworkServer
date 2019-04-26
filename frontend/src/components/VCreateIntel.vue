@@ -14,7 +14,7 @@
                             <p class="create-input text-user-content"> {{blockChainAddress}} </p>
                         </div>
                         <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
-                            <input type="number" v-model="tokens" class="create-input" step="0.000000001" required>
+                            <input type="number" v-model="tokens" class="create-input mt-0" step="0.000000001" required>
                             <span class="floating-label">Pareto Amount
                             <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake" style="color: red"></i> </span>
                         </span>
@@ -188,7 +188,9 @@
                 modalToken: false,
                 modalWaiting: false,
                 modalCloseWarning: false,
-                isPreview: false
+                isPreview: false,
+                words: [],
+                assets: []
             };
         },
         updated: function () {
@@ -208,6 +210,12 @@
             ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
         },
         mounted: function () {
+            ContentService.getAssets(r=>{
+                this.assets = r;
+                this.words = r.map(it=>{return it.symbol.charAt(0).toUpperCase() + it.symbol.slice(1).toLowerCase() });
+            }, e=>{
+                console.log(e);
+            });
             $('#intel-body-input').summernote({
                 placeholder: 'Content...',
                 height: '40vh', // set editor height
@@ -227,6 +235,18 @@
                     image: [],
                     link: [],
                     air: []
+                },
+                hint: {
+                    words: this.words,
+                    match: /\B\$(\w*)$/,
+                    search:  (keyword, callback) =>{
+                        callback(this.words.filter(item => {
+                            return (item).indexOf((keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase())) === 0;
+                        }));
+                    },
+                    content: (item)=>{
+                       return  '$'+item
+                    }
                 }
             });
             this.address();
@@ -248,9 +268,15 @@
                 this.intelState('creating', 'Creating Intel, please wait');
 
                 this.$store.state.makingRequest = true;
+                let assets=  this.assets.filter( it => { it.symbol = it.symbol.charAt(0).toUpperCase() + it.symbol.slice(1).toLowerCase(); return  this.body.indexOf("$"+it.symbol) > -1 });
+                if(assets){
+                    assets= assets.map(it=> {return it._id} )
+                }
 
                 ContentService.createIntel(
-                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress, lastApproved: this.userLastApprovedContractAddress},
+                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress,
+                        lastApproved: this.userLastApprovedContractAddress,
+                        assets: assets },
                     this.tokens,
                     {signType: this.signType, pathId: this.pathId},
                     {
@@ -448,6 +474,10 @@
     }
 
     .note-toolbar.panel-heading a {
+        color: black;
+    }
+
+    .note-hint-item {
         color: black;
     }
 
