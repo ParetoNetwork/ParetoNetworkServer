@@ -2238,25 +2238,94 @@ controller.create_customer = async function(orderdetails, callback){
 }
 
 
-controller.report_weekly = async function(callback){
+controller.dev_report = async function(callback){
 
     let last_week = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
-    let commits =  await ParetoCommit.aggregate([
+    let last_month = new Date(new Date() - 30 * 60 * 60 * 24 * 1000);
+
+
+    let commits_week_count =  await ParetoCommit.find({
+        date: {
+            $gte: last_week
+        }
+    });
+
+    let commits_week =  await ParetoCommit.aggregate([
         {   "$match" : { date : { $gte: last_week } } } ,
         {   "$group" : {
                     _id : { month: { $month: "$date" }, day: { $dayOfMonth: "$date" }, year: { $year: "$date" } },
                     count: { $sum: 1 }
                 }
-            }
+            },{ $sort : { "_id.day": 1 } }
+
         ]
     ).exec();
 
-    let trasactions = await ParetoTransaction.find({
+    let transactions_week_count = await ParetoTransaction.find({
         dateCreated: {
-            $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
+            $gte: last_week
         }
     });
-    callback(null, {commits: commits, transactions: trasactions.length});
+
+    let transactions_week = await ParetoTransaction.aggregate([
+            {   "$match" : { dateCreated : { $gte: last_week } } } ,
+            {   "$group" : {
+                    _id : { month: { $month: "$dateCreated" }, day: { $dayOfMonth: "$dateCreated" }, year: { $year: "$dateCreated" } },
+                    count: { $sum: 1 }
+                }
+            },{ $sort : { "_id.day": 1 } }
+
+        ]
+    ).exec();
+
+    //Monthly report
+
+
+    let commits_month_count =  await ParetoCommit.find({
+        date: {
+            $gte: last_month
+        }
+    });
+
+    let commits_month =  await ParetoCommit.aggregate([
+            {   "$match" : { date : { $gte: last_month } } } ,
+            {   "$group" : {
+                    _id : { month: { $month: "$date" }, day: { $dayOfMonth: "$date" }, year: { $year: "$date" } },
+                    count: { $sum: 1 }
+                }
+            },{ $sort : { "_id.day": 1 } }
+        ]
+    ).exec();
+
+    let transactions_month_count = await ParetoTransaction.find({
+        dateCreated: {
+            $gte: last_month
+        }
+    });
+
+    let transactions_month = await ParetoTransaction.aggregate([
+            {   "$match" : { dateCreated : { $gte: last_month } } } ,
+            {   "$group" : {
+                    _id : { month: { $month: "$dateCreated" }, day: { $dayOfMonth: "$dateCreated" }, year: { $year: "$dateCreated" } },
+                    count: { $sum: 1 }
+                }
+            },{ $sort : { "_id.day": 1 } }
+
+        ]
+    ).exec();
+
+
+    callback(null, {
+        commits_week_count: commits_week_count.length,
+        commits_week: commits_week,
+        transactions_week_count: transactions_week_count.length,
+        transactions_week: transactions_week,
+        commits_month_count: commits_month_count.length,
+        commits_month: commits_month,
+        transactions_month_count: transactions_month_count.length,
+        transactions_month: transactions_month
+
+    });
 }
 
 

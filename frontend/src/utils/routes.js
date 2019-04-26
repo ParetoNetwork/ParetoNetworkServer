@@ -13,8 +13,7 @@ import AuthService from '../services/authService';
 import VAuthorPage from '../components/VAuthorPage';
 import VIntelDetail from '../components/VIntelDetail';
 import VScoreCalculator from '../components/VScoreCalculator';
-import VReportWeekly from '../components/VReportWeekly';
-import VReportMonthly from '../components/VReportMonthly';
+import VDevReport from '../components/VDevReport';
 
 const routes = [
     {
@@ -44,8 +43,7 @@ const routes = [
     {path: '/customer-details', component: VCustomer},
     {path: '/payment', component: VProductsPayment},
     {path: '/thankyou-payment', component: VPaymentThankyou},
-    {path: '/weekly-report', component: VReportWeekly},
-    {path: '/monthly-report', component: VReportMonthly},
+    {path: '/reports', component: VDevReport},
 ];
 
 const router = new VueRouter(
@@ -60,7 +58,7 @@ const router = new VueRouter(
 
 router.beforeEach((to, from, next) => {
     // ...
-    const publicPages = ['/', '/leaderboards', '/about', '/products', '/checkout', '/customer-details', '/payment', '/thankyou-payment', '/weekly-report', '/monthly-report' ];
+    const publicPages = ['/', '/leaderboards', '/about', '/products', '/checkout', '/customer-details', '/payment', '/thankyou-payment', '/reports' ];
     const authRequired = !publicPages.includes(to.path);
     AuthService.auth(() => {
         next();

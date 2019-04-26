@@ -447,9 +447,9 @@ app.post('/v1/updateTransaction', function (req, res) {
 
 
 
-app.post('/v1/reportweekly', function (req, res) {
+app.post('/v1/devreport', function (req, res) {
 
-  controller.report_weekly( function (err, result) {
+  controller.dev_report( function (err, result) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {
