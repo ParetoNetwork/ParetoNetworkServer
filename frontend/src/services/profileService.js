@@ -82,7 +82,7 @@ export default class profileService {
     static storeKeys(keyData){
         const cachedProfileAddress = this.getProfile.profile.address;
         if(! cachedProfileAddress){
-            onError(errorService.sendErrorMessage('f29', {}));
+            onError(errorService.sendErrorMessage('f39', {}));
         }
         if(cachedProfileAddress != keyData.address){
             window.localStorage.setItem(keyData.address, keyData.keys);

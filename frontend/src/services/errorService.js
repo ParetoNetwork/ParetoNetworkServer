@@ -240,16 +240,16 @@ export default class errorService {
             priority: 2
         },
         f38: {
-            code: 'f38',
-            description: 'Error saving the signed keys',
-            userMessage: 'An error occurred while trying to save the signed keys',
-            priority: 2
-        },
-        f38: {
             coded: 'f38',
             description: 'Error getting keys for other users',
             userMessage: 'Error getting keys for other users',
             priority: 2,
-        }
+        },
+        f39: {
+            code: 'f39',
+            description: 'Error saving the signed keys',
+            userMessage: 'An error occurred while trying to save the signed keys',
+            priority: 2
+        },
     };
 }

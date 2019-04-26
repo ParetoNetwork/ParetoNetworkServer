@@ -160,7 +160,6 @@
                 return convertToHideText(text);
             },
         }
-    }
   };
 </script>
 
