@@ -104,6 +104,7 @@ const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
+const ParetoPayment = mongoose.model('payment');
 
 
 // set up Pareto and Intel contracts instances
@@ -427,15 +428,21 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
     return web3.eth.call({
         to: PARETO_CONTRACT_ADDRESS,
         data: contractData
-    }).then(function(result) {
+    }).then(async function(result) {
         var amount = 0;
         if (result) {
             var tokens = web3.utils.toBN(result).toString();
             amount = web3.utils.fromWei(tokens, 'ether');
             //console.log("amount: " + amount);
         }
+        let deposit = null;
+        let payment = null;
+        try{
+            deposit = await ParetoTransaction.findOne({address: address, event: 'deposited'}).exec();
+            payment = await ParetoPayment.findOne({address: address, state: 2}).exec();
+        }catch (e) { }
 
-        if(amount > 0){
+        if(amount > 0 || deposit || payment){
             return web3.eth.getPastLogs({
                 fromBlock: CONTRACT_CREATION_BLOCK_HEX,
                 toBlock: 'latest',
@@ -1393,7 +1400,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
         }
 
     });
-    intel.getPastEvents('Deposited',{fromBlock: lastBlock-1, toBlock: 'latest'}, function (err, events) {
+    intel.getPastEvents('Deposited',{fromBlock: lastBlock-1, toBlock: 'latest'},async function (err, events) {
         // console.log(events);
         if(err){ console.log(err); return;}
         for (let i=0;i<events.length;i=i+1){
@@ -1404,6 +1411,9 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const amount =  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether'));
                 const block = event.blockNumber;
                 workerController.updateTransactionByNonce(txHash, sender,3,'deposited',0,amount, block);
+                try{
+                    const payment =  await ParetoPayment.findOneAndUpdate({address: sender, processed: false, txHash: txHash, state: 2},{processed: true}).exec();
+                } catch (e) { console.log(e)}
             }catch (e) {
                 const error = ErrorHandler.backendErrorList('b21');
                 error.systemMessage = e.message? e.message: e;
@@ -1412,6 +1422,8 @@ workerController.updateFromLastIntel =  function(lastBlock){
         }
 
     });
+
+
 };
 
 

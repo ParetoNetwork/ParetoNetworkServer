@@ -259,6 +259,17 @@ app.post('/v1/addresses', function (req, res) {
   });
 });
 
+
+app.get('/v1/assets', function (req, res) {
+    controller.getAssets( function (err, results) {
+        if (err) {
+            res.status(200).json(ErrorHandler.getError(err));
+        } else {
+            res.status(200).json(ErrorHandler.getSuccess(results));
+        }
+    });
+});
+
 app.get("/getIntels", (req, res) => {
   controller.getAllIntel((err, response) => {
     if (err) {
@@ -421,21 +432,10 @@ app.post('/v1/createorder', function (req, res) {
     });
 });
 
-app.post('/v1/payment', function (req, res) {
-
-    controller.payment(req.body , function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
-});
 
 
-app.post('/v1/maketransaction', function (req, res) {
-
-    controller.transactionFlow(req.body.address, req.body.order_id , function (err, result) {
+app.post('/v1/getOrder', function (req, res) {
+    controller.getOrder(req.body.order_id , function (err, result) {
         if (err) {
             res.status(200).json(ErrorHandler.getError(err));
         } else {

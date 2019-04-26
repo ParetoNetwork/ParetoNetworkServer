@@ -15,6 +15,7 @@
     "assert": "1.4.1",
     "aws-sdk": "^2.283.1",
     "axios": "^0.18.0",
+    "bip39": "^2.5.0",
     "body-parser": "1.18.2",
     "browserify": "^16.1.1",
     "compression": "^1.7.2",
@@ -28,6 +29,7 @@
     "envify": "^4.1.0",
     "eth-sig-util": "^2.1.0",
     "ethereumjs-util": "^5.1.5",
+    "ethereumjs-wallet": "^0.6.3",
     "express": "^4.15.2",
     "express-boom-2": "0.4.0",
     "express-session": "^1.15.6",
@@ -58,6 +60,7 @@
     "vue-line-clamp": "^1.2.4",
     "vue-meta": "^1.5.6",
     "web3": "^1.0.0-beta.29",
+    "web3-provider-engine": "^14.0.6",
     "ws": "^6.2.0"
   },
   "devDependencies": {
