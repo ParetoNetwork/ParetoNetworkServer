@@ -556,7 +556,7 @@ controller.postContent = function (req, callback) {
       dateCreated: Date.now(),
       block: req.body.number || 0,
       txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
-      speed: 1, //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
+      speed: 1 || process.env.DEFAULT_SPEED, //1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
       reward: req.body.reward || 1
 
     });
