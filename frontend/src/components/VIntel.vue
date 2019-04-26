@@ -111,7 +111,8 @@
         'showModalLoginOptions',
         'showModalLedgerNano',
         'showModalOnboarding',
-        'signalWs'])
+        'signalWs',
+        'lsSecurity'])
     },
     mounted: function () {
       AuthService.auth(() => {
@@ -127,7 +128,7 @@
       });
     },
     methods: {
-      ...mapMutations(['intelEnter', 'iniWs', 'iniSignalWs']),
+      ...mapMutations(['intelEnter', 'iniWs', 'iniSignalWs', 'lsSecuritySet', 'lsSecurityGet']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
       },
@@ -204,7 +205,7 @@
               console.log(err);
             });
             profileService.getKeysForAllProfiles(res => {
-              profileService.generateGroupKeys(
+              profileService.generateGroupKeys(this.lsSecurity,
                 (groupKeys) => {
                   const Proteus = require('proteus-hd');
                   const base64js = require('base64-js');

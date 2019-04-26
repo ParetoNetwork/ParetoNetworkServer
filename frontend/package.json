@@ -44,6 +44,7 @@
     "postcss-url": "^7.2.1",
     "proteus-hd": "^1.0.4",
     "qs": "^6.5.2",
+    "secure-ls": "^1.2.5",
     "snapsvg": "^0.5.1",
     "summernote": "^0.8.11",
     "v-debounce": "^0.1.2",

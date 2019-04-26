@@ -89,13 +89,13 @@ export default class profileService {
         }
     }
 
-    static generateGroupKeys(success){
-        if (localStorage.getItem("groupKeys")) {
-            return success(localStorage.getItem("groupKeys"));
+    static generateGroupKeys(lsSecurity, success){
+        if (lsSecurity.get("groupKeys")) {
+            return success(lsSecurity.get("groupKeys"));
         }
         const cryptoString = require('crypto-random-string');
         const groupKeys = cryptoString(64); // number of characters of generated key
-        window.localStorage.setItem('groupKeys', groupKeys);
+        lsSecurity.set('groupKeys', groupKeys);
         return success(groupKeys)
     }
 

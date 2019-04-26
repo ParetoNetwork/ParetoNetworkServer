@@ -75,8 +75,10 @@
         mounted: function () {
             //window.addEventListener('scroll', this.foo);
             this.bottomNav = $('.hiden-navbar-bottom');
+            this.inilsSecurity();
         },
         methods: {
+            ...mapMutations(['inilsSecurity']),
             foo: function () {
                 if (window.scrollY + window.innerHeight + 1 >= document.body.scrollHeight) {
                     this.bottomNav.addClass('show-navbar-bottom');

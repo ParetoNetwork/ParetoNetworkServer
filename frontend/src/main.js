@@ -23,6 +23,9 @@ import {fab} from '@fortawesome/free-brands-svg-icons';
 
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+import SecureLS from 'secure-ls/dist/secure-ls';
+
 library.add(fas, fab);
 
 dom.watch();
@@ -67,6 +70,7 @@ const store = new Vuex.Store({
     shoppingCart: [],
     showshopping: false,
     signalWs: null,
+    lsSecurity: null,
   },
   mutations: {
     addReward(state, data) {
@@ -76,7 +80,7 @@ const store = new Vuex.Store({
     login(state, data) {
       state.isLogged = true;
       state.madeLogin = JSON.parse(window.localStorage.getItem('logged')),
-        state.address = data.address.address || data.address;
+      state.address = data.address.address || data.address;
       state.user = data.address;
       state.showModalSign = false;
       state.showModalLoginOptions = false;
@@ -124,7 +128,10 @@ const store = new Vuex.Store({
       if( !state.pendingTransactions.map(it=>{return it.txHash}).includes(item.txHash)  ){
           state.pendingTransactions.unshift(item);
       }
-
+    }, inilsSecurity(state) {
+        state.lsSecurity = new SecureLS({encodingType: 'aes'});
+    }, lsSecuritySet(state, {key, data}) {
+        state.lsSecurity.set(key, data);
     }, assignTransactions(state, transactions) {
       state.pendingTransactions = [...state.pendingTransactions, ...transactions];
     }, editTransaction(state, {hash, key, value}) {
