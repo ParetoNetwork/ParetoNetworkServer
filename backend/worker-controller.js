@@ -113,8 +113,6 @@ const Intel_Contract_Schema = require("../build/contracts/Intel.json");
 var sigUtil = require('eth-sig-util');
 var jwt = require('jsonwebtoken');
 
-/*project files*/
-var utils = require('../backend-utils.js');
 
 module.exports.mongoose = mongoose;
 module.exports.redisClient = redisClient;

@@ -38,6 +38,7 @@ const CONTRACT_CREATION_BLOCK_INT = process.env.CONTRACT_CREATION_BLOCK_INT;
 const EXPONENT_BLOCK_AGO = process.env.EXPONENT_BLOCK_AGO;
 const PROVISIONAL_EMAIL = process.env.PROVISIONAL_EMAIL
 const REDIS_URL = process.env.REDIS_URL || constants.REDIS_URL;
+const PARETO_RANK_GRANULARIZED_LIMIT = 10; 		//how far down to go through ranks until separating by tiers
 const queue = kue.createQueue({
   redis: REDIS_URL,
 });
@@ -76,23 +77,7 @@ var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_URL));
 var web3_events_provider = null;
 var web3_events = null;
 
-controller.startW3WebSocket = function () {
-  web3_events_provider.on('connect', function () {
-    //console.log('WS web3 connected');
-    controller.startwatchIntel()
-  });
 
-  web3_events_provider.on('end', e => {
-    //console.log('WS web3 closed');
-    //console.log('Attempting to reconnect...');
-    const error = ErrorHandler.backendErrorList('b17');
-    error.systemMessage = e.message ? e.message : e;
-    console.log(JSON.stringify(error));
-    web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
-    web3_events = new Web3(web3_events_provider);
-    controller.startW3WebSocket()
-  });
-};
 
 /**
  *
@@ -100,7 +85,21 @@ controller.startW3WebSocket = function () {
  */
 
 const mongoose = require('mongoose');
-//var models = require('./models/address');
+/*db model initializations*/
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+const ParetoAddress = mongoose.model('address');
+const ParetoContent = mongoose.model('content');
+const ParetoProfile = mongoose.model('profile');
+const ParetoPayment = mongoose.model('payment');
+const ParetoReward = mongoose.model('reward');
+const ParetoAsset = mongoose.model('asset');
+const ParetoTransaction = mongoose.model('transaction');
+const Intel_Contract_Schema = require("../build/contracts/Intel.json");
+var sigUtil = require('eth-sig-util');
+var jwt = require('jsonwebtoken');
+
+
 mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
   web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
   web3_events = new Web3(web3_events_provider);
@@ -113,29 +112,42 @@ mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
 });
 
 
-/*db model initializations*/
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-const ParetoAddress = mongoose.model('address');
-const ParetoContent = mongoose.model('content');
-const ParetoProfile = mongoose.model('profile');
-const ParetoPayment = mongoose.model('payment');
-const ParetoReward = mongoose.model('reward');
-const ParetoAsset = mongoose.model('asset');
-const ParetoTransaction = mongoose.model('transaction');
+controller.startW3WebSocket = function () {
+    web3_events_provider.on('connect', function () {
+        //console.log('WS web3 connected');
+        const ethereumWatcher = require('./ethereum/ethereum-watcher')(
+            controller,
+            web3,
+            web3_events_provider,
+            web3_events,
+            Intel_Contract_Schema,
+            ParetoAddress,
+            ParetoContent,
+            ParetoProfile,
+            ParetoPayment,
+            ParetoReward,
+            ParetoAsset,
+            ParetoTransaction,
+            ErrorHandler,
+            ETH_NETWORK,
+            PARETO_CONTRACT_ADDRESS
 
-function updateWithMongo() {
-  //ParetoProfile.
-}
+        );
+        ethereumWatcher.startwatchIntel();
+    });
 
-// set up Pareto and Intel contracts instances
-const Intel_Contract_Schema = require("../build/contracts/Intel.json");
+    web3_events_provider.on('end', e => {
+        //console.log('WS web3 closed');
+        //console.log('Attempting to reconnect...');
+        const error = ErrorHandler.backendErrorList('b17');
+        error.systemMessage = e.message ? e.message : e;
+        console.log(JSON.stringify(error));
+        web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+        web3_events = new Web3(web3_events_provider);
+        controller.startW3WebSocket()
+    });
+};
 
-var sigUtil = require('eth-sig-util');
-var jwt = require('jsonwebtoken');
-
-/*project files*/
-var utils = require('../backend-utils.js');
 
 module.exports.mongoose = mongoose;
 module.exports.redisClient = redisClient;
@@ -146,11 +158,6 @@ controller.endConnections = function () {
 }
 
 
-const dbName = 'pareto';
-
-/*system constants*/
-const PARETO_SCORE_MINIMUM = 100000; 	//minimum score to get intel
-const PARETO_RANK_GRANULARIZED_LIMIT = 10; 		//how far down to go through ranks until separating by tiers
 
 controller.getParetoCoinMarket = function (callback) {
   let url = 'https://pro-api.coinmarketcap.com/v1';
@@ -164,69 +171,6 @@ controller.getParetoCoinMarket = function (callback) {
     });
 };
 
-
-/**
- *
- *  Functions to Transfer pareto and Eth
- *
- */
-
-/**
- * Get a wallet provider to make transactions
- * @return {{engine: Web3ProviderEngine, web3: Web3}}
- */
-controller.getParetoWalletProvider = function () {
-    const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
-    const ProviderEngine = require('web3-provider-engine');
-    const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
-    const Wallet = require('ethereumjs-wallet');
-    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DP_ORACLE_SYS, "base64").toString("ascii"), "hex"));
-    const engine = new ProviderEngine();
-    engine.addProvider(new HookedWalletSubprovider({
-        getAccounts: function(cb){
-            cb(null, [ myWallet.getAddressString()]);
-        },
-        getPrivateKey: function(address, cb){
-            if (address !== myWallet.getAddressString()) {
-                cb(new Error('Account not found'))
-            } else {
-                cb(null, myWallet.getPrivateKey())
-            }
-        }
-    }));
-    engine.addProvider(new WsSubprovider({rpcUrl:  WEB3_WEBSOCKET_URL}));
-    engine.start();
-    return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
-};
-
-
-/**
- * Get a wallet provider to make transactions
- * @return {{engine: Web3ProviderEngine, web3: Web3}}
- */
-controller.getEthereumWalletProvider = function () {
-    const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet-ethtx.js')
-    const ProviderEngine = require('web3-provider-engine');
-    const WsSubprovider = require('web3-provider-engine/subproviders/websocket.js');
-    const Wallet = require('ethereumjs-wallet');
-    const myWallet =  Wallet.fromPrivateKey(new Buffer(Buffer.from(process.env.DE_ORACLE_SYS, "base64").toString("ascii"), "hex"));
-    const engine = new ProviderEngine();
-    engine.addProvider(new HookedWalletSubprovider({
-        getAccounts: function(cb){
-            cb(null, [ myWallet.getAddressString()]);
-        },
-        getPrivateKey: function(address, cb){
-            if (address !== myWallet.getAddressString()) {
-                cb(new Error('Account not found'))
-            } else {
-                cb(null, myWallet.getPrivateKey())
-            }
-        }
-    }));
-    engine.addProvider(new WsSubprovider({rpcUrl:  WEB3_WEBSOCKET_URL}));
-    engine.start();
-    return   { engine: engine, web3 : new Web3(engine), wallet: myWallet }
-};
 
 
 /**
@@ -251,7 +195,13 @@ controller.transactionFlow= async function(address, order_id, callback){
                            return  callback(err);
                          }
                          const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
-                         controller.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
+                         const ethereumWallet = require('./ethereum/ethereum-wallet')(
+                             Web3,
+                             WEB3_WEBSOCKET_URL,
+                             web3,
+                             ParetoPayment,
+                             ETH_NETWORK);
+                         ethereumWallet.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
                              if(err){
                                  ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
                                return   callback(err);
@@ -274,21 +224,6 @@ controller.transactionFlow= async function(address, order_id, callback){
         callback(e)
     });
 
-}
-
-controller.generateAddress = function (charge_id, timestamp){
-    const bip39 = require('bip39');
-    const hdkey = require('ethereumjs-wallet/hdkey');
-    const  toHex = function(str) {
-        var result = '';
-        for (var i=0; i<str.length; i++) {
-            result += str.charCodeAt(i).toString(16);
-        }
-        return result;
-    }
-    const seed = bip39.mnemonicToSeed(bip39.entropyToMnemonic(toHex(charge_id.slice(-8)+timestamp.slice(-8))));
-    const hdwallet = hdkey.fromMasterSeed(seed);
-    return  hdwallet.derivePath(`m/44'/60'/0'/0` ).deriveChild(0).getWallet().getAddressString();
 }
 
 
@@ -326,145 +261,59 @@ controller.getOrder = async function (order_id, callback){
 
 }
 
-/**
- *
- * @param address ToAddress
- * @param amount  amount of pareto that will send to address
- * @param callback
- * @return {Promise<void>}
- */
-controller.makeParetoTransaction = async function(address, amount){
-    return new Promise(async function(resolve, reject) {
-        const  walletProvider = controller.getParetoWalletProvider();
-        try{
+controller.SendInfoWebsocket = function (data) {
+    if (controller.wss) {
+        controller.wss.clients.forEach(function each(client) {
+            try {
+                if (client.isAlive === false) return client.terminate();
+                if (client.readyState === controller.WebSocket.OPEN) {
+                    // Validate if the user is subscribed a set of information
+                    client.send(JSON.stringify(ErrorHandler.getSuccess({action: 'updateContent'})));
+                    if (client.user && client.user.user == data.address) {
+                        controller.retrieveAddress(client.user.user, function (err, result) {
+                            if (!err) {
+                                if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
+                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                }
+                            }
+                        });
 
-            const Pareto_Token_Schema = require("../build/contracts/ParetoNetworkToken.json");
-            const Pareto_Address = process.env.CRED_PARETOCONTRACT;
-            const web3 = walletProvider.web3;
-            const wallet = walletProvider.wallet;
-            const ParetoTokenInstance  = new web3.eth.Contract( Pareto_Token_Schema.abi, Pareto_Address);
-            let gasPrice = await web3.eth.getGasPrice();
-            let amountPareto = web3.utils.toWei(amount.toString(), "ether");
-            let gasApprove = await ParetoTokenInstance.methods
-                .transfer(address, amountPareto)
-                .estimateGas({from: wallet.getAddressString()});
-            ParetoTokenInstance.methods
-                .transfer(address, amountPareto)
-                .send({
-                    from: wallet.getAddressString(),
-                    gas: gasApprove,
-                    gasPrice: gasPrice  * 1.3
-                })
-                .once('transactionHash', function(hash){
-                    controller.waitForReceipt(hash,async  (err, receipt)=> {
-                        if(err){
-                            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                            return  reject(err);
+                        if (data.transaction) {
+                            client.send(JSON.stringify(ErrorHandler.getSuccess({
+                                action: 'updateHash',
+                                data: data.transaction
+                            })));
+                        } else {
+
+                            const rank = parseInt(client.info.rank) || 1;
+                            let limit = parseInt(client.info.limit) || 100;
+                            const page = parseInt(client.info.page) || 0;
+
+                            //max limit
+                            if (limit > 500) {
+                                limit = 500;
+                            }
+                            /**
+                             * Send ranking
+                             */
+                            controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                                if (!err) {
+                                    if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
+                                        client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                                    }
+                                }
+                            });
                         }
-                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                        resolve({amount,  hash});
-                    })
-                })
-                .once('error', (err)=>{
-                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                    reject(err);
-                });
-        }catch (e) {
-            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-            reject(e);
-        }
-    });
-
-};
-
-
-/**
- *
- * @param address ToAddress
- * @param amount  amount of eth that will send to address
- * @param callback
- * @return {Promise<void>}
- */
-controller.makeEthTransaction = async function(address, eth){
-    return new Promise(async function(resolve, reject) {
-        const  walletProvider = controller.getEthereumWalletProvider();
-        try{
-
-            const web3 = walletProvider.web3;
-            const wallet = walletProvider.wallet;
-            let amountEther = web3.utils.toWei(eth.toString(), "ether");
-            let gasPrice = await web3.eth.getGasPrice();
-            let gasApprove = await web3.eth.estimateGas({
-                to:address,
-                from: wallet.getAddressString(),
-                value: amountEther});
-            web3.eth.sendTransaction({
-                to:address,
-                from: wallet.getAddressString(),
-                value: amountEther,
-                gas: gasApprove,
-                gasPrice: gasPrice  * 1.3
-            }).once('transactionHash', function(hash){
-                controller.waitForReceipt(hash,async  (err, receipt)=>{
-                    if(err){
-                        if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                        return  reject(err);
                     }
-                    resolve(receipt);
-
-                })
-            })
-                .once('error', function(err){
-                    if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                    reject(err);
-                });
-
-        }catch (e) {
-            if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-            reject(e);
-        }
-    });
-
-
-};
-
-
-/**
- *
- * @param address ToAddress
- * @param amount  amount of pareto that will send to address
- * @param eth  amount of eth that will send to address
- * @param callback
- * @return {Promise<void>}
- */
-controller.makeTransaction = async function(address, amount, eth, callback){
-    console.log(address);
-    Promise.all([controller.makeParetoTransaction(address,amount),
-        controller.makeEthTransaction(address,eth)]).then( (r)=>{
-        callback(null, r[0]);
-    }).catch((e)=>{
-        callback(e);
-    })
-};
-
-controller.waitForReceipt = function (hash, cb) {
-    web3.eth.getTransactionReceipt(hash, function (err, receipt) {
-        if (err) {
-            cb(err);
-        }
-
-        if (receipt !== null) {
-            // Transaction went through
-            if (cb) {
-                cb(null, receipt);
+                }
+            } catch (e) {
+                const error = ErrorHandler.backendErrorList('b14');
+                error.systemMessage = e.message ? e.message : e;
+                console.log(JSON.stringify(error));
             }
-        } else {
-            // Try again in 1 second
-            setTimeout(function () {
-                controller.waitForReceipt(hash, cb);
-            }, 1000);
-        }
-    });
+        });
+    }
+
 }
 
 controller.getBalance = async function (address, blockHeightFixed, callback) {
@@ -651,528 +500,6 @@ controller.watchTransaction = function (data, callback) {
 }
 
 
-controller.startwatchNewIntel = function () {
-  const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, Intel_Contract_Schema.networks[ETH_NETWORK].address);
-  console.log('startWatch');
-  intel.events.NewIntel().on('data', event => {
-    try {
-      const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
-      const expiry_time = event.returnValues.ttl;
-      ParetoContent.findOneAndUpdate({
-        id: event.returnValues.intelID,
-        validated: false
-      }, {
-        intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address,
-        validated: true,
-        reward: initialBalance,
-        expires: expiry_time,
-        block: event.blockNumber,
-        txHash: event.transactionHash
-      }, {multi: false}, function (err, data) {
-        if (!err && data) {
-          try {
-            controller.getBalance(data.address, 0, function (err, count) {
-              if (!err) {
-                let promises = [ParetoAddress.findOneAndUpdate({address: data.address}, {tokens: count})
-                  , ParetoTransaction.findOneAndUpdate(
-                    {
-                      intel: event.returnValues.intelID,
-                      event: 'create'
-                    }, {status: 3,
-                            txHash: event.transactionHash,
-                            event: 'create',
-                            block: event.blockNumber,
-                            amount:  initialBalance,
-                            intel: parseInt(event.returnValues.intelID),
-                            address: data.address
-                        },{upsert: true, new: true})];
-                Promise.all(promises).then(values => {
-                  if (values.length > 1) {
-                    controller.getScoreAndSaveRedis(null, (err, result) => {
-                      controller.SendInfoWebsocket({
-                        address: data.address,
-                        transaction: values[1]
-                      });
-                    })
-                  }
-                })
-                  .catch(e => {
-                    const error = ErrorHandler.backendErrorList('b22');
-                    error.systemMessage = e.message ? e.message : e;
-                    console.log(JSON.stringify(error));
-                  });
-
-              }
-            });
-
-          } catch (e) {
-            const error = ErrorHandler.backendErrorList('b18');
-            error.systemMessage = e.message ? e.message : e;
-            console.log(JSON.stringify(error));
-          }
-        }
-      });
-    } catch (e) {
-      const error = ErrorHandler.backendErrorList('b18');
-      error.systemMessage = e.message ? e.message : e;
-      console.log(JSON.stringify(error));
-    }
-
-  }).on('error', err => {
-    console.log(err);
-  });
-}
-
-
-controller.startwatchReward = function (intel, intelAddress) {
-  intel.events.Reward().on('data', event => {
-    try {
-      const intelIndex = parseInt(event.returnValues.intelIndex);
-      const rewardData = {
-        sender: event.returnValues.sender.toLowerCase(),
-        receiver: '',
-        intelAddress: intelAddress,
-        intelId: intelIndex,
-        txHash: event.transactionHash,
-        dateCreated: Date.now(),
-        block: event.blockNumber,
-        amount: web3.utils.fromWei(event.returnValues.rewardAmount, 'ether')
-      };
-      ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, rewardData, {upsert: true, new: true},
-        function (err, r) {
-          if (err) {
-            const error = ErrorHandler.backendErrorList('b19');
-            error.systemMessage = err.message ? err.message : err;
-          } else {
-            ParetoContent.findOne({id: intelIndex}, (err, intel) => {
-              if (intel) {
-                const {address} = intel;
-                ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, {receiver: address}, {},
-                  function (err, r) {
-                  }
-                );
-              }
-            });
-
-            controller.getBalance(event.returnValues.sender.toLowerCase(), 0, function (err, count) {
-              if (!err) {
-                controller.updateAddressReward(event, count);
-              } else {
-                  console.log(err)
-              }
-            });
-            web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
-              const nonce = txObject.nonce;
-              controller.updateIntelReward(intelIndex, event.transactionHash, nonce, event.returnValues.sender.toLowerCase(), rewardData.block, rewardData.amount);
-            }).catch(function (err) {
-              console.log(err)
-            });
-
-          }
-        }
-      );
-
-    } catch (e) {
-      const error = ErrorHandler.backendErrorList('b19');
-      error.systemMessage = e.message ? e.message : e;
-      console.log(JSON.stringify(error));
-    }
-
-  }).on('error', err => {
-    console.log(err);
-  });
-}
-
-controller.startwatchDistribute = function (intel, intelAddress) {
-  intel.events.RewardDistributed().on('data', event => {
-    try {
-      const intelIndex = parseInt(event.returnValues.intelIndex);
-      web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
-        const nonce = txObject.nonce;
-        const txHash = event.transactionHash;
-        const sender = event.returnValues.distributor.toLowerCase();
-        let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {
-          distributed: true,
-          txHashDistribute: event.transactionHash
-        })
-          , ParetoTransaction.findOneAndUpdate(
-            {
-              $or: [{txHash: txHash},
-                {address: sender, nonce: nonce}]
-            }, {
-              status: 3,
-              txRewardHash: txHash,
-              txHash: txHash,
-              address: sender,
-              block: event.blockNumber,
-              amount:  parseFloat(web3.utils.fromWei(event.returnValues.provider_amount, 'ether')),
-              nonce: nonce,
-              event: 'distribute',
-              intel: intelIndex,
-            },{upsert: true, new: true})];
-        Promise.all(promises).then(values => {
-          if (controller.wss && values.length > 1) {
-            controller.SendInfoWebsocket({address: values[0].address, transaction: values[1]});
-          } else {
-            console.log('no wss');
-          }
-        })
-          .catch(e => {
-            const error = ErrorHandler.backendErrorList('b21');
-            error.systemMessage = e.message ? e.message : e;
-            console.log(JSON.stringify(error));
-          });
-
-
-      }).catch(function (err) {
-        console.log(err)
-      });
-
-    } catch (e) {
-      const error = ErrorHandler.backendErrorList('b21');
-      error.systemMessage = e.message ? e.message : e;
-      console.log(JSON.stringify(error));
-    }
-
-  }).on('error', err => {
-    console.log(err);
-  });
-};
-
-controller.startwatchDeposit= function (intel) {
-  try{
-      intel.events.Deposited().on('data', event => {
-          try {
-
-              web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
-                  const nonce = txObject.nonce;
-                  const txHash = event.transactionHash;
-                  const sender = event.returnValues.from.toLowerCase();
-                  try{
-                      ParetoPayment.findOneAndUpdate(
-                          {txHash: txHash}
-                          , {processed: true}).then(value => {}).catch(err=>{});
-                  }catch (e) {  }
-                  ParetoTransaction.findOneAndUpdate(
-                      {
-                          $or: [{txHash: txHash},
-                              {address: sender, nonce: nonce}]
-                      }, {
-                          status: 3,
-                          txRewardHash: txHash,
-                          txHash: txHash,
-                          block: event.blockNumber,
-                          amount:  parseFloat(web3.utils.fromWei(event.returnValues.amount, 'ether')),
-                          address: sender,
-                          nonce: nonce,
-                          event: 'deposited',
-                      },{upsert: true, new: true}).then(value => {
-                      if (controller.wss && value) {
-                          controller.SendInfoWebsocket({address: value.address, transaction: value});
-                      } else {
-                          console.log('no wss');
-                      }
-                  }).catch(e => {
-                      const error = ErrorHandler.backendErrorList('b26');
-                      error.systemMessage = e.message ? e.message : e;
-                      console.log(JSON.stringify(error));
-                  });
-              }).catch(function (e) {
-                  const error = ErrorHandler.backendErrorList('b26');
-                  error.systemMessage = e.message ? e.message : e;
-                  console.log(JSON.stringify(error));
-              });
-
-          } catch (e) {
-              const error = ErrorHandler.backendErrorList('b26');
-              error.systemMessage = e.message ? e.message : e;
-              console.log(JSON.stringify(error));
-          }
-
-      }).on('error', err => {
-          console.log(err);
-      });
-  }catch (e) {
-      //only new intel contract has Deposited events.
-  }
-
-};
-
-controller.startWatchApprove = function () {
-  web3_events.eth.subscribe('logs',
-    {
-      fromBlock: 'latest',
-      address: PARETO_CONTRACT_ADDRESS,
-      topics: ['0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925', null, null]
-    }).on('data', async function (log) {
-
-    const blockNumber = log.blockNumber;
-    const sender = "0x" + log.topics[1].substring(26);
-    const txHash = log.transactionHash;
-
-    if (blockNumber != null) {
-      web3.eth.getTransaction(txHash).then(function (txObject) {
-        const nonce = txObject.nonce;
-        ParetoTransaction.findOneAndUpdate(
-          {
-            $or: [{txHash: txHash},
-              {address: sender, nonce: nonce}]
-          }
-          , {status: 1, address: sender, block: blockNumber, txHash: txHash}, function (err, r) {
-            if (!err && r) {
-              ParetoAddress.findOneAndUpdate({address: r.address}, {lastApprovedAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address}, function (err, r) {
-                controller.getScoreAndSaveRedis(null, function (err, r) {
-                })
-              });
-              controller.SendInfoWebsocket({address: r.address, transaction: r});
-            } else {
-              if (err) {
-                const error = ErrorHandler.backendErrorList('b21');
-                error.systemMessage = err.message ? err.message : err;
-                console.log(JSON.stringify(error));
-              }
-            }
-
-          })
-
-
-      }).catch(function (err) {
-        console.log(err)
-      });
-
-      try{
-          const payment =  await ParetoPayment.findOne({address: sender, processed: false}).exec();
-          const  walletProvider = controller.getEthereumWalletProvider();
-
-          const Intel_Schema = require("../build/contracts/Intel.json");
-          const web3 = walletProvider.web3;
-          const wallet = walletProvider.wallet;
-          const Intel  = new web3.eth.Contract( Intel_Schema.abi, Intel_Schema.networks[ETH_NETWORK].address);
-          if(payment){
-              const paretoAmount = payment.paretoAmount;
-              console.log('ini deposit');
-              let amountPareto = web3.utils.toWei(paretoAmount.toString(), "ether");
-              let gasPrice = await web3.eth.getGasPrice();
-              let gasApprove = await Intel.methods
-                  .makeDeposit(sender, amountPareto)
-                  .estimateGas({from: wallet.getAddressString()});
-              await Intel.methods
-                  .makeDeposit(sender, amountPareto)
-                  .send({
-                      from: wallet.getAddressString(),
-                      gas: gasApprove,
-                      gasPrice: gasPrice * 1.3
-                  })
-                  .once("transactionHash", async (hash) => {
-                      console.log("deposit hash "+hash);
-                      try{
-                          const payment =  await ParetoPayment.findOneAndUpdate({address: sender, processed: false},{txHash: hash}).exec();
-                      } catch (e) { console.log(e)}
-                  })
-                  .once("error", err => {
-                      if(walletProvider.engine){ try{  walletProvider.engine.stop(); }catch (e) { } }
-                      return callback(err);
-                  });
-          }
-      }catch (e) {
-          console.log(e);
-      }
-    }
-  });
-}
-
-
-/**
- * Watch Intel events. Support watch rewards for old Intel address
- */
-controller.startwatchIntel = function () {
-  controller.startwatchNewIntel()
-  ParetoContent.find({'validated': true}).distinct('intelAddress').exec(function (err, results) {
-    if (err) {
-      callback(err);
-    } else {
-      let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
-      if (!data.length) {
-        results.push(Intel_Contract_Schema.networks[ETH_NETWORK].address);
-      }
-      for (let i = 0; i < results.length; i = i + 1) {
-        const intelAddress = results[i];
-        const intel = new web3_events.eth.Contract(Intel_Contract_Schema.abi, intelAddress);
-        controller.startwatchReward(intel, intelAddress);
-        controller.startwatchDistribute(intel, intelAddress);
-        controller.startwatchDeposit(intel);
-      }
-
-    }
-  });
-  controller.startWatchApprove();
-
-};
-
-
-/**
- * update Address score when reward an intel
- * @param event
- */
-controller.updateAddressReward = function (event, token) {
-  let addressToUpdate = event.returnValues.sender.toLowerCase();
-  ParetoAddress.findOneAndUpdate({address: addressToUpdate}, {tokens: token}, {new: true}, (err, data) => {
-    let dbValues = {
-      bonus: data.bonus,
-      tokens: data.tokens,
-      score: data.score,
-      block: data.block
-    };
-    controller.addExponentAprox([addressToUpdate], [dbValues], event.blockNumber, function (err, res) {
-      var dbQuery = {
-        address: addressToUpdate
-      };
-      var dbValues = {
-        $set: {
-          score: res[0].score,
-          block: res[0].block,
-          bonus: res[0].bonus,
-          tokens: res[0].tokens
-        }
-      };
-      var dbOptions = {
-        upsert: true,
-        new: true //mongo uses returnNewDocument, mongo uses new
-      };
-      // console.log({
-      //     addrees: dbQuery.address,
-      //     dbValues: dbValues
-      // });
-      //should queue for writing later
-      var updateQuery = ParetoAddress.findOneAndUpdate(dbQuery, dbValues, dbOptions);
-      //var countQuery = ParetoAddress.count({ score : { $gt : 0 } });
-
-      updateQuery.exec().then(function (r) {
-        controller.getScoreAndSaveRedis(null, function (err, result) {
-          if (!err) {
-            controller.SendInfoWebsocket({address: addressToUpdate});
-          } else {
-            console.log(err);
-          }
-        })
-      })
-    });
-  })
-}
-
-
-controller.SendInfoWebsocket = function (data) {
-  if (controller.wss) {
-    controller.wss.clients.forEach(function each(client) {
-      try {
-        if (client.isAlive === false) return client.terminate();
-        if (client.readyState === controller.WebSocket.OPEN) {
-          // Validate if the user is subscribed a set of information
-          client.send(JSON.stringify(ErrorHandler.getSuccess({action: 'updateContent'})));
-          if (client.user && client.user.user == data.address) {
-            controller.retrieveAddress(client.user.user, function (err, result) {
-              if (!err) {
-                if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
-                  client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                }
-              }
-            });
-
-            if (data.transaction) {
-              client.send(JSON.stringify(ErrorHandler.getSuccess({
-                action: 'updateHash',
-                data: data.transaction
-              })));
-            } else {
-
-              const rank = parseInt(client.info.rank) || 1;
-              let limit = parseInt(client.info.limit) || 100;
-              const page = parseInt(client.info.page) || 0;
-
-              //max limit
-              if (limit > 500) {
-                limit = 500;
-              }
-              /**
-               * Send ranking
-               */
-              controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
-                if (!err) {
-                  if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
-                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                  }
-                }
-              });
-            }
-          }
-        }
-      } catch (e) {
-        const error = ErrorHandler.backendErrorList('b14');
-        error.systemMessage = e.message ? e.message : e;
-        console.log(JSON.stringify(error));
-      }
-    });
-  }
-
-}
-
-/**
- * Update totalreward count in Intel document
- * @param intelIndex
- * @param txHash
- */
-controller.updateIntelReward = function (intelIndex, txHash, nonce, sender, block, amount) {
-  let agg = [{$match: {'intelId': intelIndex}},
-    {
-      $group: {
-        _id: null,
-        rewards: {
-          "$addToSet": {
-            "txHash": "$txHash",
-            "amount": "$amount"
-          }
-        }
-      }
-    },
-    {$unwind: "$rewards"},
-    {
-      $group: {
-        _id: null,
-        reward: {$sum: "$rewards.amount"}
-      }
-    }
-
-  ];
-  ParetoReward.aggregate(agg).exec(function (err, r) {
-    if (r.length > 0) {
-      const reward = r[0].reward;
-      let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
-        , ParetoTransaction.findOneAndUpdate({
-          $or: [{txRewardHash: txHash}, {txHash: txHash},
-            {address: sender, intel: intelIndex, event: 'reward', nonce: nonce}]
-        }, {status: 3,
-              txRewardHash: txHash,
-              txHash: txHash,
-              nonce: nonce,
-              block: block,
-              amount:  amount,
-              event: 'reward',
-              address: sender,
-              intel: intelIndex
-        },{upsert: true, new: true})];
-      Promise.all(promises).then(values => {
-        if (values.length > 1 && controller.wss) {
-          controller.SendInfoWebsocket({address: values[1].address, transaction: values[1]});
-        }
-      })
-        .catch(e => {
-          const error = ErrorHandler.backendErrorList('b19');
-          error.systemMessage = e.message ? e.message : e;
-          console.log(JSON.stringify(error));
-        });
-    }
-  })
-};
 
 
 /**
@@ -2146,8 +1473,15 @@ controller.event_payment = async function (event, callback) {
         const timestamp  = ((new Date()).getTime() + "");
         await ParetoPayment.create({ email: event.data.object.metadata.email_customer, order_id: event.data.object.id , timestamp: timestamp, amount: event.data.object.amount/100},
              function (err, payment) {
-                    //Charge ID, charge.id?
-                 controller.transactionFlow(controller.generateAddress(event.data.object.client_secret ,timestamp) ,event.data.object.id, function (error, result){
+                 const ethereumWallet = require('./ethereum/ethereum-wallet')(
+                     Web3,
+                     WEB3_WEBSOCKET_URL,
+                     web3,
+                     ParetoPayment,
+                     ETH_NETWORK);
+                 controller.transactionFlow(
+                     ethereumWallet.generateAddress(event.data.object.client_secret ,timestamp)
+                     ,event.data.object.id, function (error, result){
                      if(error){console.log(error)}
                      if(result){console.log(result)}
                  });
