@@ -6,7 +6,7 @@ var controller = module.exports = {};
 const Decimal = require('decimal.js-light');
 const fs = require('fs');
 const path = require('path');
-const ErrorHandler = require('./error-handler.js');
+const ErrorHandler = require('./utils/error-handler.js');
 
 Decimal.set({
   precision: 20,
@@ -129,13 +129,13 @@ function updateWithMongo() {
 }
 
 // set up Pareto and Intel contracts instances
-const Intel_Contract_Schema = require("./build/contracts/Intel.json");
+const Intel_Contract_Schema = require("../build/contracts/Intel.json");
 
 var sigUtil = require('eth-sig-util');
 var jwt = require('jsonwebtoken');
 
 /*project files*/
-var utils = require('./backend-utils.js');
+var utils = require('../backend-utils.js');
 
 module.exports.mongoose = mongoose;
 module.exports.redisClient = redisClient;
@@ -338,7 +338,7 @@ controller.makeParetoTransaction = async function(address, amount){
         const  walletProvider = controller.getParetoWalletProvider();
         try{
 
-            const Pareto_Token_Schema = require("./build/contracts/ParetoNetworkToken.json");
+            const Pareto_Token_Schema = require("../build/contracts/ParetoNetworkToken.json");
             const Pareto_Address = process.env.CRED_PARETOCONTRACT;
             const web3 = walletProvider.web3;
             const wallet = walletProvider.wallet;
@@ -944,7 +944,7 @@ controller.startWatchApprove = function () {
           const payment =  await ParetoPayment.findOne({address: sender, processed: false}).exec();
           const  walletProvider = controller.getEthereumWalletProvider();
 
-          const Intel_Schema = require("./build/contracts/Intel.json");
+          const Intel_Schema = require("../build/contracts/Intel.json");
           const web3 = walletProvider.web3;
           const wallet = walletProvider.wallet;
           const Intel  = new web3.eth.Contract( Intel_Schema.abi, Intel_Schema.networks[ETH_NETWORK].address);

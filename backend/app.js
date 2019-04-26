@@ -142,7 +142,7 @@ app.use(boom());
 
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
-const ErrorHandler = require('./error-handler.js');
+const ErrorHandler = require('./utils/error-handler.js');
 
 /*app.use(session({
   store: new MongoStore(mongooseConnection: module.exports.mongoose.connection)
@@ -314,7 +314,7 @@ app.get("/getContributors/:intelId", (req, res) => {
 })
 
 app.post('/v1/config_basic', function (req, res) {
-  const intel = require("./build/contracts/Intel.json");
+  const intel = require("../build/contracts/Intel.json");
   const netWorkId = process.env.ETH_NETWORK;
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
@@ -334,8 +334,8 @@ app.post('/v1/config_basic', function (req, res) {
 });
 
 app.post('/v1/config', function (req, res) {
-  const intel = require("./build/contracts/Intel.json");
-  const pareto = require("./build/contracts/ParetoNetworkToken.json");
+  const intel = require("../build/contracts/Intel.json");
+  const pareto = require("../build/contracts/ParetoNetworkToken.json");
   const netWorkId = process.env.ETH_NETWORK;
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;

@@ -108,13 +108,13 @@ const ParetoPayment = mongoose.model('payment');
 
 
 // set up Pareto and Intel contracts instances
-const Intel_Contract_Schema = require("./build/contracts/Intel.json");
+const Intel_Contract_Schema = require("../build/contracts/Intel.json");
 
 var sigUtil = require('eth-sig-util');
 var jwt = require('jsonwebtoken');
 
 /*project files*/
-var utils = require('./backend-utils.js');
+var utils = require('../backend-utils.js');
 
 module.exports.mongoose = mongoose;
 module.exports.redisClient = redisClient;
@@ -132,7 +132,7 @@ const dbName = 'pareto';
 const PARETO_SCORE_MINIMUM 					=			100000;  	//minimum score to get intel
 const PARETO_RANK_GRANULARIZED_LIMIT 		= 			10; 		//how far down to go through ranks until separating by tiers
 
-const ErrorHandler = require('./error-handler.js');
+const ErrorHandler = require('./utils/error-handler.js');
 
 workerController.calculateScore = async function(address, blockHeightFixed, callback){
     //Web3 can throw error
@@ -284,41 +284,6 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
 /**
  *  addExponent using db instead of Ethereum network
  */
-workerController.addExponentAprox =  function(addresses, scores,  blockHeight,callback){
-    return ParetoReward.find({'block': { '$gt': (blockHeight-EXPONENT_BLOCK_AGO)} }).exec(function(err, values) {
-        if (err) {
-            callback(err);
-        }
-        else {
-            let total=values.length;
-            let rewards={};
-            for (let j = 0; j < values.length; j = j + 1) {
-                try{
-                    const sender = values[j].sender.toLowerCase();
-                    if(!rewards[sender]){
-                        rewards[sender] = 0;
-                    }
-                    rewards[sender]=rewards[sender]+1;
-                }catch (e) { console.log(e) }
-            }
-            const M = total/2;
-            for (let i = 0; i < addresses.length; i = i + 1) {
-                try{
-                    const address = addresses[i].toLowerCase();
-                    if (rewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-                        const V = (1 + (rewards[address] / M) / 2);
-                        scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
-
-                    }else{
-                        scores[i].score = 0;
-                    }
-                }catch (e) { console.log(e) }
-
-            }
-            return callback(null, scores);
-        }
-    })
-};
 
 workerController.addExponent = async function(addresses, scores, blockHeight, desiredRewards,callback){
 

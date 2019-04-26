@@ -1,6 +1,6 @@
 const request = require('supertest');
 const assert = require('chai').assert;
-const serverApp =  require('./../app.js');
+const serverApp =  require('../backend/app.js');
 
 describe('Server application /', function() {
 
