@@ -22,7 +22,7 @@
                                 :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
-                <div class="col-md-3 col-lg-4 order-3 px-0 pb-5 py-3" id="chart-row">
+                <div class="col-md-3 col-lg-4 order-3 px-0 pb-5" id="chart-row">
                     <VStackedToGroupedBars></VStackedToGroupedBars>
                     <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData"></VHandlerSunsburstChart>
                 </div>

@@ -1,8 +1,10 @@
 <template>
-  <div class="intel-container text-left">
-    <b class="title-content text-left px-3"> Trade Explorer </b>
-    <div id="d3-sunsburst">
-      <svg></svg>
+  <div class="row">
+    <div class="col text-left">
+      <b class="title-content text-left"> Trade Explorer </b>
+      <div id="d3-sunsburst">
+        <svg></svg>
+      </div>
     </div>
   </div>
 </template>
@@ -14,20 +16,18 @@
     ],
     data() {
       return {
-        height: 250,
-        width: 250,
-        row: document.getElementById("chart-row").offsetWidth
+        height: 400,
+        width: 400
       };
     },
     mounted() {
-      this.height = this.width = this.row;
       this.sunschart(this.$router, this.$notify);
     },
     methods: {
       responsivefy(svg) {
         var container = d3.select(svg.node().parentNode),
           width = parseInt(svg.style("width")),
-          height = parseInt(svg.style("height")),
+          height = parseInt(svg.style("height")) ,
           aspect = width / height;
 
         svg.attr("viewBox", "0 0 " + width + " " + height)
@@ -38,8 +38,10 @@
 
         function resize() {
           var targetWidth = parseInt(container.style("width"));
-          svg.attr("width", targetWidth);
-          svg.attr("height", Math.round(targetWidth / aspect));
+          var roundedHeightAspect = Math.round(targetWidth / aspect);
+          svg.attr("width", Math.min(targetWidth, width));
+          svg.attr("height", Math.min(roundedHeightAspect, height));
+          console.log(targetWidth, roundedHeightAspect)
         }
       },
       sunschart(router, notify) {
