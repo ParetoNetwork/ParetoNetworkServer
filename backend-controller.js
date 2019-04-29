@@ -120,6 +120,7 @@ const ParetoAddress = mongoose.model('address');
 const ParetoContent = mongoose.model('content');
 const ParetoProfile = mongoose.model('profile');
 const ParetoCommit = mongoose.model('community_commit');
+const ParetoBadges = mongoose.model('badges');
 const ParetoPayment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
@@ -2315,6 +2316,33 @@ controller.dev_report = async function(callback){
     ).exec();
 
 
+
+    //telegram members
+    let member_count =  await ParetoBadges.findOne({badge_type: 'chat_member_count', repository_name: 'common'});
+
+
+    //total community
+    let arrayMembers = await ParetoBadges.find({ $or : [{badge_type: 'chat_member_count'},{badge_type: 'channel_member_count'}],repository_name: 'common'});
+    var totalCommunity = 0;
+    arrayMembers.forEach(function (members) {
+        totalCommunity += members.record_counting;
+    });
+    //telegram announcements
+    let announcements =  await ParetoBadges.findOne({badge_type: 'channel_member_count', repository_name: 'common'});
+
+    //contributors
+    let contributors = await ParetoBadges.findOne({badge_type: 'total_contributors', repository_name: 'common'});
+
+    //pull request
+
+    let pull_r = await ParetoBadges.find({badge_type: 'closed_pull_request'});
+
+    var countPR = 0;
+    pull_r.forEach(function(closedPRForRepository) {
+        countPR += closedPRForRepository.record_counting;
+    });
+
+
     callback(null, {
         commits_week_count: commits_week_count.length,
         commits_week: commits_week,
@@ -2323,7 +2351,12 @@ controller.dev_report = async function(callback){
         commits_month_count: commits_month_count.length,
         commits_month: commits_month,
         transactions_month_count: transactions_month_count.length,
-        transactions_month: transactions_month
+        transactions_month: transactions_month,
+        telegram_members:  member_count.record_counting,
+        telegram_announcements: announcements.record_counting,
+        total_community: totalCommunity,
+        contributors: contributors.record_counting,
+        pull_request: countPR
 
     });
 }

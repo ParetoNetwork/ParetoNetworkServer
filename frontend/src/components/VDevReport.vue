@@ -7,6 +7,20 @@
 
                 </div>
             </div>
+            <div class="row" >
+
+                <div class="col-md-12 text-left pt-20">
+                    <div class="intel-container pt-20 px-lg-5">
+                        <ul>
+                            <li><h3>Telegram Chat Members:  {{telegram_members}}</h3> </li>
+                            <li><h3>Telegram announcements:  {{telegram_announcements}}</h3> </li>
+                            <li><h3>Number of contributors:  {{contributors}}</h3> </li>
+                            <li><h3>Pull request:  {{pull_request}}</h3> </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="row justify-content-center">
                 <div class="col-md-6 pt-20">
                     <nav>
@@ -17,22 +31,7 @@
                     </nav>
                 </div>
             </div>
-            <div class="row" v-if="current_tab === 1">
 
-                <div class="col-md-12 text-left">
-                    <div class="intel-container pt-20 px-lg-5">
-                        <ul>
-
-                            <li><h3>Telegram Chat:  210</h3> </li>
-                            <li><h3>Telegram Total:  24</h3> </li>
-                            <li><h3>Telegram announcements:  114</h3> </li>
-                            <li><h3>Number of contributors:  7</h3> </li>
-                            <li><h3>Pull request:  24</h3> </li>
-
-                        </ul>
-                    </div>
-                </div>
-            </div>
             <div class="row" v-if="current_tab === 1">
 
                 <div class="col-md-12 pt-10">
@@ -46,8 +45,6 @@
                                 <bar-chart :chart-data="datacollection_commits_week" :options="options"></bar-chart>
                             </div>
                             <li><h3>Commits in total:  {{commits_week_count}}</h3> </li>
-
-
                         </ul>
                     </div>
                 </div>
@@ -70,22 +67,7 @@
             </div>
 
 
-            <div class="row" v-if="current_tab === 2">
 
-                <div class="col-md-12 text-left ">
-                    <div class="intel-container pt-20 px-lg-5">
-                        <ul>
-
-                            <li><h3>Telegram Chat:  210</h3> </li>
-                            <li><h3>Telegram Total:  24</h3> </li>
-                            <li><h3>Telegram announcements:  114</h3> </li>
-                            <li><h3>Number of contributors:  7</h3> </li>
-                            <li><h3>Pull request:  44</h3> </li>
-
-                        </ul>
-                    </div>
-                </div>
-            </div>
 
             <div class="row mt-10" v-if="current_tab === 2">
 
@@ -150,6 +132,11 @@
                     this.transactions_month =  res.data.transactions_month;
                     this.commits_month_count =  res.data.commits_month_count;
                     this.transactions_month_count =  res.data.transactions_month_count;
+                    this.contributors = res.data.contributors;
+                    this.pull_reques = res.data.pull_request;
+                    this.telegram_community = res.data.total_community;
+                    this.telegram_members = res.data.telegram_members;
+                    this.telegram_announcements = res.data.telegram_announcements;
                     this.fillData();
                 },
                 error => {
@@ -174,6 +161,11 @@
                 transactions_week_count : 0,
                 commits_month_count : 0,
                 transactions_month_count : 0,
+                contributors: 0,
+                telegram_community: 0,
+                telegram_members: 0,
+                telegram_announcements: 0,
+                pull_request: 0,
                 datacollection_commits_week: null,
                 datacollection_commits_month: null,
                 datacollection_transactions_week: null,
