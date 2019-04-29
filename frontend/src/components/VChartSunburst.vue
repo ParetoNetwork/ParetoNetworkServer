@@ -43,13 +43,12 @@
           var roundedHeightAspect = Math.round(targetWidth / aspect);
           svg.attr("width", Math.min(targetWidth, width));
           svg.attr("height", Math.min(roundedHeightAspect, height));
-          console.log(targetWidth, roundedHeightAspect)
         }
       },
       sunschart(router, notify) {
         d3.selectAll("#d3-sunsburst svg > *").remove();
         const data = this.nodeData;
-        console.log(data);
+
         var width = this.width,
           height = this.height,
           radius = width / 6;
@@ -97,7 +96,6 @@
           .data(this.root.descendants().slice(1))
           .join("path")
           .attr("fill", d => {
-            console.log(d);
             while (d.depth > 1) d = d.parent;
             return color(d.data.address);
           })
@@ -188,7 +186,6 @@
           const y = (d.y0 + d.y1) / 2 * radius;
           return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
         }
-
 
         function redirect(d) {
           if (d.data.type === "profile") {

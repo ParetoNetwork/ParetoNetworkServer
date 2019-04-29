@@ -3,14 +3,8 @@
     <div class="col text-left">
       <div class="row mx-0">
         <b class="title-content text-left"> Network Statistics </b>
-        <div class="ml-2">
-          <b-form-radio-group id="radio-group-2" v-model="pickedChart">
-            <b-form-radio value="stacked" v-on:change="transitionStacked('stacked')">Stack</b-form-radio>
-            <b-form-radio value="grouped" v-on:change="transitionGrouped('grouped')">Group</b-form-radio>
-          </b-form-radio-group>
-        </div>
       </div>
-      <div id="d3-stacked-grouped-bars">
+      <div id="d3-stacked-grouped-bars" class="cursor-pointer" @dblclick="createTransition" @mouseover="pauseTransition" @mouseleave="resumeTransition">
         <svg></svg>
       </div>
     </div>
@@ -36,17 +30,42 @@
         y: function(){},
         n: 5,
         m: 58,
+        intervalFunction: {},
+        chartTransitionPaused: false,
+        intervalTransitionTime: 20000,
         margin: {top: 0, right: 0, bottom: 10, left: 0}
       };
     },
     mounted() {
       this.stackedToGroupedChart();
+      this.setTimeTransition();
     },
     methods: {
+      resumeTransition(){
+        if(this.chartTransitionPaused) {
+          this.chartTransitionPaused = false;
+          this.setTimeTransition();
+        }
+      },
+      pauseTransition(){
+        if(!this.chartTransitionPaused) {
+          this.chartTransitionPaused = true;
+          clearInterval(this.intervalFunction);
+        }
+      },
+      createTransition() {
+        if (this.pickedChart === "stacked") {
+          this.transitionGrouped();
+          this.pickedChart = "grouped";
+        } else {
+          this.transitionStacked();
+          this.pickedChart = "stacked";
+        }
+      },
       responsivefy(svg) {
         var container = d3.select(svg.node().parentNode),
           width = Math.min(parseInt(svg.style("width")), this.width),
-          height = Math.min(parseInt(svg.style("height")), this.height) ,
+          height = Math.min(parseInt(svg.style("height")), this.height),
           aspect = width / height;
 
         svg.attr("viewBox", "0 0 " + width + " " + height)
@@ -98,8 +117,6 @@
           .attr("width", width)
           .attr("height", height)
           .call(this.responsivefy);
-
-        console.log(this.y01z, );
 
         this.rect = svg.selectAll("g")
           .data(this.y01z)
@@ -174,6 +191,9 @@
           .transition()
           .attr("y", d => this.y(d[1] - d[0]))
           .attr("height", d => this.y(0) - this.y(d[1] - d[0]));
+      },
+      setTimeTransition() {
+        this.intervalFunction = setInterval(this.createTransition, this.intervalTransitionTime);
       }
   }
   }

@@ -81,9 +81,6 @@
                //   it.size =   it.size?   it.size: (index +1);
                   return it} );
           }
-
-
-
       }
     },
     watch: {
