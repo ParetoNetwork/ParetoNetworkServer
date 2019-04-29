@@ -480,10 +480,14 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                     }
                     try{
                         const transactionHash = txObjects.map(it=>{return it.transactionHash});
-                        const rewardDeposit =  await ParetoReward.find({sender: address, txHash: { $nin: transactionHash }}).distinct('txHash');
+                        const rewardDeposit = Object.values( (await ParetoReward.find({sender: address, txHash: { $nin: transactionHash }}).exec()).reduce(
+                            (data, item, index)=>{
+                                data[item.txHash] =item;
+                                return data;
+                            }
+                        ,{}));
                         for(i = 0; i < rewardDeposit.length; i++){
                             blockNumber = rewardDeposit[i].block+ "";
-                            console.log(rewardDeposit);
                             quantityEth = Decimal(rewardDeposit[i].amount + "");
                             if(blockNumber in outgoing)
                             {
