@@ -88,7 +88,7 @@
 <script>
   import ICountUp from 'vue-countup-v2';
   import moment from 'moment';
-
+  import {mapState} from 'vuex';
   import profileService from '../services/profileService';
   import VIntelButtonAction from './Events/VIntelButtonAction';
   import environment from '../utils/environment';
@@ -118,6 +118,9 @@
                 return temp.format("MMMM Do, YYYY");
             }
         },
+        computed: {
+            ...mapState(['lsSecurity'])
+        },
         mounted(){
         },
         methods: {
@@ -128,10 +131,10 @@
                 else if(intel.title && intel.encrypted){
                     const CryptoJS = require("crypto-js");
                     if(intel.createdBy.address == this.user.address){
-                        const decrypted = CryptoJS.AES.decrypt(intel.title, localStorage.getItem("groupKeys"));
+                        const decrypted = CryptoJS.AES.decrypt(intel.title, this.lsSecurity.get("groupKeys"));
                         return decrypted.toString(CryptoJS.enc.Utf8);
                     }else{
-                        const decrypted = CryptoJS.AES.decrypt(intel.title, localStorage.getItem("groupKeys-" + intel.createdBy.address));
+                        const decrypted = CryptoJS.AES.decrypt(intel.title, this.lsSecurity.get("groupKeys-" + intel.createdBy.address));
                         return decrypted.toString(CryptoJS.enc.Utf8);
                     }
                 }else{

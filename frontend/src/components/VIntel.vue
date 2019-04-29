@@ -128,7 +128,7 @@
       });
     },
     methods: {
-      ...mapMutations(['intelEnter', 'iniWs', 'iniSignalWs', 'lsSecuritySet', 'lsSecurityGet']),
+      ...mapMutations(['intelEnter', 'iniWs', 'iniSignalWs']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
       },
@@ -200,11 +200,11 @@
           res => {
             this.user = res;
             this.block = res.block;
-            profileService.generateAndSendSignedKeys(response => {},
+            profileService.generateAndSendSignedKeys(this.lsSecurity, response => {},
             err => {
               console.log(err);
             });
-            profileService.getKeysForAllProfiles(res => {
+            profileService.getKeysForAllProfiles(this.lsSecurity, res => {
               profileService.generateGroupKeys(this.lsSecurity,
                 (groupKeys) => {
                   const Proteus = require('proteus-hd');
@@ -213,8 +213,8 @@
                     if (!this.signalWs) {
                       this.iniSignalWs();
                     }
-                    const ident = Proteus.keys.IdentityKeyPair.deserialise(
-                            base64js.toByteArray(localStorage.getItem("identityKeys")).buffer
+                    const ident = Proteus.keys.IdentityKeyPair.deserialise(//adn
+                            base64js.toByteArray(this.lsSecurity.get("identityKeys")).buffer
                     );
                     this.signalWs.onmessage = (response) => {
                       try {
@@ -242,7 +242,7 @@
                         const data = JSON.parse(response.data);
                         if(data.type == 'sendGroupKeys'){
                           const preKey = Proteus.keys.PreKey.deserialise(
-                                  base64js.toByteArray(localStorage.getItem("preKey")).buffer
+                                  base64js.toByteArray(this.lsSecurity.get("preKey")).buffer
                           );
 
                           const store = new PreKeyStore([preKey]);
@@ -254,7 +254,7 @@
                             const [session, message] = msgArray;
                             const serialicedBundleKey = (new TextDecoder()).decode(message);
                             data.groupKeys = serialicedBundleKey;
-                            profileService.storeGroupKeys(data);
+                            profileService.storeGroupKeys(this.lsSecurity, data);
                           });
                         }
 
@@ -264,7 +264,7 @@
                     }
                     if(this.signalWs.readyState === WebSocket.OPEN){
                       const toBundleUser = Proteus.keys.PreKeyBundle.deserialise(
-                              base64js.toByteArray(localStorage.getItem(res[user].address)).buffer
+                              base64js.toByteArray(this.lsSecurity.get(res[user].address)).buffer
                       );
                       Proteus.session.Session.init_from_prekey(ident, toBundleUser)
                       .then((session) => {

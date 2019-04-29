@@ -40,12 +40,12 @@ export default class profileService {
     }
 
     //Generates signed keys and sends them to the server
-    static generateAndSendSignedKeys(onSuccess, onError) {
+    static generateAndSendSignedKeys(lsSecurity, onSuccess, onError) {
         const cachedProfileAddress = this.getProfile.profile.address;
         if(! cachedProfileAddress){
             onError(errorService.sendErrorMessage('f29', {}));
         }
-        if (localStorage.getItem("identityKeys")) {
+        if (lsSecurity.get("identityKeys")) {
             return onSuccess({
                 address: cachedProfileAddress
             });
@@ -69,9 +69,9 @@ export default class profileService {
             profile: cachedProfileAddress
         }).then(res => {
             if(res.data.data) {
-                window.localStorage.setItem('identityKeys', encodedSerializedIdentity);
-                window.localStorage.setItem('preKey', encodedSerializedPrekey);
-                window.localStorage.setItem('preKeyBundle', encodedSerializedPrekeyBundle);
+                lsSecurity.set('identityKeys', encodedSerializedIdentity);
+                lsSecurity.set('preKey', encodedSerializedPrekey);
+                lsSecurity.set('preKeyBundle', encodedSerializedPrekeyBundle);
                 return onSuccess(res.data.data);
             }
             else
@@ -79,13 +79,13 @@ export default class profileService {
         });
     }
 
-    static storeKeys(keyData){
+    static storeKeys(lsSecurity, keyData){
         const cachedProfileAddress = this.getProfile.profile.address;
         if(! cachedProfileAddress){
             onError(errorService.sendErrorMessage('f39', {}));
         }
         if(cachedProfileAddress != keyData.address){
-            window.localStorage.setItem(keyData.address, keyData.keys);
+            lsSecurity.set(keyData.address, keyData.keys);
         }
     }
 
@@ -99,13 +99,27 @@ export default class profileService {
         return success(groupKeys)
     }
 
-    static storeGroupKeys(keyData){
-        if (! localStorage.getItem("groupKeys-" + keyData.fromAddress)) {
-            window.localStorage.setItem("groupKeys-" + keyData.fromAddress, keyData.groupKeys);
+    static storeGroupKeys(lsSecurity, keyData){
+        if (! lsSecurity.get("groupKeys-" + keyData.fromAddress)) {
+            lsSecurity.set("groupKeys-" + keyData.fromAddress, keyData.groupKeys);
         }
     }
 
-    static getKeysForAllProfiles(onSuccess, onError){
+    static removeKeys(lsSecurity) {
+        lsSecurity.remove("groupKeys");
+        lsSecurity.remove("preKeyBundle");
+        lsSecurity.remove("preKey");
+        lsSecurity.remove("identityKeys");
+        const groupKeys = lsSecurity.getAllKeys();
+        for (var i = 0; i < groupKeys.length; i++){
+            if(groupKeys[i].startsWith('groupKeys-')){
+                lsSecurity.remove(groupKeys[i]);
+            }
+        }
+
+    }
+
+    static getKeysForAllProfiles(lsSecurity, onSuccess, onError){
         const cachedProfileAddress = this.getProfile.profile.address;
         if(! cachedProfileAddress){
             onError(errorService.sendErrorMessage('f29', {}));
@@ -115,7 +129,7 @@ export default class profileService {
         }).then(res => {
             if(res.data.data) {
                 for (var i = 0; i < res.data.data.length; i++) {
-                    this.storeKeys(res.data.data[i]);
+                    this.storeKeys(lsSecurity, res.data.data[i]);
                 }
                 return onSuccess(res.data.data);
             }

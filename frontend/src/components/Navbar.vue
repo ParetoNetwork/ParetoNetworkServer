@@ -72,6 +72,7 @@
   import {mapMutations, mapState} from 'vuex';
   import 'jquery';
   import authService from '../services/authService';
+  import profileService from '../services/profileService';
   import DashboardService from '../services/dashboardService';
   import errorService from '../services/errorService';
   import ModalLedgerNano from "./Modals/VModalLedgerNano";
@@ -125,7 +126,7 @@
     computed: {
       ...mapState([
         // map this.count to store.state.count
-        'isLogged', 'address', 'showModalSign', 'showshopping'
+        'isLogged', 'address', 'showModalSign', 'showshopping', 'lsSecurity'
       ]),
       loadingNav() {
         return this.$store.state.makingRequest;
@@ -172,6 +173,7 @@
       },
       logout: function () {
         authService.logout(() => {
+          profileService.removeKeys(this.lsSecurity);
           this.logoutVuex();
           this.collapseContent();
           this.$router.push('/');

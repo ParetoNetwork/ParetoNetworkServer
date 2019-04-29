@@ -207,7 +207,7 @@
             bodyFunction: function () {
                 return content;
             },
-            ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
+            ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress", "lsSecurity"])
         },
         mounted: function () {
             ContentService.getAssets(r=>{
@@ -275,8 +275,8 @@
 
 
                 const CryptoJS = require("crypto-js");
-                const encryptedBody = CryptoJS.AES.encrypt(this.body, localStorage.getItem("groupKeys")).toString();
-                const encryptedTitle = CryptoJS.AES.encrypt(this.title, localStorage.getItem("groupKeys")).toString();
+                const encryptedBody = CryptoJS.AES.encrypt(this.body, this.lsSecurity.get("groupKeys")).toString();
+                const encryptedTitle = CryptoJS.AES.encrypt(this.title, this.lsSecurity.get("groupKeys")).toString();
 
                 ContentService.createIntel(
                     {block: this.block, title: encryptedTitle, body: encryptedBody, address: this.blockChainAddress,

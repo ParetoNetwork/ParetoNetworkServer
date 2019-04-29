@@ -80,7 +80,7 @@
             VModalReward
         },
         computed: {
-            ...mapState(["ws", "signType", "pendingTransactions", "showModalReward"])
+            ...mapState(["ws", "signType", "pendingTransactions", "showModalReward", "lsSecurity"])
         },
         data: function () {
             return {
@@ -120,10 +120,10 @@
                 else if(intel[attr] && intel.encrypted){
                     const CryptoJS = require("crypto-js");
                     if(intel.createdBy.address == this.user.address){
-                        const decrypted = CryptoJS.AES.decrypt(intel[attr], localStorage.getItem("groupKeys"));
+                        const decrypted = CryptoJS.AES.decrypt(intel[attr], this.lsSecurity.get("groupKeys"));
                         return decrypted.toString(CryptoJS.enc.Utf8);
                     }else{
-                        const decrypted = CryptoJS.AES.decrypt(intel[attr], localStorage.getItem("groupKeys-" + intel.createdBy.address));
+                        const decrypted = CryptoJS.AES.decrypt(intel[attr], this.lsSecurity.get("groupKeys-" + intel.createdBy.address));
                         return decrypted.toString(CryptoJS.enc.Utf8);
                     }
                 }else{
