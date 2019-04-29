@@ -96,7 +96,7 @@ module.exports = function (
      */
     eth_wallet.makeParetoTransaction = async function (address, amount) {
         return new Promise(async function (resolve, reject) {
-            const walletProvider = controller.getParetoWalletProvider();
+            const walletProvider = eth_wallet.getParetoWalletProvider();
             try {
 
                 const Pareto_Token_Schema = require("../../build/contracts/ParetoNetworkToken.json");
@@ -168,7 +168,7 @@ module.exports = function (
      */
     eth_wallet.makeEthTransaction = async function (address, eth) {
         return new Promise(async function (resolve, reject) {
-            const walletProvider = wallet.getEthereumWalletProvider();
+            const walletProvider = eth_wallet.getEthereumWalletProvider();
             try {
 
                 const web3 = walletProvider.web3;
@@ -303,5 +303,5 @@ module.exports = function (
             console.log(e);
         }
     };
-    return wallet;
+    return eth_wallet;
 }

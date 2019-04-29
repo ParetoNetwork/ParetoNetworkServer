@@ -1,5 +1,6 @@
 module.exports = function (
     controller,
+    Web3,
     web3,
     web3_events_provider,
     web3_events,
@@ -13,8 +14,8 @@ module.exports = function (
     ParetoTransaction,
     ErrorHandler,
     ETH_NETWORK,
-    PARETO_CONTRACT_ADDRESS
-
+    PARETO_CONTRACT_ADDRESS,
+    WEB3_WEBSOCKET_URL
 ) {
      let ethereum  = {};
      ethereum.startwatchNewIntel = function () {

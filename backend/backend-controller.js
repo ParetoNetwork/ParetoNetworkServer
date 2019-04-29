@@ -156,6 +156,7 @@ controller.startW3WebSocket = function () {
         //console.log('WS web3 connected');
         const ethereumWatcher = require('./ethereum/ethereum-watcher')(
             controller,
+            Web3,
             web3,
             web3_events_provider,
             web3_events,
@@ -169,8 +170,8 @@ controller.startW3WebSocket = function () {
             ParetoTransaction,
             ErrorHandler,
             ETH_NETWORK,
-            PARETO_CONTRACT_ADDRESS
-
+            PARETO_CONTRACT_ADDRESS,
+            WEB3_WEBSOCKET_URL
         );
         ethereumWatcher.startwatchIntel();
     });
