@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col text-left">
       <b class="title-content text-left"> Trade Explorer </b>
-      <div id="d3-svg">
+      <div id="d3-sunsburst">
         <svg></svg>
       </div>
     </div>
@@ -16,14 +16,13 @@
     ],
     data() {
       return {
-        height: 250,
-        width: 250,
+        height: 400,
+        width: 400,
         row: document.getElementById("chart-row").offsetWidth,
         root: null
       };
     },
     mounted() {
-      this.height = this.width = this.row;
       this.sunschart(this.$router, this.$notify);
     },
     methods: {
@@ -41,14 +40,16 @@
 
         function resize() {
           var targetWidth = parseInt(container.style("width"));
-          svg.attr("width", targetWidth);
-          svg.attr("height", Math.round(targetWidth / aspect));
+          var roundedHeightAspect = Math.round(targetWidth / aspect);
+          svg.attr("width", Math.min(targetWidth, width));
+          svg.attr("height", Math.min(roundedHeightAspect, height));
+          console.log(targetWidth, roundedHeightAspect)
         }
       },
       sunschart(router, notify) {
-          d3.selectAll("svg > *").remove();
+        d3.selectAll("#d3-sunsburst svg > *").remove();
         const data = this.nodeData;
-
+        console.log(data);
         var width = this.width,
           height = this.height,
           radius = width / 6;
@@ -61,8 +62,10 @@
         var format = d3.format(",d");
 
 
-            this.root = d3.hierarchy(data)  // <-- 1
-                .sum(function (d) { return d.size});
+        this.root = d3.hierarchy(data)  // <-- 1
+          .sum(function (d) {
+            return d.size
+          });
 
         var partition = d3.partition()  // <-- 1
           .size([2 * Math.PI, this.root.height + 1]);
@@ -80,7 +83,7 @@
           .innerRadius(d => d.y0 * radius)
           .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
-        const svg = d3.select("#d3-svg svg")
+        const svg = d3.select("#d3-sunsburst svg")
           .attr("width", width)
           .attr("height", height)
           .style("font", "10px sans-serif")
@@ -93,12 +96,16 @@
           .selectAll("path")
           .data(this.root.descendants().slice(1))
           .join("path")
-          .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.address); })
+          .attr("fill", d => {
+            console.log(d);
+            while (d.depth > 1) d = d.parent;
+            return color(d.data.address);
+          })
           .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 1 : 0.6) : 0)
           .attr("d", d => arc(d.current));
 
         path.append("title")
-          .text(d => `${d.ancestors().map(d => d.data.name).reverse().join(" ")}\n${format(d.value)}`);
+          .text(d => `${d.ancestors().map(d => d.data.name).reverse().join(" ")}`);
 
         path.filter(d => d.children)
           .style("cursor", "pointer")
@@ -133,7 +140,8 @@
           return d.data.name.length * CHAR_SPACE < perimeter;
         }
 
-        const root= this.root;
+        const root = this.root;
+
         function click(p) {
           parent.datum(p.parent || root);
 
@@ -154,13 +162,13 @@
               const i = d3.interpolate(d.current, d.target);
               return t => d.current = i(t);
             })
-            .filter(function(d) {
+            .filter(function (d) {
               return +this.getAttribute("fill-opacity") || arcVisible(d.target);
             })
-            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ?  1 : 0.6) : 0)
+            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 1 : 0.6) : 0)
             .attrTween("d", d => () => arc(d.current));
 
-          label.filter(function(d) {
+          label.filter(function (d) {
             return +this.getAttribute("fill-opacity") || labelVisible(d.target);
           }).transition(t)
             .attr("fill-opacity", d => +labelVisible(d.target))
@@ -182,10 +190,10 @@
         }
 
 
-        function redirect(d){
-          if(d.data.type === "profile"){
+        function redirect(d) {
+          if (d.data.type === "profile") {
             let param = d.data.slug || d.data.address;
-            if(param){
+            if (param) {
               router.push('/intel/' + param);
             } else {
               notify({
@@ -201,12 +209,10 @@
       }
     },
     watch: {
-      row(val){
+      row(val) {
       },
-        nodeData(){
-          console.log(this.nodeData);
-            this.height = this.width = this.row;
-            this.sunschart(this.$router, this.$notify);
+      nodeData() {
+        this.sunschart(this.$router, this.$notify);
       }
     }
   };
