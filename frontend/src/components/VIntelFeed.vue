@@ -81,16 +81,12 @@
         intel: {}
       }
     },
-    computed: {
-      ...mapState(["madeLogin", "ws", "signType", "pathId", "pendingTransactions", "showModalReward"]),
-      ...mapActions(["addTransaction", "transactionComplete", "editTransaction"]),
-    },
     beforeMount: function () {
       if (this.defaultContent !== undefined && this.defaultContent.length > 0){
         this.myFeed.content = this.defaultContent;
         this.loading = false;
       } else {
-        this.loadContent({page: 0, limit: 10});
+        this.loadContent({page: 0, limit: 20});
       }
     },
     watch: {
@@ -103,7 +99,7 @@
       }
     },
     methods: {
-      ...mapMutations(["openModalReward"]),
+      ...mapMutations(["openModalReward","setFirstContent"]),
       assignBlock(block) {
         this.myFeed.content = this.myFeed.content.map(item => {
           item.blockAgo = block - item.block > 0 ? block - item.block : 0;
@@ -118,7 +114,10 @@
           this.myFeed.page++;
           this.myFeed.loading = false;
           this.myFeed.content = [...this.myFeed.content, ...res];
+          this.setFirstContent( [].concat(this.myFeed.content));
         };
+
+
 
         let onError = (error) => {
           this.loading = false;
@@ -135,7 +134,7 @@
         if (this.fetchAddress) {
           let params = {
             page: this.myFeed.page,
-            limit: 10,
+            limit: 20,
             user: this.fetchAddress
           };
           return dashboardService.getContent(params,
@@ -158,7 +157,7 @@
         try {
           if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
             && !this.myFeed.loading && !this.defaultContent) {
-            const params = {limit: 10, page: this.myFeed.page};
+            const params = {limit: 20, page: this.myFeed.page};
             this.myFeed.loading = true;
 
             this.$store.state.makingRequest = true;

@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col text-left">
       <b class="title-content text-left"> Trade Explorer </b>
-      <div id="d3-sunsburst">
+      <div id="d3-svg">
         <svg></svg>
       </div>
     </div>
@@ -16,18 +16,21 @@
     ],
     data() {
       return {
-        height: 400,
-        width: 400
+        height: 250,
+        width: 250,
+        row: document.getElementById("chart-row").offsetWidth,
+        root: null
       };
     },
     mounted() {
+      this.height = this.width = this.row;
       this.sunschart(this.$router, this.$notify);
     },
     methods: {
       responsivefy(svg) {
         var container = d3.select(svg.node().parentNode),
           width = parseInt(svg.style("width")),
-          height = parseInt(svg.style("height")) ,
+          height = parseInt(svg.style("height")),
           aspect = width / height;
 
         svg.attr("viewBox", "0 0 " + width + " " + height)
@@ -38,13 +41,12 @@
 
         function resize() {
           var targetWidth = parseInt(container.style("width"));
-          var roundedHeightAspect = Math.round(targetWidth / aspect);
-          svg.attr("width", Math.min(targetWidth, width));
-          svg.attr("height", Math.min(roundedHeightAspect, height));
-          console.log(targetWidth, roundedHeightAspect)
+          svg.attr("width", targetWidth);
+          svg.attr("height", Math.round(targetWidth / aspect));
         }
       },
       sunschart(router, notify) {
+          d3.selectAll("svg > *").remove();
         const data = this.nodeData;
 
         var width = this.width,
@@ -52,20 +54,22 @@
           radius = width / 6;
 
         let color;
+
         //color = d3.scaleOrdinal(['#5EAFC6', '#FE9922', '#93c464', '#75739F']);
         color = d3.scaleOrdinal(["#a88fca", "#d78dce", "#fd95b5", "#feae95", "#edd38b", "#d0f5a3", "#9df8a8", "#83ebc8", "#83ebc8", "#95aae7"]);
 
         var format = d3.format(",d");
 
-        var root = d3.hierarchy(data)  // <-- 1
-          .sum(function (d) { return d.size});
+
+            this.root = d3.hierarchy(data)  // <-- 1
+                .sum(function (d) { return d.size});
 
         var partition = d3.partition()  // <-- 1
-          .size([2 * Math.PI, root.height + 1]);
+          .size([2 * Math.PI, this.root.height + 1]);
 
-        partition(root);
+        partition(this.root);
 
-        root.each(d => d.current = d);
+        this.root.each(d => d.current = d);
         var format = d3.format(",d");
 
         var arc = d3.arc()
@@ -76,7 +80,7 @@
           .innerRadius(d => d.y0 * radius)
           .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
-        const svg = d3.select("#d3-sunsburst svg")
+        const svg = d3.select("#d3-svg svg")
           .attr("width", width)
           .attr("height", height)
           .style("font", "10px sans-serif")
@@ -87,7 +91,7 @@
 
         const path = g.append("g")
           .selectAll("path")
-          .data(root.descendants().slice(1))
+          .data(this.root.descendants().slice(1))
           .join("path")
           .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.address); })
           .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 1 : 0.6) : 0)
@@ -105,7 +109,7 @@
           .attr("text-anchor", "middle")
           .style("user-select", "none")
           .selectAll("text")
-          .data(root.descendants().slice(1))
+          .data(this.root.descendants().slice(1))
           .join("text")
           .attr("dy", "0.35em")
           .attr("fill-opacity", d => +labelVisible(d.current))
@@ -113,7 +117,7 @@
           .text(d => d.data.name);
 
         const parent = g.append("circle")
-          .datum(root)
+          .datum(this.root)
           .attr("r", radius)
           .attr("fill", "none")
           .attr("pointer-events", "all")
@@ -129,6 +133,7 @@
           return d.data.name.length * CHAR_SPACE < perimeter;
         }
 
+        const root= this.root;
         function click(p) {
           parent.datum(p.parent || root);
 
@@ -197,6 +202,11 @@
     },
     watch: {
       row(val){
+      },
+        nodeData(){
+          console.log(this.nodeData);
+            this.height = this.width = this.row;
+            this.sunschart(this.$router, this.$notify);
       }
     }
   };
