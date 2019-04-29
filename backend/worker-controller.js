@@ -483,7 +483,8 @@ workerController.generateScore = async function (blockHeight, address, blockHeig
                         const rewardDeposit =  await ParetoReward.find({sender: address, txHash: { $nin: transactionHash }}).distinct('txHash');
                         for(i = 0; i < rewardDeposit.length; i++){
                             blockNumber = rewardDeposit[i].block+ "";
-                            quantityEth = rewardDeposit[i].amount + "";
+                            console.log(rewardDeposit);
+                            quantityEth = Decimal(rewardDeposit[i].amount + "");
                             if(blockNumber in outgoing)
                             {
                                 outgoing[blockNumber] = outgoing[blockNumber].add(quantityEth);

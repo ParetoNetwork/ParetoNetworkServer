@@ -521,11 +521,11 @@ controller.getAssets = async function (callback){
 };
 
 controller.getAllAvailableContent = async function (req, callback) {
-    intelController.getAllAvailableContent(req, callback);
+   await intelController.getAllAvailableContent(req, callback);
 };
 
 controller.getContentByIntel = function (req, intel, callback) {
-    intelController.getContentByIntel (req, intel, callback);
+      intelController.getContentByIntel (req, intel, callback);
 };
 
 controller.getContentByCurrentUser = async function (req, callback) {

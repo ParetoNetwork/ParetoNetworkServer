@@ -20,32 +20,37 @@ describe('backend-controller /', function() {
     });
 
     it('No get content with wrong address',  function (done) {
-        const req = {
-            query: {
-                limit: 100,
-                page: 0
-            },
-            user: "asdf"
-        };
-        serverApp.controller.getAllAvailableContent(req, function(err, result){
-            assert.exists(err, 'The controller should validate fake address');
-            done();
-        });
+        setTimeout(function () {
+            const req = {
+                query: {
+                    limit: 10,
+                    page: 0
+                },
+                user: "asdf"
+            };
+            serverApp.controller.getAllAvailableContent(req, function(err, result){
+                assert.exists(err, 'The controller should validate fake address');
+                done();
+            });
+
+        }, 1000);
     });
 
     it('Current user get data Test',  function (done) {
-        const req = {
-            query: {
-                limit: 100,
-                page: 0
-            },
-            user: data.owner
-        };
-        serverApp.controller.getAllAvailableContent(req, function(err, result){
-            assert.notExists(err, 'The current data shouldnt get error');
-            assert.exists(result, 'The content must be fetched');
-            done();
-        });
+        setTimeout(function () {
+            const req = {
+                query: {
+                    limit: 10,
+                    page: 0
+                },
+                user: data.owner
+            };
+            serverApp.controller.getAllAvailableContent(req, function(err, result){
+                assert.notExists(err, 'The current data shouldnt get error');
+                assert.exists(result, 'The content must be fetched');
+                done();
+            });
+        }, 1000);
     });
 
     it('Sign up must fail whith no-allowed user',  function (done) {

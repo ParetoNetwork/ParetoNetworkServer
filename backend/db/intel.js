@@ -18,7 +18,7 @@ module.exports = function (
 
 ) {
     let intelController = {};
-
+    let blockHeight = 0;
     const PARETO_RANK_GRANULARIZED_LIMIT = 10;
     /**
      * Intel Services
@@ -192,19 +192,15 @@ module.exports = function (
     };
 
     intelController.getAllAvailableContent = async function (req, callback) {
-
         var limit = parseInt(req.query.limit || 100);
         var page = parseInt(req.query.page || 0);
-        intelController.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
-
+        await  intelController.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
             if (error) return callback(error);
             try {
                 let newQuery = await intelController.validateQuery(req.query);
                 queryFind.$and = queryFind.$and.concat(newQuery);
-
                 const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate([{path: 'assets.asset'}, {path: 'createdBy'}]).exec();
                 let newResults = [];
-
                 allResults.forEach(function (entry) {
                     /*
 
