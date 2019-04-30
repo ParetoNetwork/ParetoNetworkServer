@@ -4,7 +4,9 @@
       <div class="row mx-0">
         <b class="title-content text-left"> Network </b>
       </div>
-      <div id="d3-stacked-grouped-bars" class="cursor-pointer" @dblclick="createTransition" @mouseover="pauseTransition" @mouseleave="resumeTransition">
+      <div id="d3-stacked-grouped-bars" class="cursor-pointer position-relative" @dblclick="createTransition"
+           @mouseover="pauseTransition"
+           @mouseleave="resumeTransition">
         <svg></svg>
       </div>
     </div>
@@ -28,49 +30,53 @@
         y01z: [],
         y1Max: 0,
         yMax: 0,
-        x: function(){},
-        y: function(){},
+        x: function () {
+        },
+        y: function () {
+        },
         n: 3,
         m: 7,
         intervalFunction: {},
         chartTransitionPaused: false,
         intervalTransitionTime: 20000,
-        margin: {top: 0, right: 0, bottom: 10, left: 0},
-        userInformation : {
-
-        },
+        margin: {top: 30, right: 0, bottom: 20, left: 40},
+        userInformation: {},
         dates: [],
+        weekDays: [],
+        responsifyWidth: 0,
+        responsifyHeight: 0
       };
     },
     mounted() {
       this.setTimeTransition();
 
-      profileService.getChartUserInfo((data)=>{
-
-        for(let i=0; i<this.m; i++){
-          let ds = new Date(new Date() - (7- (i+1)) * 60 * 60 * 24 * 1000);
-          ds.setHours(0,0,0,0);
+      profileService.getChartUserInfo((data) => {
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        for (let i = 0; i < this.m; i++) {
+          let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
+          ds.setHours(0, 0, 0, 0);
+          this.weekDays.push(days[ds.getDay()]);
           this.dates[i] = {
             date: ds,
-            info: [0,0,0]
+            info: [0, 0, 0]
           };
         }
 
         let datesArray = [];
 
-        for (let i = 0; i<this.n; i++) {
+        for (let i = 0; i < this.n; i++) {
           datesArray[i] = [];
-          for (let j = 0; j<this.m; j++) {
+          for (let j = 0; j < this.m; j++) {
             datesArray[i][j] = 0;
           }
         }
 
-        data.userInformation.forEach( information => {
-          this.dates.forEach( (date, dateIndex) => {
+        data.userInformation.forEach(information => {
+          this.dates.forEach((date, dateIndex) => {
             const infoDate = new Date(information.dateCreated);
-            infoDate.setHours(0,0,0,0);
+            infoDate.setHours(0, 0, 0, 0);
 
-            if(infoDate.getTime() === date.date.getTime()){
+            if (infoDate.getTime() === date.date.getTime()) {
               switch (information.event) {
                 case 'reward':
                   datesArray[0][dateIndex] += information.amount;
@@ -86,18 +92,19 @@
           })
         });
 
+        this.weekDays[this.weekDays.length - 1] = "Today";
         this.stackedToGroupedChart(datesArray, this.pickedChart);
       });
     },
     methods: {
-      resumeTransition(){
-        if(this.chartTransitionPaused) {
+      resumeTransition() {
+        if (this.chartTransitionPaused) {
           this.chartTransitionPaused = false;
           this.setTimeTransition();
         }
       },
-      pauseTransition(){
-        if(!this.chartTransitionPaused) {
+      pauseTransition() {
+        if (!this.chartTransitionPaused) {
           this.chartTransitionPaused = true;
           clearInterval(this.intervalFunction);
         }
@@ -130,6 +137,7 @@
         }
       },
       stackedToGroupedChart(data, chartType) {
+        var LABELS = ["Reward", "Create", "Deposit"];
         const height = this.height;
         const width = this.width;
 
@@ -148,6 +156,11 @@
           .rangeRound([this.margin.left, width - this.margin.right])
           .padding(0.08);
 
+        let scaleY = [];
+        for (let i = 0; i < 5; i++) {
+          scaleY.push(this.y1Max * i / 5);
+        }
+
         this.y = d3.scaleLinear()
           .domain([0, this.y1Max])
           .range([height - this.margin.bottom, this.margin.top]);
@@ -159,12 +172,18 @@
 
         const xAxis = svg => svg.append("g")
           .attr("transform", `translate(0,${height - this.margin.bottom})`)
-          .call(d3.axisBottom(this.x).tickSizeOuter(0).tickFormat(() => ""));
+          .call(d3.axisBottom(this.x).tickSizeOuter(0).tickFormat((i) => this.weekDays[i]));
+
+        const yAxis = svg => svg.append("g")
+          .attr("transform", `translate(${this.margin.left},0)`)
+          .call(d3.axisLeft(this.y).ticks(8, "s"));
 
         const svg = d3.select("#d3-stacked-grouped-bars svg")
           .attr("width", width)
           .attr("height", height)
           .call(this.responsivefy);
+
+        var divTooltip = d3.select("#d3-stacked-grouped-bars").append("div").attr("class", "toolTip");
 
         this.rect = svg.selectAll("g")
           .data(this.y01z)
@@ -174,17 +193,68 @@
           .data(d => d)
           .join("rect")
           .attr("x", (d, i) => {
-            return this.x(i);})
-          .attr("y", height - this.margin.bottom)
+            return this.x(i) - this.margin.left;
+          })
+          .attr("y", height - this.margin.bottom - this.margin.top)
           .attr("width", this.x.bandwidth())
           .attr("height", 0);
+
+        this.rect.on("mouseover", function (d) {
+          let coords = {
+            x: this.getAttribute("x"),
+            y: this.getAttribute("y"),
+          };
+
+          const newSvg = $("#d3-stacked-grouped-bars svg")[0];
+
+          divTooltip.style("left", (coords.x * newSvg.clientWidth / width - 30) + "px")
+            .style("top", (coords.y * newSvg.clientHeight / height - 30) + "px")
+            .style("display", "inline-block")
+            .html("Pareto: " + d[1])
+            .style("opacity", .9);
+        }).on("mouseout", function (d) {
+          divTooltip.style("opacity", 0)
+        });
 
         svg.append("g")
           .call(xAxis);
 
-        if(chartType === "stacked" || !chartType){
+        svg.append("g")
+          .call(yAxis);
+
+        let drawLegend = (data) => {
+          var legend = svg.append("g")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", 10)
+            .attr("text-anchor", "end")
+            .selectAll("g")
+            .data(data)
+            .enter().append("g")
+            .attr("transform", (d, i) => {
+              return `translate(${i * -70},0)`;
+            });
+
+          legend.append("rect")
+            .attr("x", width - 19)
+            .attr("width", 19)
+            .attr("height", 19)
+            .attr("fill", (d, i) => z(i));
+
+          legend.append("text")
+            .attr("x", width - 24)
+            .attr("y", 9.5)
+            .attr("dy", "0.32em")
+            .attr("fill", "white")
+            .text(d => {
+              return d;
+            });
+        };
+
+        drawLegend(LABELS);
+
+        if (chartType === "stacked" || !chartType) {
           this.transitionStacked();
-        }else if(chartType === "grouped"){
+        } else if (chartType === "grouped") {
           this.transitionGrouped();
         }
       },
@@ -214,26 +284,30 @@
 
         return values;
       },
-      transitionStacked(){
+      transitionStacked() {
         this.y.domain([0, this.y1Max]);
 
         // console.log(rect);
         this.rect.transition()
           .duration(500)
-          .delay((d, i) => i * 20)
+          .delay((d, i) => {
+            return i * 20
+          })
           .attr("y", d => this.y(d[1]))
           .attr("height", d => this.y(d[0]) - this.y(d[1]))
           .transition()
           .attr("x", (d, i) => this.x(i))
           .attr("width", this.x.bandwidth());
       },
-      transitionGrouped(){
+      transitionGrouped() {
         this.y.domain([0, this.yMax]);
 
         // console.log(rect);
         this.rect.transition()
           .duration(500)
-          .delay((d, i) => i * 20)
+          .delay((d, i) => {
+            return i * 20
+          })
           .attr("x", (d, i) => this.x(i) + this.x.bandwidth() / this.n * d[2])
           .attr("width", this.x.bandwidth() / this.n)
           .transition()
@@ -247,6 +321,20 @@
   }
 </script>
 
-<style scoped>
-
+<style>
+  .toolTip {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    position: absolute;
+    display: none;
+    width: auto;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    border: 0 none;
+    border-radius: 8px 8px 8px 8px;
+    box-shadow: -3px 3px 15px #888888;
+    color: black;
+    font: 12px sans-serif;
+    padding: 5px;
+    text-align: center;
+  }
 </style>

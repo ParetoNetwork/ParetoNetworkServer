@@ -23,11 +23,7 @@
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
                 <div class="col-md-3 col-lg-4 order-3 px-0 pb-5" id="chart-row">
-                    <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData"></VHandlerSunsburstChart>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <br/>
+                    <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData" class="mb-4"></VHandlerSunsburstChart>
                     <VStackedToGroupedBars></VStackedToGroupedBars>
                 </div>
             </div>
