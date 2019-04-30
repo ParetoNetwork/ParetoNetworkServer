@@ -1,5 +1,5 @@
 <template>
-  <div class="intel-container text-left">
+  <div class="chart-container text-left">
     <b class="title-content text-left px-3"> Trade Explorer </b>
     <div id="d3-svg">
       <svg></svg>
@@ -48,7 +48,8 @@
           .transition()
           .duration(1000)
           .ease(d3.easeLinear)
-          .style("opacity", 0);
+          .style("opacity", 0)
+          .remove();
 
         const data = this.nodeData;
 
@@ -88,7 +89,7 @@
         const svg = d3.select("#d3-svg svg")
           .attr("width", width)
           .attr("height", height)
-          .style("font", "10px sans-serif")
+          .style("font", "8px sans-serif")
           .call(this.responsivefy)
           .style("opacity", 0);
 
