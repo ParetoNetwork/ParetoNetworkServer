@@ -44,7 +44,12 @@
         }
       },
       sunschart(router, notify) {
-          d3.selectAll("svg > *").remove();
+        d3.selectAll("svg > *")
+          .transition()
+          .duration(1000)
+          .ease(d3.easeLinear)
+          .style("opacity", 0);
+
         const data = this.nodeData;
 
         var width = this.width,
@@ -59,8 +64,10 @@
         var format = d3.format(",d");
 
 
-            this.root = d3.hierarchy(data)  // <-- 1
-                .sum(function (d) { return d.size});
+        this.root = d3.hierarchy(data)  // <-- 1
+          .sum(function (d) {
+            return d.size
+          });
 
         var partition = d3.partition()  // <-- 1
           .size([2 * Math.PI, this.root.height + 1]);
@@ -82,7 +89,14 @@
           .attr("width", width)
           .attr("height", height)
           .style("font", "10px sans-serif")
-          .call(this.responsivefy);
+          .call(this.responsivefy)
+          .style("opacity", 0);
+
+
+        svg.transition()
+          .duration(1000)
+          .ease(d3.easeLinear)
+          .style("opacity", 1);
 
         const g = svg.append("g")
           .attr("transform", `translate(${width / 2},${width / 2})`);
@@ -91,7 +105,10 @@
           .selectAll("path")
           .data(this.root.descendants().slice(1))
           .join("path")
-          .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.address); })
+          .attr("fill", d => {
+            while (d.depth > 1) d = d.parent;
+            return color(d.data.address);
+          })
           .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 1 : 0.6) : 0)
           .attr("d", d => arc(d.current));
 
@@ -131,7 +148,8 @@
           return d.data.name.length * CHAR_SPACE < perimeter;
         }
 
-        const root= this.root;
+        const root = this.root;
+
         function click(p) {
           parent.datum(p.parent || root);
 
@@ -152,13 +170,13 @@
               const i = d3.interpolate(d.current, d.target);
               return t => d.current = i(t);
             })
-            .filter(function(d) {
+            .filter(function (d) {
               return +this.getAttribute("fill-opacity") || arcVisible(d.target);
             })
-            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ?  1 : 0.6) : 0)
+            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 1 : 0.6) : 0)
             .attrTween("d", d => () => arc(d.current));
 
-          label.filter(function(d) {
+          label.filter(function (d) {
             return +this.getAttribute("fill-opacity") || labelVisible(d.target);
           }).transition(t)
             .attr("fill-opacity", d => +labelVisible(d.target))
@@ -180,10 +198,10 @@
         }
 
 
-        function redirect(d){
-          if(d.data.type === "profile"){
+        function redirect(d) {
+          if (d.data.type === "profile") {
             let param = d.data.slug || d.data.address;
-            if(param){
+            if (param) {
               router.push('/intel/' + param);
             } else {
               notify({
@@ -199,12 +217,12 @@
       }
     },
     watch: {
-      row(val){
+      row(val) {
       },
-        nodeData(){
-          console.log(this.nodeData);
-            this.height = this.width = this.row;
-            this.sunschart(this.$router, this.$notify);
+      nodeData() {
+        console.log(this.nodeData);
+        this.height = this.width = this.row;
+        this.sunschart(this.$router, this.$notify);
       }
     }
   };

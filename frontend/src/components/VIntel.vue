@@ -122,13 +122,13 @@
         'showModalOnboarding'])
     },
     mounted: function () {
+      this.sunsburstData = sunsburstData;
       AuthService.auth(() => {
         this.main();
         this.loggedUser = true;
       }, () => {
         // The user is not logged, so component loads the predefined information for the onboarding
         this.information = information;
-        this.sunsburstData = sunsburstData;
         this.loggedUser = false;
         this.primalLoad = true;
         this.user = information.user;
