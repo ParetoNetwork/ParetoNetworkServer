@@ -99,6 +99,7 @@
             while (d.depth > 1) d = d.parent;
             return color(d.data.address);
           })
+          .attr("stroke", d => arcVisible(d.current) ? '#ead6f3' : 'none')
           .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 1 : 0.6) : 0)
           .attr("d", d => arc(d.current));
 
@@ -163,12 +164,14 @@
             .filter(function (d) {
               return +this.getAttribute("fill-opacity") || arcVisible(d.target);
             })
+            .attr("stroke", d => arcVisible(d.target) ? '#ead6f3' : 'none')
             .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 1 : 0.6) : 0)
             .attrTween("d", d => () => arc(d.current));
 
           label.filter(function (d) {
             return +this.getAttribute("fill-opacity") || labelVisible(d.target);
           }).transition(t)
+            //.attr("stroke", d => arcVisible(d.target) ? '#ead6f3' : 'none')
             .attr("fill-opacity", d => +labelVisible(d.target))
             .attrTween("transform", d => () => labelTransform(d.current));
         }
