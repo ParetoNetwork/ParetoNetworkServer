@@ -85,7 +85,7 @@
         const svg = d3.select("#d3-sunsburst svg")
           .attr("width", width)
           .attr("height", height)
-          .style("font", "10px sans-serif")
+          .style("font", "8px sans-serif")
           .call(this.responsivefy);
 
         const g = svg.append("g")
