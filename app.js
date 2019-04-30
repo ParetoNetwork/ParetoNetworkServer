@@ -575,7 +575,6 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
-
 app.get('/v1/transaction', function (req, res) {
   controller.getTransaction(req, function (err, obj) {
     if (err) {
@@ -584,7 +583,6 @@ app.get('/v1/transaction', function (req, res) {
       res.status(200).json(ErrorHandler.getSuccess(obj));
     }
   });
-
 }); //end content post
 
 
@@ -673,6 +671,18 @@ app.get('/v1/chart-info', function (req, res) {
     }
   });
 });
+
+//Get the stackedGrouped chart information
+  app.get('/v1/chart-user-info', function (req, res) {
+  controller.getChartUserInformation(req, function (err, results) {
+    if(err){
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(results));
+    }
+  });
+});
+
 
 //get info about your address
 app.get('/v1/address', function (req, res) {

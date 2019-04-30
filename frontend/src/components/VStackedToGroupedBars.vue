@@ -12,6 +12,8 @@
 </template>
 
 <script>
+  import profileService from '../services/profileService';
+
   export default {
     name: 'VStackedToGroupedBars',
     props: [
@@ -28,17 +30,64 @@
         yMax: 0,
         x: function(){},
         y: function(){},
-        n: 5,
-        m: 58,
+        n: 3,
+        m: 7,
         intervalFunction: {},
         chartTransitionPaused: false,
         intervalTransitionTime: 20000,
-        margin: {top: 0, right: 0, bottom: 10, left: 0}
+        margin: {top: 0, right: 0, bottom: 10, left: 0},
+        userInformation : {
+
+        },
+        dates: [],
       };
     },
     mounted() {
-      this.stackedToGroupedChart();
       this.setTimeTransition();
+
+      profileService.getChartUserInfo((data)=>{
+
+        for(let i=0; i<this.m; i++){
+          let ds = new Date(new Date() - (7- (i+1)) * 60 * 60 * 24 * 1000);
+          ds.setHours(0,0,0,0);
+          this.dates[i] = {
+            date: ds,
+            info: [0,0,0]
+          };
+        }
+
+        let datesArray = [];
+
+        for (let i = 0; i<this.n; i++) {
+          datesArray[i] = [];
+          for (let j = 0; j<this.m; j++) {
+            datesArray[i][j] = 0;
+          }
+        }
+
+        data.userInformation.forEach( information => {
+          this.dates.forEach( (date, dateIndex) => {
+            const infoDate = new Date(information.dateCreated);
+            infoDate.setHours(0,0,0,0);
+
+            if(infoDate.getTime() === date.date.getTime()){
+              switch (information.event) {
+                case 'reward':
+                  datesArray[0][dateIndex] += information.amount;
+                  return;
+                case 'create':
+                  datesArray[1][dateIndex] += information.amount;
+                  return;
+                case 'deposit':
+                  datesArray[2][dateIndex] += information.amount;
+                  return;
+              }
+            }
+          })
+        });
+
+        this.stackedToGroupedChart(datesArray, this.pickedChart);
+      });
     },
     methods: {
       resumeTransition(){
@@ -80,17 +129,16 @@
           svg.attr("height", Math.round(targetWidth / aspect));
         }
       },
-      stackedToGroupedChart(chartType) {
+      stackedToGroupedChart(data, chartType) {
         const height = this.height;
         const width = this.width;
 
-
-        let yz = d3.range(this.n).map(() => this.bumps(this.m));
+        let yz = data;
         let xz = d3.range(this.m);
 
         this.y01z = d3.stack()
           .keys(d3.range(this.n))
-          (d3.transpose(yz)) // stacked yz
+          (d3.transpose(yz))
           .map((data, i) => data.map(([y0, y1]) => [y0, y1, i]));
 
         this.y1Max = d3.max(this.y01z, y => d3.max(y, d => d[1]));
@@ -195,7 +243,7 @@
       setTimeTransition() {
         this.intervalFunction = setInterval(this.createTransition, this.intervalTransitionTime);
       }
-  }
+    }
   }
 </script>
 

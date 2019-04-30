@@ -36,7 +36,7 @@
       }
     },
     methods: {
-      getChartInformation(data) {
+      getChartInformation(data){
           if(data){
               this.nodeData = {
                   name: '',

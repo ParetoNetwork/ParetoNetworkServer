@@ -2101,9 +2101,6 @@ controller.chartInfo = async function(req, callback){
 
         let profiles = await ParetoReward.find( { receiver: { $in: authorsKeys}});
 
-
-
-
         //console.log(rewards);
         return callback(null, authorsOrders);
       }
@@ -2113,6 +2110,18 @@ controller.chartInfo = async function(req, callback){
     console.log(e);
   }
 };
+
+controller.getChartUserInformation = async function (req, callback){
+  let address = req.query.user || req.user;
+  const dateWeekAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+
+  let transactionsRewards = await ParetoTransaction.find({event: "reward", address, dateCreated: {$gte: dateWeekAgo}});
+  let transactionsCreate = await ParetoTransaction.find({event: "create", address, dateCreated: {$gte: dateWeekAgo}});
+  let transactionsDistribute = await ParetoTransaction.find({event: "deposit", address, dateCreated: {$gte: dateWeekAgo}});
+
+  return callback(null, {userInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
+};
+
 
 /**
  * Worker Services
@@ -2351,8 +2360,6 @@ controller.listProducts = async function (callback) {
 
     }
   );
-
-
 }
 
 controller.createOrder = function (orderdetails, callback) {

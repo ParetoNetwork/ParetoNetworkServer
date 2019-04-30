@@ -4,7 +4,6 @@ import Identicon from 'identicon.js';
 import errorService from "./errorService";
 
 export default class profileService {
-
   static updateProfile(profile, onSuccess, onError) {
     http.post('/v1/updateuser', profile).then(
       res => {
@@ -36,6 +35,23 @@ export default class profileService {
           return onError(errorService.sendErrorMessage('f5', res.data.message));
       }).catch(error => {
         return onError(error);
+      });
+    }
+  }
+
+  static getChartUserInfo(onSuccess, onError) {
+    const cachedChartInformation = this.getChartInfo.chartInfo;
+
+    if (cachedChartInformation) {
+      return onSuccess(cachedChartInformation);
+    } else {
+      return http.get('/v1/chart-user-info').then(res => {
+        if (res.data.success) {
+          this.getChartInfo.chartInfo = res.data.data;
+          onSuccess(res.data.data);
+        } else {
+          onError(res.data.error);
+        }
       });
     }
   }
