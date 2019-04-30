@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col text-left">
       <div class="row mx-0">
-        <b class="title-content text-left"> Network Statistics </b>
+        <b class="title-content text-left"> Network </b>
       </div>
       <div id="d3-stacked-grouped-bars" class="cursor-pointer" @dblclick="createTransition" @mouseover="pauseTransition" @mouseleave="resumeTransition">
         <svg></svg>

@@ -45,7 +45,7 @@
               const res = data.reduce( (it, intel, index)=>{
                   if(!it[intel.address]){
                       it[intel.address] = intel.createdBy;
-                      it[intel.address].name = it[intel.address].aliasSlug || "No Alias";
+                      it[intel.address].name = it[intel.address].aliasSlug || it[intel.address].address.substring(0, 7) + "...";
                       it[intel.address].children = [];
                       it[intel.address].reward = 0;
                   }

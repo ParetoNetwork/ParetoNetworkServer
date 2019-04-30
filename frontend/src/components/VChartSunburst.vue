@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col text-left">
-      <b class="title-content text-left"> Trade Explorer </b>
+      <b class="title-content text-left"> Explorer </b>
       <div id="d3-sunsburst">
         <svg></svg>
       </div>
@@ -85,7 +85,7 @@
         const svg = d3.select("#d3-sunsburst svg")
           .attr("width", width)
           .attr("height", height)
-          .style("font", "8px sans-serif")
+          .style("font", "10px sans-serif")
           .call(this.responsivefy);
 
         const g = svg.append("g")
