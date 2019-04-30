@@ -10,5 +10,5 @@ throng({
 }, start);
 
 function start() {
-    const worker = require('./worker-controller.js');
+    const worker = require('./backend/worker-controller.js');
 }
