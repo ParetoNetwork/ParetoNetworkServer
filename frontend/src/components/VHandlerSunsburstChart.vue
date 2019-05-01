@@ -54,7 +54,7 @@
                       title: intel.title,
                       reward: intel.totalReward,
                       id: intel.id,
-                      children: (intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r => ({name: r.aliasSlug || "No Alias", reward: r.amount})) : []
+                      children: (intel.rewardsTransactions && intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r => ({name: r.aliasSlug || r.address.substring(0, 7) + "...", reward: r.amount})) : []
                   });
                   it[intel.address].reward = it[intel.address].reward + intel.totalReward;
                   return it;
