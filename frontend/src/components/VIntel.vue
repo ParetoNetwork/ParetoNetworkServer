@@ -23,8 +23,8 @@
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
                 <div class="col-md-3 col-lg-4 order-3 px-0 pb-5" id="chart-row">
-                    <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData" class="mb-4"></VHandlerSunsburstChart>
-                    <VStackedToGroupedBars></VStackedToGroupedBars>
+                    <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData" :loggedUser="loggedUser" class="mb-4"></VHandlerSunsburstChart>
+                    <VStackedToGroupedBars v-if="primalLoad" :stackedBarData="stackedBarData"></VStackedToGroupedBars>
                 </div>
             </div>
         </div>
@@ -61,7 +61,7 @@
   import ModalLedgerNano from './Modals/VModalLedgerNano';
   import ModalSplashOnboarding from './Modals/VModalSplashOnboarding';
 
-  import {information, sunsburstData} from '../utils/onboardingInfo';
+  import {information, sunsburstData, stackedBarData} from '../utils/onboardingInfo';
 
   import VStackedToGroupedBars from './VStackedToGroupedBars';
 
@@ -95,6 +95,7 @@
         etherscanUrl: window.localStorage.getItem('etherscan'),
         information: '',
         sunsburstData: '',
+        stackedBarData: '',
         loading: true,
         loggedUser: false,
         paretoAddress: window.localStorage.getItem('paretoAddress'),
@@ -124,6 +125,7 @@
     },
     mounted: function () {
       this.sunsburstData = sunsburstData;
+      this.stackedBarData = stackedBarData;
       AuthService.auth(() => {
         this.main();
         this.loggedUser = true;
