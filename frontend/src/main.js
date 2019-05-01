@@ -65,7 +65,8 @@ const store = new Vuex.Store({
     signType: (window.localStorage.getItem('signType')) || 'Metamask',
     ws: null,
     shoppingCart: [],
-    showshopping: false
+    showshopping: false,
+    firstContent: []
   },
   mutations: {
     addReward(state, data) {
@@ -160,7 +161,9 @@ const store = new Vuex.Store({
       state.showshopping = show
     }, updateCart(state, cart){
       state.shoppingCart = cart
-    }
+    }, setFirstContent(state, intels){
+          state.firstContent = intels
+      }
 
   },
   actions: {
@@ -176,6 +179,9 @@ const store = new Vuex.Store({
     editTransaction(context, params) {
       //console.log(params);
       context.commit('editTransaction', params);
+    },
+    setFirstContent(context, params) {
+      context.commit('setFirstContent', params);
     },
     transactionComplete(context, txHash) {
       context.commit('deleteTransaction', txHash);
