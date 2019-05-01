@@ -10,7 +10,13 @@
         name: 'VFab',
         mounted: function(){
 
-            let cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
+            let cart = null;
+
+            try{
+                cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
+            } catch (e){
+                //no cart var change
+            }
 
             if (cart){
                 this.$store.dispatch('resetShoppingCart')
