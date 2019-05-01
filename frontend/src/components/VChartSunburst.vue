@@ -43,7 +43,7 @@
           var roundedHeightAspect = Math.round(targetWidth / aspect);
           svg.attr("width", Math.min(targetWidth, width));
           svg.attr("height", Math.min(roundedHeightAspect, height));
-        }        
+        }
 
       },
       sunschart(router, notify) {
