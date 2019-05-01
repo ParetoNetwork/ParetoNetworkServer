@@ -43,10 +43,16 @@
           var roundedHeightAspect = Math.round(targetWidth / aspect);
           svg.attr("width", Math.min(targetWidth, width));
           svg.attr("height", Math.min(roundedHeightAspect, height));
-        }
+        }        
+
       },
       sunschart(router, notify) {
-        d3.selectAll("#d3-sunsburst svg > *").remove();
+        d3.selectAll("#d3-sunsburst svg > *")
+                .transition()
+                .duration(1000)
+                .ease(d3.easeLinear)
+                .style("opacity", 0);
+
         const data = this.nodeData;
 
         var width = this.width,
@@ -86,7 +92,15 @@
           .attr("width", width)
           .attr("height", height)
           .style("font", "10px sans-serif")
-          .call(this.responsivefy);
+          .call(this.responsivefy)
+          .style("opacity", 0);
+
+
+        svg.transition()
+          .duration(1000)
+          .ease(d3.easeLinear)
+          .style("opacity", 1);
+
 
         const g = svg.append("g")
           .attr("transform", `translate(${width / 2},${width / 2})`);
