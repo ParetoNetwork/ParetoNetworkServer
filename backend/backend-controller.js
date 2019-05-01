@@ -988,6 +988,18 @@ controller.retrieveProfileWithRedis = function (address, callback) {
 
 };
 
+controller.getChartUserInformation = async function (req, callback){
+    let address = req.query.user || req.user;
+    const dateWeekAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+
+    let transactionsRewards = await ParetoTransaction.find({event: "reward", address, dateCreated: {$gte: dateWeekAgo}});
+    let transactionsCreate = await ParetoTransaction.find({event: "create", address, dateCreated: {$gte: dateWeekAgo}});
+    let transactionsDistribute = await ParetoTransaction.find({event: "deposit", address, dateCreated: {$gte: dateWeekAgo}});
+
+    return callback(null, {userInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
+};
+
+
 
 /**
  * Get ranking from Redis.
