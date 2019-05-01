@@ -192,15 +192,22 @@ module.exports = function (
     };
 
     intelController.getAllAvailableContent = async function (req, callback) {
+
         var limit = parseInt(req.query.limit || 100);
         var page = parseInt(req.query.page || 0);
-        await  intelController.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
+        intelController.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
+
             if (error) return callback(error);
             try {
                 let newQuery = await intelController.validateQuery(req.query);
                 queryFind.$and = queryFind.$and.concat(newQuery);
-                const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit).populate([{path: 'assets.asset'}, {path: 'createdBy'}]).exec();
+
+                const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit)
+                    .populate([{ path: 'assets.asset', select:'symbol name -_id'},
+                        {path: 'createdBy' , select: 'address alias aliasSlug biography profilePic -_id'},
+                        {path: 'rewardsTransactions', select: 'amount sender', populate:{ path: 'profile', select: 'address alias aliasSlug -_id'} }]).exec();
                 let newResults = [];
+
                 allResults.forEach(function (entry) {
                     /*
 
@@ -233,6 +240,13 @@ module.exports = function (
                             _v: entry._v,
                             distributed: entry.distributed,
                             assets: entry.assets,
+                            rewardsTransactions: entry.rewardsTransactions.map(it=> {
+                                return {amount: it.amount,
+                                    address: it.sender,
+                                    alias: it.profile? it.profile.alias: '',
+                                    aliasSlug: it.profile? it.profile.aliasSlug: '',
+                                }
+                            }),
                             createdBy: {
                                 address: entry.createdBy.address,
                                 alias: entry.createdBy.alias,
