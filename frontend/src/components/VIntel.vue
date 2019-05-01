@@ -1,34 +1,38 @@
 <template>
-  <div class="main wrapp pareto-blue-dark">
-    <div class="container-fluid position-relative px-lg-5">
-      <div class="blocking-content" v-if="!loggedUser" v-on:click="showModalSplash()">
-      </div>
-      <notifications group="auth" position="bottom right"/>
-      <div class="row m-0 pt-4 pt-lg-2" style="width: 100%;">
-        <div class="col-md-3 col-lg-2 order-2 order-md-1 order-xl-1 row m-0 p-xl-0">
-          <div class="col-12 my-3 my-md-0">
-            <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
-            <VProfile v-else :addressProfile="user.address" :profileObject="user" :can-edit="true"
-                      :onboardingPicture="onboarding"></VProfile>
-          </div>
-          <div class="col-12 px-0">
-            <VEventFeed v-if="primalLoad" :user="user" :updateHash="updateHash"
-                        :defaultTransactions="information.transactions" :block="block"></VEventFeed>
-            <VShimmerMyPost v-else></VShimmerMyPost>
-          </div>
+    <div class="main wrapp pareto-blue-dark">
+        <div class="container-fluid position-relative px-lg-5">
+            <div class="blocking-content" v-if="!loggedUser" v-on:click="showModalSplash()">
+            </div>
+            <notifications group="auth" position="bottom right"/>
+            <div class="row m-0 pt-5 pt-lg-2" style="width: 100%;">
+                <div class="col-md-3 col-lg-2 order-2 order-md-1 order-xl-1 row m-0 p-xl-0">
+                    <div class="col-12 my-3 my-md-0">
+                        <VShimmerUserProfile v-if="!user.address"></VShimmerUserProfile>
+                        <VProfile v-else :addressProfile="user.address" :profileObject="user" :can-edit="true"
+                                  :onboardingPicture="onboarding"></VProfile>
+                    </div>
+                    <div class="col-12 px-0">
+                        <VEventFeed v-if="primalLoad" :user="user" :updateHash="updateHash"
+                                    :defaultTransactions="information.transactions" :block="block"></VEventFeed>
+                        <VShimmerMyPost v-else></VShimmerMyPost>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 px-2 order-1 order-md-2 order-xl-3">
+                    <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
+                                :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
+                    <VShimmerFeed v-else></VShimmerFeed>
+                </div>
+                <div class="col-md-3 col-lg-4 order-3 px-0 pb-5" id="chart-row">
+                    <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData" class="mb-4"></VHandlerSunsburstChart>
+                    <VStackedToGroupedBars></VStackedToGroupedBars>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6 col-lg-6 px-2 order-1 order-md-2 order-xl-3">
-          <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
-                      :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
-          <VShimmerFeed v-else></VShimmerFeed>
-        </div>
-      </div>
+        <ModalSignIn v-if="showModalSign"></ModalSignIn>
+        <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
+        <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
+        <ModalSplashOnboarding v-if="showModalOnboarding && !loggedUser"></ModalSplashOnboarding>
     </div>
-    <ModalSignIn v-if="showModalSign"></ModalSignIn>
-    <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
-    <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
-    <ModalSplashOnboarding v-if="showModalOnboarding && !loggedUser"></ModalSplashOnboarding>
-  </div>
 </template>
 
 <script>
@@ -57,15 +61,20 @@
   import ModalLedgerNano from './Modals/VModalLedgerNano';
   import ModalSplashOnboarding from './Modals/VModalSplashOnboarding';
 
-  import {information} from '../utils/onboardingInfo';
+  import {information, sunsburstData} from '../utils/onboardingInfo';
+
+  import VStackedToGroupedBars from './VStackedToGroupedBars';
 
   import VFab from './VFab';
+  import VHandlerSunsburstChart from "./VHandlerSunsburstChart";
 
 
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
+      VHandlerSunsburstChart,
+      VStackedToGroupedBars,
       ICountUp,
       VFab,
       VProfile,
@@ -85,6 +94,7 @@
         block: 0,
         etherscanUrl: window.localStorage.getItem('etherscan'),
         information: '',
+        sunsburstData: '',
         loading: true,
         loggedUser: false,
         paretoAddress: window.localStorage.getItem('paretoAddress'),
@@ -113,41 +123,22 @@
         'showModalOnboarding'])
     },
     mounted: function () {
+      this.sunsburstData = sunsburstData;
       AuthService.auth(() => {
         this.main();
         this.loggedUser = true;
       }, () => {
+        // The user is not logged, so component loads the predefined information for the onboarding
         this.information = information;
         this.loggedUser = false;
         this.primalLoad = true;
-
         this.user = information.user;
-        //this.onboarding = require('../assets/images/user_placeholder.png');
       });
     },
     methods: {
       ...mapMutations(['intelEnter', 'iniWs']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
-      },
-      loadAddress: function () {
-        if (!this.user.address) {
-          return dashboardService.getAddress(
-                  res => {
-                    this.user.address = res;
-                  },
-                  error => {
-                    let errorText = error.message ? error.message : error;
-                    this.$notify({
-                      group: 'notification',
-                      type: 'error',
-                      duration: 10000,
-                      title: 'Login',
-                      text: errorText
-                    });
-                  }
-          );
-        }
       },
       numberToScientificNotation(number) {
         return (number + '').length > 12 ? number.toExponential(5) : number;
@@ -196,13 +187,13 @@
       },
       loadProfile: function () {
         return profileService.getProfile(
-                res => {
-                  this.user = res;
-                  this.block = res.block;
-                },
-                error => {
-                  console.log('Could not retrieve profile');
-                }
+          res => {
+            this.user = res;
+            this.block = res.block;
+          },
+          error => {
+            console.log('Could not retrieve profile');
+          }
         );
       },
       showModal() {
@@ -229,16 +220,16 @@
         if (!this.madeLogin) {
           this.intelEnter();
           AuthService.postSign(
-                  (res) => {
-                    this.primalLoad = true;
-                    this.socketConnection();
-                    this.requestCall();
-                  },
-                  () => {
-                    this.primalLoad = true;
-                    this.socketConnection();
-                    this.requestCall();
-                  }
+            (res) => {
+              this.primalLoad = true;
+              this.socketConnection();
+              this.requestCall();
+            },
+            () => {
+              this.primalLoad = true;
+              this.socketConnection();
+              this.requestCall();
+            }
           );
         } else {
           this.primalLoad = true;
@@ -251,12 +242,12 @@
 </script>
 
 <style scoped lang="scss">
-  .blocking-content {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 99
-  }
+    .blocking-content {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 99
+    }
 </style>

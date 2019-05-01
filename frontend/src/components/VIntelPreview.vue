@@ -128,7 +128,6 @@
         return new Date(date);
       },
       convertToHideText: function (text) {
-        //console.log(text);
         return convertToHideText(text);
       },
       intelRoute: function (intel) {

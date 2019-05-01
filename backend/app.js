@@ -575,7 +575,6 @@ app.post('/v1/content', function (req, res) {
 
 }); //end content post
 
-
 app.get('/v1/transaction', function (req, res) {
   controller.getTransaction(req, function (err, obj) {
     if (err) {
@@ -584,7 +583,6 @@ app.get('/v1/transaction', function (req, res) {
       res.status(200).json(ErrorHandler.getSuccess(obj));
     }
   });
-
 }); //end content post
 
 
@@ -654,14 +652,35 @@ app.get('/v1/content/:content', function (req, res) {
 });
 
 
-app.get('/v1/ranking', function (req, res) {
 
+app.get('/v1/ranking', function (req, res) {
   if (req.query.admin === undefined) { //endpoint protection from DDOS
     res.boom.unauthorized();
   } else {
     //controller.seedLatestEvents(null, res);
   }
+});
 
+//Get the sunsburst chart information
+app.get('/v1/chart-info', function (req, res) {
+  controller.chartInfo(req, function (err, results) {
+    if(err){
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(results));
+    }
+  });
+});
+
+//Get the stackedGrouped chart information
+  app.get('/v1/chart-user-info', function (req, res) {
+  controller.getChartUserInformation(req, function (err, results) {
+    if(err){
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(results));
+    }
+  });
 });
 
 

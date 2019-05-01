@@ -93,7 +93,6 @@
         });
       }, () => {}, true);
       ProductService.showShopping(res => {
-            console.log(res)
           this.$store.dispatch('handleshowshopping', (res.data.showshoppingcart === "true"))
       });
     },

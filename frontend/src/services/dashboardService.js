@@ -55,7 +55,7 @@ export default class dashboardService {
   }
 
   static getAllContent(params, onSuccess, onError) {
-    const {limit, page} = params || {limit: 10, page: 0};
+    const {limit, page} = params || {limit: 20, page: 0};
     let query_params = window.location.search.split('?');
     let total_query = "";
 
@@ -71,6 +71,7 @@ export default class dashboardService {
         return onError(errorService.sendErrorMessage('f27', res.data.message));
       }
     }).catch(error => {
+        console.log(error);
       return onError(errorService.sendErrorMessage('f27', error));
     });
   }

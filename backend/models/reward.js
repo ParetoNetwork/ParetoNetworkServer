@@ -23,6 +23,13 @@ rewardSchema.virtual('intel', {
     foreignField: 'id', // is equal to `foreignField`
     justOne: true
 });
+
+rewardSchema.virtual('profile', {
+    ref: 'profile', // The model to use
+    localField: 'sender', // Find post where `localField`
+    foreignField: 'address', // is equal to `foreignField`
+    justOne: true
+});
 const ParetoReward = mongoose.model('reward', rewardSchema);
 
 module.exports = ParetoReward;
