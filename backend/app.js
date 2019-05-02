@@ -843,8 +843,11 @@ app.initializeWebSocket = function (server) {
   const http = require('http');
   const wss = new WebSocket.Server({
     verifyClient: function (info, cb) {
-
-      var token = info.req.headers.cookie.split('authorization=')[1];
+     const data = info.req.headers.cookie.split('; ').filter(it=>{return it.indexOf("authorization=") >=0});
+     let token = null;
+     if(data && data.length && data[0].length >= 14){
+         token = data[0].slice(14,data[0].length);
+     }
       if (!token)
         cb(false, 401, 'Unauthorized');
       else {
