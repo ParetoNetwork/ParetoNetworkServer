@@ -205,7 +205,7 @@ module.exports = function (
                 const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit)
                     .populate([{ path: 'assets.asset', select:'symbol name -_id'},
                         {path: 'createdBy' , select: 'address alias aliasSlug biography profilePic -_id'},
-                        {path: 'rewardsTransactions', select: 'amount sender', populate:{ path: 'profile', select: 'address alias aliasSlug -_id'} }]).exec();
+                        {path: 'rewardsTransactions', select: 'amount'}]).exec();
                 let newResults = [];
 
                 allResults.forEach(function (entry) {
@@ -241,10 +241,7 @@ module.exports = function (
                             distributed: entry.distributed,
                             assets: entry.assets,
                             rewardsTransactions: entry.rewardsTransactions.map(it=> {
-                                return {amount: it.amount,
-                                    address: it.sender,
-                                    alias: it.profile? it.profile.alias: '',
-                                    aliasSlug: it.profile? it.profile.aliasSlug: '',
+                                return {amount: it.amount
                                 }
                             }),
                             createdBy: {
