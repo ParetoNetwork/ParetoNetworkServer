@@ -19,7 +19,7 @@
   export default {
     name: 'VStackedToGroupedBars',
     props: [
-      "nodeData"
+      "stackedBarData"
     ],
     data() {
       return {
@@ -49,51 +49,10 @@
     },
     mounted() {
       this.setTimeTransition();
-
       profileService.getChartUserInfo((data) => {
-        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        for (let i = 0; i < this.m; i++) {
-          let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
-          ds.setHours(0, 0, 0, 0);
-          this.weekDays.push(days[ds.getDay()]);
-          this.dates[i] = {
-            date: ds,
-            info: [0, 0, 0]
-          };
-        }
-
-        let datesArray = [];
-
-        for (let i = 0; i < this.n; i++) {
-          datesArray[i] = [];
-          for (let j = 0; j < this.m; j++) {
-            datesArray[i][j] = 0;
-          }
-        }
-
-        data.userInformation.forEach(information => {
-          this.dates.forEach((date, dateIndex) => {
-            const infoDate = new Date(information.dateCreated);
-            infoDate.setHours(0, 0, 0, 0);
-
-            if (infoDate.getTime() === date.date.getTime()) {
-              switch (information.event) {
-                case 'reward':
-                  datesArray[0][dateIndex] += information.amount;
-                  return;
-                case 'create':
-                  datesArray[1][dateIndex] += information.amount;
-                  return;
-                case 'deposit':
-                  datesArray[2][dateIndex] += information.amount;
-                  return;
-              }
-            }
-          })
-        });
-
-        this.weekDays[this.weekDays.length - 1] = "Today";
-        this.stackedToGroupedChart(datesArray, this.pickedChart);
+          this.drawChart(data);
+      }, (e) =>{
+          this.drawChart(this.stackedBarData);
       });
     },
     methods: {
@@ -118,6 +77,51 @@
           this.pickedChart = "stacked";
         }
       },
+       drawChart(data){
+           var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+           for (let i = 0; i < this.m; i++) {
+               let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
+               ds.setHours(0, 0, 0, 0);
+               this.weekDays.push(days[ds.getDay()]);
+               this.dates[i] = {
+                   date: ds,
+                   info: [0, 0, 0]
+               };
+           }
+
+           let datesArray = [];
+
+           for (let i = 0; i < this.n; i++) {
+               datesArray[i] = [];
+               for (let j = 0; j < this.m; j++) {
+                   datesArray[i][j] = 0;
+               }
+           }
+
+           data.userInformation.forEach(information => {
+               this.dates.forEach((date, dateIndex) => {
+                   const infoDate = new Date(information.dateCreated);
+                   infoDate.setHours(0, 0, 0, 0);
+
+                   if (infoDate.getTime() === date.date.getTime()) {
+                       switch (information.event) {
+                           case 'reward':
+                               datesArray[0][dateIndex] += information.amount;
+                               return;
+                           case 'create':
+                               datesArray[1][dateIndex] += information.amount;
+                               return;
+                           case 'deposit':
+                               datesArray[2][dateIndex] += information.amount;
+                               return;
+                       }
+                   }
+               })
+           });
+
+           this.weekDays[this.weekDays.length - 1] = "Today";
+           this.stackedToGroupedChart(datesArray, this.pickedChart);
+       } ,
       responsivefy(svg) {
         var container = d3.select(svg.node().parentNode),
           width = Math.min(parseInt(svg.style("width")), this.width),

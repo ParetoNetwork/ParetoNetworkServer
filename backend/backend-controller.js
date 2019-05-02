@@ -545,145 +545,6 @@ controller.watchTransaction = function (data, callback) {
     intelController.watchTransaction(data, callback);
 }
 
-controller.chartInformation = async function (req, callback) {
-    let address = req.query.user || req.user;
-    try {
-        //Gets the first 10 intel from the user with the most reward given
-        let intelListQuery = ParetoContent.find({address: address}).sort({totalReward: -1}).limit(10);
-
-        //Callback for intel list query
-        intelListQuery.exec(async function (err, intelList) {
-            intelList = intelList.map(async (intel) => {
-
-                //Finds the 10 highest the rewards for a given intel
-                let rewardList = await ParetoReward.find({intelId: intel.id}).sort({amount: -1}).limit(10).exec();
-
-                //Iterates all the rewards and find the reward profile
-                const profileArray = await rewardList.map(async (reward) => {
-                    let profile = await ParetoProfile.findOne({address: reward.sender}).exec() || {};
-
-                    if(!profile.alias){
-                        profile.alias = '';
-                        profile.aliasSlug = '';
-                    }
-
-                    if(!profile.address){
-                        profile.address = 'No Address';
-                    }
-
-                    return {profile: { alias: profile.alias, aliasSlug: profile.aliasSlug, address: profile.address}, reward: reward.amount};
-                });
-
-                const profileList = await Promise.all(profileArray);
-                return {
-                    title: intel.title,
-                    size: intel.totalReward,
-                    rewardList: profileList
-                }
-            });
-
-            Promise.all(intelList).then(results => {
-                callback(null, results);
-            });
-        });
-    } catch (e) {
-        return callback(e);
-    }
-};
-
-controller.chartInfo = async function(req, callback){
-    let address = req.query.user || req.user;
-
-    try {
-        req.query.limit = 500;
-        req.query.page = 0;
-
-        // Gets all available content for the current user using the same query as the intel market view
-        controller.getAllAvailableContent(req, async function (err, result) {
-            if (err) {
-                return callback(err);
-            } else {
-                let authorsIntel = {};
-                let authorsKeys;
-                let authorsOrders;
-
-                //Parse all the results
-                result.forEach( intel => {
-                    //Creates an object of authors based on their keys
-                    if (!authorsIntel[intel.createdBy.address]) {
-                        authorsIntel[intel.createdBy.address] = {
-                            address: intel.createdBy.address || 'No Address',
-                            alias: intel.createdBy.alias || 'No Address',
-                            aliasSlug: intel.createdBy.aliasSlug || 'No Alias',
-                            intels : [],
-                            rewards: 0
-                        };
-                    }
-
-                    //Adds an intel to an author
-                    authorsIntel[intel.createdBy.address].intels.push({
-                        title: intel.title,
-                        address: intel.address,
-                        reward: intel.reward,
-                        id: intel.id
-                    });
-                    authorsIntel[intel.createdBy.address].rewards += intel.reward;
-                });
-
-                //Converts the authors object to an array
-                authorsOrders = Object.keys(authorsIntel).map( author => {
-                    return authorsIntel[author];
-                });
-
-                //Sorts the array based on reward quantity
-                authorsOrders.sort((a, b) => (a.rewards < b.rewards) ? 1 : -1);
-
-                //Filter and map the authors, choosing the first 4 authors (already sorted)
-                //and takes 5 intels from the author
-                authorsOrders = authorsOrders.reduce((array, author, index) => {
-                    if(index < 5 && author.address !== address){
-                        let intelNumber = Math.min(5, author.intels.length);
-                        let intelList = [];
-                        for (let index = 0; index < intelNumber; index++){
-                            intelList.push(author.intels[index]);
-                        }
-                        author.intels = intelList;
-
-                        array.push(author);
-                    }
-                    return array;
-                }, []);
-
-                authorsKeys = authorsOrders.map( author => author.address);
-
-                //Gets the reward list based on the addresses
-                let rewards = await ParetoReward.find({ receiver: { $in: authorsKeys}});
-
-                let rewarderList = [];
-                authorsOrders = authorsOrders.map( author => {
-                    author.intels.forEach( intel => {
-                        intel.rewards = rewards.filter( reward => {
-                            if (reward.intelId === intel.id) rewarderList.push(reward);
-                            return reward.intelId === intel.id;
-                        });
-                    });
-                    return author;
-                });
-
-                rewarderList = rewarderList.map( r => r.sender);
-
-                let profiles = await ParetoReward.find( { receiver: { $in: authorsKeys}});
-
-                //console.log(rewards);
-                return callback(null, authorsOrders);
-            }
-        });
-
-    } catch (e) {
-        console.log(e);
-    }
-};
-
 controller.getChartUserInformation = async function (req, callback){
     let address = req.query.user || req.user;
     const dateWeekAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
@@ -695,7 +556,9 @@ controller.getChartUserInformation = async function (req, callback){
     return callback(null, {userInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
 };
 
-
+controller.getRewardFromDesiredScore  =  function (address,  desiredScore, tokens, callback){
+    intelController.getRewardFromDesiredScore(address,  desiredScore, tokens, callback);
+}
 /**
  * Worker Services
  */
@@ -1353,89 +1216,11 @@ controller.getContributorsByIntel = async function (Id, callback) {
 
 }
 
-controller.getRewardFromDesiredScore = function (address,  desiredScore, tokens, callback) {
-    web3.eth.getBlock('latest')
-        .then(function (res) {
-            const blockHeight = res.number;
-
-            const promises=[ParetoAddress.find({address: address}),
-                ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}, 'sender': address}),
-                ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}}).sort({'reward': 1})
-            ];
-            Promise.all(promises).then( (allData) => {
-                let userData = allData[0][0];
-                const values = allData[1];
-                const desiredRewards = allData[2];
-                let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
-                    data["" + it.id] = it;
-                    return data;
-                }, {});
-                let lessRewards = {};
-                let distincIntel = {};
-                for (let j = 0; j < values.length; j = j + 1) {
-                    try {
-                        const block = parseFloat(values[j].block);
-                        const amount = parseFloat(values[j].amount);
-                        const intelIndex = values[j].intelId;
-                        distincIntel[intelIndex] = 1;
-                        if (!lessRewards [intelIndex]) {
-                            lessRewards [intelIndex] = {block, amount};
-                        }
-                        if (block < lessRewards [intelIndex].block) {
-                            lessRewards [intelIndex] = {block, amount};
-                        }
-                    } catch (e) {
-                        console.log(e)
-                    }
-                }
-                try {
-                    let summrewards = 0;
-
-                    let M = Object.keys(distincIntel).length;
-                    if ( userData.bonus > 0 && userData.tokens > 0) {
-                        let intels = Object.keys(lessRewards);
-                        summrewards = intels.reduce(function (reward, it) {
-                            return reward + Math.min(lessRewards[it].amount / intelDesiredRewards[it].reward, 2);
-                        }, 0);
-                    }
-                    let H = Math.log(desiredScore) / Math.log((tokens + userData.tokens) * userData.bonus) - 1;
-                    let X =  Math.ceil ((2 * H * M - summrewards) / (1 - 2 * H));
-                    let response = [];
-                    let i=0;
-                    let j=0;
-                    while(i<X && j < desiredRewards.length-1){
-                        if(desiredRewards[j].address != address){
-                            if(desiredRewards[j].reward <= 2*desiredRewards[j+1].reward){
-                                    i=i+2;
-                                    response.push({
-                                        intel: desiredRewards[j].id,
-                                        reward:2 * desiredRewards[j].reward,
-                                        title: desiredRewards[j].title,
-                                     })
-                            }else{
-                                i=i+1;
-                                response.push({
-                                    intel: desiredRewards[j].id,
-                                    reward: desiredRewards[j].reward,
-                                    title:  desiredRewards[j].title,
-                                })
-                            }
-                        }
-                        j=j+1;
-                    }
-
-                    callback(null, {rewardsNeeded: X, proposedReward: response});
-
-
-
-                } catch (e) {
-                    callback(e)
-                }
-
-
-
-            })
-        })
+controller.getAddressesWithSlug = async function (aliasArray) {
+   return await userController.getAddressesWithSlug(aliasArray);
 }
+
+
+
 
 

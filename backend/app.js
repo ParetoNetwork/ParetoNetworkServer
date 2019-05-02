@@ -661,16 +661,6 @@ app.get('/v1/ranking', function (req, res) {
   }
 });
 
-//Get the sunsburst chart information
-app.get('/v1/chart-info', function (req, res) {
-  controller.chartInfo(req, function (err, results) {
-    if(err){
-      res.status(200).json(ErrorHandler.getError(err));
-    } else {
-      res.status(200).json(ErrorHandler.getSuccess(results));
-    }
-  });
-});
 
 //Get the stackedGrouped chart information
   app.get('/v1/chart-user-info', function (req, res) {
@@ -843,8 +833,11 @@ app.initializeWebSocket = function (server) {
   const http = require('http');
   const wss = new WebSocket.Server({
     verifyClient: function (info, cb) {
-
-      var token = info.req.headers.cookie.split('authorization=')[1];
+     const data = info.req.headers.cookie.split('; ').filter(it=>{return it.indexOf("authorization=") >=0});
+     let token = null;
+     if(data && data.length && data[0].length >= 14){
+         token = data[0].slice(14,data[0].length);
+     }
       if (!token)
         cb(false, 401, 'Unauthorized');
       else {

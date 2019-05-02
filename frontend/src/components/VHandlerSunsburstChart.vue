@@ -1,5 +1,5 @@
 <template>
-  <VChartSunburst v-if="nodeData.children.length > 0" :nodeData="nodeData" :pos="pos"></VChartSunburst>
+  <VChartSunburst v-if="nodeData.children.length > 0" :nodeData="nodeData" :loggedUser="loggedUser" :pos="pos"></VChartSunburst>
 </template>
 
 <script>
@@ -12,7 +12,7 @@
       VChartSunburst
     },
     props: [
-      "user", "pos", "sunsburstData"
+      "user", "pos", "sunsburstData", "loggedUser"
     ],
     computed: {
         ...mapState(["firstContent"]),
@@ -42,6 +42,7 @@
                   name: '',
                   children: []
               };
+              let maxValue =0;
               const res = data.reduce( (it, intel, index)=>{
                   if(!it[intel.address]){
                       it[intel.address] = intel.createdBy;
@@ -54,7 +55,11 @@
                       title: intel.title,
                       reward: intel.totalReward,
                       id: intel.id,
-                      children: (intel.rewardsTransactions && intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r => ({name: r.aliasSlug || r.address.substring(0, 7) + "...", reward: r.amount})) : []
+                      children: (intel.rewardsTransactions && intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r =>
+                      {
+                          maxValue = maxValue < r.amount? r.amount: maxValue;
+                         return {name: r.amount + "", reward: r.amount}
+                      }) : []
                   });
                   it[intel.address].reward = it[intel.address].reward + intel.totalReward;
                   return it;
@@ -63,18 +68,23 @@
               function compare(a,b){
                   return b.reward - a.reward;
               }
+              const q1 = maxValue/4;
+              const q2 = 2*q1;
+              const q3 = 3*q1;
               const tnodes = Object.keys( res).length;
               this.nodeData.children =  Object.values( res).sort(compare).slice(0, Math.min(4,tnodes)).map( (it, index)=>{
                   const tnodes = it.children.length;
                   it.children = it.children.sort(compare).slice(0, Math.min(10,tnodes)).map( (it, index)=>{
                       const tnodes = it.children.length;
                       it.children = it.children.sort(compare).slice(0, Math.min(10,tnodes)).map( (it, index)=>{
-                          it.size = index+1;
+
+
+                          it.size = it.reward < q1 ? 1: (it.reward < q2 ? 2: (it.reward < q3 ? 3:4 )) ;
                           return it
                       } );
 
                      // it.size =    it.children.reduce((it,item, index)=>{ console.log(item); return it + item.size},0);
-                      it.size =   it.size?   it.size: (index +1);
+                      it.size =    it.children && it.children.length ?   it.size: 1;
                       return it
                   } );
                //   it.size =  it.children.reduce((it,item, index)=>{ return it + item.size},0);

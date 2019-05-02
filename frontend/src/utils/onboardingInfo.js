@@ -154,3 +154,7 @@ var sunsburstData = {
 };
 
 export {sunsburstData};
+
+var stackedBarData =  {"userInformation":[{"status":3,  "amount":2,"dateCreated":"2019-04-26T22:24:37.628Z","event":"reward","intel":515, "nonce":231,"block":5485158},{"status":3, "amount":1,"dateCreated":"2019-04-29T14:06:31.567Z","event":"reward","intel":518, "nonce":233,"block":5502137, },{"status":3, "amount":2,"dateCreated":"2019-04-29T22:29:00.956Z","event":"reward","intel":520, "nonce":235,"block":5504394, },{"status":3, "amount":1,"dateCreated":"2019-04-26T22:26:57.793Z","event":"create", "nonce":232,"block":5485165, },{"status":3,"amount":1,"dateCreated":"2019-04-29T22:27:44.162Z","event":"create","intel":521,"nonce":234,"block":5504388}]};
+
+export {stackedBarData};
