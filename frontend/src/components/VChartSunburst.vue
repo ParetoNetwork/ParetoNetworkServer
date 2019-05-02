@@ -12,7 +12,7 @@
   export default {
     name: 'VChartSunburst',
     props: [
-      "nodeData"
+      "nodeData", "loggedUser"
     ],
     data() {
       return {
@@ -24,8 +24,27 @@
     },
     mounted() {
       this.sunschart(this.$router, this.$notify);
+
     },
     methods: {
+        iniAnimation(){
+            if(!this.loggedUser){
+                setTimeout( ()=>{
+                    try{
+                        d3.select('#d3-sunsburst svg g path').dispatch('click');
+                        setTimeout( ()=>{
+                            try{
+                                d3.select('#d3-sunsburst svg g circle').dispatch('click');
+                                if(!this.loggedUser){
+                                    this.iniAnimation();
+                                }
+                            }catch (e) { }
+                        },2000)
+                    }catch (e) { }
+                },10000)
+            }
+
+        },
       responsivefy(svg) {
         var container = d3.select(svg.node().parentNode),
           width = parseInt(svg.style("width")),
@@ -47,11 +66,6 @@
 
       },
       sunschart(router, notify) {
-        d3.selectAll("#d3-sunsburst svg > *")
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .style("opacity", 0);
 
         const data = this.nodeData;
 
@@ -220,13 +234,27 @@
             }
           }
         }
+
+
+      if(!this.loggedUser){
+          this.iniAnimation();
+       }
       }
     },
     watch: {
       row(val) {
       },
       nodeData() {
-        this.sunschart(this.$router, this.$notify);
+          d3.selectAll("#d3-sunsburst svg > *")
+              .transition()
+              .duration(400)
+              .ease(d3.easeLinear)
+              .style("opacity", 0)
+              .on("end",  () => {
+                  d3.selectAll("#d3-sunsburst svg > *").remove();
+                  this.sunschart(this.$router, this.$notify);
+              })
+
       }
     }
   };

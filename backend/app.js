@@ -661,16 +661,6 @@ app.get('/v1/ranking', function (req, res) {
   }
 });
 
-//Get the sunsburst chart information
-app.get('/v1/chart-info', function (req, res) {
-  controller.chartInfo(req, function (err, results) {
-    if(err){
-      res.status(200).json(ErrorHandler.getError(err));
-    } else {
-      res.status(200).json(ErrorHandler.getSuccess(results));
-    }
-  });
-});
 
 //Get the stackedGrouped chart information
   app.get('/v1/chart-user-info', function (req, res) {
