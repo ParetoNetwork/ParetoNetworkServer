@@ -15,12 +15,17 @@
 
 <script>
   import profileService from '../services/profileService';
+  import ContentService from '../services/ContentService';
+  import {mapState} from 'vuex';
 
   export default {
     name: 'VStackedToGroupedBars',
     props: [
       "stackedBarData"
     ],
+    computed: {
+      ...mapState(['address', 'signType'])
+    },
     data() {
       return {
         height: 150,
@@ -34,26 +39,29 @@
         },
         y: function () {
         },
-        n: 3,
+        n: 4,
         m: 7,
         intervalFunction: {},
         chartTransitionPaused: false,
-        intervalTransitionTime: 20000,
+        intervalTransitionTime: 3000,
         margin: {top: 30, right: 0, bottom: 20, left: 40},
         userInformation: {},
         dates: [],
         weekDays: [],
         responsifyWidth: 0,
-        responsifyHeight: 0
+        responsifyHeight: 0,
+        currentBalance: 78000
       };
     },
     mounted() {
       this.setTimeTransition();
       profileService.getChartUserInfo((data) => {
-          this.drawChart(data);
-      }, (e) =>{
-          this.drawChart(this.stackedBarData);
+        this.drawChart(data);
+      }, (e) => {
+        this.drawChart(this.stackedBarData);
       });
+
+      ContentService.currentParetoBalance(this.address, {signType: this.signType});
     },
     methods: {
       resumeTransition() {
@@ -77,51 +85,60 @@
           this.pickedChart = "stacked";
         }
       },
-       drawChart(data){
-           var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-           for (let i = 0; i < this.m; i++) {
-               let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
-               ds.setHours(0, 0, 0, 0);
-               this.weekDays.push(days[ds.getDay()]);
-               this.dates[i] = {
-                   date: ds,
-                   info: [0, 0, 0]
-               };
-           }
+      drawChart(data) {
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        for (let i = 0; i < this.m; i++) {
+          let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
+          ds.setHours(0, 0, 0, 0);
+          this.weekDays.push(days[ds.getDay()]);
+          this.dates[i] = {
+            date: ds
+          };
+        }
 
-           let datesArray = [];
+        let datesArray = [];
 
-           for (let i = 0; i < this.n; i++) {
-               datesArray[i] = [];
-               for (let j = 0; j < this.m; j++) {
-                   datesArray[i][j] = 0;
-               }
-           }
+        for (let i = 0; i < this.n; i++) {
+          datesArray[i] = [];
+          for (let j = 0; j < this.m; j++) {
+            datesArray[i][j] = 0;
+          }
+        }
 
-           data.userInformation.forEach(information => {
-               this.dates.forEach((date, dateIndex) => {
-                   const infoDate = new Date(information.dateCreated);
-                   infoDate.setHours(0, 0, 0, 0);
+        data.userInformation.forEach(information => {
+          this.dates.forEach((date, dateIndex) => {
+            const infoDate = new Date(information.dateCreated);
+            infoDate.setHours(0, 0, 0, 0);
 
-                   if (infoDate.getTime() === date.date.getTime()) {
-                       switch (information.event) {
-                           case 'reward':
-                               datesArray[0][dateIndex] += information.amount;
-                               return;
-                           case 'create':
-                               datesArray[1][dateIndex] += information.amount;
-                               return;
-                           case 'deposit':
-                               datesArray[2][dateIndex] += information.amount;
-                               return;
-                       }
-                   }
-               })
-           });
+            if (infoDate.getTime() === date.date.getTime()) {
+              switch (information.event) {
+                case 'reward':
+                  datesArray[0][dateIndex] += information.amount;
+                  return;
+                case 'create':
+                  datesArray[1][dateIndex] += information.amount;
+                  return;
+                case 'deposit':
+                  datesArray[2][dateIndex] += information.amount;
+                  return;
+              }
+            }
+          })
+        });
 
-           this.weekDays[this.weekDays.length - 1] = "Today";
-           this.stackedToGroupedChart(datesArray, this.pickedChart);
-       } ,
+        let balance = this.currentBalance;
+
+        if(this.n > 3){
+          for(let i = datesArray[0].length - 1; i >= 0; i--){
+            datesArray[3][i] = balance += datesArray[0][i] + datesArray[1][i] - datesArray[2][i];
+          }
+        }
+        console.log(datesArray);
+
+        this.n -= 1;
+        this.weekDays[this.weekDays.length - 1] = "Today";
+        this.stackedToGroupedChart(datesArray, this.pickedChart);
+      },
       responsivefy(svg) {
         var container = d3.select(svg.node().parentNode),
           width = Math.min(parseInt(svg.style("width")), this.width),
@@ -141,7 +158,7 @@
         }
       },
       stackedToGroupedChart(data, chartType) {
-        var LABELS = ["Reward", "Create", "Deposit"];
+        var LABELS = ["Reward", "Create", "Deposit", "Balance"];
         const height = this.height;
         const width = this.width;
 
@@ -151,7 +168,7 @@
         this.y01z = d3.stack()
           .keys(d3.range(this.n))
           (d3.transpose(yz))
-          .map((data, i) => data.map(([y0, y1]) => [y0, y1, i]));
+          .map((data, i) => data.map(([y0, y1], j) => [y0, y1, i, j]));
 
         this.y1Max = d3.max(this.y01z, y => d3.max(y, d => d[1]));
 
@@ -203,21 +220,28 @@
           .attr("width", this.x.bandwidth())
           .attr("height", 0);
 
+        console.log(this.y01z);
+
         this.rect.on("mouseover", function (d) {
+          console.log(d[1] - d[0]);
           let coords = {
             x: this.getAttribute("x"),
             y: this.getAttribute("y"),
           };
 
           const newSvg = $("#d3-stacked-grouped-bars svg")[0];
+          let svgDim = {
+            width: parseInt(newSvg.attributes.width.value),
+            height: parseInt(newSvg.attributes.height.value),
+          };
 
-          divTooltip.style("left", (coords.x * newSvg.clientWidth / width - 30) + "px")
-            .style("top", (coords.y * newSvg.clientHeight / height - 30) + "px")
+          divTooltip.style("left", (coords.x * svgDim.width / width - 30) + "px")
+            .style("top", (coords.y * svgDim.height / height - 30) + "px")
             .style("display", "inline-block")
-            .html("Pareto: " + d[1])
+            .html("Pareto: " + (d[1] - d[0]) + "\n Total: ")
             .style("opacity", .9);
         }).on("mouseout", function (d) {
-          divTooltip.style("opacity", 0)
+          divTooltip.style("opacity", 0);
         });
 
         svg.append("g")
