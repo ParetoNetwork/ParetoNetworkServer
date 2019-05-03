@@ -43,32 +43,65 @@
         m: 7,
         intervalFunction: {},
         chartTransitionPaused: false,
-        intervalTransitionTime: 3000,
+        intervalTransitionTime: 20000,
         margin: {top: 30, right: 0, bottom: 20, left: 40},
         userInformation: {},
         dates: [],
         weekDays: [],
         responsifyWidth: 0,
         responsifyHeight: 0,
-        currentBalance: 78000
+        currentBalance: 78000,
+        chartInfoData: {}
       };
     },
     mounted() {
       this.setTimeTransition();
-      profileService.getChartUserInfo((data) => {
-        this.drawChart(data);
-      }, (e) => {
-        this.drawChart(this.stackedBarData);
-      });
+      ;
+      Promise.all([
+        this.getChartInformation(),
+        this.getCurrentIntelContractBalance(),
+        this.getBalanceInformation()])
+        .then((data) => {
+          this.currentBalance = parseInt(data[1]);
 
-      ContentService.currentParetoBalance(this.address, {signType: this.signType});
+          this.drawChart(this.chartInfoData, data[2]);
+        });
     },
     methods: {
+      getBalanceInformation(){
+        return profileService.getChartBalanceInfo(res=> {
+          return res;
+        });
+      },
       resumeTransition() {
         if (this.chartTransitionPaused) {
           this.chartTransitionPaused = false;
           this.setTimeTransition();
         }
+      },
+      getChartInformation(){
+        return profileService.getChartUserInfo((data) => {
+          this.chartInfoData = data;
+          return data;
+        }, (e) => {
+          return this.stackedBarData;
+        });
+      },
+      getCurrentIntelContractBalance(){
+        return ContentService.currentIntelContractBalance(this.address, {signType: this.signType},
+          (balance) => {
+            return balance;
+          }, error => {
+            let errorText = error.message ? error.message : error;
+
+            this.$notify({
+              group: 'notification',
+              type: 'error',
+              duration: 10000,
+              title: 'Login',
+              text: errorText
+            });
+          });
       },
       pauseTransition() {
         if (!this.chartTransitionPaused) {
@@ -85,19 +118,19 @@
           this.pickedChart = "stacked";
         }
       },
-      drawChart(data) {
+      drawChart(data, balanceDates) {
         var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         for (let i = 0; i < this.m; i++) {
           let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
           ds.setHours(0, 0, 0, 0);
           this.weekDays.push(days[ds.getDay()]);
           this.dates[i] = {
-            date: ds
+            date: ds,
+            info: [0, 0, 0]
           };
         }
 
         let datesArray = [];
-
         for (let i = 0; i < this.n; i++) {
           datesArray[i] = [];
           for (let j = 0; j < this.m; j++) {
@@ -114,28 +147,31 @@
               switch (information.event) {
                 case 'reward':
                   datesArray[0][dateIndex] += information.amount;
-                  return;
+                  break;
                 case 'create':
                   datesArray[1][dateIndex] += information.amount;
-                  return;
-                case 'deposit':
+                  break;
+                case 'deposited':
                   datesArray[2][dateIndex] += information.amount;
-                  return;
+                  break;
               }
             }
-          })
+          });
         });
 
-        let balance = this.currentBalance;
+        this.dates.forEach((date, dateIndex) => {
+          let balance = balanceDates.find( (balanceDate) => {
+            const dateObject = new Date(balanceDate.date);
+            return dateObject.getTime() === date.date.getTime();
+          });
 
-        if(this.n > 3){
-          for(let i = datesArray[0].length - 1; i >= 0; i--){
-            datesArray[3][i] = balance += datesArray[0][i] + datesArray[1][i] - datesArray[2][i];
+          if(balance){
+            datesArray[3][dateIndex] += balance.balance;
           }
-        }
+        });
+
         console.log(datesArray);
 
-        this.n -= 1;
         this.weekDays[this.weekDays.length - 1] = "Today";
         this.stackedToGroupedChart(datesArray, this.pickedChart);
       },
@@ -220,10 +256,7 @@
           .attr("width", this.x.bandwidth())
           .attr("height", 0);
 
-        console.log(this.y01z);
-
         this.rect.on("mouseover", function (d) {
-          console.log(d[1] - d[0]);
           let coords = {
             x: this.getAttribute("x"),
             y: this.getAttribute("y"),
@@ -238,7 +271,10 @@
           divTooltip.style("left", (coords.x * svgDim.width / width - 30) + "px")
             .style("top", (coords.y * svgDim.height / height - 30) + "px")
             .style("display", "inline-block")
-            .html("Pareto: " + (d[1] - d[0]) + "\n Total: ")
+            .html("Pareto: " + (
+              d[1] - d[0])
+              //+ "<br> Total Balance: " + data[3][d[3]]
+            )
             .style("opacity", .9);
         }).on("mouseout", function (d) {
           divTooltip.style("opacity", 0);
@@ -315,7 +351,6 @@
       transitionStacked() {
         this.y.domain([0, this.y1Max]);
 
-        // console.log(rect);
         this.rect.transition()
           .duration(500)
           .delay((d, i) => {
@@ -330,7 +365,6 @@
       transitionGrouped() {
         this.y.domain([0, this.yMax]);
 
-        // console.log(rect);
         this.rect.transition()
           .duration(500)
           .delay((d, i) => {

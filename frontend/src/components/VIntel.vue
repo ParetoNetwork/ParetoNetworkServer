@@ -190,7 +190,6 @@
       loadProfile: function () {
         return profileService.getProfile(
           res => {
-            console.log(res);
             this.user = res;
             this.block = res.block;
           },

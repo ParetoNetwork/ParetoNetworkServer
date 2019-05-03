@@ -792,30 +792,20 @@ export default class ContentService {
     });
   }
 
-  static async currentParetoBalance(address, signData){
+  static async currentIntelContractBalance(address, signData, onSuccess, onError){
     try {
       await this.Setup(signData);
     } catch (e) {
       return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
     }
 
-    web3.eth.getAccounts(async (err, accounts) => {
-      if (err) {
-        onError(errorService.sendErrorMessage('f34', err));
-        return;
-      }
+    let paretoContractBalance = await Intel.methods
+      .getParetoBalance(address)
+      .call();
 
-      const rewarder_address = accounts[0];
+    const balance = web3.utils.toWei(paretoContractBalance.toString(), "ether");
 
-      console.log(address, rewarder_address);
-
-      let paretoContractBalance = await ParetoTokenInstance.methods
-        .balanceOf(address)
-        .call();
-
-      const balance = web3.utils.toWei(paretoContractBalance.toString(), "ether");
-      console.log(balance);
-    });
+    return onSuccess(balance);
   }
 
   static async Setup(signData) {

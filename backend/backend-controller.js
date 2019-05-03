@@ -1,4 +1,3 @@
-
 const https = require('https');
 const request = require('request');
 const kue = require('kue');
@@ -46,8 +45,8 @@ fs.readdirSync(modelsPath).forEach(file => {
   require(modelsPath + '/' + file);
 });
 
-let intelController =null;
-let userController =null;
+let intelController = null;
+let userController = null;
 
 /**
  * Redis Initialization
@@ -79,7 +78,6 @@ var web3_events_provider = null;
 var web3_events = null;
 
 
-
 /**
  *
  * Db Initialization
@@ -106,43 +104,41 @@ mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
   web3_events = new Web3(web3_events_provider);
   controller.startW3WebSocket();
   intelController = require('./db/intel')(
-        mongoose,
-        controller,
-        web3,
-        web3_events_provider,
-        web3_events,
-        Intel_Contract_Schema,
-        ParetoAddress,
-        ParetoContent,
-        ParetoProfile,
-        ParetoPayment,
-        ParetoReward,
-        ParetoAsset,
-        ParetoTransaction,
-        ErrorHandler,
-        ETH_NETWORK,
-        PARETO_CONTRACT_ADDRESS
-
-    );
-    userController = require('./db/user')(
-        mongoose,
-        controller,
-        web3,
-        web3_events_provider,
-        web3_events,
-        Intel_Contract_Schema,
-        ParetoAddress,
-        ParetoContent,
-        ParetoProfile,
-        ParetoPayment,
-        ParetoReward,
-        ParetoAsset,
-        ParetoTransaction,
-        ErrorHandler,
-        ETH_NETWORK,
-        PARETO_CONTRACT_ADDRESS
-
-    );
+    mongoose,
+    controller,
+    web3,
+    web3_events_provider,
+    web3_events,
+    Intel_Contract_Schema,
+    ParetoAddress,
+    ParetoContent,
+    ParetoProfile,
+    ParetoPayment,
+    ParetoReward,
+    ParetoAsset,
+    ParetoTransaction,
+    ErrorHandler,
+    ETH_NETWORK,
+    PARETO_CONTRACT_ADDRESS
+  );
+  userController = require('./db/user')(
+    mongoose,
+    controller,
+    web3,
+    web3_events_provider,
+    web3_events,
+    Intel_Contract_Schema,
+    ParetoAddress,
+    ParetoContent,
+    ParetoProfile,
+    ParetoPayment,
+    ParetoReward,
+    ParetoAsset,
+    ParetoTransaction,
+    ErrorHandler,
+    ETH_NETWORK,
+    PARETO_CONTRACT_ADDRESS
+  );
   console.log("PARETO: Success connecting to Mongo ")
 }).catch(err => {
   const error = ErrorHandler.backendErrorList('b15');
@@ -152,40 +148,40 @@ mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
 
 
 controller.startW3WebSocket = function () {
-    web3_events_provider.on('connect', function () {
-        //console.log('WS web3 connected');
-        const ethereumWatcher = require('./ethereum/ethereum-watcher')(
-            controller,
-            Web3,
-            web3,
-            web3_events_provider,
-            web3_events,
-            Intel_Contract_Schema,
-            ParetoAddress,
-            ParetoContent,
-            ParetoProfile,
-            ParetoPayment,
-            ParetoReward,
-            ParetoAsset,
-            ParetoTransaction,
-            ErrorHandler,
-            ETH_NETWORK,
-            PARETO_CONTRACT_ADDRESS,
-            WEB3_WEBSOCKET_URL
-        );
-        ethereumWatcher.startwatchIntel();
-    });
+  web3_events_provider.on('connect', function () {
+    //console.log('WS web3 connected');
+    const ethereumWatcher = require('./ethereum/ethereum-watcher')(
+      controller,
+      Web3,
+      web3,
+      web3_events_provider,
+      web3_events,
+      Intel_Contract_Schema,
+      ParetoAddress,
+      ParetoContent,
+      ParetoProfile,
+      ParetoPayment,
+      ParetoReward,
+      ParetoAsset,
+      ParetoTransaction,
+      ErrorHandler,
+      ETH_NETWORK,
+      PARETO_CONTRACT_ADDRESS,
+      WEB3_WEBSOCKET_URL
+    );
+    ethereumWatcher.startwatchIntel();
+  });
 
-    web3_events_provider.on('end', e => {
-        //console.log('WS web3 closed');
-        //console.log('Attempting to reconnect...');
-        const error = ErrorHandler.backendErrorList('b17');
-        error.systemMessage = e.message ? e.message : e;
-        console.log(JSON.stringify(error));
-        web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
-        web3_events = new Web3(web3_events_provider);
-        controller.startW3WebSocket()
-    });
+  web3_events_provider.on('end', e => {
+    //console.log('WS web3 closed');
+    //console.log('Attempting to reconnect...');
+    const error = ErrorHandler.backendErrorList('b17');
+    error.systemMessage = e.message ? e.message : e;
+    console.log(JSON.stringify(error));
+    web3_events_provider = new Web3.providers.WebsocketProvider(WEB3_WEBSOCKET_URL);
+    web3_events = new Web3(web3_events_provider);
+    controller.startW3WebSocket()
+  });
 };
 
 
@@ -198,13 +194,12 @@ controller.endConnections = function () {
 }
 
 
-
 controller.getParetoCoinMarket = function (callback) {
   let url = 'https://pro-api.coinmarketcap.com/v1';
 
   request(url + '/cryptocurrency/quotes/latest?symbol=PARETO&convert=USD',
     {
-        headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY }
+      headers: {'x-cmc_pro_api_key': COIN_MARKET_API_KEY}
     },
     (error, res, body) => {
       callback(error, JSON.parse(body));
@@ -212,147 +207,156 @@ controller.getParetoCoinMarket = function (callback) {
 };
 
 
-
 /**
  * For now is a dummy purchase
  * @param address the new Created address front enfd.
  * @param callback
  */
-controller.transactionFlow= async function(address, order_id, callback){
-    const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
-    ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
-        if(payment){
-            if(payment.state > 0){
-                controller.getParetoCoinMarket((err, result)=>{
-                    const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
-                    callback(null,{amount: paretoAmount, eth: ETH_DEPOSIT});
-                })
-            }else{
-                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {address: address, state: 1}).exec().then(function (r) {
-                     controller.getParetoCoinMarket((err, result)=>{
-                         if(err){
-                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
-                           return  callback(err);
-                         }
-                         const paretoAmount = payment.amount/result.data.PARETO.quote.USD.price;
-                         const ethereumWallet = require('./ethereum/ethereum-wallet')(
-                             Web3,
-                             WEB3_WEBSOCKET_URL,
-                             web3,
-                             ParetoPayment,
-                             ETH_NETWORK);
-                         ethereumWallet.makeTransaction(address, paretoAmount, ETH_DEPOSIT,(err, result)=>{
-                             if(err){
-                                 ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r)=>{});
-                               return   callback(err);
-                             }
-                             ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 2, oracleTxHash: result.hash, paretoAmount: result.amount}).exec().then((r)=>{});
-                             callback(null, result);
-                         });
-                     })
-                }).catch(function (e) {
-                    callback(e)
-                });
-
+controller.transactionFlow = async function (address, order_id, callback) {
+  const ETH_DEPOSIT = parseFloat(process.env.ETH_DEPOSIT);
+  ParetoPayment.findOne({order_id: order_id, processed: false}).exec().then(function (payment) {
+    if (payment) {
+      if (payment.state > 0) {
+        controller.getParetoCoinMarket((err, result) => {
+          const paretoAmount = payment.amount / result.data.PARETO.quote.USD.price;
+          callback(null, {amount: paretoAmount, eth: ETH_DEPOSIT});
+        })
+      } else {
+        ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {
+          address: address,
+          state: 1
+        }).exec().then(function (r) {
+          controller.getParetoCoinMarket((err, result) => {
+            if (err) {
+              ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r) => {
+              });
+              return callback(err);
             }
+            const paretoAmount = payment.amount / result.data.PARETO.quote.USD.price;
+            const ethereumWallet = require('./ethereum/ethereum-wallet')(
+              Web3,
+              WEB3_WEBSOCKET_URL,
+              web3,
+              ParetoPayment,
+              ETH_NETWORK);
+            ethereumWallet.makeTransaction(address, paretoAmount, ETH_DEPOSIT, (err, result) => {
+              if (err) {
+                ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {state: 0}).exec().then((r) => {
+                });
+                return callback(err);
+              }
+              ParetoPayment.findOneAndUpdate({order_id: order_id, processed: false}, {
+                state: 2,
+                oracleTxHash: result.hash,
+                paretoAmount: result.amount
+              }).exec().then((r) => {
+              });
+              callback(null, result);
+            });
+          })
+        }).catch(function (e) {
+          callback(e)
+        });
 
-        }else{
-            callback(null,{amount: 0, eth: 0})
-        }
+      }
 
-    }).catch(function (e) {
-        callback(e)
-    });
+    } else {
+      callback(null, {amount: 0, eth: 0})
+    }
+
+  }).catch(function (e) {
+    callback(e)
+  });
 
 }
 
 
 controller.updateTransaction = function (body, callback) {
 
-    const data = {
-        txHash: body.txHash
-    };
-    const find = {
-        $or: [{order_id: body.order_id}, {address: body.address}],
-        processed: false
-    };
-    if (body.processed) {
-        data.processed = true;
-    }
-    ParetoPayment.findOneAndUpdate(find, data).exec().then((r) => {
-        callback(null, r);
-    }).catch(err => {
-        callback(null, err);
-    });
+  const data = {
+    txHash: body.txHash
+  };
+  const find = {
+    $or: [{order_id: body.order_id}, {address: body.address}],
+    processed: false
+  };
+  if (body.processed) {
+    data.processed = true;
+  }
+  ParetoPayment.findOneAndUpdate(find, data).exec().then((r) => {
+    callback(null, r);
+  }).catch(err => {
+    callback(null, err);
+  });
 }
 
 
-controller.getOrder = async function (order_id, callback){
-    try{
-        const order  = await ParetoPayment.findOne({order_id: order_id, processed: false}).exec();
-        if(order){
-            callback(null, order);
-        }else{
-            callback({});
-        }
-    }catch (e) {
-        callback(e);
+controller.getOrder = async function (order_id, callback) {
+  try {
+    const order = await ParetoPayment.findOne({order_id: order_id, processed: false}).exec();
+    if (order) {
+      callback(null, order);
+    } else {
+      callback({});
     }
+  } catch (e) {
+    callback(e);
+  }
 
 }
 
 controller.SendInfoWebsocket = function (data) {
-    if (controller.wss) {
-        controller.wss.clients.forEach(function each(client) {
-            try {
-                if (client.isAlive === false) return client.terminate();
-                if (client.readyState === controller.WebSocket.OPEN) {
-                    // Validate if the user is subscribed a set of information
-                    client.send(JSON.stringify(ErrorHandler.getSuccess({action: 'updateContent'})));
-                    if (client.user && client.user.user == data.address) {
-                        controller.retrieveAddress(client.user.user, function (err, result) {
-                            if (!err) {
-                                if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
-                                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                                }
-                            }
-                        });
-
-                        if (data.transaction) {
-                            client.send(JSON.stringify(ErrorHandler.getSuccess({
-                                action: 'updateHash',
-                                data: data.transaction
-                            })));
-                        } else {
-
-                            const rank = parseInt(client.info.rank) || 1;
-                            let limit = parseInt(client.info.limit) || 100;
-                            const page = parseInt(client.info.page) || 0;
-
-                            //max limit
-                            if (limit > 500) {
-                                limit = 500;
-                            }
-                            /**
-                             * Send ranking
-                             */
-                            controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
-                                if (!err) {
-                                    if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
-                                        client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
-                                    }
-                                }
-                            });
-                        }
-                    }
+  if (controller.wss) {
+    controller.wss.clients.forEach(function each(client) {
+      try {
+        if (client.isAlive === false) return client.terminate();
+        if (client.readyState === controller.WebSocket.OPEN) {
+          // Validate if the user is subscribed a set of information
+          client.send(JSON.stringify(ErrorHandler.getSuccess({action: 'updateContent'})));
+          if (client.user && client.user.user == data.address) {
+            controller.retrieveAddress(client.user.user, function (err, result) {
+              if (!err) {
+                if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
+                  client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
                 }
-            } catch (e) {
-                const error = ErrorHandler.backendErrorList('b14');
-                error.systemMessage = e.message ? e.message : e;
-                console.log(JSON.stringify(error));
+              }
+            });
+
+            if (data.transaction) {
+              client.send(JSON.stringify(ErrorHandler.getSuccess({
+                action: 'updateHash',
+                data: data.transaction
+              })));
+            } else {
+
+              const rank = parseInt(client.info.rank) || 1;
+              let limit = parseInt(client.info.limit) || 100;
+              const page = parseInt(client.info.page) || 0;
+
+              //max limit
+              if (limit > 500) {
+                limit = 500;
+              }
+              /**
+               * Send ranking
+               */
+              controller.retrieveRanksAtAddress(rank, limit, page, function (err, result) {
+                if (!err) {
+                  if (client.readyState === controller.WebSocket.OPEN && client.isAlive) {
+                    client.send(JSON.stringify(ErrorHandler.getSuccess(result)));
+                  }
+                }
+              });
             }
-        });
-    }
+          }
+        }
+      } catch (e) {
+        const error = ErrorHandler.backendErrorList('b14');
+        error.systemMessage = e.message ? e.message : e;
+        console.log(JSON.stringify(error));
+      }
+    });
+  }
 
 }
 
@@ -395,12 +399,13 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
             amount = web3.utils.fromWei(tokens, 'ether');
             // console.log("amount: " + amount);
           }
-         let deposit = null;
-         let payment = null;
-         try{
+          let deposit = null;
+          let payment = null;
+          try {
             deposit = await ParetoTransaction.findOne({address: address, event: 'deposited'}).exec();
-             payment = await ParetoPayment.findOne({address: address, state: 2}).exec();
-         }catch (e) { }
+            payment = await ParetoPayment.findOne({address: address, state: 2}).exec();
+          } catch (e) {
+          }
           if (amount > 0 || deposit || payment) {
             callback(null, amount)
           } else {
@@ -425,18 +430,16 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
 };
 
 
-
-
 /**
  *  addExponent using db instead of Ethereum network
  */
-controller.addExponentAprox =  function (addresses, scores, blockHeight, callback) {
+controller.addExponentAprox = function (addresses, scores, blockHeight, callback) {
   return ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(async function (err, values) {
-      const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
-      let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
-          data[""+it.id] = it;
-          return data;
-      }, {});
+    const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO * 2}});
+    let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
+      data["" + it.id] = it;
+      return data;
+    }, {});
     if (err) {
       callback(err);
     } else {
@@ -445,39 +448,39 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
       for (let j = 0; j < values.length; j = j + 1) {
         try {
           const sender = values[j].sender.toLowerCase();
-          const block =  parseFloat(values[j].block);
+          const block = parseFloat(values[j].block);
           const amount = parseFloat(values[j].amount);
           const intelIndex = values[j].intelId;
-            distincIntel[intelIndex] = 1;
-          if(!lessRewards[sender]){
-              lessRewards[sender]  = {};
-              lessRewards[sender][intelIndex] = { block,amount };
+          distincIntel[intelIndex] = 1;
+          if (!lessRewards[sender]) {
+            lessRewards[sender] = {};
+            lessRewards[sender][intelIndex] = {block, amount};
           }
-          if(!lessRewards[sender][intelIndex]){
-                lessRewards[sender][intelIndex] = { block,amount };
-            }
-          if(block < lessRewards[sender][intelIndex].block  ){
-              lessRewards[sender][intelIndex] = { block,amount };
+          if (!lessRewards[sender][intelIndex]) {
+            lessRewards[sender][intelIndex] = {block, amount};
+          }
+          if (block < lessRewards[sender][intelIndex].block) {
+            lessRewards[sender][intelIndex] = {block, amount};
           }
         } catch (e) {
           console.log(e)
         }
       }
-        let totalDesired =Object.keys(distincIntel).length;
-    for (let i = 0; i < addresses.length; i = i + 1) {
+      let totalDesired = Object.keys(distincIntel).length;
+      for (let i = 0; i < addresses.length; i = i + 1) {
         try {
-            const address = addresses[i].toLowerCase();
-            if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
-                let intels = Object.keys(lessRewards[address]);
-                let rewards =   intels.reduce(function (reward, it) {
-                    return reward +  Math.min(lessRewards[address][it].amount/intelDesiredRewards[it].reward,2 );
-                }, 0);
+          const address = addresses[i].toLowerCase();
+          if (lessRewards[address] && scores[i].bonus > 0 && scores[i].tokens > 0) {
+            let intels = Object.keys(lessRewards[address]);
+            let rewards = intels.reduce(function (reward, it) {
+              return reward + Math.min(lessRewards[address][it].amount / intelDesiredRewards[it].reward, 2);
+            }, 0);
 
-                const V = (1 + (rewards / (2*totalDesired)));
-                scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
-              } else {
-                scores[i].score = 0;
-              }
+            const V = (1 + (rewards / (2 * totalDesired)));
+            scores[i].score = parseFloat(Decimal(parseFloat(scores[i].tokens)).mul(Decimal(parseFloat(scores[i].bonus)).pow(V)));
+          } else {
+            scores[i].score = 0;
+          }
         } catch (e) {
           console.log(e)
         }
@@ -496,19 +499,19 @@ controller.addExponentAprox =  function (addresses, scores, blockHeight, callbac
 
 
 controller.retrieveAddress = function (address, callback) {
-    userController.retrieveAddress(address, callback);
+  userController.retrieveAddress(address, callback);
 };
 
 controller.retrieveAddresses = function (addresses, callback) {
-    userController.retrieveAddresses(addresses, callback);
+  userController.retrieveAddresses(addresses, callback);
 };
 
 controller.updateUser = async function (address, userinfo, callback) {
-    userController.updateUser(address,userinfo , callback);
+  userController.updateUser(address, userinfo, callback);
 };
 
 controller.getUserInfo = async function (address, callback) {
-    userController.getUserInfo(address, callback);
+  userController.getUserInfo(address, callback);
 };
 
 
@@ -517,48 +520,127 @@ controller.getUserInfo = async function (address, callback) {
  */
 
 
-controller.getAssets = async function (callback){
-     intelController.getAssets(callback);
+controller.getAssets = async function (callback) {
+  intelController.getAssets(callback);
 };
 
 controller.getAllAvailableContent = async function (req, callback) {
-   await intelController.getAllAvailableContent(req, callback);
+  await intelController.getAllAvailableContent(req, callback);
 };
 
 controller.getContentByIntel = function (req, intel, callback) {
-      intelController.getContentByIntel (req, intel, callback);
+  intelController.getContentByIntel(req, intel, callback);
 };
 
 controller.getContentByCurrentUser = async function (req, callback) {
-    intelController.getContentByCurrentUser (req, callback);
+  intelController.getContentByCurrentUser(req, callback);
 };
 
 controller.postContent = function (req, callback) {
-    intelController.postContent(req, callback);
+  intelController.postContent(req, callback);
 };
 
 controller.getTransaction = function (data, callback) {
-    intelController.getTransaction(data, callback);
+  intelController.getTransaction(data, callback);
 };
 
 controller.watchTransaction = function (data, callback) {
-    intelController.watchTransaction(data, callback);
+  intelController.watchTransaction(data, callback);
 }
 
-controller.getChartUserInformation = async function (req, callback){
-    let address = req.query.user || req.user;
-    const dateWeekAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+controller.getChartUserInformation = async function (req, callback) {
+  let address = req.query.user || req.user;
+  const dateWeekAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
 
-    let transactionsRewards = await ParetoTransaction.find({event: "reward", address, dateCreated: {$gte: dateWeekAgo}});
-    let transactionsCreate = await ParetoTransaction.find({event: "create", address, dateCreated: {$gte: dateWeekAgo}});
-    let transactionsDistribute = await ParetoTransaction.find({event: "deposit", address, dateCreated: {$gte: dateWeekAgo}});
+  let transactionsRewards = await ParetoTransaction.find({event: "reward", address, dateCreated: {$gte: dateWeekAgo}});
+  let transactionsCreate = await ParetoTransaction.find({event: "create", address, dateCreated: {$gte: dateWeekAgo}});
+  let transactionsDistribute = await ParetoTransaction.find({
+    event: "deposited",
+    address,
+    dateCreated: {$gte: dateWeekAgo}
+  });
 
-    return callback(null, {userInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
+  return callback(null, {userInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
 };
 
-controller.getRewardFromDesiredScore  =  function (address,  desiredScore, tokens, callback){
-    intelController.getRewardFromDesiredScore(address,  desiredScore, tokens, callback);
-}
+controller.getUserCurrentBalance = async function (req, callback) {
+  let address = req.query.user || req.user;
+
+  let transactionsRewards = await ParetoTransaction.find({event: "reward", address});
+  let transactionsCreate = await ParetoTransaction.find({event: "create", address});
+  let transactionsDeposit = await ParetoTransaction.find({event: "deposited", address});
+
+  let allTrans = [...transactionsRewards, ...transactionsCreate, ...transactionsDeposit];
+
+  let dates = {};
+  allTrans.map(transaction => {
+    let myDate = new Date(transaction.dateCreated);
+    myDate.setHours(0, 0, 0, 0);
+    if (!dates[myDate]) {
+      dates[myDate] = [transaction];
+    } else {
+      dates[myDate].push(transaction);
+    }
+  });
+
+  let datesArray = Object.keys(dates).map( date => {
+    return {
+      date: date,
+      info: dates[date]
+    };
+  });
+
+  datesArray.sort(function(a,b){
+    // Turn your strings into dates, and then subtract them
+    // to get a value that is either negative, positive, or zero.
+    return new Date(a.date) - new Date(b.date);
+  });
+
+
+  let intelBalance = 0;
+  datesArray.forEach( date => {
+    date.info.forEach( transaction => {
+      switch (transaction.event) {
+        case 'reward':
+          intelBalance -= transaction.amount;
+          break;
+        case 'create':
+          intelBalance -= transaction.amount;
+          break;
+        case 'deposited':
+          intelBalance += transaction.amount;
+          break;
+      }
+    });
+    if(intelBalance < 0) intelBalance = 0;
+    date.balance = intelBalance;
+  });
+
+  // let intelBalance = 0;
+  // Object.keys(dates).map(date => {
+  //   dates[date].map(transaction => {
+  //     switch (transaction.event) {
+  //       case 'reward':
+  //         intelBalance -= transaction.amount;
+  //         break;
+  //       case 'create':
+  //         intelBalance -= transaction.amount;
+  //         break;
+  //       case 'deposit':
+  //         intelBalance += transaction.amount;
+  //         break;
+  //     }
+  //     if(intelBalance < 0) intelBalance = 0;
+  //   });
+  //   dates[date].push(intelBalance);
+  // });
+
+  return callback(null, datesArray);
+};
+
+controller.getRewardFromDesiredScore = function (address, desiredScore, tokens, callback) {
+  intelController.getRewardFromDesiredScore(address, desiredScore, tokens, callback);
+};
 /**
  * Worker Services
  */
@@ -752,7 +834,7 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
         })
       } else {
         // controller.retrieveRanksWithRedis(1, limit, page, true, callback);
-          callback(null,[]);
+        callback(null, []);
       }
     }
 
@@ -761,120 +843,129 @@ controller.retrieveRanksAtAddress = function (q, limit, page, callback) {
 
 controller.event_payment = async function (event, callback) {
 
-    if(event.type === "payment_intent.succeeded"){
-        const timestamp  = ((new Date()).getTime() + "");
-        await ParetoPayment.create({ email: event.data.object.metadata.email_customer, order_id: event.data.object.id , timestamp: timestamp, amount: event.data.object.amount/100},
-             function (err, payment) {
-                 const ethereumWallet = require('./ethereum/ethereum-wallet')(
-                     Web3,
-                     WEB3_WEBSOCKET_URL,
-                     web3,
-                     ParetoPayment,
-                     ETH_NETWORK);
-                 controller.transactionFlow(
-                     ethereumWallet.generateAddress(event.data.object.client_secret ,timestamp)
-                     ,event.data.object.id, function (error, result){
-                     if(error){console.log(error)}
-                     if(result){console.log(result)}
-                 });
+  if (event.type === "payment_intent.succeeded") {
+    const timestamp = ((new Date()).getTime() + "");
+    await ParetoPayment.create({
+        email: event.data.object.metadata.email_customer,
+        order_id: event.data.object.id,
+        timestamp: timestamp,
+        amount: event.data.object.amount / 100
+      },
+      function (err, payment) {
+        const ethereumWallet = require('./ethereum/ethereum-wallet')(
+          Web3,
+          WEB3_WEBSOCKET_URL,
+          web3,
+          ParetoPayment,
+          ETH_NETWORK);
+        controller.transactionFlow(
+          ethereumWallet.generateAddress(event.data.object.client_secret, timestamp)
+          , event.data.object.id, function (error, result) {
+            if (error) {
+              console.log(error)
+            }
+            if (result) {
+              console.log(result)
+            }
+          });
 
-                 callback(err, payment);
-            });
+        callback(err, payment);
+      });
 
-    }
+  }
 }
 
 controller.listProducts = async function (callback) {
 
-    let skus;
-    await stripe.skus.list(
-        {active: true},
-        function(err, response) {
+  let skus;
+  await stripe.skus.list(
+    {active: true},
+    function (err, response) {
 
-            if(err){
-                callback(err, null);
-                return;
-            }
-            skus = response.data;
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      skus = response.data;
 
-            callback(null, skus);
+      callback(null, skus);
 
-            //once i have the skus, i need the products
+      //once i have the skus, i need the products
 
-        }
-    );
+    }
+  );
 
 
 }
 
 controller.createOrder = function (orderdetails, callback) {
 
-    this.create_customer(orderdetails, function (customerObj) {
-        let products_ar = [];
-        for(var product of orderdetails.order) {
-            products_ar.push(
-                {
-                    type: 'sku',
-                    parent: product.id,
-                    quantity: product.quantity
-                }
-            )
+  this.create_customer(orderdetails, function (customerObj) {
+    let products_ar = [];
+    for (var product of orderdetails.order) {
+      products_ar.push(
+        {
+          type: 'sku',
+          parent: product.id,
+          quantity: product.quantity
         }
+      )
+    }
 
-        const order = stripe.orders.create({
-            currency: 'usd',
-            email: orderdetails.customer.email,
-            items: products_ar,
-            customer: customerObj.id
+    const order = stripe.orders.create({
+      currency: 'usd',
+      email: orderdetails.customer.email,
+      items: products_ar,
+      customer: customerObj.id
 
-        });
-
-        let order_amount;
-        order.then(function (result) {
-
-            order_amount = result.amount;
-            let matadata_pi = {
-                order_id:  result.id,
-                email_customer: orderdetails.customer.email,
-            };
-            const paymentIntent =  stripe.paymentIntents.create({
-                amount: order_amount,
-                currency: 'usd',
-                payment_method_types: ['card'],
-                metadata: matadata_pi,
-                customer: customerObj.id
-            });
-
-            paymentIntent.then(function (resultint){
-
-                let response = {order: result, intent: resultint}
-                callback(response, resultint);
-
-            });
-
-        });
     });
+
+    let order_amount;
+    order.then(function (result) {
+
+      order_amount = result.amount;
+      let matadata_pi = {
+        order_id: result.id,
+        email_customer: orderdetails.customer.email,
+      };
+      const paymentIntent = stripe.paymentIntents.create({
+        amount: order_amount,
+        currency: 'usd',
+        payment_method_types: ['card'],
+        metadata: matadata_pi,
+        customer: customerObj.id
+      });
+
+      paymentIntent.then(function (resultint) {
+
+        let response = {order: result, intent: resultint}
+        callback(response, resultint);
+
+      });
+
+    });
+  });
 
 }
 
-controller.create_customer = async function(orderdetails, callback){
-    await stripe.customers.list(
-        { limit: 1, email: orderdetails.customer.email },
-        function(err, customers) {
-            if(err || customers.data.length === 0){
-                stripe.customers.create({
-                    email: orderdetails.customer.email,
-                }, function (err, customer) {
-                    callback(customer);
-                });
+controller.create_customer = async function (orderdetails, callback) {
+  await stripe.customers.list(
+    {limit: 1, email: orderdetails.customer.email},
+    function (err, customers) {
+      if (err || customers.data.length === 0) {
+        stripe.customers.create({
+          email: orderdetails.customer.email,
+        }, function (err, customer) {
+          callback(customer);
+        });
 
 
-            }else{
-                callback(customers.data[0]);
-            }
+      } else {
+        callback(customers.data[0]);
+      }
 
-        }
-    );
+    }
+  );
 }
 
 
@@ -1092,40 +1183,44 @@ controller.retrieveAddressRankWithRedis = function (addressess, attempts, callba
         }
       });
 
-        } else {
-            if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
-                // hopefully, users without pareto shouldn't get here now.
-                const error = ErrorHandler.backendErrorList('b3');
-                error.address = addressess;
-                callback(error);
-            } else {
-                const multi = redisClient.multi();
-                for (let i = 0; i < results.length; i = i + 1) {
-                    if (results[i]) {
-                        multi.hgetall(results[i].rank + "");
-                    }
-                }
-                multi.hgetall("maxRank");
-                multi.hgetall("minScore");
-                multi.exec(function (err, results) {
-                    if (err) {
-                        const error = ErrorHandler.backendErrorList('b4');
-                        error.systemMessage = err.message? err.message: err;
-                        error.address = addressess;
-                        return callback(error);
-                    }
-                    // return the cached ranking
-                    const maxRank = results[results.length-2];
-                    const minScore = results[results.length-1];
+    } else {
+      if ((!results || results.length === 0 || (!results[0] && results.length === 1))) {
+        // hopefully, users without pareto shouldn't get here now.
+        const error = ErrorHandler.backendErrorList('b3');
+        error.address = addressess;
+        callback(error);
+      } else {
+        const multi = redisClient.multi();
+        for (let i = 0; i < results.length; i = i + 1) {
+          if (results[i]) {
+            multi.hgetall(results[i].rank + "");
+          }
+        }
+        multi.hgetall("maxRank");
+        multi.hgetall("minScore");
+        multi.exec(function (err, results) {
+          if (err) {
+            const error = ErrorHandler.backendErrorList('b4');
+            error.systemMessage = err.message ? err.message : err;
+            error.address = addressess;
+            return callback(error);
+          }
+          // return the cached ranking
+          const maxRank = results[results.length - 2];
+          const minScore = results[results.length - 1];
 
-                    results = results.slice(0,-2);
-                    if(maxRank && minScore){
-                        results = results.map(it =>{it.maxRank = maxRank.rank; it.minScore = minScore.score; return it });
-                    }
+          results = results.slice(0, -2);
+          if (maxRank && minScore) {
+            results = results.map(it => {
+              it.maxRank = maxRank.rank;
+              it.minScore = minScore.score;
+              return it
+            });
+          }
 
-                    return callback(null, results);
-                });
-            }
+          return callback(null, results);
+        });
+      }
 
     }
 
@@ -1217,7 +1312,7 @@ controller.getContributorsByIntel = async function (Id, callback) {
 }
 
 controller.getAddressesWithSlug = async function (aliasArray) {
-   return await userController.getAddressesWithSlug(aliasArray);
+  return await userController.getAddressesWithSlug(aliasArray);
 }
 
 
