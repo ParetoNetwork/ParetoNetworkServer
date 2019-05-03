@@ -598,6 +598,7 @@ controller.getUserCurrentBalance = async function (req, callback) {
 
 
   let intelBalance = 0;
+
   datesArray.forEach( date => {
     date.info.forEach( transaction => {
       switch (transaction.event) {
@@ -611,8 +612,8 @@ controller.getUserCurrentBalance = async function (req, callback) {
           intelBalance += transaction.amount;
           break;
       }
+      if(intelBalance < 0) intelBalance = 0;
     });
-    if(intelBalance < 0) intelBalance = 0;
     date.balance = intelBalance;
   });
 

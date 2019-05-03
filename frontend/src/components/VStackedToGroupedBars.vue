@@ -81,6 +81,7 @@
       },
       getChartInformation(){
         return profileService.getChartUserInfo((data) => {
+          console.log(data);
           this.chartInfoData = data;
           return data;
         }, (e) => {
@@ -142,7 +143,7 @@
           this.dates.forEach((date, dateIndex) => {
             const infoDate = new Date(information.dateCreated);
             infoDate.setHours(0, 0, 0, 0);
-
+            console.log(information);
             if (infoDate.getTime() === date.date.getTime()) {
               switch (information.event) {
                 case 'reward':
@@ -170,8 +171,6 @@
           }
         });
 
-        console.log(datesArray);
-
         this.weekDays[this.weekDays.length - 1] = "Today";
         this.stackedToGroupedChart(datesArray, this.pickedChart);
       },
@@ -194,7 +193,8 @@
         }
       },
       stackedToGroupedChart(data, chartType) {
-        var LABELS = ["Reward", "Create", "Deposit", "Balance"];
+        console.log(data);
+        var LABELS = ["Reward", "Create", "Deposited", "Balance"];
         const height = this.height;
         const width = this.width;
 
@@ -257,6 +257,23 @@
           .attr("height", 0);
 
         this.rect.on("mouseover", function (d) {
+          console.log(d)
+          let type = '';
+          switch (d[2]) {
+            case 0 :
+              type = 'Reward';
+              break;
+            case 1:
+              type = 'Create';
+              break;
+            case 2 :
+              type = 'Deposited';
+              break;
+            case 3:
+              type = 'Balance';
+              break;
+          }
+
           let coords = {
             x: this.getAttribute("x"),
             y: this.getAttribute("y"),
@@ -271,8 +288,8 @@
           divTooltip.style("left", (coords.x * svgDim.width / width - 30) + "px")
             .style("top", (coords.y * svgDim.height / height - 30) + "px")
             .style("display", "inline-block")
-            .html("Pareto: " + (
-              d[1] - d[0])
+            .html(type +  ": " + (
+              data[d[2]][d[3]])
               //+ "<br> Total Balance: " + data[3][d[3]]
             )
             .style("opacity", .9);
