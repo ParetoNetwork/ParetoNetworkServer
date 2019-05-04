@@ -44,6 +44,11 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       },
@@ -58,6 +63,11 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       },
@@ -72,6 +82,11 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 90000
       },
@@ -86,6 +101,11 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 40000
       },
@@ -100,6 +120,11 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 70000
       },
@@ -114,6 +139,11 @@ const information = (function () {
         intelAddress: '0xFETYIGUJS',
         address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       }
@@ -139,7 +169,7 @@ const information = (function () {
 
 export {information};
 
-var sunsburstData = {
+var sunburstData = {
   "name": "TOPICS", "children": [{
     "name": "Topic A",
     "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
@@ -153,7 +183,7 @@ var sunsburstData = {
   }]
 };
 
-export {sunsburstData};
+export {sunburstData};
 
 var stackedBarData =  {"userInformation":[{"status":3,  "amount":2,"dateCreated":"2019-04-26T22:24:37.628Z","event":"reward","intel":515, "nonce":231,"block":5485158},{"status":3, "amount":1,"dateCreated":"2019-04-29T14:06:31.567Z","event":"reward","intel":518, "nonce":233,"block":5502137, },{"status":3, "amount":2,"dateCreated":"2019-04-29T22:29:00.956Z","event":"reward","intel":520, "nonce":235,"block":5504394, },{"status":3, "amount":1,"dateCreated":"2019-04-26T22:26:57.793Z","event":"create", "nonce":232,"block":5485165, },{"status":3,"amount":1,"dateCreated":"2019-04-29T22:27:44.162Z","event":"create","intel":521,"nonce":234,"block":5504388}]};
 

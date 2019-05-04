@@ -23,7 +23,7 @@
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
                 <div class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
-                    <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData" :loggedUser="loggedUser" class="mb-4"></VHandlerSunsburstChart>
+                    <VHandlerSunburstChart v-if="primalLoad" :user="user" :sunburstData="information.content?information.content:sunburstData" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
                     <VStackedToGroupedBars v-if="primalLoad" :stackedBarData="stackedBarData" class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"></VStackedToGroupedBars>
                 </div>
             </div>
@@ -61,19 +61,19 @@
   import ModalLedgerNano from './Modals/VModalLedgerNano';
   import ModalSplashOnboarding from './Modals/VModalSplashOnboarding';
 
-  import {information, sunsburstData, stackedBarData} from '../utils/onboardingInfo';
+  import {information, sunburstData, stackedBarData} from '../utils/onboardingInfo';
 
   import VStackedToGroupedBars from './VStackedToGroupedBars';
 
   import VFab from './VFab';
-  import VHandlerSunsburstChart from "./VHandlerSunsburstChart";
+  import VHandlersunburstChart from "./VHandlerSunburstChart";
 
 
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
-      VHandlerSunsburstChart,
+      VHandlersunburstChart,
       VStackedToGroupedBars,
       ICountUp,
       VFab,
@@ -94,7 +94,7 @@
         block: 0,
         etherscanUrl: window.localStorage.getItem('etherscan'),
         information: '',
-        sunsburstData: '',
+        sunburstData: '',
         stackedBarData: '',
         loading: true,
         loggedUser: false,
@@ -124,7 +124,7 @@
         'showModalOnboarding'])
     },
     mounted: function () {
-      this.sunsburstData = sunsburstData;
+      this.sunburstData = sunburstData;
       this.stackedBarData = stackedBarData;
       AuthService.auth(() => {
         this.main();

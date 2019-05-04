@@ -12,7 +12,7 @@
       VChartSunburst
     },
     props: [
-      "user", "pos", "sunsburstData", "loggedUser"
+      "user", "pos", "sunburstData", "loggedUser"
     ],
     computed: {
         ...mapState(["firstContent"]),
@@ -25,10 +25,10 @@
         }
       }
     },
-    name: "VHandlerSunsburstChart",
+    name: "VHandlerSunburstChart",
     mounted(){
-      if(this.sunsburstData){
-        this.nodeData = this.sunsburstData;
+      if(this.sunburstData){
+        this.nodeData = this.sunburstData;
       }
 
       if(this.user){
