@@ -63,7 +63,6 @@
         this.getBalanceInformation()])
         .then((data) => {
           this.currentBalance = parseInt(data[1]);
-
           this.drawChart(this.chartInfoData, data[2]);
         });
     },
