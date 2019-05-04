@@ -23,7 +23,8 @@
       </div> -->
       <div class="scrollable p-2" id="mypost" v-on:scroll="scrollMyPost()">
         <ul v-if="transactions.length">
-          <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions.filter(it=> !it.intelInfo)" :key="tx.txHash">
+          <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions.filter(it=> !it.intelInfo)"
+              :key="tx.txHash">
             <!--<div style="background-color: black; z-index: 0; width: 60%;">&nbsp;</div>
             <VIntelPreview v-if="tx.intelInfo" :user="user" :intel="tx.intelInfo"
                            :eventRow="true"></VIntelPreview>-->
@@ -97,7 +98,7 @@
     watch: {
       'pendingTransactions': function (newTransactions) {
         newTransactions.forEach((item, index) => {
-          if(!this.defaultTransactions){
+          if (!this.defaultTransactions) {
 
           }
           let wasFound = false;
@@ -122,7 +123,7 @@
         let currentLimit = this.limit + 10;
         let currentPage = this.page + 1;
 
-        this.limit = this.limit*this.page;
+        this.limit = this.limit * this.page;
         this.page = 0;
 
         this.transactions = [];
@@ -131,18 +132,18 @@
 
         this.loadAllContent = false;
 
-        this.loadRequest(true).then( ()=> {
+        this.loadRequest(true).then(() => {
           this.limit = currentLimit;
           this.page = currentPage;
         });
       },
-        block: function (block) {
-            this.transactions.forEach(tx => {
-                const exponentBlock =  parseFloat(localStorage.getItem("exponentBlock")) || block;
-                this.$set(tx, 'minBlock', block - exponentBlock);
-                this.$set(tx, 'exponentBlock', exponentBlock);
-            });
-        }
+      block: function (block) {
+        this.transactions.forEach(tx => {
+          const exponentBlock = parseFloat(localStorage.getItem("exponentBlock")) || block;
+          this.$set(tx, 'minBlock', block - exponentBlock);
+          this.$set(tx, 'exponentBlock', exponentBlock);
+        });
+      }
     },
     methods: {
       ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction", "restartTransactions"]),
@@ -206,9 +207,9 @@
             this.isLoadingScroll = false;
 
             this.transactions.forEach(tx => {
-                const exponentBlock =  parseFloat(localStorage.getItem("exponentBlock")) || this.block;
-                this.$set(tx, 'minBlock', this.block - exponentBlock);
-                this.$set(tx, 'exponentBlock', exponentBlock);
+              const exponentBlock = parseFloat(localStorage.getItem("exponentBlock")) || this.block;
+              this.$set(tx, 'minBlock', this.block - exponentBlock);
+              this.$set(tx, 'exponentBlock', exponentBlock);
               if ((tx.event === 'create' || tx.event === 'distribute') && tx.status > 2) {
                 this.myContent.forEach(item => {
                   if (item.id == tx.intel) {
