@@ -17,14 +17,14 @@
                         <VShimmerMyPost v-else></VShimmerMyPost>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-6 px-2 order-1 order-md-2 order-xl-3">
+                <div class="col-md-9 col-lg-6 px-2 order-1 order-md-2 order-xl-3">
                     <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
                                 :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
-                <div class="col-md-3 col-lg-4 order-3 px-0 pb-5" id="chart-row">
+                <div class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
                     <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData" :loggedUser="loggedUser" class="mb-4"></VHandlerSunsburstChart>
-                    <VStackedToGroupedBars v-if="primalLoad" :stackedBarData="stackedBarData" class="secondary-visualization"></VStackedToGroupedBars>
+                    <VStackedToGroupedBars v-if="primalLoad" :stackedBarData="stackedBarData" class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"></VStackedToGroupedBars>
                 </div>
             </div>
         </div>
@@ -252,4 +252,12 @@
         left: 0;
         z-index: 99
     }
+
+    @media (min-width: 1200px) {
+        .h-custom {
+            height: 30% !important;
+        }
+    }
+
+
 </style>

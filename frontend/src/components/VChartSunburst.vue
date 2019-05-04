@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col text-left">
-      <b class="title-content text-left"> Explorer </b>
+      <b class="title-content text-left d-lg-none d-xl-block"> Explorer </b>
       <div id="d3-sunsburst">
         <svg></svg>
       </div>
