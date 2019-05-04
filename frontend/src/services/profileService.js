@@ -39,6 +39,23 @@ export default class profileService {
     }
   }
 
+  static getChartBalanceInfo(onSuccess, onError) {
+    const cachedChartInformation = this.getChartBalanceInfo.chartInfo;
+
+    if (cachedChartInformation) {
+      return onSuccess(cachedChartInformation);
+    } else {
+      return http.get('/v1/chart-current-balance').then(res => {
+        if (res.data.success) {
+          this.getChartBalanceInfo.chartInfo = res.data.data;
+          return onSuccess(res.data.data);
+        } else {
+          return onError(res.data.error);
+        }
+      });
+    }
+  }
+
   static getChartUserInfo(onSuccess, onError) {
     const cachedChartInformation = this.getChartInfo.chartInfo;
 
