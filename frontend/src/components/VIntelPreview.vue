@@ -15,7 +15,7 @@
                                      v-bind:style="{
                                         backgroundImage: 'url( ' + loadProfileImage(intel.createdBy.profilePic, intel.createdBy.address)
                                      }"
-                                     :to="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)"
+                                     :to="intelRoute(intel)"
                         ></router-link>
                     </div>
                     <div class="cursor-pointer intel-preview"
@@ -25,7 +25,7 @@
                                 :to="intelRoute(intel)"
                                 class="subtitle-intel text-user-content redacted" v-line-clamp="1" v-html="convertToHideText(intel.title|| 'No title')">
                         </router-link>
-                        <div class="row">
+                        <router-link tag="div" class="row" :to="intelRoute(intel)">
                             <div v-if="!eventRow" class="col-12 col-md-12 ellipsis">
                                 <!-- <a v-bind:href="creatorRoute(intel.createdBy.aliasSlug || intel.createdBy.address)" class="text-user ellipsis ">Disclosed by:
                                     <b>
@@ -37,7 +37,7 @@
                                     {{intel.createdBy.alias ? intel.createdBy.alias : intel.createdBy.address}}
                                 </b>
                             </div>
-                        </div>
+                        </router-link>
                         <div class="row">
                             <div class="col-6 col-md-6 ellipsis" :class="{'col-lg-6': eventRow, 'col-lg-6': !eventRow}">
                                 <a v-bind:href="etherscanUrl+'/tx/'+intel.txHash"
