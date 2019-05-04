@@ -24,7 +24,7 @@
                 </div>
                 <div class="col-md-3 col-lg-4 order-3 px-0 pb-5" id="chart-row">
                     <VHandlerSunsburstChart v-if="primalLoad" :user="user" :sunsburstData="sunsburstData" :loggedUser="loggedUser" class="mb-4"></VHandlerSunsburstChart>
-                    <VStackedToGroupedBars v-if="primalLoad" :stackedBarData="stackedBarData"></VStackedToGroupedBars>
+                    <VStackedToGroupedBars v-if="primalLoad" :stackedBarData="stackedBarData" class="secondary-visualization"></VStackedToGroupedBars>
                 </div>
             </div>
         </div>

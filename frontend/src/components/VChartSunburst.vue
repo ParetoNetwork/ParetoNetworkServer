@@ -106,6 +106,8 @@
           .attr("width", width)
           .attr("height", height)
           .style("font", "10px sans-serif")
+          .style("display", "block")
+          .style("margin", "auto")
           .call(this.responsivefy)
           .style("opacity", 0);
 
