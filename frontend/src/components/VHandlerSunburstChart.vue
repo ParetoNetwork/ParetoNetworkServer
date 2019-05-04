@@ -28,7 +28,7 @@
     name: "VHandlerSunburstChart",
     mounted(){
       if(this.sunburstData){
-        this.nodeData = this.sunburstData;
+        this.getChartInformation(this.sunburstData);
       }
 
       if(this.user){

@@ -7,28 +7,27 @@ const information = (function () {
     rank: 107,
     score: 881345,
     tokens: 50000,
-    aliasSlug: '',
     profilePic: 'random_person'
   };
 
   const demoIntelProviderA = {
     address: '0xA355b24AF8a14Af03AbC3AF0441e7773E7a7224d',
     alias: 'PARETO Community',
+    aliasSlug: 'pareto-comm',
     biography: 'Become a member to access Market-Proven trading intel. Post, trade, earn.',
     rank: 107,
     score: 881345,
-    tokens: 50000,
-    aliasSlug: ''
+    tokens: 50000
   };
 
   const demoIntelProviderB = {
     address: '0xf70D7AC257e9e1E7340dCD74b22D321b301Ce7F3',
     alias: '80/20 Capital Research',
+    aliasSlug: '',
     biography: 'Become a member to access Market-Proven trading intel. Post, trade, earn.',
     rank: 107,
     score: 881345,
-    tokens: 50000,
-    aliasSlug: ''
+    tokens: 50000
   };
 
   return {
@@ -42,7 +41,7 @@ const information = (function () {
         blockAgo: '5769',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
         rewardsTransactions: [{
           "amount": 12
@@ -61,7 +60,7 @@ const information = (function () {
         blockAgo: '6801',
         createdBy: demoIntelProviderB,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderB.address,
         expires: new Date(),
         rewardsTransactions: [{
           "amount": 12
@@ -80,7 +79,7 @@ const information = (function () {
         blockAgo: '7223',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
         rewardsTransactions: [{
           "amount": 12
@@ -99,7 +98,7 @@ const information = (function () {
         blockAgo: '7839',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
         rewardsTransactions: [{
           "amount": 12
@@ -118,7 +117,7 @@ const information = (function () {
         blockAgo: '8362',
         createdBy: demoIntelProviderB,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderB.address,
         expires: new Date(),
         rewardsTransactions: [{
           "amount": 12
@@ -137,7 +136,7 @@ const information = (function () {
         blockAgo: '8406',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
         rewardsTransactions: [{
           "amount": 12

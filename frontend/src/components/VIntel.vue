@@ -66,14 +66,14 @@
   import VStackedToGroupedBars from './VStackedToGroupedBars';
 
   import VFab from './VFab';
-  import VHandlersunburstChart from "./VHandlerSunburstChart";
+  import VHandlerSunburstChart from "./VHandlerSunburstChart";
 
 
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
-      VHandlersunburstChart,
+      VHandlerSunburstChart,
       VStackedToGroupedBars,
       ICountUp,
       VFab,
