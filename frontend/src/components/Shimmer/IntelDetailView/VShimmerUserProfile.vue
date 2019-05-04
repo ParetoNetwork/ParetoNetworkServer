@@ -19,8 +19,8 @@
             <div class="dark-shine mt-3 medium-lines mx-auto mx-lg-1" style="min-width: 150px"></div>
         </div>
         <div class="row mx-0 justify-content-center justify-content-lg-start text-center mt-4">
-            <div class="dark-shine small-box mr-3 p-2 mb-2"></div>
-            <div class="dark-shine small-box mb-2 p-2"></div>
+            <div class="dark-shine small-box mr-1 p-2 mb-2"></div>
+            <div class="dark-shine small-box mr-1 mb-2 p-2"></div>
         </div>
     </div>
 </template>
