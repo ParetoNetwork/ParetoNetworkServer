@@ -1,9 +1,9 @@
 <template>
     <ul class="mt-sm-2 mt-md-0">
-        <li class="row text-left p-0 m-0" :key="row"
+        <li class="row text-left p-0 m-0 mr-1" :key="row"
             v-for="row of speeds">
             <div class="cl-4 mr-1" :style="getColor(row)"> </div>
-            <p class="cl-8" style="font-size: 0.5em;"> {{getTime(row)}} </p>
+            <p class="cl-8" style="font-size: 0.75em;"> {{getTime(row)}} </p>
         </li>
     </ul>
 </template>
@@ -28,16 +28,16 @@
             getColor(speed) {
                 switch (speed) {
                     case 1: {
-                        return {"background": "#c24e4e !important", "width": "30px"}
+                        return {"background": "#c24e4e !important", "width": "5px"}
                     }
                     case 2: {
-                        return {"background": "#ca9036 !important", "width": "30px" }
+                        return {"background": "#ca9036 !important", "width": "5px" }
                     }
                     case 3: {
-                        return {"background": "#6ac27e !important", "width": "30px" }
+                        return {"background": "#6ac27e !important", "width": "5px" }
                     }
                     case 4: {
-                        return {"background": "#294b83 !important", "width": "30px" }
+                        return {"background": "#294b83 !important", "width": "5px" }
                     }
                 }
 

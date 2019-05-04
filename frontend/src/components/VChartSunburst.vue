@@ -1,8 +1,8 @@
 <template>
   <div class="row">
     <div class="col text-left">
-      <b class="title-content text-left"> Explorer </b>
-      <div id="d3-sunsburst">
+      <b class="title-content text-left d-lg-none d-xl-block"> Explorer </b>
+      <div id="d3-sunburst">
         <svg></svg>
       </div>
     </div>
@@ -31,10 +31,10 @@
             if(!this.loggedUser){
                 setTimeout( ()=>{
                     try{
-                        d3.select('#d3-sunsburst svg g path').dispatch('click');
+                        d3.select('#d3-sunburst svg g path').dispatch('click');
                         setTimeout( ()=>{
                             try{
-                                d3.select('#d3-sunsburst svg g circle').dispatch('click');
+                                d3.select('#d3-sunburst svg g circle').dispatch('click');
                                 if(!this.loggedUser){
                                     this.iniAnimation();
                                 }
@@ -102,10 +102,12 @@
           .innerRadius(d => d.y0 * radius)
           .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
-        const svg = d3.select("#d3-sunsburst svg")
+        const svg = d3.select("#d3-sunburst svg")
           .attr("width", width)
           .attr("height", height)
           .style("font", "10px sans-serif")
+          .style("display", "block")
+          .style("margin", "auto")
           .call(this.responsivefy)
           .style("opacity", 0);
 
@@ -245,13 +247,13 @@
       row(val) {
       },
       nodeData() {
-          d3.selectAll("#d3-sunsburst svg > *")
+          d3.selectAll("#d3-sunburst svg > *")
               .transition()
               .duration(400)
               .ease(d3.easeLinear)
               .style("opacity", 0)
               .on("end",  () => {
-                  d3.selectAll("#d3-sunsburst svg > *").remove();
+                  d3.selectAll("#d3-sunburst svg > *").remove();
                   this.sunschart(this.$router, this.$notify);
               })
 

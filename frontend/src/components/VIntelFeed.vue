@@ -1,14 +1,14 @@
 <template>
   <div class="intel-container">
     <div v-if="!loading" class="p-2 pt-1 text-left">
-      <div class="row">
+      <div class="row align-items-center">
         <div class="col-3 ">
           <b class="title-content">
             Intel Market
           </b>
         </div>
-        <div class="col-9 ">
-          <VDelay :contentDelay="myFeed.content[0].contentDelay"></VDelay>
+        <div class="col-9">
+          <VDelay :contentDelay="myFeed.content[0].contentDelay" class="d-flex flex-row align-items-end"></VDelay>
         </div>
 
       </div>

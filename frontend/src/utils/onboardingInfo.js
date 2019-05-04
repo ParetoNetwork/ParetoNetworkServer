@@ -7,28 +7,27 @@ const information = (function () {
     rank: 107,
     score: 881345,
     tokens: 50000,
-    aliasSlug: '',
     profilePic: 'random_person'
   };
 
   const demoIntelProviderA = {
     address: '0xA355b24AF8a14Af03AbC3AF0441e7773E7a7224d',
     alias: 'PARETO Community',
+    aliasSlug: 'pareto-comm',
     biography: 'Become a member to access Market-Proven trading intel. Post, trade, earn.',
     rank: 107,
     score: 881345,
-    tokens: 50000,
-    aliasSlug: ''
+    tokens: 50000
   };
 
   const demoIntelProviderB = {
     address: '0xf70D7AC257e9e1E7340dCD74b22D321b301Ce7F3',
     alias: '80/20 Capital Research',
+    aliasSlug: '',
     biography: 'Become a member to access Market-Proven trading intel. Post, trade, earn.',
     rank: 107,
     score: 881345,
-    tokens: 50000,
-    aliasSlug: ''
+    tokens: 50000
   };
 
   return {
@@ -42,8 +41,13 @@ const information = (function () {
         blockAgo: '5769',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       },
@@ -56,8 +60,13 @@ const information = (function () {
         blockAgo: '6801',
         createdBy: demoIntelProviderB,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderB.address,
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       },
@@ -70,8 +79,13 @@ const information = (function () {
         blockAgo: '7223',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 90000
       },
@@ -84,8 +98,13 @@ const information = (function () {
         blockAgo: '7839',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 40000
       },
@@ -98,8 +117,13 @@ const information = (function () {
         blockAgo: '8362',
         createdBy: demoIntelProviderB,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderB.address,
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 70000
       },
@@ -112,8 +136,13 @@ const information = (function () {
         blockAgo: '8406',
         createdBy: demoIntelProviderA,
         intelAddress: '0xFETYIGUJS',
-        address: '0xcceba5addf6504d257c4f55aeb8c329c2e88c080',
+        address: demoIntelProviderA.address,
         expires: new Date(),
+        rewardsTransactions: [{
+          "amount": 12
+        }, {
+          "amount": 12
+        }],
         contentDelay: {blockDelay: [1, 400, 20000, 40000, 60000], blockHeight: 5478152},
         reward: 100000
       }
@@ -139,7 +168,7 @@ const information = (function () {
 
 export {information};
 
-var sunsburstData = {
+var sunburstData = {
   "name": "TOPICS", "children": [{
     "name": "Topic A",
     "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
@@ -153,7 +182,7 @@ var sunsburstData = {
   }]
 };
 
-export {sunsburstData};
+export {sunburstData};
 
 var stackedBarData =  {"userInformation":[{"status":3,  "amount":2,"dateCreated":"2019-04-26T22:24:37.628Z","event":"reward","intel":515, "nonce":231,"block":5485158},{"status":3, "amount":1,"dateCreated":"2019-04-29T14:06:31.567Z","event":"reward","intel":518, "nonce":233,"block":5502137, },{"status":3, "amount":2,"dateCreated":"2019-04-29T22:29:00.956Z","event":"reward","intel":520, "nonce":235,"block":5504394, },{"status":3, "amount":1,"dateCreated":"2019-04-26T22:26:57.793Z","event":"create", "nonce":232,"block":5485165, },{"status":3,"amount":1,"dateCreated":"2019-04-29T22:27:44.162Z","event":"create","intel":521,"nonce":234,"block":5504388}]};
 

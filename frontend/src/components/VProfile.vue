@@ -84,7 +84,7 @@
         </div> -->
     </div>
     <div class="row justify-content-center justify-content-lg-start text-center mt-1 mt-xl-1">
-      <router-link tag="div" class="cursor-pointer border mr-3 p-2 mb-2" :to="leaderboards(profile.address)"
+      <router-link tag="div" class="cursor-pointer border mr-1 p-2 mb-2" :to="leaderboards(profile.address)"
                    style="min-width: 80px">
         <ICountUp
                 :startVal="countUp.startVal"
@@ -97,7 +97,7 @@
 
         <p>Rank <i class="fa fa-globe"></i></p>
       </router-link>
-      <router-link tag="div" class="cursor-pointer border mb-2 p-2"
+      <router-link tag="div" class="cursor-pointer border mr-1 mb-2 p-2"
                    :to="leaderboards(profile.address)" style="min-width: 80px">
         <span :class="{'text-onRankUpdated' : profile.rankUpdated}">
 
