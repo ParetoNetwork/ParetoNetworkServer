@@ -439,8 +439,7 @@ export default class ContentService {
                   }
                   events.addTransaction(data);
 
-
-                  waitForNonce(hash,  (txObject)=>{
+                  waitForNonce(hash,(txObject)=>{
                       if(txObject){
                           const content = {};
                           const  nonce = txObject.nonce;
@@ -508,8 +507,6 @@ export default class ContentService {
           gasPrice: content.gasPrice
         })
         .on("transactionHash", hash => {
-
-
             if(title){
                 content.intelData = {title: title}
             }
@@ -795,6 +792,21 @@ export default class ContentService {
     });
   }
 
+  static async currentIntelContractBalance(address, signData, onSuccess, onError){
+    try {
+      await this.Setup(signData);
+    } catch (e) {
+      return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
+    }
+
+    let paretoContractBalance = await Intel.methods
+      .getParetoBalance(address)
+      .call();
+
+    const balance = web3.utils.toWei(paretoContractBalance.toString(), "ether");
+
+    return onSuccess(balance);
+  }
 
   static async Setup(signData) {
     Intel_Contract_Schema = JSON.parse(window.localStorage.getItem('intelc'));

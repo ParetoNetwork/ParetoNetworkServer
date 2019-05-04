@@ -15,12 +15,17 @@
 
 <script>
   import profileService from '../services/profileService';
+  import ContentService from '../services/ContentService';
+  import {mapState} from 'vuex';
 
   export default {
     name: 'VStackedToGroupedBars',
     props: [
       "stackedBarData"
     ],
+    computed: {
+      ...mapState(['address', 'signType'])
+    },
     data() {
       return {
         height: 150,
@@ -34,7 +39,7 @@
         },
         y: function () {
         },
-        n: 3,
+        n: 4,
         m: 7,
         intervalFunction: {},
         chartTransitionPaused: false,
@@ -44,23 +49,59 @@
         dates: [],
         weekDays: [],
         responsifyWidth: 0,
-        responsifyHeight: 0
+        responsifyHeight: 0,
+        currentBalance: 78000,
+        chartInfoData: {}
       };
     },
     mounted() {
       this.setTimeTransition();
-      profileService.getChartUserInfo((data) => {
-          this.drawChart(data);
-      }, (e) =>{
-          this.drawChart(this.stackedBarData);
-      });
+      ;
+      Promise.all([
+        this.getChartInformation(),
+        this.getCurrentIntelContractBalance(),
+        this.getBalanceInformation()])
+        .then((data) => {
+          this.currentBalance = parseInt(data[1]);
+          this.drawChart(this.chartInfoData, data[2]);
+        });
     },
     methods: {
+      getBalanceInformation(){
+        return profileService.getChartBalanceInfo(res=> {
+          return res;
+        });
+      },
       resumeTransition() {
         if (this.chartTransitionPaused) {
           this.chartTransitionPaused = false;
           this.setTimeTransition();
         }
+      },
+      getChartInformation(){
+        return profileService.getChartUserInfo((data) => {
+          console.log(data);
+          this.chartInfoData = data;
+          return data;
+        }, (e) => {
+          return this.stackedBarData;
+        });
+      },
+      getCurrentIntelContractBalance(){
+        return ContentService.currentIntelContractBalance(this.address, {signType: this.signType},
+          (balance) => {
+            return balance;
+          }, error => {
+            let errorText = error.message ? error.message : error;
+
+            this.$notify({
+              group: 'notification',
+              type: 'error',
+              duration: 10000,
+              title: 'Login',
+              text: errorText
+            });
+          });
       },
       pauseTransition() {
         if (!this.chartTransitionPaused) {
@@ -77,51 +118,61 @@
           this.pickedChart = "stacked";
         }
       },
-       drawChart(data){
-           var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-           for (let i = 0; i < this.m; i++) {
-               let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
-               ds.setHours(0, 0, 0, 0);
-               this.weekDays.push(days[ds.getDay()]);
-               this.dates[i] = {
-                   date: ds,
-                   info: [0, 0, 0]
-               };
-           }
+      drawChart(data, balanceDates) {
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        for (let i = 0; i < this.m; i++) {
+          let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
+          ds.setHours(0, 0, 0, 0);
+          this.weekDays.push(days[ds.getDay()]);
+          this.dates[i] = {
+            date: ds,
+            info: [0, 0, 0]
+          };
+        }
 
-           let datesArray = [];
+        let datesArray = [];
+        for (let i = 0; i < this.n; i++) {
+          datesArray[i] = [];
+          for (let j = 0; j < this.m; j++) {
+            datesArray[i][j] = 0;
+          }
+        }
 
-           for (let i = 0; i < this.n; i++) {
-               datesArray[i] = [];
-               for (let j = 0; j < this.m; j++) {
-                   datesArray[i][j] = 0;
-               }
-           }
+        data.userInformation.forEach(information => {
+          this.dates.forEach((date, dateIndex) => {
+            const infoDate = new Date(information.dateCreated);
+            infoDate.setHours(0, 0, 0, 0);
+            console.log(information);
+            if (infoDate.getTime() === date.date.getTime()) {
+              switch (information.event) {
+                case 'reward':
+                  datesArray[0][dateIndex] += information.amount;
+                  break;
+                case 'create':
+                  datesArray[1][dateIndex] += information.amount;
+                  break;
+                case 'deposited':
+                  datesArray[2][dateIndex] += information.amount;
+                  break;
+              }
+            }
+          });
+        });
 
-           data.userInformation.forEach(information => {
-               this.dates.forEach((date, dateIndex) => {
-                   const infoDate = new Date(information.dateCreated);
-                   infoDate.setHours(0, 0, 0, 0);
+        this.dates.forEach((date, dateIndex) => {
+          let balance = balanceDates.find( (balanceDate) => {
+            const dateObject = new Date(balanceDate.date);
+            return dateObject.getTime() === date.date.getTime();
+          });
 
-                   if (infoDate.getTime() === date.date.getTime()) {
-                       switch (information.event) {
-                           case 'reward':
-                               datesArray[0][dateIndex] += information.amount;
-                               return;
-                           case 'create':
-                               datesArray[1][dateIndex] += information.amount;
-                               return;
-                           case 'deposit':
-                               datesArray[2][dateIndex] += information.amount;
-                               return;
-                       }
-                   }
-               })
-           });
+          if(balance){
+            datesArray[3][dateIndex] += balance.balance;
+          }
+        });
 
-           this.weekDays[this.weekDays.length - 1] = "Today";
-           this.stackedToGroupedChart(datesArray, this.pickedChart);
-       } ,
+        this.weekDays[this.weekDays.length - 1] = "Today";
+        this.stackedToGroupedChart(datesArray, this.pickedChart);
+      },
       responsivefy(svg) {
         var container = d3.select(svg.node().parentNode),
           width = Math.min(parseInt(svg.style("width")), this.width),
@@ -141,7 +192,8 @@
         }
       },
       stackedToGroupedChart(data, chartType) {
-        var LABELS = ["Reward", "Create", "Deposit"];
+        console.log(data);
+        var LABELS = ["Reward", "Create", "Deposited", "Balance"];
         const height = this.height;
         const width = this.width;
 
@@ -151,7 +203,7 @@
         this.y01z = d3.stack()
           .keys(d3.range(this.n))
           (d3.transpose(yz))
-          .map((data, i) => data.map(([y0, y1]) => [y0, y1, i]));
+          .map((data, i) => data.map(([y0, y1], j) => [y0, y1, i, j]));
 
         this.y1Max = d3.max(this.y01z, y => d3.max(y, d => d[1]));
 
@@ -204,20 +256,44 @@
           .attr("height", 0);
 
         this.rect.on("mouseover", function (d) {
+          console.log(d)
+          let type = '';
+          switch (d[2]) {
+            case 0 :
+              type = 'Reward';
+              break;
+            case 1:
+              type = 'Create';
+              break;
+            case 2 :
+              type = 'Deposited';
+              break;
+            case 3:
+              type = 'Balance';
+              break;
+          }
+
           let coords = {
             x: this.getAttribute("x"),
             y: this.getAttribute("y"),
           };
 
           const newSvg = $("#d3-stacked-grouped-bars svg")[0];
+          let svgDim = {
+            width: parseInt(newSvg.attributes.width.value),
+            height: parseInt(newSvg.attributes.height.value),
+          };
 
-          divTooltip.style("left", (coords.x * newSvg.clientWidth / width - 30) + "px")
-            .style("top", (coords.y * newSvg.clientHeight / height - 30) + "px")
+          divTooltip.style("left", (coords.x * svgDim.width / width - 30) + "px")
+            .style("top", (coords.y * svgDim.height / height - 30) + "px")
             .style("display", "inline-block")
-            .html("Pareto: " + d[1])
+            .html(type +  ": " + (
+              data[d[2]][d[3]])
+              //+ "<br> Total Balance: " + data[3][d[3]]
+            )
             .style("opacity", .9);
         }).on("mouseout", function (d) {
-          divTooltip.style("opacity", 0)
+          divTooltip.style("opacity", 0);
         });
 
         svg.append("g")
@@ -291,7 +367,6 @@
       transitionStacked() {
         this.y.domain([0, this.y1Max]);
 
-        // console.log(rect);
         this.rect.transition()
           .duration(500)
           .delay((d, i) => {
@@ -306,7 +381,6 @@
       transitionGrouped() {
         this.y.domain([0, this.yMax]);
 
-        // console.log(rect);
         this.rect.transition()
           .duration(500)
           .delay((d, i) => {

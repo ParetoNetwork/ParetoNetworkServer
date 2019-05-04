@@ -163,14 +163,14 @@ const ErrorHandler = require('./utils/error-handler.js');
 });*/
 
 app.get('/v1/listproducts', function (req, res) {
-    //res.sendFile(path.join(__dirname + '/sitemap.xml'));
-    controller.listProducts(function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
+  //res.sendFile(path.join(__dirname + '/sitemap.xml'));
+  controller.listProducts(function (err, result) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
+  });
 });
 
 app.get('/sitemap.xml', function (req, res) {
@@ -261,13 +261,13 @@ app.post('/v1/addresses', function (req, res) {
 
 
 app.get('/v1/assets', function (req, res) {
-    controller.getAssets( function (err, results) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(results));
-        }
-    });
+  controller.getAssets(function (err, results) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(results));
+    }
+  });
 });
 
 app.get("/getIntels", (req, res) => {
@@ -322,7 +322,7 @@ app.post('/v1/config_basic', function (req, res) {
   const showshoppingcart = process.env.SHOW_SHOPPING_CART;
   const public_key_stripe = process.env.PK_STRIPE;
 
-    res.status(200).json(ErrorHandler.getSuccess({
+  res.status(200).json(ErrorHandler.getSuccess({
     netWorkId: netWorkId,
     intelAddress: intel.networks[netWorkId].address,
     paretoAddress: pcontract,
@@ -342,7 +342,7 @@ app.post('/v1/config', function (req, res) {
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
   const showshoppingcart = process.env.SHOW_SHOPPING_CART;
 
-    res.status(200).json(ErrorHandler.getSuccess({
+  res.status(200).json(ErrorHandler.getSuccess({
     intel: intel.abi,
     pareto: pareto.abi,
     netWorkId: netWorkId,
@@ -359,24 +359,24 @@ app.post('/v1/error-log', function (req, res) {
   if (req.body && req.body.errorState) {
     const error = req.body.errorState;
     error.systemMessage = req.body.error;
-    if(!req.user){
-        try {
-            let authorization = req.cookies.authorization;
-            if (authorization.includes('Bearer')) {
-                authorization = authorization.replace('Bearer', '');
-            }
-            authorization = authorization.trim();
-
-            jwt.verify(authorization, 'Pareto', function (err, decoded) {
-                error.address = decoded.user;
-                console.log(JSON.stringify(error));
-            });
-        }catch (e) {
-            console.log(JSON.stringify(error));
+    if (!req.user) {
+      try {
+        let authorization = req.cookies.authorization;
+        if (authorization.includes('Bearer')) {
+          authorization = authorization.replace('Bearer', '');
         }
-    }else{
-        error.address = req.user;
+        authorization = authorization.trim();
+
+        jwt.verify(authorization, 'Pareto', function (err, decoded) {
+          error.address = decoded.user;
+          console.log(JSON.stringify(error));
+        });
+      } catch (e) {
         console.log(JSON.stringify(error));
+      }
+    } else {
+      error.address = req.user;
+      console.log(JSON.stringify(error));
     }
 
   }
@@ -385,21 +385,19 @@ app.post('/v1/error-log', function (req, res) {
 });
 
 
+app.post('/webhook', function (req, res) {
+  // Retrieve the request's body and parse it as JSON
 
-    app.post('/webhook', function(req, res) {
-        // Retrieve the request's body and parse it as JSON
-
-        controller.event_payment(req.body , function (err, result) {
-            if (err) {
-                res.status(200).json(ErrorHandler.getError(err));
-            } else {
-                res.status(200).json(ErrorHandler.getSuccess(result));
-            }
-        });
-
+  controller.event_payment(req.body, function (err, result) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
+  });
 
 
-    });
+});
 
 app.post('/v1/showshoppingcar', function (req, res) {
 
@@ -411,51 +409,49 @@ app.post('/v1/showshoppingcar', function (req, res) {
 });
 
 app.get('/v1/getproducts', function (req, res) {
-    //res.sendFile(path.join(__dirname + '/sitemap.xml'));
-    controller.getProducts(function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
+  //res.sendFile(path.join(__dirname + '/sitemap.xml'));
+  controller.getProducts(function (err, result) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
+  });
 });
 
 app.post('/v1/createorder', function (req, res) {
 
-    controller.createOrder(req.body , function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
+  controller.createOrder(req.body, function (err, result) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
+  });
 });
 
 
-
 app.post('/v1/getOrder', function (req, res) {
-    controller.getOrder(req.body.order_id , function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
+  controller.getOrder(req.body.order_id, function (err, result) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
+  });
 });
 
 
 app.post('/v1/updateTransaction', function (req, res) {
 
-    controller.updateTransaction(req.body, function (err, result) {
-        if (err) {
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
-    });
+  controller.updateTransaction(req.body, function (err, result) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
+  });
 });
-
 
 
 /********* AUTHENTICATED v1 APIs *********/
@@ -526,15 +522,15 @@ app.post('/v1/unsign', function (req, res) {
 });
 
 app.post('/v1/rewardsNeeded', function (req, res) {
-    controller.getRewardFromDesiredScore(req.user,  req.body.desiredScore, req.body.tokens || 0, function (err, result) {
-        if (err) {
-            console.log(err);
-            res.status(200).json(ErrorHandler.getError(err));
-        } else {
-            res.status(200).json(ErrorHandler.getSuccess(result));
-        }
+  controller.getRewardFromDesiredScore(req.user, req.body.desiredScore, req.body.tokens || 0, function (err, result) {
+    if (err) {
+      console.log(err);
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(result));
+    }
 
-    });
+  });
 });
 
 app.get('/v1/summation', function (req, res) {
@@ -652,7 +648,6 @@ app.get('/v1/content/:content', function (req, res) {
 });
 
 
-
 app.get('/v1/ranking', function (req, res) {
   if (req.query.admin === undefined) { //endpoint protection from DDOS
     res.boom.unauthorized();
@@ -663,9 +658,9 @@ app.get('/v1/ranking', function (req, res) {
 
 
 //Get the stackedGrouped chart information
-  app.get('/v1/chart-user-info', function (req, res) {
+app.get('/v1/chart-user-info', function (req, res) {
   controller.getChartUserInformation(req, function (err, results) {
-    if(err){
+    if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {
       res.status(200).json(ErrorHandler.getSuccess(results));
@@ -673,6 +668,16 @@ app.get('/v1/ranking', function (req, res) {
   });
 });
 
+
+app.get('/v1/chart-current-balance', function (req, res) {
+  controller.getUserCurrentBalance(req, function (err, results) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(results));
+    }
+  });
+});
 
 //get info about your address
 app.get('/v1/address', function (req, res) {
@@ -833,11 +838,13 @@ app.initializeWebSocket = function (server) {
   const http = require('http');
   const wss = new WebSocket.Server({
     verifyClient: function (info, cb) {
-     const data = info.req.headers.cookie.split('; ').filter(it=>{return it.indexOf("authorization=") >=0});
-     let token = null;
-     if(data && data.length && data[0].length >= 14){
-         token = data[0].slice(14,data[0].length);
-     }
+      const data = info.req.headers.cookie.split('; ').filter(it => {
+        return it.indexOf("authorization=") >= 0
+      });
+      let token = null;
+      if (data && data.length && data[0].length >= 14) {
+        token = data[0].slice(14, data[0].length);
+      }
       if (!token)
         cb(false, 401, 'Unauthorized');
       else {
