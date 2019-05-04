@@ -237,9 +237,18 @@
           }
         }
 
+      //animate's sunburst chart on initial render, once, everytime.
+      d3.select('#d3-sunburst svg g path').dispatch('click');
+
+      setTimeout( ()=>{
+        try{
+          d3.select('#d3-sunburst svg g circle').dispatch('click');
+        }catch (e) { }
+      },1000)
 
       if(!this.loggedUser){
-          this.iniAnimation();
+
+        this.iniAnimation();
        }
       }
     },
