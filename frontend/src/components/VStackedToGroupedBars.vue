@@ -17,6 +17,7 @@
   import profileService from '../services/profileService';
   import ContentService from '../services/ContentService';
   import {mapState} from 'vuex';
+  import * as d3 from "d3";
 
   export default {
     name: 'VStackedToGroupedBars',
@@ -45,18 +46,17 @@
         chartTransitionPaused: false,
         intervalTransitionTime: 20000,
         margin: {top: 30, right: 0, bottom: 20, left: 40},
-        userInformation: {},
+        networkInformation: {},
         dates: [],
         weekDays: [],
         responsifyWidth: 0,
         responsifyHeight: 0,
-        currentBalance: 78000,
+        currentBalance: 0,
         chartInfoData: {}
       };
     },
     mounted() {
       this.setTimeTransition();
-      ;
       Promise.all([
         this.getChartInformation(),
         this.getCurrentIntelContractBalance(),
@@ -80,7 +80,7 @@
       },
       getChartInformation(){
         return profileService.getChartUserInfo((data) => {
-          console.log(data);
+          //console.log(data);
           this.chartInfoData = data;
           return data;
         }, (e) => {
@@ -88,8 +88,7 @@
         });
       },
       getCurrentIntelContractBalance(){
-        return ContentService.currentIntelContractBalance(this.address, {signType: this.signType},
-          (balance) => {
+        return ContentService.currentIntelContractBalance({signType: this.signType}, balance => {
             return balance;
           }, error => {
             let errorText = error.message ? error.message : error;
@@ -119,7 +118,7 @@
         }
       },
       drawChart(data, balanceDates) {
-        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         for (let i = 0; i < this.m; i++) {
           let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
           ds.setHours(0, 0, 0, 0);
@@ -138,11 +137,11 @@
           }
         }
 
-        data.userInformation.forEach(information => {
+        data.networkInformation.forEach(information => {
           this.dates.forEach((date, dateIndex) => {
             const infoDate = new Date(information.dateCreated);
             infoDate.setHours(0, 0, 0, 0);
-            console.log(information);
+            //console.log(information);
             if (infoDate.getTime() === date.date.getTime()) {
               switch (information.event) {
                 case 'reward':
@@ -174,7 +173,7 @@
         this.stackedToGroupedChart(datesArray, this.pickedChart);
       },
       responsivefy(svg) {
-        var container = d3.select(svg.node().parentNode),
+        let container = d3.select(svg.node().parentNode),
           width = Math.min(parseInt(svg.style("width")), this.width),
           height = Math.min(parseInt(svg.style("height")), this.height),
           aspect = width / height;
@@ -186,14 +185,14 @@
         d3.select(window).on("resize." + container.attr("id"), resize);
 
         function resize() {
-          var targetWidth = parseInt(container.style("width"));
+          let targetWidth = parseInt(container.style("width"));
           svg.attr("width", targetWidth);
           svg.attr("height", Math.round(targetWidth / aspect));
         }
       },
       stackedToGroupedChart(data, chartType) {
-        console.log(data);
-        var LABELS = ["Reward", "Create", "Deposited", "Balance"];
+        //console.log(data);
+        let LABELS = ["Rewards", "Intel", "Staked", "Total"];
         const height = this.height;
         const width = this.width;
 
@@ -239,7 +238,7 @@
           .attr("height", height)
           .call(this.responsivefy);
 
-        var divTooltip = d3.select("#d3-stacked-grouped-bars").append("div").attr("class", "toolTip");
+        let divTooltip = d3.select("#d3-stacked-grouped-bars").append("div").attr("class", "toolTip");
 
         this.rect = svg.selectAll("g")
           .data(this.y01z)
@@ -256,20 +255,20 @@
           .attr("height", 0);
 
         this.rect.on("mouseover", function (d) {
-          console.log(d)
+          //console.log(d)
           let type = '';
           switch (d[2]) {
             case 0 :
-              type = 'Reward';
+              type = 'Rewards';
               break;
             case 1:
-              type = 'Create';
+              type = 'Intel';
               break;
             case 2 :
-              type = 'Deposited';
+              type = 'Staked';
               break;
             case 3:
-              type = 'Balance';
+              type = 'Total';
               break;
           }
 
@@ -292,7 +291,7 @@
               //+ "<br> Total Balance: " + data[3][d[3]]
             )
             .style("opacity", .9);
-        }).on("mouseout", function (d) {
+        }).on("mouseout", function () {
           divTooltip.style("opacity", 0);
         });
 
@@ -303,7 +302,7 @@
           .call(yAxis);
 
         let drawLegend = (data) => {
-          var legend = svg.append("g")
+          let legend = svg.append("g")
             .attr("font-family", "sans-serif")
             .attr("font-size", 10)
             .attr("text-anchor", "end")
@@ -314,10 +313,10 @@
               return `translate(${i * -70},0)`;
             });
 
-          legend.append("rect")
-            .attr("x", width - 19)
-            .attr("width", 19)
-            .attr("height", 19)
+          legend.append("circle")
+            .attr("r",  5)
+            .attr("cx", width - 15)
+            .attr("cy", 10)
             .attr("fill", (d, i) => z(i));
 
           legend.append("text")

@@ -36,7 +36,7 @@
         computed: {
              ...mapState(['shoppingCart']),
             cartSize: function () {
-                var cartSize = 0;
+                let cartSize = 0;
                 this.cart = this.shoppingCart;
                 if(this.cart){
                     for (var i = 0; i < this.cart.length; i++) {
