@@ -666,8 +666,9 @@ controller.getChartInformationAndSaveRadis= async function (callback){
     let response =
         Object.values(transactionsRewards).map(it=>{
             let transactionByMonth = {};
-            let intelContractDeposit = 0;
             it.forEach(transaction => {
+
+
                 const date =  transaction.dateCreated;
                 const dateMonthString =  `${date.getMonth()}/${date.getFullYear()}`;
                 if(!transactionByMonth[dateMonthString]){
@@ -680,7 +681,7 @@ controller.getChartInformationAndSaveRadis= async function (callback){
                 }else{
                     transactionByMonth[dateMonthString][transaction.event] += transaction.amount;
                 }
-
+                let intelContractDeposit =  transactionByMonth[dateMonthString].intelContractDeposit || 0;
                 if(transaction.event === 'create' || transaction.event === 'reward'){
                     intelContractDeposit -= transaction.amount;
                 }else if(transaction.event === 'deposited'){
