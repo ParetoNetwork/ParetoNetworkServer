@@ -17,6 +17,7 @@
   import profileService from '../services/profileService';
   import ContentService from '../services/ContentService';
   import {mapState} from 'vuex';
+  import * as d3 from "d3";
 
   export default {
     name: 'VStackedToGroupedBars',
@@ -45,7 +46,7 @@
         chartTransitionPaused: false,
         intervalTransitionTime: 20000,
         margin: {top: 30, right: 0, bottom: 20, left: 40},
-        userInformation: {},
+        networkInformation: {},
         dates: [],
         weekDays: [],
         responsifyWidth: 0,
@@ -56,7 +57,6 @@
     },
     mounted() {
       this.setTimeTransition();
-      ;
       Promise.all([
         this.getChartInformation(),
         this.getCurrentIntelContractBalance(),
@@ -119,7 +119,7 @@
         }
       },
       drawChart(data, balanceDates) {
-        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         for (let i = 0; i < this.m; i++) {
           let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
           ds.setHours(0, 0, 0, 0);
@@ -138,7 +138,7 @@
           }
         }
 
-        data.userInformation.forEach(information => {
+        data.networkInformation.forEach(information => {
           this.dates.forEach((date, dateIndex) => {
             const infoDate = new Date(information.dateCreated);
             infoDate.setHours(0, 0, 0, 0);
@@ -174,7 +174,7 @@
         this.stackedToGroupedChart(datesArray, this.pickedChart);
       },
       responsivefy(svg) {
-        var container = d3.select(svg.node().parentNode),
+        let container = d3.select(svg.node().parentNode),
           width = Math.min(parseInt(svg.style("width")), this.width),
           height = Math.min(parseInt(svg.style("height")), this.height),
           aspect = width / height;
@@ -193,7 +193,7 @@
       },
       stackedToGroupedChart(data, chartType) {
         console.log(data);
-        var LABELS = ["Reward", "Create", "Deposited", "Balance"];
+        let LABELS = ["Rewards", "Intel", "Staked", "Contracts"];
         const height = this.height;
         const width = this.width;
 
@@ -292,7 +292,7 @@
               //+ "<br> Total Balance: " + data[3][d[3]]
             )
             .style("opacity", .9);
-        }).on("mouseout", function (d) {
+        }).on("mouseout", function () {
           divTooltip.style("opacity", 0);
         });
 
@@ -314,10 +314,10 @@
               return `translate(${i * -70},0)`;
             });
 
-          legend.append("rect")
-            .attr("x", width - 19)
-            .attr("width", 19)
-            .attr("height", 19)
+          legend.append("circle")
+            .attr("r",  5)
+            .attr("cx", width - 15)
+            .attr("cy", 10)
             .attr("fill", (d, i) => z(i));
 
           legend.append("text")

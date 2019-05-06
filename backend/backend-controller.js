@@ -549,18 +549,18 @@ controller.watchTransaction = function (data, callback) {
 }
 
 controller.getChartUserInformation = async function (req, callback) {
-  let address = req.query.user || req.user;
-  const dateWeekAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000);
+  const daysAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000); //7 weeks ago
 
-  let transactionsRewards = await ParetoTransaction.find({event: "reward", address, dateCreated: {$gte: dateWeekAgo}});
-  let transactionsCreate = await ParetoTransaction.find({event: "create", address, dateCreated: {$gte: dateWeekAgo}});
+  //const weeksAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000); //7 days ago
+
+  let transactionsRewards = await ParetoTransaction.find({event: "reward", dateCreated: {$gte: daysAgo}});
+  let transactionsCreate = await ParetoTransaction.find({event: "create", dateCreated: {$gte: daysAgo}});
   let transactionsDistribute = await ParetoTransaction.find({
     event: "deposited",
-    address,
-    dateCreated: {$gte: dateWeekAgo}
+    dateCreated: {$gte: daysAgo}
   });
 
-  return callback(null, {userInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
+  return callback(null, {networkInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
 };
 
 controller.getUserCurrentBalance = async function (req, callback) {
