@@ -168,22 +168,6 @@ const information = (function () {
 
 export {information};
 
-var sunburstData = {
-  "name": "TOPICS", "children": [{
-    "name": "Topic A",
-    "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
-  }, {
-    "name": "Topic B",
-    "children": [{"name": "Sub B1", "size": 3}, {"name": "Sub B2", "size": 3}, {
-      "name": "Sub B3", "size": 3}]
-  }, {
-    "name": "Topic C",
-    "children": [{"name": "Sub A1", "size": 4}, {"name": "Sub A2", "size": 4}]
-  }]
-};
-
-export {sunburstData};
-
 var stackedBarData =  {"userInformation":[{"status":3,  "amount":2,"dateCreated":"2019-04-26T22:24:37.628Z","event":"reward","intel":515, "nonce":231,"block":5485158},{"status":3, "amount":1,"dateCreated":"2019-04-29T14:06:31.567Z","event":"reward","intel":518, "nonce":233,"block":5502137, },{"status":3, "amount":2,"dateCreated":"2019-04-29T22:29:00.956Z","event":"reward","intel":520, "nonce":235,"block":5504394, },{"status":3, "amount":1,"dateCreated":"2019-04-26T22:26:57.793Z","event":"create", "nonce":232,"block":5485165, },{"status":3,"amount":1,"dateCreated":"2019-04-29T22:27:44.162Z","event":"create","intel":521,"nonce":234,"block":5504388}]};
 
 export {stackedBarData};

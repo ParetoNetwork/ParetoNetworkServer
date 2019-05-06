@@ -51,7 +51,7 @@
                 const hours =  Math.floor((seconds%86400)/3600);
                 const min =  Math.floor(((seconds%86400)%3600)/60);
                 const secods = (((seconds%86400)/3600)/60)-min;
-                return (days<9?"0"+days:days) + ":"+(hours<9?"0"+hours:hours)+":"+(min<9?"0"+min:min);//+":"+ ":"+seconds;
+                return (days<=9?"0"+days:days) + ":"+(hours<=9?"0"+hours:hours)+":"+(min<=9?"0"+min:min);//+":"+ ":"+seconds;
             }
         }
     }

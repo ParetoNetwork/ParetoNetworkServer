@@ -792,7 +792,7 @@ export default class ContentService {
     });
   }
 
-  static async currentIntelContractBalance(address, signData, onSuccess, onError){
+  static async currentIntelContractBalance(signData, onSuccess, onError){
     try {
       await this.Setup(signData);
     } catch (e) {
@@ -800,7 +800,7 @@ export default class ContentService {
     }
 
     let paretoContractBalance = await Intel.methods
-      .getParetoBalance(address)
+      .getParetoBalance(Intel._address)
       .call();
 
     const balance = web3.utils.toWei(paretoContractBalance.toString(), "ether");
