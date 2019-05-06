@@ -1,5 +1,8 @@
 <template>
   <VChartSunburst v-if="nodeData.children.length > 0" :nodeData="nodeData" :loggedUser="loggedUser" :pos="pos"></VChartSunburst>
+  <div v-else class="sunsburst-style">
+    <b class="title-content text-left d-lg-none d-xl-block"> Explorer </b>
+  </div>
 </template>
 
 <script>
@@ -106,6 +109,16 @@
   }
 </script>
 
-<style scoped>
+<style>
+  .sunsburst-style{
+    min-width: 400px;
+    min-height: 470px;
+  }
 
+  @media (max-width: 426px) {
+    .sunsburst-style {
+      min-width: 300px;
+      min-height: 300px;
+    }
+  }
 </style>

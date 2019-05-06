@@ -44,7 +44,7 @@
         m: 7,
         intervalFunction: {},
         chartTransitionPaused: false,
-        intervalTransitionTime: 20000,
+        intervalTransitionTime: 8000,
         margin: {top: 30, right: 0, bottom: 20, left: 40},
         networkInformation: {},
         dates: [],
@@ -336,6 +336,8 @@
         } else if (chartType === "grouped") {
           this.transitionGrouped();
         }
+
+        setTimeout(this.createTransition, 2000);
       },
       bumps(m) {
         const values = [];
