@@ -670,7 +670,7 @@ app.get('/v1/chart-user-info', function (req, res) {
 
 //Get the stackedGrouped chart information
 app.get('/v1/stacked-grouped-information', function (req, res) {
-  controller.getStackedGroupedChartInformation(req, function (err, results) {
+  controller.getStackedGroupedChartInformation( function (err, results) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {

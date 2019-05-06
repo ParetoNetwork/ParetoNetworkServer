@@ -1,6 +1,6 @@
 <template>
   <div>
-    <VStackedToGroupedBars :stackedBarData="stackedBarData"></VStackedToGroupedBars>
+    <VStackedToGroupedBars v-if="loaded" :stackedBarData="stackedBarData" :monthsInformation="monthsInformation" :monthsNumber="monthsNumber"></VStackedToGroupedBars>
   </div>
 </template>
 
@@ -10,44 +10,34 @@
 
   export default {
     name: "VHandleStackGroupBars",
-    props: [
-      "stackedBarData"
-    ],
+    data: function(){
+      return {
+        months: 7,
+        monthsInformation: [],
+        monthsNumber: [],
+        loaded: false,
+        intelMonthData: []
+      }
+    },
     components: {
       VStackedToGroupedBars
     },
+    props: [
+      "stackedBarData"
+    ],
     mounted() {
-      chartService.getStackedGroupedInformation(function (res) {
-        const transactionsRewards = res;
-        let transactionByMonth = {};
+      chartService.getStackedGroupedInformation((res)=>{
+        for(let i = this.months - 1; i >= 0; i--){
+          let date = new Date();
+          date.setMonth(date.getMonth() - i);
+          this.monthsNumber.push(date.getMonth());
+          const dateMonthString =  `${date.getMonth()}/${date.getFullYear()}`;
+          this.monthsInformation.push(res[dateMonthString]);
+        }
 
-        let intelContractDeposit = 0;
-        transactionsRewards.forEach(transaction => {
-          const date = new Date(transaction.dateCreated);
-          const dateMonthString = `${date.getMonth()}/${date.getFullYear()}`;
-
-          if (!transactionByMonth[dateMonthString]) {
-            transactionByMonth[dateMonthString] = {
-              reward: 0,
-              create: 0,
-              deposited: 0
-            };
-            transactionByMonth[dateMonthString][transaction.event] = transaction.amount;
-          } else {
-            transactionByMonth[dateMonthString][transaction.event] += transaction.amount;
-          }
-
-          if (transaction.event === 'create' || transaction.event === 'reward') {
-            intelContractDeposit -= transaction.amount;
-          } else if (transaction.event === 'deposited') {
-            intelContractDeposit += transaction.amount
-          }
-          if (intelContractDeposit < 0) intelContractDeposit = 0;
-
-          transactionByMonth[dateMonthString].intelContractDeposit = intelContractDeposit;
-        });
-
-        console.log(transactionByMonth);
+        console.log(this.monthsInformation);
+        console.log(this.monthsNumber);
+        this.loaded = true;
       });
     }
   }

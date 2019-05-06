@@ -623,15 +623,100 @@ controller.getRewardFromDesiredScore = function (address, desiredScore, tokens, 
   intelController.getRewardFromDesiredScore(address, desiredScore, tokens, callback);
 };
 
-controller.getStackedGroupedChartInformation = async function(address, callback){
-  const transactionTypes = ['reward', 'create', 'deposited'];
-  let transactionsRewards = await ParetoTransaction.find({event: { $in: transactionTypes}}).sort({_id: 1});
+controller.getStackedGroupedChartInformation = async function( callback){
+    const multi = redisClient.multi();
+    multi.hgetall("NETWORK_CHART");
+    multi.exec(function (err, result) {
+        if (err) {
+            callback(err);
+        }
+        if(!result || !result.length || !result[0]){
+            controller.getChartInformationAndSaveRadis(callback)
+        }else{
+            const info = JSON.parse(result[0]);
+            if((info.date.getTime() - (new Date()).getTime())/1000 > 86400){
+                controller.getChartInformationAndSaveRadis(callback)
+            }else{
+              callback(null, info.data);
+            }
+        }
+    });
 
-  return callback(null, transactionsRewards.map(it=> {
-    it.dateCreated = new Date(it._id.getTimestamp());
-    return it;
-  }));
+
 };
+
+
+
+controller.getChartInformationAndSaveRadis= async function (callback){
+    const multi = redisClient.multi();
+    const transactionTypes = ['reward', 'create', 'deposited'];
+    let transactionsRewards = (await ParetoTransaction.find({event: { $in: transactionTypes}, status: 3})
+        .select(['address', 'event', 'amount']).sort({_id: 1}))
+.map(it=> {
+        it.dateCreated = new Date(it._id.getTimestamp());
+        return it;
+    })
+        .reduce((data, it)=>{
+            if(!data[it.address]){
+                data[it.address] = [];
+            }
+            data[it.address].push(it);
+            return data;
+        },{});
+    let response =
+        Object.values(transactionsRewards).map(it=>{
+            let transactionByMonth = {};
+            let intelContractDeposit = 0;
+            it.forEach(transaction => {
+                const date =  transaction.dateCreated;
+                const dateMonthString =  `${date.getMonth()}/${date.getFullYear()}`;
+                if(!transactionByMonth[dateMonthString]){
+                    transactionByMonth[dateMonthString] = {
+                        reward: 0,
+                        create: 0,
+                        deposited: 0
+                    };
+                    transactionByMonth[dateMonthString][transaction.event] = transaction.amount;
+                }else{
+                    transactionByMonth[dateMonthString][transaction.event] += transaction.amount;
+                }
+
+                if(transaction.event === 'create' || transaction.event === 'reward'){
+                    intelContractDeposit -= transaction.amount;
+                }else if(transaction.event === 'deposited'){
+                    intelContractDeposit += transaction.amount
+                }
+                if(intelContractDeposit < 0) intelContractDeposit = 0;
+
+                transactionByMonth[dateMonthString].intelContractDeposit = intelContractDeposit;
+            });
+            return transactionByMonth;
+        })
+            .reduce((data, it, index)=>{
+                let keys = Object.keys(it);
+                keys.forEach( key=>{
+                    if(!data[key]){
+                        data[key] = {};
+                        data[key]['reward'] =   0;
+                        data[key]['create'] =   0;
+                        data[key]['deposited'] =  0;
+                        data[key]['intelContractDeposit'] =  0;
+                    }
+                    data[key]['reward'] = data[key]['reward'] +  it[key]['reward'] || 0;
+                    data[key]['create'] = data[key]['create'] + it[key]['create'] || 0;
+                    data[key]['deposited'] =  data[key]['deposited'] + it[key]['deposited'] || 0;
+                    data[key]['intelContractDeposit'] =   data[key]['intelContractDeposit'] + it[key]['intelContractDeposit'] || 0;
+                } );
+                return data;
+            },{});
+
+
+
+    multi.hmset("NETWORK_CHART", JSON.stringify( {date: new Date(), data: response }));
+    multi.exec(function (errors, results) {
+        callback(null, response)
+    });
+}
 /**
  * Worker Services
  */
