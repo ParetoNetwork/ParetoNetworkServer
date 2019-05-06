@@ -563,12 +563,11 @@ controller.getChartUserInformation = async function (req, callback) {
   return callback(null, {networkInformation: [...transactionsRewards, ...transactionsCreate, ...transactionsDistribute]});
 };
 
-controller.getUserCurrentBalance = async function (req, callback) {
-  let address = req.query.user || req.user;
+controller.getNetworkCurrentBalance = async function (req, callback) {
 
-  let transactionsRewards = await ParetoTransaction.find({event: "reward", address});
-  let transactionsCreate = await ParetoTransaction.find({event: "create", address});
-  let transactionsDeposit = await ParetoTransaction.find({event: "deposited", address});
+  let transactionsRewards = await ParetoTransaction.find({event: "reward"});
+  let transactionsCreate = await ParetoTransaction.find({event: "create"});
+  let transactionsDeposit = await ParetoTransaction.find({event: "deposited"});
 
   let allTrans = [...transactionsRewards, ...transactionsCreate, ...transactionsDeposit];
 

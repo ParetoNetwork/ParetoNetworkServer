@@ -186,14 +186,14 @@
         d3.select(window).on("resize." + container.attr("id"), resize);
 
         function resize() {
-          var targetWidth = parseInt(container.style("width"));
+          let targetWidth = parseInt(container.style("width"));
           svg.attr("width", targetWidth);
           svg.attr("height", Math.round(targetWidth / aspect));
         }
       },
       stackedToGroupedChart(data, chartType) {
         console.log(data);
-        let LABELS = ["Rewards", "Intel", "Staked", "Contracts"];
+        let LABELS = ["Rewards", "Intel", "Staked", "Locked"];
         const height = this.height;
         const width = this.width;
 
@@ -239,7 +239,7 @@
           .attr("height", height)
           .call(this.responsivefy);
 
-        var divTooltip = d3.select("#d3-stacked-grouped-bars").append("div").attr("class", "toolTip");
+        let divTooltip = d3.select("#d3-stacked-grouped-bars").append("div").attr("class", "toolTip");
 
         this.rect = svg.selectAll("g")
           .data(this.y01z)
@@ -260,16 +260,16 @@
           let type = '';
           switch (d[2]) {
             case 0 :
-              type = 'Reward';
+              type = 'Rewards';
               break;
             case 1:
-              type = 'Create';
+              type = 'Intel';
               break;
             case 2 :
-              type = 'Deposited';
+              type = 'Staked';
               break;
             case 3:
-              type = 'Balance';
+              type = 'Locked';
               break;
           }
 
@@ -303,7 +303,7 @@
           .call(yAxis);
 
         let drawLegend = (data) => {
-          var legend = svg.append("g")
+          let legend = svg.append("g")
             .attr("font-family", "sans-serif")
             .attr("font-size", 10)
             .attr("text-anchor", "end")

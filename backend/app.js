@@ -670,7 +670,7 @@ app.get('/v1/chart-user-info', function (req, res) {
 
 
 app.get('/v1/chart-current-balance', function (req, res) {
-  controller.getUserCurrentBalance(req, function (err, results) {
+  controller.getNetworkCurrentBalance(req, function (err, results) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {
