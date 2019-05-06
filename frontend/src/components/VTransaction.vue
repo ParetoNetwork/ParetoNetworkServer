@@ -172,12 +172,17 @@
                   this.ini = this.mid - this.mid*0.05;
                   setTimeout(this.updateBlue, Math.random() * (50 - 10) + 10)
               }
-          }else{
+          }else if (this.blue > 50 && this.blue <= 99) {
               if (this.mid > this.blue) {
                   this.mid = this.mid - 0.5;
                   this.ini = this.mid - this.mid*0.05;
                   setTimeout(this.updateBlue, Math.random() * (50 - 10) + 10)
               }
+          }
+          else { //blue > 99
+            this.mid = 99.5;
+            this.ini = 99.5;
+            setTimeout(this.updateBlue, Math.random() * (50 - 10) + 10)
           }
         },
       intelTitle(transaction){

@@ -51,7 +51,7 @@
         weekDays: [],
         responsifyWidth: 0,
         responsifyHeight: 0,
-        currentBalance: 78000,
+        currentBalance: 0,
         chartInfoData: {}
       };
     },
@@ -80,7 +80,7 @@
       },
       getChartInformation(){
         return profileService.getChartUserInfo((data) => {
-          console.log(data);
+          //console.log(data);
           this.chartInfoData = data;
           return data;
         }, (e) => {
@@ -88,8 +88,7 @@
         });
       },
       getCurrentIntelContractBalance(){
-        return ContentService.currentIntelContractBalance(this.address, {signType: this.signType},
-          (balance) => {
+        return ContentService.currentIntelContractBalance({signType: this.signType}, balance => {
             return balance;
           }, error => {
             let errorText = error.message ? error.message : error;
@@ -142,7 +141,7 @@
           this.dates.forEach((date, dateIndex) => {
             const infoDate = new Date(information.dateCreated);
             infoDate.setHours(0, 0, 0, 0);
-            console.log(information);
+            //console.log(information);
             if (infoDate.getTime() === date.date.getTime()) {
               switch (information.event) {
                 case 'reward':
@@ -192,8 +191,8 @@
         }
       },
       stackedToGroupedChart(data, chartType) {
-        console.log(data);
-        let LABELS = ["Rewards", "Intel", "Staked", "Locked"];
+        //console.log(data);
+        let LABELS = ["Rewards", "Intel", "Staked", "Total"];
         const height = this.height;
         const width = this.width;
 
@@ -256,7 +255,7 @@
           .attr("height", 0);
 
         this.rect.on("mouseover", function (d) {
-          console.log(d)
+          //console.log(d)
           let type = '';
           switch (d[2]) {
             case 0 :
@@ -269,7 +268,7 @@
               type = 'Staked';
               break;
             case 3:
-              type = 'Locked';
+              type = 'Total';
               break;
           }
 
