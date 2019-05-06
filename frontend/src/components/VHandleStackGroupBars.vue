@@ -1,6 +1,6 @@
 <template>
   <div>
-    <VStackedToGroupedBars></VStackedToGroupedBars>
+    <VStackedToGroupedBars :stackedBarData="stackedBarData"></VStackedToGroupedBars>
   </div>
 </template>
 
@@ -10,36 +10,39 @@
 
   export default {
     name: "VHandleStackGroupBars",
+    props: [
+      "stackedBarData"
+    ],
     components: {
       VStackedToGroupedBars
     },
     mounted() {
-      chartService.getStackedGroupedInformation(function(res){
+      chartService.getStackedGroupedInformation(function (res) {
         const transactionsRewards = res;
         let transactionByMonth = {};
 
         let intelContractDeposit = 0;
         transactionsRewards.forEach(transaction => {
           const date = new Date(transaction.dateCreated);
-          const dateMonthString =  `${date.getMonth()}/${date.getFullYear()}`;
+          const dateMonthString = `${date.getMonth()}/${date.getFullYear()}`;
 
-          if(!transactionByMonth[dateMonthString]){
+          if (!transactionByMonth[dateMonthString]) {
             transactionByMonth[dateMonthString] = {
               reward: 0,
               create: 0,
               deposited: 0
             };
             transactionByMonth[dateMonthString][transaction.event] = transaction.amount;
-          }else{
+          } else {
             transactionByMonth[dateMonthString][transaction.event] += transaction.amount;
           }
 
-          if(transaction.event === 'create' || transaction.event === 'reward'){
+          if (transaction.event === 'create' || transaction.event === 'reward') {
             intelContractDeposit -= transaction.amount;
-          }else if(transaction.event === 'deposited'){
+          } else if (transaction.event === 'deposited') {
             intelContractDeposit += transaction.amount
           }
-          if(intelContractDeposit < 0) intelContractDeposit = 0;
+          if (intelContractDeposit < 0) intelContractDeposit = 0;
 
           transactionByMonth[dateMonthString].intelContractDeposit = intelContractDeposit;
         });

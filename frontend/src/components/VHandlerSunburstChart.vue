@@ -112,7 +112,7 @@
 <style>
   .sunsburst-style{
     min-width: 400px;
-    min-height: 470px;
+    min-height: 400px;
   }
 
   @media (max-width: 426px) {
