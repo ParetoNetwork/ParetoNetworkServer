@@ -546,7 +546,7 @@ controller.getTransaction = function (data, callback) {
 
 controller.watchTransaction = function (data, callback) {
   intelController.watchTransaction(data, callback);
-}
+};
 
 controller.getChartUserInformation = async function (req, callback) {
   const daysAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000); //7 weeks ago
@@ -616,30 +616,21 @@ controller.getNetworkCurrentBalance = async function (req, callback) {
     date.balance = intelBalance;
   });
 
-  // let intelBalance = 0;
-  // Object.keys(dates).map(date => {
-  //   dates[date].map(transaction => {
-  //     switch (transaction.event) {
-  //       case 'reward':
-  //         intelBalance -= transaction.amount;
-  //         break;
-  //       case 'create':
-  //         intelBalance -= transaction.amount;
-  //         break;
-  //       case 'deposit':
-  //         intelBalance += transaction.amount;
-  //         break;
-  //     }
-  //     if(intelBalance < 0) intelBalance = 0;
-  //   });
-  //   dates[date].push(intelBalance);
-  // });
-
   return callback(null, datesArray);
 };
 
 controller.getRewardFromDesiredScore = function (address, desiredScore, tokens, callback) {
   intelController.getRewardFromDesiredScore(address, desiredScore, tokens, callback);
+};
+
+controller.getStackedGroupedChartInformation = async function(address, callback){
+  const transactionTypes = ['reward', 'create', 'deposited'];
+  let transactionsRewards = await ParetoTransaction.find({event: { $in: transactionTypes}}).sort({_id: 1});
+
+  return callback(null, transactionsRewards.map(it=> {
+    it.dateCreated = new Date(it._id.getTimestamp());
+    return it;
+  }));
 };
 /**
  * Worker Services
