@@ -453,6 +453,16 @@ app.post('/v1/updateTransaction', function (req, res) {
   });
 });
 
+//Get the stackedGrouped chart information
+app.get('/v1/stacked-grouped-information', function (req, res) {
+  controller.getStackedGroupedChartInformation( function (err, results) {
+    if (err) {
+      res.status(200).json(ErrorHandler.getError(err));
+    } else {
+      res.status(200).json(ErrorHandler.getSuccess(results));
+    }
+  });
+});
 
 /********* AUTHENTICATED v1 APIs *********/
 
@@ -660,17 +670,6 @@ app.get('/v1/ranking', function (req, res) {
 //Get the stackedGrouped chart information
 app.get('/v1/chart-user-info', function (req, res) {
   controller.getChartUserInformation(req, function (err, results) {
-    if (err) {
-      res.status(200).json(ErrorHandler.getError(err));
-    } else {
-      res.status(200).json(ErrorHandler.getSuccess(results));
-    }
-  });
-});
-
-//Get the stackedGrouped chart information
-app.get('/v1/stacked-grouped-information', function (req, res) {
-  controller.getStackedGroupedChartInformation( function (err, results) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {

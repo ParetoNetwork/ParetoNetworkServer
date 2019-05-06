@@ -82,6 +82,10 @@
         }
       },
       drawChart(data) {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+        this.weekDays = this.monthsNumber.map((month) => months[month]);
+
         let datesArray = [];
         for (let i = 0; i < this.n; i++) {
           datesArray[i] = [];
@@ -97,7 +101,6 @@
           datesArray[3][i] = data[i].intelContractDeposit;
         }
 
-        console.log(datesArray);
         this.stackedToGroupedChart(datesArray, this.pickedChart);
       },
       responsivefy(svg) {
@@ -119,7 +122,6 @@
         }
       },
       stackedToGroupedChart(data, chartType) {
-        //console.log(data);
         let LABELS = ["Rewards", "Intel", "Staked", "Total"];
         const height = this.height;
         const width = this.width;
@@ -327,7 +329,6 @@
     },
     watch: {
       'monthsInformation': function (newData) {
-        console.log(newData);
         this.drawChart(this.monthsInformation);
       }
     }

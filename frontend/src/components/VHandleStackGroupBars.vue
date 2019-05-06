@@ -35,8 +35,6 @@
           this.monthsInformation.push(res[dateMonthString]);
         }
 
-        console.log(this.monthsInformation);
-        console.log(this.monthsNumber);
         this.loaded = true;
       });
     }
