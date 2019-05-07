@@ -24,7 +24,11 @@
                 </div>
                 <div class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
                     <VHandlerSunburstChart v-if="primalLoad" :user="user" :sunburstData="information.content" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
-                    <VStackedToGroupedBars v-if="primalLoad" :stackedBarData="stackedBarData" class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"></VStackedToGroupedBars>
+                    <VHandleStackGroupBars
+                        class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"
+                        v-if="primalLoad"
+                        :stackedBarData="stackedBarData"></VHandleStackGroupBars>
+                    <!--<VStackedToGroupedBars></VStackedToGroupedBars>-->
                 </div>
             </div>
         </div>
@@ -67,12 +71,14 @@
 
   import VFab from './VFab';
   import VHandlerSunburstChart from "./VHandlerSunburstChart";
+  import VHandleStackGroupBars from "./VHandleStackGroupBars";
 
 
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
+      VHandleStackGroupBars,
       VHandlerSunburstChart,
       VStackedToGroupedBars,
       ICountUp,

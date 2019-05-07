@@ -39,57 +39,6 @@ export default class profileService {
     }
   }
 
-  static getChartBalanceInfo(onSuccess, onError) {
-    const cachedChartInformation = this.getChartBalanceInfo.chartInfo;
-
-    if (cachedChartInformation) {
-      return onSuccess(cachedChartInformation);
-    } else {
-      return http.get('/v1/chart-current-balance').then(res => {
-        if (res.data.success) {
-          this.getChartBalanceInfo.chartInfo = res.data.data;
-          return onSuccess(res.data.data);
-        } else {
-          return onError(res.data.error);
-        }
-      });
-    }
-  }
-
-  static getChartUserInfo(onSuccess, onError) {
-    const cachedChartInformation = this.getChartInfo.chartInfo;
-
-    if (cachedChartInformation) {
-      return onSuccess(cachedChartInformation);
-    } else {
-      return http.get('/v1/chart-user-info').then(res => {
-        if (res.data.success) {
-          this.getChartInfo.chartInfo = res.data.data;
-          onSuccess(res.data.data);
-        } else {
-          onError(res.data.error);
-        }
-      });
-    }
-  }
-
-  static getChartInfo(onSuccess, onError) {
-    const cachedChartInformation = this.getChartInfo.chartInfo;
-
-    if (cachedChartInformation) {
-      return onSuccess(cachedChartInformation);
-    } else {
-      return http.get('/v1/chart-info').then(res => {
-        if (res.data.success) {
-          this.getChartInfo.chartInfo = res.data.data;
-          onSuccess(res.data.data);
-        } else {
-          onError(res.data.error);
-        }
-      });
-    }
-  }
-
   static updateConfig(onFinish) {
     http.post('/v1/config_basic', {}).then(res => {
       res = res.data;
