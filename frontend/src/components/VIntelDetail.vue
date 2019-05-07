@@ -10,8 +10,8 @@
                         <VShimmerIntelInformation v-if="!intel.block"></VShimmerIntelInformation>
                         <div v-else class="col-12 p-4">
                             <div class="row py-3 m-0">
-                                <div class="col-md-10 p-0 pr-1">
-                                    <p class="title-user-content redacted" v-html="convertToHideText(intel.title)"></p>
+                                <div class="col-md-10 p-0 pr-1"> <!-- add redacted class back to p when fixed -->
+                                    <p class="title-user-content" v-html="convertToHideText(intel.title)"></p>
                                 </div>
                             </div>
                             <div class="row text-content m-0">
@@ -33,8 +33,8 @@
                                     {{ dateStringFormat(intel.dateCreated)| moment('from', 'now') }}
                                 </a>
                             </div>
-                            <div class="text-group mt-4">
-                                <p class="intel-body text-user-content redacted" v-html="convertToHideText(intel.body)"></p>
+                            <div class="text-group mt-4"> <!-- add redacted class back to p when fixed -->
+                                <p class="intel-body text-user-content" v-html="convertToHideText(intel.body)"></p>
                             </div>
                         </div>
                     </div>

@@ -185,7 +185,6 @@
           .attr("height", 0);
 
         this.rect.on("mouseover", function (d) {
-          //console.log(d)
           let type = '';
           switch (d[2]) {
             case 0 :
