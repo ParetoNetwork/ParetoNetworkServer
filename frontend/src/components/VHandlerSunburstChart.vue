@@ -18,7 +18,7 @@
       "user", "pos", "sunburstData", "loggedUser"
     ],
     computed: {
-        ...mapState(["firstContent"]),
+      ...mapState(["firstContent"]),
     },
     data() {
       return {
@@ -27,9 +27,9 @@
           children: []
         },
         nodes: {
-          profile: 5,
-          intel: 15,
-          rewards: 15
+          profile: 100,
+          intel: 1000,
+          rewards: 1000
         }
       }
     },
@@ -45,61 +45,62 @@
     },
     methods: {
       getChartInformation(data){
-          if(data){
-              this.nodeData = {
-                  name: '',
-                  children: []
-              };
-              let maxValue =0;
-              const res = data.reduce( (it, intel, index)=>{
-                  if(!it[intel.address]){
-                      it[intel.address] = intel.createdBy;
-                      it[intel.address].name = it[intel.address].aliasSlug || it[intel.address].address.substring(0, 7) + "...";
-                      it[intel.address].children = [];
-                      it[intel.address].reward = 0;
-                  }
-                  it[intel.address].children.push({
-                      name: intel.title.substring(0, Math.min(intel.title.length, 10)),
-                      title: intel.title,
-                      reward: intel.totalReward,
-                      id: intel.id,
-                      children: (intel.rewardsTransactions && intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r =>
-                      {
-                          maxValue = maxValue < r.amount? r.amount: maxValue;
-                         return {name: r.amount + "", reward: r.amount}
-                      }) : []
-                  });
-                  it[intel.address].reward = it[intel.address].reward + intel.totalReward;
-                  return it;
-              } ,{});
+        if(data){
+          this.nodeData = {
+            name: '',
+            children: []
+          };
+          let maxValue =0;
+          const res = data.reduce( (it, intel, index)=>{
+            if(!it[intel.address]){
+              it[intel.address] = intel.createdBy;
+              it[intel.address].name = it[intel.address].aliasSlug || it[intel.address].address.substring(0, 7) + "...";
+              it[intel.address].children = [];
+              it[intel.address].reward = 0;
+            }
+            it[intel.address].children.push({
+              name: intel.title.substring(0, Math.min(intel.title.length, 10)),
+              title: intel.title,
+              reward: intel.totalReward,
+              id: intel.id,
+              children: (intel.rewardsTransactions && intel.rewardsTransactions.length > 0)? intel.rewardsTransactions.map( r =>
+              {
+                maxValue = maxValue < r.amount? r.amount: maxValue;
+                return {name: r.amount + "", reward: r.amount}
+              }) : []
+            });
+            it[intel.address].reward = it[intel.address].reward + intel.totalReward;
+            return it;
+          } ,{});
 
-              function compare(a,b){
-                  return b.reward - a.reward;
-              }
-              const q1 = maxValue/4;
-              const q2 = 2*q1;
-              const q3 = 3*q1;
-              const tnodes = Object.keys( res).length;
-              let _this = this;
-              this.nodeData.children =  Object.values( res).sort(compare).slice(0, Math.min(this.nodes.profile ,tnodes)).map( (it, index)=>{
-                  const tnodes = it.children.length;
-                  it.children = it.children.sort(compare).slice(0, Math.min(this.nodes.intel, tnodes)).map( (it, index)=>{
-                      const tnodes = it.children.length;
-                      it.children = it.children.sort(compare).slice(0, Math.min(this.nodes.reward, tnodes)).map( (it, index)=>{
-
-
-                          it.size = it.reward < q1 ? 1: (it.reward < q2 ? 2: (it.reward < q3 ? 3:4 )) ;
-                          return it
-                      } );
-
-                     // it.size =    it.children.reduce((it,item, index)=>{ console.log(item); return it + item.size},0);
-                      it.size =    it.children && it.children.length ?   it.size: 1;
-                      return it
-                  } );
-               //   it.size =  it.children.reduce((it,item, index)=>{ return it + item.size},0);
-               //   it.size =   it.size?   it.size: (index +1);
-                  return it} );
+          function compare(a,b){
+            return b.reward - a.reward;
           }
+
+          console.log(res);
+          const q1 = maxValue/4;
+          const q2 = 2*q1;
+          const q3 = 3*q1;
+          const tnodes = Object.keys( res).length;
+          this.nodeData.children =  Object.values( res).sort(compare).slice(0, Math.min(this.nodes.profile, tnodes)).map( (it, index)=>{
+            const tnodes = it.children.length;
+            it.children = it.children.sort(compare).slice(0, Math.min(this.nodes.intel, tnodes)).map( (it, index)=>{
+              const tnodes = it.children.length;
+              it.children = it.children.sort(compare).slice(0, Math.min(this.nodes.rewards, tnodes)).map( (it, index)=>{
+
+
+                it.size = it.reward < q1 ? 1: (it.reward < q2 ? 2: (it.reward < q3 ? 3:4 )) ;
+                return it
+              } );
+
+              // it.size =    it.children.reduce((it,item, index)=>{ console.log(item); return it + item.size},0);
+              it.size =    it.children && it.children.length ?   it.size: 1;
+              return it
+            } );
+            //   it.size =  it.children.reduce((it,item, index)=>{ return it + item.size},0);
+            //   it.size =   it.size?   it.size: (index +1);
+            return it} );
+        }
       }
     },
     watch: {
@@ -108,7 +109,7 @@
         //this.getChartInformation();
       },
       firstContent(newValue, oldValue) {
-          this.getChartInformation(newValue);
+        this.getChartInformation(newValue);
 
       },
     }
