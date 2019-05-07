@@ -1,5 +1,8 @@
 <template>
   <VChartSunburst v-if="nodeData.children.length > 0" :nodeData="nodeData" :loggedUser="loggedUser" :pos="pos"></VChartSunburst>
+  <div v-else class="sunsburst-style">
+    <b class="title-content text-left d-lg-none d-xl-block"> Explorer </b>
+  </div>
 </template>
 
 <script>
@@ -22,6 +25,11 @@
         nodeData: {
           name: '',
           children: []
+        },
+        nodes: {
+          profile: 5,
+          intel: 15,
+          rewards: 15
         }
       }
     },
@@ -72,11 +80,12 @@
               const q2 = 2*q1;
               const q3 = 3*q1;
               const tnodes = Object.keys( res).length;
-              this.nodeData.children =  Object.values( res).sort(compare).slice(0, Math.min(4,tnodes)).map( (it, index)=>{
+              let _this = this;
+              this.nodeData.children =  Object.values( res).sort(compare).slice(0, Math.min(this.nodes.profile ,tnodes)).map( (it, index)=>{
                   const tnodes = it.children.length;
-                  it.children = it.children.sort(compare).slice(0, Math.min(10,tnodes)).map( (it, index)=>{
+                  it.children = it.children.sort(compare).slice(0, Math.min(this.nodes.intel, tnodes)).map( (it, index)=>{
                       const tnodes = it.children.length;
-                      it.children = it.children.sort(compare).slice(0, Math.min(10,tnodes)).map( (it, index)=>{
+                      it.children = it.children.sort(compare).slice(0, Math.min(this.nodes.reward, tnodes)).map( (it, index)=>{
 
 
                           it.size = it.reward < q1 ? 1: (it.reward < q2 ? 2: (it.reward < q3 ? 3:4 )) ;
@@ -106,6 +115,16 @@
   }
 </script>
 
-<style scoped>
+<style>
+  .sunsburst-style{
+    min-width: 400px;
+    min-height: 400px;
+  }
 
+  @media (max-width: 426px) {
+    .sunsburst-style {
+      min-width: 300px;
+      min-height: 300px;
+    }
+  }
 </style>
