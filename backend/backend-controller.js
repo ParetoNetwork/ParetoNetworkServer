@@ -626,7 +626,7 @@ controller.getRewardFromDesiredScore = function (address, desiredScore, tokens, 
 controller.getStackedGroupedChartInformation = async function( callback){
     const multi = redisClient.multi();
     multi.hgetall("NETWORK_CHART");
-    multi.exec(function (err, result) {
+    multi.exec(async function (err, result) {
         if (err) {
             callback(err);
         }
@@ -637,6 +637,12 @@ controller.getStackedGroupedChartInformation = async function( callback){
             if((info.date.getTime() - (new Date()).getTime())/1000 > 86400){
                 controller.getChartInformationAndSaveRadis(callback)
             }else{
+                try{
+                    const dateMonthString =  `${(new Date()).getMonth()}/${(new Date()).getFullYear()}`;
+                    info.data[dateMonthString].intelContractDeposit = await controller.getCurrentContractBalance();
+                }catch (e) {
+                    console.log(e);
+                }
               callback(null, info.data);
             }
         }
@@ -649,9 +655,9 @@ controller.getStackedGroupedChartInformation = async function( callback){
 
 controller.getChartInformationAndSaveRadis= async function (callback){
     const multi = redisClient.multi();
-    const transactionTypes = ['reward', 'create', 'deposited'];
+    const transactionTypes = ['reward', 'create', 'deposited', 'distribute'];
     let transactionsRewards = (await ParetoTransaction.find({event: { $in: transactionTypes}, status: 3})
-        .select(['address', 'event', 'amount']).sort({_id: 1}))
+        .select(['address', 'event', 'amount', 'intel']).sort({_id: 1}))
 .map(it=> {
         it.dateCreated = new Date(it._id.getTimestamp());
         return it;
@@ -666,9 +672,9 @@ controller.getChartInformationAndSaveRadis= async function (callback){
     let response =
         Object.values(transactionsRewards).map(it=>{
             let transactionByMonth = {};
+            let intelContractDeposit =   0;
+            let accumulatedDeposit =  0;
             it.forEach(transaction => {
-
-
                 const date =  transaction.dateCreated;
                 const dateMonthString =  `${date.getMonth()}/${date.getFullYear()}`;
                 if(!transactionByMonth[dateMonthString]){
@@ -681,14 +687,24 @@ controller.getChartInformationAndSaveRadis= async function (callback){
                 }else{
                     transactionByMonth[dateMonthString][transaction.event] += transaction.amount;
                 }
-                let intelContractDeposit =  transactionByMonth[dateMonthString].intelContractDeposit || 0;
-                if(transaction.event === 'create' || transaction.event === 'reward'){
-                    intelContractDeposit -= transaction.amount;
-                }else if(transaction.event === 'deposited'){
-                    intelContractDeposit += transaction.amount
-                }
-                if(intelContractDeposit < 0) intelContractDeposit = 0;
 
+                if(transaction.event === 'create' || transaction.event === 'reward'){
+                    accumulatedDeposit -= transaction.amount;
+                }else if(transaction.event === 'deposited'){
+                    accumulatedDeposit += transaction.amount;
+                    intelContractDeposit +=transaction.amount;
+                }
+                if(accumulatedDeposit <= 0) {
+                    accumulatedDeposit = 0;
+                    if(transaction.event === 'create' || transaction.event === 'reward'){
+                        intelContractDeposit +=transaction.amount;
+                    }
+                }
+                if(transaction.event === 'distribute'){
+                    intelContractDeposit -=transaction.amount;
+                }
+
+                transactionByMonth[dateMonthString].accumulatedDeposit = accumulatedDeposit;
                 transactionByMonth[dateMonthString].intelContractDeposit = intelContractDeposit;
             });
             return transactionByMonth;
@@ -711,12 +727,49 @@ controller.getChartInformationAndSaveRadis= async function (callback){
                 return data;
             },{});
 
-
-
+    try{
+        const dateMonthString =  `${(new Date()).getMonth()}/${(new Date()).getFullYear()}`;
+        response[dateMonthString].intelContractDeposit = await controller.getCurrentContractBalance();
+    }catch (e) {
+        console.log(e);
+    }
     multi.hmset("NETWORK_CHART", JSON.stringify( {date: new Date(), data: response }));
     multi.exec(function (errors, results) {
         callback(null, response)
     });
+}
+
+
+controller.getCurrentContractBalance =  function (){
+    return new Promise(function(resolve, reject) {
+        ParetoContent.find().distinct('intelAddress').exec(function (err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
+                if (!data.length) {
+                    results.push(Intel_Contract_Schema.networks[ETH_NETWORK].address);
+                }
+                let promises = results.map(it => {
+                    return new Promise(function (resolve, reject) {
+                        controller.getBalance(it, 0, (e, r) => {
+                            if (e) return reject(0);
+                            return resolve(r);
+                        });
+                    });
+                });
+                Promise.all(promises).then(r => {
+                    resolve(r.reduce((balance, it, index) => {
+                        return  parseFloat(balance) + parseFloat(it);
+                    }, 0))
+                })
+                    .catch(e => {
+                        reject(e)
+                    });
+            }
+        });
+    })
+
 }
 /**
  * Worker Services
