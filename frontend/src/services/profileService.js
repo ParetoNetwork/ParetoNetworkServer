@@ -17,6 +17,28 @@ export default class profileService {
     });
   }
 
+  //Returns the current user profile, but if send a profile parameter (address), will return the query profile
+  static getProfile(onSuccess, onError, profile = null) {
+    //Saves the last searched profile
+    const cachedProfile = this.getProfile.profile;
+
+    //No profile parameter, send the cached profile
+    if (cachedProfile && !profile) {
+      return onSuccess(cachedProfile);
+    } else {
+      return http.get('/v1/userinfo', profile).then(res => {
+        this.getProfile.profile = res.data.data;
+
+        if (res.data.data)
+          return onSuccess(res.data.data);
+        else
+          return onError(errorService.sendErrorMessage('f5', res.data.message));
+      }).catch(error => {
+        return onError(error);
+      });
+    }
+  }
+
   static updateConfig(onFinish) {
     http.post('/v1/config_basic', {}).then(res => {
       res = res.data;
