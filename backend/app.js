@@ -18,7 +18,6 @@ let constants = {};
 const constantsPath = path.resolve(__dirname, 'backend-private-constants.json');
 const {RateLimiterRedis} = require('rate-limiter-flexible');
 
-
 console.log(__dirname);
 
 if (!process.env.DISABLE_SSL) {

@@ -641,9 +641,9 @@ controller.getStackedGroupedChartInformation = async function( callback){
             }
         }
     });
-
-
 };
+
+
 
 
 
