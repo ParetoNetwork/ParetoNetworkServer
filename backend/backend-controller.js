@@ -546,7 +546,7 @@ controller.getTransaction = function (data, callback) {
 
 controller.watchTransaction = function (data, callback) {
   intelController.watchTransaction(data, callback);
-}
+};
 
 controller.getChartUserInformation = async function (req, callback) {
   const daysAgo = new Date(new Date() - 7 * 60 * 60 * 24 * 1000); //7 weeks ago
@@ -616,31 +616,161 @@ controller.getNetworkCurrentBalance = async function (req, callback) {
     date.balance = intelBalance;
   });
 
-  // let intelBalance = 0;
-  // Object.keys(dates).map(date => {
-  //   dates[date].map(transaction => {
-  //     switch (transaction.event) {
-  //       case 'reward':
-  //         intelBalance -= transaction.amount;
-  //         break;
-  //       case 'create':
-  //         intelBalance -= transaction.amount;
-  //         break;
-  //       case 'deposit':
-  //         intelBalance += transaction.amount;
-  //         break;
-  //     }
-  //     if(intelBalance < 0) intelBalance = 0;
-  //   });
-  //   dates[date].push(intelBalance);
-  // });
-
   return callback(null, datesArray);
 };
 
 controller.getRewardFromDesiredScore = function (address, desiredScore, tokens, callback) {
   intelController.getRewardFromDesiredScore(address, desiredScore, tokens, callback);
 };
+
+controller.getStackedGroupedChartInformation = async function( callback){
+    const multi = redisClient.multi();
+    multi.hgetall("NETWORK_CHART");
+    multi.exec(async function (err, result) {
+        if (err) {
+            callback(err);
+        }
+        if(!result || !result.length || !result[0]){
+            controller.getChartInformationAndSaveRadis(callback)
+        }else{
+            const info = JSON.parse(result[0]);
+            if((info.date.getTime() - (new Date()).getTime())/1000 > 86400){
+                controller.getChartInformationAndSaveRadis(callback)
+            }else{
+                try{
+                    const dateMonthString =  `${(new Date()).getMonth()}/${(new Date()).getFullYear()}`;
+                    info.data[dateMonthString].intelContractDeposit = await controller.getCurrentContractBalance();
+                }catch (e) {
+                    console.log(e);
+                }
+              callback(null, info.data);
+            }
+        }
+    });
+};
+
+
+
+
+
+controller.getChartInformationAndSaveRadis= async function (callback){
+    const multi = redisClient.multi();
+    const transactionTypes = ['reward', 'create', 'deposited', 'distribute'];
+    let transactionsRewards = (await ParetoTransaction.find({event: { $in: transactionTypes}, status: 3})
+        .select(['address', 'event', 'amount', 'intel']).sort({_id: 1}))
+.map(it=> {
+        it.dateCreated = new Date(it._id.getTimestamp());
+        return it;
+    })
+        .reduce((data, it)=>{
+            if(!data[it.address]){
+                data[it.address] = [];
+            }
+            data[it.address].push(it);
+            return data;
+        },{});
+    let response =
+        Object.values(transactionsRewards).map(it=>{
+            let transactionByMonth = {};
+            let intelContractDeposit =   0;
+            let accumulatedDeposit =  0;
+            it.forEach(transaction => {
+                const date =  transaction.dateCreated;
+                const dateMonthString =  `${date.getMonth()}/${date.getFullYear()}`;
+                if(!transactionByMonth[dateMonthString]){
+                    transactionByMonth[dateMonthString] = {
+                        reward: 0,
+                        create: 0,
+                        deposited: 0
+                    };
+                    transactionByMonth[dateMonthString][transaction.event] = transaction.amount;
+                }else{
+                    transactionByMonth[dateMonthString][transaction.event] += transaction.amount;
+                }
+
+                if(transaction.event === 'create' || transaction.event === 'reward'){
+                    accumulatedDeposit -= transaction.amount;
+                }else if(transaction.event === 'deposited'){
+                    accumulatedDeposit += transaction.amount;
+                    intelContractDeposit +=transaction.amount;
+                }
+                if(accumulatedDeposit <= 0) {
+                    accumulatedDeposit = 0;
+                    if(transaction.event === 'create' || transaction.event === 'reward'){
+                        intelContractDeposit +=transaction.amount;
+                    }
+                }
+                if(transaction.event === 'distribute'){
+                    intelContractDeposit -=transaction.amount;
+                }
+
+                transactionByMonth[dateMonthString].accumulatedDeposit = accumulatedDeposit;
+                transactionByMonth[dateMonthString].intelContractDeposit = intelContractDeposit;
+            });
+            return transactionByMonth;
+        })
+            .reduce((data, it, index)=>{
+                let keys = Object.keys(it);
+                keys.forEach( key=>{
+                    if(!data[key]){
+                        data[key] = {};
+                        data[key]['reward'] =   0;
+                        data[key]['create'] =   0;
+                        data[key]['deposited'] =  0;
+                        data[key]['intelContractDeposit'] =  0;
+                    }
+                    data[key]['reward'] = data[key]['reward'] +  it[key]['reward'] || 0;
+                    data[key]['create'] = data[key]['create'] + it[key]['create'] || 0;
+                    data[key]['deposited'] =  data[key]['deposited'] + it[key]['deposited'] || 0;
+                    data[key]['intelContractDeposit'] =   data[key]['intelContractDeposit'] + it[key]['intelContractDeposit'] || 0;
+                } );
+                return data;
+            },{});
+
+    try{
+        const dateMonthString =  `${(new Date()).getMonth()}/${(new Date()).getFullYear()}`;
+        response[dateMonthString].intelContractDeposit = await controller.getCurrentContractBalance();
+    }catch (e) {
+        console.log(e);
+    }
+    multi.hmset("NETWORK_CHART", JSON.stringify( {date: new Date(), data: response }));
+    multi.exec(function (errors, results) {
+        callback(null, response)
+    });
+}
+
+
+controller.getCurrentContractBalance =  function (){
+    return new Promise(function(resolve, reject) {
+        ParetoContent.find().distinct('intelAddress').exec(function (err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                let data = results.filter(item => item === Intel_Contract_Schema.networks[ETH_NETWORK].address);
+                if (!data.length) {
+                    results.push(Intel_Contract_Schema.networks[ETH_NETWORK].address);
+                }
+                let promises = results.map(it => {
+                    return new Promise(function (resolve, reject) {
+                        controller.getBalance(it, 0, (e, r) => {
+                            if (e) return reject(0);
+                            return resolve(r);
+                        });
+                    });
+                });
+                Promise.all(promises).then(r => {
+                    resolve(r.reduce((balance, it, index) => {
+                        return  parseFloat(balance) + parseFloat(it);
+                    }, 0))
+                })
+                    .catch(e => {
+                        reject(e)
+                    });
+            }
+        });
+    })
+
+}
 /**
  * Worker Services
  */

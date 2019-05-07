@@ -22,7 +22,7 @@
   export default {
     name: 'VStackedToGroupedBars',
     props: [
-      "stackedBarData"
+      "stackedBarData", "monthsNumber", "monthsInformation"
     ],
     computed: {
       ...mapState(['address', 'signType'])
@@ -44,7 +44,7 @@
         m: 7,
         intervalFunction: {},
         chartTransitionPaused: false,
-        intervalTransitionTime: 20000,
+        intervalTransitionTime: 8000,
         margin: {top: 30, right: 0, bottom: 20, left: 40},
         networkInformation: {},
         dates: [],
@@ -57,50 +57,14 @@
     },
     mounted() {
       this.setTimeTransition();
-      Promise.all([
-        this.getChartInformation(),
-        this.getCurrentIntelContractBalance(),
-        this.getBalanceInformation()])
-        .then((data) => {
-          this.currentBalance = parseInt(data[1]);
-          this.drawChart(this.chartInfoData, data[2]);
-        });
+      this.drawChart(this.monthsInformation);
     },
     methods: {
-      getBalanceInformation(){
-        return profileService.getChartBalanceInfo(res=> {
-          return res;
-        });
-      },
       resumeTransition() {
         if (this.chartTransitionPaused) {
           this.chartTransitionPaused = false;
           this.setTimeTransition();
         }
-      },
-      getChartInformation(){
-        return profileService.getChartUserInfo((data) => {
-          //console.log(data);
-          this.chartInfoData = data;
-          return data;
-        }, (e) => {
-          return this.stackedBarData;
-        });
-      },
-      getCurrentIntelContractBalance(){
-        return ContentService.currentIntelContractBalance({signType: this.signType}, balance => {
-            return balance;
-          }, error => {
-            let errorText = error.message ? error.message : error;
-
-            this.$notify({
-              group: 'notification',
-              type: 'error',
-              duration: 10000,
-              title: 'Login',
-              text: errorText
-            });
-          });
       },
       pauseTransition() {
         if (!this.chartTransitionPaused) {
@@ -117,17 +81,10 @@
           this.pickedChart = "stacked";
         }
       },
-      drawChart(data, balanceDates) {
-        let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        for (let i = 0; i < this.m; i++) {
-          let ds = new Date(new Date() - (7 - (i + 1)) * 60 * 60 * 24 * 1000);
-          ds.setHours(0, 0, 0, 0);
-          this.weekDays.push(days[ds.getDay()]);
-          this.dates[i] = {
-            date: ds,
-            info: [0, 0, 0]
-          };
-        }
+      drawChart(data) {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+        this.weekDays = this.monthsNumber.map((month) => months[month]);
 
         let datesArray = [];
         for (let i = 0; i < this.n; i++) {
@@ -137,39 +94,13 @@
           }
         }
 
-        data.networkInformation.forEach(information => {
-          this.dates.forEach((date, dateIndex) => {
-            const infoDate = new Date(information.dateCreated);
-            infoDate.setHours(0, 0, 0, 0);
-            //console.log(information);
-            if (infoDate.getTime() === date.date.getTime()) {
-              switch (information.event) {
-                case 'reward':
-                  datesArray[0][dateIndex] += information.amount;
-                  break;
-                case 'create':
-                  datesArray[1][dateIndex] += information.amount;
-                  break;
-                case 'deposited':
-                  datesArray[2][dateIndex] += information.amount;
-                  break;
-              }
-            }
-          });
-        });
+        for (let i = 0; i < this.m; i++) {
+          datesArray[0][i] = data[i].reward;
+          datesArray[1][i] = data[i].create;
+          datesArray[2][i] = data[i].deposited;
+          datesArray[3][i] = data[i].intelContractDeposit;
+        }
 
-        this.dates.forEach((date, dateIndex) => {
-          let balance = balanceDates.find( (balanceDate) => {
-            const dateObject = new Date(balanceDate.date);
-            return dateObject.getTime() === date.date.getTime();
-          });
-
-          if(balance){
-            datesArray[3][dateIndex] += balance.balance;
-          }
-        });
-
-        this.weekDays[this.weekDays.length - 1] = "Today";
         this.stackedToGroupedChart(datesArray, this.pickedChart);
       },
       responsivefy(svg) {
@@ -191,7 +122,6 @@
         }
       },
       stackedToGroupedChart(data, chartType) {
-        //console.log(data);
         let LABELS = ["Rewards", "Intel", "Staked", "Total"];
         const height = this.height;
         const width = this.width;
@@ -336,6 +266,8 @@
         } else if (chartType === "grouped") {
           this.transitionGrouped();
         }
+
+        setTimeout(this.createTransition, 2000);
       },
       bumps(m) {
         const values = [];
@@ -393,6 +325,11 @@
       },
       setTimeTransition() {
         this.intervalFunction = setInterval(this.createTransition, this.intervalTransitionTime);
+      }
+    },
+    watch: {
+      'monthsInformation': function (newData) {
+        this.drawChart(this.monthsInformation);
       }
     }
   }
