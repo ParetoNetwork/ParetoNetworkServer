@@ -77,7 +77,6 @@
             return b.reward - a.reward;
           }
 
-          console.log(res);
           const q1 = maxValue/4;
           const q2 = 2*q1;
           const q3 = 3*q1;
