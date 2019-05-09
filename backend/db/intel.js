@@ -195,6 +195,7 @@ module.exports = function (
 
         var limit = parseInt(req.query.limit || 100);
         var page = parseInt(req.query.page || 0);
+        var compact = req.query.thin || false;
         intelController.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
 
             if (error) return callback(error);
@@ -227,7 +228,7 @@ module.exports = function (
                             block: entry.block,
                             title: entry.title,
                             address: entry.address,
-                            body: entry.body,
+                            body: compact ? '' : entry.body,
                             expires: entry.expires,
                             dateCreated: entry.dateCreated,
                             txHash: entry.txHash,
