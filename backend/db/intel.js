@@ -193,9 +193,9 @@ module.exports = function (
 
     intelController.getAllAvailableContent = async function (req, callback) {
 
-        var limit = parseInt(req.query.limit || 100);
-        var page = parseInt(req.query.page || 0);
-        var compact = req.query.compact || false;
+        let limit = parseInt(req.query.limit || 100);
+        let page = parseInt(req.query.page || 0);
+        let compact = req.query.compact || false;
         intelController.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
 
             if (error) return callback(error);
@@ -320,6 +320,7 @@ module.exports = function (
     }
 
     intelController.getContentByIntel = function (req, intel, callback) {
+        let compact = req.query.compact || false;
         intelController.getQueryContentByUser(req.user, intel, async function (error, contentDelay, queryFind, percentile) {
             if (error) return callback(error);
             try {
@@ -338,7 +339,7 @@ module.exports = function (
                         block: entry.block,
                         title: entry.title,
                         address: entry.address,
-                        body: entry.body,
+                        body: compact ? '' : entry.body,
                         expires: entry.expires,
                         dateCreated: entry.dateCreated,
                         txHash: entry.txHash,
@@ -386,8 +387,9 @@ module.exports = function (
         let address = req.query.user || req.user;
         let isAddress = web3.utils.isAddress(address) === true;
 
-        var limit = parseInt(req.query.limit || 100);
-        var page = parseInt(req.query.page || 0);
+        let limit = parseInt(req.query.limit || 100);
+        let page = parseInt(req.query.page || 0);
+        let compact = req.query.compact || false;
 
         if (!isAddress) {
             let profileFound = await ParetoProfile.findOne({aliasSlug: address}).exec();
@@ -424,7 +426,7 @@ module.exports = function (
                                     block: entry.block,
                                     address: entry.address,
                                     title: entry.title,
-                                    body: entry.body,
+                                    body: compact ? '' : entry.body,
                                     dateCreated: entry.dateCreated,
                                     txHash: entry.txHash,
                                     totalReward: entry.totalReward || 0,
