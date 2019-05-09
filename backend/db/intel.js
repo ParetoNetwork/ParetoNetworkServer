@@ -195,7 +195,7 @@ module.exports = function (
 
         var limit = parseInt(req.query.limit || 100);
         var page = parseInt(req.query.page || 0);
-        var compact = req.query.thin || false;
+        var compact = req.query.compact || false;
         intelController.getQueryContentByUser(req.user, null, async function (error, contentDelay, queryFind, percentile) {
 
             if (error) return callback(error);
