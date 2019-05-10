@@ -15,7 +15,7 @@
 
 <script>
   import profileService from '../services/profileService';
-  import ContentService from '../services/ContentService';
+  import IntelService from '../services/IntelService';
   import {mapState} from 'vuex';
   import * as d3 from "d3";
 

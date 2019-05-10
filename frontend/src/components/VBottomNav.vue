@@ -33,7 +33,7 @@
 </template>
 
 <script>
-    import ContentService from '../services/ContentService';
+    import IntelService from '../services/IntelService';
 
     export default {
         name: 'VBottomNav',
@@ -50,7 +50,7 @@
         },
         methods: {
             getCoinMarketPrice: function () {
-                // ContentService.getParetoInfo(res => {
+                // IntelService.getParetoInfo(res => {
                 //         this.paretoUSD = this.numberToCurrency(res.quote.USD.price);
                 //         //console.log(this.paretoUSD);
                 //     },
@@ -65,7 +65,7 @@
                 //     });
             },
             getRecommendedGas: function(){
-                // ContentService.getStimatedGasPrice(res => {
+                // IntelService.getStimatedGasPrice(res => {
                 //     this.recommendedGasPrice = res;
                 // }, error => {
                 //     this.$notify({

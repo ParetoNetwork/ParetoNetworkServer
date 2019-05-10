@@ -553,7 +553,7 @@ Node.prototype._decode = function decode(input, options) {
       options.track(input.path(), start, input.length, 'tagged');
 
     if (options && options.track && state.tag !== null)
-      options.track(input.path(), input.offset, input.length, 'content');
+      options.track(input.path(), input.offset, input.length, 'intel.js');
 
     // Select proper method for tag
     if (state.any)

@@ -647,7 +647,7 @@ app.get('/v1/content/me', function (req, res) {
 
 //get info about another address
 app.get('/v1/content/:content', function (req, res) {
-  controller.getContentByIntel(req, req.params.content, function (err, result) {
+  controller.getContentByIntel(req, req.params.intel, function (err, result) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {

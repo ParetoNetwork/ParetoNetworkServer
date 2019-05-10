@@ -23,7 +23,7 @@ function dispatchView() {
 
         var preview = document.getElementById('preview');
         if (preview !== null) {
-            preview.innerHTML = '<b>' + data.content.title + '</b>' + '<br/><br/>' + data.content.body;
+            preview.innerHTML = '<b>' + data.intel.title + '</b>' + '<br/><br/>' + data.intel.body;
             preview.style.backgroundColor = 'rgba(245,245,245,1)';
         }
         console.log(res);

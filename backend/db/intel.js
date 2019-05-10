@@ -6,7 +6,7 @@ module.exports = function (
     web3_events,
     Intel_Contract_Schema,
     ParetoAddress,
-    ParetoContent,
+    ParetoIntel,
     ParetoProfile,
     ParetoPayment,
     ParetoReward,
@@ -203,7 +203,7 @@ module.exports = function (
                 let newQuery = await intelController.validateQuery(req.query);
                 queryFind.$and = queryFind.$and.concat(newQuery);
 
-                const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit)
+                const allResults = await ParetoIntel.find(queryFind).sort({dateCreated: -1}).skip(page * limit).limit(limit)
                     .populate([{ path: 'assets.asset', select:'symbol name -_id'},
                         {path: 'createdBy' , select: 'address alias aliasSlug biography profilePic -_id'},
                         {path: 'rewardsTransactions', select: 'amount'}]).exec();
@@ -329,7 +329,7 @@ module.exports = function (
                 } else {
                     queryFind.$and = queryFind.$and.concat({txHash: intel})
                 }
-                const allResults = await ParetoContent.find(queryFind).sort({dateCreated: -1}).populate([{path: 'assets.asset'}, {path: 'createdBy'}]).exec();
+                const allResults = await ParetoIntel.find(queryFind).sort({dateCreated: -1}).populate([{path: 'assets.asset'}, {path: 'createdBy'}]).exec();
                 if (allResults && allResults.length > 0) {
                     const entry = allResults[0];
                     let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
@@ -403,7 +403,7 @@ module.exports = function (
                 callback(new Error('Invalid Address'));
             }
         } else {
-            var query = ParetoContent.find({
+            var query = ParetoIntel.find({
                 address: address,
                 validated: true
             }).sort({dateCreated: -1}).skip(limit * page).limit(limit).populate([{path: 'assets.asset'}, {path: 'createdBy'}]);
@@ -475,7 +475,7 @@ module.exports = function (
             }
         } else {
 
-            let Intel = new ParetoContent({
+            let Intel = new ParetoIntel({
                 address: req.body.address || req.user,
                 title: req.body.title,
                 body: req.body.body,
@@ -678,7 +678,7 @@ module.exports = function (
 
                 const promises=[ParetoAddress.find({address: address}),
                     ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}, 'sender': address}),
-                    ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}}).sort({'reward': 1})
+                    ParetoIntel.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}}).sort({'reward': 1})
                 ];
                 Promise.all(promises).then( (allData) => {
                     let userData = allData[0][0];

@@ -3,7 +3,7 @@ const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 var Schema = mongoose.Schema;
 
-var paretoContentSchema = new Schema({
+var paretoIntelSchema = new Schema({
 	address: String,
 	intelAddress: String,
 	title: String,
@@ -21,24 +21,24 @@ var paretoContentSchema = new Schema({
 	assets:[{ asset: { type: mongoose.Schema.Types.ObjectId, ref: 'asset' }}],
 	expires: Number // time in Epoch 
 
-}, { collection : 'content' , toObject : {virtuals:true},toJSON: { virtuals: true } });
+}, { collection : 'intel' , toObject : {virtuals:true},toJSON: { virtuals: true } });
 
-paretoContentSchema.plugin(AutoIncrement, { inc_field: 'id' });
+paretoIntelSchema.plugin(AutoIncrement, { inc_field: 'id' });
 
 
-paretoContentSchema.virtual('createdBy', {
+paretoIntelSchema.virtual('createdBy', {
     ref: 'profile', // The model to use
     localField: 'address', // Find post where `localField`
     foreignField: 'address', // is equal to `foreignField`
     justOne: true
 });
 
-paretoContentSchema.virtual('rewardsTransactions', {
+paretoIntelSchema.virtual('rewardsTransactions', {
     ref: 'reward', // The model to use
     localField: 'id', // Find post where `localField`
     foreignField: 'intelId', // is equal to `foreignField`
     justOne: false
 });
-const ParetoContent = mongoose.model('content', paretoContentSchema);
+const ParetoIntel = mongoose.model('intel.js', paretoIntelSchema);
 
-module.exports = ParetoContent;
+module.exports = ParetoIntel;

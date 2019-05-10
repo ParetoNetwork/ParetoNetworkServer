@@ -88,7 +88,7 @@ const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
-const ParetoContent = mongoose.model('content');
+const ParetoIntel = mongoose.model('intel.js');
 const ParetoProfile = mongoose.model('profile');
 const ParetoPayment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
@@ -111,7 +111,7 @@ mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
     web3_events,
     Intel_Contract_Schema,
     ParetoAddress,
-    ParetoContent,
+    ParetoIntel,
     ParetoProfile,
     ParetoPayment,
     ParetoReward,
@@ -129,7 +129,7 @@ mongoose.connect(CONNECTION_URL, {useNewUrlParser: true}).then(tmp => {
     web3_events,
     Intel_Contract_Schema,
     ParetoAddress,
-    ParetoContent,
+    ParetoIntel,
     ParetoProfile,
     ParetoPayment,
     ParetoReward,
@@ -158,7 +158,7 @@ controller.startW3WebSocket = function () {
       web3_events,
       Intel_Contract_Schema,
       ParetoAddress,
-      ParetoContent,
+      ParetoIntel,
       ParetoProfile,
       ParetoPayment,
       ParetoReward,
@@ -435,7 +435,7 @@ controller.getBalance = async function (address, blockHeightFixed, callback) {
  */
 controller.addExponentAprox = function (addresses, scores, blockHeight, callback) {
   return ParetoReward.find({'block': {'$gte': (blockHeight - EXPONENT_BLOCK_AGO)}}).exec(async function (err, values) {
-    const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO * 2}});
+    const desiredRewards = await ParetoIntel.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO * 2}});
     let intelDesiredRewards = desiredRewards.reduce(function (data, it) {
       data["" + it.id] = it;
       return data;
@@ -742,7 +742,7 @@ controller.getChartInformationAndSaveRadis= async function (callback){
 
 controller.getCurrentContractBalance =  function (){
     return new Promise(function(resolve, reject) {
-        ParetoContent.find().distinct('intelAddress').exec(function (err, results) {
+        ParetoIntel.find().distinct('intelAddress').exec(function (err, results) {
             if (err) {
                 console.log(err);
             } else {

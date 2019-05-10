@@ -101,7 +101,7 @@ mongoose.connect(CONNECTION_URL, { useNewUrlParser: true }).then(tmp=>{
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 const ParetoAddress = mongoose.model('address');
-const ParetoContent = mongoose.model('content');
+const ParetoIntel = mongoose.model('intel.js');
 const ParetoReward = mongoose.model('reward');
 const ParetoTransaction = mongoose.model('transaction');
 const ParetoPayment = mongoose.model('payment');
@@ -161,7 +161,7 @@ workerController.calculateScore = async function(address, blockHeightFixed, call
                         else{
 
                             if(result.tokens!==0){
-                                const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
+                                const desiredRewards = await ParetoIntel.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
                                 workerController.addExponent([address],[result],blockHeight,desiredRewards, function (err, results){
 
                                     if(err){return callback(err)}
@@ -290,7 +290,7 @@ workerController.addExponent = async function(addresses, scores, blockHeight, de
          data[""+it.id] = it;
         return data;
     }, {});
-    return ParetoContent.find({'validated': true }).distinct('intelAddress').exec(function(err, results) {
+    return ParetoIntel.find({'validated': true }).distinct('intelAddress').exec(function(err, results) {
         if (err) {
             callback(err);
         }
@@ -831,7 +831,7 @@ workerController.aproxAllScoreRanking = async function(callback){
                                     }else{
 
                                         if(data.event == 'distribute' && r){
-                                            ParetoContent.findOneAndUpdate({id: r.intel}, { distributed: true, txHashDistribute: data.txHash}, function (err, r) {})
+                                            ParetoIntel.findOneAndUpdate({id: r.intel}, { distributed: true, txHashDistribute: data.txHash}, function (err, r) {})
                                         }
 
                                     }
@@ -904,7 +904,7 @@ workerController.processData = async function (txObjects, address, blockHeight, 
             }
         })
     }
-    const desiredRewards = await ParetoContent.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
+    const desiredRewards = await ParetoIntel.find({block: {$gte: blockHeight - EXPONENT_BLOCK_AGO*2}});
     await workerController.addExponent(addressesExponent, scores, blockHeight,desiredRewards, function (err, results) {
         if(!err ){
 
@@ -1316,7 +1316,7 @@ workerController.updateFromLastIntel =  function(lastBlock){
                 const event = events[i];
                 const initialBalance =  web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                 const expiry_time = event.returnValues.ttl;
-                ParetoContent.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
+                ParetoIntel.findOneAndUpdate({ id: event.returnValues.intelID, validated: false }, {intelAddress: Intel_Contract_Schema.networks[ETH_NETWORK].address, validated: true, reward: initialBalance, expires: expiry_time, block: event.blockNumber, txHash: event.transactionHash }, { multi: false }, function (err, data) {
                 });
                 const txHash = event.transactionHash;
                 const block = event.blockNumber;
