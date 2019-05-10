@@ -173,7 +173,7 @@
       },
       loadMyContent: function () {
         let params = {page: this.page, limit: this.limit};
-        return dashboardService.getContent(params,
+        return dashboardService.getIntel(params,
           res => {
             this.loadedMyContent = true;
             this.myContent = [...this.myContent, ...res];
@@ -248,7 +248,7 @@
       updateCreateEvent: function (tx) {
         let params = {page: 0, limit: 10};
 
-        return dashboardService.getContent(params,
+        return dashboardService.getIntel(params,
           res => {
             try {
               let intel = res.find(item => {

@@ -319,7 +319,7 @@ module.exports = function (
         }).join(' ');
     }
 
-    intelController.getContentByIntel = function (req, intel, callback) {
+    intelController.getIntelByIntel = function (req, intel, callback) {
         let compact = req.query.compact || false;
         intelController.getQueryContentByUser(req.user, intel, async function (error, contentDelay, queryFind, percentile) {
             if (error) return callback(error);
@@ -383,7 +383,7 @@ module.exports = function (
         });
     };
 
-    intelController.getContentByCurrentUser = async function (req, callback) {
+    intelController.getIntelByCurrentUser = async function (req, callback) {
         let address = req.query.user || req.user;
         let isAddress = web3.utils.isAddress(address) === true;
 

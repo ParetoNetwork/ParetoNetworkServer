@@ -80,7 +80,7 @@
 //         const provider_address = accounts[0];
 
 //         const result = await request.post(
-//             'http://localhost:3000/v1/content',
+//             'http://localhost:3000/v1/intel',
 //             {
 //                 "address": provider_address,
 //                 "title": "Intel's title",

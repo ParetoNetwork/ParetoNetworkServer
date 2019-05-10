@@ -61,7 +61,7 @@ const store = new Vuex.Store({
     ws: null,
     shoppingCart: [],
     showshopping: false,
-    firstContent: []
+    firstIntel: []
   },
   mutations: {
     addReward(state, data) {

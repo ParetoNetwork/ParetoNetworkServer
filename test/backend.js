@@ -57,7 +57,7 @@ describe('Server application /', function() {
     });
 
     it('User address is needed to get content', function (done) {
-        request(serverApp.app).get("/v1/content/")
+        request(serverApp.app).get("/v1/intel/")
             .expect(200)
             .expect( function (res) {
                 assert(res.body.success === false, "must be false");

@@ -45550,7 +45550,7 @@ module.exports = {
 
         $.ajax({
             method: 'POST',
-            url: '/v1/content',
+            url: '/v1/intel',
             data: data,
             dataType: 'json',
             success: function (data, textStatus, jqXHR) {

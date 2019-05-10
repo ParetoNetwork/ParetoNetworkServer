@@ -558,7 +558,7 @@ app.get('/v1/summation', function (req, res) {
 
 });//end entire function
 
-app.post('/v1/content', function (req, res) {
+app.post('/v1/intel', function (req, res) {
 
   if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
     res.status(200).json(ErrorHandler.bodyMissingError());
@@ -611,7 +611,7 @@ app.post('/v1/transaction', function (req, res) {
 }); //end content post
 
 
-app.get('/v1/content', function (req, res) {
+app.get('/v1/intel', function (req, res) {
   //this needs a session id, basically an authenticated address
 
   var limit = parseInt(req.query.limit) || 15;
@@ -635,8 +635,8 @@ app.get('/v1/content', function (req, res) {
 });
 
 
-app.get('/v1/content/me', function (req, res) {
-  controller.getContentByCurrentUser(req, function (err, result) {
+app.get('/v1/intel/me', function (req, res) {
+  controller.getIntelByCurrentUser(req, function (err, result) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {
@@ -646,8 +646,8 @@ app.get('/v1/content/me', function (req, res) {
 });
 
 //get info about another address
-app.get('/v1/content/:content', function (req, res) {
-  controller.getContentByIntel(req, req.params.intel, function (err, result) {
+app.get('/v1/intel/:content', function (req, res) {
+  controller.getIntelByIntel(req, req.params.intel, function (err, result) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {
@@ -828,7 +828,7 @@ app.use('/public/static/', expressStaticGzip('/public/static/', {
 }));
 
 
-/*app.get('/v1/content/social', function(req, res){
+/*app.get('/v1/intel/social', function(req, res){
   //add solume API key to config + environment variable
   //use request promises and get solume result
 

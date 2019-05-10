@@ -18,7 +18,7 @@
       "user", "pos", "sunburstData", "loggedUser"
     ],
     computed: {
-      ...mapState(["firstContent"]),
+      ...mapState(["firstIntel"]),
     },
     data() {
       return {

@@ -528,12 +528,12 @@ controller.getAllAvailableContent = async function (req, callback) {
   await intelController.getAllAvailableContent(req, callback);
 };
 
-controller.getContentByIntel = function (req, intel, callback) {
-  intelController.getContentByIntel(req, intel, callback);
+controller.getIntelByIntel = function (req, intel, callback) {
+  intelController.getIntelByIntel(req, intel, callback);
 };
 
-controller.getContentByCurrentUser = async function (req, callback) {
-  intelController.getContentByCurrentUser(req, callback);
+controller.getIntelByCurrentUser = async function (req, callback) {
+  intelController.getIntelByCurrentUser(req, callback);
 };
 
 controller.postContent = function (req, callback) {

@@ -52273,7 +52273,7 @@ module.exports = {
 
         $.ajax({
             method: 'POST',
-            url: '/v1/content',
+            url: '/v1/intel',
             data: data,
             dataType: 'json',
             success: function (data, textStatus, jqXHR) {
@@ -52346,7 +52346,7 @@ module.exports = {
             ordering: false,
             info: false,
             ajax: {
-                url: '/v1/content/me',
+                url: '/v1/intel/me',
                 dataSrc: ''
             },
             columnDefs: [
@@ -52379,7 +52379,7 @@ module.exports = {
             ordering: false,
             info: false,
             ajax: {
-                url: '/v1/content'/*+'?rank='+rank+'&limit='+limit+'&page='+page*/,
+                url: '/v1/intel'/*+'?rank='+rank+'&limit='+limit+'&page='+page*/,
                 dataSrc: ''
             },
             columnDefs: [
