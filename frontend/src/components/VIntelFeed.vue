@@ -137,7 +137,7 @@
             limit: 20,
             user: this.fetchAddress
           };
-          return dashboardService.getIntel(params,
+          return dashboardService.getIntelForLoggedInUser(params,
             onSuccess,
             onError
           );

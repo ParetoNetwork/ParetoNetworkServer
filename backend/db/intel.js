@@ -462,7 +462,7 @@ module.exports = function (
 
     };
 
-    intelController.postContent = function (req, callback) {
+    intelController.postIntel = function (req, callback) {
 
         var body = req.body;
 

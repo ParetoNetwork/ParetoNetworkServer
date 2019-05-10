@@ -568,17 +568,17 @@ app.post('/v1/intel', function (req, res) {
 
     //needs to check address whitelist against the authorized address, if people figure out the post body format.
 
-    controller.postContent(req, function (err, obj) {
+    controller.postIntel(req, function (err, obj) {
       if (err) {
         res.status(200).json(ErrorHandler.getError(err));
       } else {
-        res.status(200).json(ErrorHandler.getSuccess({status: 'success', content: obj}));
+        res.status(200).json(ErrorHandler.getSuccess({status: 'success', intel: obj}));
       }
 
     });
   }
 
-}); //end content post
+}); //end intel post
 
 app.get('/v1/transaction', function (req, res) {
   controller.getTransaction(req, function (err, obj) {
@@ -646,7 +646,7 @@ app.get('/v1/intel/me', function (req, res) {
 });
 
 //get info about another address
-app.get('/v1/intel/:content', function (req, res) {
+app.get('/v1/intel/:intel', function (req, res) {
   controller.getIntelByIntel(req, req.params.intel, function (err, result) {
     if (err) {
       res.status(200).json(ErrorHandler.getError(err));
