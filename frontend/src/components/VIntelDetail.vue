@@ -121,8 +121,8 @@
           this.hardwareAvailable = true;
         }
       },
-      getIntel: function () {
-        return DashboardService.getIntel(this.id, res => {
+      getIntelById: function () {
+        return DashboardService.getIntelById(this.id, res => {
           this.getProfile(res.address);
           this.intel = res;
         }, error => {
@@ -189,7 +189,7 @@
       },
       requestCall: function () {
         Promise.all([
-          this.getIntel(),
+          this.getIntelById(),
           this.getAddress(),
           this.loadProfile()
         ]).then(values => {
