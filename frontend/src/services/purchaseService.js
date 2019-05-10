@@ -98,7 +98,7 @@ export default class PurchaseService {
 
     static sign(walletProvider, callback){
         const from = walletProvider.wallet.getAddressString();
-        const params = [walletProvider.web3.utils.toHex('Pareto'), from];
+        const params = [walletProvider.web3.utils.toHex('Pareto Network'), from];
         const method = 'personal_sign';
         walletProvider.web3.sendAsync({method,params,from}, function(err, data) {
             if(err){return callback(err)}
@@ -107,7 +107,7 @@ export default class PurchaseService {
                     {
                         type: 'string',
                         name: 'Message',
-                        value: 'Pareto'
+                        value: 'Pareto Network'
                     }
                 ],
                 owner: from,

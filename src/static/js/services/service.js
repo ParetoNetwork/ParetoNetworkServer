@@ -27,7 +27,7 @@ module.exports = {
             {
                 type: 'string',
                 name: 'Message',
-                value: 'Pareto' //replace with TOS
+                value: 'Pareto Network' //replace with TOS
             }
         ];
 

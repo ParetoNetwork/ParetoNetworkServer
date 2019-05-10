@@ -858,7 +858,7 @@ controller.sign = function (params, callback) {
       },
       primaryType: "CustomType",
       domain: {
-        name: "Pareto",
+        name: "Pareto Network",
         version: PARETO_SIGN_VERSION,
         chainId: ETH_NETWORK,
         verifyingContract: PARETO_CONTRACT_ADDRESS
@@ -894,7 +894,7 @@ controller.sign = function (params, callback) {
         if (!err) {
           controller.getScoreAndSaveRedis(owner, (e, r) => {
           });
-          callback(null, {token: jwt.sign({user: owner}, 'Pareto', {expiresIn: "5y"})});
+          callback(null, {token: jwt.sign({user: owner}, 'Pareto Network', {expiresIn: "5y"})});
         } else {
           callback(err);
         }
