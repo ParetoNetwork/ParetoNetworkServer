@@ -18,7 +18,7 @@ var rewardSchema = new Schema({
 
 
 rewardSchema.virtual('intel', {
-    ref: 'content', // The model to use
+    ref: 'intel.js', // The model to use
     localField: 'intelId', // Find post where `localField`
     foreignField: 'id', // is equal to `foreignField`
     justOne: true

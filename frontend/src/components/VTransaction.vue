@@ -34,7 +34,7 @@
   import {mapState, mapActions} from "vuex";
 
   import {countUpMixin} from "../mixins/countUp";
-  import ContentService from "../services/ContentService";
+  import IntelService from "../services/IntelService";
 
   export default {
     name: "VTransaction",
@@ -106,7 +106,7 @@
 
           this.editTransaction({hash: this.transaction.txHash, key: 'clicked', value: 'true'});
 
-          ContentService.pendingTransactionApproval(
+          IntelService.pendingTransactionApproval(
             this.transaction,
             {signType: this.signType, pathId: this.pathId},
             {

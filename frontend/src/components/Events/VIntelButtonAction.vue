@@ -41,7 +41,7 @@
 
 <script>
   import {mapMutations, mapState} from 'vuex';
-  import ContentService from '../../services/ContentService';
+  import IntelService from '../../services/IntelService';
   import VModalReward from '../Modals/VModalReward';
 
   export default {
@@ -82,7 +82,7 @@
           return;
         }
 
-        ContentService.distributeRewards(
+        IntelService.distributeRewards(
           {title: intel.title, ID: intel.id, intelAddress: intel.intelAddress},
           {signType: this.signType, pathId: this.pathId},
           {

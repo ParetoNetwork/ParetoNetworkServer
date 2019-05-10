@@ -12,7 +12,7 @@ let ParetoTokenInstance;
 let Intel_Contract_Schema;
 let Pareto_Token_Schema;
 /* eslint-disable no-console */
-export default class ContentService {
+export default class IntelService {
 
   static ledgerNanoEngine = null;
   static ledgerWalletSubProvider = null;
@@ -33,9 +33,9 @@ export default class ContentService {
         3: "ropsten"
     };
 
-  static uploadContent(content, onSuccess, onError) {
+  static uploadintel(intel, onSuccess, onError) {
     http
-      .post("/v1/content", content)
+      .post("/v1/intel", intel)
       .then(res => {
         if (res.data.success) {
           return onSuccess(res.data.data);
@@ -97,7 +97,7 @@ export default class ContentService {
     if (typeof web3 !== 'undefined') {
       provider = new Web3(web3.currentProvider);
     } else {
-      provider = new Web3(new Web3.providers.HttpProvider(ContentService.networks[window.localStorage.getItem('netWorkId')].https));
+      provider = new Web3(new Web3.providers.HttpProvider(IntelService.networks[window.localStorage.getItem('netWorkId')].https));
     }
 
     let gasPriceWei = await provider.eth.getGasPrice();
@@ -107,27 +107,27 @@ export default class ContentService {
     gasPrice ? OnSuccess(gasPrice) : OnError('There was a problem fetching the current recommended gas price');
   }
 
-  static async pendingTransactionApproval(content, signData, events, onSuccess, onError) {
+  static async pendingTransactionApproval(intel, signData, events, onSuccess, onError) {
     try {
       await this.Setup(signData);
       Intel = new web3.eth.Contract(
         Intel_Contract_Schema,
-        content.intelAddress
+        intel.intelAddress
       );
       const accounts = await web3.eth.getAccounts();
 
       let gasPrice = await web3.eth.getGasPrice();
 
-      const depositAmount = web3.utils.toWei(content.amount.toString(), "ether");
+      const depositAmount = web3.utils.toWei(intel.amount.toString(), "ether");
       const desiredReward = depositAmount;
 
-      if (accounts[0].toLowerCase() == content.address.toLowerCase()) {
-        switch (content.event) {
+      if (accounts[0].toLowerCase() == intel.address.toLowerCase()) {
+        switch (intel.event) {
           case "reward":
             const rewarder_address = accounts[0];
-            switch (content.status) {
+            switch (intel.status) {
               case 0: {
-                waitForReceipt(content.txHash, async receipt => {
+                waitForReceipt(intel.txHash, async receipt => {
                   events.toastTransaction({
                     group: 'notification',
                     title: 'Event Ready',
@@ -135,12 +135,12 @@ export default class ContentService {
                     duration: 10000,
                     text: 'Second transaction ready, complete it'
                   });
-                  events.editTransaction({hash: content.txHash, key: 'status', value: 1});
+                  events.editTransaction({hash: intel.txHash, key: 'status', value: 1});
 
-                  ContentService.sendReward(null,true, Intel, {
-                    intel: content.intel,
+                  IntelService.sendReward(null,true, Intel, {
+                    intel: intel.intel,
                     depositAmount: depositAmount,
-                    txHash: content.txHash,
+                    txHash: intel.txHash,
                     rewarder_address: rewarder_address,
                     gasPrice: gasPrice
                   }, events, onSuccess, onError);
@@ -148,21 +148,21 @@ export default class ContentService {
                 break;
               }
               case 1: {
-                ContentService.sendReward(null, true, Intel, {
-                  intel: content.intel,
+                IntelService.sendReward(null, true, Intel, {
+                  intel: intel.intel,
                   depositAmount: depositAmount,
-                  txHash: content.txHash,
+                  txHash: intel.txHash,
                   rewarder_address: rewarder_address,
                   gasPrice: gasPrice
                 }, events, onSuccess, onError);
                 break;
               }
               case 2: {
-                waitForReceipt(content.txRewardHash, receipt => {
-                  if (ContentService.ledgerNanoEngine) {
-                    ContentService.ledgerNanoEngine.stop();
+                waitForReceipt(intel.txRewardHash, receipt => {
+                  if (IntelService.ledgerNanoEngine) {
+                    IntelService.ledgerNanoEngine.stop();
                   }
-                  events.editTransaction({hash: content.txHash, key: 'status', value: 3});
+                  events.editTransaction({hash: intel.txHash, key: 'status', value: 3});
                   onSuccess("success");
                 });
                 break;
@@ -174,10 +174,10 @@ export default class ContentService {
             const provider_address = accounts[0];
             const _ttl = Math.round(new Date().getTime() / 1000) + 864000;
 
-            switch (content.status) {
+            switch (intel.status) {
               case 0:
-                waitForReceipt(content.txHash, async receipt => {
-                  events.editTransaction({hash: content.txHash, key: 'status', value: 1});
+                waitForReceipt(intel.txHash, async receipt => {
+                  events.editTransaction({hash: intel.txHash, key: 'status', value: 1});
 
                   events.toastTransaction({
                     group: 'notification',
@@ -187,37 +187,37 @@ export default class ContentService {
                     text: 'Second transaction ready, complete it'
                   });
 
-                  content = {
+                  intel = {
                     provider_address,
                     depositAmount,
                     desiredReward,
                     _ttl,
-                    txHash: content.txHash,
-                    intel: content.intel,
+                    txHash: intel.txHash,
+                    intel: intel.intel,
                     gasPrice: gasPrice
                   };
 
-                  this.sendCreate(null, true, content, events, onSuccess, onError);
+                  this.sendCreate(null, true, intel, events, onSuccess, onError);
                 });
                 break;
               case 1:
-                content = {
+                intel = {
                   provider_address,
                   depositAmount,
                   desiredReward,
                   _ttl,
-                  txHash: content.txHash,
-                  intel: content.intel,
+                  txHash: intel.txHash,
+                  intel: intel.intel,
                   gasPrice: gasPrice
                 };
-                this.sendCreate(null, true, content, events, onSuccess, onError);
+                this.sendCreate(null, true, intel, events, onSuccess, onError);
                 break;
               case 2:
-                waitForReceipt(content.txHash, receipt => {
-                  if (ContentService.ledgerNanoEngine) {
-                    ContentService.ledgerNanoEngine.stop();
+                waitForReceipt(intel.txHash, receipt => {
+                  if (IntelService.ledgerNanoEngine) {
+                    IntelService.ledgerNanoEngine.stop();
                   }
-                  events.editTransaction({hash: content.txHash, key: 'status', value: 3});
+                  events.editTransaction({hash: intel.txHash, key: 'status', value: 3});
                   onSuccess("successfull");
                 });
             }
@@ -231,47 +231,47 @@ export default class ContentService {
     }
   }
 
-  static async sendCreate(title, withIncreaseApproval, content, events, onSuccess, onError) {
+  static async sendCreate(title, withIncreaseApproval, intel, events, onSuccess, onError) {
     try {
       let gasCreateIntel = await Intel.methods
         .create(
-          content.provider_address,
-          content.depositAmount,
-          content.desiredReward,
-          content.intel,
-          content._ttl
+          intel.provider_address,
+          intel.depositAmount,
+          intel.desiredReward,
+          intel.intel,
+          intel._ttl
         )
-        .estimateGas({from: content.provider_address});
+        .estimateGas({from: intel.provider_address});
 
       await Intel.methods
         .create(
-          content.provider_address,
-          content.depositAmount,
-          content.desiredReward,
-          content.intel,
-          content._ttl
+          intel.provider_address,
+          intel.depositAmount,
+          intel.desiredReward,
+          intel.intel,
+          intel._ttl
         )
         .send({
-          from: content.provider_address,
+          from: intel.provider_address,
           gas: gasCreateIntel,
-          gasPrice: content.gasPrice
+          gasPrice: intel.gasPrice
         })
         .on("transactionHash", hash => {
 
             if(withIncreaseApproval){
-                content.txRewardHash = hash;
-                content.status = 2;
-                ContentService.postTransactions(content);
-                events.editTransaction({hash: content.txHash, key: 'status', value: 2});
+                intel.txRewardHash = hash;
+                intel.status = 2;
+                IntelService.postTransactions(intel);
+                events.editTransaction({hash: intel.txHash, key: 'status', value: 2});
             }else{
-                content.txHash = hash;
-                content.txRewardHash = hash;
-                content.status = 2;
-                ContentService.postTransactions(content);
+                intel.txHash = hash;
+                intel.txRewardHash = hash;
+                intel.status = 2;
+                IntelService.postTransactions(intel);
                 if(title){
-                    content.intelData = {title: title};
+                    intel.intelData = {title: title};
                 }
-                events.addTransaction(content);
+                events.addTransaction(intel);
             }
 
 
@@ -279,11 +279,11 @@ export default class ContentService {
             waitForNonce(hash,( txObject)=>{
                 if(txObject){
                     const  nonce = txObject.nonce;
-                    content.status =  txObject.blockNumber? 3 :  2;
-                    content.nonce = nonce;
-                    ContentService.postTransactions(content);
+                    intel.status =  txObject.blockNumber? 3 :  2;
+                    intel.nonce = nonce;
+                    IntelService.postTransactions(intel);
                     if(title){
-                        content.intelData = {title: title};
+                        intel.intelData = {title: title};
                     }
 
                 }
@@ -292,26 +292,26 @@ export default class ContentService {
 
 
           waitForReceipt(hash, receipt => {
-            if (ContentService.ledgerNanoEngine) {
-              ContentService.ledgerNanoEngine.stop();
+            if (IntelService.ledgerNanoEngine) {
+              IntelService.ledgerNanoEngine.stop();
             }
-            events.editTransaction({hash: content.txHash, key: 'status', value: 3});
-            events.editTransaction({hash: content.txHash, intelInfo: 'status', value: 'noFetch'});
+            events.editTransaction({hash: intel.txHash, key: 'status', value: 3});
+            events.editTransaction({hash: intel.txHash, intelInfo: 'status', value: 'noFetch'});
 
             let params = {
-              txHash: content.txHash,
-                txRewardHash: content.txHash,
+              txHash: intel.txHash,
+                txRewardHash: intel.txHash,
               status: 3
             };
-            ContentService.postTransactions(params);
-            onSuccess({success: true, res: content});
+            IntelService.postTransactions(params);
+            onSuccess({success: true, res: intel});
           });
         })
         .on("error", err => {
-          if (ContentService.ledgerNanoEngine) {
-            ContentService.ledgerNanoEngine.stop();
+          if (IntelService.ledgerNanoEngine) {
+            IntelService.ledgerNanoEngine.stop();
           }
-          events.editTransaction({hash: content.txHash, key: 'status', value: 4});
+          events.editTransaction({hash: intel.txHash, key: 'status', value: 4});
 
           onError(errorService.sendErrorMessage('f19', err.message || err));
         });
@@ -319,13 +319,13 @@ export default class ContentService {
     } catch (e) {
       console.log(e);
       let params = {
-        txHash: content.txHash,
-          txRewardHash: content.txHash,
+        txHash: intel.txHash,
+          txRewardHash: intel.txHash,
         status: 4
       };
       this.postTransactions(params);
 
-      events.editTransaction({hash: content.txHash, key: 'status', value: 4});
+      events.editTransaction({hash: intel.txHash, key: 'status', value: 4});
       events.toastTransaction({
         group: 'notification',
         title: 'Error:',
@@ -399,17 +399,17 @@ export default class ContentService {
         params.desiredReward = desiredReward;
         params._ttl = _ttl;
 
-        ContentService.uploadContent(serverData, async res => {
-          params.intel = res.content.Intel_ID;
-          ContentService.sendCreate(serverData.title, false, params, events, onSuccess, onError);
+        IntelService.uploadintel(serverData, async res => {
+          params.intel = res.intel.Intel_ID;
+          IntelService.sendCreate(serverData.title, false, params, events, onSuccess, onError);
         });
       }
 
       async function userIncreaseApproval() {
-        ContentService.uploadContent(
+        IntelService.uploadintel(
           serverData,
           async res => {
-            params.intel = res.content.Intel_ID;
+            params.intel = res.intel.Intel_ID;
 
             let totalTokensToApprove = 10000000000;
             let increaseApprovalTotal = web3.utils.toWei(totalTokensToApprove.toString(), "ether");
@@ -433,7 +433,7 @@ export default class ContentService {
                   data.amount = tokenAmount;
                   data.intelAddress = Intel.options.address;
                   data.event = "approve";
-                  ContentService.postTransactions(data);
+                  IntelService.postTransactions(data);
                   if(serverData.title){
                       data.intelData = {title: serverData.title};
                   }
@@ -441,20 +441,20 @@ export default class ContentService {
 
                   waitForNonce(hash,(txObject)=>{
                       if(txObject){
-                          const content = {};
+                          const intel = {};
                           const  nonce = txObject.nonce;
-                          content.txHash = hash;
-                          content.status = txObject.blockNumber? 1 :  0;
-                          content.event = "approve";
-                          content.address = provider_address;
-                          content.intelAddress = Intel.options.address;
-                          content.amount = tokenAmount;
-                          content.nonce = nonce;
+                          intel.txHash = hash;
+                          intel.status = txObject.blockNumber? 1 :  0;
+                          intel.event = "approve";
+                          intel.address = provider_address;
+                          intel.intelAddress = Intel.options.address;
+                          intel.amount = tokenAmount;
+                          intel.nonce = nonce;
                           if(serverData.title){
-                              content.intelData = {title: serverData.title};
+                              intel.intelData = {title: serverData.title};
                           }
 
-                          ContentService.postTransactions(content);
+                          IntelService.postTransactions(intel);
                       }
                       });
                 var txHash = hash;
@@ -471,17 +471,17 @@ export default class ContentService {
                     text: 'Second transaction ready, complete it'
                   });
 
-                  const newContent = {
+                  const newintel = {
                     provider_address,
                     depositAmount,
                     desiredReward,
                     _ttl,
                     txHash: txHash,
-                    intel: res.content.Intel_ID,
+                    intel: res.intel.Intel_ID,
                     gasPrice: gasPrice
                   };
 
-                  ContentService.sendCreate(serverData.title, true, newContent, events, onSuccess, onError);
+                  IntelService.sendCreate(serverData.title, true, newintel, events, onSuccess, onError);
                 });
               })
               .on("error", err => {
@@ -493,71 +493,71 @@ export default class ContentService {
     });
   }
 
-  static async sendReward(title, withIncreasedApproval, Intel, content, events, onSuccess, onError) {
+  static async sendReward(title, withIncreasedApproval, Intel, intel, events, onSuccess, onError) {
     try {
       const gasSendReward = await Intel.methods
-        .sendReward(content.intel, content.depositAmount)
-        .estimateGas({from: content.address});
+        .sendReward(intel.intel, intel.depositAmount)
+        .estimateGas({from: intel.address});
 
       await Intel.methods
-        .sendReward(content.intel, content.depositAmount)
+        .sendReward(intel.intel, intel.depositAmount)
         .send({
-          from: content.address,
+          from: intel.address,
           gas: gasSendReward,
-          gasPrice: content.gasPrice
+          gasPrice: intel.gasPrice
         })
         .on("transactionHash", hash => {
             if(title){
-                content.intelData = {title: title}
+                intel.intelData = {title: title}
             }
             if(withIncreasedApproval){
-                content.txRewardHash = hash;
-                content.status = 2;
-                ContentService.postTransactions(content);
-                events.editTransaction({hash: content.txHash, key: 'status', value: 2});
+                intel.txRewardHash = hash;
+                intel.status = 2;
+                IntelService.postTransactions(intel);
+                events.editTransaction({hash: intel.txHash, key: 'status', value: 2});
             }else{
-                content.txHash = hash;
-                content.txRewardHash = hash;
-                content.status = 2;
-                ContentService.postTransactions(content);
-                events.addTransaction(content);
+                intel.txHash = hash;
+                intel.txRewardHash = hash;
+                intel.status = 2;
+                IntelService.postTransactions(intel);
+                events.addTransaction(intel);
             }
 
             waitForNonce(hash, (txObject)=>{
                 if(txObject){
                     const  nonce = txObject.nonce;
-                    content.status = txObject.blockNumber? 3 :  2;
-                    content.nonce = nonce;
+                    intel.status = txObject.blockNumber? 3 :  2;
+                    intel.nonce = nonce;
                     if(title){
-                        content.intelData = {title: title}
+                        intel.intelData = {title: title}
                     }
-                    ContentService.postTransactions(content);
+                    IntelService.postTransactions(intel);
                 }
                 }) ;
           waitForReceipt(hash, receipt => {
-            if (ContentService.ledgerNanoEngine) {
-              ContentService.ledgerNanoEngine.stop();
+            if (IntelService.ledgerNanoEngine) {
+              IntelService.ledgerNanoEngine.stop();
             }
-            events.editTransaction({hash: content.txHash, key: 'status', value: 3});
+            events.editTransaction({hash: intel.txHash, key: 'status', value: 3});
             onSuccess("Transaction Completed");
           });
         })
         .on("error", error => {
 
-          if (ContentService.ledgerNanoEngine) {
-            ContentService.ledgerNanoEngine.stop();
+          if (IntelService.ledgerNanoEngine) {
+            IntelService.ledgerNanoEngine.stop();
           }
-          events.editTransaction({hash: content.txHash, key: 'status', value: 4});
+          events.editTransaction({hash: intel.txHash, key: 'status', value: 4});
           onError(errorService.sendErrorMessage('f21', error));
         });
     } catch (e) {
       let params = {
-        txHash: content.txHash,
+        txHash: intel.txHash,
         status: 4
       };
       this.postTransactions(params);
 
-      events.editTransaction({hash: content.txHash, key: 'status', value: 4});
+      events.editTransaction({hash: intel.txHash, key: 'status', value: 4});
       events.toastTransaction({
         group: 'notification',
         title: 'Error:',
@@ -569,7 +569,7 @@ export default class ContentService {
   }
 
   //Activates when an user wants to make a reward to an intel
-  static async rewardIntel(content, signData, events, onSuccess, onError) {
+  static async rewardIntel(intel, signData, events, onSuccess, onError) {
     try {
       await this.Setup(signData);
     } catch (e) {
@@ -581,28 +581,28 @@ export default class ContentService {
         return;
       }
       const rewarder_address = accounts[0];
-      if (content.address.toLowerCase() !== rewarder_address.toLowerCase()) {
+      if (intel.address.toLowerCase() !== rewarder_address.toLowerCase()) {
         onError(errorService.sendErrorMessage('f36', err));
         return;
       }
 
       Intel = new web3.eth.Contract(
         Intel_Contract_Schema,
-        content.intelAddress
+        intel.intelAddress
       );
 
       let gasPrice = await web3.eth.getGasPrice();
 
-      const depositAmount = web3.utils.toWei(content.tokenAmount.toString(), "ether");
+      const depositAmount = web3.utils.toWei(intel.tokenAmount.toString(), "ether");
 
       let userAllowance = 0;
 
       let params = {
         address: rewarder_address,
-        intel: content.ID,
-        amount: content.tokenAmount,
+        intel: intel.ID,
+        amount: intel.tokenAmount,
         event: 'reward',
-        intelAddress: content.intelAddress,
+        intelAddress: intel.intelAddress,
         status: 0,
         clicked: true,
         dateCreated: new Date()
@@ -611,7 +611,7 @@ export default class ContentService {
       //Compares last used contract address to current using contract address
       //if not the same, compares the user allowance
 
-      if (content.lastApproved && (content.lastApproved.toLowerCase() === content.intelAddress.toLowerCase())) {
+      if (intel.lastApproved && (intel.lastApproved.toLowerCase() === intel.intelAddress.toLowerCase())) {
           await ParetoTokenInstance.methods
               .allowance(rewarder_address, Intel.options.address).call().then(async res => {
                   userAllowance = parseFloat(res);
@@ -624,7 +624,7 @@ export default class ContentService {
       function directlyCreateReward() {
         params.depositAmount = depositAmount;
         params.gasPrice = gasPrice;
-        ContentService.sendReward(content.title, false, Intel, params, events, onSuccess, onError);
+        IntelService.sendReward(intel.title, false, Intel, params, events, onSuccess, onError);
       }
 
       //Does the increase approval for an user if the allowance is less than the token amount
@@ -635,11 +635,11 @@ export default class ContentService {
 
         //Calculates the gas for the increase approval transaction
         let gasApprove = await ParetoTokenInstance.methods
-          .increaseApproval(content.intelAddress, increaseApprovalTotal)
+          .increaseApproval(intel.intelAddress, increaseApprovalTotal)
           .estimateGas({from: rewarder_address});
 
         await ParetoTokenInstance.methods
-          .increaseApproval(content.intelAddress, increaseApprovalTotal)
+          .increaseApproval(intel.intelAddress, increaseApprovalTotal)
           .send({
             from: rewarder_address,
             gas: gasApprove,
@@ -651,14 +651,14 @@ export default class ContentService {
               data.txHash = hash;
               data.status = 0;
               data.event = "approve";
-              data.intelData = {title: content.title};
-              data.intel  = content.ID;
-              data.amount = content.tokenAmount;
-              data.intelAddress = content.intelAddress;
+              data.intelData = {title: intel.title};
+              data.intel  = intel.ID;
+              data.amount = intel.tokenAmount;
+              data.intelAddress = intel.intelAddress;
               data.address = rewarder_address;
               events.addTransaction(data);
 
-              ContentService.postTransactions(data);
+              IntelService.postTransactions(data);
 
                waitForNonce(hash, (txObject)=>{
                    if(txObject){
@@ -669,11 +669,11 @@ export default class ContentService {
                        param.event = "approve";
                        param.nonce = nonce;
                        param.address = rewarder_address;
-                       param.intel  = content.ID;
-                       param.amount = content.tokenAmount;
-                       param.intelAddress = content.intelAddress;
-                       ContentService.postTransactions(param);
-                       param.intelData = {title: content.title};
+                       param.intel  = intel.ID;
+                       param.amount = intel.tokenAmount;
+                       param.intelAddress = intel.intelAddress;
+                       IntelService.postTransactions(param);
+                       param.intelData = {title: intel.title};
 
 
                    }
@@ -693,8 +693,8 @@ export default class ContentService {
               });
               events.editTransaction({hash: hash, key: 'status', value: 1});
 
-              ContentService.sendReward(content.title, true, Intel, {
-                intel: content.ID,
+              IntelService.sendReward(intel.title, true, Intel, {
+                intel: intel.ID,
                 depositAmount: depositAmount,
                 txHash: txHash,
                 address: rewarder_address,
@@ -709,12 +709,12 @@ export default class ContentService {
     });
   }
 
-  static async distributeRewards(content, signData, events, onSuccess, onError) {
+  static async distributeRewards(intel, signData, events, onSuccess, onError) {
     try {
       await this.Setup(signData);
       Intel = new web3.eth.Contract(
         Intel_Contract_Schema,
-        content.intelAddress
+        intel.intelAddress
       );
     } catch (e) {
       return onError(errorService.sendErrorMessage( (e === 'invalid networkId')? 'f37': 'f35', e));
@@ -730,21 +730,21 @@ export default class ContentService {
 
       try {
         gasDistribute = await Intel.methods
-          .distributeReward(content.ID)
+          .distributeReward(intel.ID)
           .estimateGas({from: distributor});
 
         events.addDistribute({
-          intel: content.ID,
+          intel: intel.ID,
           event: 'distribute',
           status: 0,
           clicked: true,
-          intelData: {title: content.title} ,
+          intelData: {title: intel.title} ,
           dateCreated: new Date()
         });
 
         let gasPrice = await web3.eth.getGasPrice();
         await Intel.methods
-          .distributeReward(content.ID)
+          .distributeReward(intel.ID)
           .send({
             from: distributor,
             gas: gasDistribute,
@@ -758,31 +758,31 @@ export default class ContentService {
                   let params = {
                       address: distributor,
                       txHash: hash,
-                      intel: content.ID,
+                      intel: intel.ID,
                       amount: 0,
                       event: 'distribute',
-                      intelAddress: content.intelAddress,
+                      intelAddress: intel.intelAddress,
                       status: 0,
                       nonce: nonce,
                       clicked: true,
                       dateCreated: new Date()
                   };
 
-                  ContentService.postTransactions(params);
+                  IntelService.postTransactions(params);
               }).catch(function (err) {
                   console.log(err);
               });
 
             waitForReceipt(hash, receipt => {
-              if (ContentService.ledgerNanoEngine) {
-                ContentService.ledgerNanoEngine.stop();
+              if (IntelService.ledgerNanoEngine) {
+                IntelService.ledgerNanoEngine.stop();
               }
               onSuccess("Transaction Completed");
             });
           })
           .on("error", error => {
-            if (ContentService.ledgerNanoEngine) {
-              ContentService.ledgerNanoEngine.stop();
+            if (IntelService.ledgerNanoEngine) {
+              IntelService.ledgerNanoEngine.stop();
             }
             onError(errorService.sendErrorMessage('f22', error));
           });
@@ -813,8 +813,8 @@ export default class ContentService {
     Pareto_Token_Schema = JSON.parse(window.localStorage.getItem('paretoc'));
     const signType = signData.signType;
     const pathId = signData.pathId;
-    if (ContentService.ledgerNanoEngine) {
-      ContentService.ledgerNanoEngine.stop();
+    if (IntelService.ledgerNanoEngine) {
+      IntelService.ledgerNanoEngine.stop();
     }
     switch (signType) {
       case  'LedgerNano': {
@@ -826,7 +826,7 @@ export default class ContentService {
         this.ledgerWalletSubProvider = await LedgerWalletSubproviderFactory(() => networkId, pathId);
         this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
         this.ledgerNanoEngine.addProvider(this.ledgerWalletSubProvider);
-        this.ledgerNanoEngine.addProvider(new WsSubprovider({rpcUrl: ContentService.networks[networkId].wss})); // you need RPC endpoint
+        this.ledgerNanoEngine.addProvider(new WsSubprovider({rpcUrl: IntelService.networks[networkId].wss})); // you need RPC endpoint
         this.ledgerNanoEngine.start();
         provider = this.ledgerNanoEngine;
         break;
@@ -843,7 +843,7 @@ export default class ContentService {
           // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
           provider = new Web3(
             new Web3.providers.HttpProvider(
-              ContentService.networks[window.localStorage.getItem('netWorkId')].https
+              IntelService.networks[window.localStorage.getItem('netWorkId')].https
             )
           );
         }
@@ -855,7 +855,7 @@ export default class ContentService {
 
     web3 = new Web3(provider);
    const net = await web3.eth.net.getNetworkType();
-   if(net !== ContentService.networksType[window.localStorage.getItem('netWorkId')] ){
+   if(net !== IntelService.networksType[window.localStorage.getItem('netWorkId')] ){
        throw "invalid networkId";
     }
     Intel = new web3.eth.Contract(

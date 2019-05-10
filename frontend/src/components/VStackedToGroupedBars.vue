@@ -15,7 +15,7 @@
 
 <script>
   import profileService from '../services/profileService';
-  import ContentService from '../services/ContentService';
+  import IntelService from '../services/IntelService';
   import {mapState} from 'vuex';
   import * as d3 from "d3";
 
@@ -29,7 +29,7 @@
     },
     data() {
       return {
-        height: 150,
+        height: 180,
         width: 500,
         pickedChart: 'stacked',
         rect: [],

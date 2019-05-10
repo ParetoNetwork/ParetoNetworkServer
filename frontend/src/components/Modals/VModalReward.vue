@@ -43,7 +43,7 @@
 
 <script>
     import {mapMutations, mapState, mapActions } from 'vuex';
-    import ContentService from "../../services/ContentService";
+    import IntelService from "../../services/IntelService";
     import AuthService from "../../services/authService";
     import fromExponential from 'from-exponential';
 
@@ -112,7 +112,7 @@
 
                 let lastApproved = this.userLastApprovedContractAddress;
 
-                ContentService.rewardIntel(
+                IntelService.rewardIntel(
                     {title, ID, tokenAmount, intelAddress, lastApproved, address: this.address},
                     {signType: this.signType, pathId: this.pathId},
                     {

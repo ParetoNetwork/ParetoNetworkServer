@@ -17,7 +17,7 @@ var paretoTransactionSchema = new Schema({
 
 
 paretoTransactionSchema.virtual('intelData', {
-    ref: 'content', // The model to use
+    ref: 'intel.js', // The model to use
     localField: 'intel', // Find post where `localField`
     foreignField: 'id', // is equal to `foreignField`
     justOne: true

@@ -150,7 +150,7 @@
 <script>
     import DashboardService from '../services/dashboardService';
     import AuthService from '../services/authService';
-    import ContentService from '../services/ContentService';
+    import IntelService from '../services/IntelService';
 
     import VProfile from "./VProfile.vue";
     import {mapState, mapActions} from "vuex";
@@ -205,12 +205,12 @@
         },
         computed: {
             bodyFunction: function () {
-                return content;
+                return intel;
             },
             ...mapState(["madeLogin", "ws", "signType", "pathId", "userLastApprovedContractAddress"])
         },
         mounted: function () {
-            ContentService.getAssets(r=>{
+            IntelService.getAssets(r=>{
                 this.assets = r;
                 this.words = r.map(it=>{return it.symbol.charAt(0).toUpperCase() + it.symbol.slice(1).toLowerCase() });
             }, e=>{
@@ -273,7 +273,7 @@
                     assets= assets.map(it=> {return it._id} )
                 }
 
-                ContentService.createIntel(
+                IntelService.createIntel(
                     {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress,
                         lastApproved: this.userLastApprovedContractAddress,
                         assets: assets },
@@ -356,7 +356,7 @@
             },
             redirectAfterCreateIntel(intelId) {
                 let params = {page: 0, limit: 10};
-                return DashboardService.getContent(params,
+                return DashboardService.getIntel(params,
                     res => {
                         const intel = res.find(item => {
                             return intelId == item.id;
