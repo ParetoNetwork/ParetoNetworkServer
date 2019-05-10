@@ -13,7 +13,7 @@
                 <p> Before use Ledger Nano S, verify the next items: </p>
                 <div class="m-2 ml-4">
                     <ul>
-                        <li> The Browser must be Google Chrome</li>
+                        <li> The Browser must be Google Chrome or Brave</li>
                         <li> Plugged-in their Ledger Wallet Nano S</li>
                         <li> Input digits pin</li>
                         <li> Navigated to the Ethereum app on their device</li>

@@ -7,19 +7,15 @@
             Intel Market
           </b>
         </div>
-        <div class="col-9">
+        <div class="col-8">
           <VDelay :intelDelay="myFeed.intel[0].contentDelay" class="d-flex flex-row align-items-end"></VDelay>
+        </div>
+        <div class="col-1" @click="openHelpIntelFeedModal()">
+          <i class="fas fa-question-circle"></i>
         </div>
 
       </div>
-    <!-- <div class="row text-intel">
-      <div class="col-4 col-md-4 col-lg-2">
-        CONTRIBUTOR
-      </div>
-      <div class="col-8 col-md-8 col-lg-10 pl-lg-3">
-        INTEL
-      </div>
-    </div> -->
+
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
           <li class="text-left  py-2" :style="getBorderLeft(row.speed)" :key="row._id"
@@ -224,7 +220,11 @@
 
 
             return {};
-        }
+        },
+      openEditProfileModal() {
+
+          this.openModalEditProfile(true);
+      }
     }
   }
 </script>
