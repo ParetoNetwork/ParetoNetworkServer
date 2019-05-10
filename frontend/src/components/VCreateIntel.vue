@@ -356,7 +356,7 @@
             },
             redirectAfterCreateIntel(intelId) {
                 let params = {page: 0, limit: 10};
-                return DashboardService.getIntel(params,
+                return DashboardService.getIntelForLoggedInUser(params,
                     res => {
                         const intel = res.find(item => {
                             return intelId == item.id;

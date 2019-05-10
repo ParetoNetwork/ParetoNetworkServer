@@ -536,8 +536,8 @@ controller.getIntelByCurrentUser = async function (req, callback) {
   intelController.getIntelByCurrentUser(req, callback);
 };
 
-controller.postContent = function (req, callback) {
-  intelController.postContent(req, callback);
+controller.postIntel = function (req, callback) {
+  intelController.postIntel(req, callback);
 };
 
 controller.getTransaction = function (data, callback) {
