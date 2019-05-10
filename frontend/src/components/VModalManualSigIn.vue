@@ -57,7 +57,7 @@
     data() {
       return {
         loading: false,
-        message: "Pareto",
+        message: "Pareto Network",
         addresstemp: "",
         signed: ""
       };

@@ -199,9 +199,9 @@ app.post('/v1/sign', function (req, res) {
       res.status(200).json(ErrorHandler.getError(err));
     } else {
       if (sessionDebug == 1) { //this allows you to create a cookie that works on localhost and without SSL, and can be accessed by javascript
-        res.cookie('authorization', result.token, {httpOnly: true});
+        res.cookie('pareto_auth', result.token, {httpOnly: true});
       } else {
-        res.cookie('authorization', result.token, {
+        res.cookie('pareto_auth', result.token, {
           domain: 'pareto.network',
           path: '/',
           httpOnly: true,
@@ -360,13 +360,13 @@ app.post('/v1/error-log', function (req, res) {
     error.systemMessage = req.body.error;
     if (!req.user) {
       try {
-        let authorization = req.cookies.authorization;
+        let authorization = req.cookies.pareto_auth;
         if (authorization.includes('Bearer')) {
           authorization = authorization.replace('Bearer', '');
         }
         authorization = authorization.trim();
 
-        jwt.verify(authorization, 'Pareto', function (err, decoded) {
+        jwt.verify(authorization, 'Pareto Network', function (err, decoded) {
           error.address = decoded.user;
           console.log(JSON.stringify(error));
         });
@@ -398,7 +398,7 @@ app.post('/webhook', function (req, res) {
 
 });
 
-app.post('/v1/showshoppingcar', function (req, res) {
+app.post('/v1/showshoppingcart', function (req, res) {
 
   const showshoppingcart = process.env.SHOW_SHOPPING_CART;
 
@@ -467,19 +467,19 @@ app.get('/v1/stacked-grouped-information', function (req, res) {
 
 app.use(function (req, res, next) {
 
-  if (req.cookies === undefined || req.cookies.authorization === undefined) {
+  if (req.cookies === undefined || req.cookies.pareto_auth === undefined) {
 
     res.status(200).json(ErrorHandler.tokenMissingError())
 
   } else {
 
-    let authorization = req.cookies.authorization;
+    let authorization = req.cookies.pareto_auth;
     if (authorization.includes('Bearer')) {
       authorization = authorization.replace('Bearer', '');
     }
     authorization = authorization.trim();
 
-    jwt.verify(authorization, 'Pareto', function (err, decoded) {
+    jwt.verify(authorization, 'Pareto Network', function (err, decoded) {
       if (err) {
         res.status(200).json(ErrorHandler.jwtFailedError())
       } else {
@@ -514,9 +514,9 @@ app.post('/v1/unsign', function (req, res) {
       res.status(200).json(ErrorHandler.getError(err))
     } else {
       if (sessionDebug == 1) {
-        res.cookie('authorization', result.token, {httpOnly: true, maxAge: 1231006505});
+        res.cookie('pareto_auth', result.token, {httpOnly: true, maxAge: 1231006505});
       } else {
-        res.cookie('authorization', result.token, {
+        res.cookie('pareto_auth', result.token, {
           domain: 'pareto.network',
           path: '/',
           httpOnly: true,
@@ -848,7 +848,7 @@ app.initializeWebSocket = function (server) {
   const wss = new WebSocket.Server({
     verifyClient: function (info, cb) {
       const data = info.req.headers.cookie.split('; ').filter(it => {
-        return it.indexOf("authorization=") >= 0
+        return it.indexOf("pareto_auth=") >= 0
       });
       let token = null;
       if (data && data.length && data[0].length >= 14) {
@@ -857,7 +857,7 @@ app.initializeWebSocket = function (server) {
       if (!token)
         cb(false, 401, 'Unauthorized');
       else {
-        jwt.verify(token, 'Pareto', function (err, decoded) {
+        jwt.verify(token, 'Pareto Network', function (err, decoded) {
           if (err) {
             cb(false, 401, 'Unauthorized')
           } else {
