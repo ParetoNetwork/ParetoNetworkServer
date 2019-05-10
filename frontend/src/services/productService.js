@@ -36,7 +36,7 @@ export default class productService {
 
     static showShopping(onSuccess, onError){
 
-        http.post('/v1/showshoppingcar').then(
+        http.post('/v1/showshoppingcart').then(
             res => {
                 if(res){
                     return onSuccess(res.data);

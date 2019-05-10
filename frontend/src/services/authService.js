@@ -212,7 +212,7 @@ export default class authService {
                 {
                     type: 'string',
                     name: 'Message',
-                    value: 'Pareto' //replace with TOS
+                    value: 'Pareto Network' //replace with TOS
                 }
             ];
             this.ledgerWalletSubProvider.ledger.setDerivationPath(pathId);
@@ -234,7 +234,7 @@ export default class authService {
                         return  authService.actualConnection;
                     }
                 };
-                this.ledgerWalletSubProvider.ledger.signMessage({data:  this.ledgerNanoProvider.utils.toHex('Pareto')}, (err, result) => {
+                this.ledgerWalletSubProvider.ledger.signMessage({data:  this.ledgerNanoProvider.utils.toHex('Pareto Network')}, (err, result) => {
                     if (err) {
                         if(err.metaData.code ===5){
                            return  authService.signWallet(pathId, addr, onSuccess, onError)
@@ -249,7 +249,7 @@ export default class authService {
                         return onError('Please login into MetaMask (or other Web3 browser) in order to access the Pareto Network');
                     }
 
-                    const recovered = Sig.recoverPersonalSignature({data: 'Pareto', sig: result});
+                    const recovered = Sig.recoverPersonalSignature({data: 'Pareto Network', sig: result});
 
                     if (recovered === from) {
                         authService.signParetoServer(msgParams, from, result, onSuccess, onError)
@@ -350,13 +350,13 @@ export default class authService {
                                    },
                                    primaryType: 'CustomType',
                                    domain: {
-                                       name:    'Pareto',
+                                       name:    'Pareto Network',
                                        version: version.toString(),
                                        chainId: parseInt(network),
                                        verifyingContract: contractAddress
                                    },
                                    message: {
-                                       message: 'Pareto'
+                                       message: 'Pareto Network'
                                    }
                                };
                                let params = [ from, JSON.stringify(msgParams)];
@@ -386,7 +386,7 @@ export default class authService {
                                                {
                                                    type: 'string',
                                                    name: 'Message',
-                                                   value: 'Pareto' //replace with TOS
+                                                   value: 'Pareto Network' //replace with TOS
                                                }
                                            ];
                                        }
@@ -411,7 +411,7 @@ export default class authService {
                                                {
                                                    type: 'string',
                                                    name: 'Message',
-                                                   value: 'Pareto' //replace with TOS
+                                                   value: 'Pareto Network' //replace with TOS
                                                }
                                            ];
                                            const params = [msgParams,from];
@@ -432,7 +432,7 @@ export default class authService {
                                        {
                                            type: 'string',
                                            name: 'Message',
-                                           value: 'Pareto' //replace with TOS
+                                           value: 'Pareto Network' //replace with TOS
                                        }
                                    ];
                                    params = [msgParams,from];
