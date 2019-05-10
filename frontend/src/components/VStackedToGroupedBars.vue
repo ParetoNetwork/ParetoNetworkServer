@@ -29,7 +29,7 @@
     },
     data() {
       return {
-        height: 150,
+        height: 180,
         width: 500,
         pickedChart: 'stacked',
         rect: [],
