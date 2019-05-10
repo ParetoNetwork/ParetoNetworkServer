@@ -3,12 +3,12 @@
     <div v-if="!loading" class="p-2 pt-1 text-left">
       <div class="row align-items-center">
         <div class="col-3 ">
-          <b class="title-intel">
+          <b class="title-content">
             Intel Market
           </b>
         </div>
         <div class="col-9">
-          <VDelay v-if="myFeed.length > 0" :intelDelay="myFeed.intel[0].intelDelay" class="d-flex flex-row align-items-end"></VDelay>
+          <VDelay :intelDelay="myFeed.intel[0].contentDelay" class="d-flex flex-row align-items-end"></VDelay>
         </div>
 
       </div>
@@ -119,8 +119,6 @@
           }
         };
 
-
-
         let onError = (error) => {
           this.loading = false;
           let errorText = error.message ? error.message : error;
@@ -183,12 +181,12 @@
         return dashboardService.getAllIntel(params, res => {
             res.forEach(intel => {
               let found = false;
-              this.myFeed.intel = this.myFeed.intel.map(myFeedintel => {
-                if (intel._id === myFeedintel._id) {
-                  myFeedintel = intel;
+              this.myFeed.intel = this.myFeed.intel.map(myFeedIntel => {
+                if (intel._id === myFeedIntel._id) {
+                  myFeedIntel = intel;
                   found = true;
                 }
-                return myFeedintel;
+                return myFeedIntel;
               });
               if (!found) {
                 this.myFeed.intel.unshift(intel);

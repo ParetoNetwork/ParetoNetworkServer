@@ -156,8 +156,8 @@ const store = new Vuex.Store({
       state.showshopping = show
     }, updateCart(state, cart){
       state.shoppingCart = cart
-    }, setFirstContent(state, intels){
-          state.firstContent = intels
+    }, setFirstIntel(state, intels){
+          state.firstIntel = intels
       }
 
   },
@@ -175,8 +175,8 @@ const store = new Vuex.Store({
       //console.log(params);
       context.commit('editTransaction', params);
     },
-    setFirstContent(context, params) {
-      context.commit('setFirstContent', params);
+    setFirstIntel(context, params) {
+      context.commit('setFirstIntel', params);
     },
     transactionComplete(context, txHash) {
       context.commit('deleteTransaction', txHash);

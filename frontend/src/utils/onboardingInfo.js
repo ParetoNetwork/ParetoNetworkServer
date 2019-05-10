@@ -31,7 +31,7 @@ const information = (function () {
   };
 
   return {
-    content: [
+    intel: [
       {
         title: '🏅 What is the Pareto Network? Intro to Alpha Capture',
         dateCreated: new Date(),
