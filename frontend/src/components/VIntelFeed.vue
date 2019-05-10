@@ -8,11 +8,11 @@
           </b>
         </div>
         <div class="col-9">
-          <VDelay :contentDelay="myFeed.content[0].contentDelay" class="d-flex flex-row align-items-end"></VDelay>
+          <VDelay :intelDelay="myFeed.intel[0].contentDelay" class="d-flex flex-row align-items-end"></VDelay>
         </div>
 
       </div>
-    <!-- <div class="row text-content">
+    <!-- <div class="row text-intel">
       <div class="col-4 col-md-4 col-lg-2">
         CONTRIBUTOR
       </div>
@@ -23,7 +23,7 @@
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
           <li class="text-left  py-2" :style="getBorderLeft(row.speed)" :key="row._id"
-              v-for="row of myFeed.content">
+              v-for="row of myFeed.intel">
             <VIntelPreview :user="user" :intel="row" :eventRow="false"></VIntelPreview>
           </li>
         </ul>
@@ -63,17 +63,17 @@
         VDelay
     },
     props: [
-      'updateContent', 'block', 'user', 'fetchAddress', 'title', 'defaultContent', 'onboardingPicture'
+      'updateIntel', 'block', 'user', 'fetchAddress', 'title', 'defaultIntel', 'onboardingPicture'
     ],
     mixins: [countUpMixin],
     data: function () {
       return {
-        allMyContent: [],
+        allMyIntel: [],
         baseURL: environment.baseURL,
         moment: moment,
         etherscanUrl: window.localStorage.getItem('etherscan'),
         myFeed: {
-          content: [],
+          intel: [],
           loading: false,
           page: 0,
         },
@@ -82,42 +82,42 @@
       }
     },
     beforeMount: function () {
-      if (this.defaultContent !== undefined && this.defaultContent.length > 0){
-        this.myFeed.content = this.defaultContent;
+      if (this.defaultIntel !== undefined && this.defaultIntel.length > 0){
+        this.myFeed.intel = this.defaultIntel;
         this.loading = false;
       } else {
-        this.loadContent({page: 0, limit: 20});
+        this.loadIntel({page: 0, limit: 20});
       }
     },
     watch: {
       //Updates when parent view, which has the webSocket, receives new information and refreshes
-      updateContent: function (uC) {
-        this.updateFeedContent();
+      updateIntel: function (uC) {
+        this.updateFeedIntel();
       },
       block: function (block) {
         this.assignBlock(block);
       }
     },
     methods: {
-      ...mapMutations(["openModalReward","setFirstContent"]),
+      ...mapMutations(["openModalReward","setFirstIntel"]),
       assignBlock(block) {
-        this.myFeed.content = this.myFeed.content.map(item => {
+        this.myFeed.intel = this.myFeed.intel.map(item => {
           item.blockAgo = block - item.block > 0 ? block - item.block : 0;
           return item;
         });
       },
-      loadContent: function (params) {
+      loadIntel: function (params) {
         params = params || null;
 
         let onSuccess = (res) => {
           this.loading = false;
           this.myFeed.page++;
           this.myFeed.loading = false;
-          this.myFeed.content = [...this.myFeed.content, ...res];
-          this.setFirstContent( [].concat(this.myFeed.content));
+          if(res.length > 0) {
+            this.myFeed.intel = [...this.myFeed.intel, ...res];
+            this.setFirstIntel([].concat(this.myFeed.intel));
+          }
         };
-
-
 
         let onError = (error) => {
           this.loading = false;
@@ -126,7 +126,7 @@
             group: 'notification',
             type: 'error',
             duration: 10000,
-            title: 'Content',
+            title: 'Intel',
             text: errorText
           });
         };
@@ -137,12 +137,12 @@
             limit: 20,
             user: this.fetchAddress
           };
-          return dashboardService.getContent(params,
+          return dashboardService.getIntel(params,
             onSuccess,
             onError
           );
         } else {
-          return dashboardService.getAllContent(params,
+          return dashboardService.getAllIntel(params,
             onSuccess,
             onError
           );
@@ -156,14 +156,14 @@
 
         try {
           if (list.scrollTop + list.offsetHeight >= list.scrollHeight * 0.9
-            && !this.myFeed.loading && !this.defaultContent) {
+            && !this.myFeed.loading && !this.defaultIntel) {
             const params = {limit: 20, page: this.myFeed.page};
             this.myFeed.loading = true;
 
             this.$store.state.makingRequest = true;
 
-            let myFeedContentReady = this.loadContent(params);
-            myFeedContentReady.then(() => {
+            let myFeedIntelReady = this.loadIntel(params);
+            myFeedIntelReady.then(() => {
               this.$store.state.makingRequest = false;
             });
           }
@@ -172,24 +172,24 @@
         }
       },
       //Calls method when socket information comes in from parent method
-      updateFeedContent: function () {
+      updateFeedIntel: function () {
         let params = {
           page: 0,
-          limit: this.myFeed.content.length,
+          limit: this.myFeed.intel.length,
           user: this.fetchAddress
         };
-        return dashboardService.getAllContent(params, res => {
+        return dashboardService.getAllIntel(params, res => {
             res.forEach(intel => {
               let found = false;
-              this.myFeed.content = this.myFeed.content.map(myFeedintel => {
-                if (intel._id === myFeedintel._id) {
-                  myFeedintel = intel;
+              this.myFeed.intel = this.myFeed.intel.map(myFeedIntel => {
+                if (intel._id === myFeedIntel._id) {
+                  myFeedIntel = intel;
                   found = true;
                 }
-                return myFeedintel;
+                return myFeedIntel;
               });
               if (!found) {
-                this.myFeed.content.unshift(intel);
+                this.myFeed.intel.unshift(intel);
               }
             });
           },
@@ -200,7 +200,7 @@
               group: 'notification',
               type: 'error',
               duration: 10000,
-              title: 'Content',
+              title: 'Intel',
               text: errorText
             });
           }

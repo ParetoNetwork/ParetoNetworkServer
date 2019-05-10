@@ -35,9 +35,9 @@ POST  /v1/unsign
 
 GET   /v1/summation
 
-GET   /v1/content
+GET   /v1/intel
 
-POST  /v1/content
+POST  /v1/intel
 
 
 

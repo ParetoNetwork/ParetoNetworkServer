@@ -162,7 +162,7 @@ module.exports = {
 
         $.ajax({
             method: 'POST',
-            url: '/v1/content?compact=true',
+            url: '/v1/intel?compact=true',
             data: data,
             dataType: 'json',
             success: function (data, textStatus, jqXHR) {
@@ -235,7 +235,7 @@ module.exports = {
             ordering: false,
             info: false,
             ajax: {
-                url: '/v1/content/me?compact=true',
+                url: '/v1/intel/me?compact=true',
                 dataSrc: ''
             },
             columnDefs: [
@@ -268,7 +268,7 @@ module.exports = {
             ordering: false,
             info: false,
             ajax: {
-                url: '/v1/content?compact=true'/*+'?rank='+rank+'&limit='+limit+'&page='+page*/,
+                url: '/v1/intel?compact=true'/*+'?rank='+rank+'&limit='+limit+'&page='+page*/,
                 dataSrc: ''
             },
             columnDefs: [

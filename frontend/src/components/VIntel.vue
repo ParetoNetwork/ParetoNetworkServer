@@ -19,11 +19,11 @@
                 </div>
                 <div class="col-md-9 col-lg-6 px-2 order-1 order-md-2 order-xl-3">
                     <VIntelFeed v-if="primalLoad" :user="user" :updateContent="updateContentVar" :block="block"
-                                :defaultContent="information.content" :onboardingPicture="onboarding"></VIntelFeed>
+                                :defaultIntel="information.intel" :onboardingPicture="onboarding"></VIntelFeed>
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
                 <div class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
-                    <VHandlerSunburstChart v-if="primalLoad" :user="user" :sunburstData="information.content" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
+                    <VHandlerSunburstChart v-if="primalLoad" :user="user" :sunburstData="information.intel" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
                     <VHandleStackGroupBars
                         class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"
                         v-if="primalLoad"

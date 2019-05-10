@@ -6,7 +6,7 @@ module.exports = function (
     web3_events,
     Intel_Contract_Schema,
     ParetoAddress,
-    ParetoContent,
+    ParetoIntel,
     ParetoProfile,
     ParetoPayment,
     ParetoReward,
@@ -25,7 +25,7 @@ module.exports = function (
              try {
                  const initialBalance = web3.utils.fromWei(event.returnValues.depositAmount, 'ether');
                  const expiry_time = event.returnValues.ttl;
-                 ParetoContent.findOneAndUpdate({
+                 ParetoIntel.findOneAndUpdate({
                      id: event.returnValues.intelID,
                      validated: false
                  }, {
@@ -111,7 +111,7 @@ module.exports = function (
                              const error = ErrorHandler.backendErrorList('b19');
                              error.systemMessage = err.message ? err.message : err;
                          } else {
-                             ParetoContent.findOne({id: intelIndex}, (err, intel) => {
+                             ParetoIntel.findOne({id: intelIndex}, (err, intel) => {
                                  if (intel) {
                                      const {address} = intel;
                                      ParetoReward.findOneAndUpdate({txHash: event.transactionHash}, {receiver: address}, {},
@@ -158,7 +158,7 @@ module.exports = function (
                      const nonce = txObject.nonce;
                      const txHash = event.transactionHash;
                      const sender = event.returnValues.distributor.toLowerCase();
-                     let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {
+                     let promises = [ParetoIntel.findOneAndUpdate({id: intelIndex}, {
                          distributed: true,
                          txHashDistribute: event.transactionHash
                      })
@@ -324,7 +324,7 @@ module.exports = function (
       */
      ethereum.startwatchIntel = function () {
          ethereum.startwatchNewIntel()
-         ParetoContent.find({'validated': true}).distinct('intelAddress').exec(function (err, results) {
+         ParetoIntel.find({'validated': true}).distinct('intelAddress').exec(function (err, results) {
              if (err) {
                  console.log(err);
              } else {
@@ -427,7 +427,7 @@ module.exports = function (
          ParetoReward.aggregate(agg).exec(function (err, r) {
              if (r.length > 0) {
                  const reward = r[0].reward;
-                 let promises = [ParetoContent.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
+                 let promises = [ParetoIntel.findOneAndUpdate({id: intelIndex}, {totalReward: reward})
                      , ParetoTransaction.findOneAndUpdate({
                          $or: [{txRewardHash: txHash}, {txHash: txHash},
                              {address: sender, intel: intelIndex, event: 'reward', nonce: nonce}]

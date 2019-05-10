@@ -553,7 +553,7 @@ Node.prototype._decode = function decode(input, options) {
       options.track(input.path(), start, input.length, 'tagged');
 
     if (options && options.track && state.tag !== null)
-      options.track(input.path(), input.offset, input.length, 'content');
+      options.track(input.path(), input.offset, input.length, 'intel.js');
 
     // Select proper method for tag
     if (state.any)
@@ -45550,7 +45550,7 @@ module.exports = {
 
         $.ajax({
             method: 'POST',
-            url: '/v1/content',
+            url: '/v1/intel',
             data: data,
             dataType: 'json',
             success: function (data, textStatus, jqXHR) {
@@ -45564,7 +45564,7 @@ module.exports = {
 
                 var preview = document.getElementById('preview');
                 if (preview !== null) {
-                    preview.innerHTML = '<b>' + data.content.title + '</b>' + '<br/><br/>' + data.content.body;
+                    preview.innerHTML = '<b>' + data.intel.title + '</b>' + '<br/><br/>' + data.intel.body;
                     preview.style.backgroundColor = 'rgba(245,245,245,1)';
                 }
 

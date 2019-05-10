@@ -18,7 +18,7 @@
             }
         },
         props: [
-            'contentDelay'
+            'intelDelay'
         ]
         , beforeMount: function () {
 
@@ -46,11 +46,10 @@
             },
 
             getTime(speed) {
-                const seconds = this.contentDelay.blockDelay[speed]*12;
+                const seconds = this.intelDelay.blockDelay[speed]*12; //the object before being passed in is called contentDelay.blockDelay
                 const days =  Math.floor( seconds/86400);
                 const hours =  Math.floor((seconds%86400)/3600);
                 const min =  Math.floor(((seconds%86400)%3600)/60);
-                const secods = (((seconds%86400)/3600)/60)-min;
                 return (days<=9?"0"+days:days) + ":"+(hours<=9?"0"+hours:hours)+":"+(min<=9?"0"+min:min);//+":"+ ":"+seconds;
             }
         }

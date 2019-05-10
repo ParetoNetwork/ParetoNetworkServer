@@ -6,7 +6,7 @@ module.exports = function (
     web3_events,
     Intel_Contract_Schema,
     ParetoAddress,
-    ParetoContent,
+    ParetoIntel,
     ParetoProfile,
     ParetoPayment,
     ParetoReward,

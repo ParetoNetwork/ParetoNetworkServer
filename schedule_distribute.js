@@ -6,7 +6,7 @@ var Tx = require("ethereumjs-tx");
 
 const web3 = new Web3(process.env.WEB3_URL);
 
-const ParetoIntel = mongoose.model("content");
+const ParetoIntel = mongoose.model("intel.js");
 const ParetoProfile = mongoose.model("profile");
 
 const ethNetwork = process.env.ETH_NETWORK;

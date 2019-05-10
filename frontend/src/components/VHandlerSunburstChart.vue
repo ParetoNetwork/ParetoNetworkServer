@@ -18,7 +18,7 @@
       "user", "pos", "sunburstData", "loggedUser"
     ],
     computed: {
-      ...mapState(["firstContent"]),
+      ...mapState(["firstIntel"]),
     },
     data() {
       return {
@@ -107,7 +107,7 @@
         //Loads chart information when user props loads
         //this.getChartInformation();
       },
-      firstContent(newValue, oldValue) {
+      firstIntel(newValue, oldValue) {
         this.getChartInformation(newValue);
 
       },

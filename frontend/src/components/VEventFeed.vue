@@ -40,7 +40,7 @@
 
 <script>
   import {mapState, mapActions, mapMutations} from "vuex";
-  import ContentService from "../services/ContentService";
+  import IntelService from "../services/IntelService";
   import dashboardService from "../services/dashboardService";
   import VShimmerMyPost from "./Shimmer/IntelView/VShimmerMyPost";
   import VIntelPreview from "./VIntelPreview";
@@ -151,7 +151,7 @@
       //Loads the pendingTransactions state
       getTransactions: function () {
         let params = {q: 'all', page: this.page, limit: this.limit};
-        return ContentService.getTransactions(params, data => {
+        return IntelService.getTransactions(params, data => {
           data = data.filter(item => {
             if (item.event === 'distribute') {
               this.addDistribute(item);
@@ -173,7 +173,7 @@
       },
       loadMyContent: function () {
         let params = {page: this.page, limit: this.limit};
-        return dashboardService.getContent(params,
+        return dashboardService.getIntel(params,
           res => {
             this.loadedMyContent = true;
             this.myContent = [...this.myContent, ...res];
@@ -248,7 +248,7 @@
       updateCreateEvent: function (tx) {
         let params = {page: 0, limit: 10};
 
-        return dashboardService.getContent(params,
+        return dashboardService.getIntel(params,
           res => {
             try {
               let intel = res.find(item => {
