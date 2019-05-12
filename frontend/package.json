@@ -43,6 +43,7 @@
     "snapsvg": "^0.5.1",
     "summernote": "^0.8.11",
     "v-debounce": "^0.1.2",
+    "v-tooltip": "^2.0.1",
     "vue": "^2.5.16",
     "vue-countup-v2": "^1.0.3",
     "vue-d3-sunburst": "^0.2.0",

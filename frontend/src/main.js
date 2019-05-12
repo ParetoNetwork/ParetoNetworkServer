@@ -5,10 +5,11 @@ import App from './App.vue';
 import VueRouter from 'vue-router';
 import router from './utils/routes';
 import Meta from 'vue-meta';
-import lineClamp from 'vue-line-clamp'
+import lineClamp from 'vue-line-clamp';
+import VTooltip from 'v-tooltip';
 
 import Vuex from 'vuex';
-import Notifications from 'vue-notification'
+import Notifications from 'vue-notification';
 
 const snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
 import BootstrapVue from 'bootstrap-vue';
@@ -31,6 +32,7 @@ Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(Notifications);
 Vue.use(lineClamp);
+Vue.use(VTooltip);
 Vue.use(require('vue-moment'));
 
 
