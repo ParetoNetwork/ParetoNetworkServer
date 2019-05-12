@@ -10,9 +10,9 @@
         <div class="col-8">
           <VDelay :intelDelay="myFeed.intel[0].contentDelay" class="d-flex flex-row align-items-end"></VDelay>
         </div>
-        <div class="col-1" @click="openHelpIntelFeedModal()">
+        <!-- <div class="col-1" v-tooltip="'Members can view the intel that they are privileged to see.'">
           <i class="fas fa-question-circle"></i>
-        </div>
+        </div> -->
 
       </div>
 
