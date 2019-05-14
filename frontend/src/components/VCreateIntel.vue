@@ -10,21 +10,12 @@
                         <div class="col-12 p-1">
                             <label class="pareto-label" style="padding-left: 10px"><b>NEW INTEL</b></label>
                         </div>
-                        <div class="col-md-6 col-lg-4 p-1 mb-4 mb-md-2">
-                            <p class="create-input text-user-content"> {{blockChainAddress}} </p>
-                        </div>
-                        <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
-                            <input type="number" v-model="tokens" class="create-input mt-0" step="0.000000001" required>
-                            <span class="floating-label">Pareto Amount
-                            <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake" style="color: red"></i> </span>
-                        </span>
-                        </div>
                     </div>
                     <div class="row mt-4 mt-md-2">
                         <div v-show="!isPreview" class="col-lg-10 font-body p-1 mt-4 mt-md-1">
                             <div class="flex-row intel-container text-user-content">
                                 <div class="group create-input-space">
-                                    <input id="intel-title-input"
+                                    <input id="intel-title-input" style="width: 100%;"
                                            type="text" class="create-input create-content-text title-user-content"
                                            name="intel-title" v-model="title" required>
                                     <span class="floating-label create-content-text title-user-content">
@@ -70,6 +61,15 @@
                             </div>
                         </div>
                         <div class="col-lg-2 d-flex flex-lg-column justify-content-end justify-content-lg-start">
+                            <!-- <div class="col-md-3 col-lg-2 p-1 mt-4 mt-md-0 create-input-space">
+                                <input type="number" v-model="tokens" class="create-input mt-0" step="0.000000001" required>
+                                <span class="floating-label">
+                                Pareto Amount
+                                <span v-if="formError.tokens && !tokens">
+                                    <i class="fa fa-exclamation-circle shake" style="color: red"></i>
+                                </span>
+                            </span>
+                            </div> --> <!-- put in modal -->
                             <button class="btn btn-dark-secondary-pareto mt-2 order-lg-2"
                                     @click="showPreview()">
                                 <b v-if="!isPreview">preview</b>
@@ -97,7 +97,7 @@
                 :body-text-variant="'light'">
 
                 <b-container fluid>
-                    <h4 class="font-body my-3"> CONFIRM PUBLISH </h4>
+                    <h4 class="font-body my-3"> CONFIRM INTEL </h4>
                     <div v-if="this.signType==='LedgerNano'" class="text-left">
                         <p> Before use Ledger Nano S, verify the next items: </p>
                         <div class="m-2 ml-4">
@@ -112,32 +112,45 @@
                         <br/>
                     </div>
 
-                    <div class="create-input w-100">
+                    <!-- <div class="create-input w-100">
                         <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
                             <span> Address </span>
                             <span class="ml-4 ellipsis"> {{blockChainAddress}} </span>
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="create-input w-100 mt-3">
                         <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
                             <span> Deposit </span>
-                            <span class="ml-4">
+                            <span class="ml-2">
                                     <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
-                                    {{tokens}}
                                 </span>
+                            <input type="number" id="tokenInput" class="nested-input" style="margin-top: -7px; margin-bottom: -7px;" step="1" v-bind:value="parseInt(maxTokens/10)" v-bind:max="maxTokens" v-bind:min="parseInt(maxTokens/50)" v-on:input="tokens = $('#tokenInput')[0].value" required>
                         </div>
                     </div>
+
+                    <!-- minutes hours days weeks buttons -->
+                    <!-- <div class="w-100 mt-3">
+                        <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input create-input">
+                            <span>Priority </span>
+                            <input type="number" class="nested-input mt-0" style="text-align: right;" step="1" value="100" required>
+                            <span v-if="formError.tokens && !tokens">
+                                    <i class="fa fa-exclamation-circle shake" style="color: red"></i>
+                            </span>
+
+                        </div>
+                    </div> -->
 
                     <b-row class="m-2 mt-4 d-flex justify-content-end">
                         <button
                             class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0"
-                            @click="hideModal()"
-                            :disabled="!hardwareAvailable || validateTokenAmount()">Cancel
+                            @click="hideModal()">
+                            Cancel
                         </button>
                         <button
                             class="btn btn-dark-primary-pareto mt-2 ml-2"
-                            @click="createIntel()">Confirm
+                            @click="createIntel()"
+                            :disabled="!hardwareAvailable /*|| validateTokenAmount()*/">Confirm
                         </button>
                     </b-row>
                 </b-container>
@@ -267,6 +280,8 @@
 
                 this.intelState('creating', 'Creating Intel, please wait');
 
+                this.tokens = $("#tokenInput")[0].value; //maybe validate
+
                 this.$store.state.makingRequest = true;
                 let assets=  this.assets.filter( it => { it.symbol = it.symbol.charAt(0).toUpperCase() + it.symbol.slice(1).toLowerCase(); return  this.body.indexOf("$"+it.symbol) > -1 });
                 if(assets){
@@ -380,7 +395,7 @@
                 }
             },
             validateContent: function (e) {
-                this.formError.tokens = this.validateTokenAmount();
+                //this.formError.tokens = this.validateTokenAmount();
                 this.formError.title = !this.title;
 
                 //The lenght is 12 because summernote, on first click, creates an empty p and br, creating 12 characters
@@ -391,7 +406,7 @@
                     $('.note-placeholder').append('<i id="miss-content" class="fa fa-exclamation-circle shake" style="color: red"></i>')
                 }
 
-                if (this.formError.tokens || this.formError.title || this.formError.body) return;
+                if (this.formError.title || this.formError.body) return;
 
                 this.showModal();
             },

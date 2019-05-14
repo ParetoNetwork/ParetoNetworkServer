@@ -14,6 +14,13 @@ input:not(:focus):valid ~ .floating-label{
   border: 0px;
   background-color: $light-blue-pareto;
   color: white;
+
+}
+
+.nested-input {
+  border: 0px;
+  background-color: $light-blue-pareto;
+  color: white;
   width: 100%;
 }
 
