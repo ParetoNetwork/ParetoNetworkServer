@@ -94,7 +94,7 @@ const ParetoPayment = mongoose.model('payment');
 const ParetoReward = mongoose.model('reward');
 const ParetoAsset = mongoose.model('asset');
 const ParetoTransaction = mongoose.model('transaction');
-const Intel_Contract_Schema = require("../build/contracts/Intel.json");
+const Intel_Contract_Schema = require(process.env.ETH_NETWORK == 1 ? "../build/contracts/Intel-mainnet.json" : "../build/contracts/Intel-ropsten.json"); //1 is mainnet, 3 is ropsten
 var sigUtil = require('eth-sig-util');
 var jwt = require('jsonwebtoken');
 

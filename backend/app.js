@@ -313,8 +313,8 @@ app.get("/getContributors/:intelId", (req, res) => {
 })
 
 app.post('/v1/config_basic', function (req, res) {
-  const intel = require("../build/contracts/Intel.json");
   const netWorkId = process.env.ETH_NETWORK;
+  const intel = require(netWorkId == 1 ? "../build/contracts/Intel-mainnet.json" : "../build/contracts/Intel-ropsten.json"); //1 is mainnet, 3 is ropsten
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
@@ -333,9 +333,9 @@ app.post('/v1/config_basic', function (req, res) {
 });
 
 app.post('/v1/config', function (req, res) {
-  const intel = require("../build/contracts/Intel.json");
   const pareto = require("../build/contracts/ParetoNetworkToken.json");
   const netWorkId = process.env.ETH_NETWORK;
+  const intel = require(netWorkId == 1 ? "../build/contracts/Intel-mainnet.json" : "../build/contracts/Intel-ropsten.json"); //1 is mainnet, 3 is ropsten
   const pcontract = process.env.CRED_PARETOCONTRACT;
   const psignversion = process.env.PARETO_SIGN_VERSION;
   const exponentBlock = process.env.EXPONENT_BLOCK_AGO;
