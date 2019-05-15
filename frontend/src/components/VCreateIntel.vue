@@ -5,7 +5,7 @@
                 <div class="col-12 order-last order-lg-first col-lg-2 mr-2 mb-4">
                     <VProfile :addressProfile="blockChainAddress" :can-edit="true"></VProfile>
                 </div>
-                <div class="col-12 col-lg-9 mb-4">
+                <div class="col-12 col-lg-9 mt-sm-4 mt-md-0 mt-lg-0 mb-4">
                     <div class="row mb-md-4">
                         <div class="col-12 p-1">
                             <label class="pareto-label" style="padding-left: 10px"><b>NEW INTEL</b></label>
