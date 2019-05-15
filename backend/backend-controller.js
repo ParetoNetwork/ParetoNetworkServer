@@ -722,6 +722,12 @@ controller.getChartInformationAndSaveRadis= async function (callback){
                     data[key]['reward'] = data[key]['reward'] +  it[key]['reward'] || 0;
                     data[key]['create'] = data[key]['create'] + it[key]['create'] || 0;
                     data[key]['deposited'] =  data[key]['deposited'] + it[key]['deposited'] || 0;
+                    if(data[key]['intelContractDeposit'] < 0){
+                      data[key]['intelContractDeposit'] = 0;
+                    }
+                    if(it[key]['intelContractDeposit'] < 0){
+                      it[key]['intelContractDeposit'] = 0;
+                    }
                     data[key]['intelContractDeposit'] =   data[key]['intelContractDeposit'] + it[key]['intelContractDeposit'] || 0;
                 } );
                 return data;
@@ -737,7 +743,7 @@ controller.getChartInformationAndSaveRadis= async function (callback){
     multi.exec(function (errors, results) {
         callback(null, response)
     });
-}
+};
 
 
 controller.getCurrentContractBalance =  function (){
@@ -759,7 +765,7 @@ controller.getCurrentContractBalance =  function (){
                     });
                 });
                 Promise.all(promises).then(r => {
-                    resolve(r.reduce((balance, it, index) => {
+                    resolve(r.reduce((balance, it) => {
                         return  parseFloat(balance) + parseFloat(it);
                     }, 0))
                 })

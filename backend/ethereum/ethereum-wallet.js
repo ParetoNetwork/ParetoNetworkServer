@@ -269,7 +269,8 @@ module.exports = function (
             const payment =  await ParetoPayment.findOne({address: sender, processed: false}).exec();
             const  walletProvider = eth_wallet.getEthereumWalletProvider();
 
-            const Intel_Schema = require("../../build/contracts/Intel.json");
+
+            const Intel_Schema = require(ETH_NETWORK == 1 ? "../build/contracts/Intel-mainnet.json" : "../build/contracts/Intel-ropsten.json"); //1 is mainnet, 3 is ropsten
             const web3 = walletProvider.web3;
             const wallet = walletProvider.wallet;
             const Intel  = new web3.eth.Contract( Intel_Schema.abi, Intel_Schema.networks[ETH_NETWORK].address);
