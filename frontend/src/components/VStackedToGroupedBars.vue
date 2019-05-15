@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="row align-items-xl-end height-dynamic">
     <div class="col text-left">
       <div class="row mx-0">
         <b class="title-content text-left"> Network </b>
@@ -349,5 +349,37 @@
     font: 12px sans-serif;
     padding: 5px;
     text-align: center;
+  }
+
+  /* the delta in height is 4vh for every 1000px, can this be put into a Sass formula? */
+  @media (min-height: 800px){
+    .height-dynamic {
+      height: 28vh;
+    }
+  }
+  @media (min-height: 900px){
+    .height-dynamic {
+      height: 34vh;
+    }
+  }
+  @media (min-height: 1000px){
+    .height-dynamic {
+      height: 38vh;
+    }
+  }
+  @media (min-height: 1100px){
+    .height-dynamic {
+      height: 42vh;
+    }
+  }
+  @media (min-height: 1200px){
+    .height-dynamic {
+      height: 46vh;
+    }
+  }
+  @media (min-height: 1300px){
+    .height-dynamic {
+      height: 48vh;
+    }
   }
 </style>
