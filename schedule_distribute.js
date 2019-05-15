@@ -12,7 +12,7 @@ const ParetoProfile = mongoose.model("profile");
 const ethNetwork = process.env.ETH_NETWORK;
 const privKey = process.env.PRIV_KEY_DISTRIBUTOR;
 
-const Intel_Contract_Schema = require("./build/contracts/Intel.json");
+const Intel_Contract_Schema = require(ethNetwork == 1 ? "../build/contracts/Intel-mainnet.json" : "../build/contracts/Intel-ropsten.json"); //1 is mainnet, 3 is ropsten
 const Intel = new web3.eth.Contract(
   Intel_Contract_Schema.abi,
   Intel_Contract_Schema.networks[ethNetwork].address
