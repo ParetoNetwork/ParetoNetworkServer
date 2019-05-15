@@ -8,7 +8,7 @@
                 <div class="col-12 col-lg-8 mb-4 px-1 intel-container">
                     <div class="row m-0 text-group">
                         <VShimmerIntelInformation v-if="!intel.block"></VShimmerIntelInformation>
-                        <div v-else class="col-12 p-4">
+                        <div v-else class="col-12 p-4" :style="getBorderLeft(intel.speed)">
                             <div class="row py-3 m-0">
                                 <div class="col-md-10 p-0 pr-1"> <!-- add redacted class back to p when fixed -->
                                     <p class="title-user-content" v-html="convertToHideText(intel.title)"></p>
@@ -187,6 +187,25 @@
         });
         return transactionPending;
       },
+        getBorderLeft(speed) {
+            switch(speed){
+                case 1:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#c24e4e !important"}
+                }
+                case 2:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#ca9036 !important"}
+                }
+                case 3:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#6ac27e !important"}
+                }
+                case 4:{
+                    return {"border-left": "0.5rem solid", "border-left-color": "#294b83 !important"}
+                }
+            }
+
+
+            return {};
+        },
       requestCall: function () {
         Promise.all([
           this.getIntelById(),
