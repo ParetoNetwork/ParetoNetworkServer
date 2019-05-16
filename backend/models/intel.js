@@ -13,7 +13,7 @@ var paretoIntelSchema = new Schema({
     totalReward: { type: Number, default: 0 },
     txHash: String,
     txHashDistribute: String,//set required { type: String, required: true }
-	speed: Number,
+	priority: Number,
 	dateCreated: { type: Date, default: Date.now },
 	block: Number,
 	distributed: { type: Boolean, default: false },

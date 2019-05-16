@@ -8,7 +8,7 @@
           </b>
         </div>
         <div class="col-8">
-          <VDelay :intelDelay="myFeed.intel[0].contentDelay" class="d-flex flex-row align-items-end"></VDelay>
+          <VDelay :intelDelay="myFeed.intel[0].contentDelay" :select="1" class="d-flex flex-row align-items-end"></VDelay>
         </div>
         <!-- <div class="col-1" v-tooltip="'Members can view the intel that they are privileged to see.'">
           <i class="fas fa-question-circle"></i>
@@ -18,7 +18,7 @@
 
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
-          <li class="text-left  py-2" :style="getBorderLeft(row.speed)" :key="row._id"
+          <li class="text-left  py-2" :style="getBorderLeft(row.priority)" :key="row._id"
               v-for="row of myFeed.intel">
             <VIntelPreview :user="user" :intel="row" :eventRow="false"></VIntelPreview>
           </li>
@@ -202,8 +202,8 @@
           }
         );
       },
-        getBorderLeft(speed) {
-            switch(speed){
+        getBorderLeft(priority) {
+            switch(priority){
                 case 1:{
                     return {"border-left": "0.5rem solid", "border-left-color": "#c24e4e !important"}
                 }
