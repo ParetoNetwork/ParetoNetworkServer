@@ -798,7 +798,7 @@
 
 <script>
     import VParticles from './VParticles.vue';
-    import ModalSignIn from "./VModalManualSigIn";
+    import ModalSignIn from "./Modals/VModalManualSigIn";
     import {mapState} from 'vuex';
 
     export default {

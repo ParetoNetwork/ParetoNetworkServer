@@ -9,7 +9,7 @@
         <div class="d-block text-center pt-5">
             <form action="">
                 <div class="input-group mb-3 create-input-space">
-                    <input v-model="alias" type="text" class="create-input create-content-text text-user-content" id="alias"
+                    <input v-model="alias" type="text" class="create-input create-content-text text-user-content" style="width: 100%;" id="alias"
                            aria-describedby="basic-addon3" required>
                     <span class="floating-label create-content-text title-user-content">
                         <b> Alias </b>
@@ -19,11 +19,11 @@
                     <b class="pareto-subtitle create-content-text title-user-content ml-3 mb-2">
                         Current Alias Slug
                     </b>
-                    <input v-model="aliasSlug || user.aliasSlug" type="text" class="readonly-input create-content-text text-user-content" id="alias-slug"
+                    <input v-model="aliasSlug || user.aliasSlug" type="text" class="readonly-input create-content-text text-user-content" style="width: 100%;" id="alias-slug"
                            aria-describedby="basic-addon3" onkeydown="event.preventDefault()" readonly>
                 </div>
                 <div class="input-group mb-3 mt-5 create-input-space">
-                    <textarea v-model="bio" class="create-input create-content-text text-user-content" id="bio" rows="4"
+                    <textarea v-model="bio" class="create-input create-content-text text-user-content" style="width: 100%;" id="bio" rows="4"
                               aria-describedby="basic-addon3" required> </textarea>
                     <span class="floating-label create-content-text title-user-content">
                         <b> Biography </b>

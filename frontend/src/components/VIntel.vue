@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <ModalSignIn v-if="showModalSign"></ModalSignIn>
+        <ModalManualSignIn v-if="showModalSign"></ModalManualSignIn>
         <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
         <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
         <ModalSplashOnboarding v-if="showModalOnboarding && !loggedUser"></ModalSplashOnboarding>
@@ -62,7 +62,7 @@
   import errorService from '../services/errorService';
 
   import LoginOptions from './Modals/VLoginOptions';
-  import ModalSignIn from './VModalManualSigIn';
+  import ModalManualSignIn from './Modals/VModalManualSigIn';
   import ModalLedgerNano from './Modals/VModalLedgerNano';
   import ModalSplashOnboarding from './Modals/VModalSplashOnboarding';
 
@@ -93,7 +93,7 @@
       VShimmerViz,
       ModalLedgerNano,
       LoginOptions,
-      ModalSignIn,
+      ModalManualSignIn,
       ModalSplashOnboarding
     },
     data: function () {

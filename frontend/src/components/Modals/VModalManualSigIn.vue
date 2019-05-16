@@ -1,8 +1,8 @@
 <template>
   <div class="modal fade" id="signModal" role="dialog">
     <notifications group="auth" position="bottom right"/>
-    <div class="modal-dialog" role="document">
-      <div class="modal-content bg-dark text-light">
+    <div class="modal-dialog modal-content" role="document">
+      <div class="text-light">
         <div class="modal-header">
           <h2 class="font-body">Manual Sign in</h2>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -47,7 +47,7 @@
 <script>
   /* eslint-disable */
   import 'jquery'
-  import Auth from '../services/authService';
+  import Auth from '../../services/authService';
   import {mapState, mapMutations} from 'vuex';
 
   export default {
@@ -81,12 +81,12 @@
           this.$router.go();
 
           Auth.postSign(
-            res => {
-              this.$store.dispatch({
-                type: 'login',
-                address: {address: res, dataSign: {signType: 'Manual', pathId: ''}},
-              });
-            },
+                  res => {
+                    this.$store.dispatch({
+                      type: 'login',
+                      address: {address: res, dataSign: {signType: 'Manual', pathId: ''}},
+                    });
+                  },
           );
         }, error => {
           $('#signModal').modal('hide');
@@ -105,7 +105,7 @@
         this.$store.state.showModalSign = false;
       }
       , ...mapMutations(
-        ['login', 'loadingLogin', 'stopLogin']
+              ['login', 'loadingLogin', 'stopLogin']
       )
     }
   };
