@@ -120,12 +120,14 @@
                     </div> -->
 
                     <div class="create-input w-100 mt-3">
-                        <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
+                        <div class="d-flex justify-content-start w-100 pb-1 modal-input">
                             <span> Deposit </span>
                             <span class="ml-2">
                                     <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                 </span>
                             <input type="number" id="tokenInput" class="nested-input" style="margin-top: -7px; margin-bottom: -7px;" step="1" v-bind:value="parseInt(maxTokens/10)" v-bind:max="maxTokens" v-bind:min="parseInt(maxTokens/50)" v-on:input="tokens = $('#tokenInput')[0].value" required>
+                            <!-- <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake"
+                                                                       style="color: red"></i></span> -->
                         </div>
                     </div>
 
@@ -141,6 +143,14 @@
                         </div>
                     </div> -->
 
+                    <div class="w-100 mt-3" style="padding: 10px 0px 8px 15px; border-radius: 3px; border: 0px;">
+                        <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
+                            <span class="mt-2"> Priority </span>
+                            <VDelay :intelDelay="{}" class="ml-1 ml-md-5 d-flex flex-row align-items-end" @chosenPriority="chosenPriorityEvent"></VDelay>
+                        </div>
+
+                    </div>
+
                     <b-row class="m-2 mt-4 d-flex justify-content-end">
                         <button
                             class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0"
@@ -149,7 +159,7 @@
                         </button>
                         <button
                             class="btn btn-dark-primary-pareto mt-2 ml-2"
-                            @click="createIntel()"
+                            @click="createIntel()/*validateConfirmToken()*/"
                             :disabled="!hardwareAvailable /*|| validateTokenAmount()*/">Confirm
                         </button>
                     </b-row>
@@ -164,7 +174,7 @@
     import DashboardService from '../services/dashboardService';
     import AuthService from '../services/authService';
     import IntelService from '../services/IntelService';
-
+    import VDelay from "./VDelay";
     import VProfile from "./VProfile.vue";
     import {mapState, mapActions} from "vuex";
 
@@ -173,7 +183,7 @@
 
     export default {
         name: 'VCreateIntel',
-      components: {VProfile},
+      components: {VProfile, VDelay},
         data: function () {
             return {
                 nextRoute: {
@@ -185,6 +195,7 @@
                 body: '',
                 hardwareAvailable: false,
                 content: '',
+                priority: 2, //this is default priority and should be defined somewhere
                 title: '',
                 maxTokens: 1,
                 blockChainAddress: '',
@@ -280,7 +291,7 @@
 
                 this.intelState('creating', 'Creating Intel, please wait');
 
-                this.tokens = $("#tokenInput")[0].value; //maybe validate
+                this.tokens = $("#tokenInput")[0].value;
 
                 this.$store.state.makingRequest = true;
                 let assets=  this.assets.filter( it => { it.symbol = it.symbol.charAt(0).toUpperCase() + it.symbol.slice(1).toLowerCase(); return  this.body.indexOf("$"+it.symbol) > -1 });
@@ -289,7 +300,7 @@
                 }
 
                 IntelService.createIntel(
-                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress,
+                    {block: this.block, title: this.title, body: this.body, address: this.blockChainAddress, priority: this.priority,
                         lastApproved: this.userLastApprovedContractAddress,
                         assets: assets },
                     this.tokens,
@@ -344,6 +355,9 @@
                         }
                     });
             },
+            chosenPriorityEvent(chosenPriority) {
+              this.priority =  chosenPriority;
+            },
             hideModalWarning: function () {
                 this.modalCloseWarning = false;
             },
@@ -394,8 +408,7 @@
                     $('.note-editor').show();
                 }
             },
-            validateContent: function (e) {
-                //this.formError.tokens = this.validateTokenAmount();
+            validateContent: function () {
                 this.formError.title = !this.title;
 
                 //The lenght is 12 because summernote, on first click, creates an empty p and br, creating 12 characters
@@ -409,6 +422,14 @@
                 if (this.formError.title || this.formError.body) return;
 
                 this.showModal();
+            },
+            validateConfirmToken: function(){
+                if(this.validateTokenAmount()){
+                    this.formError.tokens = true;
+                } else {
+                    this.formError.tokens = false;
+                    this.createIntel();
+                }
             },
             validateTokenAmount: function () {
                 return !this.tokens || parseFloat(this.tokens) <= 0 || parseFloat(this.tokens) > parseFloat(this.maxTokens);
