@@ -11,7 +11,7 @@ const information = (function () {
   };
 
   const demoIntelProviderA = {
-    address: '0xA355b24AF8a14Af03AbC3AF0441e7773E7a7224d',
+    address: '0x5cceb9de613b3dd47007c6307fdaee1a20924d4b',
     alias: 'PARETO Community',
     aliasSlug: 'pareto-comm',
     biography: 'Become a member to access Market-Proven trading intel. Post, trade, earn.',
