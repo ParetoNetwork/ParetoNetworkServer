@@ -7,7 +7,9 @@
             </div>
             <div v-else class="col col-0 col-xs-0" :id="('priority'+row)" :style="getBorderColor(row)" @click="setSelection(row)">
                 <div class="mr-1" :style="getColor(row)"> </div>
-                <p style="font-size: 1em; border: 1px;"> {{row}} </p> <!-- wish to show text here when larger screen -->
+                <p v-responsive.sm.xs style="font-size: 1em; border: 1px;"> {{row}} </p>
+                <!-- wish to show text here when larger screen -->
+                <p v-responsive="['hidden-xs', 'hidden-sm']" style="font-size: 0.80em; border: 1px;"> {{getPriority(row)}} </p>
             </div>
         </li>
     </ul>
