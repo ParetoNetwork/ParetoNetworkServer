@@ -7,7 +7,7 @@
                 </div>
                 <div class="col-12 col-lg-9 mt-sm-4 mt-md-0 mt-lg-0 mb-4">
                     <div class="row mb-md-4">
-                        <div class="col-12 p-1">
+                        <div class="col-12 p-1 mt-x">
                             <label class="pareto-label" style="padding-left: 10px"><b>NEW INTEL</b></label>
                         </div>
                     </div>
@@ -125,9 +125,9 @@
                             <span class="ml-2">
                                     <img src="../assets/images/LogoMarkColor.svg" width="20px" alt="" class="mr-2">
                                 </span>
-                            <input type="number" id="tokenInput" class="nested-input" style="margin-top: -7px; margin-bottom: -7px;" step="1" v-bind:value="parseInt(maxTokens/10)" v-bind:max="maxTokens" v-bind:min="parseInt(maxTokens/50)" v-on:input="tokens = $('#tokenInput')[0].value" required>
-                            <!-- <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake"
-                                                                       style="color: red"></i></span> -->
+                            <input type="number" id="tokenInput" class="nested-input" style="margin-top: -7px; margin-bottom: -7px;" step="1" v-bind:value="parseInt(maxTokens/30)" v-bind:max="maxTokens" v-bind:min="parseInt(maxTokens/50)" v-on:input="tokens = $('#tokenInput')[0].value" required>
+                            <span v-if="formError.tokens && !tokens"> <i class="fa fa-exclamation-circle shake"
+                                                                       style="color: red"></i></span>
                         </div>
                     </div>
 
@@ -153,13 +153,13 @@
 
                     <b-row class="m-2 mt-4 d-flex justify-content-end">
                         <button
-                            class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0"
+                            class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0 col-5"
                             @click="hideModal()">
                             Cancel
                         </button>
                         <button
-                            class="btn btn-dark-primary-pareto mt-2 ml-2"
-                            @click="createIntel()/*validateConfirmToken()*/"
+                            class="btn btn-dark-primary-pareto mt-2 ml-2 col-5"
+                            @click="validateConfirmToken()"
                             :disabled="!hardwareAvailable /*|| validateTokenAmount()*/">Confirm
                         </button>
                     </b-row>
@@ -424,6 +424,7 @@
                 this.showModal();
             },
             validateConfirmToken: function(){
+                this.tokens = $('#tokenInput')[0].value;
                 if(this.validateTokenAmount()){
                     this.formError.tokens = true;
                 } else {
@@ -546,4 +547,11 @@
         font-weight: bolder;
         padding-left: 10px;
     }
+
+    @media(max-width : 500px) and (max-height : 700px){
+        .mt-x {
+            margin-top: 20px;
+        }
+    }
+
 </style>
