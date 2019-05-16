@@ -20,6 +20,7 @@ module.exports = function (
     let intelController = {};
     let blockHeight = 0;
     const PARETO_RANK_GRANULARIZED_LIMIT = 10;
+    let defaultPriority = process.env.INTEL_DEFAULT_PRIORITY || 2;
     /**
      * Intel Services
      */
@@ -141,22 +142,22 @@ module.exports = function (
                                                 $or: [
                                                     {
                                                         block: {$lte: (blockHeight - blockDelay * 1)},
-                                                        speed: 1,
+                                                        priority: 1,
                                                         $or: [{validated: true}, {block: {$gt: 0}}]
                                                     },
                                                     {
                                                         block: {$lte: (blockHeight - blockDelay * 50)},
-                                                        speed: 2,
+                                                        priority: 2,
                                                         $or: [{validated: true}, {block: {$gt: 0}}]
                                                     },
                                                     {
                                                         block: {$lte: (blockHeight - blockDelay * 100)},
-                                                        speed: 3,
+                                                        priority: 3,
                                                         $or: [{validated: true}, {block: {$gt: 0}}]
                                                     },
                                                     {
                                                         block: {$lte: (blockHeight - blockDelay * 150)},
-                                                        speed: 4,
+                                                        priority: 4,
                                                         $or: [{validated: true}, {block: {$gt: 0}}]
                                                     },
                                                     {address: address, $or: [{validated: true}, {block: {$gt: 0}}]}
@@ -214,14 +215,14 @@ module.exports = function (
 
                      currently: force use of limit to keep json response smaller.
                      limit isn't used earlier so that redis knows the full result,
-                     and because the queries for each speed of content are separate
+                     and because the queries for each priority of intel are separate
 
                      future: server should already have an idea of what content any user can see,
                      since it knows their latest scores and the current block height. therefore the full content response can be queried at once, perhaps, and pages can be done fictionally
 
                      */
                     try {
-                        let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
+                        let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.priority] + entry.block);
                         let data = {
                             _id: entry._id,
                             blockAgo: Math.max(blockHeight - entry.block, 0),
@@ -234,7 +235,7 @@ module.exports = function (
                             txHash: entry.txHash,
                             totalReward: entry.totalReward || 0,
                             reward: entry.reward,
-                            speed: entry.speed,
+                            priority: entry.priority,
                             id: entry.id,
                             txHashDistribute: entry.txHashDistribute,
                             intelAddress: entry.intelAddress,
@@ -332,7 +333,7 @@ module.exports = function (
                 const allResults = await ParetoIntel.find(queryFind).sort({dateCreated: -1}).populate([{path: 'assets.asset'}, {path: 'createdBy'}]).exec();
                 if (allResults && allResults.length > 0) {
                     const entry = allResults[0];
-                    let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.speed] + entry.block);
+                    let delayAgo = contentDelay.blockHeight - (contentDelay.blockDelay[entry.priority] + entry.block);
                     const data = {
                         _id: entry._id,
                         blockAgo: Math.max(blockHeight - entry.block, 0),
@@ -345,7 +346,7 @@ module.exports = function (
                         txHash: entry.txHash,
                         totalReward: entry.totalReward || 0,
                         reward: entry.reward,
-                        speed: entry.speed,
+                        priority: entry.priority,
                         id: entry.id,
                         txHashDistribute: entry.txHashDistribute,
                         intelAddress: entry.intelAddress,
@@ -431,7 +432,7 @@ module.exports = function (
                                     txHash: entry.txHash,
                                     totalReward: entry.totalReward || 0,
                                     reward: entry.reward,
-                                    speed: entry.speed,
+                                    priority: entry.priority,
                                     txHashDistribute: entry.txHashDistribute,
                                     expires: entry.expires,
                                     validated: entry.validated,
@@ -483,7 +484,7 @@ module.exports = function (
                 dateCreated: Date.now(),
                 block: req.body.number || 0,
                 txHash: req.body.txHash || '0x0', //this is done client side to cause an internal invocation
-                speed: process.env.DEFAULT_SPEED || 1 ,//1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
+                priority: req.body.priority || defaultPriority,//1 is very fast speed, 2 is fast, 3 is normal, medium speed, 4 is very slow speed for long applicable swing trades
                 reward: req.body.reward || 1
 
             });
