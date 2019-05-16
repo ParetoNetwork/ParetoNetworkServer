@@ -28,7 +28,7 @@
                         class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"
                         v-if="primalLoad"
                         :stackedBarData="stackedBarData"></VHandleStackGroupBars>
-                    <!--<VStackedToGroupedBars></VStackedToGroupedBars>-->
+                    <VShimmerViz v-else></VShimmerViz>
                 </div>
             </div>
         </div>
@@ -55,6 +55,7 @@
   import VShimmerUserProfile from './Shimmer/IntelDetailView/VShimmerUserProfile';
   import VShimmerMyPost from './Shimmer/IntelView/VShimmerMyPost';
   import VShimmerFeed from './Shimmer/IntelView/VShimmerFeed';
+  import VShimmerViz from './Shimmer/Visualizations/VShimmerViz';
 
   import VProfile from './VProfile';
   import VEventFeed from './VEventFeed';
@@ -89,6 +90,7 @@
       VShimmerMyPost,
       VShimmerFeed,
       VShimmerUserProfile,
+      VShimmerViz,
       ModalLedgerNano,
       LoginOptions,
       ModalSignIn,

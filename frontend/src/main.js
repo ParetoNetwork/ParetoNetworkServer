@@ -7,6 +7,7 @@ import router from './utils/routes';
 import Meta from 'vue-meta';
 import lineClamp from 'vue-line-clamp';
 import VTooltip from 'v-tooltip';
+import responsive from 'vue-responsive';
 
 import Vuex from 'vuex';
 import Notifications from 'vue-notification';
@@ -33,6 +34,7 @@ Vue.use(Vuex);
 Vue.use(Notifications);
 Vue.use(lineClamp);
 Vue.use(VTooltip);
+Vue.use(responsive);
 Vue.use(require('vue-moment'));
 
 

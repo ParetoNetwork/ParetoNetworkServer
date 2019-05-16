@@ -16,13 +16,13 @@
         <b-form-group>
           <b-button class="btn btn-dark-primary-pareto mt-2 mb-3"
                     @click="checkLoginOption('MetaMask')"> MetaMask
-          </b-button>
+          </b-button> <br/>
           <b-button class="btn btn-dark-primary-pareto mb-3"
                     @click="checkLoginOption('Manually')"> Manually
-          </b-button>
+          </b-button> <br/>
           <b-button class="btn btn-dark-primary-pareto mb-3"
                     @click="checkLoginOption('LedgerNano')"> Ledger Nano
-          </b-button>
+          </b-button> <br/>
 
           <b-button class="btn btn-dark-secondary-pareto"
                     @click="onClosedModal()"> Cancel</b-button>
