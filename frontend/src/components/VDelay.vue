@@ -1,10 +1,13 @@
 <template>
     <ul id='vdelay' class="mt-sm-2 mt-md-0">
         <li class="row text-left p-0 m-0 mr-1 mr-md-3" :key="row" v-for="row of priorities">
-            <div class="col col-0 col-xs-0" :id="('priority'+row)" :style="getBorderColor(row)" @click="setSelection(row)">
-                <div class="cl-4 mr-1" :style="getColor(row)"> </div>
-                <p v-if="intelDelay.blockDelay" class="cl-8" style="font-size: 0.75em;"> {{getTime(row)}} </p>
-                <p v-else class="cl-8" style="font-size: 1em; border: 1px;"> {{row}} </p> <!-- wish to show text here when larger screen -->
+            <div v-if="intelDelay.blockDelay" class="col-0 pr-1 mr-1 d-flex" :id="('priority'+row)" @click="setSelection(row)">
+                <div class="mr-1" :style="getBorderColor(row)"> </div>
+                <p style="font-size: 0.90em;"> {{getTime(row)}} </p>
+            </div>
+            <div v-else class="col col-0 col-xs-0" :id="('priority'+row)" :style="getBorderColor(row)" @click="setSelection(row)">
+                <div class="mr-1" :style="getColor(row)"> </div>
+                <p style="font-size: 1em; border: 1px;"> {{row}} </p> <!-- wish to show text here when larger screen -->
             </div>
         </li>
     </ul>
@@ -21,12 +24,12 @@
             }
         },
         props: [
-            'intelDelay'
+            'intelDelay',"select"
         ]
         , beforeMount: function () {
 
         }, mounted: function() {
-            $('ul#vdelay > li:nth-child(2) > div').addClass('selected-state');
+            if(this.select!=1) $('ul#vdelay > li:nth-child(2) > div').addClass('selected-state');
         },
         methods: {
             getColor(priority) {
@@ -99,6 +102,10 @@
                 $('ul#vdelay > li > div').removeClass('selected-state');
 
                 let e = '#priority'+priority;
+                if(this.select==1 && $(e).hasClass('selected-state')){ //exclusive to the intel feed, to sort by priority and unselect the sorting
+                    $(e).removeClass('selected-state');
+                    this.$emit('chosenPriority', 0); //resets the feed
+                }
                 $(e).addClass('selected-state');
 
                 this.chosenPriority = priority;
@@ -128,6 +135,10 @@
 
     #priority4:active, #priority4:hover, #priority4:focus, #priority4.selected-state {
         background: #294b83;
+    }
+
+    .nullified{
+        background: none;
     }
 
 </style>
