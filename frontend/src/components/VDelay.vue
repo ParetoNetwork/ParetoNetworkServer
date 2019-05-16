@@ -102,9 +102,19 @@
                 $('ul#vdelay > li > div').removeClass('selected-state');
 
                 let e = '#priority'+priority;
-                if(this.select==1 && $(e).hasClass('selected-state')){ //exclusive to the intel feed, to sort by priority and unselect the sorting
+                if(this.select==1){ //exclusive to the intel feed, to sort by priority and unselect the sorting
+                    $(e).attr('background', 'none');
+                    /*
                     $(e).removeClass('selected-state');
+
+                    $(e).attr('user-select', 'none');
+                    $(e).attr('cursor', 'default');
+                    $('ul#vdelay li').setClass('nullified');
                     this.$emit('chosenPriority', 0); //resets the feed
+                     */
+                    $(e).removeClass('selected-state');
+                    $('ul#vdelay').addClass('active').siblings().remove('active');
+                    $('ul#vdelay').addClass('active').siblings().remove('focus');
                 }
                 $(e).addClass('selected-state');
 
@@ -129,16 +139,18 @@
         background: #6ac27e;
     }
 
-    #priority3.selected-state {
-        background: #6ac27e;
-    }
-
     #priority4:active, #priority4:hover, #priority4:focus, #priority4.selected-state {
         background: #294b83;
     }
 
     .nullified{
         background: none;
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
     }
 
 </style>
