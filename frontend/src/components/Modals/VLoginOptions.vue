@@ -1,3 +1,4 @@
+
 <template>
   <div>|
     <notifications group="auth" position="bottom right"/>
@@ -13,23 +14,18 @@
       <b-container fluid>
         <h2 class="font-body"> Choose a Login Method</h2>
         <b-form-group>
-          <b-form-radio-group v-model="selected">
-            <b-row class="m-2 mt-4">
-              <b-form-radio value="MetaMask"> MetaMask</b-form-radio>
-            </b-row>
-            <b-row class="m-2 mt-4">
-              <b-form-radio value="Manually"> Manually</b-form-radio>
-            </b-row>
-            <b-row class="m-2 mt-4">
-              <b-form-radio value="LedgerNano"> Ledger Nano</b-form-radio>
-            </b-row>
-          </b-form-radio-group>
-          <b-row class="m-2 mt-4">
-            <b-button class="btn btn-dark-primary-pareto" :disabled="!selected"
-                      @click="checkLoginOption(selected)"> Login
-            </b-button>
-            <b-button class="btn btn-dark-secondary-pareto ml-2" @click="onClosedModal()"> Cancel</b-button>
-          </b-row>
+          <b-button class="btn btn-dark-primary-pareto mt-2 mb-3"
+                    @click="checkLoginOption('MetaMask')"> MetaMask
+          </b-button>
+          <b-button class="btn btn-dark-primary-pareto mb-3"
+                    @click="checkLoginOption('Manually')"> Manually
+          </b-button>
+          <b-button class="btn btn-dark-primary-pareto mb-3"
+                    @click="checkLoginOption('LedgerNano')"> Ledger Nano
+          </b-button>
+
+          <b-button class="btn btn-dark-secondary-pareto"
+                    @click="onClosedModal()"> Cancel</b-button>
         </b-form-group>
       </b-container>
     </b-modal>
