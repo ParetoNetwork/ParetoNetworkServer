@@ -162,7 +162,7 @@
   import Auth from '../services/authService';
   import Profile from '../services/profileService';
   import {mapMutations, mapState} from 'vuex';
-  import ModalSignIn from './VModalManualSigIn';
+  import ModalSignIn from './Modals/VModalManualSigIn';
 
   import ICountUp from 'vue-countup-v2';
   import infiniteScroll from 'vue-infinite-scroll';

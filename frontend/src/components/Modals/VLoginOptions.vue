@@ -38,6 +38,7 @@
   import {mapMutations} from 'vuex';
   import authService from "../../services/authService";
   import dashboardService from "../../services/dashboardService";
+  import ModalManualSignIn from "./VModalManualSigIn";
   import ModalLedgerNano from "./VModalLedgerNano";
   import errorService from "../../services/errorService";
 
@@ -46,7 +47,7 @@
     props: {
       redirectRoute: String
     },
-    components: {ModalLedgerNano},
+    components: {ModalManualSignIn, ModalLedgerNano},
     data() {
       return {
         option: '',
@@ -55,6 +56,7 @@
     },
     mounted: function () {
       this.$refs.loginOptions.show();
+      this.resetStates();
     },
     methods: {
       onClosedModal: function () {
@@ -102,6 +104,10 @@
       },
       LedgerNano: function () {
         this.$store.state.showModalLedgerNano = true;
+      },
+      resetStates: function () {
+        this.$store.state.showModalSign = false;
+        this.$store.state.showModalLedgerNano = false;
       }
       , ...mapMutations({
         loginVuex: 'login',
