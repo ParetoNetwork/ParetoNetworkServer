@@ -60,6 +60,7 @@ const store = new Vuex.Store({
     showModalLedgerNano: false,
     showModalOnboarding: true,
     showModalReward: false,
+    showModalInfo: false,
     showModalEditProfile: false,
     signType: (window.localStorage.getItem('signType')) || 'Metamask',
     ws: null,
@@ -146,6 +147,8 @@ const store = new Vuex.Store({
       state.currentDistributes = state.currentDistributes.filter(item => item.intel !== intelId);
     }, openModalReward(state, open) {
       state.showModalReward = open;
+    }, openModalInfo(state, open) {
+      state.showModalInfo = open;
     }, openModalEditProfile(state, open) {
       state.showModalEditProfile = open;
     }, deleteTransaction(state, txHash) {

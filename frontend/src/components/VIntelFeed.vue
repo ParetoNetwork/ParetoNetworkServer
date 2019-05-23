@@ -2,7 +2,7 @@
   <div class="intel-container">
     <div v-if="!loading" class="p-2 pt-1 text-left">
       <div class="row align-items-center">
-        <div class="col-3 ">
+        <div class="col-3">
           <b class="title-content">
             Intel Market
           </b>
@@ -10,9 +10,9 @@
         <div class="col-8">
           <VDelay :intelDelay="myFeed.intel[0].contentDelay" :select="1" class="d-flex flex-row align-items-end"></VDelay>
         </div>
-        <!-- <div class="col-1" v-tooltip="'Members can view the intel that they are privileged to see.'">
+        <div class="col-1" @click="openModalInfoClick()">
           <i class="fas fa-question-circle"></i>
-        </div> -->
+        </div>
 
       </div>
 
@@ -26,6 +26,7 @@
       </div>
     </div>
     <VShimmerFeed v-else></VShimmerFeed>
+    <VModalInfo v-if="showModalInfo"></VModalInfo>
   </div>
 </template>
 
@@ -42,8 +43,7 @@
 
   import VShimmerFeed from "./Shimmer/IntelView/VShimmerFeed";
 
-  import VIntelButtonAction from "./Events/VIntelButtonAction";
-  import VModalReward from "./Modals/VModalReward";
+  import VModalInfo from "./Modals/VModalInfo";
   import VIntelPreview from "./VIntelPreview";
   import VDelay from "./VDelay";
   import errorService from "../services/errorService";
@@ -53,10 +53,9 @@
     components: {
       ICountUp,
       VShimmerFeed,
-      VIntelButtonAction,
-      VModalReward,
       VIntelPreview,
-        VDelay
+      VDelay,
+      VModalInfo
     },
     props: [
       'updateIntel', 'block', 'user', 'fetchAddress', 'title', 'defaultIntel', 'onboardingPicture'
@@ -94,8 +93,13 @@
         this.assignBlock(block);
       }
     },
+    computed: {
+      ...mapState([
+        'showModalInfo',
+        ])
+    },
     methods: {
-      ...mapMutations(["openModalReward","setFirstIntel"]),
+      ...mapMutations(["openModalInfo", "openModalReward","setFirstIntel"]),
       assignBlock(block) {
         this.myFeed.intel = this.myFeed.intel.map(item => {
           item.blockAgo = block - item.block > 0 ? block - item.block : 0;
@@ -202,28 +206,29 @@
           }
         );
       },
-        getBorderLeft(priority) {
-            switch(priority){
-                case 1:{
-                    return {"border-left": "0.5rem solid", "border-left-color": "#c24e4e !important"}
-                }
-                case 2:{
-                    return {"border-left": "0.5rem solid", "border-left-color": "#ca9036 !important"}
-                }
-                case 3:{
-                    return {"border-left": "0.5rem solid", "border-left-color": "#6ac27e !important"}
-                }
-                case 4:{
-                    return {"border-left": "0.5rem solid", "border-left-color": "#294b83 !important"}
-                }
-            }
+      getBorderLeft(priority) {
+          switch(priority){
+              case 1:{
+                  return {"border-left": "0.5rem solid", "border-left-color": "#c24e4e !important"}
+              }
+              case 2:{
+                  return {"border-left": "0.5rem solid", "border-left-color": "#ca9036 !important"}
+              }
+              case 3:{
+                  return {"border-left": "0.5rem solid", "border-left-color": "#6ac27e !important"}
+              }
+              case 4:{
+                  return {"border-left": "0.5rem solid", "border-left-color": "#294b83 !important"}
+              }
+          }
 
 
-            return {};
-        },
-      openEditProfileModal() {
+          return {};
+      },
+      openModalInfoClick() {
 
-          this.openModalEditProfile(true);
+          this.openModalInfo(true);
+
       }
     }
   }
