@@ -1,5 +1,6 @@
 <template>
     <div class="d-inline-block">
+        <!-- if intel not expired -->
         <button v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
                 class="btn mx-auto px-4"
                 :disabled="pendingRowTransactions(intel) || user.address === intel.address"
@@ -10,6 +11,7 @@
             <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
             {{ intel.reward }}
         </button>
+        <!-- if intel is expired -->
         <button
                 v-if="
                     intel.intelAddress &&
@@ -28,10 +30,9 @@
         </button>
         <a v-if="intel.distributed"
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
-           :disabled="user.address !== intel.address"
            target="_blank">
-            <button class="btn cursor-pointer btn-dark-grey-primary-pareto mx-auto px-4">
-                <img v-if="user.address === intel.address"  class="left" style="width: 18px;" src="../../assets/images/etherscan.png" alt="">
+            <button class="btn cursor-pointer btn-dark-secondary-pareto mx-auto px-4">
+                <i v-if="user.address === intel.address" class="fa fa-external-link-alt left"></i>
                 <img src="../../assets/images/LogoMarkDark.png" width="20px" alt="">
                 {{ intel.reward }}
             </button>

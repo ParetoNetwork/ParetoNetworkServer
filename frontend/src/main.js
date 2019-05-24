@@ -60,7 +60,12 @@ const store = new Vuex.Store({
     showModalLedgerNano: false,
     showModalOnboarding: true,
     showModalReward: false,
+    showModalInfoGraphs: false,
+    showModalInfoIntel: false,
     showModalEditProfile: false,
+    showModalInfoLeaderboard: false,
+    showModalInfoActivity: false,
+    showModalInfoProfile: false,
     signType: (window.localStorage.getItem('signType')) || 'Metamask',
     ws: null,
     shoppingCart: [],
@@ -146,7 +151,17 @@ const store = new Vuex.Store({
       state.currentDistributes = state.currentDistributes.filter(item => item.intel !== intelId);
     }, openModalReward(state, open) {
       state.showModalReward = open;
-    }, openModalEditProfile(state, open) {
+    },openModalInfoProfile(state, open) {
+      state.showModalInfoProfile = open;
+    },openModalInfoActivity(state, open) {
+      state.showModalInfoActivity = open;
+    },openModalInfoLeaderboard(state, open) {
+      state.showModalInfoLeaderboard = open;
+    },openModalInfoIntel(state, open) {
+      state.showModalInfoIntel = open;
+    },openModalInfoGraphs(state, open) {
+      state.showModalInfoGraphs = open;
+    },openModalEditProfile(state, open) {
       state.showModalEditProfile = open;
     }, deleteTransaction(state, txHash) {
       state.pendingTransactions = state.pendingTransactions.filter(item => item.txHash !== txHash);
