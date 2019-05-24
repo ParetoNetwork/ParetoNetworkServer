@@ -21,7 +21,7 @@ const tutorials = (function () {
       },
       "leaderboard" : {
         header: "Leaderboard",
-        body: ""
+        body: "Browse all members in the Pareto Network. All holders of PARETO Rewards are counted as members and their ranks are visible on this score board. Tap the external link icon to view their address and transaction history on a block explorer. Search by rank, score or address."
       }
     }
   }
