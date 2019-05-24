@@ -24,7 +24,7 @@
                 </div>
                 <div class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
                     <VHandlerSunburstChart v-if="primalLoad" :user="user" :sunburstData="information.intel" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
-                    <div class="text-center" @click="openModalInfoGraphsClick()">
+                    <div class="text-center ml-2 mr-2 mt-1" @click="openModalInfoGraphsClick()">
                         <i class="fas fa-question-circle"></i>
                     </div>
                     <VHandleStackGroupBars

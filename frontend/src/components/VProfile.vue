@@ -22,7 +22,18 @@
                  :to="creatorRoute(profile.aliasSlug || profile.address)"
     ></router-link>
     <div class="mt-1">
-      <p class="subtitle-user-content"><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
+      <div v-responsive.sm.xs class="row text-center justify-content-center align-items-center">
+        <div class="text-center ml-2 mr-2 mt-1" @click="openModalInfoProfileClick()">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <p class="subtitle-user-content"><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
+      </div>
+      <div v-responsive="['hidden-xs', 'hidden-sm']" class="row">
+        <div class="text-center ml-2 mr-2 mt-1" @click="openModalInfoProfileClick()">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <p class="subtitle-user-content"><b> {{profile.alias || profile.address.substring(0,10) + '...'}} :</b></p>
+      </div>
       <p class="text-user-content mt-1 mt-xl-1" :class="{'cursor-pointer' : !!canEdit}"
          @click="openEditProfileModal()">
                 <span v-if="canEdit">
@@ -117,14 +128,11 @@
           Score <i class="fa fa-star fa-lg" style="color: #fca130;"></i>
         </div>
       </router-link>
-      <div></div>
     </div>
-    <!--<button class="btn btn-success-pareto mt-5">-->
-    <!--<span class="px-4 subtitle-dashboard">REWARD AUTHOR</span>-->
-    <!--</button>-->
 
     <VModalEditProfile v-if="showModalEditProfile" @profileEdit="editedProfileEvent"
                        :user="profile"></VModalEditProfile>
+    <VModalInfo v-if="showModalInfoProfile" :tutorial="tutorials.tutorial.profile"></VModalInfo>
   </div>
   <VShimmerUserProfile v-else></VShimmerUserProfile>
 </template>
@@ -139,6 +147,9 @@
 
   import VModalEditProfile from './Modals/VModalEditProfile';
   import VShimmerUserProfile from './Shimmer/IntelDetailView/VShimmerUserProfile';
+  import VModalInfo from "./Modals/VModalInfo";
+
+  import {tutorials} from '../utils/tutorialInfo';
 
   export default {
     name: 'VProfile',
@@ -149,10 +160,11 @@
     components: {
       ICountUp,
       VShimmerUserProfile,
-      VModalEditProfile
+      VModalEditProfile,
+      VModalInfo
     },
     computed: {
-      ...mapState(['showModalEditProfile', 'address'])
+      ...mapState(['showModalEditProfile', 'address', 'showModalInfoProfile'])
     },
     beforeMount: function () {
       if (this.profileObject) {
@@ -166,6 +178,7 @@
         canOpenProfileModal: false,
         baseURL: environment.baseURL,
         etherscanUrl: window.localStorage.getItem('etherscan'),
+        tutorials: { header : '', body : ''},
         profile: {
           address: '',
           alias: '',
@@ -176,8 +189,11 @@
         paretoAddress: window.localStorage.getItem('paretoAddress')
       };
     },
+    mounted: function() {
+      this.tutorials = tutorials;
+    },
     methods: {
-      ...mapMutations(['openModalEditProfile']),
+      ...mapMutations(['openModalEditProfile', 'openModalInfoProfile']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
       },
@@ -207,6 +223,9 @@
       openInput: function () {
         document.getElementById('file').click();
       },
+      openModalInfoProfileClick() {
+        this.openModalInfoProfile(true);
+      },
       updatePicture: function () {
         let file = this.$refs.file.files[0];
         let formData = new FormData();
@@ -218,6 +237,7 @@
         });
       }
     },
+
     watch: {
       addressProfile: function (newVal) {
         if (!this.profileObject) {
