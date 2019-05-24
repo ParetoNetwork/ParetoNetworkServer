@@ -2,20 +2,23 @@
   <div class="intel-container">
     <div v-if="!loading" class="p-2 pt-1 text-left">
       <div class="row align-items-center">
-        <div class="col-3">
+        <div v-responsive="['hidden-xs', 'hidden-sm']" class="col-3">
           <b class="title-content">
             Intel Market
+          </b>
+        </div>
+        <div v-responsive.sm.xs class="col-2">
+          <b class="title-content">
+            Intel
           </b>
         </div>
         <div class="col-8">
           <VDelay :intelDelay="myFeed.intel[0].contentDelay" :select="1" class="d-flex flex-row align-items-end"></VDelay>
         </div>
-        <div class="col-1" @click="openModalInfoClick()">
+        <div class="col-1" @click="openModalInfoIntelClick()">
           <i class="fas fa-question-circle"></i>
         </div>
-
       </div>
-
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
           <li class="text-left  py-2" :style="getBorderLeft(row.priority)" :key="row._id"
@@ -26,7 +29,7 @@
       </div>
     </div>
     <VShimmerFeed v-else></VShimmerFeed>
-    <VModalInfo v-if="showModalInfo"></VModalInfo>
+    <VModalInfo v-if="showModalInfoIntel" :tutorial="tutorials.tutorial.intelmarket"></VModalInfo>
   </div>
 </template>
 
@@ -48,6 +51,8 @@
   import VDelay from "./VDelay";
   import errorService from "../services/errorService";
 
+  import {tutorials} from '../utils/tutorialInfo';
+
   export default {
     name: "VIntelFeed",
     components: {
@@ -66,6 +71,7 @@
         allMyIntel: [],
         baseURL: environment.baseURL,
         moment: moment,
+        tutorials: {},
         etherscanUrl: window.localStorage.getItem('etherscan'),
         myFeed: {
           intel: [],
@@ -84,6 +90,9 @@
         this.loadIntel({page: 0, limit: 20});
       }
     },
+    mounted: function() {
+      this.tutorials = tutorials;
+    },
     watch: {
       //Updates when parent view, which has the webSocket, receives new information and refreshes
       updateIntel: function (uC) {
@@ -95,11 +104,11 @@
     },
     computed: {
       ...mapState([
-        'showModalInfo',
+        'showModalInfoIntel',
         ])
     },
     methods: {
-      ...mapMutations(["openModalInfo", "openModalReward","setFirstIntel"]),
+      ...mapMutations(["openModalInfoIntel", "openModalReward","setFirstIntel"]),
       assignBlock(block) {
         this.myFeed.intel = this.myFeed.intel.map(item => {
           item.blockAgo = block - item.block > 0 ? block - item.block : 0;
@@ -225,9 +234,9 @@
 
           return {};
       },
-      openModalInfoClick() {
+      openModalInfoIntelClick() {
 
-          this.openModalInfo(true);
+          this.openModalInfoIntel(true);
 
       }
     }

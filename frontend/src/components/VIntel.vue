@@ -24,6 +24,9 @@
                 </div>
                 <div class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
                     <VHandlerSunburstChart v-if="primalLoad" :user="user" :sunburstData="information.intel" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
+                    <div class="text-center" @click="openModalInfoGraphsClick()">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
                     <VHandleStackGroupBars
                         class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"
                         v-if="primalLoad"
@@ -36,6 +39,7 @@
         <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
         <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
         <ModalSplashOnboarding v-if="showModalOnboarding && !loggedUser"></ModalSplashOnboarding>
+        <VModalInfo v-if="showModalInfoGraphs" :tutorial="tutorials.tutorial.network"></VModalInfo>
     </div>
 </template>
 
@@ -65,6 +69,7 @@
   import ModalManualSignIn from './Modals/VModalManualSigIn';
   import ModalLedgerNano from './Modals/VModalLedgerNano';
   import ModalSplashOnboarding from './Modals/VModalSplashOnboarding';
+  import VModalInfo from "./Modals/VModalInfo";
 
   import {information, stackedBarData} from '../utils/onboardingInfo';
 
@@ -73,6 +78,8 @@
   import VFab from './VFab';
   import VHandlerSunburstChart from "./VHandlerSunburstChart";
   import VHandleStackGroupBars from "./VHandleStackGroupBars";
+
+  import {tutorials} from '../utils/tutorialInfo';
 
 
   export default {
@@ -94,7 +101,8 @@
       ModalLedgerNano,
       LoginOptions,
       ModalManualSignIn,
-      ModalSplashOnboarding
+      ModalSplashOnboarding,
+      VModalInfo
     },
     data: function () {
       return {
@@ -105,6 +113,7 @@
         sunburstData: '',
         stackedBarData: '',
         loading: true,
+        tutorials: {},
         loggedUser: false,
         paretoAddress: window.localStorage.getItem('paretoAddress'),
         primalLoad: false,
@@ -129,10 +138,12 @@
         'showModalSign',
         'showModalLoginOptions',
         'showModalLedgerNano',
-        'showModalOnboarding'])
+        'showModalOnboarding',
+        'showModalInfoGraphs'])
     },
     mounted: function () {
       this.stackedBarData = stackedBarData;
+      this.tutorials = tutorials;
       AuthService.auth(() => {
         this.main();
         this.loggedUser = true;
@@ -145,7 +156,7 @@
       });
     },
     methods: {
-      ...mapMutations(['intelEnter', 'iniWs']),
+      ...mapMutations(['intelEnter', 'iniWs', 'openModalInfoGraphs']),
       creatorRoute(address) {
         return '/intel/' + address + '/';
       },
@@ -220,6 +231,9 @@
         ]).then(values => {
           this.$store.state.makingRequest = false;
         });
+      },
+      openModalInfoGraphsClick() {
+          this.openModalInfoGraphs(true);
       },
       main: function () {
         profileService.updateConfig(res => {
