@@ -39,7 +39,7 @@
         <LoginOptions v-if="showModalLoginOptions"></LoginOptions>
         <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
         <ModalSplashOnboarding v-if="showModalOnboarding && !loggedUser"></ModalSplashOnboarding>
-        <VModalInfo v-if="showModalInfoGraphs" :tutorial="tutorials.tutorial.network"></VModalInfo>
+        <VModalInfo v-if="showModalInfoGraphs" :tutorial="tutorials.tutorial.graphs"></VModalInfo>
     </div>
 </template>
 
@@ -113,7 +113,7 @@
         sunburstData: '',
         stackedBarData: '',
         loading: true,
-        tutorials: {},
+        tutorials: { header : '', body : ''},
         loggedUser: false,
         paretoAddress: window.localStorage.getItem('paretoAddress'),
         primalLoad: false,

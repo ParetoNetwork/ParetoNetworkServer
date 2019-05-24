@@ -15,13 +15,9 @@ const tutorials = (function () {
         header: "Member Profile",
         body: ""
       },
-      "explorer" : {
-        header: "Explorer",
-        body: ""
-      },
-      "network" : {
-        header: "Network Activity",
-        body: ""
+      "graphs" : {
+        header: "Explorer & Network Graphs",
+        body: "The explorer graph is an interactive visualization of the current intel feed, sorted by intel provider, to convey network wide confidence in a piece of intel. The network graph shows the use of PARETO Rewards over time, giving an understanding how much PARETO is off the market and locked in the platform contracts."
       },
       "leaderboard" : {
         header: "Leaderboard",
