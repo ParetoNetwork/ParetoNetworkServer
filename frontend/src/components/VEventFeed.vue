@@ -2,25 +2,14 @@
   <div class="intel-container">
     <VShimmerMyPost v-if="!loadAllContent"></VShimmerMyPost>
     <div v-else class="mb-3 mb-md-1">
-      <div class="pt-1" style="padding-left: 0.5rem;">
-        <div class="text-left title-content">
+      <div class="row pt-1" style="padding-left: 0.5rem;">
+        <div class="col-9 text-left title-content">
           <b>Member Activity</b>
         </div>
-        <button v-if="false" class="btn btn-success-pareto button-margin" @click="goToIntelPage()">POST
-          NEW INTEL
-        </button>
+        <div class="col-1 text-right ml-2 mr-2 mt-1" @click="openModalInfoActivityClick()">
+          <i class="fas fa-question-circle"></i>
+        </div>
       </div>
-      <!-- <div class="row mx-0 text-center text-content">
-        <div class="col-4">
-          EVENT
-        </div>
-        <div class="col-4">
-          AMOUNT
-        </div>
-        <div class="col-4">
-          TX ID
-        </div>
-      </div> -->
       <div class="scrollable p-2" id="mypost" v-on:scroll="scrollMyPost()">
         <ul v-if="transactions.length">
           <li v-bind:id="tx.txHash" class="border-0" v-for="tx in transactions.filter(it=> !it.intelInfo)"
@@ -35,6 +24,7 @@
         <span v-else> No data to display </span>
       </div>
     </div>
+    <VModalInfo v-if="showModalInfoActivity" :tutorial="tutorials.tutorial.activity"></VModalInfo>
   </div>
 </template>
 
@@ -46,6 +36,9 @@
   import VIntelPreview from "./VIntelPreview";
   import VTransaction from "./VTransaction";
   import {Promise} from "es6-promise";
+  import VModalInfo from "./Modals/VModalInfo";
+
+  import {tutorials} from '../utils/tutorialInfo';
 
   export default {
     name: "VEventFeed",
@@ -58,6 +51,7 @@
         etherscanUrl: window.localStorage.getItem('etherscan'),
         loadedMyContent: false,
         myContent: [],
+        tutorials: { header : '', body : ''},
         allContent: [],
         page: 0,
         limit: 20,
@@ -70,10 +64,11 @@
     components: {
       VTransaction,
       VShimmerMyPost,
-      VIntelPreview
+      VIntelPreview,
+      VModalInfo
     },
     computed: {
-      ...mapState(["pendingTransactions"]),
+      ...mapState(["pendingTransactions", "showModalInfoActivity"]),
     },
     directives: {
       scroll: {
@@ -88,6 +83,7 @@
       }
     },
     mounted: function () {
+      this.tutorials = tutorials;
       if (this.defaultTransactions !== undefined && this.defaultTransactions.length > 0) {
         this.loadAllContent = true;
         this.transactions = this.defaultTransactions;
@@ -147,7 +143,7 @@
     },
     methods: {
       ...mapActions(["addTransaction", "transactionComplete", "assignTransactions", "editTransaction", "restartTransactions"]),
-      ...mapMutations(["addDistribute"]),
+      ...mapMutations(["addDistribute", "openModalInfoActivity"]),
       //Loads the pendingTransactions state
       getTransactions: function () {
         let params = {q: 'all', page: this.page, limit: this.limit};
@@ -235,6 +231,9 @@
             console.log(e)
           }
         });
+      },
+      openModalInfoActivityClick() {
+        this.openModalInfoActivity(true);
       },
       scrollMyPost: function () {
         let list = document.getElementById("mypost");

@@ -88,7 +88,12 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h4 class="font-body font-weight-bold mb-3">Leaderboard</h4>
+                    <div class="row justify-content-center align-items-center mb-3">
+                        <h4 class="font-body font-weight-bold">Leaderboard</h4>
+                        <div class="text-center ml-2 mr-2 mt-1" @click="openModalInfoLeaderboardClick()">
+                             <i class="fas fa-question-circle"></i>
+                        </div>
+                    </div>
                     <div class="" style="font-size: 12px">
                         <div class="table-area">
 
@@ -153,6 +158,7 @@
         <ModalSignIn v-if="showModalSign"></ModalSignIn>
         <LoginOptions :redirectRoute="'/leaderboards'" v-if="showModalLoginOptions"></LoginOptions>
         <ModalLedgerNano v-if="showModalLedgerNano"></ModalLedgerNano>
+        <VModalInfo v-if="showModalInfoLeaderboard" :tutorial="tutorials.tutorial.leaderboard"></VModalInfo>
     </div>
 </template>
 
@@ -169,9 +175,11 @@
   import LoginOptions from './Modals/VLoginOptions';
   import ModalLedgerNano from './Modals/VModalLedgerNano';
   import VShimmerLeaderboard from './Shimmer/LeaderboardView/VShimmerLeaderboard';
+  import VModalInfo from "./Modals/VModalInfo";
 
   import {countUpMixin} from '../mixins/countUp';
   import errorService from '../services/errorService';
+  import {tutorials} from '../utils/tutorialInfo';
 
   export default {
     name: 'VLeaderboards',
@@ -181,7 +189,8 @@
       LoginOptions,
       ModalSignIn,
       VShimmerLeaderboard,
-      ICountUp
+      ICountUp,
+      VModalInfo
     },
     directives: {
       infiniteScroll,
@@ -217,6 +226,7 @@
         loading: true,
         updated: 0,
         table: '',
+        tutorials: { header : '', body : ''},
         row: '',
         searchValue: '',
         socketActivity: true,
@@ -272,12 +282,14 @@
         'showModalSign',
         'showModalLoginOptions',
         'showModalLedgerNano',
+        'showModalInfoLeaderboard',
         'ws'
       ])
     },
     mounted: function () {
       this.leaderFromUrlParams(this.$route);
       this.getAddress();
+      this.tutorials = tutorials;
     },
     updated: function () {
       this.updated++;
@@ -295,6 +307,7 @@
       });
     },
     methods: {
+      ...mapMutations(['openModalInfoLeaderboard']),
       getAddress() {
         Profile.updateConfig(res => {
           this.etherscan = window.localStorage.getItem('etherscan');
@@ -563,6 +576,9 @@
       },
       infiniteScrollFunction: function () {
         if (!this.loading) this.getLeaderboard(this.leader.length==0);
+      },
+      openModalInfoLeaderboardClick() {
+            this.openModalInfoLeaderboard(true);
       },
       onScroll: function () {
 
