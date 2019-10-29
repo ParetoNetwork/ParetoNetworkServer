@@ -33,7 +33,7 @@
         background-image: linear-gradient(to right, #6aba82, #85c568, #6aba82,  #85c568, #9ff677);
         background-repeat: no-repeat;
         background-size: cover;
-        font-size: 40px;
+        font-size: 30px;
         color: black;
         text-align: center;
         line-height: 60px;
@@ -47,8 +47,8 @@
         position: absolute;
         font-family: 'FontAwesome';
         top: 1px;
-        left: 13px;
-        content: "\f14b";
+        left: 16px;
+        content: "\f304";
     }
 
     .floatingab:hover {
