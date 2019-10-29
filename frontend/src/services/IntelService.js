@@ -817,10 +817,10 @@ export default class IntelService {
       IntelService.ledgerNanoEngine.stop();
     }
     switch (signType) {
-      case  'LedgerNano': {
+      /*case  'LedgerNano': {
         const ProviderEngine = require('web3-provider-engine');
         const WsSubprovider = require('web3-provider-engine/subproviders/websocket');
-        var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
+        let LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
         this.ledgerNanoEngine = new ProviderEngine();
         const networkId = window.localStorage.getItem('netWorkId');
         this.ledgerWalletSubProvider = await LedgerWalletSubproviderFactory(() => networkId, pathId);
@@ -830,7 +830,7 @@ export default class IntelService {
         this.ledgerNanoEngine.start();
         provider = this.ledgerNanoEngine;
         break;
-      }
+      }*/
       default: {
         window.web3 = await authService.onMetamaskAccess();
         if (typeof window.web3 !== "undefined") {

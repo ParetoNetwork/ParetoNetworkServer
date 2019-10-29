@@ -1,5 +1,5 @@
 <template>
-    <a href="/create" class="floatingab"></a>
+    <a v-if="products_in" href="/checkout" class="floatingabshop"></a>
 </template>
 
 <script>
@@ -10,21 +10,36 @@
         name: 'VFab',
         mounted: function(){
 
+            let cart = null;
+
+            try{
+                cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
+            } catch (e){
+                //no cart var change
+            }
+
+            if (cart){
+                this.$store.dispatch('resetShoppingCart')
+                for (var i = 0; i < cart.length; i++) {
+
+                    this.$store.dispatch('addToCart', cart[i]);
+                }
+            }
 
         },
         computed: {
-            ...mapState(['status'])/*,
+            ...mapState(['shoppingCart']),
             products_in: function () {
                 this.cart = this.shoppingCart;
                 return this.shoppingCart.length > 0;
-            }*/
+            }
         }
     };
 
 </script>
 
 <style scoped>
-    .floatingab {
+    .floatingabshop {
         width: 60px;
         height: 60px;
         border-radius: 50%;
@@ -43,20 +58,20 @@
         bottom: 50px;
     }
 
-    .floatingab:before {
+    .floatingabshop:before {
         position: absolute;
         font-family: 'FontAwesome';
-        top: 1px;
-        left: 13px;
-        content: "\f14b";
+        top: 0;
+        left: 10px;
+        content: "\f07a";
     }
 
-    .floatingab:hover {
+    .floatingabshop:hover {
         box-shadow: 0 6px 14px 0 #666;
     }
 
     @media (max-width: 812px) {
-        .floatingab {
+        .floatingabshop {
             right: 10px;
         }
     }

@@ -30,16 +30,17 @@
                 this.$router.push({ path: '/checkout' })
             }
         },
-        data: {
+        data () {
+            return {
                 cart: []
+            }
         },
         computed: {
              ...mapState(['shoppingCart']),
             cartSize: function () {
                 let cartSize = 0;
-                this.cart = this.shoppingCart;
-                if(this.cart){
-                    for (var i = 0; i < this.cart.length; i++) {
+                if(this.shoppingCart){
+                    for (var i = 0; i < this.shoppingCart.length; i++) {
                         cartSize += this.shoppingCart[i].quantity;
                     }
                 }else{
