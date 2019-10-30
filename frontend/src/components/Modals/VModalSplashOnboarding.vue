@@ -7,13 +7,15 @@
         hide-header
         hide-footer
         size="lg"
+        body-class="modal-onboarding"
         :body-bg-variant="'dark'">
 
-      <div class="row h-100 position-relative">
-        <div class="col-lg-7 order-lg-2 px-0 intel-container">
+      <div class="row h-100 position-relative p-3">
+        <div class="col-lg-7 col-md-6 order-lg-2 intel-container">
           <div class="d-flex justify-content-center h-100">
             <div class="d-flex flex-column justify-content-around">
               <div></div>
+              <img v-responsive="['hidden-all','xs','sm']" src="../../assets/images/LogoReverse.svg" width="200px" style="margin: 0 auto" alt="">
               <div class="p-5 text-left">
                 <h1 class="mb-3 title-content" style="font-size: 30px"><b>Post. Trade. Earn.</b></h1>
                 <p class="subtitle-user-content">
@@ -21,26 +23,22 @@
                 </p>
               </div>
               <button class="btn btn-dark-primary-pareto button--login mx-auto"
-                      style="font-size: 18px; width: 400px; max-width: 80%"
+                      style="font-size: 18px; max-width: 80%"
                       @click="showModal"><b v-if="!makingLogin">Access</b> <span v-else
                                                                                  class="fa fa-spinner fa-spin"></span>
               </button>
             </div>
           </div>
         </div>
-        <div class="col-lg-5 order-lg-1">
-          <div class="d-flex justify-content-center h-100">
-            <div class="d-flex flex-column justify-content-around">
+        <div v-responsive="['hidden-xs', 'hidden-sm']" class="col-lg-5 col-md-6 order-lg-1">
+          <div class="d-flex justify-content-center h-100 h-50-ns pareto-bg-dark">
+            <div class="d-flex flex-column justify-content-around col-lg-10 col-md-auto col-sm-10 p-5">
               <div class="d-none d-md-block"></div>
               <img src="../../assets/images/LogoReverse.svg" width="200px" style="margin: 0 auto" alt="">
               <p class="p-3 d-none d-md-block subtitle-user-content">Current, reputable & actionable intel for traders and investors.</p>
             </div>
           </div>
         </div>
-        <span class="cursor-pointer" @click="cancelClick()">
-        <i class="fa fa-window-close fa-2x"
-           style="position: absolute; right: 0; top: 0;"></i>
-      </span>
       </div>
     </b-modal>
   </div>
@@ -115,6 +113,10 @@
 
   .onboarding-modal .modal-body {
     padding: 0;
+  }
+
+  .modal-onboarding {
+    height: 65vh;
   }
 
   @media (min-width: 500px) {

@@ -2,7 +2,7 @@
     <div class="d-inline-block">
         <!-- if intel not expired -->
         <button v-if="intel.intelAddress && signType != 'Manual' && intel.expires > Math.round(new Date().getTime() / 1000)"
-                class="btn mx-auto px-4"
+                class="btn mx-auto px-6"
                 :disabled="pendingRowTransactions(intel) || user.address === intel.address"
                 v-bind:class="{pulsate: pendingRowTransactions(intel),
                 'btn-dark-primary-pareto': !(pendingRowTransactions(intel) || user.address === intel.address),
@@ -19,7 +19,7 @@
                     intel.expires < Math.round(new Date().getTime() / 1000) &&
                     !intel.distributed"
                 :disabled="clickedCollect ||  user.address !== intel.address"
-                class="btn  mx-auto px-4"
+                class="btn  mx-auto px-6"
                 v-bind:class="{pulsate: clickedCollect,
                   'btn-dark-primary-pareto': user.address === intel.address,
                 'btn-dark-grey-primary-pareto':  user.address !== intel.address}"
@@ -31,7 +31,7 @@
         <a v-if="intel.distributed"
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
            target="_blank">
-            <button class="btn cursor-pointer btn-primary-pareto mx-auto px-4">
+            <button class="btn cursor-pointer btn-primary-pareto mx-auto px-6">
                 <img src="../../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                 {{ intel.reward }}
             </button>

@@ -1,5 +1,5 @@
 <template>
-    <a v-if="products_in" href="/checkout" class="floatingab"></a>
+    <a href="/create" class="floatingab"></a>
 </template>
 
 <script>
@@ -10,29 +10,14 @@
         name: 'VFab',
         mounted: function(){
 
-            let cart = null;
-
-            try{
-                cart = JSON.parse(window.localStorage.getItem('ShoppingCart'));
-            } catch (e){
-                //no cart var change
-            }
-
-            if (cart){
-                this.$store.dispatch('resetShoppingCart')
-                for (var i = 0; i < cart.length; i++) {
-
-                    this.$store.dispatch('addToCart', cart[i]);
-                }
-            }
 
         },
         computed: {
-            ...mapState(['shoppingCart']),
+            ...mapState(['status'])/*,
             products_in: function () {
                 this.cart = this.shoppingCart;
                 return this.shoppingCart.length > 0;
-            }
+            }*/
         }
     };
 
@@ -48,7 +33,7 @@
         background-image: linear-gradient(to right, #6aba82, #85c568, #6aba82,  #85c568, #9ff677);
         background-repeat: no-repeat;
         background-size: cover;
-        font-size: 40px;
+        font-size: 30px;
         color: black;
         text-align: center;
         line-height: 60px;
@@ -61,9 +46,9 @@
     .floatingab:before {
         position: absolute;
         font-family: 'FontAwesome';
-        top: 0;
-        left: 10px;
-        content: "\f07a";
+        top: 1px;
+        left: 16px;
+        content: "\f304";
     }
 
     .floatingab:hover {
