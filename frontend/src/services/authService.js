@@ -4,7 +4,7 @@ import qs from 'qs';
 import http from './HttpService';
 import profileService from './profileService';
 import errorService from './errorService';
-import ledger from "ledgerco";
+//import ledger from "ledgerco";
 
 /* eslint-disable no-console */
 let logged = false;
@@ -142,11 +142,8 @@ export default class authService {
 
     static initLedgerNano(onSuccess, onError){
         if( !this.ledgerNanoProvider || !this.ledgerWalletSubProvider){
-           // const ProviderEngine = require('web3-provider-engine');
-           // const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
-            var LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
-           // this.ledgerNanoEngine = new ProviderEngine();
-          //  this.ledgerNanoProvider = new Web3(this.ledgerNanoEngine);
+
+            //let LedgerWalletSubproviderFactory = require('ledger-wallet-provider').default;
 
             LedgerWalletSubproviderFactory().then(ledgerWalletSubProvider=>{
                 this.ledgerWalletSubProvider = ledgerWalletSubProvider;

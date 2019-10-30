@@ -13,16 +13,16 @@
 
       <b-container fluid>
         <h2 class="font-body"> Choose a Login Method</h2>
-        <b-form-group>
+        <b-form-group class="text-center">
           <b-button class="btn btn-dark-primary-pareto mt-2 mb-3"
                     @click="checkLoginOption('MetaMask')"> MetaMask
           </b-button> <br/>
           <b-button class="btn btn-dark-primary-pareto mb-3"
                     @click="checkLoginOption('Manually')"> Manually
           </b-button> <br/>
-          <b-button class="btn btn-dark-primary-pareto mb-3"
+          <!-- <b-button class="btn btn-dark-primary-pareto mb-3"
                     @click="checkLoginOption('LedgerNano')"> Ledger Nano
-          </b-button> <br/>
+          </b-button> <br/> -->
 
           <b-button class="btn btn-dark-secondary-pareto"
                     @click="onClosedModal()"> Cancel</b-button>

@@ -129,7 +129,7 @@ module.exports = function (
                                  }
                              });
                              web3.eth.getTransaction(event.transactionHash).then(function (txObject) {
-                                 const nonce = txObject.nonce;
+                                 const nonce = txObject ? txObject.nonce : 0;
                                  ethereum.updateIntelReward(intelIndex, event.transactionHash, nonce, event.returnValues.sender.toLowerCase(), rewardData.block, rewardData.amount);
                              }).catch(function (err) {
                                  console.log(err)
