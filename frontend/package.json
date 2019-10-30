@@ -46,7 +46,7 @@
     "v-debounce": "^0.1.2",
     "v-tooltip": "^2.0.1",
     "vue": "^2.5.16",
-    "vue-countup-v2": "^1.0.3",
+    "vue-countup-v2": "^4.0.0",
     "vue-d3-sunburst": "^0.2.0",
     "vue-infinite-scroll": "^2.0.2",
     "vue-line-clamp": "^1.2.4",
