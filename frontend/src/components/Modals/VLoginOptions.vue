@@ -13,7 +13,7 @@
 
       <b-container fluid>
         <h2 class="font-body"> Choose a Login Method</h2>
-        <b-form-group>
+        <b-form-group class="text-center">
           <b-button class="btn btn-dark-primary-pareto mt-2 mb-3"
                     @click="checkLoginOption('MetaMask')"> MetaMask
           </b-button> <br/>
