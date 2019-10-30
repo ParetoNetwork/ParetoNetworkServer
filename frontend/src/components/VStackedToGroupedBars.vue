@@ -95,10 +95,10 @@
         }
 
         for (let i = 0; i < this.m; i++) {
-          datesArray[0][i] = data[i].reward || 0;
-          datesArray[1][i] = data[i].create;
-          datesArray[2][i] = data[i].deposited;
-          datesArray[3][i] = data[i].intelContractDeposit < 0? 0 : data[i].intelContractDeposit;
+          datesArray[0][i] = data[i] ? data[i].reward : 0;
+          datesArray[1][i] = data[i] ? data[i].create : 0;
+          datesArray[2][i] = data[i] ? data[i].deposited : 0;
+          datesArray[3][i] = data[i] ? data[i].intelContractDeposit < 0 ? 0 : data[i].intelContractDeposit : 0;
         }
 
         this.stackedToGroupedChart(datesArray, this.pickedChart);

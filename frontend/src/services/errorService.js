@@ -56,7 +56,7 @@ export default class errorService {
         f7: {
             code: 'f7',
             description: 'Update Create Event',
-            userMessage: 'The transaction proccess failed',
+            userMessage: 'The transaction process failed',
             priority: 2
         },
         f8: {
