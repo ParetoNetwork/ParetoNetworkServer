@@ -20,9 +20,9 @@
           <b-button class="btn btn-dark-primary-pareto mb-3"
                     @click="checkLoginOption('Manually')"> Manually
           </b-button> <br/>
-          <b-button class="btn btn-dark-primary-pareto mb-3"
+          <!-- <b-button class="btn btn-dark-primary-pareto mb-3"
                     @click="checkLoginOption('LedgerNano')"> Ledger Nano
-          </b-button> <br/>
+          </b-button> <br/> -->
 
           <b-button class="btn btn-dark-secondary-pareto"
                     @click="onClosedModal()"> Cancel</b-button>

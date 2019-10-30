@@ -769,6 +769,10 @@
         min-height: 100vh;
     }
 
+    .table {
+        color: white;
+    }
+
     .table-fixed thead {
         width: 97%;
     }
