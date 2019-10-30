@@ -1,9 +1,9 @@
 <template>
     <div class="text-left pl-1">
-        <div class="row pb-3 border-bottom" :class="{'ml-2 mr-0 py-2': eventRow}"
+        <div class="row pb-1 border-bottom" :class="{'ml-2 mr-0 py-2': eventRow}"
              style="border-bottom-color: black !important;">
             <div class="col-md-12 col-lg-9">
-                <div class="row">
+                <div class="row py-2">
                     <div v-if="!eventRow" v-bind:class="{ 'col-2 col-md-2 col-lg-2' : !eventRow }">
                         <div v-if="onboardingPicture"
                              class="thumb profile-pic cursor-pointer ml-2"

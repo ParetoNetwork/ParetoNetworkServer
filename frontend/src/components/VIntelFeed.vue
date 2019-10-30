@@ -21,7 +21,7 @@
       </div>
       <div class="scrollable pr-lg-2" id="myfeed" v-on:scroll="scrollMyFeed()">
         <ul>
-          <li class="text-left  py-2" :style="getBorderLeft(row.priority)" :key="row._id"
+          <li class="text-left" :style="getBorderLeft(row.priority)" :key="row._id"
               v-for="row of myFeed.intel">
             <VIntelPreview :user="user" :intel="row" :eventRow="false"></VIntelPreview>
           </li>
