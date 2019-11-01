@@ -15,10 +15,9 @@
           <div class="d-flex justify-content-center h-100">
             <div class="d-flex flex-column justify-content-around">
               <div></div>
-              <img v-responsive="['hidden-all','xs','sm']" src="../../assets/images/LogoReverse.svg" width="200px" style="margin: 0 auto" alt="">
-              <div class="p-5 text-left">
-                <h1 class="mb-3 title-content" style="font-size: 30px"><b>Post. Trade. Earn.</b></h1>
-                <p class="subtitle-user-content">
+              <div class="p-3 text-left">
+                <h1 class="mb-3 title-content" style="font-size: 1.5em"><b>Post. Trade. Earn.</b></h1>
+                <p class="subtitle-user-content" style="font-size: 1em">
                   The first true peer-to-peer intel marketplace.<br/>Sign in or Purchase access today.
                 </p>
               </div>
