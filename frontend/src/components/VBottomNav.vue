@@ -30,7 +30,7 @@
                 -->
             </div>
             <div class="col" style="text-align: right;">
-                <div class="text-user-content" style="font-size: 12px; padding-top: 3px;">
+                <div class="text-user-content pt-sm-1 pt-md-1 pt-lg-1" style="font-size: 12px;">
                     <a v-bind:href="'https://blog.pareto.network'"
                        target="_blank" alt="Pareto Network Newsroom">
                         <i class="fas fa-broadcast-tower"></i>
