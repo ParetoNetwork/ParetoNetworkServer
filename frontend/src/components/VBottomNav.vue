@@ -34,7 +34,7 @@
                     <a v-bind:href="'https://blog.pareto.network'"
                        target="_blank" alt="Pareto Network Newsroom">
                         <i class="fas fa-broadcast-tower"></i>
-                        <span>Newsroom</span>
+                        <span> Newsroom</span>
                     </a>
                 </div>
             </div>
