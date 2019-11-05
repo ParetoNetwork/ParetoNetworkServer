@@ -32,8 +32,8 @@ export const countUpMixin = {
                 return 0;
         },
         onReady: function(instance, CountUp) {
-            const that = this;
-            instance.update(that.endVal + 100);
+            //const that = this;
+            //instance.update(that.endVal + 100);
         }
     }
 };
