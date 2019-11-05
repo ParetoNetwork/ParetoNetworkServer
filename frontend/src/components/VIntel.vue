@@ -22,16 +22,21 @@
                                 :defaultIntel="information.intel" :onboardingPicture="onboarding"></VIntelFeed>
                     <VShimmerFeed v-else></VShimmerFeed>
                 </div>
-                <div class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
-                    <VHandlerSunburstChart v-if="primalLoad" :user="user" :sunburstData="information.intel" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
+                <div v-if="primalLoad" class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column" id="chart-row">
+                    <VHandlerSunburstChart :user="user" :sunburstData="information.intel" :loggedUser="loggedUser" class="mb-4"></VHandlerSunburstChart>
                     <div class="text-center ml-2 mr-2 mt-1" @click="openModalInfoGraphsClick()">
                         <i class="fas fa-question-circle"></i>
                     </div>
                     <VHandleStackGroupBars
                         class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"
-                        v-if="primalLoad"
                         :stackedBarData="stackedBarData"></VHandleStackGroupBars>
-                    <VShimmerViz v-else></VShimmerViz>
+                </div>
+                <div v-else class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column">
+                    <VShimmerChartSunburst v-responsive="['hidden-xs', 'hidden-sm']" class="mb-4"></VShimmerChartSunburst>
+                    <div class="text-center ml-2 mr-2 mt-1" @click="openModalInfoGraphsClick()">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <VShimmerChartStackGroupBars v-responsive="['hidden-xs', 'hidden-sm']" class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"></VShimmerChartStackGroupBars>
                 </div>
             </div>
         </div>
@@ -59,7 +64,8 @@
   import VShimmerUserProfile from './Shimmer/IntelDetailView/VShimmerUserProfile';
   import VShimmerMyPost from './Shimmer/IntelView/VShimmerMyPost';
   import VShimmerFeed from './Shimmer/IntelView/VShimmerFeed';
-  import VShimmerViz from './Shimmer/Visualizations/VShimmerViz';
+  import VShimmerChartSunburst from './Shimmer/Visualizations/VShimmerChartSunburst';
+  import VShimmerChartStackGroupBars from "./Shimmer/Visualizations/VShimmerChartStackGroupBars";
 
   import VProfile from './VProfile';
   import VEventFeed from './VEventFeed';
@@ -73,22 +79,24 @@
 
   import {information, stackedBarData} from '../utils/onboardingInfo';
 
-  import VStackedToGroupedBars from './VStackedToGroupedBars';
+  import VChartStackedToGroupedBars from './VChartStackedToGroupedBars';
 
   import VFab from './VFab';
   import VHandlerSunburstChart from "./VHandlerSunburstChart";
   import VHandleStackGroupBars from "./VHandleStackGroupBars";
 
   import {tutorials} from '../utils/tutorialInfo';
+  import VChartSunburst from "./VChartSunburst";
 
 
   export default {
     name: 'VIntel',
     mixins: [countUpMixin],
     components: {
+        VChartSunburst,
       VHandleStackGroupBars,
       VHandlerSunburstChart,
-      VStackedToGroupedBars,
+      VChartStackedToGroupedBars: VChartStackedToGroupedBars,
       ICountUp,
       VFab,
       VProfile,
@@ -97,7 +105,8 @@
       VShimmerMyPost,
       VShimmerFeed,
       VShimmerUserProfile,
-      VShimmerViz,
+      VShimmerChartStackGroupBars,
+      VShimmerChartSunburst,
       ModalLedgerNano,
       LoginOptions,
       ModalManualSignIn,
