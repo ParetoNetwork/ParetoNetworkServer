@@ -31,7 +31,7 @@
         <a v-if="intel.distributed"
            v-bind:href="etherscanUrl+'/tx/'+ (intel.txHashDistribute || intel.txHash)"
            target="_blank">
-            <button class="btn cursor-pointer btn-primary-pareto mx-auto px-6">
+            <button class="btn mx-auto px-6 btn-primary-pareto">
                 <img src="../../assets/images/LogoMarkWhite.svg" width="20px" alt="">
                 {{ intel.reward }}
             </button>
