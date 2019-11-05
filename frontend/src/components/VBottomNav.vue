@@ -1,19 +1,20 @@
 <template>
     <div class="navbar hiden-navbar-bottom d-flex font-body py-0 container-fluid">
-        <div class="row">
-            <div style="text-align: left;">
-                <a href="https://ethereum.org"><img style="height: 23px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
+        <div class="row w-100">
+            <div v-responsive="['hidden-xs', 'hidden-sm']" class="col" style="text-align: left;">
+                <a href="https://ethereum.org"><img style="height: 28px;" src="../assets/images/powered-by-ethereum-small.png" alt=""></a>
                 <!-- <div class="mr-3"> PARETO PRICE: {{paretoUSD}} </div>
                  <div class="mr-3"> RECOMMENDED ETHEREUM GAS PRICE: {{recommendedGasPrice}} gwei </div>
                   <i class="fa fa-circle mr-1" style="color: #32CD32; padding: 2px;"></i>
                  <div class="mr-3"> STATUS: CONNECTED </div>
                  <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
             </div>
-            <div class="col" style="text-align: right;">
+            <div class="col" style="text-align: center;">
                 <div class="text-user-content" style="font-size: 9px; padding-top: 3px;">
                     <a v-bind:href="etherscanUrl+'/address/0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2'"
                        target="_blank" alt="Pareto Network Foundation Donation address">
-                        0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2
+                        <span v-responsive="['hidden-xs', 'hidden-sm']">0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2 &nbsp; &nbsp; &nbsp;</span>
+                        <span v-responsive.sm.xs>SUPPORT </span>
                         <i class="fa fa-external-link-alt green-color"></i>
                     </a>
                 </div>
@@ -27,6 +28,15 @@
                 <a class="mr-3 nav-link" href="/api-docs/"> API </a>
                 <a class="mr-3 nav-link border" style="font-weight: bold;" href="https://t.me/paretonetworkdiscussion"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 1px;"></i>Support</a>
                 -->
+            </div>
+            <div class="col" style="text-align: right;">
+                <div class="text-user-content" style="font-size: 12px; padding-top: 3px;">
+                    <a v-bind:href="'https://blog.pareto.network'"
+                       target="_blank" alt="Pareto Network Newsroom">
+                        <i class="fas fa-broadcast-tower"></i>
+                        <span> Newsroom</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -93,7 +103,7 @@
     .hiden-navbar-bottom {
         font-size: 10px;
         background: #000211;
-        height: 24px;
+        height: 3vh;
         width: 100%;
         position: fixed !important;
         transition: height 300ms;
