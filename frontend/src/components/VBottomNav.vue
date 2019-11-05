@@ -14,7 +14,7 @@
                     <a v-bind:href="etherscanUrl+'/address/0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2'"
                        target="_blank" alt="Pareto Network Foundation Donation address">
                         <span v-responsive="['hidden-xs', 'hidden-sm']" style="font-size: 9px;">0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2 &nbsp; &nbsp; &nbsp;</span>
-                        <span v-responsive.sm.xs>DONATE </span>
+                        <span v-responsive.sm.xs style="font-size: 10px;">DONATE </span>
                         <i class="fa fa-external-link-alt green-color"></i>
                     </a>
                 </div>
@@ -37,21 +37,21 @@
                     </a>
                 </div>
             </div>
-            <div class="col text-center">
+            <div v-responsive="['hidden-xs', 'hidden-sm']" class="col text-right-xs text-sm-right text-center">
                 <div class="text-user-content pt-sm-1 pt-md-1 pt-lg-1" style="font-size: 12px;">
                     <a v-bind:href="'https://t.me/paretonetworkofficial'"
                        target="_blank" alt="Pareto Network Telegram Announcements Channel">
-                        <span v-responsive="['hidden-xs', 'hidden-sm']"><i class="fab fa-telegram" style="color: #226acd; padding: 1px;"></i></span>
+                        <i class="fab fa-telegram" style="color: #226acd; padding: 1px;"></i>
                         <span>Telegram</span>
                     </a>
                 </div>
             </div>
-            <div class="col text-sm-center text-md-right">
+            <div class="col text-right-xs text-sm-right text-md-right">
                 <div class="text-user-content pt-sm-1 pt-md-1 pt-lg-1">
                     <a v-bind:href="'https://blog.pareto.network'"
                        target="_blank" alt="Pareto Network Newsroom">
-                        <i class="fas fa-broadcast-tower" style="font-size: 10px;"></i>
-                        <span style="font-size: 8px;"> NEWSROOM</span>
+                        <i class="fas fa-broadcast-tower" style="font-size: 12px;"></i>
+                        <span style="font-size: 10px;"> NEWSROOM</span>
                     </a>
                 </div>
             </div>
