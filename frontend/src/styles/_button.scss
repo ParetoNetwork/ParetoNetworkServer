@@ -3,21 +3,22 @@
   border-radius: 7px;
   background-image: linear-gradient(to top, #59bf90, #97ca47);
 }
-.btn-primary-pareto {
-  @extend .btn-primary;
-  border-radius: 7px;
-  background-image: linear-gradient(to bottom, #00628f, #1b4e8b);
-  width: 120px;
-}
 
 .btn-pareto{
   border-radius: 3px;
   font-family: 'Body';
   font-weight: bolder;
-  font-size: 16px;
+  font-size: 13.5px;
   margin: 0px;
   padding: 5px;
   width: 150px;
+}
+
+.btn-primary-pareto {
+  @extend .btn-pareto;
+  background-image: linear-gradient(to bottom, #00628f, #1b4e8b);
+  width: 120px;
+  color: $white;
 }
 
 .btn-dark-primary-pareto{
