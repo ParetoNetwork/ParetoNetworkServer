@@ -32,8 +32,11 @@
                         :stackedBarData="stackedBarData"></VHandleStackGroupBars>
                 </div>
                 <div v-else class="col-md-12 col-lg-4 order-3 px-0 pb-5 d-lg-flex flex-lg-row d-xl-flex flex-xl-column">
-                    <VShimmerChartSunburst class="mb-4"></VShimmerChartSunburst>
-                    <VShimmerChartStackGroupBars class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"></VShimmerChartStackGroupBars>
+                    <VShimmerChartSunburst v-responsive="['hidden-xs', 'hidden-sm']" class="mb-4"></VShimmerChartSunburst>
+                    <div class="text-center ml-2 mr-2 mt-1" @click="openModalInfoGraphsClick()">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <VShimmerChartStackGroupBars v-responsive="['hidden-xs', 'hidden-sm']" class="h-custom align-items-xl-end align-items-lg-center d-flex-md align-items-md-center"></VShimmerChartStackGroupBars>
                 </div>
             </div>
         </div>
@@ -76,7 +79,7 @@
 
   import {information, stackedBarData} from '../utils/onboardingInfo';
 
-  import VStackedToGroupedBars from './VChartStackedToGroupedBars';
+  import VChartStackedToGroupedBars from './VChartStackedToGroupedBars';
 
   import VFab from './VFab';
   import VHandlerSunburstChart from "./VHandlerSunburstChart";
@@ -93,7 +96,7 @@
         VChartSunburst,
       VHandleStackGroupBars,
       VHandlerSunburstChart,
-      VStackedToGroupedBars,
+      VChartStackedToGroupedBars: VChartStackedToGroupedBars,
       ICountUp,
       VFab,
       VProfile,

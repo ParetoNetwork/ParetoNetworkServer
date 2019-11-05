@@ -1,12 +1,12 @@
 <template>
   <div>
-    <VStackedToGroupedBars v-if="loaded" :stackedBarData="stackedBarData" :monthsInformation="monthsInformation" :monthsNumber="monthsNumber"></VStackedToGroupedBars>
+    <VChartStackedToGroupedBars v-if="loaded" :stackedBarData="stackedBarData" :monthsInformation="monthsInformation" :monthsNumber="monthsNumber"></VChartStackedToGroupedBars>
   </div>
 </template>
 
 <script>
   import chartService from '../services/chartService';
-  import VStackedToGroupedBars from './VChartStackedToGroupedBars';
+  import VChartStackedToGroupedBars from './VChartStackedToGroupedBars';
 
   export default {
     name: "VHandleStackGroupBars",
@@ -20,7 +20,7 @@
       }
     },
     components: {
-      VStackedToGroupedBars
+      VChartStackedToGroupedBars: VChartStackedToGroupedBars
     },
     props: [
       "stackedBarData"
