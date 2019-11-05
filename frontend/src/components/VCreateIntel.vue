@@ -47,7 +47,7 @@
                                 <div class="group create-input-space">
                                     <input
                                         type="text"
-                                        class="create-input create-content-text"
+                                        class="create-input create-content-text title-user-content"
                                         name="intel-title"
                                         v-model="title" readonly>
                                 </div>
@@ -70,11 +70,16 @@
                                 </span>
                             </span>
                             </div> --> <!-- put in modal -->
-                            <button class="btn btn-dark-secondary-pareto mt-2 order-lg-2"
+
+
+                            <!-- if you want a preview button it goes here, last checked there was
+                             a bug where the title variable would get trimmed in preview mode, but only visually.
+
+                             <button class="btn btn-dark-secondary-pareto mt-2 order-lg-2"
                                     @click="showPreview()">
                                 <b v-if="!isPreview">preview</b>
                                 <b v-if="isPreview">edit</b>
-                            </button>
+                            </button> -->
                             <button
                                 class="btn btn-dark-primary-pareto ml-2 ml-lg-0 mt-2 order-lg-1"
                                 @click="validateContent()"
@@ -503,6 +508,18 @@
     .note-editor.note-frame.panel {
         padding: 10px 10px 0px;
         border: none;
+    }
+
+    .note-btn {
+        color: white;
+    }
+
+    .note-btn:hover {
+        background: #679ab4 !important;
+    }
+
+    .note-image-btn {
+        width: 150px;
     }
 
     .note-toolbar.panel-heading {
