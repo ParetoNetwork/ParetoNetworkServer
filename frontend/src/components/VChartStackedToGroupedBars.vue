@@ -14,13 +14,11 @@
 </template>
 
 <script>
-  import profileService from '../services/profileService';
-  import IntelService from '../services/IntelService';
   import {mapState} from 'vuex';
   import * as d3 from "d3";
 
   export default {
-    name: 'VStackedToGroupedBars',
+    name: 'VChartStackedToGroupedBars',
     props: [
       "stackedBarData", "monthsNumber", "monthsInformation"
     ],
