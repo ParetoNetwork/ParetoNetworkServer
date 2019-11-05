@@ -9,12 +9,12 @@
                  <div class="mr-3"> STATUS: CONNECTED </div>
                  <div class="mr-3"> RECOMMENDED GAS PRICE: 23 GWEI</div> -->
             </div>
-            <div class="col" style="text-align: center;">
-                <div class="text-user-content" style="font-size: 9px; padding-top: 3px;">
+            <div class="col text-sm-center text-md-center text-lg-center">
+                <div class="text-user-content pt-sm-1 pt-md-1 pt-lg-1" style="font-size: 8px; padding-top: 3px;">
                     <a v-bind:href="etherscanUrl+'/address/0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2'"
                        target="_blank" alt="Pareto Network Foundation Donation address">
-                        <span v-responsive="['hidden-xs', 'hidden-sm']">0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2 &nbsp; &nbsp; &nbsp;</span>
-                        <span v-responsive.sm.xs>SUPPORT </span>
+                        <span v-responsive="['hidden-xs', 'hidden-sm']" style="font-size: 9px;">0x005d85FE4fcf44C95190Cad3c1bbDA242A62EEB2 &nbsp; &nbsp; &nbsp;</span>
+                        <span v-responsive.sm.xs>DONATE </span>
                         <i class="fa fa-external-link-alt green-color"></i>
                     </a>
                 </div>
@@ -26,15 +26,32 @@
 
                 <!-- re-display these, make them aligned right
                 <a class="mr-3 nav-link" href="/api-docs/"> API </a>
-                <a class="mr-3 nav-link border" style="font-weight: bold;" href="https://t.me/paretonetworkdiscussion"><i class="fa fa-telegram mr-1" style="color: #226acd; padding: 1px;"></i>Support</a>
                 -->
             </div>
-            <div class="col" style="text-align: right;">
+            <div v-responsive="['hidden-xs', 'hidden-sm']" class="col" style="text-align: center;">
                 <div class="text-user-content pt-sm-1 pt-md-1 pt-lg-1" style="font-size: 12px;">
+                    <a v-bind:href="'/api-docs/'"
+                       target="_blank" alt="Pareto Network API">
+                        <i class="fas fa-cog"></i>
+                        <span> API</span>
+                    </a>
+                </div>
+            </div>
+            <div class="col text-center">
+                <div class="text-user-content pt-sm-1 pt-md-1 pt-lg-1" style="font-size: 12px;">
+                    <a v-bind:href="'https://t.me/paretonetworkofficial'"
+                       target="_blank" alt="Pareto Network Telegram Announcements Channel">
+                        <span v-responsive="['hidden-xs', 'hidden-sm']"><i class="fab fa-telegram" style="color: #226acd; padding: 1px;"></i></span>
+                        <span>Telegram</span>
+                    </a>
+                </div>
+            </div>
+            <div class="col text-sm-center text-md-right">
+                <div class="text-user-content pt-sm-1 pt-md-1 pt-lg-1">
                     <a v-bind:href="'https://blog.pareto.network'"
                        target="_blank" alt="Pareto Network Newsroom">
-                        <i class="fas fa-broadcast-tower"></i>
-                        <span> Newsroom</span>
+                        <i class="fas fa-broadcast-tower" style="font-size: 10px;"></i>
+                        <span style="font-size: 8px;"> NEWSROOM</span>
                     </a>
                 </div>
             </div>
