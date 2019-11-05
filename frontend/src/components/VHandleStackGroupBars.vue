@@ -6,7 +6,7 @@
 
 <script>
   import chartService from '../services/chartService';
-  import VStackedToGroupedBars from './VStackedToGroupedBars';
+  import VStackedToGroupedBars from './VChartStackedToGroupedBars';
 
   export default {
     name: "VHandleStackGroupBars",
