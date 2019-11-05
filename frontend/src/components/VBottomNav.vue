@@ -103,7 +103,7 @@
     .hiden-navbar-bottom {
         font-size: 10px;
         background: #000211;
-        height: 24px;
+        height: 3vh;
         width: 100%;
         position: fixed !important;
         transition: height 300ms;
