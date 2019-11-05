@@ -277,7 +277,7 @@
     .blocking-content {
         position: absolute;
         width: 100%;
-        height: 88vh;
+        height: 85vh;
         top: 0;
         left: 0;
         z-index: 99
