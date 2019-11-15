@@ -156,6 +156,16 @@
 
                     </div>
 
+                    <!-- Campaign length
+
+                    <div class="w-100 mt-3" style="padding: 10px 0px 8px 15px; border-radius: 3px; border: 0px;">
+                        <div class="d-flex justify-content-start w-100 pr-5 pb-1 modal-input">
+                            <span class="mt-2"> Campaign </span>
+
+                        </div>
+
+                    </div> -->
+
                     <b-row class="m-2 mt-4 d-flex justify-content-end">
                         <button
                             class="btn btn-darker-secondary-pareto mt-2 ml-2 ml-lg-0 col-5"
