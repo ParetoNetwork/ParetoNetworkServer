@@ -172,9 +172,13 @@ export default class IntelService {
             break;
           case "create":
             const provider_address = accounts[0];
-            const _ttl = Math.round(new Date().getTime() / 1000) + 864000;
 
-            switch (intel.status) {
+            const dayInMilliseconds = 86400;
+            const numDays = Intel.options.address === "0x5CCeb9dE613b3Dd47007C6307FDaeE1A20924d4B" ? 365 : 10; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
+            const _ttl = Math.round(new Date().getTime() / 1000) + dayInMilliseconds * numDays;
+
+
+              switch (intel.status) {
               case 0:
                 waitForReceipt(intel.txHash, async receipt => {
                   events.editTransaction({hash: intel.txHash, key: 'status', value: 1});
@@ -364,7 +368,9 @@ export default class IntelService {
         return;
       }
 
-      const _ttl = Math.round(new Date().getTime() / 1000) + 864000; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
+      const dayInMilliseconds = 86400;
+      const numDays = Intel.options.address === "0x5CCeb9dE613b3Dd47007C6307FDaeE1A20924d4B" ? 365 : 10; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
+      const _ttl = Math.round(new Date().getTime() / 1000) + dayInMilliseconds * numDays;
 
       let params = {
         intelAddress: Intel.options.address,
