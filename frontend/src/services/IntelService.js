@@ -174,7 +174,7 @@ export default class IntelService {
             const provider_address = accounts[0];
 
             const dayInMilliseconds = 86400;
-            const numDays = Intel.options.address === "0x5CCeb9dE613b3Dd47007C6307FDaeE1A20924d4B" ? 365 : 10; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
+            const numDays = serverData.address === "0x5CCeb9dE613b3Dd47007C6307FDaeE1A20924d4B".toLowerCase() ? 365 : 10; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
             const _ttl = Math.round(new Date().getTime() / 1000) + dayInMilliseconds * numDays;
 
 
@@ -369,7 +369,7 @@ export default class IntelService {
       }
 
       const dayInMilliseconds = 86400;
-      const numDays = Intel.options.address === "0x5CCeb9dE613b3Dd47007C6307FDaeE1A20924d4B" ? 365 : 10; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
+      const numDays = serverData.address === "0x5CCeb9dE613b3Dd47007C6307FDaeE1A20924d4B".toLowerCase() ? 365 : 10; // add 10 days minutes to allow the rewarder to reward pareto tokens to the intel (temporary)
       const _ttl = Math.round(new Date().getTime() / 1000) + dayInMilliseconds * numDays;
 
       let params = {
