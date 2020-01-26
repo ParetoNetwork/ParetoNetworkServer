@@ -1,5 +1,7 @@
 # Pareto Network Server
 
+<a href="https://twitter.com/ParetoNetwork"><img src="https://img.shields.io/twitter/follow/ParetoNetwork.svg?style=plastic"></img></a>
+
 Frontend and Backend for calculating ranking and all other functions of the Pareto Network intel feed.
 
 This implements two parts of the ranking algorithm so far, and can do a client side calculation first primarily for cosmetic purposes.
